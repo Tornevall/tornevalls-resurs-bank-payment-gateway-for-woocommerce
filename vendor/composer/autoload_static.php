@@ -20,6 +20,7 @@ class ComposerStaticInitb3cd9b3a484862ad1122116bf7e2606d
         'R' => 
         array (
             'Resursbank\\RBEcomPHP\\' => 21,
+            'ResursBank\\' => 11,
         ),
     );
 
@@ -39,6 +40,10 @@ class ComposerStaticInitb3cd9b3a484862ad1122116bf7e2606d
         'Resursbank\\RBEcomPHP\\' => 
         array (
             0 => __DIR__ . '/..' . '/resursbank/ecomphp/source/classes/rbapiloader.php',
+        ),
+        'ResursBank\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 
