@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection ParameterDefaultValueIsNotNullInspection */
+
 namespace ResursBank;
 
 use TorneLIB\Exception\ExceptionHandler;
@@ -29,6 +31,83 @@ class Data
 
     /** @var array $stylesAdmin */
     private static $stylesAdmin = [];
+
+    /** @var array $fileImageExtensions */
+    private static $fileImageExtensions = ['jpg', 'gif', 'png'];
+
+    /**
+     * @param $imageName
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getImage($imageName)
+    {
+        $imageFileName = null;
+        $imageFile = sprintf(
+            '%s/%s',
+            self::getGatewayPath('images'),
+            $imageName
+        );
+
+        // Match allowed file extensions and return if it exists within the file name.
+        if ((bool)preg_match(
+            sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
+            $imageFile
+        )) {
+            $imageFile = preg_replace(
+                sprintf('/^(.*)(.%s)$/', implode('|.', self::$fileImageExtensions)),
+                '$1',
+                $imageFile
+            );
+        } else {
+            return null;
+        }
+
+        foreach (self::$fileImageExtensions as $extension) {
+            if (file_exists($imageFile . '.' . $extension)) {
+                $imageFileName = $imageFile . '.' . $extension;
+            }
+        }
+
+        return $imageFileName !== null ? self::getImageUrl($imageName) : null;
+    }
+
+    /**
+     * Get file path for major initializer (init.php).
+     * @param string $subDirectory
+     * @return string
+     * @version 0.0.1.0
+     */
+    public static function getGatewayPath($subDirectory = '')
+    {
+        $subPathTest = preg_replace('/\//', '', $subDirectory);
+        $gatewayPath = preg_replace('/\/+$/', '', RESURSBANK_GATEWAY_PATH);
+
+        if (!empty($subPathTest) && file_exists($gatewayPath . '/' . $subPathTest)) {
+            $gatewayPath .= '/' . $subPathTest;
+        }
+
+        return $gatewayPath;
+    }
+
+    /**
+     * @param string $imageFileName
+     * @return string
+     * @version 0.0.1.0
+     */
+    private static function getImageUrl($imageFileName = '')
+    {
+        $return = sprintf(
+            '%s/images',
+            self::getGatewayUrl()
+        );
+
+        if (!empty($imageFileName)) {
+            $return .= '/' . $imageFileName;
+        }
+
+        return $return;
+    }
 
     /**
      * @return string
@@ -62,16 +141,6 @@ class Data
         return (new Generic())->getVersionByComposer(
             self::getGatewayPath()
         );
-    }
-
-    /**
-     * Get file path for major initializer (init.php).
-     * @return string
-     * @version 0.0.1.0
-     */
-    public static function getGatewayPath()
-    {
-        return preg_replace('/\/+$/', '', RESURSBANK_GATEWAY_PATH);
     }
 
     /**
@@ -116,10 +185,10 @@ class Data
      */
     public static function getPluginScripts($isAdmin = false)
     {
-        if (!$isAdmin) {
-            $return = self::$jsLoaders;
-        } else {
+        if ($isAdmin) {
             $return = self::$jsLoadersAdmin;
+        } else {
+            $return = self::$jsLoaders;
         }
 
         return $return;
@@ -132,10 +201,10 @@ class Data
      */
     public static function getPluginStyles($isAdmin = false)
     {
-        if (!$isAdmin) {
-            $return = self::$styles;
-        } else {
+        if ($isAdmin) {
             $return = self::$stylesAdmin;
+        } else {
+            $return = self::$styles;
         }
 
         return $return;
@@ -149,10 +218,10 @@ class Data
      */
     public static function getJsDependencies($scriptName, $isAdmin)
     {
-        if (!$isAdmin) {
-            $return = isset(self::$jsDependencies) ? self::$jsDependencies[$scriptName] : [];
-        } else {
+        if ($isAdmin) {
             $return = isset(self::$jsDependenciesAdmin) ? self::$jsDependenciesAdmin[$scriptName] : [];
+        } else {
+            $return = isset(self::$jsDependencies) ? self::$jsDependencies[$scriptName] : [];
         }
 
         return $return;
@@ -182,9 +251,7 @@ class Data
     public static function getTestMode()
     {
         /** @todo Change to false when database is ready. */
-        $return = true;
-
-        return $return;
+        return true;
     }
 
     /**
