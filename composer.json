@@ -1,8 +1,9 @@
 {
     "name": "tornevall/resurs-bank-payment-gateway-for-woocommerce",
     "description": "Resurs Bank gateway for WooCommerce (third party release).",
+    "version": "0.0.1.0",
     "minimum-stability": "stable",
-    "license": "Apache-2.0",
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "Tomas Tornevall",
