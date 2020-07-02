@@ -36,7 +36,7 @@ class Data
      */
     public static function getGatewayUrl()
     {
-        return plugin_dir_url(__FILE__);
+        return preg_replace('/\/+$/', '', plugin_dir_url(__FILE__));
     }
 
     /**

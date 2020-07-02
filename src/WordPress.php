@@ -35,7 +35,7 @@ class WordPress
                 sprintf('%s-%s', Data::getPrefix(), $styleName),
                 sprintf(
                     '%s/css/%s?%s',
-                    Data::getGatewayPath(),
+                    Data::getGatewayUrl(),
                     $styleFile,
                     isResursTest() ? time() : 'static'
                 ),
@@ -49,7 +49,7 @@ class WordPress
                 sprintf('%s-%s', Data::getPrefix(), $scriptName),
                 sprintf(
                     '%s/js/%s?%s',
-                    Data::getGatewayPath(),
+                    Data::getGatewayUrl(),
                     $scriptFile,
                     isResursTest() ? Data::getPrefix() . '-' . time() : 'static'
                 ),
