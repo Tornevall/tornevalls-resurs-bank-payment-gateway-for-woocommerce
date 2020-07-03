@@ -23,5 +23,5 @@ define('RESURSBANK_PREFIX', 'trbwc');
 require_once(__DIR__ . '/vendor/autoload.php');
 
 if (function_exists('add_action')) {
-    WordPress::initializePage();
+    WordPress::initializePlugin();
 }

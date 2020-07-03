@@ -9,7 +9,7 @@ namespace ResursBank;
  */
 class WordPress
 {
-    public static function initializePage()
+    public static function initializePlugin()
     {
         self::setupFilters();
         self::setupScripts();
