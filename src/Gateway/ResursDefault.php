@@ -1,6 +1,6 @@
 <?php
 
-namespace Resursbank\Gateway;
+namespace ResursBank\Gateway;
 
 /**
  * Class ResursDefault

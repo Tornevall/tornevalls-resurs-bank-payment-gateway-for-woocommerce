@@ -5,6 +5,10 @@ namespace ResursBank\Helper;
 use ResursBank\Module\Data;
 use TorneLIB\IO\Data\Strings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Class WordPress WordPress related actions.
  * @package ResursBank
@@ -32,7 +36,7 @@ class WordPress
      */
     private static function setupFilters()
     {
-        //add_filter('woocommerce_get_settings_pages', 'resursbank_gateway_settings');
+        add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
     }
 
     /**
