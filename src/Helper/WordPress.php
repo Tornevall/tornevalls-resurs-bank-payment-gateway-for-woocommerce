@@ -1,6 +1,7 @@
 <?php
 
 namespace ResursBank\Helper;
+
 use ResursBank\Module\Data;
 use TorneLIB\IO\Data\Strings;
 
@@ -26,6 +27,7 @@ class WordPress
 
     /**
      * Internal filter setup.
+     * @param $before
      * @since 0.0.1.0
      */
     private static function setupFilters()
@@ -40,6 +42,15 @@ class WordPress
     {
         add_action('wp_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScripts');
         add_action('admin_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScriptsAdmin');
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getPriorVersionsDisabled()
+    {
+        return true;
     }
 
     /**

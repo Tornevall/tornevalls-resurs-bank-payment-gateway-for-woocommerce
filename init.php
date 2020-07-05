@@ -24,6 +24,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
 add_action('plugins_loaded', '\ResursBank\Helper\WordPress::initializePlugin');
+
+// Making sure that we do not coexist with prior versions.
+add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Helper\WordPress::getPriorVersionsDisabled');
+
 //WordPress::initializePlugin();
 load_plugin_textdomain(
     'trbwc',
