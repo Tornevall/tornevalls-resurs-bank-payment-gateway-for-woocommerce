@@ -4,7 +4,6 @@
 
 namespace ResursBank\Module;
 
-use ResursBank\Helper\WordPress;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Utils\Generic;
 
@@ -135,54 +134,6 @@ class Data
     }
 
     /**
-     * Fetch plugin version from composer package.
-     * @return string
-     * @throws ExceptionHandler
-     * @version 0.0.1.0
-     */
-    public static function getVersionByComposer()
-    {
-        return (new Generic())->getVersionByComposer(
-            self::getGatewayPath()
-        );
-    }
-
-    /**
-     * Get current version from plugin data.
-     * @return string
-     * @version 0.0.1.0
-     */
-    public static function getCurrentVersion()
-    {
-        return self::getPluginDataContent('version');
-    }
-
-    /**
-     * Get data from plugin setup (top of init.php).
-     * @param $key
-     * @return string
-     * @version 0.0.1.0
-     */
-    private static function getPluginDataContent($key)
-    {
-        $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
-        return $pluginContent[$key];
-    }
-
-    /**
-     * Get waypoint for init.php.
-     * @return string
-     * @version 0.0.1.0
-     */
-    private static function getPluginInitFile()
-    {
-        return sprintf(
-            '%s/init.php',
-            self::getGatewayPath()
-        );
-    }
-
-    /**
      * @param bool $isAdmin
      * @return array
      * @version 0.0.1.0
@@ -269,5 +220,66 @@ class Data
     public static function getPrefix()
     {
         return RESURSBANK_PREFIX;
+    }
+
+    /**
+     * @return bool
+     * @throws ExceptionHandler
+     */
+    public static function getValidatedVersion()
+    {
+        $return = false;
+        if (version_compare(self::getCurrentVersion(), self::getVersionByComposer(), '==')) {
+            $return = true;
+        }
+        return $return;
+    }
+
+    /**
+     * Get current version from plugin data.
+     * @return string
+     * @version 0.0.1.0
+     */
+    public static function getCurrentVersion()
+    {
+        return self::getPluginDataContent('version');
+    }
+
+    /**
+     * Get data from plugin setup (top of init.php).
+     * @param $key
+     * @return string
+     * @version 0.0.1.0
+     */
+    private static function getPluginDataContent($key)
+    {
+        $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
+        return $pluginContent[$key];
+    }
+
+    /**
+     * Get waypoint for init.php.
+     * @return string
+     * @version 0.0.1.0
+     */
+    private static function getPluginInitFile()
+    {
+        return sprintf(
+            '%s/init.php',
+            self::getGatewayPath()
+        );
+    }
+
+    /**
+     * Fetch plugin version from composer package.
+     * @return string
+     * @throws ExceptionHandler
+     * @version 0.0.1.0
+     */
+    public static function getVersionByComposer()
+    {
+        return (new Generic())->getVersionByComposer(
+            self::getGatewayPath() . '/composer.json'
+        );
     }
 }

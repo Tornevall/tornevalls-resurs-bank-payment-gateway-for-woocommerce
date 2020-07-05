@@ -11,8 +11,6 @@
  * Domain Path: /language
  */
 
-use ResursBank\Helper\WordPress;
-
 if (!defined('ABSPATH')) {
     exit;
 }
