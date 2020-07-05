@@ -2,8 +2,9 @@
 
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
-namespace ResursBank;
+namespace ResursBank\Module;
 
+use ResursBank\Helper\WordPress;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Utils\Generic;
 
@@ -16,6 +17,9 @@ class Data
 {
     /** @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list. */
     private static $jsLoaders = ['resursbank' => 'resursbank.js'];
+
+    /** @var array $jsLoadersCheckout Loadable scripts, only from checkout. */
+    private static $jsLoadersCheckout = ['checkout' => 'checkout.js'];
 
     /** @var array $jsLoadersAdmin List of loadable scripts for admin. */
     private static $jsLoadersAdmin = ['resursbank' => 'resursbank.js'];
@@ -188,7 +192,10 @@ class Data
         if ($isAdmin) {
             $return = self::$jsLoadersAdmin;
         } else {
-            $return = self::$jsLoaders;
+            $return = array_merge(
+                self::$jsLoaders,
+                is_checkout() ? self::$jsLoadersCheckout : []
+            );
         }
 
         return $return;
@@ -219,9 +226,9 @@ class Data
     public static function getJsDependencies($scriptName, $isAdmin)
     {
         if ($isAdmin) {
-            $return = isset(self::$jsDependenciesAdmin) ? self::$jsDependenciesAdmin[$scriptName] : [];
+            $return = isset(self::$jsDependenciesAdmin[$scriptName]) ? self::$jsDependenciesAdmin[$scriptName] : [];
         } else {
-            $return = isset(self::$jsDependencies) ? self::$jsDependencies[$scriptName] : [];
+            $return = isset(self::$jsDependencies[$scriptName]) ? self::$jsDependencies[$scriptName] : [];
         }
 
         return $return;

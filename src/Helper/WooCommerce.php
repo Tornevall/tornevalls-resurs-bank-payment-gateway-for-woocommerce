@@ -1,6 +1,10 @@
 <?php
 
-namespace ResursBank;
+namespace ResursBank\Helper;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Class WooCommerce WooCommerce related actions.
@@ -9,5 +13,4 @@ namespace ResursBank;
  */
 class WooCommerce
 {
-
 }

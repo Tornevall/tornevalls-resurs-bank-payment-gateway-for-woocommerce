@@ -8,10 +8,10 @@
  * Author: Tomas Tornevall
  * Author URI:
  * Text Domain: trbwc
- * Domain Path: /languages
+ * Domain Path: /language
  */
 
-use ResursBank\WordPress;
+use ResursBank\Helper\WordPress;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -19,9 +19,16 @@ if (!defined('ABSPATH')) {
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
 define('RESURSBANK_IS_DEVELOPER', true);
 define('RESURSBANK_PREFIX', 'trbwc');
+define('RESURSBANK_SNAKECASE_FILTERS', true);
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
-if (function_exists('add_action')) {
-    WordPress::initializePlugin();
-}
+// This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
+// or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
+add_action('plugins_loaded', '\ResursBank\Helper\WordPress::initializePlugin');
+//WordPress::initializePlugin();
+load_plugin_textdomain(
+    'trbwc',
+    false,
+    dirname(plugin_basename(__FILE__)) . '/language'
+);

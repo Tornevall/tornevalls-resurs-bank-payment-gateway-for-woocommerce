@@ -1,6 +1,6 @@
 <?php
 
-namespace ResursBank;
+namespace ResursBank\Module;
 
 if (!defined('ABSPATH')) {
     exit;
