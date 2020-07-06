@@ -51,12 +51,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/Roave/SecurityAdvisories.git",
-            "reference": "57353ec1a34527a2dbbd3c0fb9418ffc008c6f60"
+            "reference": "239e50ae0e1906d32b32ed58bc7d15c81bfc06f0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/57353ec1a34527a2dbbd3c0fb9418ffc008c6f60",
-            "reference": "57353ec1a34527a2dbbd3c0fb9418ffc008c6f60",
+            "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/239e50ae0e1906d32b32ed58bc7d15c81bfc06f0",
+            "reference": "239e50ae0e1906d32b32ed58bc7d15c81bfc06f0",
             "shasum": ""
         },
         "conflict": {
@@ -125,6 +125,7 @@
             "friendsofsymfony/user-bundle": ">=1.2,<1.3.5",
             "fuel/core": "<1.8.1",
             "getgrav/grav": "<1.7-beta.8",
+            "gos/web-socket-bundle": "<1.10.4|>=2,<2.6.1|>=3,<3.3",
             "gree/jose": "<=2.2",
             "gregwar/rst": "<1.0.3",
             "guzzlehttp/guzzle": ">=4-rc.2,<4.2.4|>=5,<5.3.1|>=6,<6.2.1",
@@ -301,7 +302,7 @@
             "zfcampus/zf-apigility-doctrine": ">=1,<1.0.3",
             "zfr/zfr-oauth2-server-module": "<0.1.2"
         },
-        "time": "2020-07-03T16:50:03+00:00",
+        "time": "2020-07-06T15:00:46+00:00",
         "type": "metapackage",
         "notification-url": "https://packagist.org/downloads/",
         "license": [
