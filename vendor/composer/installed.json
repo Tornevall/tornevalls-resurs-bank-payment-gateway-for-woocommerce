@@ -391,14 +391,14 @@
     },
     {
         "name": "tornevall/tornelib-php-errorhandler",
-        "version": "6.1.9",
-        "version_normalized": "6.1.9.0",
+        "version": "6.1.10",
+        "version_normalized": "6.1.10.0",
         "source": {
             "type": "git",
             "url": "https://bitbucket.tornevall.net/scm/lib/tornelib-php-errorhandler.git",
-            "reference": "e84e75c3eaf2b6a848025aedbf223bf3a1dc81e4"
+            "reference": "be04f20f918bd55a148bdaaff78f84d2b7db0097"
         },
-        "time": "2020-06-14T08:44:12+00:00",
+        "time": "2020-06-28T14:07:31+00:00",
         "type": "library",
         "installation-source": "source",
         "autoload": {
@@ -595,18 +595,18 @@
     },
     {
         "name": "tornevall/tornelib-php-utils",
-        "version": "6.1.5",
-        "version_normalized": "6.1.5.0",
+        "version": "6.1.6",
+        "version_normalized": "6.1.6.0",
         "source": {
             "type": "git",
             "url": "https://bitbucket.tornevall.net/scm/lib/tornelib-php-utils.git",
-            "reference": "d626f48d1fc9ca27802b17474e8f56f2606390ba"
+            "reference": "77878e330f15ad8b93d6c2dd434592b15c67a395"
         },
         "require": {
             "tornevall/tornelib-php-errorhandler": "^6.1.0",
             "tornevall/tornelib-php-flags": "^6.1.0"
         },
-        "time": "2020-06-11T12:58:48+00:00",
+        "time": "2020-07-06T10:12:31+00:00",
         "type": "library",
         "installation-source": "source",
         "autoload": {
