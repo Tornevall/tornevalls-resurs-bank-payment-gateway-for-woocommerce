@@ -22,7 +22,7 @@ class ResursDefault extends \WC_Payment_Gateway
         $this->generic = new Generic();
         $this->generic->setTemplatePath(Data::getGatewayPath('templates'));
 
-        $this->id = ResursDefault::class;
+        $this->id = Data::getPrefix('default');
         $this->method_title = __('Resurs Bank', 'trbwc');
         $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'trbwc');
         $this->title = __('Resurs Bank AB', 'trbwc');
@@ -30,6 +30,8 @@ class ResursDefault extends \WC_Payment_Gateway
         //$this->icon = Data::getImage('logo2018.png');
         $this->init_settings();
         $this->init_form_fields();
+
+        add_action('woocommerce_update_options', [$this, 'process_admin_options']);
     }
 
     /**
@@ -37,7 +39,7 @@ class ResursDefault extends \WC_Payment_Gateway
      */
     public function init_form_fields()
     {
-        $this->form_fields = Data::getFormFields(true);
+        $this->form_fields = Data::getFormFields();
     }
 
     /**
@@ -45,11 +47,15 @@ class ResursDefault extends \WC_Payment_Gateway
      */
     public function admin_options()
     {
+        ob_start();
         parent::admin_options();
+        $adminDefaultForm = ob_get_clean();
+
         echo $this->generic->getTemplate(
             'adminpage_default_adminoptions',
             [
-                'moreSettingsHref' => admin_url('admin.php?page=wc-settings&tab=rbwc_gateway'),
+                'adminDefaultForm' => $adminDefaultForm,
+                'moreSettingsHref' => admin_url(sprintf("admin.php?page=wc-settings&tab=%s", AdminPage::getId())),
                 'moreSettings' => __('Looking for more settings?', 'trbwc'),
                 'moreSettingsDescription' => __(
                     'This plugin offers a lot of settings, which has been traditionally been kept in a separate tab. ' .
@@ -67,10 +73,5 @@ class ResursDefault extends \WC_Payment_Gateway
                 ),
             ]
         );
-    }
-
-    public function process_admin_options()
-    {
-        return parent::process_admin_options();
     }
 }

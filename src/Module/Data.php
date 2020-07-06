@@ -15,13 +15,16 @@ use TorneLIB\Utils\Generic;
 class Data
 {
     /** @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list. */
-    private static $jsLoaders = ['resursbank' => 'resursbank.js'];
+    private static $jsLoaders = ['resursbank_all' => 'resurs_global.js', 'resursbank' => 'resursbank.js'];
 
     /** @var array $jsLoadersCheckout Loadable scripts, only from checkout. */
     private static $jsLoadersCheckout = ['checkout' => 'checkout.js'];
 
     /** @var array $jsLoadersAdmin List of loadable scripts for admin. */
-    private static $jsLoadersAdmin = ['resursbank' => 'resursbank.js'];
+    private static $jsLoadersAdmin = [
+        'resursbank_all' => 'resurs_global.js',
+        'resursbank_admin' => 'resursbank_admin.js',
+    ];
 
     /** @var array $jsDependencies List of dependencies for the scripts in this plugin. */
     private static $jsDependencies = ['resursbank' => ['jquery']];
@@ -37,8 +40,6 @@ class Data
 
     /** @var array $fileImageExtensions */
     private static $fileImageExtensions = ['jpg', 'gif', 'png'];
-
-    private static $formFieldDefaults = [];
 
     /**
      * @param $imageName
@@ -229,12 +230,17 @@ class Data
 
     /**
      * Anti collider.
+     * @param string $extra
      * @return string
      * @since 0.0.1.0
      */
-    public static function getPrefix()
+    public static function getPrefix($extra = '')
     {
-        return RESURSBANK_PREFIX;
+        if (empty($extra)) {
+            return RESURSBANK_PREFIX;
+        }
+
+        return RESURSBANK_PREFIX . '_' . $extra;
     }
 
     /**

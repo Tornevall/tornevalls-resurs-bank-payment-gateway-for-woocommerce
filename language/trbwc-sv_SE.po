@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-06 13:53+0200\n"
-"PO-Revision-Date: 2020-07-06 13:53+0200\n"
+"POT-Creation-Date: 2020-07-06 15:55+0200\n"
+"PO-Revision-Date: 2020-07-06 15:55+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -23,9 +23,18 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 
-#: src/Gateway/AdminPage.php:70
-msgid "Extended configuration view for Resurs Bank."
-msgstr "Utökad konfigurationsvy för Resurs Bank."
+#: src/Gateway/AdminPage.php:89
+msgid "Plugin and account settings"
+msgstr "Plugin- och kontoninställningar"
+
+#: src/Gateway/AdminPage.php:90
+msgid "Advanced"
+msgstr "Avancerat"
+
+#: src/Gateway/AdminPage.php:114
+#, php-format
+msgid "Extended configuration view for Resurs Bank: %s"
+msgstr "Utökad konfigurationsvy för Resurs Bank: %s"
 
 #: src/Gateway/ResursDefault.php:26
 msgid "Resurs Bank"
@@ -65,15 +74,15 @@ msgstr ""
 msgid "You can reach the other settings here!"
 msgstr "Du når de andra inställningarna här!"
 
-#: src/Module/FormFields.php:21
+#: src/Module/FormFields.php:26
 msgid "Enable/Disable"
 msgstr "Aktivera/Inaktivera"
 
-#: src/Module/FormFields.php:23
+#: src/Module/FormFields.php:28
 msgid "Enable Resurs Bank"
 msgstr "Aktivera Resurs Bank"
 
-#: src/Module/FormFields.php:25
+#: src/Module/FormFields.php:30
 msgid ""
 "This enables core functions of Resurs Bank, like the payment gateway, etc. "
 "When disabled, after shop functions (i.e. debiting, annulling, etc) will "
@@ -83,35 +92,35 @@ msgstr ""
 "gatewayen, med mera. När den är avstängd så kommer efterköps-funktioner "
 "(såsom debitering, annullering, mfl) fortfarande fungera."
 
-#: src/Module/FormFields.php:32
+#: src/Module/FormFields.php:37
 msgid "Environment"
 msgstr "Miljö"
 
-#: src/Module/FormFields.php:36
+#: src/Module/FormFields.php:41
 msgid "Test/Staging"
 msgstr "Test/Staging"
 
-#: src/Module/FormFields.php:40
+#: src/Module/FormFields.php:45
 msgid "Production/Live"
 msgstr "Produktion/Live"
 
-#: src/Module/FormFields.php:46
+#: src/Module/FormFields.php:51
 msgid "Defines if you are are live or just in test/staging. Default: test."
 msgstr "Definierar om du är live eller enbart i test/staging. Standard: test."
 
-#: src/Module/FormFields.php:51
+#: src/Module/FormFields.php:56
 msgid "Resurs Bank webservices username"
 msgstr "Resurs Banks webservice-användarnamn"
 
-#: src/Module/FormFields.php:54
+#: src/Module/FormFields.php:59
 msgid "Web services username, received from Resurs Bank."
 msgstr "Webservicens användarnamn, vilket du erhållit från Resurs Bank."
 
-#: src/Module/FormFields.php:61
+#: src/Module/FormFields.php:66
 msgid "Resurs Bank webservices password"
 msgstr "Resurs Banks webservice-lösenord"
 
-#: src/Module/FormFields.php:65
+#: src/Module/FormFields.php:70
 msgid "Web services password, received from Resurs Bank."
 msgstr "Webservicens lösenord, vilket du erhållit från Resurs Bank."
 

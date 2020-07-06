@@ -10,75 +10,101 @@ namespace ResursBank\Module;
 class FormFields
 {
     /**
-     * @param bool $getBasic
+     * @param string $section
+     * @param string $id
      * @return array
      */
-    public static function getFormFields($getBasic = null)
+    public static function getFormFields($section = 'basic', $id = '')
     {
+        if (empty($section)) {
+            $section = 'basic';
+        }
+
         // Basic settings. Returned to ResursDefault configuration.
-        $basic = [
-            'enabled' => [
-                'title' => __('Enable/Disable'),
-                'type' => 'checkbox',
-                'label' => __('Enable Resurs Bank'),
-                'description' => __(
-                    'This enables core functions of Resurs Bank, like the payment gateway, etc. ' .
-                    'When disabled, after shop functions (i.e. debiting, annulling, etc) will still work.',
-                    'trbwc'
-                ),
-                'default' => 'yes',
-            ],
-            'environment' => [
-                'title' => __('Environment', 'trbwc'),
-                'type' => 'select',
-                'options' => [
-                    'test' => __(
-                        'Test/Staging',
+        $formFields = [
+            'basic' => [
+                'enabled' => [
+                    'id' => 'enabled',
+                    'title' => __('Enable/Disable', 'trbwc'),
+                    'type' => 'checkbox',
+                    'label' => __('Enable Resurs Bank', 'trbwc'),
+                    'description' => __(
+                        'This enables core functions of Resurs Bank, like the payment gateway, etc. ' .
+                        'When disabled, after shop functions (i.e. debiting, annulling, etc) will still work.',
                         'trbwc'
                     ),
-                    'live' => __(
-                        'Production/Live',
+                    'default' => 'yes',
+                ],
+                'environment' => [
+                    'id' => 'environment',
+                    'title' => __('Environment', 'trbwc'),
+                    'type' => 'select',
+                    'options' => [
+                        'test' => __(
+                            'Test/Staging',
+                            'trbwc'
+                        ),
+                        'live' => __(
+                            'Production/Live',
+                            'trbwc'
+                        ),
+                    ],
+                    'default' => 'test',
+                    'description' => __(
+                        'Defines if you are are live or just in test/staging. Default: test.',
                         'trbwc'
                     ),
                 ],
-                'default' => 'test',
-                'description' => __(
-                    'Defines if you are are live or just in test/staging. Default: test.',
-                    'trbwc'
-                ),
-            ],
-            'login' => [
-                'title' => __('Resurs Bank webservices username', 'trbwc'),
-                'type' => 'text',
-                'description' => __(
-                    'Web services username, received from Resurs Bank.',
-                    'trbwc'
-                ),
-                'default' => '',
-                'desc_tip' => true,
-            ],
-            'password' => [
-                'title' => __('Resurs Bank webservices password', 'trbwc'),
-                'type' => 'password',
-                'default' => '',
-                'description' => __(
-                    'Web services password, received from Resurs Bank.',
-                    'trbwc'
-                ),
-                'desc_tip' => true,
+                'login' => [
+                    'id' => 'login',
+                    'title' => __('Resurs Bank webservices username', 'trbwc'),
+                    'type' => 'text',
+                    'description' => __(
+                        'Web services username, received from Resurs Bank.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                    'desc_tip' => true,
+                ],
+                'password' => [
+                    'id' => 'password',
+                    'title' => __('Resurs Bank webservices password', 'trbwc'),
+                    'type' => 'password',
+                    'default' => '',
+                    'description' => __(
+                        'Web services password, received from Resurs Bank.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => true,
+                ],
             ],
         ];
 
-        // Extended settings - the rest of it.
-        $extended = [
+        if ($section === 'all') {
+            $return = $formFields;
+        } else {
+            $return = isset($formFields[$section]) ? self::getTransformedIdArray($formFields[$section], $id) : [];
+        }
 
-        ];
+        return $return;
+    }
 
-        $formFields = array_merge(
-            $basic,
-            !(bool)$getBasic ? $extended : []
-        );
+    /**
+     * @return string
+     */
+    public static function getTransformedIdArray($array, $add)
+    {
+        $return = $array;
 
-        return $formFields;
+        if (!empty($add)) {
+            foreach ($array as $itemKey => $item) {
+                if (isset($item['id'])) {
+                    $item['id'] = sprintf('%s_%s', $add, $item['id']);
+                }
+                $return[$itemKey] = $item;
+            }
+        }
+
+        return $return;
     }
 }

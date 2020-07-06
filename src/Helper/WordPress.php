@@ -38,6 +38,7 @@ class WordPress
     {
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
+        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
     }
 
     /**
@@ -105,6 +106,7 @@ class WordPress
                 Data::getJsDependencies($scriptName, $isAdmin)
             );
         }
+
     }
 
     /**
@@ -115,10 +117,20 @@ class WordPress
      */
     public static function applyFilters($filterName, $value)
     {
-        return apply_filters(
-            sprintf('%s_%s', 'rbwc', self::getFilterName($filterName)),
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                self::getFilterName($filterName)
+            ),
             $value,
-            self::getFilterArgs(func_get_args())
+        ];
+
+        $applyArray = array_merge($applyArray, self::getFilterArgs(func_get_args()));
+
+        return call_user_func_array(
+            'apply_filters',
+            $applyArray
         );
     }
 
