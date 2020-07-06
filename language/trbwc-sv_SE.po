@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-06 15:55+0200\n"
-"PO-Revision-Date: 2020-07-06 15:55+0200\n"
+"POT-Creation-Date: 2020-07-06 22:29+0200\n"
+"PO-Revision-Date: 2020-07-06 22:29+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -23,15 +23,31 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 
-#: src/Gateway/AdminPage.php:89
+#: src/Gateway/AdminPage.php:95
+msgid "Developer Settings"
+msgstr "Utvecklar-inställningar"
+
+#: src/Gateway/AdminPage.php:98
+msgid "Disable RB 2.x"
+msgstr "Stäng av RB 2.x"
+
+#: src/Gateway/AdminPage.php:100
+msgid "Disable prior similar versions of the Resurs Bank plugin (v2.x-series)."
+msgstr "Stäng av tidigare versioner av Resurs Bank-pluginet (v2.x-serien)"
+
+#: src/Gateway/AdminPage.php:102
+msgid ""
+"This setting will disable, not entirely, but the functions in Resurs Bank "
+"Gateway v2.x with help from filters in that release."
+msgstr ""
+"Denna inställningen stänger ned, ej helt, funktioner i Resurs Bank Gateway "
+"v2.x, med hjälp av filter i den releasen."
+
+#: src/Gateway/AdminPage.php:156 src/Module/FormFields.php:28
 msgid "Plugin and account settings"
-msgstr "Plugin- och kontoninställningar"
+msgstr "Plugin- och kontoinställningar"
 
-#: src/Gateway/AdminPage.php:90
-msgid "Advanced"
-msgstr "Avancerat"
-
-#: src/Gateway/AdminPage.php:114
+#: src/Gateway/AdminPage.php:185
 #, php-format
 msgid "Extended configuration view for Resurs Bank: %s"
 msgstr "Utökad konfigurationsvy för Resurs Bank: %s"
@@ -48,41 +64,70 @@ msgstr "Resurs Bank betalnings-gateway med dynamiska betalsätt."
 msgid "Resurs Bank AB"
 msgstr "Resurs Bank AB"
 
-#: src/Gateway/ResursDefault.php:53
-msgid "Looking for more settings?"
-msgstr "Letar du efter fler inställningar?"
+#: src/Helper/WooCommerce.php:77
+msgid "Settings"
+msgstr "Inställningar"
 
-#: src/Gateway/ResursDefault.php:55
+#: src/Module/Data.php:432
+msgid "Plugin version"
+msgstr "Plugin-version"
+
+#: src/Module/Data.php:433
+msgid "Composer version"
+msgstr "Composer-version"
+
+#: src/Module/Data.php:434
+msgid "PHP Version"
+msgstr "PHP-Version"
+
+#: src/Module/Data.php:435
+msgid "Webservice Library"
+msgstr "Webservice-Bibliotek"
+
+#: src/Module/Data.php:436
+msgid "Communication Library"
+msgstr "Kommunikationsbibliotek"
+
+#: src/Module/Data.php:437
+msgid "Communication Drivers"
+msgstr "Kommunikations-drivrutiner"
+
+#: src/Module/Data.php:446
 msgid ""
-"This plugin offers a lot of settings, which has been traditionally been kept "
-"in a separate tab. The page you are currently visiting only contains the "
-"vital settings for the plugin."
+"If something is wrong and you are unsure of where to begin, take a look at "
+"the communication drivers. Wrappers that must be available for this plugin "
+"to fully work, is either the CurlWrapper or SimpleStreamWrapper -and- the "
+"SoapClientWrapper. Resurs Bank offers multiple services over both Soap/XML "
+"and REST so they have to be present."
 msgstr ""
-"Det här pluginet erbjuder många inställningar, vilka traditionellt har "
-"funnits i en separat flik. Sidan som du för tillfället besöker innehåller "
-"enbart de vitala inställningarna för pluginet."
+"Om något är fel och du är osäker på var du ska börja, ta dig en titt på "
+"kommunikations-drivrutinerna. Wrappers som måste vara tillgängliga för att "
+"pluginet skall fungera fullt ut, är antingen CurlWrapper eller "
+"SimpleStreamWrapper -och- SoapClientWrapper. Resurs Bank erbjuder flera "
+"olika tjänster över både Soap/XML och REST, så de måste finnas tillgängliga."
 
-#: src/Gateway/ResursDefault.php:60
+#: src/Module/Data.php:453
 msgid ""
-"You should also be aware of that this switch does not enable nor disable the "
-"entire plugin. Just the basic functionality for it."
+"If you ever need support with this plugin, you should primarily check this "
+"page before sending support requests. When you send the requests, make sure "
+"you do include the information below in your message. Doing this, it will be "
+"easier in the end to help you out."
 msgstr ""
-"Du bör också vara medveten om att denna inställningen varken aktiverar eller "
-"stänger av pluginet helt och hållet. Bara basfunktionaliteten för det."
+"Om du någon gång behöver support med detta pluginet, bör du primärt titta "
+"till den här sidan innan du skickar support-ärenden. När du skickar ärenden, "
+"se till att du inkluderar så mycket information som möjligt från nedan, i "
+"ditt meddelande. Om du gör detta, blir det i slutänden mycket lättare att "
+"hjälpa dig."
 
-#: src/Gateway/ResursDefault.php:65
-msgid "You can reach the other settings here!"
-msgstr "Du når de andra inställningarna här!"
-
-#: src/Module/FormFields.php:26
+#: src/Module/FormFields.php:31 src/Module/FormFields.php:32
 msgid "Enable/Disable"
 msgstr "Aktivera/Inaktivera"
 
-#: src/Module/FormFields.php:28
+#: src/Module/FormFields.php:34
 msgid "Enable Resurs Bank"
 msgstr "Aktivera Resurs Bank"
 
-#: src/Module/FormFields.php:30
+#: src/Module/FormFields.php:36
 msgid ""
 "This enables core functions of Resurs Bank, like the payment gateway, etc. "
 "When disabled, after shop functions (i.e. debiting, annulling, etc) will "
@@ -92,37 +137,76 @@ msgstr ""
 "gatewayen, med mera. När den är avstängd så kommer efterköps-funktioner "
 "(såsom debitering, annullering, mfl) fortfarande fungera."
 
-#: src/Module/FormFields.php:37
+#: src/Module/FormFields.php:44
 msgid "Environment"
 msgstr "Miljö"
 
-#: src/Module/FormFields.php:41
+#: src/Module/FormFields.php:48
 msgid "Test/Staging"
 msgstr "Test/Staging"
 
-#: src/Module/FormFields.php:45
+#: src/Module/FormFields.php:52
 msgid "Production/Live"
 msgstr "Produktion/Live"
 
-#: src/Module/FormFields.php:51
+#: src/Module/FormFields.php:58
 msgid "Defines if you are are live or just in test/staging. Default: test."
 msgstr "Definierar om du är live eller enbart i test/staging. Standard: test."
 
-#: src/Module/FormFields.php:56
+#: src/Module/FormFields.php:64
 msgid "Resurs Bank webservices username"
 msgstr "Resurs Banks webservice-användarnamn"
 
-#: src/Module/FormFields.php:59
+#: src/Module/FormFields.php:67
 msgid "Web services username, received from Resurs Bank."
 msgstr "Webservicens användarnamn, vilket du erhållit från Resurs Bank."
 
-#: src/Module/FormFields.php:66
+#: src/Module/FormFields.php:74
 msgid "Resurs Bank webservices password"
 msgstr "Resurs Banks webservice-lösenord"
 
-#: src/Module/FormFields.php:70
+#: src/Module/FormFields.php:78
 msgid "Web services password, received from Resurs Bank."
 msgstr "Webservicens lösenord, vilket du erhållit från Resurs Bank."
+
+#: src/Module/FormFields.php:84
+msgid "Country"
+msgstr "Land"
+
+#: src/Module/FormFields.php:92
+#, fuzzy
+#| msgid ""
+#| "Defines which country this plugin operates from. Credentials given by "
+#| "Resurs Bank are country limited. Default: Store address country."
+msgid ""
+"Defines which country this plugin operates from. Credentials given by Resurs "
+"Bank are limited to a specifc country. Default: Store address country."
+msgstr ""
+"Definierar vilket land detta plugin opererar från. Användaruppgifter som "
+"erhålls från Resurs Bank är begränsade till specifikt land. Standard: "
+"Butiksadressens land."
+
+#: src/Module/FormFields.php:99
+msgid "Advanced Settings"
+msgstr "Avancerade Inställningar"
+
+#: src/Module/FormFields.php:101 src/Module/FormFields.php:102
+msgid "Activate developer section"
+msgstr "Aktivera utvecklar-sektionen"
+
+#: src/Module/FormFields.php:104
+msgid ""
+"The developer section is normally nothing you will need, unless you are a "
+"very advanced administrator that likes to configure a little bit over the "
+"limits. If you know what you are doing, feel free to activate this section."
+msgstr ""
+"Utvecklarsektionen är normalt sett inte något du kommer behöva, förutsatt "
+"att du inte är en väldigt avancerad administratör som gillar att konfigurera "
+"lite över gränserna. Om du vet vad du gör, kan du aktivera sektionen."
+
+#: src/Module/FormFields.php:114
+msgid "Support"
+msgstr "Support och hjälp"
 
 #. Plugin Name of the plugin/theme
 msgid "Tornevall Networks Resurs Bank payment gateway for WooCommerce"
@@ -143,6 +227,32 @@ msgstr "Anslut Resurs Bank som WooCommerce betalningsgateway."
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
 msgstr "Tomas Tornevall"
+
+#~ msgid "Advanced"
+#~ msgstr "Avancerat"
+
+#~ msgid "Looking for more settings?"
+#~ msgstr "Letar du efter fler inställningar?"
+
+#~ msgid ""
+#~ "This plugin offers a lot of settings, which has been traditionally been "
+#~ "kept in a separate tab. The page you are currently visiting only contains "
+#~ "the vital settings for the plugin."
+#~ msgstr ""
+#~ "Det här pluginet erbjuder många inställningar, vilka traditionellt har "
+#~ "funnits i en separat flik. Sidan som du för tillfället besöker innehåller "
+#~ "enbart de vitala inställningarna för pluginet."
+
+#~ msgid ""
+#~ "You should also be aware of that this switch does not enable nor disable "
+#~ "the entire plugin. Just the basic functionality for it."
+#~ msgstr ""
+#~ "Du bör också vara medveten om att denna inställningen varken aktiverar "
+#~ "eller stänger av pluginet helt och hållet. Bara basfunktionaliteten för "
+#~ "det."
+
+#~ msgid "You can reach the other settings here!"
+#~ msgstr "Du når de andra inställningarna här!"
 
 #~ msgid "Title"
 #~ msgstr "Titel"

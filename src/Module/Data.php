@@ -4,7 +4,9 @@
 
 namespace ResursBank\Module;
 
+use ResursBank\Helper\WordPress;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
 
 /**
@@ -14,32 +16,62 @@ use TorneLIB\Utils\Generic;
  */
 class Data
 {
-    /** @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list. */
+    /**
+     * @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list.
+     * @since 0.0.1.0
+     */
     private static $jsLoaders = ['resursbank_all' => 'resurs_global.js', 'resursbank' => 'resursbank.js'];
 
-    /** @var array $jsLoadersCheckout Loadable scripts, only from checkout. */
+    /**
+     * @var array $jsLoadersCheckout Loadable scripts, only from checkout.
+     * @since 0.0.1.0
+     */
     private static $jsLoadersCheckout = ['checkout' => 'checkout.js'];
 
-    /** @var array $jsLoadersAdmin List of loadable scripts for admin. */
+    /**
+     * @var array $jsLoadersAdmin List of loadable scripts for admin.
+     * @since 0.0.1.0
+     */
     private static $jsLoadersAdmin = [
         'resursbank_all' => 'resurs_global.js',
         'resursbank_admin' => 'resursbank_admin.js',
     ];
 
-    /** @var array $jsDependencies List of dependencies for the scripts in this plugin. */
+    /**
+     * @var array $jsDependencies List of dependencies for the scripts in this plugin.
+     * @since 0.0.1.0
+     */
     private static $jsDependencies = ['resursbank' => ['jquery']];
 
-    /** @var array $jsDependenciesAdmin */
+    /**
+     * @var array $jsDependenciesAdmin
+     * @since 0.0.1.0
+     */
     private static $jsDependenciesAdmin = [];
 
-    /** @var array $styles List of loadable styles. */
+    /**
+     * @var array $styles List of loadable styles.
+     * @since 0.0.1.0
+     */
     private static $styles = ['resursbank' => 'resursbank.css'];
 
-    /** @var array $stylesAdmin */
+    /**
+     * @var array $stylesAdmin
+     * @since 0.0.1.0
+     */
     private static $stylesAdmin = [];
 
-    /** @var array $fileImageExtensions */
+    /**
+     * @var array $fileImageExtensions
+     * @since 0.0.1.0
+     */
     private static $fileImageExtensions = ['jpg', 'gif', 'png'];
+
+    /**
+     * @var array $formFieldDefaults
+     * @since 0.0.1.0
+     */
+    private static $formFieldDefaults;
 
     /**
      * @param $imageName
@@ -229,21 +261,6 @@ class Data
     }
 
     /**
-     * Anti collider.
-     * @param string $extra
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getPrefix($extra = '')
-    {
-        if (empty($extra)) {
-            return RESURSBANK_PREFIX;
-        }
-
-        return RESURSBANK_PREFIX . '_' . $extra;
-    }
-
-    /**
      * @return bool
      * @throws ExceptionHandler
      */
@@ -307,22 +324,39 @@ class Data
      * @return bool|string
      * @since 0.0.1.0
      */
-    public static function getResursOption($key = '', $option_name = 'woocommerce_rbwc_gateway_settings')
+    public static function getResursOption($key)
     {
-        $return = self::getDefault($key);
-        $getOptionsNamespace = get_option($option_name);
-        if (isset($getOptionsNamespace[$key])) {
-            $return = $getOptionsNamespace[$key];
+        $optionKeyPrefix = sprintf('%s_%s', Data::getPrefix('admin'), $key);
+        $return = self::getDefault($optionKeyPrefix);
+        $getOptionReturn = get_option($optionKeyPrefix);
+
+        if (!empty($getOptionReturn) && empty($return)) {
+            $return = $getOptionReturn;
         }
 
         // What the old plugin never did to save space.
-        if (self::getTruth($return) !== null) {
+        if (($return = self::getTruth($return)) !== null) {
             $return = (bool)$return;
         } else {
             $return = (string)$return;
         }
 
         return $return;
+    }
+
+    /**
+     * Anti collider.
+     * @param string $extra
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getPrefix($extra = '')
+    {
+        if (empty($extra)) {
+            return RESURSBANK_PREFIX;
+        }
+
+        return RESURSBANK_PREFIX . '_' . $extra;
     }
 
     /**
@@ -334,12 +368,27 @@ class Data
     {
         $return = '';
 
-        if (!count(self::$formFieldDefaults)) {
-            self::$formFieldDefaults = FormFields::getFormFields();
+        if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
+            self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
         }
 
         if (isset(self::$formFieldDefaults[$key]['default'])) {
             $return = self::$formFieldDefaults[$key]['default'];
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $array
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getDefaultsFromSections($array)
+    {
+        $return = [];
+        foreach ($array as $section => $content) {
+            $return += $content;
         }
 
         return $return;
@@ -361,5 +410,80 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @param $content
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function getPluginInformation($content)
+    {
+        $generic = new Generic();
+        $generic->setTemplatePath(Data::getGatewayPath('templates'));
+        $netWrapper = new NetWrapper();
+
+        $renderData = [
+            __('Plugin version', 'trbwc') => Data::getCurrentVersion(),
+            __('Composer version', 'trbwc') => Data::getVersionByComposer(),
+            __('PHP Version', 'trbwc') => PHP_VERSION,
+            __('Webservice Library', 'trbwc') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
+            __('Communication Library', 'trbwc') => 'netcurl-' . $netWrapper->getVersion(),
+            __('Communication Drivers', 'trbwc') => implode('<br>', self::getWrapperList($netWrapper)),
+        ];
+
+        $renderData += WordPress::applyFilters('renderInformationData', $renderData);
+        $content .= $generic->getTemplate(
+            'plugin_information',
+            [
+                'required_drivers' => self::getSpecialString('required_drivers'),
+                'support_string' => self::getSpecialString('support_string'),
+                'render' => $renderData,
+            ]
+        );
+
+        return $content;
+    }
+
+    /**
+     * Return list of wrappers from netcurl wrapper driver.
+     * @param $netWrapper
+     * @return array
+     */
+    private static function getWrapperList($netWrapper)
+    {
+        $wrapperList = [];
+        foreach ($netWrapper->getWrappers() as $wrapperClass => $wrapperInstance) {
+            $wrapperList[] = preg_replace('/(.*)\\\\(.*?)$/', '$2', $wrapperClass);
+        }
+
+        return $wrapperList;
+    }
+
+    /**
+     * Return long translations.
+     * @param $key
+     * @return mixed
+     */
+    private static function getSpecialString($key)
+    {
+        $array = [
+            'required_drivers' => __(
+                'If something is wrong and you are unsure of where to begin, take a look at the communication ' .
+                'drivers. Wrappers that must be available for this plugin to fully work, is either the ' .
+                'CurlWrapper or SimpleStreamWrapper -and- the SoapClientWrapper. Resurs Bank offers ' .
+                'multiple services over both Soap/XML and REST so they have to be present.',
+                'trbwc'
+            ),
+            'support_string' => __(
+                'If you ever need support with this plugin, you should primarily check this ' .
+                'page before sending support requests. When you send the requests, make sure you do ' .
+                'include the information below in your message. Doing this, it will be easier ' .
+                'in the end to help you out.',
+                'trbwc'
+            ),
+        ];
+
+        return isset($array[$key]) ? $array[$key] : '';
     }
 }

@@ -36,9 +36,12 @@ class WordPress
      */
     private static function setupFilters()
     {
+        add_filter('plugin_action_links', 'ResursBank\Helper\WooCommerce::getPluginAdminUrl', 10, 2);
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
         add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
+        add_filter('rbwc_get_dependent_settings', 'ResursBank\Gateway\AdminPage::getDependentSettings');
+        add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
     }
 
     /**
@@ -63,6 +66,8 @@ class WordPress
      */
     public static function getPriorVersionsDisabled()
     {
+        $return = (bool)Data::getResursOption('getPriorVersionsDisabled');
+
         return true;
     }
 
@@ -87,7 +92,7 @@ class WordPress
                     '%s/css/%s?%s',
                     Data::getGatewayUrl(),
                     $styleFile,
-                    isResursTest() ? time() : 'static'
+                    Data::getTestMode() ? time() : 'static'
                 ),
                 [],
                 Data::getCurrentVersion()
@@ -101,7 +106,7 @@ class WordPress
                     '%s/js/%s?%s',
                     Data::getGatewayUrl(),
                     $scriptFile,
-                    isResursTest() ? Data::getPrefix() . '-' . time() : 'static'
+                    Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
                 ),
                 Data::getJsDependencies($scriptName, $isAdmin)
             );

@@ -41,7 +41,7 @@ class AdminPage extends WC_Settings_Page
 
     public function __construct()
     {
-        $this->id = Data::getPrefix('default');
+        $this->id = Data::getPrefix('admin');
 
         $this->generic = new Generic();
         $this->generic->setTemplatePath(Data::getGatewayPath('templates'));
@@ -57,8 +57,6 @@ class AdminPage extends WC_Settings_Page
         add_action('woocommerce_sections_' . $this->id, [$this, 'output_sections']);
         add_action('woocommerce_settings_save_' . $this->id, [$this, 'save']);
 
-        //add_action('woocommerce_update_options_' . $this->id, [$this, 'resurs_bank_settings_save_legacy']);
-
         parent::__construct();
     }
 
@@ -70,6 +68,9 @@ class AdminPage extends WC_Settings_Page
      */
     public static function getAdminDynamicContent($content, $current_section)
     {
+        if ($current_section === 'information') {
+            $content .= WordPress::applyFilters('getPluginInformation', null);
+        }
         return $content;
     }
 
@@ -78,7 +79,41 @@ class AdminPage extends WC_Settings_Page
      */
     public static function getId()
     {
-        return Data::getPrefix('default');
+        return Data::getPrefix('admin');
+    }
+
+    /**
+     * Filter based addon.
+     * @param $currentArray
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getDependentSettings($currentArray)
+    {
+        $developerArray = [
+            'developer' => [
+                'title' => __('Developer Settings', 'trbwc'),
+                'getPriorVersionsDisabled' => [
+                    'id' => 'getPriorVersionsDisabled',
+                    'title' => __('Disable RB 2.x', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __('Disable prior similar versions of the Resurs Bank plugin (v2.x-series).', 'trbwc'),
+                    'desc_top' => __(
+                        'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
+                        'with help from filters in that release.',
+                        'trbwc'
+                    ),
+                    'default' => 'yes',
+                ],
+            ],
+        ];
+
+        $showDeveloper = (bool)Data::getResursOption('show_developer');
+        if ($showDeveloper) {
+            $currentArray += $developerArray;
+        }
+
+        return $currentArray;
     }
 
     public function save()
@@ -94,7 +129,7 @@ class AdminPage extends WC_Settings_Page
      */
     public function get_settings($current_section = '')
     {
-        $settings = FormFields::getFormFields($current_section);
+        $settings = FormFields::getFormFields($current_section, $this->id);
 
         return apply_filters('woocommerce_get_settings_' . $this->id, $settings, $current_section);
     }
@@ -113,10 +148,18 @@ class AdminPage extends WC_Settings_Page
      */
     private function getSectionNames()
     {
-        return [
-            '' => __('Plugin and account settings', 'trbwc'),
-            'advanced' => __('Advanced', 'trbwc'),
-        ];
+        $return = [];
+        $formFields = Data::getFormFields('all');
+        foreach ($formFields as $sectionKey => $sectionArray) {
+            if ($sectionKey === 'basic') {
+                $return[''] = isset($sectionArray['title']) ?
+                    $sectionArray['title'] : __('Plugin and account settings', 'trbwc');
+            } else {
+                $return[$sectionKey] = isset($sectionArray['title']) ? $sectionArray['title'] : $sectionKey;
+            }
+        }
+
+        return $return;
     }
 
     /**
