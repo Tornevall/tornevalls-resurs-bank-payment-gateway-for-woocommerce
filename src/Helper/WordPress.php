@@ -5,6 +5,10 @@ namespace ResursBank\Helper;
 use ResursBank\Module\Data;
 use TorneLIB\IO\Data\Strings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Class WordPress WordPress related actions.
  * @package ResursBank
@@ -22,17 +26,29 @@ class WordPress
             return;
         }
         self::setupFilters();
+        self::setupActions();
         self::setupScripts();
     }
 
     /**
      * Internal filter setup.
-     * @param $before
      * @since 0.0.1.0
      */
     private static function setupFilters()
     {
-        //add_filter('woocommerce_get_settings_pages', 'resursbank_gateway_settings');
+        add_filter('plugin_action_links', 'ResursBank\Helper\WooCommerce::getPluginAdminUrl', 10, 2);
+        add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
+        add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
+        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
+        add_filter('rbwc_get_dependent_settings', 'ResursBank\Gateway\AdminPage::getDependentSettings');
+        add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private static function setupActions()
+    {
     }
 
     /**
@@ -50,6 +66,8 @@ class WordPress
      */
     public static function getPriorVersionsDisabled()
     {
+        $return = (bool)Data::getResursOption('getPriorVersionsDisabled');
+
         return true;
     }
 
@@ -74,7 +92,7 @@ class WordPress
                     '%s/css/%s?%s',
                     Data::getGatewayUrl(),
                     $styleFile,
-                    isResursTest() ? time() : 'static'
+                    Data::getTestMode() ? time() : 'static'
                 ),
                 [],
                 Data::getCurrentVersion()
@@ -88,11 +106,12 @@ class WordPress
                     '%s/js/%s?%s',
                     Data::getGatewayUrl(),
                     $scriptFile,
-                    isResursTest() ? Data::getPrefix() . '-' . time() : 'static'
+                    Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
                 ),
                 Data::getJsDependencies($scriptName, $isAdmin)
             );
         }
+
     }
 
     /**
@@ -103,10 +122,20 @@ class WordPress
      */
     public static function applyFilters($filterName, $value)
     {
-        return apply_filters(
-            sprintf('%s_%s', 'rbwc', self::getFilterName($filterName)),
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                self::getFilterName($filterName)
+            ),
             $value,
-            self::getFilterArgs(func_get_args())
+        ];
+
+        $applyArray = array_merge($applyArray, self::getFilterArgs(func_get_args()));
+
+        return call_user_func_array(
+            'apply_filters',
+            $applyArray
         );
     }
 

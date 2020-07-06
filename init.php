@@ -14,12 +14,16 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+require_once(__DIR__ . '/vendor/autoload.php');
+if (!ResursBank\Helper\WooCommerce::getActiveState()) {
+    return;
+}
+
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
 define('RESURSBANK_IS_DEVELOPER', true);
 define('RESURSBANK_PREFIX', 'trbwc');
 define('RESURSBANK_SNAKECASE_FILTERS', true);
-
-require_once(__DIR__ . '/vendor/autoload.php');
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
