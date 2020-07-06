@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-06 10:06+0200\n"
-"PO-Revision-Date: 2020-07-06 10:07+0200\n"
+"POT-Creation-Date: 2020-07-06 13:53+0200\n"
+"PO-Revision-Date: 2020-07-06 13:53+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -17,37 +17,63 @@ msgstr ""
 "X-Poedit-WPHeader: init.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
-"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 
-#: src/Gateway/AdminPage.php:58
+#: src/Gateway/AdminPage.php:70
 msgid "Extended configuration view for Resurs Bank."
 msgstr "Utökad konfigurationsvy för Resurs Bank."
 
-#: src/Gateway/ResursDefault.php:16
+#: src/Gateway/ResursDefault.php:26
 msgid "Resurs Bank"
 msgstr "Resurs Bank"
 
-#: src/Gateway/ResursDefault.php:17
+#: src/Gateway/ResursDefault.php:27
 msgid "Resurs Bank Payment Gateway with dynamic payment methods."
 msgstr "Resurs Bank betalnings-gateway med dynamiska betalsätt."
 
-#: src/Gateway/ResursDefault.php:18
+#: src/Gateway/ResursDefault.php:28
 msgid "Resurs Bank AB"
 msgstr "Resurs Bank AB"
 
-#: src/Gateway/ResursDefault.php:33
+#: src/Gateway/ResursDefault.php:53
+msgid "Looking for more settings?"
+msgstr "Letar du efter fler inställningar?"
+
+#: src/Gateway/ResursDefault.php:55
+msgid ""
+"This plugin offers a lot of settings, which has been traditionally been kept "
+"in a separate tab. The page you are currently visiting only contains the "
+"vital settings for the plugin."
+msgstr ""
+"Det här pluginet erbjuder många inställningar, vilka traditionellt har "
+"funnits i en separat flik. Sidan som du för tillfället besöker innehåller "
+"enbart de vitala inställningarna för pluginet."
+
+#: src/Gateway/ResursDefault.php:60
+msgid ""
+"You should also be aware of that this switch does not enable nor disable the "
+"entire plugin. Just the basic functionality for it."
+msgstr ""
+"Du bör också vara medveten om att denna inställningen varken aktiverar eller "
+"stänger av pluginet helt och hållet. Bara basfunktionaliteten för det."
+
+#: src/Gateway/ResursDefault.php:65
+msgid "You can reach the other settings here!"
+msgstr "Du når de andra inställningarna här!"
+
+#: src/Module/FormFields.php:21
 msgid "Enable/Disable"
 msgstr "Aktivera/Inaktivera"
 
-#: src/Gateway/ResursDefault.php:35
+#: src/Module/FormFields.php:23
 msgid "Enable Resurs Bank"
 msgstr "Aktivera Resurs Bank"
 
-#: src/Gateway/ResursDefault.php:37
+#: src/Module/FormFields.php:25
 msgid ""
 "This enables core functions of Resurs Bank, like the payment gateway, etc. "
 "When disabled, after shop functions (i.e. debiting, annulling, etc) will "
@@ -57,17 +83,49 @@ msgstr ""
 "gatewayen, med mera. När den är avstängd så kommer efterköps-funktioner "
 "(såsom debitering, annullering, mfl) fortfarande fungera."
 
+#: src/Module/FormFields.php:32
+msgid "Environment"
+msgstr "Miljö"
+
+#: src/Module/FormFields.php:36
+msgid "Test/Staging"
+msgstr "Test/Staging"
+
+#: src/Module/FormFields.php:40
+msgid "Production/Live"
+msgstr "Produktion/Live"
+
+#: src/Module/FormFields.php:46
+msgid "Defines if you are are live or just in test/staging. Default: test."
+msgstr "Definierar om du är live eller enbart i test/staging. Standard: test."
+
+#: src/Module/FormFields.php:51
+msgid "Resurs Bank webservices username"
+msgstr "Resurs Banks webservice-användarnamn"
+
+#: src/Module/FormFields.php:54
+msgid "Web services username, received from Resurs Bank."
+msgstr "Webservicens användarnamn, vilket du erhållit från Resurs Bank."
+
+#: src/Module/FormFields.php:61
+msgid "Resurs Bank webservices password"
+msgstr "Resurs Banks webservice-lösenord"
+
+#: src/Module/FormFields.php:65
+msgid "Web services password, received from Resurs Bank."
+msgstr "Webservicens lösenord, vilket du erhållit från Resurs Bank."
+
 #. Plugin Name of the plugin/theme
 msgid "Tornevall Networks Resurs Bank payment gateway for WooCommerce"
 msgstr "Tornevall Networks Resurs Bank betalningsgateway för WooCommerce"
 
 #. Plugin URI of the plugin/theme
 msgid ""
-"https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-"
-"gateway-for-woocommerce"
+"https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-gateway-"
+"for-woocommerce"
 msgstr ""
-"https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-"
-"gateway-for-woocommerce"
+"https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-gateway-"
+"for-woocommerce"
 
 #. Description of the plugin/theme
 msgid "Connect Resurs Bank as WooCommerce payment gateway."

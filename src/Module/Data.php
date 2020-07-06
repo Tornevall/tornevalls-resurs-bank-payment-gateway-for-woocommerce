@@ -38,6 +38,8 @@ class Data
     /** @var array $fileImageExtensions */
     private static $fileImageExtensions = ['jpg', 'gif', 'png'];
 
+    private static $formFieldDefaults = [];
+
     /**
      * @param $imageName
      * @return string
@@ -281,5 +283,77 @@ class Data
         return (new Generic())->getVersionByComposer(
             self::getGatewayPath() . '/composer.json'
         );
+    }
+
+    /**
+     * @param bool $getBasic
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getFormFields($getBasic = false)
+    {
+        return FormFields::getFormFields($getBasic);
+    }
+
+    /**
+     * @param string $key
+     * @param string $option_name
+     * @return bool|string
+     * @since 0.0.1.0
+     */
+    public static function getResursOption($key = '', $option_name = 'woocommerce_rbwc_gateway_settings')
+    {
+        $return = self::getDefault($key);
+        $getOptionsNamespace = get_option($option_name);
+        if (isset($getOptionsNamespace[$key])) {
+            $return = $getOptionsNamespace[$key];
+        }
+
+        // What the old plugin never did to save space.
+        if (self::getTruth($return) !== null) {
+            $return = (bool)$return;
+        } else {
+            $return = (string)$return;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @return null
+     * @since 0.0.1.0
+     */
+    private static function getDefault($key)
+    {
+        $return = '';
+
+        if (!count(self::$formFieldDefaults)) {
+            self::$formFieldDefaults = FormFields::getFormFields();
+        }
+
+        if (isset(self::$formFieldDefaults[$key]['default'])) {
+            $return = self::$formFieldDefaults[$key]['default'];
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $value
+     * @return bool|null
+     * @since 0.0.1.0
+     */
+    public static function getTruth($value)
+    {
+        if (in_array($value, ['true', 'yes'])) {
+            $return = true;
+        } elseif (in_array($value, ['false', 'no'])) {
+            $return = false;
+        } else {
+            $return = null;
+        }
+
+        return $return;
     }
 }

@@ -3,6 +3,7 @@
 namespace ResursBank\Gateway;
 
 use ResursBank\Module\Data;
+use TorneLIB\Utils\Generic;
 use WC_Settings_Page;
 
 if (!defined('ABSPATH')) {
@@ -35,19 +36,27 @@ class AdminPage extends WC_Settings_Page
      */
     private $parentConstructor = false;
 
+    /**
+     * @var Generic $generic Generic library, mainly used for automatically handling templates.
+     */
+    private $generic;
+
     public function __construct()
     {
+        $this->generic = new Generic();
+        $this->generic->setTemplatePath(Data::getGatewayPath('templates'));
+
         // In case we need it in future.
         $this->label_image = sprintf(
             '<img src="%s" border="0">',
             Data::getImage('logo2018.png')
         );
 
-        parent::__construct();
-
         add_action('woocommerce_settings_' . $this->id, [$this, 'getResursSettingsView']);
         add_action('woocommerce_sections_' . $this->id, [$this, 'getOutputSections']);
         //add_action('woocommerce_update_options_' . $this->id, [$this, 'resurs_bank_settings_save_legacy']);
+
+        parent::__construct();
     }
 
     /**
@@ -55,7 +64,12 @@ class AdminPage extends WC_Settings_Page
      */
     public function getResursSettingsView()
     {
-        echo '<b>' . __('Extended configuration view for Resurs Bank.', 'trbwc') . '</b>';
+        echo $this->generic->getTemplate(
+            'adminpage_main.html',
+            [
+                'adminPageTop' => __('Extended configuration view for Resurs Bank.', 'trbwc'),
+            ]
+        );
     }
 
     /**
