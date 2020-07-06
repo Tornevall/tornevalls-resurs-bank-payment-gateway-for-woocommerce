@@ -37,20 +37,16 @@ class AdminPage extends WC_Settings_Page
 
     public function __construct()
     {
+        // In case we need it in future.
         $this->label_image = sprintf(
             '<img src="%s" border="0">',
             Data::getImage('logo2018.png')
         );
 
+        parent::__construct();
+
         add_action('woocommerce_settings_' . $this->id, [$this, 'getResursSettingsView']);
-
-        if ($this->parentConstructor) {
-            parent::__construct();
-        } else {
-            add_action('woocommerce_settings_tabs', [$this, 'getSettingTabs']);
-            add_action('woocommerce_sections_' . $this->id, [$this, 'getOutputSections']);
-        }
-
+        add_action('woocommerce_sections_' . $this->id, [$this, 'getOutputSections']);
         //add_action('woocommerce_update_options_' . $this->id, [$this, 'resurs_bank_settings_save_legacy']);
     }
 
@@ -59,16 +55,12 @@ class AdminPage extends WC_Settings_Page
      */
     public function getResursSettingsView()
     {
-        echo "BAJS";
-    }
-
-    public function save()
-    {
-        parent::save();
+        echo '<b>' . __('Extended configuration view for Resurs Bank.', 'trbwc') . '</b>';
     }
 
     /**
      * @since 0.0.1.0
+     * @deprecated No longer working.
      */
     public function getSettingTabs()
     {

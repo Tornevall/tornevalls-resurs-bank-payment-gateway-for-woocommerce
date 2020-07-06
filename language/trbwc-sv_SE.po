@@ -1,0 +1,94 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
+"WooCommerce\n"
+"POT-Creation-Date: 2020-07-06 10:06+0200\n"
+"PO-Revision-Date: 2020-07-06 10:07+0200\n"
+"Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
+"Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
+"Language: sv_SE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.3.1\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: init.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
+"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.min.js\n"
+"X-Poedit-SearchPathExcluded-1: vendor\n"
+
+#: src/Gateway/AdminPage.php:58
+msgid "Extended configuration view for Resurs Bank."
+msgstr "Utökad konfigurationsvy för Resurs Bank."
+
+#: src/Gateway/ResursDefault.php:16
+msgid "Resurs Bank"
+msgstr "Resurs Bank"
+
+#: src/Gateway/ResursDefault.php:17
+msgid "Resurs Bank Payment Gateway with dynamic payment methods."
+msgstr "Resurs Bank betalnings-gateway med dynamiska betalsätt."
+
+#: src/Gateway/ResursDefault.php:18
+msgid "Resurs Bank AB"
+msgstr "Resurs Bank AB"
+
+#: src/Gateway/ResursDefault.php:33
+msgid "Enable/Disable"
+msgstr "Aktivera/Inaktivera"
+
+#: src/Gateway/ResursDefault.php:35
+msgid "Enable Resurs Bank"
+msgstr "Aktivera Resurs Bank"
+
+#: src/Gateway/ResursDefault.php:37
+msgid ""
+"This enables core functions of Resurs Bank, like the payment gateway, etc. "
+"When disabled, after shop functions (i.e. debiting, annulling, etc) will "
+"still work."
+msgstr ""
+"Detta aktiverar kärnfunktionerna för Resurs Bank. exempelvis betalnings-"
+"gatewayen, med mera. När den är avstängd så kommer efterköps-funktioner "
+"(såsom debitering, annullering, mfl) fortfarande fungera."
+
+#. Plugin Name of the plugin/theme
+msgid "Tornevall Networks Resurs Bank payment gateway for WooCommerce"
+msgstr "Tornevall Networks Resurs Bank betalningsgateway för WooCommerce"
+
+#. Plugin URI of the plugin/theme
+msgid ""
+"https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-"
+"gateway-for-woocommerce"
+msgstr ""
+"https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-"
+"gateway-for-woocommerce"
+
+#. Description of the plugin/theme
+msgid "Connect Resurs Bank as WooCommerce payment gateway."
+msgstr "Anslut Resurs Bank som WooCommerce betalningsgateway."
+
+#. Author of the plugin/theme
+msgid "Tomas Tornevall"
+msgstr "Tomas Tornevall"
+
+#~ msgid "Title"
+#~ msgstr "Titel"
+
+#~ msgid "This controls the title which the user sees during checkout."
+#~ msgstr "Detta bestämmer rubriken på fraktsättet som kunden ser i kassan."
+
+#, fuzzy
+#~ msgid "Cheque Payment"
+#~ msgstr "Betalning av check"
+
+#~ msgid "Customer Message"
+#~ msgstr "Kundmeddelande"
+
+#~ msgid "Enable Cheque Payment"
+#~ msgstr "Aktivera checkbetalning"

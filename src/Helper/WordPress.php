@@ -26,17 +26,25 @@ class WordPress
             return;
         }
         self::setupFilters();
+        self::setupActions();
         self::setupScripts();
     }
 
     /**
      * Internal filter setup.
-     * @param $before
      * @since 0.0.1.0
      */
     private static function setupFilters()
     {
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
+        add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private static function setupActions()
+    {
     }
 
     /**

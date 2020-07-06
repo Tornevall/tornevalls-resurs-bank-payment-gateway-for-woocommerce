@@ -3,6 +3,7 @@
 namespace ResursBank\Helper;
 
 use ResursBank\Gateway\AdminPage;
+use ResursBank\Gateway\ResursDefault;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -40,5 +41,15 @@ class WooCommerce
         }
 
         return $settings;
+    }
+
+    /**
+     * @param $gateways
+     * @since 0.0.1.0
+     */
+    public static function getGateway($gateways)
+    {
+        $gateways[] = ResursDefault::class;
+        return $gateways;
     }
 }

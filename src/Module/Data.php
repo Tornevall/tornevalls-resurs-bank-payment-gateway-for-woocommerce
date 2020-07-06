@@ -122,6 +122,19 @@ class Data
     }
 
     /**
+     * Get waypoint for init.php.
+     * @return string
+     * @version 0.0.1.0
+     */
+    private static function getPluginInitFile()
+    {
+        return sprintf(
+            '%s/init.php',
+            self::getGatewayPath()
+        );
+    }
+
+    /**
      * @return string
      * @version 0.0.1.0
      */
@@ -255,19 +268,6 @@ class Data
     {
         $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
         return $pluginContent[$key];
-    }
-
-    /**
-     * Get waypoint for init.php.
-     * @return string
-     * @version 0.0.1.0
-     */
-    private static function getPluginInitFile()
-    {
-        return sprintf(
-            '%s/init.php',
-            self::getGatewayPath()
-        );
     }
 
     /**
