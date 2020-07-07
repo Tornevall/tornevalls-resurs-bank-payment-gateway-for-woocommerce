@@ -79,8 +79,8 @@ class WordPress
                 [
                     'requiredVersionNotice' => sprintf(
                         __(
-                            'The current plugin "%s" requires at least version %s - for the moment, you are ' .
-                            'running on version %s. You should consider upgrading as soon as possible.',
+                            'The current plugin "%s" requires at least version %s - for the moment, you are running ' .
+                            'on version %s. You should consider upgrading as soon as possible.',
                             'trbwc'
                         ),
                         Data::getPluginTitle(true),
@@ -142,7 +142,6 @@ class WordPress
                 Data::getJsDependencies($scriptName, $isAdmin)
             );
         }
-
     }
 
     /**
