@@ -2,6 +2,7 @@
 
 namespace ResursBank\Helper;
 
+use Exception;
 use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
@@ -17,7 +18,18 @@ if (!defined('ABSPATH')) {
  */
 class WooCommerce
 {
+    /**
+     * @var $basename
+     * @since 0.0.1.0
+     */
     private static $basename;
+
+    /**
+     * By this plugin lowest required woocommerce version.
+     * @var string
+     * @since 0.0.1.0
+     */
+    private static $requiredVersion = '3.4.0';
 
     /**
      * @return bool
@@ -79,5 +91,45 @@ class WooCommerce
             );
         }
         return $links;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function testRequiredVersion()
+    {
+        if (version_compare(self::getWooCommerceVersion(), self::$requiredVersion, '<')) {
+            throw new Exception(
+                'Your WooCommerce release are too old. Please upgrade.',
+                500
+            );
+        }
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getWooCommerceVersion()
+    {
+        global $woocommerce;
+
+        $return = null;
+
+        if (isset($woocommerce)) {
+            $return = $woocommerce->version;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getRequiredVersion()
+    {
+        return self::$requiredVersion;
     }
 }

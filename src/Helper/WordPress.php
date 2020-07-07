@@ -2,6 +2,7 @@
 
 namespace ResursBank\Helper;
 
+use Exception;
 use ResursBank\Module\Data;
 use TorneLIB\IO\Data\Strings;
 
@@ -49,6 +50,7 @@ class WordPress
      */
     private static function setupActions()
     {
+        add_action('admin_notices', 'ResursBank\Helper\WordPress::getAdminNotices');
     }
 
     /**
@@ -61,14 +63,35 @@ class WordPress
     }
 
     /**
+     * @since 0.0.1.0
+     */
+    public static function getAdminNotices()
+    {
+        global $current_tab, $parent_file;
+
+        try {
+            if ($current_tab === Data::getPrefix('admin') || $parent_file === 'woocommerce') {
+                WooCommerce::testRequiredVersion();
+            }
+        } catch (Exception $e) {
+            echo Data::getGenericClass()->getTemplate(
+                'adminpage_woocommerce_requirement',
+                [
+                    'requiredVersion' => WooCommerce::getRequiredVersion(),
+                    'currentVersion' => WooCommerce::getWooCommerceVersion(),
+                ]
+            );
+        }
+    }
+
+    /**
      * @return bool
      * @since 0.0.1.0
+     * @noinspection PhpExpressionResultUnusedInspection
      */
     public static function getPriorVersionsDisabled()
     {
-        $return = (bool)Data::getResursOption('getPriorVersionsDisabled');
-
-        return true;
+        return Data::getResursOption('getPriorVersionsDisabled');
     }
 
     /**

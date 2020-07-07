@@ -19,9 +19,6 @@ class ResursDefault extends \WC_Payment_Gateway
 
     public function __construct()
     {
-        $this->generic = new Generic();
-        $this->generic->setTemplatePath(Data::getGatewayPath('templates'));
-
         $this->id = Data::getPrefix('default');
         $this->method_title = __('Resurs Bank', 'trbwc');
         $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'trbwc');

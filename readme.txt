@@ -8,7 +8,7 @@ Stable tag: 0.0.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Resurs Bank Payment Gateway for WooCommerce.
+Resurs Bank Payment Gateway for WooCommerce. Requires at least WooCommerce 3.4.0.
 
 == Description ==
 
