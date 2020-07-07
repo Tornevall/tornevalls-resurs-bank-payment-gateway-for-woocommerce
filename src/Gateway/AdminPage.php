@@ -2,7 +2,6 @@
 
 namespace ResursBank\Gateway;
 
-use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
@@ -21,10 +20,13 @@ if (!defined('ABSPATH')) {
 class AdminPage extends WC_Settings_Page
 {
     /**
+     * @var array
+     */
+    private static $settingStorage = [];
+    /**
      * @var string $label
      */
     protected $label = 'Resurs Bank';
-
     /**
      * @var string $label_image
      */
@@ -85,12 +87,15 @@ class AdminPage extends WC_Settings_Page
 
     /**
      * Filter based addon.
+     * Do not use getResursOption in this request as this may cause infinite loops.
      * @param $currentArray
-     * @return mixed
+     * @return array
      * @since 0.0.1.0
      */
     public static function getDependentSettings($currentArray)
     {
+        $return = $currentArray;
+
         $developerArray = [
             'developer' => [
                 'title' => __('Developer Settings', 'trbwc'),
@@ -121,23 +126,36 @@ class AdminPage extends WC_Settings_Page
                     'title' => 'Exceed version requirement',
                     'type' => 'checkbox',
                     'desc' => 'Set required version to 999.0.0',
-                    'desc_tip' => sprintf(
-                        __(
-                            'Figure out what happens when WooCommerce version (%s) does not meet the requirements.',
-                            'trbwc'
-                        ),
-                        WooCommerce::getRequiredVersion()
+                    'desc_tip' => __(
+                        'Figure out what happens when WooCommerce version does not meet the requirements.',
+                        'trbwc'
                     ),
                 ],
             ],
         ];
 
-        $showDeveloper = (bool)Data::getResursOption('show_developer');
-        if ($showDeveloper) {
-            $currentArray += $developerArray;
+        if (self::getShowDeveloper()) {
+            $return += $developerArray;
         }
 
-        return $currentArray;
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private static function getShowDeveloper()
+    {
+        if (!isset(self::$settingStorage['showDeveloper'])) {
+            self::$settingStorage['showDeveloper'] = Data::getTruth(
+                get_option(
+                    sprintf('%s_%s', Data::getPrefix('admin'), 'show_developer')
+                )
+            );
+        }
+
+        return (bool)self::$settingStorage['showDeveloper'];
     }
 
     public function save()
