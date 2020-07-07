@@ -77,7 +77,6 @@ class WooCommerce
      */
     public static function getPluginAdminUrl($links, $file)
     {
-
         if (strpos($file, self::getBaseName()) !== false) {
             $links[] = sprintf(
                 '<a href="%s?page=wc-settings&tab=%s">%s</a>',

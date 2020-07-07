@@ -30,6 +30,11 @@ class Data
     private static $jsLoadersCheckout = ['checkout' => 'checkout.js'];
 
     /**
+     * @var array
+     */
+    private static $settingStorage = [];
+
+    /**
      * @var array $jsLoadersAdmin List of loadable scripts for admin.
      * @since 0.0.1.0
      */
@@ -240,112 +245,28 @@ class Data
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getDeveloperMode()
-    {
-        $return = false;
-
-        if (defined('RESURSBANK_IS_DEVELOPER')) {
-            $return = RESURSBANK_IS_DEVELOPER;
-        }
-
-        return $return;
-    }
-
-    /**
      * Returns test mode boolean.
      * @return bool
      * @since 0.0.1.0
      */
     public static function getTestMode()
     {
-        /** @todo Change to false when database is ready. */
-        return true;
-    }
-
-    /**
-     * @return bool
-     * @throws ExceptionHandler
-     * @since 0.0.1.0
-     */
-    public static function getValidatedVersion()
-    {
-        $return = false;
-        if (version_compare(self::getCurrentVersion(), self::getVersionByComposer(), '==')) {
-            $return = true;
-        }
-        return $return;
-    }
-
-    /**
-     * Get current version from plugin data.
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getCurrentVersion()
-    {
-        return self::getPluginDataContent('version');
-    }
-
-    /**
-     * Get data from plugin setup (top of init.php).
-     * @param $key
-     * @return string
-     * @version 0.0.1.0
-     */
-    private static function getPluginDataContent($key)
-    {
-        $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
-        return $pluginContent[$key];
-    }
-
-    /**
-     * Fetch plugin version from composer package.
-     * @return string
-     * @throws ExceptionHandler
-     * @version 0.0.1.0
-     */
-    public static function getVersionByComposer()
-    {
-        return (new Generic())->getVersionByComposer(
-            self::getGatewayPath() . '/composer.json'
-        );
-    }
-
-    /**
-     * @param bool $getBaseName
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getPluginTitle($getBaseName = false)
-    {
-        return !$getBaseName ? self::getPluginDataContent('Plugin Name') : WooCommerce::getBaseName();
-    }
-
-    /**
-     * @param bool $getBasic
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getFormFields($getBasic = false)
-    {
-        return FormFields::getFormFields($getBasic);
+        return in_array(self::getResursOption('environment'), ['test', 'staging']);
     }
 
     /**
      * @param string $key
+     * @param null $forceDefault
      * @return bool|string
      * @since 0.0.1.0
      */
     public static function getResursOption($key)
     {
         $optionKeyPrefix = sprintf('%s_%s', Data::getPrefix('admin'), $key);
-        $return = self::getDefault($optionKeyPrefix);
+        $return = self::getDefault($key);
         $getOptionReturn = get_option($optionKeyPrefix);
 
-        if (!empty($getOptionReturn) && empty($return)) {
+        if (!empty($getOptionReturn)) {
             $return = $getOptionReturn;
         }
 
@@ -425,6 +346,75 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @return bool
+     * @throws ExceptionHandler
+     * @since 0.0.1.0
+     */
+    public static function getValidatedVersion()
+    {
+        $return = false;
+        if (version_compare(self::getCurrentVersion(), self::getVersionByComposer(), '==')) {
+            $return = true;
+        }
+        return $return;
+    }
+
+    /**
+     * Get current version from plugin data.
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getCurrentVersion()
+    {
+        return self::getPluginDataContent('version');
+    }
+
+    /**
+     * Get data from plugin setup (top of init.php).
+     * @param $key
+     * @return string
+     * @version 0.0.1.0
+     */
+    private static function getPluginDataContent($key)
+    {
+        $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
+        return $pluginContent[$key];
+    }
+
+    /**
+     * Fetch plugin version from composer package.
+     * @return string
+     * @throws ExceptionHandler
+     * @version 0.0.1.0
+     */
+    public static function getVersionByComposer()
+    {
+        return (new Generic())->getVersionByComposer(
+            self::getGatewayPath() . '/composer.json'
+        );
+    }
+
+    /**
+     * @param bool $getBaseName
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getPluginTitle($getBaseName = false)
+    {
+        return !$getBaseName ? self::getPluginDataContent('Plugin Name') : WooCommerce::getBaseName();
+    }
+
+    /**
+     * @param bool $getBasic
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getFormFields($getBasic = false)
+    {
+        return FormFields::getFormFields($getBasic);
     }
 
     /**
@@ -520,5 +510,70 @@ class Data
         ];
 
         return isset($array[$key]) ? $array[$key] : '';
+    }
+
+    /**
+     * Filter based addon.
+     * Do not use getResursOption in this request as this may cause infinite loops.
+     * @param $currentArray
+     * @param $section
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getDependentSettings($currentArray, $section)
+    {
+        $return = $currentArray;
+
+        $developerArray = [
+            'developer' => [
+                'title' => __('Developer Settings', 'trbwc'),
+                'plugin_section' => [
+                    'type' => 'title',
+                    'title' => 'Plugin Settings',
+                ],
+                'priorVersionsDisabled' => [
+                    'id' => 'priorVersionsDisabled',
+                    'title' => __('Disable RB 2.x', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __('Disable prior similar versions of the Resurs Bank plugin (v2.x-series).', 'trbwc'),
+                    'desc_top' => __(
+                        'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
+                        'with help from filters in that release.',
+                        'trbwc'
+                    ),
+                    'default' => 'yes',
+                ],
+                'dev_section_end' => [
+                    'type' => 'sectionend',
+                ],
+                'testing_section' => [
+                    'type' => 'title',
+                    'title' => 'Test Section',
+                ],
+            ],
+        ];
+
+        if ($section === 'all' || self::getShowDeveloper()) {
+            $return += $developerArray;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getShowDeveloper()
+    {
+        if (!isset(self::$settingStorage['showDeveloper'])) {
+            self::$settingStorage['showDeveloper'] = Data::getTruth(
+                get_option(
+                    sprintf('%s_%s', Data::getPrefix('admin'), 'show_developer')
+                )
+            );
+        }
+
+        return (bool)self::$settingStorage['showDeveloper'];
     }
 }

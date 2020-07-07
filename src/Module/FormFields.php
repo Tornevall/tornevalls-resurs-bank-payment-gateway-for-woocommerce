@@ -15,6 +15,7 @@ class FormFields
      * @param string $section
      * @param string $id
      * @return array
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function getFormFields($section = 'basic', $id = '')
     {
@@ -115,7 +116,7 @@ class FormFields
             ],
         ];
 
-        $formFields = WordPress::applyFilters('getDependentSettings', $formFields);
+        $formFields = WordPress::applyFilters('getDependentSettings', $formFields, $section);
 
         if ($section === 'all') {
             $return = $formFields;
