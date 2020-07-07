@@ -118,15 +118,6 @@ class AdminPage extends WC_Settings_Page
                     'type' => 'title',
                     'title' => 'Test Section',
                 ],
-                'version_exceed' => [
-                    'title' => 'Exceed version requirement',
-                    'type' => 'checkbox',
-                    'desc' => 'Set required version to 999.0.0',
-                    'desc_tip' => __(
-                        'Figure out what happens when WooCommerce version does not meet the requirements.',
-                        'trbwc'
-                    ),
-                ],
             ],
         ];
 

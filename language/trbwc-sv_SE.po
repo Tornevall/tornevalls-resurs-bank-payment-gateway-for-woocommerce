@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-07 08:11+0200\n"
-"PO-Revision-Date: 2020-07-07 08:12+0200\n"
+"POT-Creation-Date: 2020-07-07 11:04+0200\n"
+"PO-Revision-Date: 2020-07-07 11:04+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -23,19 +23,19 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 
-#: src/Gateway/AdminPage.php:96
+#: src/Gateway/AdminPage.php:97
 msgid "Developer Settings"
 msgstr "Utvecklar-inställningar"
 
-#: src/Gateway/AdminPage.php:103
+#: src/Gateway/AdminPage.php:104
 msgid "Disable RB 2.x"
 msgstr "Stäng av RB 2.x"
 
-#: src/Gateway/AdminPage.php:105
+#: src/Gateway/AdminPage.php:106
 msgid "Disable prior similar versions of the Resurs Bank plugin (v2.x-series)."
 msgstr "Stäng av tidigare versioner av Resurs Bank-pluginet (v2.x-serien)"
 
-#: src/Gateway/AdminPage.php:107
+#: src/Gateway/AdminPage.php:108
 msgid ""
 "This setting will disable, not entirely, but the functions in Resurs Bank "
 "Gateway v2.x with help from filters in that release."
@@ -43,31 +43,24 @@ msgstr ""
 "Denna inställningen stänger ned, ej helt, funktioner i Resurs Bank Gateway "
 "v2.x, med hjälp av filter i den releasen."
 
-#: src/Gateway/AdminPage.php:126
-#, php-format
-msgid ""
-"Figure out what happens when WooCommerce version (%s) does not meet the "
-"requirements."
-msgstr "Testa vad som händer när WooCommerce-versionen (%s) inte möter kraven."
-
-#: src/Gateway/AdminPage.php:180 src/Module/FormFields.php:28
+#: src/Gateway/AdminPage.php:185 src/Module/FormFields.php:28
 msgid "Plugin and account settings"
 msgstr "Plugin- och kontoinställningar"
 
-#: src/Gateway/AdminPage.php:209
+#: src/Gateway/AdminPage.php:214
 #, php-format
 msgid "Extended configuration view for Resurs Bank: %s"
 msgstr "Utökad konfigurationsvy för Resurs Bank: %s"
 
-#: src/Gateway/ResursDefault.php:26
+#: src/Gateway/ResursDefault.php:23
 msgid "Resurs Bank"
 msgstr "Resurs Bank"
 
-#: src/Gateway/ResursDefault.php:27
+#: src/Gateway/ResursDefault.php:24
 msgid "Resurs Bank Payment Gateway with dynamic payment methods."
 msgstr "Resurs Bank betalnings-gateway med dynamiska betalsätt."
 
-#: src/Gateway/ResursDefault.php:28
+#: src/Gateway/ResursDefault.php:25
 msgid "Resurs Bank AB"
 msgstr "Resurs Bank AB"
 
@@ -75,40 +68,40 @@ msgstr "Resurs Bank AB"
 msgid "Settings"
 msgstr "Inställningar"
 
-#: src/Module/Data.php:428
+#: src/Module/Data.php:429
 msgid "Plugin version"
 msgstr "Plugin-version"
 
-#: src/Module/Data.php:429
+#: src/Module/Data.php:430
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: src/Module/Data.php:431
+#: src/Module/Data.php:432
 #, php-format
 msgid "%s, at least %s are required."
 msgstr "%s, åtminstone %s krävs."
 
-#: src/Module/Data.php:437
+#: src/Module/Data.php:438
 msgid "Composer version"
 msgstr "Composer-version"
 
-#: src/Module/Data.php:438
+#: src/Module/Data.php:439
 msgid "PHP Version"
 msgstr "PHP-Version"
 
-#: src/Module/Data.php:439
+#: src/Module/Data.php:440
 msgid "Webservice Library"
 msgstr "Webservice-Bibliotek"
 
-#: src/Module/Data.php:440
+#: src/Module/Data.php:441
 msgid "Communication Library"
 msgstr "Kommunikationsbibliotek"
 
-#: src/Module/Data.php:441
+#: src/Module/Data.php:442
 msgid "Communication Drivers"
 msgstr "Kommunikations-drivrutiner"
 
-#: src/Module/Data.php:481
+#: src/Module/Data.php:496
 msgid ""
 "If something is wrong and you are unsure of where to begin, take a look at "
 "the communication drivers. Wrappers that must be available for this plugin "
@@ -122,7 +115,7 @@ msgstr ""
 "SimpleStreamWrapper -och- SoapClientWrapper. Resurs Bank erbjuder flera "
 "olika tjänster över både Soap/XML och REST, så de måste finnas tillgängliga."
 
-#: src/Module/Data.php:488
+#: src/Module/Data.php:503
 msgid ""
 "If you ever need support with this plugin, you should primarily check this "
 "page before sending support requests. When you send the requests, make sure "
@@ -239,6 +232,16 @@ msgstr "Anslut Resurs Bank som WooCommerce betalningsgateway."
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
 msgstr "Tomas Tornevall"
+
+#, fuzzy
+#~| msgid ""
+#~| "Figure out what happens when WooCommerce version (%s) does not meet the "
+#~| "requirements."
+#~ msgid ""
+#~ "Figure out what happens when WooCommerce version does not meet the "
+#~ "requirements."
+#~ msgstr ""
+#~ "Testa vad som händer när WooCommerce-versionen (%s) inte möter kraven."
 
 #~ msgid "%s, requires at least %s."
 #~ msgstr "%s, kräver minst %s."
