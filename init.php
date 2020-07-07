@@ -21,13 +21,14 @@ if (!ResursBank\Helper\WooCommerce::getActiveState()) {
 }
 
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
-define('RESURSBANK_IS_DEVELOPER', true);
 define('RESURSBANK_PREFIX', 'trbwc');
 define('RESURSBANK_SNAKECASE_FILTERS', true);
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
 add_action('plugins_loaded', '\ResursBank\Helper\WordPress::initializePlugin');
+// Necessary on an early level.
+add_filter('rbwc_get_dependent_settings', 'ResursBank\Module\Data::getDependentSettings', 10, 2);
 
 // Making sure that we do not coexist with prior versions.
 add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Helper\WordPress::getPriorVersionsDisabled');

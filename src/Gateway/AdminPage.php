@@ -5,7 +5,6 @@ namespace ResursBank\Gateway;
 use ResursBank\Helper\WordPress;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use TorneLIB\Utils\Generic;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
@@ -20,13 +19,10 @@ if (!defined('ABSPATH')) {
 class AdminPage extends WC_Settings_Page
 {
     /**
-     * @var array
-     */
-    private static $settingStorage = [];
-    /**
      * @var string $label
      */
     protected $label = 'Resurs Bank';
+
     /**
      * @var string $label_image
      */
@@ -81,70 +77,6 @@ class AdminPage extends WC_Settings_Page
         return Data::getPrefix('admin');
     }
 
-    /**
-     * Filter based addon.
-     * Do not use getResursOption in this request as this may cause infinite loops.
-     * @param $currentArray
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getDependentSettings($currentArray)
-    {
-        $return = $currentArray;
-
-        $developerArray = [
-            'developer' => [
-                'title' => __('Developer Settings', 'trbwc'),
-                'plugin_section' => [
-                    'type' => 'title',
-                    'title' => 'Plugin Settings',
-                ],
-                'getPriorVersionsDisabled' => [
-                    'id' => 'getPriorVersionsDisabled',
-                    'title' => __('Disable RB 2.x', 'trbwc'),
-                    'type' => 'checkbox',
-                    'desc' => __('Disable prior similar versions of the Resurs Bank plugin (v2.x-series).', 'trbwc'),
-                    'desc_top' => __(
-                        'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
-                        'with help from filters in that release.',
-                        'trbwc'
-                    ),
-                    'default' => 'yes',
-                ],
-                'dev_section_end' => [
-                    'type' => 'sectionend',
-                ],
-                'testing_section' => [
-                    'type' => 'title',
-                    'title' => 'Test Section',
-                ],
-            ],
-        ];
-
-        if (self::getShowDeveloper()) {
-            $return += $developerArray;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private static function getShowDeveloper()
-    {
-        if (!isset(self::$settingStorage['showDeveloper'])) {
-            self::$settingStorage['showDeveloper'] = Data::getTruth(
-                get_option(
-                    sprintf('%s_%s', Data::getPrefix('admin'), 'show_developer')
-                )
-            );
-        }
-
-        return (bool)self::$settingStorage['showDeveloper'];
-    }
-
     public function save()
     {
         global $current_section;
@@ -169,16 +101,23 @@ class AdminPage extends WC_Settings_Page
      */
     public function get_sections()
     {
-        return apply_filters('woocommerce_get_sections_' . $this->id, $this->getSectionNames());
+        return apply_filters('woocommerce_get_sections_' . $this->id, $this->getSectionNames(__FUNCTION__));
     }
 
     /**
+     * @param null $fromFunction
      * @return array
+     * @since 0.0.1.0
      */
-    private function getSectionNames()
+    private function getSectionNames($fromFunction = null)
     {
         $return = [];
         $formFields = Data::getFormFields('all');
+
+        if ($fromFunction === 'get_sections' && !Data::getShowDeveloper()) {
+            unset($formFields['developer']);
+        }
+
         foreach ($formFields as $sectionKey => $sectionArray) {
             if ($sectionKey === 'basic') {
                 $return[''] = isset($sectionArray['title']) ?

@@ -41,7 +41,6 @@ class WordPress
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
         add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
-        add_filter('rbwc_get_dependent_settings', 'ResursBank\Gateway\AdminPage::getDependentSettings');
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
     }
 
@@ -99,7 +98,7 @@ class WordPress
      */
     public static function getPriorVersionsDisabled()
     {
-        return Data::getResursOption('getPriorVersionsDisabled');
+        return Data::getResursOption('priorVersionsDisabled');
     }
 
     /**
