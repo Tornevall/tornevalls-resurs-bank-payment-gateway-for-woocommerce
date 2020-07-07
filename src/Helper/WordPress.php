@@ -77,8 +77,16 @@ class WordPress
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_woocommerce_requirement',
                 [
-                    'requiredVersion' => WooCommerce::getRequiredVersion(),
-                    'currentVersion' => WooCommerce::getWooCommerceVersion(),
+                    'requiredVersionNotice' => sprintf(
+                        __(
+                            'The current plugin "%s" requires at least version %s - for the moment, you are ' .
+                            'running on version %s. You should consider upgrading as soon as possible.',
+                            'trbwc'
+                        ),
+                        Data::getPluginTitle(),
+                        WooCommerce::getRequiredVersion(),
+                        WooCommerce::getWooCommerceVersion()
+                    ),
                 ]
             );
         }

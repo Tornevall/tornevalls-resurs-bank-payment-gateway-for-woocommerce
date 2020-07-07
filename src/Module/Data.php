@@ -268,6 +268,7 @@ class Data
     /**
      * @return bool
      * @throws ExceptionHandler
+     * @since 0.0.1.0
      */
     public static function getValidatedVersion()
     {
@@ -281,11 +282,19 @@ class Data
     /**
      * Get current version from plugin data.
      * @return string
-     * @version 0.0.1.0
+     * @since 0.0.1.0
      */
     public static function getCurrentVersion()
     {
         return self::getPluginDataContent('version');
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getPluginTitle() {
+        return self::getPluginDataContent();
     }
 
     /**
