@@ -4,6 +4,7 @@
 
 namespace ResursBank\Module;
 
+use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
@@ -425,6 +426,14 @@ class Data
 
         $renderData = [
             __('Plugin version', 'trbwc') => Data::getCurrentVersion(),
+            __('WooCommerce', 'trbwc') => sprintf(
+                __(
+                    '%s, at least %s are required.',
+                    'trbwc'
+                ),
+                WooCommerce::getVersion(),
+                WooCommerce::getRequiredVersion()
+            ),
             __('Composer version', 'trbwc') => Data::getVersionByComposer(),
             __('PHP Version', 'trbwc') => PHP_VERSION,
             __('Webservice Library', 'trbwc') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',

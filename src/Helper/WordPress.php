@@ -21,6 +21,8 @@ class WordPress
      */
     public static function initializePlugin()
     {
+        WooCommerce::getVersion();
+
         // Do not actively work where WooCommerce isn't live.
         if (!class_exists('WC_Payment_Gateway')) {
             return;

@@ -8,6 +8,7 @@ This plugin will however give you a wider support for filters and actions to sim
  
 ## Requirements and security considerations
 
+* WooCommerce 3.4.0 or higher.
 * Do not run anything lower than [PHP 5.6.20](https://wordpress.org/news/2019/04/minimum-php-version-update/).
 * Version 2.x had some flaws, at least one of the to consider quite severe; the payment methods was written as file libraries and the directory structure has to be writable. The imports of those methods was also written dynamically, meaning the directory structure was [globbed](https://www.php.net/manual/en/function.glob.php) into the runtime. If an attacker was aware of this (which is possible by reading the code), arbitrary files could be written into this structure and get executed by the plugin. For this release, all such elements are removed.
 * [WordPress PHP recommendation](https://meta.trac.wordpress.org/ticket/5257) is raised to 7.2 - you should upgrade too. [You can also read more here](https://wpastra.com/changing-wordpress-php-version/).

@@ -2,6 +2,7 @@
 
 namespace ResursBank\Gateway;
 
+use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
@@ -93,6 +94,10 @@ class AdminPage extends WC_Settings_Page
         $developerArray = [
             'developer' => [
                 'title' => __('Developer Settings', 'trbwc'),
+                'plugin_section' => [
+                    'type' => 'title',
+                    'title' => 'Plugin Settings',
+                ],
                 'getPriorVersionsDisabled' => [
                     'id' => 'getPriorVersionsDisabled',
                     'title' => __('Disable RB 2.x', 'trbwc'),
@@ -104,6 +109,25 @@ class AdminPage extends WC_Settings_Page
                         'trbwc'
                     ),
                     'default' => 'yes',
+                ],
+                'dev_section_end' => [
+                    'type' => 'sectionend',
+                ],
+                'testing_section' => [
+                    'type' => 'title',
+                    'title' => 'Test Section',
+                ],
+                'version_exceed' => [
+                    'title' => 'Exceed version requirement',
+                    'type' => 'checkbox',
+                    'desc' => 'Set required version to 999.0.0',
+                    'desc_tip' => sprintf(
+                        __(
+                            'Figure out what happens when WooCommerce version (%s) does not meet the requirements.',
+                            'trbwc'
+                        ),
+                        WooCommerce::getRequiredVersion()
+                    ),
                 ],
             ],
         ];
