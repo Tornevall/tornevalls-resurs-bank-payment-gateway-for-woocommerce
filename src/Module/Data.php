@@ -290,14 +290,6 @@ class Data
     }
 
     /**
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getPluginTitle() {
-        return self::getPluginDataContent('Plugin Name');
-    }
-
-    /**
      * Get data from plugin setup (top of init.php).
      * @param $key
      * @return string
@@ -320,6 +312,16 @@ class Data
         return (new Generic())->getVersionByComposer(
             self::getGatewayPath() . '/composer.json'
         );
+    }
+
+    /**
+     * @param bool $getBaseName
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getPluginTitle($getBaseName = false)
+    {
+        return !$getBaseName ? self::getPluginDataContent('Plugin Name') : WooCommerce::getBaseName();
     }
 
     /**

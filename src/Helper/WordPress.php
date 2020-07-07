@@ -69,8 +69,6 @@ class WordPress
     {
         global $current_tab, $parent_file;
 
-        Data::getPluginTitle();
-
         try {
             if ($current_tab === Data::getPrefix('admin') || $parent_file === 'woocommerce') {
                 WooCommerce::testRequiredVersion();
@@ -85,7 +83,7 @@ class WordPress
                             'running on version %s. You should consider upgrading as soon as possible.',
                             'trbwc'
                         ),
-                        Data::getPluginTitle(),
+                        Data::getPluginTitle(true),
                         WooCommerce::getRequiredVersion(),
                         WooCommerce::getWooCommerceVersion()
                     ),

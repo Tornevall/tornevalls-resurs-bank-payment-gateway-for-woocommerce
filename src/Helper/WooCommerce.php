@@ -77,10 +77,8 @@ class WooCommerce
      */
     public static function getPluginAdminUrl($links, $file)
     {
-        if (empty(self::$basename)) {
-            self::$basename = trim(plugin_basename(Data::getGatewayPath()));
-        }
-        if (strpos($file, self::$basename) !== false) {
+
+        if (strpos($file, self::getBaseName()) !== false) {
             $links[] = sprintf(
                 '<a href="%s?page=wc-settings&tab=%s">%s</a>',
                 admin_url(),
@@ -91,6 +89,19 @@ class WooCommerce
             );
         }
         return $links;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getBaseName()
+    {
+        if (empty(self::$basename)) {
+            self::$basename = trim(plugin_basename(Data::getGatewayPath()));
+        }
+
+        return self::$basename;
     }
 
     /**
