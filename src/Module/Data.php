@@ -39,6 +39,11 @@ class Data
     ];
 
     /**
+     * @var Generic $genericClass
+     */
+    private static $genericClass;
+
+    /**
      * @var array $jsDependencies List of dependencies for the scripts in this plugin.
      * @since 0.0.1.0
      */
@@ -253,7 +258,6 @@ class Data
      * Returns test mode boolean.
      * @return bool
      * @since 0.0.1.0
-     * @todo Fetch this mode from database.
      */
     public static function getTestMode()
     {
@@ -321,7 +325,6 @@ class Data
 
     /**
      * @param string $key
-     * @param string $option_name
      * @return bool|string
      * @since 0.0.1.0
      */
@@ -420,8 +423,6 @@ class Data
      */
     public static function getPluginInformation($content)
     {
-        $generic = new Generic();
-        $generic->setTemplatePath(Data::getGatewayPath('templates'));
         $netWrapper = new NetWrapper();
 
         $renderData = [
@@ -431,7 +432,7 @@ class Data
                     '%s, at least %s are required.',
                     'trbwc'
                 ),
-                WooCommerce::getVersion(),
+                WooCommerce::getWooCommerceVersion(),
                 WooCommerce::getRequiredVersion()
             ),
             __('Composer version', 'trbwc') => Data::getVersionByComposer(),
@@ -442,7 +443,7 @@ class Data
         ];
 
         $renderData += WordPress::applyFilters('renderInformationData', $renderData);
-        $content .= $generic->getTemplate(
+        $content .= self::getGenericClass()->getTemplate(
             'plugin_information',
             [
                 'required_drivers' => self::getSpecialString('required_drivers'),
@@ -467,6 +468,20 @@ class Data
         }
 
         return $wrapperList;
+    }
+
+    /**
+     * @return Generic
+     * @since 0.0.1.0
+     */
+    public static function getGenericClass()
+    {
+        if (self::$genericClass !== Generic::class) {
+            self::$genericClass = new Generic();
+            self::$genericClass->setTemplatePath(Data::getGatewayPath('templates'));
+        }
+
+        return self::$genericClass;
     }
 
     /**

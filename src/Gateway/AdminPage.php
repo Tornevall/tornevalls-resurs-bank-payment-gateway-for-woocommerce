@@ -38,16 +38,12 @@ class AdminPage extends WC_Settings_Page
     private $parentConstructor = false;
 
     /**
-     * @var Generic $generic Generic library, mainly used for automatically handling templates.
+     * AdminPage constructor.
+     * @since 0.0.1.0
      */
-    private $generic;
-
     public function __construct()
     {
         $this->id = Data::getPrefix('admin');
-
-        $this->generic = new Generic();
-        $this->generic->setTemplatePath(Data::getGatewayPath('templates'));
 
         // In case we need it in future.
         $this->label_image = sprintf(
@@ -219,7 +215,7 @@ class AdminPage extends WC_Settings_Page
         $outputHtml = ob_get_clean();
 
         // This displays the entire configuration.
-        echo $this->generic->getTemplate(
+        echo Data::getGenericClass()->getTemplate(
             'adminpage_main',
             [
                 'adminPageTop' => sprintf(
