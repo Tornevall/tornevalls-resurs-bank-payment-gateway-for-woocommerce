@@ -3,6 +3,7 @@
 namespace ResursBank\Helper;
 
 use Exception;
+use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use TorneLIB\IO\Data\Strings;
 
@@ -26,9 +27,28 @@ class WordPress
         if (!class_exists('WC_Payment_Gateway')) {
             return;
         }
+        self::setupAjaxActions();
         self::setupFilters();
         self::setupActions();
         self::setupScripts();
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private static function setupAjaxActions()
+    {
+        $actionList = [
+            'test_credentials',
+        ];
+        foreach ($actionList as $action) {
+            $camelCaseAction = sprintf('ResursBank\Module\PluginApi::%s', Strings::returnCamelCase($action));
+            add_action(
+                sprintf('rbwc_%s', $action),
+                $camelCaseAction
+            );
+            //if (method_exists('ResursBank\Module\PluginApi', Strings::returnCamelCase($action))) {}
+        }
     }
 
     /**
@@ -37,11 +57,16 @@ class WordPress
      */
     private static function setupFilters()
     {
+        // Generic calls.
         add_filter('plugin_action_links', 'ResursBank\Helper\WooCommerce::getPluginAdminUrl', 10, 2);
+        // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
-        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
+        add_action('rbwc_get_localized_scripts', 'ResursBank\Helper\WordPress::getLocalizedScripts', 10, 2);
+        // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
+        // Other calls.
+        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
     }
 
     /**
@@ -49,7 +74,10 @@ class WordPress
      */
     private static function setupActions()
     {
+        $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
         add_action('admin_notices', 'ResursBank\Helper\WordPress::getAdminNotices');
+        add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
+        add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
     }
 
     /**
@@ -117,7 +145,7 @@ class WordPress
     {
         foreach (Data::getPluginStyles($isAdmin) as $styleName => $styleFile) {
             wp_enqueue_style(
-                sprintf('%s-%s', Data::getPrefix(), $styleName),
+                sprintf('%s_%s', Data::getPrefix(), $styleName),
                 sprintf(
                     '%s/css/%s?%s',
                     Data::getGatewayUrl(),
@@ -130,8 +158,9 @@ class WordPress
         }
 
         foreach (Data::getPluginScripts($isAdmin) as $scriptName => $scriptFile) {
+            $realScriptName = sprintf('%s_%s', Data::getPrefix(), $scriptName);
             wp_enqueue_script(
-                sprintf('%s-%s', Data::getPrefix(), $scriptName),
+                $realScriptName,
                 sprintf(
                     '%s/js/%s?%s',
                     Data::getGatewayUrl(),
@@ -140,32 +169,27 @@ class WordPress
                 ),
                 Data::getJsDependencies($scriptName, $isAdmin)
             );
+            WordPress::doAction('getLocalizedScripts', $realScriptName, $isAdmin);
         }
     }
 
     /**
-     * @param $filterName
+     * @param $actionName
      * @param $value
      * @return mixed
-     * @since 0.0.1.0
      */
-    public static function applyFilters($filterName, $value)
+    public static function doAction($actionName, $value)
     {
-        $applyArray = [
+        $actionArray = [
             sprintf(
                 '%s_%s',
                 'rbwc',
-                self::getFilterName($filterName)
+                self::getFilterName($actionName)
             ),
             $value,
         ];
 
-        $applyArray = array_merge($applyArray, self::getFilterArgs(func_get_args()));
-
-        return call_user_func_array(
-            'apply_filters',
-            $applyArray
-        );
+        do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
     }
 
     /**
@@ -202,6 +226,26 @@ class WordPress
     /**
      * @param $filterName
      * @param $value
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function applyFilters($filterName, $value)
+    {
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                self::getFilterName($filterName)
+            ),
+            $value,
+        ];
+
+        return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
+    }
+
+    /**
+     * @param $filterName
+     * @param $value
      * @return mixed|void
      * @since 0.0.1.0
      * @deprecated Marked deprecated, use the new definitions instead.
@@ -213,5 +257,105 @@ class WordPress
             $value,
             self::getFilterArgs(func_get_args())
         );
+    }
+
+    /**
+     * @param $scriptName
+     * @param bool $isAdmin
+     * @since 0.0.1.0
+     */
+    public static function getLocalizedScripts($scriptName, $isAdmin = false)
+    {
+        if (($localizationData = self::getLocalizationData($scriptName, $isAdmin))) {
+            wp_localize_script(
+                $scriptName,
+                sprintf('l_%s', $scriptName),
+                $localizationData
+            );
+        }
+    }
+
+    /**
+     * @param $scriptName
+     * @param $isAdmin
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getLocalizationData($scriptName, $isAdmin)
+    {
+        $return = [];
+
+        if ((bool)$isAdmin && preg_match('/_admin$/', $scriptName)) {
+            // Shown in admin localization only.
+            $return['noncify'] = self::getNonce('admin');
+            $return['environment'] = Api::getEnvironment();
+            $return['wsdl'] = Api::getWsdlMode();
+            $return['hasCredentials'] = (new Api)->getCredentialsPresent();
+            $return['translate_checkout_rco'] = __(
+                'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
+                'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
+                'at the endpoint of Resurs Bank.',
+                'trbwc'
+            );
+            $return['translate_checkout_simplified'] = __(
+                'The integrated checkout (also known as the "simplified shop flow") is a direct integration with ' .
+                'WooCommerce which uses intended APIs to interact with your customers while finishing the orders.',
+                'trbwc'
+            );
+            $return['translate_checkout_hosted'] = __(
+                '"Resurs Hosted Checkout" works similarly as the integrated simplified checkout, but on the ' .
+                'checkout itself the customer are redirected to a hosted website to fulfill their payments. ' .
+                'It can be quite easily compared with a Paypal solution.',
+                'trbwc'
+            );
+            $return['resurs_test_credentials'] = __(
+                'Validate credentials',
+                'trbwc'
+            );
+            $return['credential_failure_notice'] = __(
+                'The credential check failed. If you save the current data we can not guarantee ' .
+                'that your store will properly work.',
+                'trbwc'
+            );
+            $return['credential_success_notice'] = __(
+                'The credential check was successful. You may now save the data.',
+                'trbwc'
+            );
+        } elseif (preg_match('/_all$/', $scriptName)) {
+            // Shown in all views.
+            $return['noncify'] = self::getNonce('all');
+            $return['ajaxify'] = admin_url('admin-ajax.php');
+            $return['spin'] = Data::getImage('spin.gif');
+            $return['success'] = __('Successful.', 'trbwc');
+            $return['failed'] = __('Failed.', 'trbwc');
+        } else {
+            // Shown in store front only.
+            $return['noncify'] = self::getNonce('simple');
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $tag
+     * @param bool $strictify
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getNonceTag($tag, $strictify = true)
+    {
+        return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
+    }
+
+    /**
+     * Makes nonces strict based on client ip address.
+     * @param $tag
+     * @param bool $strictify
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getNonce($tag, $strictify = true)
+    {
+        return (string)wp_create_nonce(self::getNonceTag($tag, $strictify));
     }
 }

@@ -1,1 +1,0 @@
-var $rQuery = jQuery.noConflict();
