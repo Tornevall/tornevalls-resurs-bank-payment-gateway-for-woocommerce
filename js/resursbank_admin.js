@@ -1,16 +1,25 @@
+/**
+ * @since 0.0.1.0
+ */
 $rQuery(document).ready(function ($) {
     getResursAdminFields();
 });
 
 /**
  * Handle wp-admin, and update realtime fields.
+ * @since 0.0.1.0
  */
-function getResursAdminFields() {
+function getResursAdminFields()
+{
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
 }
 
-function getResursAdminPasswordButton() {
+/**
+ * @since 0.0.1.0
+ */
+function getResursAdminPasswordButton()
+{
     var pwBox = $rQuery('#trbwc_admin_password');
     if (pwBox.length > 0) {
         pwBox.after(
@@ -37,8 +46,10 @@ function getResursAdminPasswordButton() {
 
 /**
  * Backend-test chosen credentials.
+ * @since 0.0.1.0
  */
-function getResursCredentialsResult() {
+function getResursCredentialsResult()
+{
     if ($rQuery('#trbwc_admin_password').length > 0) {
         getResursSpin('#resurs_test_credentials_result');
         var uData = {
@@ -58,8 +69,10 @@ function getResursCredentialsResult() {
 
 /**
  * Update description of checkout type to the selected.
+ * @since 0.0.1.0
  */
-function getResursAdminCheckoutType() {
+function getResursAdminCheckoutType()
+{
     var checkoutType = $rQuery('#trbwc_admin_checkout_type');
     if (checkoutType.length > 0) {
         $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
@@ -70,8 +83,10 @@ function getResursAdminCheckoutType() {
 
 /**
  * @param current
+ * @since 0.0.1.0
  */
-function resursUpdateFlowDescription(current) {
+function resursUpdateFlowDescription(current)
+{
     $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
         getResursLocalization('translate_checkout_' + current.value)
     );
@@ -80,8 +95,10 @@ function resursUpdateFlowDescription(current) {
 /**
  * @param key
  * @returns {boolean}
+ * @since 0.0.1.0
  */
-function getResursLocalization(key) {
+function getResursLocalization(key)
+{
     var returnValue = false;
     if (typeof l_trbwc_resursbank_admin[key] !== 'undefined') {
         returnValue = l_trbwc_resursbank_admin[key]

@@ -290,7 +290,6 @@ class WordPress
             $return['noncify'] = self::getNonce('admin');
             $return['environment'] = Api::getEnvironment();
             $return['wsdl'] = Api::getWsdlMode();
-            $return['hasCredentials'] = (new Api)->getCredentialsPresent();
             $return['translate_checkout_rco'] = __(
                 'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
                 'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
