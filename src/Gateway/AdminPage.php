@@ -2,6 +2,7 @@
 
 namespace ResursBank\Gateway;
 
+use Exception;
 use ResursBank\Helper\WordPress;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
@@ -135,6 +136,7 @@ class AdminPage extends WC_Settings_Page
 
     /**
      * @since 0.0.1.0
+     * @throws Exception
      */
     public function output()
     {
