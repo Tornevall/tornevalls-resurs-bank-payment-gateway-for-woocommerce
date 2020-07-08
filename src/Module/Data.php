@@ -4,6 +4,7 @@
 
 namespace ResursBank\Module;
 
+use Exception;
 use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
 use TorneLIB\Exception\ExceptionHandler;
@@ -31,6 +32,7 @@ class Data
 
     /**
      * @var array
+     * @since 0.0.1.0
      */
     private static $settingStorage = [];
 
@@ -45,6 +47,7 @@ class Data
 
     /**
      * @var Generic $genericClass
+     * @since 0.0.1.0
      */
     private static $genericClass;
 
@@ -420,7 +423,8 @@ class Data
     /**
      * @param $content
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
+     * @since 0.0.1.0
      */
     public static function getPluginInformation($content)
     {
@@ -460,6 +464,7 @@ class Data
      * Return list of wrappers from netcurl wrapper driver.
      * @param $netWrapper
      * @return array
+     * @since 0.0.1.0
      */
     private static function getWrapperList($netWrapper)
     {
@@ -489,6 +494,7 @@ class Data
      * Return long translations.
      * @param $key
      * @return mixed
+     * @since 0.0.1.0
      */
     private static function getSpecialString($key)
     {

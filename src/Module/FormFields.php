@@ -16,8 +16,9 @@ class FormFields
      * @param string $id
      * @return array
      * @noinspection ParameterDefaultValueIsNotNullInspection
+     * @since 0.0.1.0
      */
-    public static function getFormFields($section = 'basic', $id = '')
+    public static function getFormFields($section = 'basic', $id = null)
     {
         if (empty($section)) {
             $section = 'basic';
@@ -203,6 +204,7 @@ class FormFields
      * @param $array
      * @param $add
      * @return string
+     * @since 0.0.1.0
      */
     public static function getTransformedIdArray($array, $add)
     {

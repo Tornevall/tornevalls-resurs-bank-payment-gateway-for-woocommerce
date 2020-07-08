@@ -73,6 +73,7 @@ class PluginApi
 
     /**
      * @throws Exception
+     * @since 0.0.1.0
      */
     public static function testCredentials()
     {

@@ -177,6 +177,7 @@ class WordPress
      * @param $actionName
      * @param $value
      * @return mixed
+     * @since 0.0.1.0
      */
     public static function doAction($actionName, $value)
     {

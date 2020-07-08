@@ -74,6 +74,7 @@ class WooCommerce
      * @param $links
      * @param $file
      * @return mixed
+     * @since 0.0.1.0
      */
     public static function getPluginAdminUrl($links, $file)
     {

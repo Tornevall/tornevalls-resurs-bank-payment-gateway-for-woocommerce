@@ -30,6 +30,7 @@ class Api
 
     /**
      * @return bool|string
+     * @since 0.0.1.0
      */
     public static function getWsdlMode()
     {
@@ -38,6 +39,7 @@ class Api
 
     /**
      * @return bool
+     * @since 0.0.1.0
      */
     public function getCredentialsPresent()
     {
