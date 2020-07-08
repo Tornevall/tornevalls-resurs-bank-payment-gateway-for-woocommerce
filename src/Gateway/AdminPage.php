@@ -77,6 +77,9 @@ class AdminPage extends WC_Settings_Page
         return Data::getPrefix('admin');
     }
 
+    /**
+     * @since 0.0.1.0
+     */
     public function save()
     {
         global $current_section;

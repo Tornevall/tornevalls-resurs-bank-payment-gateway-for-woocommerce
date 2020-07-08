@@ -21,7 +21,7 @@ class Data
      * @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list.
      * @since 0.0.1.0
      */
-    private static $jsLoaders = ['resursbank_all' => 'resurs_global.js', 'resursbank' => 'resursbank.js'];
+    private static $jsLoaders = ['resursbank_all' => 'resursbank_global.js', 'resursbank' => 'resursbank.js'];
 
     /**
      * @var array $jsLoadersCheckout Loadable scripts, only from checkout.
@@ -39,7 +39,7 @@ class Data
      * @since 0.0.1.0
      */
     private static $jsLoadersAdmin = [
-        'resursbank_all' => 'resurs_global.js',
+        'resursbank_all' => 'resursbank_global.js',
         'resursbank_admin' => 'resursbank_admin.js',
     ];
 
@@ -271,8 +271,8 @@ class Data
         }
 
         // What the old plugin never did to save space.
-        if (($return = self::getTruth($return)) !== null) {
-            $return = (bool)$return;
+        if (($testBoolean = self::getTruth($return)) !== null) {
+            $return = (bool)$testBoolean;
         } else {
             $return = (string)$return;
         }
@@ -535,7 +535,11 @@ class Data
                     'id' => 'priorVersionsDisabled',
                     'title' => __('Disable RB 2.x', 'trbwc'),
                     'type' => 'checkbox',
-                    'desc' => __('Disable prior similar versions of the Resurs Bank plugin (v2.x-series).', 'trbwc'),
+                    'desc' => __(
+                        'Disable prior similar versions of the Resurs Bank plugin (v2.x-series) - ' .
+                        'You might need an extra reload after save',
+                        'trbwc'
+                    ),
                     'desc_top' => __(
                         'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
                         'with help from filters in that release.',

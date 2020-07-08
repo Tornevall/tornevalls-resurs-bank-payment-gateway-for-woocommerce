@@ -26,7 +26,7 @@ class FormFields
         // Basic settings. Returned to ResursDefault configuration.
         $formFields = [
             'basic' => [
-                'title' => __('Plugin and account settings', 'trbwc'),
+                'title' => __('Basic Resurs Bank API Settings', 'trbwc'),
                 'enabled' => [
                     'id' => 'enabled',
                     'title' => __('Enable/Disable', 'trbwc'),
@@ -54,6 +54,9 @@ class FormFields
                             'trbwc'
                         ),
                     ],
+                    'custom_attributes' => [
+                        'size' => 2,
+                    ],
                     'default' => 'test',
                     'desc' => __(
                         'Defines if you are are live or just in test/staging. Default: test.',
@@ -79,10 +82,13 @@ class FormFields
                         'Web services password, received from Resurs Bank.',
                         'trbwc'
                     ),
+                    'custom_attributes' => [
+                        'onload' => 'resursAppendCredentialCheck()',
+                    ],
                 ],
                 'country' => [
                     'id' => 'country',
-                    'title' => __('Country', 'trbwc'),
+                    'title' => __('Chosen merchant country', 'trbwc'),
                     'type' => 'text',
                     'default' => get_option('woocommerce_default_country'),
                     'css' => 'width: 100px',
@@ -95,12 +101,74 @@ class FormFields
                         'trbwc'
                     ),
                 ],
+                'shopflow' => [
+                    'id' => 'checkout_type',
+                    'title' => __('Checkout Type', 'trbwc'),
+                    'type' => 'select',
+                    'options' => [
+                        'rco' => __(
+                            'Resurs Checkout (embedded checkout by iframe)',
+                            'trbwc'
+                        ),
+                        'simplified' => __(
+                            'Integrated Checkout (simplified shopflow)',
+                            'trbwc'
+                        ),
+                        'hosted' => __(
+                            'Hosted Checkout',
+                            'trbwc'
+                        ),
+                    ],
+                    'custom_attributes' => [
+                        'size' => 3,
+                        'onchange' => 'resursUpdateFlowDescription(this)',
+                    ],
+                    'default' => 'rco',
+                    'desc' => __(
+                        'Chosen checkout type.',
+                        'trbwc'
+                    ),
+                ],
+            ],
+            'customers_orders' => [
+                'title' => __('Customers and orders', 'trbwc'),
             ],
             'advanced' => [
                 'title' => __('Advanced Settings', 'trbwc'),
+                'complex_api_section' => [
+                    'type' => 'title',
+                    'title' => 'Advanced API Configuration',
+                ],
+                'api_wsdl' => [
+                    'id' => 'api_wsdl',
+                    'title' => 'Cache WSDL calls',
+                    'type' => 'select',
+                    'options' => [
+                        'default' => __(
+                            'Default: Only for production/live environment',
+                            'trbwc'
+                        ),
+                        'both' => __(
+                            'Both for production/live and test/staging',
+                            'trbwc'
+                        ),
+                        'none' => __(
+                            'Not at all, please',
+                            'trbwc'
+                        ),
+                    ],
+                    'default' => 'default',
+                ],
+                'complex_api_section_end' => [
+                    'type' => 'sectionend',
+                ],
+                'complex_developer_section' => [
+                    'type' => 'title',
+                    'title' => 'Developer Section',
+                ],
                 'show_developer' => [
-                    'title' => __('Activate developer section', 'rbwc'),
-                    'desc' => __('Activate developer section', 'trbwc'),
+                    'title' => __('Activate developer mode', 'rbwc'),
+                    'desc' => __('Activate developer mode (you might need an extra reload after save)', 'trbwc'),
                     'desc_tip' => __(
                         'The developer section is normally nothing you will need, unless you are a very advanced ' .
                         'administrator that likes to configure a little bit over the limits. If you know what you ' .
@@ -109,6 +177,9 @@ class FormFields
                     ),
                     'type' => 'checkbox',
                     'default' => 'no',
+                ],
+                'complex_developer_section_end' => [
+                    'type' => 'sectionend',
                 ],
             ],
             'information' => [
