@@ -27,6 +27,7 @@ class WordPress
         if (!class_exists('WC_Payment_Gateway')) {
             return;
         }
+
         self::setupAjaxActions();
         self::setupFilters();
         self::setupActions();
@@ -75,6 +76,7 @@ class WordPress
     private static function setupActions()
     {
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+        add_action('rbwc_event_logger', 'ResursBank\Module\Data::setLogInternal', 10, 2);
         add_action('admin_notices', 'ResursBank\Helper\WordPress::getAdminNotices');
         add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
@@ -95,28 +97,81 @@ class WordPress
     public static function getAdminNotices()
     {
         global $current_tab, $parent_file;
+        $requiredVersionNotice = sprintf(
+            __(
+                'The current plugin "%s" requires at least version %s - for the moment, you are running ' .
+                'on version %s. You should consider upgrading as soon as possible.',
+                'trbwc'
+            ),
+            Data::getPluginTitle(true),
+            WooCommerce::getRequiredVersion(),
+            WooCommerce::getWooCommerceVersion()
+        );
 
         try {
             if ($current_tab === Data::getPrefix('admin') || $parent_file === 'woocommerce') {
-                WooCommerce::testRequiredVersion();
+                WooCommerce::testRequiredVersion(false);
             }
         } catch (Exception $e) {
+            self::doAction('eventLogger', Data::LOG_WARNING, $requiredVersionNotice);
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_woocommerce_requirement',
                 [
-                    'requiredVersionNotice' => sprintf(
-                        __(
-                            'The current plugin "%s" requires at least version %s - for the moment, you are running ' .
-                            'on version %s. You should consider upgrading as soon as possible.',
-                            'trbwc'
-                        ),
-                        Data::getPluginTitle(true),
-                        WooCommerce::getRequiredVersion(),
-                        WooCommerce::getWooCommerceVersion()
-                    ),
+                    'requiredVersionNotice' => $requiredVersionNotice,
                 ]
             );
         }
+    }
+
+    /**
+     * @param $actionName
+     * @param $value
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function doAction($actionName, $value)
+    {
+        $actionArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                self::getFilterName($actionName)
+            ),
+            $value,
+        ];
+
+        do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
+    }
+
+    /**
+     * @param $filterName
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getFilterName($filterName)
+    {
+        $return = $filterName;
+        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
+            $return = (new Strings())->getSnakeCase($filterName);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Clean up arguments and return the real ones.
+     * @param $args
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getFilterArgs($args)
+    {
+        if (is_array($args) && count($args) > 2) {
+            array_shift($args);
+            array_shift($args);
+        }
+
+        return $args;
     }
 
     /**
@@ -171,57 +226,6 @@ class WordPress
             );
             WordPress::doAction('getLocalizedScripts', $realScriptName, $isAdmin);
         }
-    }
-
-    /**
-     * @param $actionName
-     * @param $value
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function doAction($actionName, $value)
-    {
-        $actionArray = [
-            sprintf(
-                '%s_%s',
-                'rbwc',
-                self::getFilterName($actionName)
-            ),
-            $value,
-        ];
-
-        do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * @param $filterName
-     * @return string
-     * @since 0.0.1.0
-     */
-    private static function getFilterName($filterName)
-    {
-        $return = $filterName;
-        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
-            $return = (new Strings())->getSnakeCase($filterName);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Clean up arguments and return the real ones.
-     * @param $args
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getFilterArgs($args)
-    {
-        if (is_array($args) && count($args) > 2) {
-            array_shift($args);
-            array_shift($args);
-        }
-
-        return $args;
     }
 
     /**
@@ -337,17 +341,6 @@ class WordPress
     }
 
     /**
-     * @param $tag
-     * @param bool $strictify
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getNonceTag($tag, $strictify = true)
-    {
-        return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
-    }
-
-    /**
      * Makes nonces strict based on client ip address.
      * @param $tag
      * @param bool $strictify
@@ -357,5 +350,16 @@ class WordPress
     private static function getNonce($tag, $strictify = true)
     {
         return (string)wp_create_nonce(self::getNonceTag($tag, $strictify));
+    }
+
+    /**
+     * @param $tag
+     * @param bool $strictify
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getNonceTag($tag, $strictify = true)
+    {
+        return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
     }
 }

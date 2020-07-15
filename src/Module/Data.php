@@ -18,6 +18,14 @@ use TorneLIB\Utils\Generic;
  */
 class Data
 {
+    const LOG_DEBUG = 'debug';
+    const LOG_NOTICE = 'notice';
+    const LOG_CRITICAL = 'critical';
+    const LOG_ERROR = 'error';
+    const LOG_WARNING = 'warning';
+
+    private static $Log;
+
     /**
      * @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list.
      * @since 0.0.1.0
@@ -585,5 +593,42 @@ class Data
         }
 
         return (bool)self::$settingStorage['showDeveloper'];
+    }
+
+    /**
+     * @param $severity
+     * @param $logFunction
+     * @param $logMessage
+     * @param array $context
+     */
+    public static function setLogInternal($severity, $logMessage, $context = [])
+    {
+        if (empty(self::$Log)) {
+            self::$Log = new \WC_Logger();
+        }
+
+        $prefix = sprintf('rbwc_%s', $severity);
+        $message = sprintf('%s message: %s', $prefix, $logMessage);
+
+        switch ($severity) {
+            case 'debug':
+                self::$Log->debug($message, $context);
+                break;
+            case 'notice':
+                self::$Log->notice($message, $context);
+                break;
+            case 'critical':
+                self::$Log->critical($message, $context);
+                break;
+            case 'error':
+                self::$Log->error($message, $context);
+                break;
+            case 'warning':
+                self::$Log->warning($message, $context);
+                break;
+            default:
+                self::$Log->notice($message, $context);
+                break;
+        }
     }
 }
