@@ -41,6 +41,7 @@ class WordPress
     {
         $actionList = [
             'test_credentials',
+            'import_credentials',
         ];
         foreach ($actionList as $action) {
             $camelCaseAction = sprintf('ResursBank\Module\PluginApi::%s', Strings::returnCamelCase($action));
@@ -64,6 +65,7 @@ class WordPress
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
         add_action('rbwc_get_localized_scripts', 'ResursBank\Helper\WordPress::getLocalizedScripts', 10, 2);
+        add_action('rbwc_localizations_admin', 'ResursBank\Helper\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
         // Other calls.
@@ -283,6 +285,81 @@ class WordPress
     }
 
     /**
+     * Localized variables shown in admin only.
+     * @param $return
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getLocalizationDataAdmin($return)
+    {
+        $return['noncify'] = self::getNonce('admin');
+        $return['environment'] = Api::getEnvironment();
+        $return['wsdl'] = Api::getWsdlMode();
+        $return['translate_checkout_rco'] = __(
+            'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
+            'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
+            'at the endpoint of Resurs Bank.',
+            'trbwc'
+        );
+        $return['translate_checkout_simplified'] = __(
+            'The integrated checkout (also known as the "simplified shop flow") is a direct integration with ' .
+            'WooCommerce which uses intended APIs to interact with your customers while finishing the orders.',
+            'trbwc'
+        );
+        $return['translate_checkout_hosted'] = __(
+            '"Resurs Hosted Checkout" works similarly as the integrated simplified checkout, but on the ' .
+            'checkout itself the customer are redirected to a hosted website to fulfill their payments. ' .
+            'It can be quite easily compared with a Paypal solution.',
+            'trbwc'
+        );
+        $return['resurs_test_credentials'] = __(
+            'Validate credentials',
+            'trbwc'
+        );
+        $return['credential_failure_notice'] = __(
+            'The credential check failed. If you save the current data we can not guarantee ' .
+            'that your store will properly work.',
+            'trbwc'
+        );
+        $return['credential_success_notice'] = __(
+            'The credential check was successful. You may now save the data.',
+            'trbwc'
+        );
+
+        return self::applyFilters('localizationsAdmin', $return);
+    }
+
+    /**
+     * Localized variables shown in all views.
+     * @param $return
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getLocalizationDataGlobal($return)
+    {
+        $return['noncify'] = self::getNonce('all');
+        $return['ajaxify'] = admin_url('admin-ajax.php');
+        $return['spin'] = Data::getImage('spin.gif');
+        $return['success'] = __('Successful.', 'trbwc');
+        $return['failed'] = __('Failed.', 'trbwc');
+
+        return self::applyFilters('localizationsGlobal', $return);
+    }
+
+    /**
+     * Localized variables shown in front (customer) view only.
+     * @param $return
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getLocalizationDataFront($return)
+    {
+        $return['noncify'] = self::getNonce('simple');
+
+        return self::applyFilters('localizationsFront', $return);
+    }
+
+    /**
      * @param $scriptName
      * @param $isAdmin
      * @return array
@@ -293,50 +370,11 @@ class WordPress
         $return = [];
 
         if ((bool)$isAdmin && preg_match('/_admin$/', $scriptName)) {
-            // Shown in admin localization only.
-            $return['noncify'] = self::getNonce('admin');
-            $return['environment'] = Api::getEnvironment();
-            $return['wsdl'] = Api::getWsdlMode();
-            $return['translate_checkout_rco'] = __(
-                'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
-                'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
-                'at the endpoint of Resurs Bank.',
-                'trbwc'
-            );
-            $return['translate_checkout_simplified'] = __(
-                'The integrated checkout (also known as the "simplified shop flow") is a direct integration with ' .
-                'WooCommerce which uses intended APIs to interact with your customers while finishing the orders.',
-                'trbwc'
-            );
-            $return['translate_checkout_hosted'] = __(
-                '"Resurs Hosted Checkout" works similarly as the integrated simplified checkout, but on the ' .
-                'checkout itself the customer are redirected to a hosted website to fulfill their payments. ' .
-                'It can be quite easily compared with a Paypal solution.',
-                'trbwc'
-            );
-            $return['resurs_test_credentials'] = __(
-                'Validate credentials',
-                'trbwc'
-            );
-            $return['credential_failure_notice'] = __(
-                'The credential check failed. If you save the current data we can not guarantee ' .
-                'that your store will properly work.',
-                'trbwc'
-            );
-            $return['credential_success_notice'] = __(
-                'The credential check was successful. You may now save the data.',
-                'trbwc'
-            );
+            $return = self::getLocalizationDataAdmin($return);
         } elseif (preg_match('/_all$/', $scriptName)) {
-            // Shown in all views.
-            $return['noncify'] = self::getNonce('all');
-            $return['ajaxify'] = admin_url('admin-ajax.php');
-            $return['spin'] = Data::getImage('spin.gif');
-            $return['success'] = __('Successful.', 'trbwc');
-            $return['failed'] = __('Failed.', 'trbwc');
+            $return = self::getLocalizationDataGlobal($return);
         } else {
-            // Shown in store front only.
-            $return['noncify'] = self::getNonce('simple');
+            $return = self::getLocalizationDataFront($return);
         }
 
         return $return;
@@ -363,5 +401,31 @@ class WordPress
     public static function getNonceTag($tag, $strictify = true)
     {
         return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
+    }
+
+    /**
+     * @param $return
+     * @return mixed
+     */
+    public static function getLocalizedScriptsDeprecated($return)
+    {
+        $importDeprecated = get_option('resursImportCredentials');
+
+        if (!$importDeprecated) {
+            $return['deprecated_login'] = !empty(Data::getResursOptionDeprecated('login')) ? true : false;
+            $return['resurs_deprecated_credentials'] = __(
+                'Import credentials from Resurs v2.x',
+                'trbwc'
+            );
+            $return['credential_import_success'] = __(
+                'Importen lyckades.',
+                'trbwc'
+            );
+            $return['credential_import_failed'] = __(
+                'Importen misslyckades.',
+                'trbwc'
+            );
+        }
+        return $return;
     }
 }
