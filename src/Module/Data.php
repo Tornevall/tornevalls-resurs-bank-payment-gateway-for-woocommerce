@@ -10,6 +10,7 @@ use ResursBank\Helper\WordPress;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
+use WC_Logger;
 
 /**
  * Class Data Core data class for plugin. This is where we store dynamic content without dependencies those days.
@@ -266,13 +267,45 @@ class Data
     }
 
     /**
+     * Get resurs-options from deprecated spaces (feature only returns saved data, not earlier defaults).
+     * Affected namespaces:
+     * woocommerce_resurs-bank_settings                // Default.
+     * woocommerce_{paymentMethod}_settings            // woocommerce_resurs_bank_nr_<method>_settings.
+     * woocommerce_resurs_bank_omnicheckout_settings   // Omni/RCO section.
+     * wc_resurs2_salt                                 // Salts are skipped, obviously.
      * @param string $key
-     * @param null $forceDefault
+     * @param string $namespace
+     * @return bool|mixed|null
+     * @since 0.0.1.0
+     */
+    public static function getResursOptionDeprecated($key, $namespace = "woocommerce_resurs-bank_settings")
+    {
+        $return = null;
+
+        $getOptionsNamespace = get_option($namespace);
+        if (isset($getOptionsNamespace[$key])) {
+            $return = $getOptionsNamespace[$key];
+        }
+
+        $trueFalse = self::getTruth($return);
+        if ($trueFalse !== null) {
+            $return = $trueFalse;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param string $key
+     * @param null $namespace
      * @return bool|string
      * @since 0.0.1.0
      */
-    public static function getResursOption($key)
+    public static function getResursOption($key, $namespace = null)
     {
+        if (preg_match('/woocom(.*?)resurs/', $namespace)) {
+            return self::getResursOptionDeprecated($key, $namespace);
+        }
         $optionKeyPrefix = sprintf('%s_%s', Data::getPrefix('admin'), $key);
         $return = self::getDefault($key);
         $getOptionReturn = get_option($optionKeyPrefix);
@@ -603,7 +636,7 @@ class Data
     public static function setLogInternal($severity, $logMessage, $context = [])
     {
         if (empty(self::$Log)) {
-            self::$Log = new \WC_Logger();
+            self::$Log = new WC_Logger();
         }
 
         $prefix = sprintf('rbwc_%s', $severity);

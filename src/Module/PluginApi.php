@@ -71,6 +71,16 @@ class PluginApi
         return $return;
     }
 
+    public static function importCredentials()
+    {
+        update_option('resursImportCredentials', time());
+        self::getValidatedNonce();
+        self::reply([
+            'login' => Data::getResursOptionDeprecated('login'),
+            'pass' => Data::getResursOptionDeprecated('password'),
+        ]);
+    }
+
     /**
      * @throws Exception
      * @since 0.0.1.0
