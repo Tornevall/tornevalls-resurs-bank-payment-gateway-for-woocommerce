@@ -597,7 +597,6 @@ class Data
 
     /**
      * @param $severity
-     * @param $logFunction
      * @param $logMessage
      * @param array $context
      */
@@ -613,9 +612,6 @@ class Data
         switch ($severity) {
             case 'debug':
                 self::$Log->debug($message, $context);
-                break;
-            case 'notice':
-                self::$Log->notice($message, $context);
                 break;
             case 'critical':
                 self::$Log->critical($message, $context);

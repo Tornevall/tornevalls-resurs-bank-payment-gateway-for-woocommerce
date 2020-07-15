@@ -76,7 +76,7 @@ class WordPress
     private static function setupActions()
     {
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-        add_action('rbwc_event_logger', 'ResursBank\Module\Data::setLogInternal', 10, 2);
+        //add_action('rbwc_event_logger', 'ResursBank\Module\Data::setLogInternal', 10, 2);
         add_action('admin_notices', 'ResursBank\Helper\WordPress::getAdminNotices');
         add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
@@ -97,6 +97,7 @@ class WordPress
     public static function getAdminNotices()
     {
         global $current_tab, $parent_file;
+
         $requiredVersionNotice = sprintf(
             __(
                 'The current plugin "%s" requires at least version %s - for the moment, you are running ' .
@@ -113,7 +114,8 @@ class WordPress
                 WooCommerce::testRequiredVersion(false);
             }
         } catch (Exception $e) {
-            self::doAction('eventLogger', Data::LOG_WARNING, $requiredVersionNotice);
+            //self::doAction('eventLogger', Data::LOG_WARNING, $requiredVersionNotice);
+            Data::setLogInternal(Data::LOG_NOTICE, $requiredVersionNotice);
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_woocommerce_requirement',
                 [
