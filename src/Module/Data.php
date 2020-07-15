@@ -819,10 +819,11 @@ class Data
     }
 
     /**
-     * Fetch orderinfo from EComPHP.
+     * Fetch order info from EComPHP.
      * @param $return
      * @return mixed
      * @return array
+     * @since 0.0.1.0
      */
     public static function getPreparedDataByEcom($return)
     {
@@ -882,10 +883,12 @@ class Data
     }
 
     /**
-     * Makes sure nothing interfering with orders that has not been created by us.
+     * Makes sure nothing interfering with orders that has not been created by us. If this returns false,
+     * it means we should not be there and touch things.
      * @param $thisMethod
      * @param null $order
      * @return bool
+     * @since 0.0.1.0
      */
     public static function canHandleOrder($thisMethod, $order = null)
     {
