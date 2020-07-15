@@ -267,6 +267,35 @@ class Data
     }
 
     /**
+     * @param string $key
+     * @param null $namespace
+     * @return bool|string
+     * @since 0.0.1.0
+     */
+    public static function getResursOption($key, $namespace = null)
+    {
+        if (preg_match('/woocom(.*?)resurs/', $namespace)) {
+            return self::getResursOptionDeprecated($key, $namespace);
+        }
+        $optionKeyPrefix = sprintf('%s_%s', Data::getPrefix('admin'), $key);
+        $return = self::getDefault($key);
+        $getOptionReturn = get_option($optionKeyPrefix);
+
+        if (!empty($getOptionReturn)) {
+            $return = $getOptionReturn;
+        }
+
+        // What the old plugin never did to save space.
+        if (($testBoolean = self::getTruth($return)) !== null) {
+            $return = (bool)$testBoolean;
+        } else {
+            $return = (string)$return;
+        }
+
+        return $return;
+    }
+
+    /**
      * Get resurs-options from deprecated spaces (feature only returns saved data, not earlier defaults).
      * Affected namespaces:
      * woocommerce_resurs-bank_settings                // Default.
@@ -296,29 +325,18 @@ class Data
     }
 
     /**
-     * @param string $key
-     * @param null $namespace
-     * @return bool|string
+     * @param $value
+     * @return bool|null
      * @since 0.0.1.0
      */
-    public static function getResursOption($key, $namespace = null)
+    public static function getTruth($value)
     {
-        if (preg_match('/woocom(.*?)resurs/', $namespace)) {
-            return self::getResursOptionDeprecated($key, $namespace);
-        }
-        $optionKeyPrefix = sprintf('%s_%s', Data::getPrefix('admin'), $key);
-        $return = self::getDefault($key);
-        $getOptionReturn = get_option($optionKeyPrefix);
-
-        if (!empty($getOptionReturn)) {
-            $return = $getOptionReturn;
-        }
-
-        // What the old plugin never did to save space.
-        if (($testBoolean = self::getTruth($return)) !== null) {
-            $return = (bool)$testBoolean;
+        if (in_array($value, ['true', 'yes'])) {
+            $return = true;
+        } elseif (in_array($value, ['false', 'no'])) {
+            $return = false;
         } else {
-            $return = (string)$return;
+            $return = null;
         }
 
         return $return;
@@ -369,24 +387,6 @@ class Data
         $return = [];
         foreach ($array as $section => $content) {
             $return += $content;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $value
-     * @return bool|null
-     * @since 0.0.1.0
-     */
-    public static function getTruth($value)
-    {
-        if (in_array($value, ['true', 'yes'])) {
-            $return = true;
-        } elseif (in_array($value, ['false', 'no'])) {
-            $return = false;
-        } else {
-            $return = null;
         }
 
         return $return;

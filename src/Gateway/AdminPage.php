@@ -135,8 +135,8 @@ class AdminPage extends WC_Settings_Page
     }
 
     /**
-     * @since 0.0.1.0
      * @throws Exception
+     * @since 0.0.1.0
      */
     public function output()
     {

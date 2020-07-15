@@ -13,5 +13,4 @@ if (!defined('ABSPATH')) {
  */
 class Core
 {
-
 }
