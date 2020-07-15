@@ -128,57 +128,6 @@ class WordPress
     }
 
     /**
-     * @param $actionName
-     * @param $value
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function doAction($actionName, $value)
-    {
-        $actionArray = [
-            sprintf(
-                '%s_%s',
-                'rbwc',
-                self::getFilterName($actionName)
-            ),
-            $value,
-        ];
-
-        do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * @param $filterName
-     * @return string
-     * @since 0.0.1.0
-     */
-    private static function getFilterName($filterName)
-    {
-        $return = $filterName;
-        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
-            $return = (new Strings())->getSnakeCase($filterName);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Clean up arguments and return the real ones.
-     * @param $args
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getFilterArgs($args)
-    {
-        if (is_array($args) && count($args) > 2) {
-            array_shift($args);
-            array_shift($args);
-        }
-
-        return $args;
-    }
-
-    /**
      * @return bool
      * @since 0.0.1.0
      * @noinspection PhpExpressionResultUnusedInspection
@@ -233,23 +182,54 @@ class WordPress
     }
 
     /**
-     * @param $filterName
+     * @param $actionName
      * @param $value
      * @return mixed
      * @since 0.0.1.0
      */
-    public static function applyFilters($filterName, $value)
+    public static function doAction($actionName, $value)
     {
-        $applyArray = [
+        $actionArray = [
             sprintf(
                 '%s_%s',
                 'rbwc',
-                self::getFilterName($filterName)
+                self::getFilterName($actionName)
             ),
             $value,
         ];
 
-        return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
+        do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
+    }
+
+    /**
+     * @param $filterName
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getFilterName($filterName)
+    {
+        $return = $filterName;
+        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
+            $return = (new Strings())->getSnakeCase($filterName);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Clean up arguments and return the real ones.
+     * @param $args
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getFilterArgs($args)
+    {
+        if (is_array($args) && count($args) > 2) {
+            array_shift($args);
+            array_shift($args);
+        }
+
+        return $args;
     }
 
     /**
@@ -282,6 +262,27 @@ class WordPress
                 $localizationData
             );
         }
+    }
+
+    /**
+     * @param $scriptName
+     * @param $isAdmin
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getLocalizationData($scriptName, $isAdmin)
+    {
+        $return = [];
+
+        if ((bool)$isAdmin && preg_match('/_admin$/', $scriptName)) {
+            $return = self::getLocalizationDataAdmin($return);
+        } elseif (preg_match('/_all$/', $scriptName)) {
+            $return = self::getLocalizationDataGlobal($return);
+        } else {
+            $return = self::getLocalizationDataFront($return);
+        }
+
+        return $return;
     }
 
     /**
@@ -330,6 +331,49 @@ class WordPress
     }
 
     /**
+     * Makes nonces strict based on client ip address.
+     * @param $tag
+     * @param bool $strictify
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getNonce($tag, $strictify = true)
+    {
+        return (string)wp_create_nonce(self::getNonceTag($tag, $strictify));
+    }
+
+    /**
+     * @param $tag
+     * @param bool $strictify
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getNonceTag($tag, $strictify = true)
+    {
+        return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
+    }
+
+    /**
+     * @param $filterName
+     * @param $value
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function applyFilters($filterName, $value)
+    {
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                self::getFilterName($filterName)
+            ),
+            $value,
+        ];
+
+        return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
+    }
+
+    /**
      * Localized variables shown in all views.
      * @param $return
      * @return mixed
@@ -357,50 +401,6 @@ class WordPress
         $return['noncify'] = self::getNonce('simple');
 
         return self::applyFilters('localizationsFront', $return);
-    }
-
-    /**
-     * @param $scriptName
-     * @param $isAdmin
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getLocalizationData($scriptName, $isAdmin)
-    {
-        $return = [];
-
-        if ((bool)$isAdmin && preg_match('/_admin$/', $scriptName)) {
-            $return = self::getLocalizationDataAdmin($return);
-        } elseif (preg_match('/_all$/', $scriptName)) {
-            $return = self::getLocalizationDataGlobal($return);
-        } else {
-            $return = self::getLocalizationDataFront($return);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Makes nonces strict based on client ip address.
-     * @param $tag
-     * @param bool $strictify
-     * @return string
-     * @since 0.0.1.0
-     */
-    private static function getNonce($tag, $strictify = true)
-    {
-        return (string)wp_create_nonce(self::getNonceTag($tag, $strictify));
-    }
-
-    /**
-     * @param $tag
-     * @param bool $strictify
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getNonceTag($tag, $strictify = true)
-    {
-        return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
     }
 
     /**

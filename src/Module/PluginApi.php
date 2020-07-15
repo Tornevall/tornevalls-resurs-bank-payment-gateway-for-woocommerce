@@ -52,26 +52,6 @@ class PluginApi
     }
 
     /**
-     * Make sure the used nonce can only be used once.
-     * @param $nonceTag
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function expireNonce($nonceTag)
-    {
-        $optionTag = 'resurs_nonce_' . $nonceTag;
-        $return = false;
-        $lastNonce = get_option($optionTag);
-        if (self::getParam('n') === $lastNonce) {
-            $return = true;
-        } else {
-            // Only update if different.
-            update_option($optionTag, self::getParam('n'));
-        }
-        return $return;
-    }
-
-    /**
      * @since 0.0.1.0
      */
     public static function importCredentials()
@@ -81,25 +61,6 @@ class PluginApi
         self::reply([
             'login' => Data::getResursOptionDeprecated('login'),
             'pass' => Data::getResursOptionDeprecated('password'),
-        ]);
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function testCredentials()
-    {
-        self::getValidatedNonce();
-
-        $validationResponse = (new Api())->getConnection()->validateCredentials(
-            (self::getParam('e') !== 'live'),
-            self::getParam('u'),
-            self::getParam('p')
-        );
-
-        self::reply([
-            'validation' => $validationResponse,
         ]);
     }
 
@@ -144,6 +105,26 @@ class PluginApi
     }
 
     /**
+     * Make sure the used nonce can only be used once.
+     * @param $nonceTag
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function expireNonce($nonceTag)
+    {
+        $optionTag = 'resurs_nonce_' . $nonceTag;
+        $return = false;
+        $lastNonce = get_option($optionTag);
+        if (self::getParam('n') === $lastNonce) {
+            $return = true;
+        } else {
+            // Only update if different.
+            update_option($optionTag, self::getParam('n'));
+        }
+        return $return;
+    }
+
+    /**
      * @param $key
      * @return mixed|string
      * @since 0.0.1.0
@@ -174,5 +155,24 @@ class PluginApi
         header('Content-type: application/json; charset=utf-8', true, 200);
         echo json_encode($out);
         die();
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function testCredentials()
+    {
+        self::getValidatedNonce();
+
+        $validationResponse = (new Api())->getConnection()->validateCredentials(
+            (self::getParam('e') !== 'live'),
+            self::getParam('u'),
+            self::getParam('p')
+        );
+
+        self::reply([
+            'validation' => $validationResponse,
+        ]);
     }
 }

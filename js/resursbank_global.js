@@ -7,7 +7,8 @@ var $rQuery = jQuery.noConflict();
  * @param requestData
  * @param callbackMethod
  */
-function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMethod) {
+function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMethod)
+{
     if (typeof requestData === 'object') {
         if (typeof requestData['action'] === 'undefined') {
             requestData['action'] = requestVerb;
@@ -36,7 +37,8 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
 /**
  * @param data
  */
-function getResursError(data) {
+function getResursError(data)
+{
     console.log("Resurs Bank Ajax Error: ", data);
 }
 
@@ -44,7 +46,8 @@ function getResursError(data) {
  *
  * @param element
  */
-function getResursSpin(element) {
+function getResursSpin(element)
+{
     $rQuery(element).html(
         $rQuery('<img>', {
             'src': getResursLocalization('spin')

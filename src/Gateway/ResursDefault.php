@@ -4,12 +4,13 @@ namespace ResursBank\Gateway;
 
 use ResursBank\Module\Data;
 use TorneLIB\Utils\Generic;
+use WC_Payment_Gateway;
 
 /**
  * Class ResursDefault
  * @package Resursbank\Gateway
  */
-class ResursDefault extends \WC_Payment_Gateway
+class ResursDefault extends WC_Payment_Gateway
 {
     /**
      * @var Generic $generic Generic library, mainly used for automatically handling templates.

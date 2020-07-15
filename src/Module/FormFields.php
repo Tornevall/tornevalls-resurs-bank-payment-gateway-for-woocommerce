@@ -138,11 +138,11 @@ class FormFields
                 'title' => __('Advanced Settings', 'trbwc'),
                 'rco_customer_behaviour' => [
                     'type' => 'title',
-                    'title' => __('Resurs Checkout customer interaction behaviour', 'trbwc')
+                    'title' => __('Resurs Checkout customer interaction behaviour', 'trbwc'),
                 ],
                 'rco_customer_behaviour_end' => [
                     'id' => 'rco_customer_behaviour_end',
-                    'type' => 'sectionend'
+                    'type' => 'sectionend',
                 ],
                 'complex_api_section' => [
                     'type' => 'title',
