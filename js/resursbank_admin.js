@@ -167,6 +167,8 @@ function getResursLocalization(key)
         returnValue = l_trbwc_resursbank_admin[key]
     } else if (typeof l_trbwc_resursbank_all[key] !== 'undefined') {
         returnValue = l_trbwc_resursbank_all[key];
+    } else if (typeof l_trbwc_resursbank_order[key] !== 'undefined') {
+        returnValue = l_trbwc_resursbank_order[key];
     }
     return returnValue;
 }

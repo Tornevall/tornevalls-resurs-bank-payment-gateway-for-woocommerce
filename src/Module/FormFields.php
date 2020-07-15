@@ -150,7 +150,7 @@ class FormFields
                 ],
                 'api_wsdl' => [
                     'id' => 'api_wsdl',
-                    'title' => __('Cache WSDL calls', 'trbwc'),
+                    'title' => __('WSDL requests are cached', 'trbwc'),
                     'type' => 'select',
                     'options' => [
                         'default' => __(

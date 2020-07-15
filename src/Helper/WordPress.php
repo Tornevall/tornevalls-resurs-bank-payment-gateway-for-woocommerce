@@ -64,8 +64,6 @@ class WordPress
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
-        add_action('rbwc_get_localized_scripts', 'ResursBank\Helper\WordPress::getLocalizedScripts', 10, 2);
-        add_action('rbwc_localizations_admin', 'ResursBank\Helper\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
         // Other calls.
@@ -78,10 +76,32 @@ class WordPress
     private static function setupActions()
     {
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-        //add_action('rbwc_event_logger', 'ResursBank\Module\Data::setLogInternal', 10, 2);
         add_action('admin_notices', 'ResursBank\Helper\WordPress::getAdminNotices');
         add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
+        add_action('rbwc_get_localized_scripts', 'ResursBank\Helper\WordPress::getLocalizedScripts', 10, 3);
+        add_action('rbwc_localizations_admin', 'ResursBank\Helper\WordPress::getLocalizedScriptsDeprecated', 10, 2);
+
+        self::setupWoocommerceActions();
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private static function setupWoocommerceActions()
+    {
+        add_action(
+            'woocommerce_admin_order_data_after_order_details',
+            'ResursBank\Helper\WooCommerce::getAdminAfterOrderDetails'
+        );
+        add_action(
+            'woocommerce_admin_order_data_after_billing_address',
+            'ResursBank\Helper\WooCommerce::getAdminAfterBilling'
+        );
+        add_action(
+            'woocommerce_admin_order_data_after_shipping_address',
+            'ResursBank\Helper\WooCommerce::getAdminAfterShipping'
+        );
     }
 
     /**
@@ -167,18 +187,29 @@ class WordPress
 
         foreach (Data::getPluginScripts($isAdmin) as $scriptName => $scriptFile) {
             $realScriptName = sprintf('%s_%s', Data::getPrefix(), $scriptName);
-            wp_enqueue_script(
-                $realScriptName,
-                sprintf(
-                    '%s/js/%s?%s',
-                    Data::getGatewayUrl(),
-                    $scriptFile,
-                    Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
-                ),
-                Data::getJsDependencies($scriptName, $isAdmin)
-            );
-            WordPress::doAction('getLocalizedScripts', $realScriptName, $isAdmin);
+            self::setEnqueue($realScriptName, $scriptFile, $isAdmin);
         }
+    }
+
+    /**
+     * @param $scriptName
+     * @param $scriptFile
+     * @param $isAdmin
+     * @since 0.0.1.0
+     */
+    public static function setEnqueue($scriptName, $scriptFile, $isAdmin, $localizeArray = [])
+    {
+        wp_enqueue_script(
+            $scriptName,
+            sprintf(
+                '%s/js/%s?%s',
+                Data::getGatewayUrl(),
+                $scriptFile,
+                Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
+            ),
+            Data::getJsDependencies($scriptName, $isAdmin)
+        );
+        WordPress::doAction('getLocalizedScripts', $scriptName, $isAdmin, $localizeArray);
     }
 
     /**
@@ -251,11 +282,15 @@ class WordPress
     /**
      * @param $scriptName
      * @param bool $isAdmin
+     * @param null $extraLocalizationData
      * @since 0.0.1.0
      */
-    public static function getLocalizedScripts($scriptName, $isAdmin = false)
+    public static function getLocalizedScripts($scriptName, $isAdmin = null, $extraLocalizationData = null)
     {
-        if (($localizationData = self::getLocalizationData($scriptName, $isAdmin))) {
+        if (($localizationData = self::getLocalizationData($scriptName, (bool)$isAdmin))) {
+            if (is_array($extraLocalizationData) && count($extraLocalizationData)) {
+                $localizationData += $extraLocalizationData;
+            }
             wp_localize_script(
                 $scriptName,
                 sprintf('l_%s', $scriptName),
@@ -419,11 +454,11 @@ class WordPress
                 'trbwc'
             );
             $return['credential_import_success'] = __(
-                'Importen lyckades.',
+                'Import successful.',
                 'trbwc'
             );
             $return['credential_import_failed'] = __(
-                'Importen misslyckades.',
+                'Import failed.',
                 'trbwc'
             );
         }
