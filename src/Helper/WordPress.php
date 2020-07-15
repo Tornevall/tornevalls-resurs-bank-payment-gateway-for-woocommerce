@@ -406,6 +406,7 @@ class WordPress
     /**
      * @param $return
      * @return mixed
+     * @since 0.0.1.0
      */
     public static function getLocalizedScriptsDeprecated($return)
     {

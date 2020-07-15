@@ -71,6 +71,9 @@ class PluginApi
         return $return;
     }
 
+    /**
+     * @since 0.0.1.0
+     */
     public static function importCredentials()
     {
         update_option('resursImportCredentials', time());

@@ -632,6 +632,7 @@ class Data
      * @param $severity
      * @param $logMessage
      * @param array $context
+     * @since 0.0.1.0
      */
     public static function setLogInternal($severity, $logMessage, $context = [])
     {
