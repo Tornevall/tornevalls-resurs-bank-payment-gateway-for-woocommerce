@@ -105,12 +105,13 @@ class WooCommerce
     }
 
     /**
+     * @param null $testException
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function testRequiredVersion()
+    public static function testRequiredVersion($testException = null)
     {
-        if (version_compare(self::getWooCommerceVersion(), self::$requiredVersion, '<')) {
+        if ((bool)$testException || version_compare(self::getWooCommerceVersion(), self::$requiredVersion, '<')) {
             throw new Exception(
                 'Your WooCommerce release are too old. Please upgrade.',
                 500

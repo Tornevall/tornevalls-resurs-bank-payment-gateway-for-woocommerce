@@ -79,12 +79,14 @@ class PluginApi
     {
         self::getValidatedNonce();
 
+        $validationResponse = (new Api())->getConnection()->validateCredentials(
+            (self::getParam('e') !== 'live'),
+            self::getParam('u'),
+            self::getParam('p')
+        );
+
         self::reply([
-            'validation' => (new Api())->getConnection()->validateCredentials(
-                (self::getParam('e') !== 'live'),
-                self::getParam('u'),
-                self::getParam('p')
-            ),
+            'validation' => $validationResponse,
         ]);
     }
 
