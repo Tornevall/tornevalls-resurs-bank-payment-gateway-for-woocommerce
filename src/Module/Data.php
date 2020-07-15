@@ -7,6 +7,7 @@ namespace ResursBank\Module;
 use Exception;
 use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
+use ResursException;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
@@ -25,7 +26,24 @@ class Data
     const LOG_ERROR = 'error';
     const LOG_WARNING = 'warning';
 
+    /**
+     * @var string[] Order metadata to search, to find Resurs Order References.
+     */
+    private static $searchArray = [
+        'paymentId',
+        'paymentIdLast',
+    ];
+
+    /**
+     * @var WC_Logger $Log
+     * @since 0.0.1.0
+     */
     private static $Log;
+
+    /**
+     * @var array $payments
+     */
+    private static $payments = [];
 
     /**
      * @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list.
@@ -82,7 +100,7 @@ class Data
      * @var array $stylesAdmin
      * @since 0.0.1.0
      */
-    private static $stylesAdmin = [];
+    private static $stylesAdmin = ['resursbank_admin' => 'resursbank_admin.css'];
 
     /**
      * @var array $fileImageExtensions
@@ -660,5 +678,231 @@ class Data
                 self::$Log->notice($message, $context);
                 break;
         }
+    }
+
+    /**
+     * @param $key
+     * @param $order
+     * @return mixed|null
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    public static function getOrderMeta($key, $order)
+    {
+        $return = null;
+        $orderData = self::getOrderInfo($order);
+
+        if (isset($orderData['meta'][$key])) {
+            $return = $orderData['meta'][$key];
+        }
+
+        return $return;
+    }
+
+    /**
+     * Advanced order fetching. Make sure you use Data::canHandleOrder($paymentMethod) before running this.
+     * It is not our purpose to interfere with all orders.
+     * @param mixed $order
+     * @param bool $orderIsResursReference
+     * @return array
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    public static function getOrderInfo($order, $orderIsResursReference = false)
+    {
+        $return = [];
+        $orderId = null;
+        if (is_object($order)) {
+            $orderId = $order->get_id();
+        } elseif ((int)$order && !is_string($order) && !$orderIsResursReference) {
+            $orderId = $order;
+            $order = new \WC_Order($orderId);
+        } elseif (is_string($order)) {
+            // Landing here it might be a Resurs or EComPHP reference.
+            if (($foundOrderId = self::getOrderByEcomRef($order))) {
+                $order = self::getOrderInfo($foundOrderId);
+                $orderId = $order['order']->get_id();
+            }
+        }
+
+        if ((int)($orderId) &&
+            is_object($order)
+        ) {
+            // Dynamically fetch order data during order-view session (sharable over many actions).
+            $return = self::getPrefetchedPayment($orderId);
+
+            if (!count($return)) {
+                $return = self::setPrefetchedPayment($orderId, $order);
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $order
+     * @return null
+     * @since 0.0.1.0
+     */
+    public static function getOrderByEcomRef($order)
+    {
+        global $wpdb;
+        $return = null;
+
+        foreach (self::$searchArray as $key) {
+            $getPostId = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '%s' and meta_value = '%s'",
+                    $key,
+                    $order
+                )
+            );
+            if ((int)$getPostId) {
+                $return = $getPostId;
+                break;
+            }
+        }
+
+        return (int)$return;
+    }
+
+    /**
+     * Get locally stored payment if it is present.
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getPrefetchedPayment($key)
+    {
+        return isset(self::$payments[$key]) ? self::$payments[$key] : [];
+    }
+
+    /**
+     * Set and return order information.
+     * @param $orderId
+     * @return array|mixed
+     * @since 0.0.1.0
+     */
+    private static function setPrefetchedPayment($orderId, $order)
+    {
+        $return['order'] = $order;
+        $return['meta'] = (int)$orderId ? get_post_custom($orderId) : [];
+        $return['resurs'] = self::getResursReference($return);
+
+        if (!empty($return['resurs'])) {
+            $return = self::getPreparedDataByEcom($return);
+            self::getLocalizedOrderData($return);
+        }
+        // Store payment for later use.
+        self::$payments[$orderId] = $return;
+
+        return $return;
+    }
+
+    /**
+     * @param $orderDataArray
+     * @return string
+     */
+    public static function getResursReference($orderDataArray)
+    {
+        $return = '';
+
+        if (isset($orderDataArray['meta']) && is_array($orderDataArray)) {
+            foreach (self::$searchArray as $searchKey) {
+                if (isset($orderDataArray['meta'][$searchKey])) {
+                    $return = array_pop($orderDataArray['meta'][$searchKey]);
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * Fetch orderinfo from EComPHP.
+     * @param $return
+     * @return mixed
+     * @return array
+     */
+    public static function getPreparedDataByEcom($return)
+    {
+        $return = self::getOrderInfoExceptionData($return);
+        try {
+            $return['ecom'] = Api::getPayment($return['resurs']);
+            $return = WooCommerce::getFormattedPaymentData($return);
+            $return = WooCommerce::getPaymentInfoDetails($return);
+        } catch (\Exception $e) {
+            $return['ecomException'] = [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ];
+        }
+        return (array)$return;
+    }
+
+    /**
+     * Prepare for exceptions.
+     * @param $return
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getOrderInfoExceptionData($return)
+    {
+        $return['errorString'] = __(
+            'An error occurred during the payment information retrieval from Resurs Bank so we can ' .
+            'not show the current order status for the moment.',
+            'trbwc'
+        );
+        $return['ecomException'] = [
+            'message' => null,
+            'code' => 0,
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @param array $orderData
+     * @since 0.0.1.0
+     */
+    private static function getLocalizedOrderData($orderData = [])
+    {
+        $localizeArray = [
+            'resursOrder' => $orderData['resurs'],
+            'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
+        ];
+
+        $scriptName = sprintf('%s_resursbank_order', Data::getPrefix());
+        WordPress::setEnqueue(
+            $scriptName,
+            'resursbank_order.js',
+            is_admin(),
+            $localizeArray
+        );
+    }
+
+    /**
+     * Makes sure nothing interfering with orders that has not been created by us.
+     * @param $thisMethod
+     * @param null $order
+     * @return bool
+     */
+    public static function canHandleOrder($thisMethod, $order = null)
+    {
+        $return = false;
+
+        $allowMethod = [
+            'resurs_bank_',
+            'rbwc_',
+        ];
+
+        foreach ($allowMethod as $methodKey) {
+            if ((bool)preg_match(sprintf('/^%s/', $methodKey), $thisMethod)) {
+                $return = true;
+                break;
+            }
+        }
+
+        return $return;
     }
 }

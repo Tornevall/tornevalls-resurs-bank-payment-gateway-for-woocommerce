@@ -14,6 +14,11 @@ use Resursbank\RBEcomPHP\ResursBank;
 class Api
 {
     /**
+     * @var ResursBank $resursBank
+     */
+    public static $resursBank;
+
+    /**
      * @var ResursBank $ecom
      * @since 0.0.1.0
      */
@@ -38,18 +43,61 @@ class Api
     }
 
     /**
-     * @return bool
+     * Get payment properly by testing two API's before giving up.
+     * @param $orderId
+     * @param null $failover
+     * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
-    public function getCredentialsPresent()
+    public static function getPayment($orderId, $failover = null)
     {
-        $return = true;
         try {
-            $this->getResolvedCredentials();
-        } catch (Exception $e) {
-            $return = false;
+            $return = self::getResurs()->getPayment($orderId);
+        } catch (\Exception $e) {
+            if (!(bool)$failover && $e->getCode() === 2) {
+                self::getResurs()->setFlag('GET_PAYMENT_BY_REST');
+                return self::getPayment($orderId, $failover);
+            }
+            throw $e;
         }
+        self::getResurs()->deleteFlag('GET_PAYMENT_BY_REST');
+
         return $return;
+    }
+
+    /**
+     * @return ResursBank
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getResurs()
+    {
+        if (empty(self::$resursBank)) {
+            self::$resursBank = new Api();
+        }
+
+        return self::$resursBank->getConnection();
+    }
+
+    /**
+     * @return ResursBank
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getConnection()
+    {
+        if (empty($this->ecom)) {
+            $this->getResolvedCredentials();
+            $this->ecom = new ResursBank(
+                $this->credentials['username'],
+                $this->credentials['password'],
+                Api::getEnvironment()
+            );
+            $this->setWsdlCache();
+        }
+
+        return $this->ecom;
     }
 
     /**
@@ -66,24 +114,6 @@ class Api
         }
 
         return true;
-    }
-
-    /**
-     * @return ResursBank
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function getConnection()
-    {
-        $this->getResolvedCredentials();
-        $this->ecom = new ResursBank(
-            $this->credentials['username'],
-            $this->credentials['password'],
-            Api::getEnvironment()
-        );
-        $this->setWsdlCache();
-
-        return $this->ecom;
     }
 
     /**
@@ -126,5 +156,20 @@ class Api
         }
 
         return $wsdlMode;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public function getCredentialsPresent()
+    {
+        $return = true;
+        try {
+            $this->getResolvedCredentials();
+        } catch (Exception $e) {
+            $return = false;
+        }
+        return $return;
     }
 }

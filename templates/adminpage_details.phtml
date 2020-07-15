@@ -1,0 +1,40 @@
+<p class="form-field form-field-wide">
+    <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle">
+        <?php
+        _e('Order information from Resurs Bank', 'trbwc')
+        ?>
+    </label>
+    <?php if (isset($ecomException['code']) && (int)$ecomException['code']) { ?>
+        <span class="resursApiException">
+        <?php echo $errorString; ?><br>
+            <br>
+        <b><?php printf('Exception %d: %s', $ecomException['code'], $ecomException['message']) ?></b>
+        </span>
+    <?php } else { ?>
+        <span>
+        <?php
+        if (is_array($ecom_short) && count($ecom_short)) {
+            foreach ($ecom_short as $key => $value) {
+                ?>
+                <span style="display: block;" class="resursOrderInfoContainer">
+                    <label for="resurs_order_<?php echo md5($key) ?>"
+                           style="font-weight: bold;"><?php echo ucfirst($key) ?>
+                    </label>
+                    <?php
+                    if (is_numeric($value)) {
+                        echo round($value, 2);
+                    } elseif (is_bool($value)) {
+                        echo $value ? __('Yes.', 'trbwc') : __('No.', 'trbwc');
+                    } elseif ($key === 'status') {
+                        echo implode(', ', (array)$value);
+                    } else {
+                        echo $value;
+                    } ?>
+                </span>
+                <?php
+            }
+        }
+        ?>
+    </span>
+    <?php } ?>
+</p>
