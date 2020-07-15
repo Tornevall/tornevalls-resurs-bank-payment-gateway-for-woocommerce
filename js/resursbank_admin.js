@@ -9,8 +9,7 @@ $rQuery(document).ready(function ($) {
  * Handle wp-admin, and update realtime fields.
  * @since 0.0.1.0
  */
-function getResursAdminFields()
-{
+function getResursAdminFields() {
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
 }
@@ -18,8 +17,7 @@ function getResursAdminFields()
 /**
  * @since 0.0.1.0
  */
-function getResursAdminPasswordButton()
-{
+function getResursAdminPasswordButton() {
     var pwBox = $rQuery('#trbwc_admin_password');
     if (pwBox.length > 0) {
         pwBox.after(
@@ -37,7 +35,8 @@ function getResursAdminPasswordButton()
                 '<div>',
                 {
                     'id': 'resurs_test_credentials_result',
-                    'style': 'margin-top: 3px; padding 5px; width: 400px;'
+                    'style': 'margin-top: 3px; padding 5px; width: 400px; ' +
+                        'font-style: italic; font-weight: bold; color: #000099;'
                 }
             )
         );
@@ -48,8 +47,7 @@ function getResursAdminPasswordButton()
  * Backend-test chosen credentials.
  * @since 0.0.1.0
  */
-function getResursCredentialsResult()
-{
+function getResursCredentialsResult() {
     if ($rQuery('#trbwc_admin_password').length > 0) {
         getResursSpin('#resurs_test_credentials_result');
         var uData = {
@@ -71,8 +69,7 @@ function getResursCredentialsResult()
  * Update description of checkout type to the selected.
  * @since 0.0.1.0
  */
-function getResursAdminCheckoutType()
-{
+function getResursAdminCheckoutType() {
     var checkoutType = $rQuery('#trbwc_admin_checkout_type');
     if (checkoutType.length > 0) {
         $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
@@ -85,8 +82,7 @@ function getResursAdminCheckoutType()
  * @param current
  * @since 0.0.1.0
  */
-function resursUpdateFlowDescription(current)
-{
+function resursUpdateFlowDescription(current) {
     $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
         getResursLocalization('translate_checkout_' + current.value)
     );
@@ -97,8 +93,7 @@ function resursUpdateFlowDescription(current)
  * @returns {boolean}
  * @since 0.0.1.0
  */
-function getResursLocalization(key)
-{
+function getResursLocalization(key) {
     var returnValue = false;
     if (typeof l_trbwc_resursbank_admin[key] !== 'undefined') {
         returnValue = l_trbwc_resursbank_admin[key]

@@ -102,7 +102,7 @@ class FormFields
                         'trbwc'
                     ),
                 ],
-                'shopflow' => [
+                'checkout_type' => [
                     'id' => 'checkout_type',
                     'title' => __('Checkout Type', 'trbwc'),
                     'type' => 'select',
@@ -136,13 +136,21 @@ class FormFields
             ],
             'advanced' => [
                 'title' => __('Advanced Settings', 'trbwc'),
+                'rco_customer_behaviour' => [
+                    'type' => 'title',
+                    'title' => __('Resurs Checkout customer interaction behaviour', 'trbwc')
+                ],
+                'rco_customer_behaviour_end' => [
+                    'id' => 'rco_customer_behaviour_end',
+                    'type' => 'sectionend'
+                ],
                 'complex_api_section' => [
                     'type' => 'title',
-                    'title' => 'Advanced API Configuration',
+                    'title' => __('Advanced API', 'trbwc'),
                 ],
                 'api_wsdl' => [
                     'id' => 'api_wsdl',
-                    'title' => 'Cache WSDL calls',
+                    'title' => __('Cache WSDL calls', 'trbwc'),
                     'type' => 'select',
                     'options' => [
                         'default' => __(
@@ -165,10 +173,10 @@ class FormFields
                 ],
                 'complex_developer_section' => [
                     'type' => 'title',
-                    'title' => 'Developer Section',
+                    'title' => __('Developer Section', 'trbwc'),
                 ],
                 'show_developer' => [
-                    'title' => __('Activate developer mode', 'rbwc'),
+                    'title' => __('Activate developer mode', 'trbwc'),
                     'desc' => __('Activate developer mode (you might need an extra reload after save)', 'trbwc'),
                     'desc_tip' => __(
                         'The developer section is normally nothing you will need, unless you are a very advanced ' .
