@@ -135,15 +135,17 @@ class FormFields
                 'title' => __('Customers and orders', 'trbwc'),
                 'fraud_finalization_section' => [
                     'type' => 'title',
-                    'title' => __('Callbacks: Automatic fraud- and debit handling', 'trbwc'),
+                    'title' => __('How to handle fraud and debiting', 'trbwc'),
                     'desc' => sprintf(
                         __(
                             'This section configures how fraud and finalizations should be handled in the ' .
-                            'integrated/simplified and hosted checkout (not Resurs Checkout!). In short, the settings ' .
-                            'below makes sure that orders that is frozen when the order has been handled are ' .
-                            'automatically annulled. If the orders in other hands are healthy and booked you can ' .
-                            'also set the process to automatically debit/finalize the order with the flagset below. ' .
-                            'Observe that some of the settings can not be enabled simultaneously. ' .
+                            'integrated (simplified flow) and hosted checkout (not Resurs Checkout!). ' .
+                            'It is strongly recommended to keep the settings disabled and let callbacks handle ' .
+                            'the rest, unless you are a travel company that rely on non fraudulent behaviours. ' .
+                            'The settings below makes sure that orders that is frozen when the order has been ' .
+                            'handled are automatically annulled. If the orders in other hands are healthy and booked ' .
+                            'you can also set the process to automatically debit/finalize the order with the setup ' .
+                            'below. ' .
                             'For more information, see <a href="%s" target="_blank">%s</a>.',
                             'trbwc'
                         ),
@@ -190,7 +192,7 @@ class FormFields
                     'title' => __('Automatically debit if booked', 'trbwc'),
                     'desc' => __('Enabled/disabled', 'trbwc'),
                     'desc_tip' => __(
-                        'Orders are automatically debited (finalized) if the fraud control passes. ',
+                        'Orders are automatically debited (finalized) if the fraud control passes. ' .
                         'By default, the best practice is to handle all finalizations asynchronously with callbacks. ' .
                         'Callback event name is FINALIZATION.',
                         'trbwc'
