@@ -135,7 +135,7 @@ class FormFields
                 'title' => __('Customers and orders', 'trbwc'),
                 'fraud_finalization_section' => [
                     'type' => 'title',
-                    'title' => __('Callbacks: Automatic fraud- and debit handling', 'trbwc'),
+                    'title' => __('Automatic fraud- and debit handling', 'trbwc'),
                     'desc' => sprintf(
                         __(
                             'This section configures how fraud and finalizations should be handled in the ' .

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-16 11:28+0200\n"
-"PO-Revision-Date: 2020-07-16 11:30+0200\n"
+"POT-Creation-Date: 2020-07-16 12:42+0200\n"
+"PO-Revision-Date: 2020-07-16 12:42+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -106,23 +106,27 @@ msgstr ""
 msgid "The credential check was successful. You may now save the data."
 msgstr "Autentiseringskontrollen lyckades. Du kan nu spara uppgifterna."
 
-#: src/Helper/WordPress.php:423
+#: src/Helper/WordPress.php:366
+msgid "This setting requires you to enable the fraud control."
+msgstr "Den här inställningen kräver att bedrägerikontrollen är aktiverad."
+
+#: src/Helper/WordPress.php:427
 msgid "Successful."
 msgstr "Lyckades."
 
-#: src/Helper/WordPress.php:424
+#: src/Helper/WordPress.php:428
 msgid "Failed."
 msgstr "Misslyckades."
 
-#: src/Helper/WordPress.php:454
+#: src/Helper/WordPress.php:458
 msgid "Import credentials from Resurs v2.x"
 msgstr "Importera loginuppgifter från Resurs v2.x"
 
-#: src/Helper/WordPress.php:458
+#: src/Helper/WordPress.php:462
 msgid "Import successful."
 msgstr "Importen lyckades."
 
-#: src/Helper/WordPress.php:462
+#: src/Helper/WordPress.php:466
 msgid "Import failed."
 msgstr "Importen misslyckades."
 
@@ -310,9 +314,8 @@ msgid "Customers and orders"
 msgstr "Kunder och beställningar"
 
 #: src/Module/FormFields.php:138
-msgid "Callbacks: Automatic fraud- and debit handling"
-msgstr ""
-"Callbacks: Automatisk bedrägeri- och debitering/finaliserings-hantering"
+msgid "Automatic fraud- and debit handling"
+msgstr "Automatisk bedrägeri- och debitering/finaliserings-hantering"
 
 #: src/Module/FormFields.php:141
 #, php-format
@@ -339,8 +342,8 @@ msgstr ""
 msgid "Wait for fraud control"
 msgstr "Vänta på bedrägerikontroll"
 
-#: src/Module/FormFields.php:158 src/Module/FormFields.php:172
-#: src/Module/FormFields.php:185
+#: src/Module/FormFields.php:158 src/Module/FormFields.php:175
+#: src/Module/FormFields.php:191
 msgid "Enabled/disabled"
 msgstr "Aktiverad/inaktiverad"
 
@@ -356,11 +359,11 @@ msgstr ""
 "måste Resurs Bank kunna nå ditt system med callbacks för att kunna leverera "
 "resultatet. Callbackens namn är AUTOMATIC_FRAUD_CONTROL."
 
-#: src/Module/FormFields.php:171
+#: src/Module/FormFields.php:174
 msgid "Annul frozen orders"
 msgstr "Annullera frusna ordrar"
 
-#: src/Module/FormFields.php:174
+#: src/Module/FormFields.php:177
 msgid ""
 "If Resurs Bank freezes a payment due to fraud, the order will automatically "
 "be annulled. By default, the best practice is to handle all annulments "
@@ -370,57 +373,57 @@ msgstr ""
 "automatiskt att annulleras. Som standard, är det rekommenderat att hantera "
 "alla annulleringar asynkront med callbacks. Callbackens namn är ANNUL."
 
-#: src/Module/FormFields.php:184
+#: src/Module/FormFields.php:190
 msgid "Automatically debit if booked"
 msgstr "Debitera automatiskt vid bokning"
 
-#: src/Module/FormFields.php:187
+#: src/Module/FormFields.php:193
 msgid ""
 "Orders are automatically debited (finalized) if the fraud control passes. "
 msgstr "Ordrar debiteras automatiskt om bedrägerikontrollen går bra."
 
-#: src/Module/FormFields.php:199
+#: src/Module/FormFields.php:208
 msgid "Resurs Checkout customer interaction behaviour"
 msgstr "Resurs Checkout beteenden vid kundinteraktion"
 
-#: src/Module/FormFields.php:207
+#: src/Module/FormFields.php:216
 msgid "Advanced Settings"
 msgstr "Avancerade Inställningar"
 
-#: src/Module/FormFields.php:210
+#: src/Module/FormFields.php:219
 msgid "Advanced API"
 msgstr "Avancerat API"
 
-#: src/Module/FormFields.php:214
+#: src/Module/FormFields.php:223
 msgid "WSDL requests are cached"
 msgstr "WSDL-förfrågningar cachas"
 
-#: src/Module/FormFields.php:218
+#: src/Module/FormFields.php:227
 msgid "Default: Only for production/live environment"
 msgstr "Standard: Enbart i produktion/live"
 
-#: src/Module/FormFields.php:222
+#: src/Module/FormFields.php:231
 msgid "Both for production/live and test/staging"
 msgstr "Både i produktion/live och test/staging"
 
-#: src/Module/FormFields.php:226
+#: src/Module/FormFields.php:235
 msgid "Not at all, please"
 msgstr "Inte alls, tack"
 
-#: src/Module/FormFields.php:237
+#: src/Module/FormFields.php:246
 msgid "Developer Section"
 msgstr "Utvecklar-inställningar"
 
-#: src/Module/FormFields.php:240
+#: src/Module/FormFields.php:249
 msgid "Activate developer mode"
 msgstr "Aktivera utvecklar-sektionen"
 
-#: src/Module/FormFields.php:241
+#: src/Module/FormFields.php:250
 msgid "Activate developer mode (you might need an extra reload after save)"
 msgstr ""
 "Aktivera utvecklarläget (det kan behövas en extra omladdning efter spara)"
 
-#: src/Module/FormFields.php:243
+#: src/Module/FormFields.php:252
 msgid ""
 "The developer section is normally nothing you will need, unless you are a "
 "very advanced administrator that likes to configure a little bit over the "
@@ -430,7 +433,7 @@ msgstr ""
 "att du inte är en väldigt avancerad administratör som gillar att konfigurera "
 "lite över gränserna. Om du vet vad du gör, kan du aktivera sektionen."
 
-#: src/Module/FormFields.php:256
+#: src/Module/FormFields.php:265
 msgid "Support"
 msgstr "Support och hjälp"
 
