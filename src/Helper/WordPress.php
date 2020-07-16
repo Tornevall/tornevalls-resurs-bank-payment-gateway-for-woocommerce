@@ -49,7 +49,6 @@ class WordPress
                 sprintf('rbwc_%s', $action),
                 $camelCaseAction
             );
-            //if (method_exists('ResursBank\Module\PluginApi', Strings::returnCamelCase($action))) {}
         }
     }
 

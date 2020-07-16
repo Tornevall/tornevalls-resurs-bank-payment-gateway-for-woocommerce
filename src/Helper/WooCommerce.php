@@ -154,9 +154,16 @@ class WooCommerce
      */
     public static function getAdminAfterOrderDetails($order = null)
     {
-        if (!empty($order) && Data::canHandleOrder($order->get_payment_method())) {
+        if (!empty($order) &&
+            Data::canHandleOrder($order->get_payment_method())
+        ) {
             $orderData = Data::getOrderInfo($order);
-            echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+            if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
+                echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+            }
+            // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
+            // if someone wants to create their own view.
+            WordPress::doAction('showOrderDetails', $orderData);
         }
     }
 
@@ -180,7 +187,10 @@ class WooCommerce
      */
     public static function getAdminAfterBilling($order = null)
     {
-        if (!empty($order) && Data::canHandleOrder($order->get_payment_method())) {
+        if (!empty($order) &&
+            WordPress::applyFilters('canDisplayOrderInfoAfterBilling', true) &&
+            Data::canHandleOrder($order->get_payment_method())
+        ) {
             $orderData = Data::getOrderInfo($order);
             echo Data::getGenericClass()->getTemplate('adminpage_billing.phtml', $orderData);
         }
@@ -193,7 +203,10 @@ class WooCommerce
      */
     public static function getAdminAfterShipping($order = null)
     {
-        if (!empty($order) && Data::canHandleOrder($order->get_payment_method())) {
+        if (!empty($order) &&
+            WordPress::applyFilters('canDisplayOrderInfoAfterShipping', true) &&
+            Data::canHandleOrder($order->get_payment_method())
+        ) {
             $orderData = Data::getOrderInfo($order);
             echo Data::getGenericClass()->getTemplate('adminpage_shipping.phtml', $orderData);
         }
