@@ -55,7 +55,7 @@ class Data
      * @var array $jsLoadersCheckout Loadable scripts, only from checkout.
      * @since 0.0.1.0
      */
-    private static $jsLoadersCheckout = ['checkout' => 'checkout.js'];
+    private static $jsLoadersCheckout = ['resursbank_checkout' => 'resursbank_checkout.js'];
 
     /**
      * @var array
@@ -325,7 +325,7 @@ class Data
      * @return bool|mixed|null
      * @since 0.0.1.0
      */
-    public static function getResursOptionDeprecated($key, $namespace = "woocommerce_resurs-bank_settings")
+    public static function getResursOptionDeprecated($key, $namespace = 'woocommerce_resurs-bank_settings')
     {
         $return = null;
 

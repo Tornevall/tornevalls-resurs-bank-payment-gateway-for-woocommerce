@@ -5,9 +5,11 @@ namespace ResursBank\Helper;
 use Exception;
 use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursDefault;
+use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursException;
 use stdClass;
+use function in_array;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -81,6 +83,7 @@ class WooCommerce
     public static function getPluginAdminUrl($links, $file)
     {
         if (strpos($file, self::getBaseName()) !== false) {
+            /** @noinspection HtmlUnknownTarget */
             $links[] = sprintf(
                 '<a href="%s?page=wc-settings&tab=%s">%s</a>',
                 admin_url(),
@@ -246,6 +249,22 @@ class WooCommerce
         }
         if (isset($ecomCustomer->addressRow2) && !empty($ecomCustomer->addressRow2)) {
             $return['addressRow1'] .= "\n" . $ecomCustomer->addressRow2;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $return
+     * @param $scriptName
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getGenericLocalization($return, $scriptName)
+    {
+        if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
+            $return[sprintf('%s_rco_suggest_id', Data::getPrefix())] = Api::getResurs()->getPreferredPaymentId();
+            $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getResursOption('checkout_type');
         }
 
         return $return;
