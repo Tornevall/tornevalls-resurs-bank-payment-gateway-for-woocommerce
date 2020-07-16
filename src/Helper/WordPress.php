@@ -58,6 +58,8 @@ class WordPress
      */
     private static function setupFilters()
     {
+        // Localization.
+        add_filter('rbwc_localizations_generic', 'ResursBank\Helper\WooCommerce::getGenericLocalization', 10, 2);
         // Generic calls.
         add_filter('plugin_action_links', 'ResursBank\Helper\WooCommerce::getPluginAdminUrl', 10, 2);
         // Helper calls.
@@ -313,7 +315,7 @@ class WordPress
         } elseif (preg_match('/_all$/', $scriptName)) {
             $return = self::getLocalizationDataGlobal($return);
         } else {
-            $return = self::getLocalizationDataFront($return);
+            $return = self::getLocalizationDataGeneric($return, $scriptName);
         }
 
         return $return;
@@ -358,6 +360,10 @@ class WordPress
         );
         $return['credential_success_notice'] = __(
             'The credential check was successful. You may now save the data.',
+            'trbwc'
+        );
+        $return['requireFraudControl'] = __(
+            'This setting requires you to enable the fraud control.',
             'trbwc'
         );
 
@@ -430,11 +436,11 @@ class WordPress
      * @return mixed
      * @since 0.0.1.0
      */
-    private static function getLocalizationDataFront($return)
+    private static function getLocalizationDataGeneric($return, $scriptName = null)
     {
         $return['noncify'] = self::getNonce('simple');
 
-        return self::applyFilters('localizationsFront', $return);
+        return self::applyFilters('localizationsGeneric', $return, $scriptName);
     }
 
     /**

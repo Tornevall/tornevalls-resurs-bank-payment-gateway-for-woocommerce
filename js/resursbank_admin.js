@@ -9,8 +9,7 @@ $rQuery(document).ready(function ($) {
  * Handle wp-admin, and update realtime fields.
  * @since 0.0.1.0
  */
-function getResursAdminFields()
-{
+function getResursAdminFields() {
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
 }
@@ -18,8 +17,7 @@ function getResursAdminFields()
 /**
  * @since 0.0.1.0
  */
-function getDeprecatedCredentialsForm()
-{
+function getDeprecatedCredentialsForm() {
     if (getResursLocalization('deprecated_login')) {
         var userBox = $rQuery('#trbwc_admin_login');
         userBox.after(
@@ -49,8 +47,7 @@ function getDeprecatedCredentialsForm()
  * @param pwBox
  * @since 0.0.1.0
  */
-function getResursCredentialsTestForm(pwBox)
-{
+function getResursCredentialsTestForm(pwBox) {
     pwBox.after(
         $rQuery(
             '<button>',
@@ -76,8 +73,7 @@ function getResursCredentialsTestForm(pwBox)
 /**
  * @since 0.0.1.0
  */
-function getResursAdminPasswordButton()
-{
+function getResursAdminPasswordButton() {
     var pwBox = $rQuery('#trbwc_admin_password');
     // This box became too big so functions are split up.
     if (pwBox.length > 0) {
@@ -90,8 +86,7 @@ function getResursAdminPasswordButton()
 /**
  * @since 0.0.1.0
  */
-function getResursDeprecatedLogin()
-{
+function getResursDeprecatedLogin() {
     if ($rQuery('#trbwc_admin_password').length > 0) {
         getResursSpin('#resurs_import_credentials_result');
         getResursAjaxify('post', 'resursbank_import_credentials', {}, function (data) {
@@ -111,8 +106,7 @@ function getResursDeprecatedLogin()
  * Backend-test chosen credentials.
  * @since 0.0.1.0
  */
-function getResursCredentialsResult()
-{
+function getResursCredentialsResult() {
     if ($rQuery('#trbwc_admin_password').length > 0) {
         getResursSpin('#resurs_test_credentials_result');
         var uData = {
@@ -134,8 +128,7 @@ function getResursCredentialsResult()
  * Update description of checkout type to the selected.
  * @since 0.0.1.0
  */
-function getResursAdminCheckoutType()
-{
+function getResursAdminCheckoutType() {
     var checkoutType = $rQuery('#trbwc_admin_checkout_type');
     if (checkoutType.length > 0) {
         $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
@@ -148,8 +141,7 @@ function getResursAdminCheckoutType()
  * @param current
  * @since 0.0.1.0
  */
-function resursUpdateFlowDescription(current)
-{
+function resursUpdateFlowDescription(current) {
     $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
         getResursLocalization('translate_checkout_' + current.value)
     );
@@ -160,8 +152,7 @@ function resursUpdateFlowDescription(current)
  * @returns {boolean}
  * @since 0.0.1.0
  */
-function getResursLocalization(key)
-{
+function getResursLocalization(key) {
     var returnValue = false;
     if (typeof l_trbwc_resursbank_admin[key] !== 'undefined') {
         returnValue = l_trbwc_resursbank_admin[key]
@@ -171,4 +162,70 @@ function getResursLocalization(key)
         returnValue = l_trbwc_resursbank_order[key];
     }
     return returnValue;
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function setResursFraudControl() {
+    $rQuery('#trbwc_admin_waitForFraudControl').attr('checked', 'checked');
+    if ($rQuery('.waitForFraudControlWarning').length === 0) {
+        $rQuery('#trbwc_admin_annulIfFrozen').parent().after(
+            $rQuery(
+                '<div>',
+                {
+                    'class': 'waitForFraudControlWarning',
+                }
+            ).html(getResursLocalization('requireFraudControl'))
+        );
+    }
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function getResursFraudFlags(clickObject) {
+    if ($rQuery('#trbwc_admin_waitForFraudControl').length) {
+        var fraudSettings = {
+            'waitForFraudControl': $rQuery('#trbwc_admin_waitForFraudControl').is(':checked'),
+            'annulIfFrozen': $rQuery('#trbwc_admin_annulIfFrozen').is(':checked'),
+            'finalizeIfBooked': $rQuery('#trbwc_admin_finalizeIfBooked').is(':checked'),
+        };
+
+        if (!fraudSettings['annulIfFrozen']) {
+            $rQuery('.waitForFraudControlWarning').remove();
+        }
+
+        // Add messge: 'string' to below ruleset to activate an alery.
+        var prohibitRuleset = {
+            'notAlone': {
+                'waitForFraudControl': false,
+                'annulIfFrozen': true,
+            }
+        };
+        var prohibitActions = {
+            'notAlone': function () {
+                setResursFraudControl();
+            }
+        }
+
+        for (var prohibitId in prohibitRuleset) {
+            var matches = 0;
+            var requireMatches = 0;
+            for (var prohibitKey in prohibitRuleset[prohibitId]) {
+                requireMatches++;
+                if (fraudSettings[prohibitKey] === prohibitRuleset[prohibitId][prohibitKey]) {
+                    matches++;
+                }
+            }
+
+            if (matches === requireMatches) {
+                if (typeof prohibitActions[prohibitId] !== 'undefined' &&
+                    prohibitActions[prohibitId] !== ''
+                ) {
+                    prohibitActions[prohibitId]();
+                }
+            }
+        }
+    }
 }

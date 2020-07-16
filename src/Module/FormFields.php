@@ -133,9 +133,76 @@ class FormFields
             ],
             'customers_orders' => [
                 'title' => __('Customers and orders', 'trbwc'),
-            ],
-            'advanced' => [
-                'title' => __('Advanced Settings', 'trbwc'),
+                'fraud_finalization_section' => [
+                    'type' => 'title',
+                    'title' => __('Callbacks: Automatic fraud- and debit handling', 'trbwc'),
+                    'desc' => sprintf(
+                        __(
+                            'This section configures how fraud and finalizations should be handled in the ' .
+                            'integrated/simplified and hosted checkout (not Resurs Checkout!). In short, the settings ' .
+                            'below makes sure that orders that is frozen when the order has been handled are ' .
+                            'automatically annulled. If the orders in other hands are healthy and booked you can ' .
+                            'also set the process to automatically debit/finalize the order with the flagset below. ' .
+                            'Observe that some of the settings can not be enabled simultaneously. ' .
+                            'For more information, see <a href="%s" target="_blank">%s</a>.',
+                            'trbwc'
+                        ),
+                        'https://test.resurs.com/docs/display/ecom/paymentData',
+                        'https://test.resurs.com/docs/display/ecom/paymentData'
+                    ),
+                ],
+                'waitForFraudControl' => [
+                    'id' => 'waitForFraudControl',
+                    'type' => 'checkbox',
+                    'title' => __('Wait for fraud control', 'trbwc'),
+                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'The checkout process waits until the fraud control is finished at Resurs Bank ' .
+                        'and the order is handled synchronously. If this setting is disabled, Resurs Bank must be ' .
+                        'able to reach your system with callbacks to be able to deliver the result. ' .
+                        'Callback event name is AUTOMATIC_FRAUD_CONTROL.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                    'custom_attributes' => [
+                        'onchange' => 'getResursFraudFlags(this)',
+                    ],
+                ],
+                'annulIfFrozen' => [
+                    'id' => 'annulIfFrozen',
+                    'type' => 'checkbox',
+                    'title' => __('Annul frozen orders', 'trbwc'),
+                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'If Resurs Bank freezes a payment due to fraud, the order will automatically be annulled. ' .
+                        'By default, the best practice is to handle all annulments asynchronously with callbacks. ' .
+                        'Callback event name is ANNUL.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                    'custom_attributes' => [
+                        'onchange' => 'getResursFraudFlags(this)',
+                    ],
+                ],
+                'finalizeIfBooked' => [
+                    'id' => 'finalizeIfBooked',
+                    'type' => 'checkbox',
+                    'title' => __('Automatically debit if booked', 'trbwc'),
+                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'Orders are automatically debited (finalized) if the fraud control passes. ',
+                        'By default, the best practice is to handle all finalizations asynchronously with callbacks. ' .
+                        'Callback event name is FINALIZATION.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                    'custom_attributes' => [
+                        'onchange' => 'getResursFraudFlags(this)',
+                    ],
+                ],
+                'fraud_finalization_section_end' => [
+                    'type' => 'sectionend',
+                ],
                 'rco_customer_behaviour' => [
                     'type' => 'title',
                     'title' => __('Resurs Checkout customer interaction behaviour', 'trbwc'),
@@ -144,6 +211,9 @@ class FormFields
                     'id' => 'rco_customer_behaviour_end',
                     'type' => 'sectionend',
                 ],
+            ],
+            'advanced' => [
+                'title' => __('Advanced Settings', 'trbwc'),
                 'complex_api_section' => [
                     'type' => 'title',
                     'title' => __('Advanced API', 'trbwc'),

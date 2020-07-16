@@ -20,3 +20,10 @@
     display: block;
     border-radius: 5px;
 }
+
+.waitForFraudControlWarning {
+    margin-left: 5px;
+    padding: 5px;
+    border: 1px solid #990000;
+    background: #f8dede;
+}
