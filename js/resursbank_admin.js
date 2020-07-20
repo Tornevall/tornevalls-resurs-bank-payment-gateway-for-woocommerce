@@ -9,7 +9,8 @@ $rQuery(document).ready(function ($) {
  * Handle wp-admin, and update realtime fields.
  * @since 0.0.1.0
  */
-function getResursAdminFields() {
+function getResursAdminFields()
+{
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
 }
@@ -17,7 +18,8 @@ function getResursAdminFields() {
 /**
  * @since 0.0.1.0
  */
-function getDeprecatedCredentialsForm() {
+function getDeprecatedCredentialsForm()
+{
     if (getResursLocalization('deprecated_login')) {
         var userBox = $rQuery('#trbwc_admin_login');
         userBox.after(
@@ -44,10 +46,27 @@ function getDeprecatedCredentialsForm() {
 }
 
 /**
+ * @since 0.0.1.0
+ */
+function getResursPaymentMethods()
+{
+    getResursSpin('#div_trbwc_admin_payment_methods_button');
+    getResursAjaxify('post', 'resursbank_get_payment_methods', {}, function () {
+        $rQuery('#div_trbwc_admin_payment_methods_button').html(
+            $rQuery('<div>', {
+                'style': 'font-weight: bold; color: #000099;'
+            }).html(getResursLocalization('reloading'))
+        );
+        document.location.reload();
+    });
+}
+
+/**
  * @param pwBox
  * @since 0.0.1.0
  */
-function getResursCredentialsTestForm(pwBox) {
+function getResursCredentialsTestForm(pwBox)
+{
     pwBox.after(
         $rQuery(
             '<button>',
@@ -73,7 +92,8 @@ function getResursCredentialsTestForm(pwBox) {
 /**
  * @since 0.0.1.0
  */
-function getResursAdminPasswordButton() {
+function getResursAdminPasswordButton()
+{
     var pwBox = $rQuery('#trbwc_admin_password');
     // This box became too big so functions are split up.
     if (pwBox.length > 0) {
@@ -86,7 +106,8 @@ function getResursAdminPasswordButton() {
 /**
  * @since 0.0.1.0
  */
-function getResursDeprecatedLogin() {
+function getResursDeprecatedLogin()
+{
     if ($rQuery('#trbwc_admin_password').length > 0) {
         getResursSpin('#resurs_import_credentials_result');
         getResursAjaxify('post', 'resursbank_import_credentials', {}, function (data) {
@@ -106,7 +127,8 @@ function getResursDeprecatedLogin() {
  * Backend-test chosen credentials.
  * @since 0.0.1.0
  */
-function getResursCredentialsResult() {
+function getResursCredentialsResult()
+{
     if ($rQuery('#trbwc_admin_password').length > 0) {
         getResursSpin('#resurs_test_credentials_result');
         var uData = {
@@ -128,7 +150,8 @@ function getResursCredentialsResult() {
  * Update description of checkout type to the selected.
  * @since 0.0.1.0
  */
-function getResursAdminCheckoutType() {
+function getResursAdminCheckoutType()
+{
     var checkoutType = $rQuery('#trbwc_admin_checkout_type');
     if (checkoutType.length > 0) {
         $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
@@ -141,7 +164,8 @@ function getResursAdminCheckoutType() {
  * @param current
  * @since 0.0.1.0
  */
-function resursUpdateFlowDescription(current) {
+function resursUpdateFlowDescription(current)
+{
     $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
         getResursLocalization('translate_checkout_' + current.value)
     );
@@ -152,7 +176,8 @@ function resursUpdateFlowDescription(current) {
  * @returns {boolean}
  * @since 0.0.1.0
  */
-function getResursLocalization(key) {
+function getResursLocalization(key)
+{
     var returnValue = false;
     if (typeof l_trbwc_resursbank_admin[key] !== 'undefined') {
         returnValue = l_trbwc_resursbank_admin[key]
@@ -167,7 +192,8 @@ function getResursLocalization(key) {
 /**
  * @since 0.0.1.0
  */
-function setResursFraudControl() {
+function setResursFraudControl()
+{
     $rQuery('#trbwc_admin_waitForFraudControl').attr('checked', 'checked');
     if ($rQuery('.waitForFraudControlWarning').length === 0) {
         $rQuery('#trbwc_admin_annulIfFrozen').parent().after(
@@ -184,7 +210,8 @@ function setResursFraudControl() {
 /**
  * @since 0.0.1.0
  */
-function getResursFraudFlags(clickObject) {
+function getResursFraudFlags(clickObject)
+{
     if ($rQuery('#trbwc_admin_waitForFraudControl').length) {
         var fraudSettings = {
             'waitForFraudControl': $rQuery('#trbwc_admin_waitForFraudControl').is(':checked'),

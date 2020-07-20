@@ -45,6 +45,7 @@ class WordPress
         $actionList = [
             'test_credentials',
             'import_credentials',
+            'get_payment_methods',
         ];
         foreach ($actionList as $action) {
             $camelCaseAction = sprintf('ResursBank\Module\PluginApi::%s', Strings::returnCamelCase($action));
@@ -97,6 +98,8 @@ class WordPress
         add_action('rbwc_localizations_admin', 'ResursBank\Helper\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
+        add_action('woocommerce_admin_field_button', 'ResursBank\Module\FormFields::getFieldButton', 10, 2);
+        add_action('woocommerce_admin_field_methodlist', 'ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
     }
 
     /**
@@ -153,6 +156,14 @@ class WordPress
     public static function getAdminNotices()
     {
         global $current_tab, $parent_file;
+
+        if (isset($_SESSION[Data::getPrefix()]['exception'])) {
+            $class = 'notice notice-error is-dismissible';
+            foreach ($_SESSION[Data::getPrefix()]['exception'] as $index => $item) {
+                printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($item->getMessage()));
+            }
+            unset($_SESSION[Data::getPrefix()]['exception']);
+        }
 
         $requiredVersionNotice = sprintf(
             __(
@@ -383,7 +394,7 @@ class WordPress
             'trbwc'
         );
         $return['resurs_test_credentials'] = __(
-            'Validate credentials',
+            'Update credentials and payment methods',
             'trbwc'
         );
         $return['credential_failure_notice'] = __(
@@ -392,7 +403,7 @@ class WordPress
             'trbwc'
         );
         $return['credential_success_notice'] = __(
-            'The credential check was successful. You may now save the data.',
+            'The credential check was successful. You may now save the rest of your data.',
             'trbwc'
         );
         $return['requireFraudControl'] = __(
@@ -459,6 +470,7 @@ class WordPress
         $return['spin'] = Data::getImage('spin.gif');
         $return['success'] = __('Successful.', 'trbwc');
         $return['failed'] = __('Failed.', 'trbwc');
+        $return['reloading'] = __('Please wait while reloading...', 'trbwc');
 
         return self::applyFilters('localizationsGlobal', $return);
     }

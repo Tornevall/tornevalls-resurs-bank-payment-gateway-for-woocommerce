@@ -34,3 +34,15 @@
     border: 1px solid #990000;
     background: #f8dede;
 }
+
+.resursMethodHead {
+    font-width: bold;
+    background: #d4d2d2;
+    font-size: 12px;
+}
+
+.resursMethodBody {
+    padding: 2px !important;
+    background: #ffffff;
+    border: 1px solid #ffffff;
+}

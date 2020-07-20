@@ -171,8 +171,41 @@ class PluginApi
             self::getParam('p')
         );
 
+        // Save when validating.
+        if ($validationResponse) {
+            Data::setResursOption('login', self::getParam('u'));
+            Data::setResursOption('password', self::getParam('p'));
+            Data::setResursOption('environment', self::getParam('e'));
+            Api::getPaymentMethods(false);
+            Api::getAnnuityFactors(false);
+        }
+
+        Data::setLogNotice(
+            sprintf(
+                __(
+                    'Credentials for Resurs was validated before saving. Response was %s.',
+                    'trbwc'
+                ),
+                $validationResponse
+            )
+        );
+
         self::reply([
             'validation' => $validationResponse,
+        ]);
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getPaymentMethods()
+    {
+        // Refetch.
+        Api::getPaymentMethods(false);
+        Api::getAnnuityFactors(false);
+        self::reply([
+            'reload' => true,
         ]);
     }
 }
