@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-20 18:36+0200\n"
-"PO-Revision-Date: 2020-07-20 18:37+0200\n"
+"POT-Creation-Date: 2020-07-20 19:55+0200\n"
+"PO-Revision-Date: 2020-07-20 19:55+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -96,8 +96,8 @@ msgstr ""
 "Paypal-lösning."
 
 #: src/Helper/WordPress.php:397
-msgid "Update credentials and payment methods"
-msgstr "Uppdatera användaruppgifter och betalningsmetoder"
+msgid "Validate and save credentials and payment methods"
+msgstr "Validera och spara autentiseringsuppgifter och betalningsmetoder"
 
 #: src/Helper/WordPress.php:401
 msgid ""
@@ -552,20 +552,40 @@ msgid "Available payment methods"
 msgstr "Tillgängliga betalningsmetoder"
 
 #: templates/adminpage_paymentmethods.phtml:5
+msgid ""
+"Amount limits: Defines from-to which order amount a payment method will be "
+"displayed in the checkout."
+msgstr ""
+"Beloppsgränser: Definierar från-till vilket orderbelopp en betalningsmetod "
+"blir synlig."
+
+#: templates/adminpage_paymentmethods.phtml:8
+msgid ""
+"Customer types: Which customers that can take advantage of a specific "
+"payment method (NATURAL: Private customers, LEGAL: Company based customers)."
+msgstr ""
+"Kundtyper: Vilka kunder som kan dra nytta av en specifik betalningsmetod "
+"(NATURAL: Privatkunder, LEGAL: Företagsbaserade kunder)."
+
+#: templates/adminpage_paymentmethods.phtml:15
 msgid "Method ID"
 msgstr "Metod-ID"
 
-#: templates/adminpage_paymentmethods.phtml:6
+#: templates/adminpage_paymentmethods.phtml:16
 msgid "Description"
 msgstr "Beskrivning"
 
-#: templates/adminpage_paymentmethods.phtml:7
+#: templates/adminpage_paymentmethods.phtml:17
 msgid "Amount limits"
 msgstr "Beloppsgränser"
 
-#: templates/adminpage_paymentmethods.phtml:8
+#: templates/adminpage_paymentmethods.phtml:18
 msgid "Method type"
 msgstr "Typ av metod"
+
+#: templates/adminpage_paymentmethods.phtml:19
+msgid "Customer types"
+msgstr "Kundtyper"
 
 #: templates/adminpage_shipping.phtml:5
 msgid "Resurs Bank Shippingaddress"
@@ -590,6 +610,9 @@ msgstr "Anslut Resurs Bank som WooCommerce betalningsgateway."
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
 msgstr "Tomas Tornevall"
+
+#~ msgid "Method type: Internally defined type of method we are dealing with."
+#~ msgstr "Metodtyp: Internt definierad typ av metod som vi har att göra med."
 
 #~ msgid "Validate credentials"
 #~ msgstr "Validera uppgifter"

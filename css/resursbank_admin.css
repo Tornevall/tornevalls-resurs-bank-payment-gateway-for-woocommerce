@@ -36,9 +36,10 @@
 }
 
 .resursMethodHead {
-    font-width: bold;
+    font-weight: bold !important;
     background: #d4d2d2;
     font-size: 12px;
+    vertical-align: top;
 }
 
 .resursMethodBody {

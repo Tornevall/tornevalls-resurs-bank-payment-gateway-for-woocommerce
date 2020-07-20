@@ -277,6 +277,7 @@ class Api
     }
 
     /**
+     * Fetch annuity factors from storage or new data.
      * @param $fromStorage
      * @return array|int|mixed|null
      * @throws Exception
@@ -323,6 +324,7 @@ class Api
     }
 
     /**
+     * Fetch stored or new payment methods.
      * @param bool $fromStorage
      * @return array|mixed
      * @throws Exception
