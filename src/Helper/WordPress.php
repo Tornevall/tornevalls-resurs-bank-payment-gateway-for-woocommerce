@@ -30,8 +30,10 @@ class WordPress
 
         self::setupAjaxActions();
         self::setupFilters();
-        self::setupActions();
         self::setupScripts();
+        self::setupActions();
+        self::setupWoocommerceAdminActions();
+        self::setupWoocommerceCheckoutActions();
     }
 
     /**
@@ -58,17 +60,26 @@ class WordPress
      */
     private static function setupFilters()
     {
-        // Localization.
-        add_filter('rbwc_localizations_generic', 'ResursBank\Helper\WooCommerce::getGenericLocalization', 10, 2);
         // Generic calls.
         add_filter('plugin_action_links', 'ResursBank\Helper\WooCommerce::getPluginAdminUrl', 10, 2);
+        // Other calls.
+        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
+        // Data calls.
+        add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
+        // Localization.
+        add_filter('rbwc_localizations_generic', 'ResursBank\Helper\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
-        // Data calls.
-        add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
-        // Other calls.
-        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private static function setupScripts()
+    {
+        add_action('wp_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScripts');
+        add_action('admin_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScriptsAdmin');
     }
 
     /**
@@ -78,18 +89,17 @@ class WordPress
     {
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
         add_action('admin_notices', 'ResursBank\Helper\WordPress::getAdminNotices');
-        add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
-        add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
         add_action('rbwc_get_localized_scripts', 'ResursBank\Helper\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', 'ResursBank\Helper\WordPress::getLocalizedScriptsDeprecated', 10, 2);
-
-        self::setupWoocommerceActions();
+        add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
+        add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
     }
 
     /**
+     * Admin events.
      * @since 0.0.1.0
      */
-    private static function setupWoocommerceActions()
+    private static function setupWoocommerceAdminActions()
     {
         add_action(
             'woocommerce_admin_order_data_after_order_details',
@@ -106,12 +116,30 @@ class WordPress
     }
 
     /**
-     * @since 0.0.1.0
+     * Checkout events.
      */
-    private static function setupScripts()
+    private static function setupWoocommerceCheckoutActions()
     {
-        add_action('wp_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScripts');
-        add_action('admin_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScriptsAdmin');
+        // v3core: Customer is in checkout.
+        add_action(
+            'woocommerce_before_checkout_form',
+            'ResursBank\Helper\WooCommerce::getBeforeCheckoutForm'
+        );
+        // v3core: Customer is not in checkout.
+        add_action(
+            'woocommerce_add_to_cart',
+            'ResursBank\Helper\WooCommerce::getAddToCart'
+        );
+        // v3core: Customer is not in checkout.
+        add_action(
+            'woocommerce_cart_updated',
+            'ResursBank\Helper\WooCommerce::getAddToCart'
+        );
+        // v3core: Customer is not in checkout.
+        add_action(
+            'woocommerce_update_order_review_fragments',
+            'ResursBank\Helper\WooCommerce::getReviewFragments'
+        );
     }
 
     /**

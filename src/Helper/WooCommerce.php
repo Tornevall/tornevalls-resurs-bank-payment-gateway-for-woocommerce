@@ -9,6 +9,7 @@ use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursException;
 use stdClass;
+use WC_Session;
 use function in_array;
 
 if (!defined('ABSPATH')) {
@@ -22,6 +23,12 @@ if (!defined('ABSPATH')) {
  */
 class WooCommerce
 {
+    /**
+     * @var WC_Session
+     * @since 0.0.1.0
+     */
+    private static $session;
+
     /**
      * @var $basename
      * @since 0.0.1.0
@@ -187,6 +194,7 @@ class WooCommerce
     /**
      * @param null $order
      * @throws ResursException
+     * @since 0.0.1.0
      */
     public static function getAdminAfterBilling($order = null)
     {
@@ -258,6 +266,7 @@ class WooCommerce
      * @param $return
      * @param $scriptName
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getGenericLocalization($return, $scriptName)
@@ -302,5 +311,91 @@ class WooCommerce
             $return['ecom_short'] = $purgedEcom;
         }
         return $return;
+    }
+
+    /**
+     * @param $key
+     * @return array|mixed|string
+     * @since 0.0.1.0
+     */
+    public static function getSessionValue($key)
+    {
+        $return = null;
+
+        if (self::getSession()) {
+            $return = WC()->session->get($key);
+        } else {
+            if (isset($_SESSION[$key])) {
+                $return = $_SESSION[$key];
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private static function getSession()
+    {
+        global $woocommerce;
+
+        $return = false;
+        if (isset($woocommerce->session) && !empty($woocommerce->session)) {
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
+     * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
+     * @since 0.0.1.0
+     */
+    public static function getBeforeCheckoutForm()
+    {
+        self::setCustomerCheckoutLocation(true);
+    }
+
+    /**
+     * v3core: Checkout vs Cart Manipulation.
+     * @since 0.0.1.0
+     */
+    private static function setCustomerCheckoutLocation($customerIsInCheckout)
+    {
+        self::setSessionValue('customerWasInCheckout', $customerIsInCheckout);
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @since 0.0.1.0
+     */
+    public static function setSessionValue($key, $value)
+    {
+        if (self::getSession()) {
+            WC()->session->set($key, $value);
+        } else {
+            $_SESSION[$key] = $value;
+        }
+    }
+
+    /**
+     * v3core: Checkout vs Cart Manipulation - A moment when customer is not in checkout.
+     * @since 0.0.1.0
+     */
+    public static function getAddToCart()
+    {
+        self::setCustomerCheckoutLocation(false);
+    }
+
+    /**
+     * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
+     * @since 0.0.1.0
+     */
+    private static function getReviewFragments()
+    {
+        self::setCustomerCheckoutLocation(true);
     }
 }
