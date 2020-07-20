@@ -37,6 +37,7 @@ class WordPress
     }
 
     /**
+     * Preparing for ajax actions.
      * @since 0.0.1.0
      */
     private static function setupAjaxActions()
@@ -74,6 +75,7 @@ class WordPress
     }
 
     /**
+     * Script preparation.
      * @since 0.0.1.0
      */
     private static function setupScripts()
@@ -83,6 +85,7 @@ class WordPress
     }
 
     /**
+     * Basic actions.
      * @since 0.0.1.0
      */
     private static function setupActions()
@@ -116,7 +119,8 @@ class WordPress
     }
 
     /**
-     * Checkout events.
+     * Customer based events (checkout, etc).
+     * @since 0.0.1.0
      */
     private static function setupWoocommerceCheckoutActions()
     {
