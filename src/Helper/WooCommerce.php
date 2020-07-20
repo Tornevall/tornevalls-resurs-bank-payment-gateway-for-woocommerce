@@ -193,31 +193,32 @@ class WooCommerce
         ) {
             $login = Data::getResursOption('login');
             $password = Data::getResursOption('password');
-            if (!empty($login) && !empty($password)) {
-                if (!Data::getOrderMeta('orderapi', $orderData['order'])) {
-                    Data::setLogInternal(
-                        Data::LOG_NOTICE,
-                        sprintf(
-                            __('EComPHP data present, storing api meta to order %s.', 'trbwc'),
-                            $orderData['order']->get_id()
-                        )
-                    );
+            if (Data::getResursOption('store_api_history') &&
+                !empty($login) &&
+                !empty($password) &&
+                !Data::getOrderMeta('orderapi', $orderData['order'])) {
+                Data::setLogInternal(
+                    Data::LOG_NOTICE,
+                    sprintf(
+                        __('EComPHP data present, storing api meta to order %s.', 'trbwc'),
+                        $orderData['order']->get_id()
+                    )
+                );
 
-                    // Set encrypted order meta data with api credentials that belongs to this order.
-                    Data::setOrderMeta(
-                        $orderData['order'],
-                        'orderapi',
-                        Data::getCrypt()->aesEncrypt(
-                            json_encode(
-                                [
-                                    'l' => $login,
-                                    'p' => $password,
-                                    'e' => Data::getResursOption('environment'),
-                                ]
-                            )
+                // Set encrypted order meta data with api credentials that belongs to this order.
+                Data::setOrderMeta(
+                    $orderData['order'],
+                    'orderapi',
+                    Data::getCrypt()->aesEncrypt(
+                        json_encode(
+                            [
+                                'l' => $login,
+                                'p' => $password,
+                                'e' => Data::getResursOption('environment'),
+                            ]
                         )
-                    );
-                }
+                    )
+                );
             }
         }
     }
