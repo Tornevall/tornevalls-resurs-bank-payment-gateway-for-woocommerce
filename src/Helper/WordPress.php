@@ -72,6 +72,7 @@ class WordPress
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
+        add_filter('is_protected_meta', 'ResursBank\Helper\WooCommerce::getProtectedMetaData', 10, 3);
     }
 
     /**

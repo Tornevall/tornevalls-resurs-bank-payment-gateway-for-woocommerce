@@ -9,6 +9,7 @@ use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursException;
 use stdClass;
+use TorneLIB\Exception\ExceptionHandler;
 use WC_Session;
 use function in_array;
 
@@ -168,12 +169,56 @@ class WooCommerce
             Data::canHandleOrder($order->get_payment_method())
         ) {
             $orderData = Data::getOrderInfo($order);
+            self::setOrderMetaInformation($orderData);
             if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
                 echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
             }
             // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
             // if someone wants to create their own view.
             WordPress::doAction('showOrderDetails', $orderData);
+        }
+    }
+
+    /**
+     * @param $orderData
+     * @throws ResursException
+     * @throws ExceptionHandler
+     * @since 0.0.1.0
+     */
+    private static function setOrderMetaInformation($orderData)
+    {
+        if (isset($orderData['ecom_short']) &&
+            is_array($orderData['ecom_short']) &&
+            count($orderData['ecom_short'])
+        ) {
+            $login = Data::getResursOption('login');
+            $password = Data::getResursOption('password');
+            if (!empty($login) && !empty($password)) {
+                if (!Data::getOrderMeta('orderapi', $orderData['order'])) {
+                    Data::setLogInternal(
+                        Data::LOG_NOTICE,
+                        sprintf(
+                            __('EComPHP data present, storing api meta to order %s.', 'trbwc'),
+                            $orderData['order']->get_id()
+                        )
+                    );
+
+                    // Set encrypted order meta data with api credentials that belongs to this order.
+                    Data::setOrderMeta(
+                        $orderData['order'],
+                        'orderapi',
+                        Data::getCrypt()->aesEncrypt(
+                            json_encode(
+                                [
+                                    'l' => $login,
+                                    'p' => $password,
+                                    'e' => Data::getResursOption('environment'),
+                                ]
+                            )
+                        )
+                    );
+                }
+            }
         }
     }
 
@@ -189,6 +234,23 @@ class WooCommerce
             $return = true;
         }
         return $return;
+    }
+
+    /**
+     * @param $protected
+     * @param $metaKey
+     * @param $metaType
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getProtectedMetaData($protected, $metaKey, $metaType)
+    {
+        /** @noinspection NotOptimalRegularExpressionsInspection */
+        // Order meta that is protected against editing.
+        if (($metaType === 'post') && preg_match(sprintf('/^%s/i', Data::getPrefix()), $metaKey)) {
+            $protected = true;
+        }
+        return $protected;
     }
 
     /**
@@ -300,6 +362,8 @@ class WooCommerce
             'metaData',
             'totalAmount',
             'limit',
+            'username',
+            'isCurrentCredentials',
         ];
         if (isset($return['ecom'])) {
             $purgedEcom = (array)$return['ecom'];
