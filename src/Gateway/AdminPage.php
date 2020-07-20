@@ -4,8 +4,10 @@ namespace ResursBank\Gateway;
 
 use Exception;
 use ResursBank\Helper\WordPress;
+use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\PluginApi;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
@@ -161,7 +163,7 @@ class AdminPage extends WC_Settings_Page
                     $sectionNames[$current_section]
                 ),
                 'adminPageSectionHtml' => $outputHtml,
-                'adminDynamicContent' => WordPress::applyFilters('adminDynamicContent', '', $current_section, 'musli'),
+                'adminDynamicContent' => WordPress::applyFilters('adminDynamicContent', '', $current_section),
             ]
         );
     }

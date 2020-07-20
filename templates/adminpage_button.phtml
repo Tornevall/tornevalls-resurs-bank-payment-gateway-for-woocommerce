@@ -1,0 +1,10 @@
+<button type="<?php echo $action; ?>"
+    <?php if (isset($id) && !empty($id)) { ?>
+        id="button_<?php echo $id; ?>"
+        name="button_<?php echo $id; ?>"
+    <?php } ?>
+    <?php echo $custom_attributes ?>>
+    <?php echo $title ?>
+</button>
+<!-- Freely added spinner. -->
+<div id="div_<?php echo $id; ?>"></div>

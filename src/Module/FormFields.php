@@ -2,14 +2,16 @@
 
 namespace ResursBank\Module;
 
+use Exception;
 use ResursBank\Helper\WordPress;
+use WC_Settings_API;
 
 /**
  * Class FormFields Self contained settings.
  * @package ResursBank\Module
  * @since 0.0.1.0
  */
-class FormFields
+class FormFields extends WC_Settings_API
 {
     /**
      * @param string $section
@@ -129,6 +131,45 @@ class FormFields
                         'Chosen checkout type.',
                         'trbwc'
                     ),
+                ],
+            ],
+            'payment_methods' => [
+                'title' => __('Payment methods and settings', 'trbwc'),
+                'payment_methods_settings' => [
+                    'type' => 'title',
+                    'title' => __('Payment methods and settings', 'trbwc'),
+                    'desc' => __(
+                        'This section covers information for your current payment methods that is linked with your ' .
+                        'API settings. You can not edit titles or descriptions at this page so if you need to ' .
+                        'change such data you have to contact Resurs Bank support.',
+                        'trbwc'
+                    ),
+                ],
+                'payment_methods_list' => [
+                    'type' => 'methodlist',
+                ],
+                'payment_methods_button' => [
+                    'type' => 'button',
+                    'action' => 'button',
+                    'title' => __('Update payment methods and annuity factors', 'trbwc'),
+                    'custom_attributes' => [
+                        'onclick' => 'getResursPaymentMethods()',
+                    ],
+                ],
+                'payment_methods_settings_end' => [
+                    'type' => 'sectionend',
+                ],
+                'payment_method_annuity' => [
+                    'title' => __('Part payment settings', 'trbwc'),
+                    'desc' => __(
+                        'If you have part payment options in any of your payment methods, this is where ' .
+                        'you configure how the prices are shown in your product view and similar.',
+                        'trbwc'
+                    ),
+                    'type' => 'title',
+                ],
+                'payment_method_annuity_end' => [
+                    'type' => 'sectionend',
                 ],
             ],
             'customers_orders' => [
@@ -319,5 +360,51 @@ class FormFields
         }
 
         return $return;
+    }
+
+    /**
+     * @param $formData
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getFieldButton($formData)
+    {
+        (new FormFields())->getFieldButtonApi($formData);
+    }
+
+    /**
+     * @param $formData
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getFieldButtonApi($formData)
+    {
+        $action = isset($formData['action']) && !empty($formData['action']) ? $formData['action'] : 'button';
+
+        if (isset($formData['id']) && $formData['id'] === Data::getPrefix('admin_payment_methods_button')) {
+            $formArray = $formData;
+            $formArray['action'] = $action; // Our action
+            $formArray['custom_attributes'] = $this->get_custom_attribute_html($formData);
+            echo Data::getGenericClass()->getTemplate('adminpage_button', $formArray);
+        }
+    }
+
+    /**
+     * Fetch payment methods list. formData is not necessary here since this is a very specific field.
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getFieldMethodList()
+    {
+        $paymentMethods = Api::getPaymentMethods();
+
+        if (is_array($paymentMethods)) {
+            echo Data::getGenericClass()->getTemplate(
+                'adminpage_paymentmethods.phtml',
+                [
+                    'paymentMethods' => $paymentMethods,
+                ]
+            );
+        }
     }
 }

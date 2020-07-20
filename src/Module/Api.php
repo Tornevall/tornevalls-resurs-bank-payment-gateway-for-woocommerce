@@ -18,13 +18,21 @@ class Api
      * @var ResursBank $resursBank
      */
     public static $resursBank;
-
+    /**
+     * @var array $paymentMethods
+     * @since 0.0.1.0
+     */
+    private static $paymentMethods;
+    /**
+     * @var array $annuityFactors
+     * @since 0.0.1.0
+     */
+    private static $annuityFactors;
     /**
      * @var ResursBank $ecom
      * @since 0.0.1.0
      */
     private $ecom;
-
     /**
      * @var array $credentials
      * @since 0.0.1.0
@@ -266,6 +274,82 @@ class Api
         }
 
         return $wsdlMode;
+    }
+
+    /**
+     * @param $fromStorage
+     * @return array|int|mixed|null
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
+     */
+    public static function getAnnuityFactors($fromStorage = true)
+    {
+        $return = self::$annuityFactors;
+        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('annuityFactors'), false))) {
+            $return = $stored;
+        }
+
+        if (!$fromStorage || empty($return)) {
+            try {
+                $annuityArray = [];
+                if (is_array($fromStorage)) {
+                    $paymentMethods = $fromStorage;
+                } else {
+                    $paymentMethods = (array)Api::getPaymentMethods();
+                }
+                if (count($paymentMethods)) {
+                    foreach ($paymentMethods as $paymentMethod) {
+                        $annuityResponse = Api::getResurs()->getAnnuityFactors($paymentMethod->id);
+                        if (is_array($annuityResponse) || is_object($annuityResponse)) {
+                            // Are we running side by side with v2.x?
+                            // And is that side running ECom 1.3.41 or higher?
+                            $annuityArray[$paymentMethod->id] = is_array($annuityResponse) ?
+                                $annuityResponse : [$annuityResponse];
+                        }
+                    }
+                    self::$annuityFactors = $annuityArray;
+                }
+            } catch (Exception $e) {
+                // Reset.
+                Data::setResursOption('annuityFactors', null);
+                throw $e;
+            }
+            $return = self::$annuityFactors;
+            Data::setResursOption('annuityFactors', json_encode(self::$annuityFactors));
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param bool $fromStorage
+     * @return array|mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
+     */
+    public static function getPaymentMethods($fromStorage = true)
+    {
+        $return = self::$paymentMethods;
+
+        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('paymentMethods'), false))) {
+            $return = $stored;
+        }
+
+        if (!$fromStorage || empty($return)) {
+            try {
+                self::$paymentMethods = Api::getResurs()->getPaymentMethods();
+            } catch (Exception $e) {
+                // Reset.
+                Data::setResursOption('paymentMethods', null);
+                throw $e;
+            }
+            $return = self::$paymentMethods;
+            Data::setResursOption('paymentMethods', json_encode(self::$paymentMethods));
+        }
+
+        return $return;
     }
 
     /**

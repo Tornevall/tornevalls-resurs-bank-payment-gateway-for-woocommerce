@@ -26,31 +26,26 @@ class Data
      * @since 0.0.1.0
      */
     const LOG_DEBUG = 'debug';
-
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_NOTICE = 'notice';
-
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_CRITICAL = 'critical';
-
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_ERROR = 'error';
-
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_WARNING = 'warning';
-
     /**
      * @var array Order metadata to search, to find Resurs Order References.
      * @since 0.0.1.0
@@ -733,6 +728,10 @@ class Data
      */
     public static function setLogException($exception)
     {
+        if (!isset($_SESSION[Data::getPrefix()])) {
+            $_SESSION[Data::getPrefix()]['exception'] = [];
+        }
+        $_SESSION[Data::getPrefix()]['exception'][] = $exception;
         self::setLogError(
             sprintf(
                 __(
