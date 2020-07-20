@@ -75,9 +75,31 @@ class WooCommerce
      * @return mixed
      * @since 0.0.1.0
      */
-    public static function getGateway($gateways)
+    public static function getGateways($gateways)
     {
-        $gateways[] = ResursDefault::class;
+        if (is_admin()) {
+            $gateways[] = ResursDefault::class;
+        } else {
+            $gateways = self::getGatewaysFromPaymentMethods($gateways);
+        }
+        return $gateways;
+    }
+
+    /**
+     * @param $gateways
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getGatewaysFromPaymentMethods($gateways)
+    {
+        $methodList = Api::getPaymentMethods();
+
+        foreach ($methodList as $methodClass) {
+            $gatewayClass = new ResursDefault($methodClass);
+            $gateways[] = $gatewayClass;
+        }
+
         return $gateways;
     }
 
@@ -457,10 +479,14 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
+     * @param $fragments
+     * @return mixed
      * @since 0.0.1.0
      */
-    private static function getReviewFragments()
+    public static function getReviewFragments($fragments)
     {
         self::setCustomerCheckoutLocation(true);
+
+        return $fragments;
     }
 }

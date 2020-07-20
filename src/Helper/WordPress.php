@@ -5,6 +5,7 @@ namespace ResursBank\Helper;
 use Exception;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
+use ResursBank\Module\FormFields;
 use TorneLIB\IO\Data\Strings;
 
 if (!defined('ABSPATH')) {
@@ -72,7 +73,7 @@ class WordPress
         add_filter('rbwc_localizations_generic', 'ResursBank\Helper\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
-        add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
+        add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateways');
         add_filter('is_protected_meta', 'ResursBank\Helper\WooCommerce::getProtectedMetaData', 10, 3);
     }
 
@@ -471,6 +472,7 @@ class WordPress
         $return['success'] = __('Successful.', 'trbwc');
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
+        $return['checkout_fields'] = FormFields::getFieldString();
 
         return self::applyFilters('localizationsGlobal', $return);
     }

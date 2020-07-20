@@ -145,6 +145,54 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                 ],
+                'order_id_type' => [
+                    'id' => 'order_id_type',
+                    'type' => 'select',
+                    'title' => __('Order id numbering', 'trbwc'),
+                    'desc' => __(
+                        'Decide which kind of order id/reference that should be used when customers are ' .
+                        'placing orders. If you let the plugin set the reference, the reference will be based on ' .
+                        'a timestamp with an ending random number to make them unique (i.e. YYYYMMDDHHMMSS-UNIQUE).',
+                        'trbwc'
+                    ),
+                    'default' => 'ecom',
+                    'options' => [
+                        'ecom' => __('Let plugin set the reference', 'trbwc'),
+                        'postid' => __('Use WooCommerce internal post id as reference', 'trbwc'),
+                    ],
+                    'custom_attributes' => [
+                        'size' => 2,
+                    ],
+                ],
+                'payment_method_icons' => [
+                    'id' => 'payment_method_icons',
+                    'title' => __('Checkout method logotypes', 'trbwc'),
+                    'type' => 'select',
+                    'default' => 'none',
+                    'options' => [
+                        'none' => __('Prefer to not display logotypes', 'trbwc'),
+                        'woocommerce_icon' => __('Display logotypes as WooCommerce default', 'trbwc'),
+                    ],
+                    'custom_attributes' => [
+                        'size' => 2,
+                    ],
+                ],
+                'streamline_payment_fields' => [
+                    'id' => 'streamline_payment_fields',
+                    'type' => 'checkbox',
+                    'title' => __('Applicant fields are always visible', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'default' => 'no',
+                    'desc_tip' => __(
+                        'The applicant fields that Resurs Bank is using to handle payments is normally, inherited ' .
+                        'from WooCommerce standard billing fields in the checkout. You can however enable them ' .
+                        'here, if you want your customers to see them anyway,',
+                        'trbwc'
+                    ),
+                ],
+                'payment_methods_settings_end' => [
+                    'type' => 'sectionend',
+                ],
                 'payment_methods_list' => [
                     'type' => 'methodlist',
                 ],
@@ -156,7 +204,7 @@ class FormFields extends WC_Settings_API
                         'onclick' => 'getResursPaymentMethods()',
                     ],
                 ],
-                'payment_methods_settings_end' => [
+                'payment_methods_list_end' => [
                     'type' => 'sectionend',
                 ],
                 'payment_method_annuity' => [
@@ -198,7 +246,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'waitForFraudControl',
                     'type' => 'checkbox',
                     'title' => __('Wait for fraud control', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'The checkout process waits until the fraud control is finished at Resurs Bank ' .
                         'and the order is handled synchronously. If this setting is disabled, Resurs Bank must be ' .
@@ -215,7 +263,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'annulIfFrozen',
                     'type' => 'checkbox',
                     'title' => __('Annul frozen orders', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'If Resurs Bank freezes a payment due to fraud, the order will automatically be annulled. ' .
                         'By default, the best practice is to handle all annulments asynchronously with callbacks. ' .
@@ -231,7 +279,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'finalizeIfBooked',
                     'type' => 'checkbox',
                     'title' => __('Automatically debit if booked', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'Orders are automatically debited (finalized) if the fraud control passes. ' .
                         'By default, the best practice is to handle all finalizations asynchronously with callbacks. ' .
@@ -284,7 +332,7 @@ class FormFields extends WC_Settings_API
                 'store_api_history' => [
                     'id' => 'store_api_history',
                     'title' => __('Store API history in orders', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'If this setting is active, the first time you view a specific order API data will be stored ' .
                         'for it. This means that it will be possible to go back to prior orders and view them even ' .
@@ -406,5 +454,89 @@ class FormFields extends WC_Settings_API
                 ]
             );
         }
+    }
+
+    /**
+     * @param string $key
+     * @return array|mixed
+     * @since 0.0.1.0
+     */
+    public static function getFieldString($key = null)
+    {
+        $fields = [
+            'government_id' => __('Social security number', 'trbwc'),
+            'phone' => __('Phone number', 'trbwc'),
+            'mobile' => __('Mobile number', 'trbwc'),
+            'email' => __('E-mail address', 'trbwc'),
+            'government_id_contact' => __('Applicant government id'),
+            'card_number' => __('Card number', 'trbwc'),
+        ];
+
+        // If no key are sent here, it is probably a localization request.
+        $return = $fields;
+
+        if (!empty($key) && isset($fields[$key])) {
+            $return = $fields[$key];
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function canDisplayField($key)
+    {
+        return in_array($key, [
+            'government_id',
+            'government_id_contact',
+        ]);
+    }
+
+    /**
+     * @param null $key
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getSpecificTypeFields($key = null)
+    {
+        $return = [
+            'INVOICE' => [
+                'government_id',
+                'phone',
+                'mobile',
+                'email',
+            ],
+            'INVOICE_LEGAL' => [
+                'government_id',
+                'phone',
+                'mobile',
+                'email',
+                'government_id_contact',
+            ],
+            'CARD' => [
+                'government_id',
+                'card_number',
+            ],
+            'REVOLVING_CREDIT' => [
+                'government_id',
+                'mobile',
+                'email',
+            ],
+            'PART_PAYMENT' => [
+                'government_id',
+                'phone',
+                'mobile',
+                'email',
+            ],
+        ];
+
+        if (!empty($key) && isset($return[$key])) {
+            $return = $return[$key];
+        }
+
+        return $return;
     }
 }
