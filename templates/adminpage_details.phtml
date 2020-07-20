@@ -17,6 +17,18 @@
     <?php } else { ?>
         <span>
         <?php
+        if (!$ecom->isCurrentCredentials) {
+            ?>
+            <span style="display:block;" class="resursOrderInfoDifferentCredentials">
+<?php
+printf(__(
+    'Purchased with merchant username "%s" from environment "%s".',
+    'trbwc'
+), $ecom->username, $ecom->environment);
+?>
+            </span>
+            <?php
+        }
         if (is_array($ecom_short) && count($ecom_short)) {
             foreach ($ecom_short as $key => $value) {
                 ?>

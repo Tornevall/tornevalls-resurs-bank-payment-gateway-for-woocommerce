@@ -240,6 +240,19 @@ class FormFields
                     ],
                     'default' => 'default',
                 ],
+                'store_api_history' => [
+                    'id' => 'store_api_history',
+                    'title' => __('Store API history in orders', 'trbwc'),
+                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'If this setting is active, the first time you view a specific order API data will be stored ' .
+                        'for it. This means that it will be possible to go back to prior orders and view them even ' .
+                        'after you change the user credentials.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'yes',
+                ],
                 'complex_api_section_end' => [
                     'type' => 'sectionend',
                 ],

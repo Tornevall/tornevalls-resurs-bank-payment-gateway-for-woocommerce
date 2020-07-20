@@ -8,6 +8,7 @@ use Exception;
 use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
 use ResursException;
+use TorneLIB\Data\Aes;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
@@ -20,14 +21,39 @@ use WC_Logger;
  */
 class Data
 {
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
     const LOG_DEBUG = 'debug';
+
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
     const LOG_NOTICE = 'notice';
+
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
     const LOG_CRITICAL = 'critical';
+
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
     const LOG_ERROR = 'error';
+
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
     const LOG_WARNING = 'warning';
 
     /**
-     * @var string[] Order metadata to search, to find Resurs Order References.
+     * @var array Order metadata to search, to find Resurs Order References.
+     * @since 0.0.1.0
      */
     private static $searchArray = [
         'paymentId',
@@ -42,6 +68,7 @@ class Data
 
     /**
      * @var array $payments
+     * @since 0.0.1.0
      */
     private static $payments = [];
 
@@ -113,6 +140,12 @@ class Data
      * @since 0.0.1.0
      */
     private static $formFieldDefaults;
+
+    /**
+     * @var Aes
+     * @since 0.0.1.0
+     */
+    private static $encrypt;
 
     /**
      * @param $imageName
@@ -647,6 +680,20 @@ class Data
     }
 
     /**
+     * @param $logMessage
+     * @param array $context
+     * @since 0.0.1.0
+     */
+    public static function setLogNotice($logMessage, $context = [])
+    {
+        self::setLogInternal(
+            Data::LOG_NOTICE,
+            $logMessage,
+            $context
+        );
+    }
+
+    /**
      * @param $severity
      * @param $logMessage
      * @param array $context
@@ -681,6 +728,39 @@ class Data
     }
 
     /**
+     * @param Exception $exception
+     * @since 0.0.1.0
+     */
+    public static function setLogException($exception)
+    {
+        self::setLogError(
+            sprintf(
+                __(
+                    '%s exception %s: %s',
+                    'trbwc'
+                ),
+                self::getPrefix(),
+                $exception->getCode(),
+                $exception->getMessage()
+            )
+        );
+    }
+
+    /**
+     * @param $logMessage
+     * @param array $context
+     * @since 0.0.1.0
+     */
+    public static function setLogError($logMessage, $context = [])
+    {
+        self::setLogInternal(
+            Data::LOG_ERROR,
+            $logMessage,
+            $context
+        );
+    }
+
+    /**
      * @param $key
      * @param $order
      * @return mixed|null
@@ -690,10 +770,23 @@ class Data
     public static function getOrderMeta($key, $order)
     {
         $return = null;
-        $orderData = self::getOrderInfo($order);
+        if (is_array($order) && isset($order['order'])) {
+            // Get from a prefetched request.
+            $orderData = $order;
+        } else {
+            $orderData = self::getOrderInfo($order);
+        }
 
         if (isset($orderData['meta'][$key])) {
             $return = $orderData['meta'][$key];
+        }
+        $pluginPrefixedKey = sprintf('%s_%s', Data::getPrefix(), $key);
+        if (isset($orderData['meta'][$pluginPrefixedKey])) {
+            if (is_array($orderData['meta'][$pluginPrefixedKey])) {
+                $return = array_pop($orderData['meta'][$pluginPrefixedKey]);
+            } else {
+                $return = $orderData['meta'][$pluginPrefixedKey];
+            }
         }
 
         return $return;
@@ -829,7 +922,7 @@ class Data
     {
         $return = self::getOrderInfoExceptionData($return);
         try {
-            $return['ecom'] = Api::getPayment($return['resurs']);
+            $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
             $return = WooCommerce::getFormattedPaymentData($return);
             $return = WooCommerce::getPaymentInfoDetails($return);
         } catch (\Exception $e) {
@@ -907,5 +1000,68 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @param $order
+     * @param $key
+     * @param $value
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    public static function setOrderMeta($order, $key, $value)
+    {
+        if (method_exists($order, 'get_id')) {
+            if ($order->get_id()) {
+                update_post_meta(
+                    $order->get_id(),
+                    sprintf('%s_%s', Data::getPrefix(), $key),
+                    $value
+                );
+            }
+        } else {
+            throw new Exception(
+                'Unable to update order meta - object $order is of wrong type.',
+                400
+            );
+        }
+    }
+
+    /**
+     * @return Aes
+     * @throws ExceptionHandler
+     */
+    public static function getCrypt()
+    {
+        $aesKey = self::getResursOption('key');
+        $aesIv = self::getResursOption('iv');
+
+        if (empty($aesKey) && empty($aesIv)) {
+            $aesKey = uniqid('k_' . microtime(true), true);
+            $aesIv = uniqid('i_' . microtime(true), true);
+            self::setResursOption('key', $aesKey);
+            self::setResursOption('iv', $aesIv);
+        }
+
+        if (empty(self::$encrypt)) {
+            self::$encrypt = new Aes();
+            self::$encrypt->setAesKeys(
+                self::getPrefix() . $aesKey,
+                self::getPrefix() . $aesIv
+            );
+        }
+
+        return self::$encrypt;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setResursOption($key, $value)
+    {
+        return update_option(sprintf('%s_%s', Data::getPrefix('admin'), $key), $value);
     }
 }

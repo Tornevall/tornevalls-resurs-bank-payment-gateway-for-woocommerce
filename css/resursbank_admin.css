@@ -13,6 +13,13 @@
     padding: 5px !important;
 }
 
+.resursOrderInfoDifferentCredentials {
+    background: #511515 !important;
+    color: #ffffff !important;
+    padding: 5px !important;
+    font-weight: bold;
+}
+
 .resursApiException {
     background: #f8dede;
     border: 1px solid #990000;
