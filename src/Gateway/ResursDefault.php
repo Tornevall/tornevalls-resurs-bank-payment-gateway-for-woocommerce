@@ -4,6 +4,7 @@ namespace ResursBank\Gateway;
 
 use Exception;
 use ResursBank\Helper\WordPress;
+use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use RuntimeException;
@@ -23,6 +24,11 @@ class ResursDefault extends WC_Payment_Gateway
     private $applicantPostData = [];
 
     /**
+     * @var WC_Cart $cart
+     */
+    private $cart;
+
+    /**
      * @var array $methodInformation
      * @since 0.0.1.0
      */
@@ -40,6 +46,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function __construct($getPaymentMethodObject = [])
     {
+        global $woocommerce;
+        $this->cart = isset($woocommerce->cart) ? $woocommerce->cart : null;
         $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
         $this->method_title = __('Resurs Bank', 'trbwc');
@@ -114,9 +122,9 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function isPaymentReady()
     {
-        return isset($_REQUEST['payment_method']) &&
-        isset($_REQUEST['wc-ajax']) &&
-        $_REQUEST['wc-ajax'] === 'checkout' ? true : false;
+        return (isset($_REQUEST['payment_method']) &&
+            isset($_REQUEST['wc-ajax']) &&
+            $_REQUEST['wc-ajax'] === 'checkout');
     }
 
     /**
@@ -126,6 +134,28 @@ class ResursDefault extends WC_Payment_Gateway
     {
         add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
         add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
+        add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function is_available()
+    {
+        $return = parent::is_available();
+
+        $minMax = Api::getResurs()->getMinMax(
+            $this->get_order_total(),
+            $this->methodInformation->minLimit,
+            $this->methodInformation->maxLimit
+        );
+        if (!$minMax) {
+            $return = false;
+        }
+
+        return $return;
     }
 
     /**

@@ -1063,4 +1063,50 @@ class Data
     {
         return update_option(sprintf('%s_%s', Data::getPrefix('admin'), $key), $value);
     }
+
+    /**
+     * @param array $settings
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getGeneralSettings($settings = [])
+    {
+        foreach ($settings as $setting) {
+            if (isset($setting['id']) && $setting['id'] === 'woocommerce_price_num_decimals') {
+                $currentPriceDecimals = wc_get_price_decimals();
+                if ($currentPriceDecimals < 2 && self::getResursOption('prevent_rounding_panic')) {
+                    $settings[] = [
+                        'title' => __('Number of decimals headsup message', 'trbwc'),
+                        'type' => 'decimal_warning',
+                        'desc' => 'Description',
+                    ];
+                }
+            }
+        }
+        return $settings;
+    }
+
+    /**
+     * @param $currentValue
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getDecimalValue($currentValue)
+    {
+        global $current_tab;
+        if ($current_tab !== 'general' && $currentValue < 2 && self::getResursOption('prevent_rounding_panic')) {
+            $currentValue = 2;
+        }
+        return $currentValue;
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isResursMethod($paymentMethod)
+    {
+        return (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
+    }
 }

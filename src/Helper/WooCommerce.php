@@ -97,7 +97,10 @@ class WooCommerce
 
         foreach ($methodList as $methodClass) {
             $gatewayClass = new ResursDefault($methodClass);
-            $gateways[] = $gatewayClass;
+            // Ask itself.
+            if ($gatewayClass->is_available()) {
+                $gateways[] = $gatewayClass;
+            }
         }
 
         return $gateways;
@@ -107,17 +110,19 @@ class WooCommerce
      * Self aware setup link.
      * @param $links
      * @param $file
+     * @param null $section
      * @return mixed
      * @since 0.0.1.0
      */
-    public static function getPluginAdminUrl($links, $file)
+    public static function getPluginAdminUrl($links, $file, $section = null)
     {
         if (strpos($file, self::getBaseName()) !== false) {
             /** @noinspection HtmlUnknownTarget */
             $links[] = sprintf(
-                '<a href="%s?page=wc-settings&tab=%s">%s</a>',
+                '<a href="%s?page=wc-settings&tab=%s&section=%s">%s</a>',
                 admin_url(),
                 Data::getPrefix('admin'),
+                $section,
                 __(
                     'Settings'
                 )
@@ -488,5 +493,16 @@ class WooCommerce
         self::setCustomerCheckoutLocation(true);
 
         return $fragments;
+    }
+
+    /**
+     * @param array $postData
+     * @since 0.0.1.0
+     */
+    public static function getOrderReviewSettings($postData = [])
+    {
+        if (isset($_POST['payment_method']) && Data::isResursMethod($_POST['payment_method'])) {
+            add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
+        }
     }
 }

@@ -342,6 +342,23 @@ class FormFields extends WC_Settings_API
                     'type' => 'checkbox',
                     'default' => 'yes',
                 ],
+                'prevent_rounding_panic' => [
+                    'id' => 'prevent_rounding_panic',
+                    'title' => __('Prevent rounding errors', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'WooCommerce are able to show prices rounded with 0 decimals. It is however widely known ' .
+                        'that payment gateways may have problems with tax calculation, when the decimals are less ' .
+                        'then 2. For Resurs Bank, it is confirmed that this causes problems. ' .
+                        'With this setting enabled, the plugin will try to override the decimal setup as ' .
+                        'long as it is set to be below 2. If you disable this feature, you also confirm that you are ' .
+                        'willingly using an unsupported feature. If you\'ve not already done it, it is recommended ' .
+                        'to instead raise the number of decimals to 2 or higher.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'yes',
+                ],
                 'complex_api_section_end' => [
                     'type' => 'sectionend',
                 ],
@@ -434,6 +451,20 @@ class FormFields extends WC_Settings_API
             $formArray['action'] = $action; // Our action
             $formArray['custom_attributes'] = $this->get_custom_attribute_html($formData);
             echo Data::getGenericClass()->getTemplate('adminpage_button', $formArray);
+        }
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getFieldDecimals()
+    {
+
+        if (wc_get_price_decimals() < 2 && Data::getResursOption('prevent_rounding_panic')) {
+            echo Data::getGenericClass()->getTemplate('adminpage_general_decimals.phtml', [
+                'pluginTitle' => Data::getPluginTitle(),
+            ]);
         }
     }
 
