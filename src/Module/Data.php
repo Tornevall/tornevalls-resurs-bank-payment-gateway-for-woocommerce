@@ -8,11 +8,13 @@ use Exception;
 use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
 use ResursException;
+use RuntimeException;
 use TorneLIB\Data\Aes;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
 use WC_Logger;
+use WC_Order;
 
 /**
  * Class Data Core data class for plugin. This is where we store dynamic content without dependencies those days.
@@ -21,6 +23,11 @@ use WC_Logger;
  */
 class Data
 {
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const LOG_INFO = 'info';
     /**
      * @var string
      * @since 0.0.1.0
@@ -47,14 +54,38 @@ class Data
      */
     const LOG_WARNING = 'warning';
     /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const CAN_LOG_JUNK = 'junk';
+
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const CAN_LOG_ORDER_EVENTS = 'order_events';
+
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const CAN_LOG_ORDER_DEVELOPER = 'order_developer';
+
+    /**
+     * @var array
+     * @since 0.0.1.0
+     */
+    private static $can = [];
+
+    /**
      * @var array Order metadata to search, to find Resurs Order References.
      * @since 0.0.1.0
      */
     private static $searchArray = [
         'paymentId',
         'paymentIdLast',
+        'resursReference',
     ];
-
     /**
      * @var WC_Logger $Log
      * @since 0.0.1.0
@@ -323,7 +354,7 @@ class Data
         if (preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
-        $optionKeyPrefix = sprintf('%s_%s', Data::getPrefix('admin'), $key);
+        $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin'), $key);
         $return = self::getDefault($key);
         $getOptionReturn = get_option($optionKeyPrefix);
 
@@ -518,7 +549,7 @@ class Data
         $netWrapper = new NetWrapper();
 
         $renderData = [
-            __('Plugin version', 'trbwc') => Data::getCurrentVersion(),
+            __('Plugin version', 'trbwc') => self::getCurrentVersion(),
             __('WooCommerce', 'trbwc') => sprintf(
                 __(
                     '%s, at least %s are required.',
@@ -527,7 +558,7 @@ class Data
                 WooCommerce::getWooCommerceVersion(),
                 WooCommerce::getRequiredVersion()
             ),
-            __('Composer version', 'trbwc') => Data::getVersionByComposer(),
+            __('Composer version', 'trbwc') => self::getVersionByComposer(),
             __('PHP Version', 'trbwc') => PHP_VERSION,
             __('Webservice Library', 'trbwc') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
             __('Communication Library', 'trbwc') => 'netcurl-' . $netWrapper->getVersion(),
@@ -571,7 +602,7 @@ class Data
     {
         if (self::$genericClass !== Generic::class) {
             self::$genericClass = new Generic();
-            self::$genericClass->setTemplatePath(Data::getGatewayPath('templates'));
+            self::$genericClass->setTemplatePath(self::getGatewayPath('templates'));
         }
 
         return self::$genericClass;
@@ -651,7 +682,7 @@ class Data
         ];
 
         if ($section === 'all' || self::getShowDeveloper()) {
-            $return += $developerArray;
+            $return = array_merge($return, $developerArray);
         }
 
         return $return;
@@ -664,9 +695,9 @@ class Data
     public static function getShowDeveloper()
     {
         if (!isset(self::$settingStorage['showDeveloper'])) {
-            self::$settingStorage['showDeveloper'] = Data::getTruth(
+            self::$settingStorage['showDeveloper'] = self::getTruth(
                 get_option(
-                    sprintf('%s_%s', Data::getPrefix('admin'), 'show_developer')
+                    sprintf('%s_%s', self::getPrefix('admin'), 'show_developer')
                 )
             );
         }
@@ -676,86 +707,109 @@ class Data
 
     /**
      * @param $logMessage
-     * @param array $context
      * @since 0.0.1.0
      */
-    public static function setLogNotice($logMessage, $context = [])
+    public static function setLogNotice($logMessage)
     {
         self::setLogInternal(
-            Data::LOG_NOTICE,
-            $logMessage,
-            $context
+            self::LOG_NOTICE,
+            $logMessage
         );
     }
 
     /**
      * @param $severity
      * @param $logMessage
-     * @param array $context
      * @since 0.0.1.0
      */
-    public static function setLogInternal($severity, $logMessage, $context = [])
+    public static function setLogInternal($severity, $logMessage)
     {
         if (empty(self::$Log)) {
             self::$Log = new WC_Logger();
         }
 
-        $prefix = sprintf('rbwc_%s', $severity);
-        $message = sprintf('%s message: %s', $prefix, $logMessage);
+        $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
+
+        $from = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'Console';
+        $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
 
         switch ($severity) {
+            case 'info':
+                self::$Log->info($message);
+                break;
             case 'debug':
-                self::$Log->debug($message, $context);
+                self::$Log->debug($message);
                 break;
             case 'critical':
-                self::$Log->critical($message, $context);
+                self::$Log->critical($message);
                 break;
             case 'error':
-                self::$Log->error($message, $context);
+                self::$Log->error($message);
                 break;
             case 'warning':
-                self::$Log->warning($message, $context);
+                self::$Log->warning($message);
                 break;
             default:
-                self::$Log->notice($message, $context);
+                self::$Log->notice($message);
                 break;
         }
     }
 
     /**
-     * @param Exception $exception
+     * @param $fromFunction
+     * @param $message
+     * @return bool
      * @since 0.0.1.0
      */
-    public static function setLogException($exception)
+    public static function setDeveloperLog($fromFunction, $message)
     {
-        if (!isset($_SESSION[Data::getPrefix()])) {
-            $_SESSION[Data::getPrefix()]['exception'] = [];
-        }
-        $_SESSION[Data::getPrefix()]['exception'][] = $exception;
-        self::setLogError(
+        return self::canLog(
+            self::CAN_LOG_ORDER_DEVELOPER,
             sprintf(
                 __(
-                    '%s exception %s: %s',
+                    'DevLog Method "%s" message: %s.',
                     'trbwc'
                 ),
-                self::getPrefix(),
-                $exception->getCode(),
-                $exception->getMessage()
+                $fromFunction,
+                $message
             )
         );
     }
 
     /**
-     * @param $logMessage
-     * @param array $context
+     * @param $eventType
+     * @param $logData
+     * @return bool
      * @since 0.0.1.0
      */
-    public static function setLogError($logMessage, $context = [])
+    public static function canLog($eventType, $logData)
+    {
+        $return = false;
+
+        // Ask the data base once, then get local storage value.
+        if (!isset(self::$can[$eventType])) {
+            self::$can[$eventType] = (bool)self::getResursOption(
+                sprintf('can_log_%s', $eventType)
+            );
+        }
+
+        if (self::$can[$eventType]) {
+            $return = true;
+            self::setLogInfo($logData);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $logMessage
+     * @since 0.0.1.0
+     */
+    public static function setLogInfo($logMessage)
     {
         self::setLogInternal(
-            Data::LOG_ERROR,
-            $logMessage,
-            $context
+            self::LOG_INFO,
+            $logMessage
         );
     }
 
@@ -779,7 +833,7 @@ class Data
         if (isset($orderData['meta'][$key])) {
             $return = $orderData['meta'][$key];
         }
-        $pluginPrefixedKey = sprintf('%s_%s', Data::getPrefix(), $key);
+        $pluginPrefixedKey = sprintf('%s_%s', self::getPrefix(), $key);
         if (isset($orderData['meta'][$pluginPrefixedKey])) {
             if (is_array($orderData['meta'][$pluginPrefixedKey])) {
                 $return = array_pop($orderData['meta'][$pluginPrefixedKey]);
@@ -808,7 +862,7 @@ class Data
             $orderId = $order->get_id();
         } elseif ((int)$order && !is_string($order) && !$orderIsResursReference) {
             $orderId = $order;
-            $order = new \WC_Order($orderId);
+            $order = new WC_Order($orderId);
         } elseif (is_string($order)) {
             // Landing here it might be a Resurs or EComPHP reference.
             if (($foundOrderId = self::getOrderByEcomRef($order))) {
@@ -860,6 +914,7 @@ class Data
 
     /**
      * Get locally stored payment if it is present.
+     * @param $key
      * @return array
      * @since 0.0.1.0
      */
@@ -871,6 +926,7 @@ class Data
     /**
      * Set and return order information.
      * @param $orderId
+     * @param WC_Order $order
      * @return array|mixed
      * @since 0.0.1.0
      */
@@ -900,8 +956,13 @@ class Data
 
         if (isset($orderDataArray['meta']) && is_array($orderDataArray)) {
             foreach (self::$searchArray as $searchKey) {
+                $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
                 if (isset($orderDataArray['meta'][$searchKey])) {
                     $return = array_pop($orderDataArray['meta'][$searchKey]);
+                    break;
+                }
+                if (isset($orderDataArray['meta'][$protectedMetaKey])) {
+                    $return = array_pop($orderDataArray['meta'][$protectedMetaKey]);
                     break;
                 }
             }
@@ -921,10 +982,17 @@ class Data
     {
         $return = self::getOrderInfoExceptionData($return);
         try {
-            $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
-            $return = WooCommerce::getFormattedPaymentData($return);
-            $return = WooCommerce::getPaymentInfoDetails($return);
-        } catch (\Exception $e) {
+            if (!$return['ecomException']['code']) {
+                $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
+                $return = WooCommerce::getFormattedPaymentData($return);
+                $return = WooCommerce::getPaymentInfoDetails($return);
+            }
+        } catch (Exception $e) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
+            );
+            Data::setLogException($e);
             $return['ecomException'] = [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
@@ -955,6 +1023,41 @@ class Data
     }
 
     /**
+     * @param Exception $exception
+     * @since 0.0.1.0
+     */
+    public static function setLogException($exception)
+    {
+        if (!isset($_SESSION[self::getPrefix()])) {
+            $_SESSION[self::getPrefix()]['exception'] = [];
+        }
+        $_SESSION[self::getPrefix()]['exception'][] = $exception;
+        self::setLogError(
+            sprintf(
+                __(
+                    '%s internal generic exception %s: %s',
+                    'trbwc'
+                ),
+                self::getPrefix(),
+                $exception->getCode(),
+                $exception->getMessage()
+            )
+        );
+    }
+
+    /**
+     * @param $logMessage
+     * @since 0.0.1.0
+     */
+    public static function setLogError($logMessage)
+    {
+        self::setLogInternal(
+            self::LOG_ERROR,
+            $logMessage
+        );
+    }
+
+    /**
      * @param array $orderData
      * @since 0.0.1.0
      */
@@ -965,7 +1068,7 @@ class Data
             'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
         ];
 
-        $scriptName = sprintf('%s_resursbank_order', Data::getPrefix());
+        $scriptName = sprintf('%s_resursbank_order', self::getPrefix());
         WordPress::setEnqueue(
             $scriptName,
             'resursbank_order.js',
@@ -978,17 +1081,17 @@ class Data
      * Makes sure nothing interfering with orders that has not been created by us. If this returns false,
      * it means we should not be there and touch things.
      * @param $thisMethod
-     * @param null $order
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canHandleOrder($thisMethod, $order = null)
+    public static function canHandleOrder($thisMethod)
     {
         $return = false;
 
         $allowMethod = [
             'resurs_bank_',
             'rbwc_',
+            'trbwc_',
         ];
 
         foreach ($allowMethod as $methodKey) {
@@ -1005,25 +1108,42 @@ class Data
      * @param $order
      * @param $key
      * @param $value
-     * @throws ResursException
+     * @param bool $protected
+     * @return bool|int
+     * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderMeta($order, $key, $value)
+    public static function setOrderMeta($order, $key, $value, $protected = true)
     {
+        $return = false;
+
         if (method_exists($order, 'get_id')) {
-            if ($order->get_id()) {
-                update_post_meta(
+            self::canLog(
+                self::CAN_LOG_JUNK,
+                sprintf(
+                    '%s (%s): %s=%s (protected=%s).',
+                    __FUNCTION__,
                     $order->get_id(),
-                    sprintf('%s_%s', Data::getPrefix(), $key),
+                    $key,
+                    $value,
+                    ($protected ? 'true' : 'false')
+                )
+            );
+            if ($order->get_id()) {
+                $return = update_post_meta(
+                    $order->get_id(),
+                    sprintf('%s_%s', $protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
                     $value
                 );
             }
         } else {
-            throw new Exception(
+            throw new RuntimeException(
                 'Unable to update order meta - object $order is of wrong type.',
                 400
             );
         }
+
+        return $return;
     }
 
     /**
@@ -1061,6 +1181,52 @@ class Data
      */
     public static function setResursOption($key, $value)
     {
-        return update_option(sprintf('%s_%s', Data::getPrefix('admin'), $key), $value);
+        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
+    }
+
+    /**
+     * @param array $settings
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getGeneralSettings($settings = [])
+    {
+        foreach ($settings as $setting) {
+            if (isset($setting['id']) && $setting['id'] === 'woocommerce_price_num_decimals') {
+                $currentPriceDecimals = wc_get_price_decimals();
+                if ($currentPriceDecimals < 2 && self::getResursOption('prevent_rounding_panic')) {
+                    $settings[] = [
+                        'title' => __('Number of decimals headsup message', 'trbwc'),
+                        'type' => 'decimal_warning',
+                        'desc' => 'Description',
+                    ];
+                }
+            }
+        }
+        return $settings;
+    }
+
+    /**
+     * @param $currentValue
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getDecimalValue($currentValue)
+    {
+        global $current_tab;
+        if ($current_tab !== 'general' && $currentValue < 2 && self::getResursOption('prevent_rounding_panic')) {
+            $currentValue = 2;
+        }
+        return $currentValue;
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isResursMethod($paymentMethod)
+    {
+        return (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
     }
 }

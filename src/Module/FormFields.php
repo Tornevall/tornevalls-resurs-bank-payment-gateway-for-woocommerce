@@ -27,6 +27,7 @@ class FormFields extends WC_Settings_API
         }
 
         // Basic settings. Returned to ResursDefault configuration.
+        /** @noinspection HtmlUnknownTarget */
         $formFields = [
             'basic' => [
                 'title' => __('Basic Resurs Bank API Settings', 'trbwc'),
@@ -145,6 +146,54 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                 ],
+                'order_id_type' => [
+                    'id' => 'order_id_type',
+                    'type' => 'select',
+                    'title' => __('Order id numbering', 'trbwc'),
+                    'desc' => __(
+                        'Decide which kind of order id/reference that should be used when customers are ' .
+                        'placing orders. If you let the plugin set the reference, the reference will be based on ' .
+                        'a timestamp with an ending random number to make them unique (i.e. YYYYMMDDHHMMSS-UNIQUE).',
+                        'trbwc'
+                    ),
+                    'default' => 'ecom',
+                    'options' => [
+                        'ecom' => __('Let plugin set the reference', 'trbwc'),
+                        'postid' => __('Use WooCommerce internal post id as reference', 'trbwc'),
+                    ],
+                    'custom_attributes' => [
+                        'size' => 2,
+                    ],
+                ],
+                'payment_method_icons' => [
+                    'id' => 'payment_method_icons',
+                    'title' => __('Checkout method logotypes', 'trbwc'),
+                    'type' => 'select',
+                    'default' => 'none',
+                    'options' => [
+                        'none' => __('Prefer to not display logotypes', 'trbwc'),
+                        'woocommerce_icon' => __('Display logotypes as WooCommerce default', 'trbwc'),
+                    ],
+                    'custom_attributes' => [
+                        'size' => 2,
+                    ],
+                ],
+                'streamline_payment_fields' => [
+                    'id' => 'streamline_payment_fields',
+                    'type' => 'checkbox',
+                    'title' => __('Applicant fields are always visible', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'default' => 'no',
+                    'desc_tip' => __(
+                        'The applicant fields that Resurs Bank is using to handle payments is normally, inherited ' .
+                        'from WooCommerce standard billing fields in the checkout. You can however enable them ' .
+                        'here, if you want your customers to see them anyway.',
+                        'trbwc'
+                    ),
+                ],
+                'payment_methods_settings_end' => [
+                    'type' => 'sectionend',
+                ],
                 'payment_methods_list' => [
                     'type' => 'methodlist',
                 ],
@@ -156,7 +205,7 @@ class FormFields extends WC_Settings_API
                         'onclick' => 'getResursPaymentMethods()',
                     ],
                 ],
-                'payment_methods_settings_end' => [
+                'payment_methods_list_end' => [
                     'type' => 'sectionend',
                 ],
                 'payment_method_annuity' => [
@@ -198,7 +247,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'waitForFraudControl',
                     'type' => 'checkbox',
                     'title' => __('Wait for fraud control', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'The checkout process waits until the fraud control is finished at Resurs Bank ' .
                         'and the order is handled synchronously. If this setting is disabled, Resurs Bank must be ' .
@@ -215,7 +264,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'annulIfFrozen',
                     'type' => 'checkbox',
                     'title' => __('Annul frozen orders', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'If Resurs Bank freezes a payment due to fraud, the order will automatically be annulled. ' .
                         'By default, the best practice is to handle all annulments asynchronously with callbacks. ' .
@@ -231,7 +280,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'finalizeIfBooked',
                     'type' => 'checkbox',
                     'title' => __('Automatically debit if booked', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'Orders are automatically debited (finalized) if the fraud control passes. ' .
                         'By default, the best practice is to handle all finalizations asynchronously with callbacks. ' .
@@ -261,6 +310,48 @@ class FormFields extends WC_Settings_API
                     'type' => 'title',
                     'title' => __('Advanced API', 'trbwc'),
                 ],
+                'coupons_ex_tax' => [
+                    'title' => __('Coupons are added excluding tax', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'When order rows are added to Resurs Bank API, discount amounts are added excluding tax. ' .
+                        'If you want to include the tax in the added discount amount, you can enable this feature ' .
+                        'here. Best practice is to keep it disabled.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'yes',
+                ],
+                'prevent_rounding_panic' => [
+                    'id' => 'prevent_rounding_panic',
+                    'title' => __('Prevent rounding errors', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'WooCommerce are able to show prices rounded with 0 decimals. It is however widely known ' .
+                        'that payment gateways may have problems with tax calculation, when the decimals are less ' .
+                        'then 2. For Resurs Bank, it is confirmed that this causes problems. ' .
+                        'With this setting enabled, the plugin will try to override the decimal setup as ' .
+                        'long as it is set to be below 2. If you disable this feature, you also confirm that you are ' .
+                        'willingly using an unsupported feature. If you\'ve not already done it, it is recommended ' .
+                        'to instead raise the number of decimals to 2 or higher.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'yes',
+                ],
+                'store_api_history' => [
+                    'id' => 'store_api_history',
+                    'title' => __('Store API history in orders', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'If this setting is active, the first time you view a specific order API data will be stored ' .
+                        'for it. This means that it will be possible to go back to prior orders and view them even ' .
+                        'after you change the user credentials.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'yes',
+                ],
                 'api_wsdl' => [
                     'id' => 'api_wsdl',
                     'title' => __('WSDL requests are cached', 'trbwc'),
@@ -281,25 +372,58 @@ class FormFields extends WC_Settings_API
                     ],
                     'default' => 'default',
                 ],
-                'store_api_history' => [
-                    'id' => 'store_api_history',
-                    'title' => __('Store API history in orders', 'trbwc'),
-                    'desc' => __('Enabled/disabled', 'trbwc'),
-                    'desc_tip' => __(
-                        'If this setting is active, the first time you view a specific order API data will be stored ' .
-                        'for it. This means that it will be possible to go back to prior orders and view them even ' .
-                        'after you change the user credentials.',
-                        'trbwc'
-                    ),
-                    'type' => 'checkbox',
-                    'default' => 'yes',
-                ],
                 'complex_api_section_end' => [
                     'type' => 'sectionend',
                 ],
                 'complex_developer_section' => [
                     'type' => 'title',
                     'title' => __('Developer Section', 'trbwc'),
+                ],
+                'logging' => [
+                    'title' => __('Logging', 'trbwc'),
+                    'type' => 'title',
+                    'desc' => __(
+                        'Default for this plugin is to log a fair amount of data for you. However, there is also ' .
+                        'also much debug data for developers available, that you normally not need. In this section ' .
+                        'you can choose the extras you want to see in your logs.',
+                        'trbwc'
+                    ),
+                ],
+                'can_log_order_events' => [
+                    'id' => 'can_log_order_events',
+                    'type' => 'checkbox',
+                    'title' => __('Details at order events for merchants', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Detailed order events are data that normally passes without any sound. ' .
+                        'Things like initial order creations and clicks could show up in your logs.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'can_log_order_developer' => [
+                    'id' => 'can_log_order_developer',
+                    'type' => 'checkbox',
+                    'title' => __('Developer based details at order events', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Works like details for merchants, but this adds debugging information that may only be ' .
+                        'relevant for developers.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'can_log_junk' => [
+                    'id' => 'can_log_junk',
+                    'type' => 'checkbox',
+                    'title' => __('Deep details', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Things that only developers would have interest in. Logs may be junky with this ' .
+                        'option enabled.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
                 ],
                 'show_developer' => [
                     'title' => __('Activate developer mode', 'trbwc'),
@@ -369,7 +493,7 @@ class FormFields extends WC_Settings_API
      */
     public static function getFieldButton($formData)
     {
-        (new FormFields())->getFieldButtonApi($formData);
+        (new self())->getFieldButtonApi($formData);
     }
 
     /**
@@ -390,6 +514,20 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getFieldDecimals()
+    {
+
+        if (wc_get_price_decimals() < 2 && Data::getResursOption('prevent_rounding_panic')) {
+            echo Data::getGenericClass()->getTemplate('adminpage_general_decimals.phtml', [
+                'pluginTitle' => Data::getPluginTitle(),
+            ]);
+        }
+    }
+
+    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      * @throws Exception
      * @since 0.0.1.0
@@ -406,5 +544,90 @@ class FormFields extends WC_Settings_API
                 ]
             );
         }
+    }
+
+    /**
+     * @param string $key
+     * @return array|mixed
+     * @since 0.0.1.0
+     */
+    public static function getFieldString($key = null)
+    {
+        $fields = [
+            'government_id' => __('Social security number', 'trbwc'),
+            'phone' => __('Phone number', 'trbwc'),
+            'mobile' => __('Mobile number', 'trbwc'),
+            'email' => __('E-mail address', 'trbwc'),
+            'government_id_contact' => __('Applicant government id'),
+            'card_number' => __('Card number', 'trbwc'),
+        ];
+
+        // If no key are sent here, it is probably a localization request.
+        $return = $fields;
+
+        if (!empty($key) && isset($fields[$key])) {
+            $return = $fields[$key];
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function canDisplayField($key)
+    {
+        return in_array($key, [
+            'government_id',
+            'government_id_contact',
+            'card_number',
+        ]);
+    }
+
+    /**
+     * @param null $key
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getSpecificTypeFields($key = null)
+    {
+        $return = [
+            'INVOICE' => [
+                'government_id',
+                'phone',
+                'mobile',
+                'email',
+            ],
+            'INVOICE_LEGAL' => [
+                'government_id',
+                'phone',
+                'mobile',
+                'email',
+                'government_id_contact',
+            ],
+            'CARD' => [
+                'government_id',
+                'card_number',
+            ],
+            'REVOLVING_CREDIT' => [
+                'government_id',
+                'mobile',
+                'email',
+            ],
+            'PART_PAYMENT' => [
+                'government_id',
+                'phone',
+                'mobile',
+                'email',
+            ],
+        ];
+
+        if (!empty($key) && isset($return[$key])) {
+            $return = $return[$key];
+        }
+
+        return $return;
     }
 }

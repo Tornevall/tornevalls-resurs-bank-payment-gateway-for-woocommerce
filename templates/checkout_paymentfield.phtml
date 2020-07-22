@@ -1,0 +1,11 @@
+<div style="display:<?php echo $displayMode; ?>">
+    <label for="<?php echo $fieldName ?>" style="width:100%;display:block;">
+        <?php echo $fieldLabel ?>
+    </label>
+    <input type="text"
+           id="<?php echo $fieldName ?>"
+           size="<?php echo $fieldSize ?>"
+           class="field_<?php echo $fieldName ?>"
+           name="<?php echo $fieldName; ?>"
+           onkeyup="setBillingInherit(this)">
+</div>

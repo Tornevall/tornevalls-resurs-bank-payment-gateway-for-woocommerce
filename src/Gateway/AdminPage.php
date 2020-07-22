@@ -4,10 +4,8 @@ namespace ResursBank\Gateway;
 
 use Exception;
 use ResursBank\Helper\WordPress;
-use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use ResursBank\Module\PluginApi;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
@@ -22,17 +20,14 @@ if (!defined('ABSPATH')) {
 class AdminPage extends WC_Settings_Page
 {
     /**
-     * @var string $label
-     */
-    protected $label = 'Resurs Bank';
-
-    /**
      * @var string $label_image
+     * @since 0.0.1.0
      */
     protected $label_image;
 
     /**
      * @var bool $parentConstructor
+     * @since 0.0.1.0
      */
     private $parentConstructor = false;
 
@@ -43,8 +38,10 @@ class AdminPage extends WC_Settings_Page
     public function __construct()
     {
         $this->id = Data::getPrefix('admin');
+        $this->label = 'Resurs Bank';
 
         // In case we need it in future.
+        /** @noinspection HtmlUnknownTarget */
         $this->label_image = sprintf(
             '<img src="%s" border="0">',
             Data::getImage('logo2018.png')
@@ -176,6 +173,7 @@ class AdminPage extends WC_Settings_Page
     {
         global $current_tab;
         if (!$this->parentConstructor) {
+            /** @noinspection HtmlUnknownTarget */
             printf(
                 '<a href="%s" class="nav-tab %s">%s</a>',
                 esc_html(admin_url('admin.php?page=wc-settings&tab=' . $this->id)),

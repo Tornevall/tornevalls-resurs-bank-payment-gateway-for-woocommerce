@@ -5,6 +5,7 @@ namespace ResursBank\Helper;
 use Exception;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
+use ResursBank\Module\FormFields;
 use TorneLIB\IO\Data\Strings;
 
 if (!defined('ABSPATH')) {
@@ -72,7 +73,7 @@ class WordPress
         add_filter('rbwc_localizations_generic', 'ResursBank\Helper\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
-        add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateway');
+        add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateways');
         add_filter('is_protected_meta', 'ResursBank\Helper\WooCommerce::getProtectedMetaData', 10, 3);
     }
 
@@ -99,7 +100,9 @@ class WordPress
         add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
         add_action('woocommerce_admin_field_button', 'ResursBank\Module\FormFields::getFieldButton', 10, 2);
+        add_action('woocommerce_admin_field_decimal_warning', 'ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', 'ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
+        add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
     }
 
     /**
@@ -148,9 +151,14 @@ class WordPress
             'woocommerce_update_order_review_fragments',
             'ResursBank\Helper\WooCommerce::getReviewFragments'
         );
+        add_action(
+            'woocommerce_checkout_update_order_review',
+            'ResursBank\Helper\WooCommerce::getOrderReviewSettings'
+        );
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAdminNotices()
@@ -177,12 +185,12 @@ class WordPress
         );
 
         try {
-            if ($current_tab === Data::getPrefix('admin') || $parent_file === 'woocommerce') {
+            if ($parent_file === 'woocommerce' || $current_tab === Data::getPrefix('admin')) {
                 WooCommerce::testRequiredVersion(false);
             }
         } catch (Exception $e) {
-            //self::doAction('eventLogger', Data::LOG_WARNING, $requiredVersionNotice);
-            Data::setLogInternal(Data::LOG_NOTICE, $requiredVersionNotice);
+            //Data::setLogInternal(Data::LOG_NOTICE, $requiredVersionNotice);
+            Data::setLogException($e);
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_woocommerce_requirement',
                 [
@@ -240,7 +248,9 @@ class WordPress
      * @param $scriptName
      * @param $scriptFile
      * @param $isAdmin
+     * @param array $localizeArray
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function setEnqueue($scriptName, $scriptFile, $isAdmin, $localizeArray = [])
     {
@@ -254,13 +264,12 @@ class WordPress
             ),
             Data::getJsDependencies($scriptName, $isAdmin)
         );
-        WordPress::doAction('getLocalizedScripts', $scriptName, $isAdmin, $localizeArray);
+        self::doAction('getLocalizedScripts', $scriptName, $isAdmin, $localizeArray);
     }
 
     /**
      * @param $actionName
      * @param $value
-     * @return mixed
      * @since 0.0.1.0
      */
     public static function doAction($actionName, $value)
@@ -317,11 +326,22 @@ class WordPress
      */
     public static function applyFiltersDeprecated($filterName, $value)
     {
-        return apply_filters(
+        $return = apply_filters(
             sprintf('%s_%s', 'resurs_bank', self::getFilterName($filterName)),
             $value,
             self::getFilterArgs(func_get_args())
         );
+
+        // This dual filter solutions isn't very clever.
+        if ($return === null) {
+            $return = apply_filters(
+                sprintf('%s_%s', 'resursbank', self::getFilterName($filterName)),
+                $value,
+                self::getFilterArgs(func_get_args())
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -334,7 +354,7 @@ class WordPress
     {
         if (($localizationData = self::getLocalizationData($scriptName, (bool)$isAdmin))) {
             if (is_array($extraLocalizationData) && count($extraLocalizationData)) {
-                $localizationData += $extraLocalizationData;
+                $localizationData = array_merge($localizationData, $extraLocalizationData);
             }
             wp_localize_script(
                 $scriptName,
@@ -394,7 +414,7 @@ class WordPress
             'trbwc'
         );
         $return['resurs_test_credentials'] = __(
-            'Update credentials and payment methods',
+            'Validate and save credentials and payment methods',
             'trbwc'
         );
         $return['credential_failure_notice'] = __(
@@ -420,6 +440,7 @@ class WordPress
      * @param bool $strictify
      * @return string
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     private static function getNonce($tag, $strictify = true)
     {
@@ -431,6 +452,7 @@ class WordPress
      * @param bool $strictify
      * @return string
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function getNonceTag($tag, $strictify = true)
     {
@@ -471,6 +493,7 @@ class WordPress
         $return['success'] = __('Successful.', 'trbwc');
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
+        $return['checkout_fields'] = FormFields::getFieldString();
 
         return self::applyFilters('localizationsGlobal', $return);
     }
@@ -478,6 +501,7 @@ class WordPress
     /**
      * Localized variables shown in front (customer) view only.
      * @param $return
+     * @param null $scriptName
      * @return mixed
      * @since 0.0.1.0
      */

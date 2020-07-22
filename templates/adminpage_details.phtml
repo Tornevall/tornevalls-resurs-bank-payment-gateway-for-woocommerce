@@ -2,20 +2,21 @@
     For order info details we show a basic view with exception notification fields.
     If EComPHP triggers any exceptions they are shown here and then nowhere else.
  -->
-<p class="form-field form-field-wide">
-    <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle">
-        <?php
-        _e('Order information from Resurs Bank', 'trbwc')
-        ?>
-    </label>
-    <?php if (isset($ecomException['code']) && (int)$ecomException['code']) { ?>
-        <span class="resursApiException">
+<?php if (isset($ecom)) { ?>
+    <p class="form-field form-field-wide">
+        <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle">
+            <?php
+            _e('Order information from Resurs Bank', 'trbwc')
+            ?>
+        </label>
+        <?php if (isset($ecomException['code']) && (int)$ecomException['code']) { ?>
+            <span class="resursApiException">
         <?php echo $errorString; ?><br>
             <br>
         <b><?php printf('Exception %d: %s', $ecomException['code'], $ecomException['message']) ?></b>
         </span>
-    <?php } else { ?>
-        <span>
+        <?php } else { ?>
+            <span>
         <?php
         if (!$ecom->isCurrentCredentials) {
             ?>
@@ -52,5 +53,7 @@ printf(__(
         }
         ?>
     </span>
-    <?php } ?>
-</p>
+        <?php } ?>
+    </p>
+<?php } ?>
+

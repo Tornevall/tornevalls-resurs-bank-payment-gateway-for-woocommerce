@@ -2,30 +2,285 @@
 
 namespace ResursBank\Gateway;
 
+use Exception;
+use ResursBank\Helper\WooCommerce;
+use ResursBank\Helper\WordPress;
+use ResursBank\Module\Api;
 use ResursBank\Module\Data;
+use ResursBank\Module\FormFields;
+use Resursbank\RBEcomPHP\RESURS_FLOW_TYPES;
+use ResursException;
+use RuntimeException;
+use stdClass;
+use TorneLIB\IO\Data\Strings;
 use TorneLIB\Utils\Generic;
+use WC_Cart;
+use WC_Coupon;
+use WC_Order;
 use WC_Payment_Gateway;
+use WC_Product;
+use WC_Tax;
+use WP_Post;
 
 /**
  * Class ResursDefault
+ * Default payment method class. Handles payments and orders dynamically, with focus on less loss
+ * of data during API communication.
  * @package Resursbank\Gateway
  */
 class ResursDefault extends WC_Payment_Gateway
 {
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const STATUS_FINALIZED = 'completed';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const STATUS_BOOKED = 'processing';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const STATUS_FROZEN = 'on-hold';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const STATUS_SIGNING = 'on-hold';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const STATUS_DENIED = 'failed';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const STATUS_FAILED = 'failed';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const STATUS_CANCELLED = 'cancelled';
+
+    /**
+     * @var array $applicantPostData Applicant request.
+     * @since 0.0.1.0
+     */
+    private $applicantPostData = [];
+
+    /**
+     * @var stdClass $paymentResponse
+     * @since 0.0.1.0
+     */
+    private $paymentResponse;
+
+    /**
+     * @var array
+     * @since 0.0.1.0
+     */
+    private $wcOrderData;
+
+    /**
+     * Data that will be sent between Resurs Bank and ourselves.
+     * @var array $apiData
+     * @since 0.0.1.0
+     */
+    private $apiData = [];
+
+    /**
+     * @var string $apiDataId
+     * @since 0.0.1.0
+     */
+    private $apiDataId = '';
+
+    /**
+     * Main API. Use as primary communicator. Acts like a bridge between the real API.
+     * @var Api $API
+     * @since 0.0.1.0
+     */
+    private $API;
+
+    /**
+     * @var WC_Cart $cart
+     * @since 0.0.1.0
+     */
+    private $cart;
+
+    /**
+     * @var WC_Order $order
+     * @since 0.0.1.0
+     */
+    private $order;
+
+    /**
+     * @var array $paymentMethodInformation
+     * @since 0.0.1.0
+     */
+    private $paymentMethodInformation;
+
     /**
      * @var Generic $generic Generic library, mainly used for automatically handling templates.
      * @since 0.0.1.0
      */
     private $generic;
 
-    public function __construct()
+    /**
+     * ResursDefault constructor.
+     * @param $resursPaymentMethodObject
+     * @noinspection ParameterDefaultValueIsNotNullInspection
+     * @since 0.0.1.0
+     */
+    public function __construct($resursPaymentMethodObject = [])
     {
+        global $woocommerce;
+        $this->cart = isset($woocommerce->cart) ? $woocommerce->cart : null;
+        $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
         $this->method_title = __('Resurs Bank', 'trbwc');
         $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'trbwc');
         $this->title = __('Resurs Bank AB', 'trbwc');
-        //$this->has_fields = true;
-        //$this->icon = Data::getImage('logo2018.png');
+        $this->setPaymentMethodInformation($resursPaymentMethodObject);
+        $this->has_fields = Data::getResursOption('checkout_type') === 'simplified';
+        $this->setFilters();
+        $this->setActions();
+    }
+
+    /**
+     * Initializer. It is not until we have payment method information we can start using this class for real.
+     * @param $paymentMethodInformation
+     * @since 0.0.1.0
+     */
+    private function setPaymentMethodInformation($paymentMethodInformation)
+    {
+        if (is_object($paymentMethodInformation)) {
+            $this->apiDataId = sha1(uniqid('wc-api', true));
+            $this->API = new Api();
+            $this->paymentMethodInformation = $paymentMethodInformation;
+            $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
+            $this->title = $this->paymentMethodInformation->description;
+            $this->method_description = '';
+            if (Data::getResursOption('payment_method_icons') === 'woocommerce_icon') {
+                $this->icon = Data::getImage('resurs-logo.png');
+            }
+
+            // Applicant post data should be the final request.
+            $this->applicantPostData = $this->getApplicantPostData();
+        }
+    }
+
+    /**
+     * @return array
+     * @since 0.0.1.0
+     */
+    private function getApplicantPostData()
+    {
+        $realMethodId = $this->getRealMethodId();
+        $return = [];
+        // Skip the scraping if this is not a payment.
+        if ($this->isPaymentReady()) {
+            foreach ($_REQUEST as $requestKey => $requestValue) {
+                if (preg_match(sprintf('/%s$/', $realMethodId), $requestKey)) {
+                    $applicantDataKey = (string)preg_replace(
+                        sprintf(
+                            '/%s_(.*?)_%s/',
+                            Data::getPrefix(),
+                            $realMethodId
+                        ),
+                        '$1',
+                        $requestKey
+                    );
+                    $return[$applicantDataKey] = $requestValue;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return string|string[]|null
+     * @since 0.0.1.0
+     */
+    private function getRealMethodId()
+    {
+        return preg_replace('/^trbwc_/', '', $this->id);
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private function isPaymentReady()
+    {
+        return (isset($_REQUEST['payment_method'], $_REQUEST['wc-ajax']) && $_REQUEST['wc-ajax'] === 'checkout');
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private function setFilters()
+    {
+        add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
+        add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
+        add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private function setActions()
+    {
+        add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function is_available()
+    {
+        $return = parent::is_available();
+        if ($this->paymentMethodInformation) {
+            $minMax = Api::getResurs()->getMinMax(
+                $this->get_order_total(),
+                $this->paymentMethodInformation->minLimit,
+                $this->paymentMethodInformation->maxLimit
+            );
+            if (!$minMax) {
+                $return = false;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * How to handle the submit order button. For future RCO.
+     *
+     * @param $classButtonHtml
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public function getOrderButtonHtml($classButtonHtml)
+    {
+        return $classButtonHtml;
+    }
+
+    /**
+     * How to handle checkout fields. For future RCO.
+     *
+     * @param $fields
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public function getCheckoutFields($fields)
+    {
+        return $fields;
     }
 
     /**
@@ -39,5 +294,1096 @@ class ResursDefault extends WC_Payment_Gateway
         $url = add_query_arg('tab', $_REQUEST['tab'], $url);
         wp_safe_redirect($url);
         die('Deprecated space');
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function payment_fields()
+    {
+        $fieldHtml = null;
+        // If not here, no fields are required.
+        $requiredFields = (array)FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
+
+        if (Data::getResursOption('checkout_type') === 'rco') {
+            // TODO: No fields should be active on RCO. Make sure we never land here at all.
+            return;
+        }
+
+        if (count($requiredFields)) {
+            foreach ($requiredFields as $fieldName) {
+                $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
+                    'displayMode' => $this->getDisplayableField($fieldName) ? '' : 'none',
+                    'methodId' => $this->paymentMethodInformation->id,
+                    'fieldSize' => WordPress::applyFilters('getPaymentFieldSize', 24, $fieldName),
+                    'streamLine' => Data::getResursOption('streamline_payment_fields'),
+                    'fieldLabel' => FormFields::getFieldString($fieldName),
+                    'fieldName' => sprintf(
+                        '%s_%s_%s',
+                        Data::getPrefix(),
+                        $fieldName,
+                        $this->paymentMethodInformation->id
+                    ),
+                ]);
+            }
+
+            echo $fieldHtml;
+        }
+    }
+
+    /**
+     * @param $fieldName
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private function getDisplayableField($fieldName)
+    {
+        return !(Data::getResursOption('streamline_payment_fields') ||
+            !FormFields::canDisplayField($fieldName));
+    }
+
+    /**
+     * @param int $order_id
+     * @return array|void
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function process_payment($order_id)
+    {
+        $order = new WC_Order($order_id);
+        $this->order = $order;
+        $return = [
+            'result' => 'failure',
+            'redirect' => $this->getReturnUrl($order),
+        ];
+
+        // Developers can put their last veto here.
+        WordPress::doAction('canProcessOrder', $order);
+        $this->preProcessOrder($order, $return);
+        $return = $this->processResursOrder($order, $return);
+
+        return $return;
+    }
+
+    /**
+     * @param $order
+     * @param string $result
+     * @param null $resursReturnUrl
+     * @return string
+     * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
+     */
+    private function getReturnUrl($order, $result = 'failure', $resursReturnUrl = null)
+    {
+        $returnUrl = $this->get_return_url($order);
+        if (empty($resursReturnUrl)) {
+            $returnUrl = $resursReturnUrl;
+        }
+        return $result === 'success' || (bool)$result === true ?
+            $returnUrl : html_entity_decode($order->get_cancel_order_url());
+    }
+
+    /**
+     * @param WC_Order $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function preProcessOrder(WC_Order $order)
+    {
+        $this->apiData['wc_order_id'] = $order->get_id();
+        $this->apiData['preferred_id'] = $this->getPaymentId();
+        Data::setDeveloperLog(
+            __FUNCTION__,
+            sprintf(
+                'setPreferredId:%s',
+                $this->apiData['preferred_id']
+            )
+        );
+        $this->API->getConnection()->setPreferredId($this->apiData['preferred_id']);
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function getPaymentId()
+    {
+        switch (Data::getResursOption('order_id_type')) {
+            case 'postid':
+                $return = $this->order->get_id();
+                break;
+            case 'ecom':
+            default:
+                $return = Api::getResurs()->getPreferredPaymentId();
+                break;
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * @param WC_Order $order
+     * @return array
+     * @throws Exception
+     */
+    private function processResursOrder($order)
+    {
+        // Available options: simplified, hosted, rco. Methods should exists for each of them.
+        $checkoutRequestType = sprintf('process%s', ucfirst(Data::getResursOption('checkout_type')));
+
+        if (method_exists($this, $checkoutRequestType)) {
+            $this->order->add_order_note(
+                sprintf(__('Resurs Bank processing order (%s).', 'trbwc'), $checkoutRequestType)
+            );
+            // Automatically process orders with a checkout type that is supported by this plugin.
+            // Checkout types will become available as the method starts to exist.
+
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __('%s: Initialize Resurs Bank %s (%s) via %s.', 'trbwc'),
+                    __FUNCTION__,
+                    $order->get_id(),
+                    $this->getPaymentId(),
+                    $checkoutRequestType
+                )
+            );
+
+            $return = $this->{$checkoutRequestType}($order);
+        } else {
+            Data::setLogError(
+                sprintf(
+                    'Merchant is trying to run this plugin with an unsupported checkout type (%s).',
+                    $checkoutRequestType
+                )
+            );
+            throw new RuntimeException(
+                __(
+                    'Chosen checkout type is currently unsupported'
+                ),
+                404
+            );
+        }
+
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                __('%s: Order %s returned "%s" to WooCommerce.', 'trbwc'),
+                __FUNCTION__,
+                $order->get_id(),
+                $return['result']
+            )
+        );
+
+        return $return;
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public function getApiRequest()
+    {
+        $finalRedirectUrl = wc_get_cart_url();
+
+        if ($_REQUEST['apiData']) {
+            $this->setApiData(json_decode(
+                (new Strings())->base64urlDecode($_REQUEST['apiData']),
+                true
+            ));
+
+            $this->order = $this->getCurrentOrder();
+            $this->apiData['isReturningCustomer'] = false;
+            if ($this->getApiValue('wc_order_id') && $this->getApiValue('preferred_id')) {
+                $this->apiData['isReturningCustomer'] = true;
+            }
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __('API data request: %s.', 'trbwc'),
+                    $this->apiData['isReturningCustomer'] ?
+                        __('Returning customer. Validating order with WooCommerce.', 'trbwc') :
+                        __('wc_order_id + preferred_id not present', 'trbwc')
+                )
+            );
+            $this->wcOrderData = Data::getOrderInfo($this->order);
+
+            if ($this->isSuccess()) {
+                // When someone returns with a successful call.
+                if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
+                    !Data::getOrderMeta('signingOk', $this->wcOrderData) && $this->setFinalSigning()
+                ) {
+                    $finalRedirectUrl = $this->get_return_url($this->order);
+                }
+            } else {
+                $noticeMessage = __(
+                    'Could not complete your order. Please, contact support for more information.',
+                    'trbwc'
+                );
+                if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
+                    !Data::getOrderMeta('signingOk', $this->wcOrderData)
+                ) {
+                    $this->updateOrderStatus(
+                        self::STATUS_CANCELLED,
+                        __('Returning customer failed or aborted signing process.', 'trbwc')
+                    );
+                    $noticeMessage = __(
+                        'Could not complete order due to signing problems. Did you cancel your order?',
+                        'trbwc'
+                    );
+                }
+                wc_add_notice($noticeMessage);
+            }
+        }
+
+        wp_safe_redirect($finalRedirectUrl);
+        die;
+    }
+
+    /**
+     * @param $apiArray
+     * @return $this
+     * @since 0.0.1.0
+     */
+    private function setApiData($apiArray)
+    {
+        $this->apiData = array_merge($this->apiData, $apiArray);
+        return $this;
+    }
+
+    /**
+     * @return WC_Order
+     * @since 0.0.1.0
+     */
+    private function getCurrentOrder()
+    {
+        return new WC_Order($this->getApiValue('wc_order_id'));
+    }
+
+    /**
+     * @param $key
+     * @return mixed|string
+     * @since 0.0.1.0
+     */
+    public function getApiValue($key)
+    {
+        // If key is empty or not found, return the whole set.
+        return (string)isset($this->apiData[$key]) ? $this->apiData[$key] : $this->apiData;
+    }
+
+    /**
+     * @return array|mixed|string
+     * @since 0.0.1.0
+     */
+    private function isSuccess()
+    {
+        return $this->getApiValue('success');
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setFinalSigning()
+    {
+        $return = false;
+        try {
+            if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order))) {
+                $bookSignedOrderReference = Data::getOrderMeta('resursReference', $this->wcOrderData);
+                $customerSignedMessage = sprintf(
+                    __('Customer returned from Resurs Bank signing to complete order %s.', 'trbwc'),
+                    $bookSignedOrderReference
+                );
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    $customerSignedMessage
+                );
+                $this->order->add_order_note($customerSignedMessage);
+                $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
+                    $bookSignedOrderReference
+                );
+                $this->getResultByPaymentStatus();
+                $return = true;
+            } else {
+                $this->setFinalSigningProblemNotes($lastExceptionCode);
+            }
+        } catch (Exception $booksignedException) {
+            $this->setFinalSigningExceptionNotes($booksignedException);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function getResultByPaymentStatus()
+    {
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf('%s bookPaymentStatus order %s:%s', __FUNCTION__, $this->order->get_id(),
+                $this->getBookPaymentStatus())
+        );
+        switch ($this->getBookPaymentStatus()) {
+            case 'FINALIZED':
+                $this->setSigningMarked();
+                WC()->session->set('order_awaiting_payment', true);
+                $this->updateOrderStatus(
+                    self::STATUS_FINALIZED,
+                    __('Order is debited and completed.', 'trbwc')
+                );
+                $return = $this->getResult('success');
+                break;
+            case 'BOOKED':
+                $this->setSigningMarked();
+                $this->updateOrderStatus(
+                    self::STATUS_BOOKED,
+                    __('Order is booked and ready to handle.', 'trbwc')
+                );
+                $return = $this->getResult('success');
+                break;
+            case 'FROZEN':
+                $this->setSigningMarked();
+                $this->updateOrderStatus(
+                    self::STATUS_FROZEN,
+                    __('Order is frozen and waiting for manual inspection.', 'trbwc')
+                );
+                $return = $this->getResult('success');
+                break;
+            case 'SIGNING':
+                Data::setOrderMeta($this->order, 'signingOk', false);
+                Data::setOrderMeta($this->order, 'signingRedirectTime', time());
+                $this->updateOrderStatus(
+                    self::STATUS_SIGNING,
+                    __('Resurs Bank requires signing on this order. Customer redirected.', 'trbwc')
+                );
+                $return = $this->getResult('success', $this->getBookSigningUrl());
+                break;
+            case 'FAILED':
+            case 'DENIED':
+            default:
+                $this->order->add_order_note(
+                    sprintf(__('The booking failed with status %s. Customer notified in checkout.', 'trbwc')),
+                    $this->getBookPaymentStatus()
+                );
+                wc_add_notice(__(
+                    'The payment can not complete. Contact customer services for more information.',
+                    'trbwc'
+                ), 'error');
+                $return = $this->getResult('failed');
+                break;
+        }
+        return $return;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getBookPaymentStatus()
+    {
+        return $this->getPaymentResponse('bookPaymentStatus');
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private function getPaymentResponse($key)
+    {
+        return isset($this->paymentResponse->$key) ? $this->paymentResponse->$key : '';
+    }
+
+    /**
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    private function setSigningMarked()
+    {
+        $return = false;
+        if (Data::getOrderMeta($this->order, 'signingRedirectTime') &&
+            Data::getOrderMeta($this->order, 'bookPaymentStatus')
+        ) {
+            $return = Data::setOrderMeta($this->order, 'signingOk', true);
+        }
+        return $return;
+    }
+
+    /**
+     * @param $woocommerceStatus
+     * @param $statusNotification
+     * @since 0.0.1.0
+     */
+    private function updateOrderStatus($woocommerceStatus, $statusNotification)
+    {
+        Data::setDeveloperLog(
+            __FUNCTION__,
+            sprintf('Status: %s, Message: %s', $woocommerceStatus, $statusNotification)
+        );
+
+        if ($woocommerceStatus === self::STATUS_FINALIZED) {
+            $this->order->payment_complete();
+            $this->order->add_order_note($statusNotification);
+        } else {
+            $this->order->update_status(
+                $woocommerceStatus,
+                $statusNotification
+            );
+        }
+
+        $this->order->save();
+    }
+
+    /**
+     * @param $status
+     * @param $redirect
+     * @return array
+     * @since 0.0.1.0
+     */
+    private function getResult($status, $redirect = null)
+    {
+        if (empty($redirect)) {
+            $redirect = $status === 'failed' ?
+                $this->order->get_cancel_order_url() : $this->get_return_url($this->order);
+        }
+        Data::setDeveloperLog(
+            __FUNCTION__,
+            sprintf('Result: %s, Redirect to %s.', $status, $redirect)
+        );
+        return [
+            'result' => $status,
+            'redirect' => $redirect,
+        ];
+    }
+
+    /**
+     * @return mixed|string
+     * @since 0.0.1.0
+     */
+    private function getBookSigningUrl()
+    {
+        return (string)$this->getPaymentResponse('signingUrl');
+    }
+
+    /**
+     * @param $lastExceptionCode
+     * @since 0.0.1.0
+     */
+    private function setFinalSigningProblemNotes($lastExceptionCode)
+    {
+        $this->order->add_order_note(
+            sprintf(
+                __(
+                    'Booking this signed payment has been running multiple times but failed ' .
+                    'with exception %s.',
+                    'trbwc'
+                ),
+                $lastExceptionCode
+            )
+        );
+        Data::setLogNotice(
+            sprintf(
+                __(
+                    'Tried to book signed payment but skipped: This has happened before and an ' .
+                    'exception with code %d occurred that time.',
+                    'trbwc'
+                ),
+                $lastExceptionCode
+            )
+        );
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setFinalSigningExceptionNotes()
+    {
+        Data::setLogException($booksignedException);
+        Data::setOrderMeta(
+            $this->order,
+            'bookSignedPaymentExceptionCode',
+            $booksignedException->getCode()
+        );
+        Data::setOrderMeta(
+            $this->order,
+            'bookSignedPaymentExceptionMessage',
+            $booksignedException->getMessage()
+        );
+    }
+
+    /**
+     * @return array|mixed|string
+     * @since 0.0.1.0
+     */
+    private function getApiType()
+    {
+        return $this->getApiValue('urltype');
+    }
+
+    /**
+     * Simplified shopflow.
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
+     */
+    private function processSimplified()
+    {
+        $this->API->setCheckoutType(RESURS_FLOW_TYPES::SIMPLIFIED_FLOW);
+        $this->API->setFraudFlags();
+        $this->setOrderData();
+        Data::setDeveloperLog(
+            __FUNCTION__,
+            sprintf('%s createPayment %s init', __FUNCTION__, $this->getPaymentMethod())
+        );
+        $this->paymentResponse = $this->API->getConnection()->createPayment(
+            $this->getPaymentMethod()
+        );
+
+        // Keep last payment status.
+        Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->getBookPaymentStatus());
+
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                '%s: %s:bookPaymentStatus:%s, signingUrl: %s',
+                __FUNCTION__,
+                $this->getPaymentId(),
+                $this->getBookPaymentStatus(),
+                $this->getBookSigningUrl()
+            )
+        );
+
+        return $this->getResultByPaymentStatus();
+    }
+
+    /**
+     * Global order data handler. Things that happens to all flows.
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setOrderData()
+    {
+        Data::setDeveloperLog(__FUNCTION__, 'Start.');
+        $this
+            ->setCustomer()
+            ->setCustomerId()
+            ->setStoreId()
+            ->setOrderLines()
+            ->setCoupon()
+            ->setShipping()
+            ->setFee()
+            ->setSigning();
+        Data::setDeveloperLog(__FUNCTION__, 'Done.');
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setSigning()
+    {
+        $this->API->getConnection()->setSigning(
+            $this->getSigningUrl(['success' => true, 'urlType' => 'success']),
+            $this->getSigningUrl(['success' => false, 'urlType' => 'fail']),
+            Data::getResursOption('always_sign'),
+            $this->getSigningUrl(['success' => false, 'urlType' => 'back'])
+        );
+
+        // The data id is the hey value for finding prior orders on landing pages etc.
+        Data::setOrderMeta($this->order, 'apiDataId', $this->apiDataId);
+        Data::setOrderMeta($this->order, 'orderSigningPayload', $this->getApiData());
+        Data::setOrderMeta($this->order, 'resursReference', $this->getPaymentId());
+
+        return $this;
+    }
+
+    /**
+     * @param null $params
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getSigningUrl($params = null)
+    {
+        $wcApi = WooCommerce::getWcApiUrl();
+        $signingBaseUrl = add_query_arg('apiDataId', $this->apiDataId, $wcApi);
+        $signingBaseUrl = add_query_arg('apiData', $this->getApiData((array)$params, true), $signingBaseUrl);
+
+        Data::setDeveloperLog(
+            __FUNCTION__,
+            sprintf(
+                __('ECom setSigning: %s', 'trbwc'),
+                $signingBaseUrl
+            )
+        );
+        Data::setDeveloperLog(
+            __FUNCTION__,
+            sprintf(
+                __('ECom setSigning parameters: %s', 'trbwc'),
+                print_r($this->getApiData((array)$params), true)
+            )
+        );
+
+        return $signingBaseUrl;
+    }
+
+    /**
+     * @param null $addArray
+     * @param null $encode
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getApiData($addArray = null, $encode = null)
+    {
+        $return = json_encode(array_merge((array)$addArray, $this->apiData));
+
+        if ((bool)$encode) {
+            $return = (new Strings())->base64urlEncode($return);
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * @return $thisapply
+     * @since 0.0.1.0
+     * @todo Complete this.
+     */
+    private function setFee()
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setShipping()
+    {
+        // Add when not free.
+        if ($this->cart->get_shipping_total() > 0) {
+            Data::setDeveloperLog(
+                __FUNCTION__,
+                sprintf('Apply shipping fee %s', $this->cart->get_shipping_total())
+            );
+
+            // Rounding is ironically used with wc settings.
+            $this->API->getConnection()->addOrderLine(
+                WordPress::applyFilters('getShippingName', 'shipping'),
+                WordPress::applyFilters('getShippingDescription', __('Shipping', 'rbwc')),
+                $this->cart->get_shipping_total(),
+                (float)round(
+                    $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
+                    wc_get_price_decimals()
+                ) * 100,
+                $this->getFromProduct('unit', null),
+                'SHIPPING_FEE'
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $getValueType
+     * @param WC_Product $productObject
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function getFromProduct($getValueType, $productObject)
+    {
+        $return = '';
+
+        switch ($getValueType) {
+            case 'artNo':
+                $return = $this->getProperArticleNumber($productObject);
+                break;
+            case 'title':
+                $return = !empty($useTitle = $productObject->get_title()) ? $useTitle : __(
+                    'Article description is missing.',
+                    'trbwc'
+                );
+                break;
+            case 'unitAmountWithoutVat':
+                // Special reflection of what Resurs Bank wants.
+                $return = wc_get_price_excluding_tax($productObject);
+                break;
+            case 'vatPct':
+                $return = $this->getProductVat($productObject);
+                break;
+            case 'unit':
+                // Using default measure from ECom for now.
+                $return = $this->API->getConnection()->getDefaultUnitMeasure();
+                break;
+            default:
+                if (method_exists($productObject, sprintf('get_%s', $getValueType))) {
+                    $return = $productObject->{sprintf('get_%s', $getValueType)}();
+                }
+                break;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Different way to fetch article numbers.
+     * @param WC_Product $product
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private function getProperArticleNumber($product)
+    {
+        $return = $product->get_id();
+        $productSkuValue = $product->get_sku();
+        if (!empty($productSkuValue) &&
+            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
+        ) {
+            $return = $productSkuValue;
+        }
+
+        return WordPress::applyFilters('getArticleNumber', $return, $product);
+    }
+
+    /**
+     * @param WC_Product $product
+     * @return float|int
+     * @since 0.0.1.0
+     */
+    private function getProductVat($product)
+    {
+        $taxClass = $product->get_tax_class();
+        $ratesArray = WC_Tax::get_rates($taxClass);
+
+        $rates = array_shift($ratesArray);
+        if (isset($rates['rate'])) {
+            $return = (double)$rates['rate'];
+        } else {
+            $return = 0;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setCoupon()
+    {
+        if (wc_coupons_enabled()) {
+            $coupons = $this->cart->get_coupons();
+
+            /**
+             * @var string $code
+             * @var WC_Coupon $coupon
+             */
+            foreach ($coupons as $code => $coupon) {
+                /** @var WP_Post $couponInformation */
+                $couponInformation = get_post($coupon->get_id());
+                $couponDescription = !$couponInformation->post_excerpt ? $couponInformation->post_excerpt : __(
+                    'Coupon',
+                    'trbwc'
+                );
+
+                $couponsExcludingTax = Data::getResursOption('coupons_ex_tax');
+
+                Data::setDeveloperLog(
+                    __FUNCTION__,
+                    sprintf('Apply coupon %s', $coupon->get_id())
+                );
+
+                $this->API->getConnection()->addOrderLine(
+                    $coupon->get_id(),
+                    WordPress::applyFilters('getCouponDescription', $couponDescription),
+                    0 - $this->cart->get_coupon_discount_amount(
+                        $coupon->get_code(),
+                        WordPress::applyFilters('couponsExTax', $couponsExcludingTax, $coupon)
+                    ),
+                    WordPress::applyFilters('getCouponVatPct', 0),
+                    $this->getFromProduct('unit', null),
+                    'DISCOUNT'
+                );
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setOrderLines()
+    {
+        if (count($currentCart = $this->cart->get_cart())) {
+            foreach ($currentCart as $item) {
+                /**
+                 * Data object is of type WC_Product_Simple actually.
+                 * @var WC_Product $productData
+                 */
+                $productData = $item['data'];
+
+                if ($productData !== null) {
+                    Data::setDeveloperLog(
+                        __FUNCTION__,
+                        sprintf(
+                            'Add orderline %s.',
+                            $productData->get_id()
+                        )
+                    );
+                    $this->setOrderRow('ORDER_LINE', $productData, $item);
+                }
+            }
+        } else {
+            Data::setLogError(sprintf(
+                __('%s: Could not create order from an empty cart.', 'trbwc')
+            ));
+            throw new RuntimeException(
+                __('Cart is empty!', 'trbwc')
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $rowType
+     * @param WC_Product $productData
+     * @param array $item
+     * @return ResursDefault
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setOrderRow($rowType, $productData, $item)
+    {
+        $this->API->getConnection()->addOrderLine(
+            $this->getFromProduct('artNo', $productData),
+            $this->getFromProduct('title', $productData),
+            $this->getFromProduct('unitAmountWithoutVat', $productData),
+            $this->getFromProduct('vatPct', $productData),
+            $this->getFromProduct('unit', $productData),
+            $rowType,
+            $item['quantity']
+        );
+
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setStoreId()
+    {
+        /** @noinspection PhpDeprecationInspection */
+        $deprecatedStoreId = WordPress::applyFiltersDeprecated('set_storeid', null);
+        $storeId = (int)WordPress::applyFilters('setStoreId', $deprecatedStoreId);
+        if ($storeId) {
+            $this->API->getConnection()->setStoreId($storeId);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     * @throws ResursException
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setCustomerId()
+    {
+        $customerId = $this->getCustomerId();
+        if ($customerId) {
+            $this->API->getConnection()->setMetaData('CustomerId', $customerId);
+        }
+        return $this;
+    }
+
+    /**
+     * @return int
+     * @since 0.0.1.0
+     */
+    private function getCustomerId()
+    {
+        $return = 0;
+        if (function_exists('wp_get_current_user')) {
+            $current_user = wp_get_current_user();
+        } else {
+            $current_user = get_currentuserinfo();
+        }
+
+        if (isset($current_user, $current_user->ID) && $current_user !== null) {
+            $return = $current_user->ID;
+        }
+        // Created orders has higher priority since this id might have been created during order processing
+        if (!empty($this->order) && method_exists($this->order, 'get_user_id')) {
+            $orderUserId = $this->order->get_user_id();
+            if ($orderUserId) {
+                $return = $orderUserId;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setCustomer()
+    {
+        $governmentId = $this->getCustomerData('government_id');
+        Data::setDeveloperLog(__FUNCTION__, sprintf('setCountryByCountryCode:%s', $this->getCustomerData('country')));
+        $this->API->getConnection()->setCountryByCountryCode($this->getCustomerData('country'));
+        if ($governmentId) {
+            Data::setDeveloperLog(__FUNCTION__, 'setBillingByGetAddress');
+            // Prepare a billing address if government id is present.
+            $this->API->getConnection()->setBillingByGetAddress($governmentId);
+        } else {
+            Data::setDeveloperLog(__FUNCTION__, 'setBillingAddress:WC_Order');
+            $this->API->getConnection()->setBillingAddress(
+                $this->getCustomerData('full_name'),
+                $this->getCustomerData('first_name'),
+                $this->getCustomerData('last_name'),
+                $this->getCustomerData('address_1'),
+                $this->getCustomerData('address_2'),
+                $this->getCustomerData('city'),
+                $this->getCustomerData('postcode'),
+                $this->getCustomerData('country')
+            );
+        }
+
+        if (isset($_REQUEST['ship_to_different_address'])) {
+            Data::setDeveloperLog(__FUNCTION__, 'setDeliveryAddress:WC_Order:billing');
+            $this->API->getConnection()->setDeliveryAddress(
+                $this->getCustomerData('full_name', 'shipping'),
+                $this->getCustomerData('first_name', 'shipping'),
+                $this->getCustomerData('last_name', 'shipping'),
+                $this->getCustomerData('address_1', 'shipping'),
+                $this->getCustomerData('address_2', 'shipping'),
+                $this->getCustomerData('city', 'shipping'),
+                $this->getCustomerData('postcode', 'shipping'),
+                $this->getCustomerData('country', 'shipping')
+            );
+        }
+
+        Data::setDeveloperLog(__FUNCTION__, 'setApiCustomer:$_POST');
+        $this->API->getConnection()->setCustomer(
+            $this->getCustomerData('government_id'),
+            $this->getCustomerData('phone'),
+            $this->getCustomerData('mobile'),
+            $this->getCustomerData('email'),
+            'NATURAL',
+            $this->getCustomerData('government_id_contact')
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param string $returnType
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getCustomerData($key, $returnType = null)
+    {
+        $return = isset($this->applicantPostData[$key]) ? $this->applicantPostData[$key] : '';
+
+        if ($key === 'mobile' && isset($return['phone']) && !$return) {
+            $return = $return['phone'];
+        }
+        if ($key === 'phone' && isset($return['mobile']) && !$return) {
+            $return = $return['phone'];
+        }
+
+        // If it's not in the postdata, it could possibly be found in the order maintained from the order.
+        $billingAddress = $this->order->get_address();
+        $deliveryAddress = $this->order->get_address('shipping');
+
+        if ((!$returnType || $returnType === 'billing') && !$return && isset($billingAddress[$key])) {
+            $return = $billingAddress[$key];
+        }
+        if (($returnType === 'shipping' || $returnType === 'delivery') && !$return && isset($deliveryAddress[$key])) {
+            $return = $deliveryAddress[$key];
+        }
+
+        if ($key === 'full_name') {
+            // Full name is a merge from first and last name. It's made up but sometimes necessary.
+            $return = sprintf('%s %s', $this->getCustomerData('first_name'), $this->getCustomerData('last_name'));
+        }
+
+        Data::canLog(Data::CAN_LOG_JUNK, sprintf('%s:%s,%s', __FUNCTION__, $key, $return));
+
+        return (string)$return;
+    }
+
+    /**
+     * Get payment method from ecom data.
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getPaymentMethod()
+    {
+        return (string)isset($this->paymentMethodInformation->id) ? $this->paymentMethodInformation->id : '';
+    }
+
+    /**
+     * Hosted checkout flow. Like simplified, but less data.
+     * @param $return
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
+     */
+    private function processHosted($return)
+    {
+        $this->API->setCheckoutType(RESURS_FLOW_TYPES::HOSTED_FLOW);
+        $this->API->setFraudFlags();
+        $this->setOrderData();
+        $this->setCardData();
+    }
+
+    /**
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setCardData()
+    {
+        $this->API->getConnection()->setCardData(
+            $this->getCustomerData('card_number')
+        );
+
+        return $this;
+    }
+
+    /**
+     * Standard Resurs Checkout. Not interceptor ready.
+     * @param $return
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection PhpUnusedPrivateMethodInspection
+     */
+    private function processRco($return)
+    {
+        $this->API->setCheckoutType(RESURS_FLOW_TYPES::RESURS_CHECKOUT);
+        // setFraudFlags can not be set for this checkout type.
+        $this->setOrderData();
     }
 }
