@@ -67,6 +67,22 @@ class ResursDefault extends WC_Payment_Gateway
     const STATUS_CANCELLED = 'cancelled';
 
     /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const TYPE_HOSTED = 'hosted';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const TYPE_SIMPLIFIED = 'simplified';
+    /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const TYPE_RCO = 'rco';
+
+    /**
      * @var array $applicantPostData Applicant request.
      * @since 0.0.1.0
      */
@@ -512,14 +528,14 @@ class ResursDefault extends WC_Payment_Gateway
             $this->wcOrderData = Data::getOrderInfo($this->order);
 
             if ($this->isSuccess() && $this->setFinalSigning()) {
-                if ($this->getCheckoutType() === 'simplified') {
+                if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
                     // When someone returns with a successful call.
                     if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
                         !Data::getOrderMeta('signingOk', $this->wcOrderData)
                     ) {
                         $finalRedirectUrl = $this->get_return_url($this->order);
                     }
-                } elseif ($this->getCheckoutType() === 'hosted') {
+                } elseif ($this->getCheckoutType() === self::TYPE_HOSTED) {
                     $finalRedirectUrl = $this->get_return_url($this->order);
                 }
             } else {
@@ -614,12 +630,12 @@ class ResursDefault extends WC_Payment_Gateway
         $return = false;
         try {
             if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order)) ||
-                $this->getCheckoutType() === 'hosted'
+                $this->getCheckoutType() === self::TYPE_HOSTED
             ) {
                 $bookSignedOrderReference = Data::getOrderMeta('resursReference', $this->wcOrderData);
                 $this->setFinalSigningNotes($bookSignedOrderReference);
                 // Signing is only necessary for simplified flow.
-                if ($this->getCheckoutType() === 'simplified') {
+                if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
                     $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
                         $bookSignedOrderReference
                     );
