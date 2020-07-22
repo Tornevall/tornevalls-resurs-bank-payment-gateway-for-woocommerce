@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-22 14:56+0200\n"
-"PO-Revision-Date: 2020-07-22 14:56+0200\n"
+"POT-Creation-Date: 2020-07-22 18:30+0200\n"
+"PO-Revision-Date: 2020-07-22 18:31+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -44,89 +44,77 @@ msgstr "Resurs Bank betalnings-gateway med dynamiska betalsätt."
 msgid "Resurs Bank AB"
 msgstr "Resurs Bank AB"
 
-#: src/Gateway/ResursDefault.php:438
+#: src/Gateway/ResursDefault.php:439
 #, php-format
 msgid "Resurs Bank processing order (%s)."
 msgstr "Resurs Bank behandlar order (%s)."
 
-#: src/Gateway/ResursDefault.php:446
+#: src/Gateway/ResursDefault.php:447
 #, php-format
-msgid "%s: Initialize Resurs Bank %s (%s) via %s."
-msgstr "%s: Initierar Resurs Bank %s (%s) via %s."
+msgid "%s: Initialize Resurs Bank process, order %s (%s) via %s."
+msgstr "%s: Initierar Resurs Bank-procedur, order %s (%s) via %s."
 
-#: src/Gateway/ResursDefault.php:464
+#: src/Gateway/ResursDefault.php:465
 msgid "Chosen checkout type is currently unsupported"
 msgstr "Vald utcheckningstyp stöds för närvarande inte"
 
-#: src/Gateway/ResursDefault.php:473
+#: src/Gateway/ResursDefault.php:474
 #, php-format
 msgid "%s: Order %s returned \"%s\" to WooCommerce."
-msgstr "%s: Order %s returnerade %s till WooCommerce."
+msgstr "%s: Order %s returnerades %s till WooCommerce."
 
-#: src/Gateway/ResursDefault.php:504
+#: src/Gateway/ResursDefault.php:506
 #, php-format
 msgid "API data request: %s."
 msgstr "API-databegäran: %s."
 
-#: src/Gateway/ResursDefault.php:506
-msgid "Returning customer. Validating order with WooCommerce."
-msgstr "Återvändande kund. Validerar order med WooCommerce."
+#: src/Gateway/ResursDefault.php:508
+msgid ""
+"Customer returned from Resurs Bank. WooCommerce order validation in progress."
+msgstr ""
+"Kund återvände från Resurs Bank. Ordervalidering från WooCommerce pågår."
 
-#: src/Gateway/ResursDefault.php:507
+#: src/Gateway/ResursDefault.php:509
 msgid "wc_order_id + preferred_id not present"
 msgstr "wc_order_id + preferred_id saknas"
 
-#: src/Gateway/ResursDefault.php:521
-msgid ""
-"Could not complete your order. Please, contact support for more information."
-msgstr ""
-"Det gick inte att slutföra din beställning. Vänligen kontakta supporten för "
-"mer information."
-
-#: src/Gateway/ResursDefault.php:529
-msgid "Returning customer failed or aborted signing process."
-msgstr "Återkommande kund misslyckades eller avbröt signeringsprocessen."
-
-#: src/Gateway/ResursDefault.php:532
-msgid ""
-"Could not complete order due to signing problems. Did you cancel your order?"
-msgstr ""
-"Det gick inte att slutföra ordern på grund av signeringsproblem. Har du "
-"avbrutit din köp?"
-
-#: src/Gateway/ResursDefault.php:596
+#: src/Gateway/ResursDefault.php:556
 #, php-format
-msgid "Customer returned from Resurs Bank signing to complete order %s."
-msgstr ""
-"Kunden återvände från Resurs Banks signering för att slutföra ordern %s."
+msgid "Finishing. Ready to redirect customer. Using URL %s"
+msgstr "Avslutar. Redo att omdirigera kunden. Använder URL %s"
 
-#: src/Gateway/ResursDefault.php:637
+#: src/Gateway/ResursDefault.php:655
+#, php-format
+msgid "Customer returned from Resurs Bank to complete order %s."
+msgstr "Kunden återvände från Resurs Bank för att slutföra order %s."
+
+#: src/Gateway/ResursDefault.php:687
 msgid "Order is debited and completed."
 msgstr "Beställningen är debiterad och slutförd."
 
-#: src/Gateway/ResursDefault.php:645
+#: src/Gateway/ResursDefault.php:695
 msgid "Order is booked and ready to handle."
 msgstr "Beställningen är bokad och klar att hantera."
 
-#: src/Gateway/ResursDefault.php:653
+#: src/Gateway/ResursDefault.php:703
 msgid "Order is frozen and waiting for manual inspection."
 msgstr "Beställningen är frusen och väntar på manuell inspektion."
 
-#: src/Gateway/ResursDefault.php:662
+#: src/Gateway/ResursDefault.php:712
 msgid "Resurs Bank requires signing on this order. Customer redirected."
 msgstr "Resurs Bank kräver signering av ordern. Kunden omdirigeras."
 
-#: src/Gateway/ResursDefault.php:670
+#: src/Gateway/ResursDefault.php:720
 #, php-format
 msgid "The booking failed with status %s. Customer notified in checkout."
 msgstr "Bokningen misslyckades med status %s. Kunden meddelas i kassan."
 
-#: src/Gateway/ResursDefault.php:674
+#: src/Gateway/ResursDefault.php:724
 msgid ""
 "The payment can not complete. Contact customer services for more information."
 msgstr "Ordern kan inte slutföras. Kontakta kundservice för mer information."
 
-#: src/Gateway/ResursDefault.php:782
+#: src/Gateway/ResursDefault.php:832
 #, php-format
 msgid ""
 "Booking this signed payment has been running multiple times but failed with "
@@ -135,7 +123,7 @@ msgstr ""
 "Bokningen av den här signerade betalningen har pågått flera gånger men "
 "misslyckades med fel %s."
 
-#: src/Gateway/ResursDefault.php:792
+#: src/Gateway/ResursDefault.php:842
 #, php-format
 msgid ""
 "Tried to book signed payment but skipped: This has happened before and an "
@@ -144,34 +132,67 @@ msgstr ""
 "Försökte boka signerad betalning men hoppades över: Detta har gjorts "
 "tidigare och ett fel med kod %d inträffade den gången."
 
-#: src/Gateway/ResursDefault.php:925
+#: src/Gateway/ResursDefault.php:878
+msgid ""
+"Could not complete your order. Please contact support for more information."
+msgstr ""
+"Det gick inte att slutföra din beställning. Vänligen kontakta supporten för "
+"mer information."
+
+#: src/Gateway/ResursDefault.php:884
+msgid ""
+"Could not complete order due to signing problems. Did you cancel your order?"
+msgstr ""
+"Det gick inte att slutföra ordern på grund av signeringsproblem. Har du "
+"avbrutit din köp?"
+
+#: src/Gateway/ResursDefault.php:900
+#, php-format
+msgid ""
+"Customer returned via urlType \"%s\" - failed or cancelled payment (signing "
+"required: %s)."
+msgstr ""
+"Kunden returnerades via urltyp \"%s\" - misslyckades eller avbröt "
+"betalningen (signering krävdes: %s)."
+
+#: src/Gateway/ResursDefault.php:902 src/Module/FormFields.php:315
+#: src/Module/FormFields.php:396 src/Module/FormFields.php:408
+#: src/Module/FormFields.php:420
+msgid "Yes"
+msgstr "Ja"
+
+#: src/Gateway/ResursDefault.php:902
+msgid "No"
+msgstr "Nej"
+
+#: src/Gateway/ResursDefault.php:1021
 #, php-format
 msgid "ECom setSigning: %s"
 msgstr "ECom setSigning: %s"
 
-#: src/Gateway/ResursDefault.php:932
+#: src/Gateway/ResursDefault.php:1028
 #, php-format
 msgid "ECom setSigning parameters: %s"
 msgstr "ECom setSigning parametrar: %s"
 
-#: src/Gateway/ResursDefault.php:984
+#: src/Gateway/ResursDefault.php:1080
 msgid "Shipping"
 msgstr "Frakt"
 
-#: src/Gateway/ResursDefault.php:1015
+#: src/Gateway/ResursDefault.php:1111
 msgid "Article description is missing."
 msgstr "Artikelbeskrivning saknas."
 
-#: src/Gateway/ResursDefault.php:1097
+#: src/Gateway/ResursDefault.php:1193
 msgid "Coupon"
 msgstr "Kupong"
 
-#: src/Gateway/ResursDefault.php:1151
+#: src/Gateway/ResursDefault.php:1247
 #, php-format
 msgid "%s: Could not create order from an empty cart."
 msgstr "%s: Det gick inte att skapa order från en tom kundvagn."
 
-#: src/Gateway/ResursDefault.php:1154
+#: src/Gateway/ResursDefault.php:1250
 msgid "Cart is empty!"
 msgstr "Varukorgen är tom!"
 
@@ -181,8 +202,8 @@ msgstr "Inställningar"
 
 #: src/Helper/WooCommerce.php:235
 #, php-format
-msgid "EComPHP data present, storing api meta to order %s."
-msgstr "EComPHP data existerar, lagrar API-meta till order %s."
+msgid "EComPHP data present. Saving metadata for order %s."
+msgstr "Det finns data från EComPHP. Sparar metadata för order %s."
 
 #: src/Helper/WooCommerce.php:469
 #, php-format
@@ -664,11 +685,6 @@ msgstr "Avancerat API"
 msgid "Coupons are added excluding tax"
 msgstr "Kuponger läggs till exklusive moms"
 
-#: src/Module/FormFields.php:315 src/Module/FormFields.php:396
-#: src/Module/FormFields.php:408 src/Module/FormFields.php:420
-msgid "Yes"
-msgstr "Ja"
-
 #: src/Module/FormFields.php:317
 msgid ""
 "When order rows are added to Resurs Bank API, discount amounts are added "
@@ -953,6 +969,12 @@ msgstr "Anslut Resurs Bank som WooCommerce betalningsgateway."
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
 msgstr "Tomas Tornevall"
+
+#, fuzzy
+#~| msgid "Returning customer. Validating order with WooCommerce."
+#~ msgid ""
+#~ "Returning customer - Thank you request. Validating order with WooCommerce."
+#~ msgstr "Återvändande kund. Validerar order med WooCommerce."
 
 #~ msgid "Merchant based details at order events"
 #~ msgstr "Detaljer vid orderhändelser"

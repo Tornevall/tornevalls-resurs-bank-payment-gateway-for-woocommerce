@@ -157,6 +157,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function setPaymentMethodInformation($paymentMethodInformation)
     {
         if (is_object($paymentMethodInformation)) {
+            $this->apiData['checkoutType'] = Data::getResursOption('checkout_type');
             $this->apiDataId = sha1(uniqid('wc-api', true));
             $this->API = new Api();
             $this->paymentMethodInformation = $paymentMethodInformation;
@@ -443,9 +444,9 @@ class ResursDefault extends WC_Payment_Gateway
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
-                    __('%s: Initialize Resurs Bank %s (%s) via %s.', 'trbwc'),
+                    __('%s: Initialize Resurs Bank process, order %s (%s) via %s.', 'trbwc'),
                     __FUNCTION__,
-                    $order->get_id(),
+                    $this->order->get_id(),
                     $this->getPaymentId(),
                     $checkoutRequestType
                 )
@@ -481,6 +482,7 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
     public function getApiRequest()
@@ -503,39 +505,58 @@ class ResursDefault extends WC_Payment_Gateway
                 sprintf(
                     __('API data request: %s.', 'trbwc'),
                     $this->apiData['isReturningCustomer'] ?
-                        __('Returning customer. Validating order with WooCommerce.', 'trbwc') :
+                        __('Customer returned from Resurs Bank. WooCommerce order validation in progress.', 'trbwc') :
                         __('wc_order_id + preferred_id not present', 'trbwc')
                 )
             );
             $this->wcOrderData = Data::getOrderInfo($this->order);
 
-            if ($this->isSuccess()) {
-                // When someone returns with a successful call.
-                if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
-                    !Data::getOrderMeta('signingOk', $this->wcOrderData) && $this->setFinalSigning()
-                ) {
+            if ($this->isSuccess() && $this->setFinalSigning()) {
+                if ($this->getCheckoutType() === 'simplified') {
+                    // When someone returns with a successful call.
+                    if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
+                        !Data::getOrderMeta('signingOk', $this->wcOrderData)
+                    ) {
+                        $finalRedirectUrl = $this->get_return_url($this->order);
+                    }
+                } elseif ($this->getCheckoutType() === 'hosted') {
                     $finalRedirectUrl = $this->get_return_url($this->order);
                 }
             } else {
-                $noticeMessage = __(
-                    'Could not complete your order. Please, contact support for more information.',
-                    'trbwc'
-                );
+                // Landing here is complex, but this part of the method is based on failures.
+                $signing = false;       // Initially, we presume no signing was in action.
                 if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
                     !Data::getOrderMeta('signingOk', $this->wcOrderData)
                 ) {
-                    $this->updateOrderStatus(
-                        self::STATUS_CANCELLED,
-                        __('Returning customer failed or aborted signing process.', 'trbwc')
-                    );
-                    $noticeMessage = __(
-                        'Could not complete order due to signing problems. Did you cancel your order?',
-                        'trbwc'
-                    );
+                    // If we however find the order flagged with signing requirement metas, we presume
+                    // customer aborted payment or failed the signing.
+                    $signing = true;
                 }
-                wc_add_notice($noticeMessage);
+                // Now, we should push out a notice to the customer that the order is about to get annulled
+                // in WooCommerce. If there is signs of signing, the message will look a bit different.
+                $setCustomerNotice = $this->getCustomerAfterSigningNotices($signing);
+                // Now that we have the customer notice, we'll create a similar for the merchant the same way.
+                $cancelNote = $this->getCancelNotice($signing);
+                // For the sake of logging, we'll also add that note to the logged to keep them collected for
+                // debugging.
+                Data::canLog(Data::CAN_LOG_ORDER_EVENTS, $cancelNote);
+                // Now that we have all necessary data, we'll cancelling the order.
+                $this->updateOrderStatus(
+                    self::STATUS_CANCELLED,
+                    $cancelNote
+                );
+                // And then we prepare WooCommerce to show this visually.
+                wc_add_notice($setCustomerNotice);
             }
         }
+
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                __('Finishing. Ready to redirect customer. Using URL %s', 'trbwc'),
+                $finalRedirectUrl
+            )
+        );
 
         wp_safe_redirect($finalRedirectUrl);
         die;
@@ -582,6 +603,8 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Final signing: Checks and update order if signing was required initially. Let it through on hosted but
+     * keep logging the details.
      * @return bool
      * @throws Exception
      * @since 0.0.1.0
@@ -590,21 +613,18 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $return = false;
         try {
-            if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order))) {
+            if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order)) ||
+                $this->getCheckoutType() === 'hosted'
+            ) {
                 $bookSignedOrderReference = Data::getOrderMeta('resursReference', $this->wcOrderData);
-                $customerSignedMessage = sprintf(
-                    __('Customer returned from Resurs Bank signing to complete order %s.', 'trbwc'),
-                    $bookSignedOrderReference
-                );
-                Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS,
-                    $customerSignedMessage
-                );
-                $this->order->add_order_note($customerSignedMessage);
-                $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
-                    $bookSignedOrderReference
-                );
-                $this->getResultByPaymentStatus();
+                $this->setFinalSigningNotes($bookSignedOrderReference);
+                // Signing is only necessary for simplified flow.
+                if ($this->getCheckoutType() === 'simplified') {
+                    $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
+                        $bookSignedOrderReference
+                    );
+                    $this->getResultByPaymentStatus();
+                }
                 $return = true;
             } else {
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
@@ -617,6 +637,32 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getCheckoutType()
+    {
+        return (string)$this->getApiValue('checkoutType');
+    }
+
+    /**
+     * @param $bookSignedOrderReference
+     * @since 0.0.1.0
+     */
+    private function setFinalSigningNotes($bookSignedOrderReference)
+    {
+        $customerSignedMessage = sprintf(
+            __('Customer returned from Resurs Bank to complete order %s.', 'trbwc'),
+            $bookSignedOrderReference
+        );
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            $customerSignedMessage
+        );
+        $this->order->add_order_note($customerSignedMessage);
+    }
+
+    /**
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
@@ -625,8 +671,12 @@ class ResursDefault extends WC_Payment_Gateway
     {
         Data::canLog(
             Data::CAN_LOG_ORDER_EVENTS,
-            sprintf('%s bookPaymentStatus order %s:%s', __FUNCTION__, $this->order->get_id(),
-                $this->getBookPaymentStatus())
+            sprintf(
+                '%s bookPaymentStatus order %s:%s',
+                __FUNCTION__,
+                $this->order->get_id(),
+                $this->getBookPaymentStatus()
+            )
         );
         switch ($this->getBookPaymentStatus()) {
             case 'FINALIZED':
@@ -802,19 +852,60 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setFinalSigningExceptionNotes()
+    private function setFinalSigningExceptionNotes($bookSignedException)
     {
-        Data::setLogException($booksignedException);
+        Data::setLogException($bookSignedException);
         Data::setOrderMeta(
             $this->order,
             'bookSignedPaymentExceptionCode',
-            $booksignedException->getCode()
+            $bookSignedException->getCode()
         );
         Data::setOrderMeta(
             $this->order,
             'bookSignedPaymentExceptionMessage',
-            $booksignedException->getMessage()
+            $bookSignedException->getMessage()
         );
+    }
+
+    /**
+     * @param $signing
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getCustomerAfterSigningNotices($signing)
+    {
+        $return = __(
+            'Could not complete your order. Please contact support for more information.',
+            'trbwc'
+        );
+
+        if ($signing) {
+            $return = (string)__(
+                'Could not complete order due to signing problems. Did you cancel your order?',
+                'trbwc'
+            );
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * @param $signing
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getCancelNotice($signing)
+    {
+        return sprintf(
+            __('Customer returned via urlType "%s" - failed or cancelled payment (signing required: %s).', 'trbwc'),
+            $this->getUrlType(),
+            $signing ? __('Yes', 'trbwc') : __('No', 'trbwc')
+        );
+    }
+
+    private function getUrlType()
+    {
+        return $this->getApiValue('urlType');
     }
 
     /**
@@ -827,7 +918,11 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Simplified shopflow.
+     * Simplified shop flow.
+     * All flows should have three sections:
+     * #1 Prepare order
+     * #2 Create order
+     * #3 Log, handle and return response
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
@@ -835,20 +930,19 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function processSimplified()
     {
+        // Section #1: Prepare order.
         $this->API->setCheckoutType(RESURS_FLOW_TYPES::SIMPLIFIED_FLOW);
         $this->API->setFraudFlags();
         $this->setOrderData();
-        Data::setDeveloperLog(
-            __FUNCTION__,
-            sprintf('%s createPayment %s init', __FUNCTION__, $this->getPaymentMethod())
-        );
+        $this->setCreatePaymentNotice(__FUNCTION__);
+
+        // Section #2: Create Order
         $this->paymentResponse = $this->API->getConnection()->createPayment(
             $this->getPaymentMethod()
         );
 
-        // Keep last payment status.
+        // Section #3: Log, handle and return response
         Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->getBookPaymentStatus());
-
         Data::canLog(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
@@ -860,6 +954,7 @@ class ResursDefault extends WC_Payment_Gateway
             )
         );
 
+        // Return booking result.
         return $this->getResultByPaymentStatus();
     }
 
@@ -901,6 +996,7 @@ class ResursDefault extends WC_Payment_Gateway
         );
 
         // The data id is the hey value for finding prior orders on landing pages etc.
+        Data::setOrderMeta($this->order, 'checkoutType', Data::getResursOption('checkout_type'));
         Data::setOrderMeta($this->order, 'apiDataId', $this->apiDataId);
         Data::setOrderMeta($this->order, 'orderSigningPayload', $this->getApiData());
         Data::setOrderMeta($this->order, 'resursReference', $this->getPaymentId());
@@ -1333,6 +1429,19 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @param $fromFunction
+     * @since 0.0.1.0
+     */
+    private function setCreatePaymentNotice($fromFunction)
+    {
+        // Create payment for simplified (log in all flows).
+        Data::setDeveloperLog(
+            $fromFunction,
+            sprintf('createPayment %s init', $this->getPaymentMethod())
+        );
+    }
+
+    /**
      * Get payment method from ecom data.
      * @return string
      * @since 0.0.1.0
@@ -1344,18 +1453,49 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Hosted checkout flow. Like simplified, but less data.
+     * All flows should have three sections:
+     * #1 Prepare order
+     * #2 Create order
+     * #3 Log, handle and return response
      * @param $return
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection PhpUnusedPrivateMethodInspection
      */
-    private function processHosted($return)
+    private function processHosted()
     {
         $this->API->setCheckoutType(RESURS_FLOW_TYPES::HOSTED_FLOW);
         $this->API->setFraudFlags();
         $this->setOrderData();
-        $this->setCardData();
+        $this->setCreatePaymentNotice(__FUNCTION__);
+
+        // Section #2: Create Order
+        $this->paymentResponse = $this->API->getConnection()->createPayment(
+            $this->getPaymentMethod()
+        );
+
+        // Section #3: Log, handle and return response
+
+        // Make sure the response contains an url (not necessarily a https-based URL in staging, so compare with http).
+        if (strncmp($this->paymentResponse, 'http', 4) === 0) {
+            $return = $this->getResult('success', $this->paymentResponse);
+        } else {
+            $return = $this->getResult('failed');
+        }
+
+        Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->paymentResponse);
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                '%s: %s:bookPaymentStatus:hosted:%s',
+                __FUNCTION__,
+                $this->getPaymentId(),
+                $this->paymentResponse
+            )
+        );
+
+        return $return;
     }
 
     /**

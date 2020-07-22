@@ -232,7 +232,7 @@ class WooCommerce
                 Data::setLogInternal(
                     Data::LOG_NOTICE,
                     sprintf(
-                        __('EComPHP data present, storing api meta to order %s.', 'trbwc'),
+                        __('EComPHP data present. Saving metadata for order %s.', 'trbwc'),
                         $orderData['order']->get_id()
                     )
                 );
