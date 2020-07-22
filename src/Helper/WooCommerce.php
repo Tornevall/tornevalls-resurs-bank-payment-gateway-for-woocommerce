@@ -14,10 +14,6 @@ use TorneLIB\Exception\ExceptionHandler;
 use WC_Session;
 use function in_array;
 
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 /**
  * Class WooCommerce WooCommerce related actions.
  * @package ResursBank

@@ -8,10 +8,6 @@ use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use TorneLIB\IO\Data\Strings;
 
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 /**
  * Class WordPress WordPress related actions.
  * @package ResursBank

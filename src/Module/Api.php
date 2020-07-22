@@ -1,5 +1,4 @@
 <?php
-/** @noinspection PhpUndefinedClassInspection */
 
 namespace ResursBank\Module;
 
@@ -73,8 +72,8 @@ class Api
                 $resurs = self::getEcomBySecondaryCredentials($credentialMeta, $orderId);
                 $return = $resurs->getPayment($orderId);
                 $return->isCurrentCredentials = false;
-                $return->username = $credentialMeta->l;
-                $return->environment = $credentialMeta->e;
+                $return->username = isset($credentialMeta->l) ? $credentialMeta->l : '';
+                $return->environment = isset($credentialMeta->e) ? $credentialMeta->e : 1;
             } else {
                 $return = self::getResurs()->getPayment($orderId);
                 $return->isCurrentCredentials = true;
@@ -235,6 +234,7 @@ class Api
 
     /**
      * @param $credentialMeta
+     * @param $orderId
      * @return ResursBank
      * @throws Exception
      * @since 0.0.1.0
@@ -254,7 +254,9 @@ class Api
             )
         );
         return self::getTemporaryEcom(
-            $credentialMeta->l, $credentialMeta->p, in_array($credentialMeta->e, ['test', 'staging']) ? 1 : 0
+            isset($credentialMeta->l) ? $credentialMeta->l : '',
+            isset($credentialMeta->p) ? $credentialMeta->p : '',
+            in_array($credentialMeta->e, ['test', 'staging']) ? 1 : 0
         );
     }
 
