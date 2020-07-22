@@ -9,10 +9,6 @@ use ResursBank\Module\FormFields;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 /**
  * Class Settings
  * @package Resursbank\Gateway

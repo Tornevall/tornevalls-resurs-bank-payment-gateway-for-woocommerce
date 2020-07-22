@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection ParameterDefaultValueIsNotNullInspection */
-
 namespace ResursBank\Module;
 
 use Exception;
@@ -216,7 +214,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    public static function getGatewayPath($subDirectory = '')
+    public static function getGatewayPath($subDirectory = null)
     {
         $subPathTest = preg_replace('/\//', '', $subDirectory);
         $gatewayPath = preg_replace('/\/+$/', '', RESURSBANK_GATEWAY_PATH);
@@ -233,7 +231,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    private static function getImageUrl($imageFileName = '')
+    private static function getImageUrl($imageFileName = null)
     {
         $return = sprintf(
             '%s/images',
@@ -286,7 +284,7 @@ class Data
      * @return array
      * @version 0.0.1.0
      */
-    public static function getPluginScripts($isAdmin = false)
+    public static function getPluginScripts($isAdmin = null)
     {
         if ($isAdmin) {
             $return = self::$jsLoadersAdmin;
@@ -305,7 +303,7 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getPluginStyles($isAdmin = false)
+    public static function getPluginStyles($isAdmin = null)
     {
         if ($isAdmin) {
             $return = self::$stylesAdmin;
@@ -383,6 +381,7 @@ class Data
      * @param string $namespace
      * @return bool|mixed|null
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function getResursOptionDeprecated($key, $namespace = 'woocommerce_resurs-bank_settings')
     {
@@ -425,7 +424,7 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getPrefix($extra = '')
+    public static function getPrefix($extra = null)
     {
         if (empty($extra)) {
             return RESURSBANK_PREFIX;
@@ -523,7 +522,7 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getPluginTitle($getBaseName = false)
+    public static function getPluginTitle($getBaseName = null)
     {
         return !$getBaseName ? self::getPluginDataContent('Plugin Name') : WooCommerce::getBaseName();
     }
@@ -533,7 +532,7 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getFormFields($getBasic = false)
+    public static function getFormFields($getBasic = null)
     {
         return FormFields::getFormFields($getBasic);
     }
@@ -854,7 +853,7 @@ class Data
      * @throws ResursException
      * @since 0.0.1.0
      */
-    public static function getOrderInfo($order, $orderIsResursReference = false)
+    public static function getOrderInfo($order, $orderIsResursReference = null)
     {
         $return = [];
         $orderId = null;
@@ -895,10 +894,11 @@ class Data
         global $wpdb;
         $return = null;
 
+        $tableName = $wpdb->prefix . 'postmeta';
         foreach (self::$searchArray as $key) {
             $getPostId = $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '%s' and meta_value = '%s'",
+                    "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
                     $key,
                     $order
                 )
@@ -988,11 +988,11 @@ class Data
                 $return = WooCommerce::getPaymentInfoDetails($return);
             }
         } catch (Exception $e) {
-            Data::canLog(
-                Data::CAN_LOG_ORDER_EVENTS,
+            self::canLog(
+                self::CAN_LOG_ORDER_EVENTS,
                 sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
             );
-            Data::setLogException($e);
+            self::setLogException($e);
             $return['ecomException'] = [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
@@ -1061,10 +1061,10 @@ class Data
      * @param array $orderData
      * @since 0.0.1.0
      */
-    private static function getLocalizedOrderData($orderData = [])
+    private static function getLocalizedOrderData($orderData = null)
     {
         $localizeArray = [
-            'resursOrder' => $orderData['resurs'],
+            'resursOrder' => isset($orderData['resurs']) ? $orderData['resurs'] : '',
             'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
         ];
 
@@ -1113,7 +1113,7 @@ class Data
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderMeta($order, $key, $value, $protected = true)
+    public static function setOrderMeta($order, $key, $value, $protected = null)
     {
         $return = false;
 
@@ -1189,9 +1189,9 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getGeneralSettings($settings = [])
+    public static function getGeneralSettings($settings = null)
     {
-        foreach ($settings as $setting) {
+        foreach ((array)$settings as $setting) {
             if (isset($setting['id']) && $setting['id'] === 'woocommerce_price_num_decimals') {
                 $currentPriceDecimals = wc_get_price_decimals();
                 if ($currentPriceDecimals < 2 && self::getResursOption('prevent_rounding_panic')) {
@@ -1203,7 +1203,7 @@ class Data
                 }
             }
         }
-        return $settings;
+        return (array)$settings;
     }
 
     /**

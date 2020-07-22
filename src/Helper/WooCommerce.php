@@ -14,10 +14,6 @@ use TorneLIB\Exception\ExceptionHandler;
 use WC_Session;
 use function in_array;
 
-if (!defined('ABSPATH')) {
-    exit;
-}
-
 /**
  * Class WooCommerce WooCommerce related actions.
  * @package ResursBank
@@ -232,7 +228,7 @@ class WooCommerce
                 Data::setLogInternal(
                     Data::LOG_NOTICE,
                     sprintf(
-                        __('EComPHP data present, storing api meta to order %s.', 'trbwc'),
+                        __('EComPHP data present. Saving metadata for order %s.', 'trbwc'),
                         $orderData['order']->get_id()
                     )
                 );
