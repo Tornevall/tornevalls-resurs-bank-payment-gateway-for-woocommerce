@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2020-07-22 13:13+0200\n"
-"PO-Revision-Date: 2020-07-22 13:13+0200\n"
+"POT-Creation-Date: 2020-07-22 14:56+0200\n"
+"PO-Revision-Date: 2020-07-22 14:56+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -32,101 +32,101 @@ msgstr "Plugin- och kontoinställningar"
 msgid "Extended configuration view for Resurs Bank: %s"
 msgstr "Utökad konfigurationsvy för Resurs Bank: %s"
 
-#: src/Gateway/ResursDefault.php:113
+#: src/Gateway/ResursDefault.php:143
 msgid "Resurs Bank"
 msgstr "Resurs Bank"
 
-#: src/Gateway/ResursDefault.php:114
+#: src/Gateway/ResursDefault.php:144
 msgid "Resurs Bank Payment Gateway with dynamic payment methods."
 msgstr "Resurs Bank betalnings-gateway med dynamiska betalsätt."
 
-#: src/Gateway/ResursDefault.php:115
+#: src/Gateway/ResursDefault.php:145
 msgid "Resurs Bank AB"
 msgstr "Resurs Bank AB"
 
-#: src/Gateway/ResursDefault.php:408
+#: src/Gateway/ResursDefault.php:438
 #, php-format
 msgid "Resurs Bank processing order (%s)."
 msgstr "Resurs Bank behandlar order (%s)."
 
-#: src/Gateway/ResursDefault.php:416
+#: src/Gateway/ResursDefault.php:446
 #, php-format
 msgid "%s: Initialize Resurs Bank %s (%s) via %s."
 msgstr "%s: Initierar Resurs Bank %s (%s) via %s."
 
-#: src/Gateway/ResursDefault.php:434
+#: src/Gateway/ResursDefault.php:464
 msgid "Chosen checkout type is currently unsupported"
 msgstr "Vald utcheckningstyp stöds för närvarande inte"
 
-#: src/Gateway/ResursDefault.php:443
+#: src/Gateway/ResursDefault.php:473
 #, php-format
 msgid "%s: Order %s returned \"%s\" to WooCommerce."
 msgstr "%s: Order %s returnerade %s till WooCommerce."
 
-#: src/Gateway/ResursDefault.php:474
+#: src/Gateway/ResursDefault.php:504
 #, php-format
 msgid "API data request: %s."
 msgstr "API-databegäran: %s."
 
-#: src/Gateway/ResursDefault.php:476
+#: src/Gateway/ResursDefault.php:506
 msgid "Returning customer. Validating order with WooCommerce."
 msgstr "Återvändande kund. Validerar order med WooCommerce."
 
-#: src/Gateway/ResursDefault.php:477
+#: src/Gateway/ResursDefault.php:507
 msgid "wc_order_id + preferred_id not present"
 msgstr "wc_order_id + preferred_id saknas"
 
-#: src/Gateway/ResursDefault.php:491
+#: src/Gateway/ResursDefault.php:521
 msgid ""
 "Could not complete your order. Please, contact support for more information."
 msgstr ""
 "Det gick inte att slutföra din beställning. Vänligen kontakta supporten för "
 "mer information."
 
-#: src/Gateway/ResursDefault.php:499
+#: src/Gateway/ResursDefault.php:529
 msgid "Returning customer failed or aborted signing process."
 msgstr "Återkommande kund misslyckades eller avbröt signeringsprocessen."
 
-#: src/Gateway/ResursDefault.php:502
+#: src/Gateway/ResursDefault.php:532
 msgid ""
 "Could not complete order due to signing problems. Did you cancel your order?"
 msgstr ""
 "Det gick inte att slutföra ordern på grund av signeringsproblem. Har du "
 "avbrutit din köp?"
 
-#: src/Gateway/ResursDefault.php:566
+#: src/Gateway/ResursDefault.php:596
 #, php-format
 msgid "Customer returned from Resurs Bank signing to complete order %s."
 msgstr ""
 "Kunden återvände från Resurs Banks signering för att slutföra ordern %s."
 
-#: src/Gateway/ResursDefault.php:607
+#: src/Gateway/ResursDefault.php:637
 msgid "Order is debited and completed."
 msgstr "Beställningen är debiterad och slutförd."
 
-#: src/Gateway/ResursDefault.php:615
+#: src/Gateway/ResursDefault.php:645
 msgid "Order is booked and ready to handle."
 msgstr "Beställningen är bokad och klar att hantera."
 
-#: src/Gateway/ResursDefault.php:623
+#: src/Gateway/ResursDefault.php:653
 msgid "Order is frozen and waiting for manual inspection."
 msgstr "Beställningen är frusen och väntar på manuell inspektion."
 
-#: src/Gateway/ResursDefault.php:632
+#: src/Gateway/ResursDefault.php:662
 msgid "Resurs Bank requires signing on this order. Customer redirected."
 msgstr "Resurs Bank kräver signering av ordern. Kunden omdirigeras."
 
-#: src/Gateway/ResursDefault.php:640
+#: src/Gateway/ResursDefault.php:670
 #, php-format
 msgid "The booking failed with status %s. Customer notified in checkout."
 msgstr "Bokningen misslyckades med status %s. Kunden meddelas i kassan."
 
-#: src/Gateway/ResursDefault.php:644
+#: src/Gateway/ResursDefault.php:674
 msgid ""
 "The payment can not complete. Contact customer services for more information."
 msgstr "Ordern kan inte slutföras. Kontakta kundservice för mer information."
 
-#: src/Gateway/ResursDefault.php:752
+#: src/Gateway/ResursDefault.php:782
 #, php-format
 msgid ""
 "Booking this signed payment has been running multiple times but failed with "
@@ -135,7 +135,7 @@ msgstr ""
 "Bokningen av den här signerade betalningen har pågått flera gånger men "
 "misslyckades med fel %s."
 
-#: src/Gateway/ResursDefault.php:762
+#: src/Gateway/ResursDefault.php:792
 #, php-format
 msgid ""
 "Tried to book signed payment but skipped: This has happened before and an "
@@ -144,34 +144,34 @@ msgstr ""
 "Försökte boka signerad betalning men hoppades över: Detta har gjorts "
 "tidigare och ett fel med kod %d inträffade den gången."
 
-#: src/Gateway/ResursDefault.php:895
+#: src/Gateway/ResursDefault.php:925
 #, php-format
 msgid "ECom setSigning: %s"
 msgstr "ECom setSigning: %s"
 
-#: src/Gateway/ResursDefault.php:902
+#: src/Gateway/ResursDefault.php:932
 #, php-format
 msgid "ECom setSigning parameters: %s"
 msgstr "ECom setSigning parametrar: %s"
 
-#: src/Gateway/ResursDefault.php:952
+#: src/Gateway/ResursDefault.php:984
 msgid "Shipping"
 msgstr "Frakt"
 
-#: src/Gateway/ResursDefault.php:983
+#: src/Gateway/ResursDefault.php:1015
 msgid "Article description is missing."
 msgstr "Artikelbeskrivning saknas."
 
-#: src/Gateway/ResursDefault.php:1065
+#: src/Gateway/ResursDefault.php:1097
 msgid "Coupon"
 msgstr "Kupong"
 
-#: src/Gateway/ResursDefault.php:1119
+#: src/Gateway/ResursDefault.php:1151
 #, php-format
 msgid "%s: Could not create order from an empty cart."
 msgstr "%s: Det gick inte att skapa order från en tom kundvagn."
 
-#: src/Gateway/ResursDefault.php:1122
+#: src/Gateway/ResursDefault.php:1154
 msgid "Cart is empty!"
 msgstr "Varukorgen är tom!"
 
