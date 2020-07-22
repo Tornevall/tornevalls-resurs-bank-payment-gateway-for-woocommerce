@@ -8,6 +8,7 @@ use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursException;
+use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\ExceptionHandler;
 use WC_Session;
@@ -73,6 +74,7 @@ class WooCommerce
     /**
      * @param $gateways
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getGateways($gateways)
@@ -152,7 +154,7 @@ class WooCommerce
     public static function testRequiredVersion($testException = null)
     {
         if ((bool)$testException || version_compare(self::getWooCommerceVersion(), self::$requiredVersion, '<')) {
-            throw new Exception(
+            throw new RuntimeException(
                 'Your WooCommerce release are too old. Please upgrade.',
                 500
             );
@@ -188,6 +190,8 @@ class WooCommerce
     /**
      * @param mixed $order
      * @throws ResursException
+     * @throws ExceptionHandler
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAdminAfterOrderDetails($order = null)
@@ -210,6 +214,7 @@ class WooCommerce
      * @param $orderData
      * @throws ResursException
      * @throws ExceptionHandler
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function setOrderMetaInformation($orderData)
@@ -220,9 +225,9 @@ class WooCommerce
         ) {
             $login = Data::getResursOption('login');
             $password = Data::getResursOption('password');
-            if (Data::getResursOption('store_api_history') &&
+            if (!empty($password) &&
                 !empty($login) &&
-                !empty($password) &&
+                Data::getResursOption('store_api_history') &&
                 !Data::getOrderMeta('orderapi', $orderData['order'])) {
                 Data::setLogInternal(
                     Data::LOG_NOTICE,
@@ -284,6 +289,7 @@ class WooCommerce
     /**
      * @param null $order
      * @throws ResursException
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAdminAfterBilling($order = null)
@@ -300,6 +306,7 @@ class WooCommerce
     /**
      * @param null $order
      * @throws ResursException
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAdminAfterShipping($order = null)
@@ -416,10 +423,8 @@ class WooCommerce
 
         if (self::getSession()) {
             $return = WC()->session->get($key);
-        } else {
-            if (isset($_SESSION[$key])) {
-                $return = $_SESSION[$key];
-            }
+        } elseif (isset($_SESSION[$key])) {
+            $return = $_SESSION[$key];
         }
 
         return $return;
@@ -452,11 +457,21 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation.
+     * @param $customerIsInCheckout
      * @since 0.0.1.0
      */
     private static function setCustomerCheckoutLocation($customerIsInCheckout)
     {
-        self::setSessionValue('customerWasInCheckout', $customerIsInCheckout);
+        $sessionKey = 'customerWasInCheckout';
+        Data::canLog(
+            Data::CAN_LOG_JUNK,
+            sprintf(
+                __('Session value %s set to %s.', 'trbwc'),
+                $sessionKey,
+                $customerIsInCheckout ? 'true' : 'false'
+            )
+        );
+        self::setSessionValue($sessionKey, $customerIsInCheckout);
     }
 
     /**
@@ -471,6 +486,15 @@ class WooCommerce
         } else {
             $_SESSION[$key] = $value;
         }
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getWcApiUrl()
+    {
+        return sprintf('%s', WC()->api_request_url('ResursDefault'));
     }
 
     /**
@@ -496,11 +520,11 @@ class WooCommerce
     }
 
     /**
-     * @param array $postData
      * @since 0.0.1.0
      */
-    public static function getOrderReviewSettings($postData = [])
+    public static function getOrderReviewSettings()
     {
+        // Rounding panic prevention.
         if (isset($_POST['payment_method']) && Data::isResursMethod($_POST['payment_method'])) {
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
         }

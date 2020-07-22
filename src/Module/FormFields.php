@@ -27,6 +27,7 @@ class FormFields extends WC_Settings_API
         }
 
         // Basic settings. Returned to ResursDefault configuration.
+        /** @noinspection HtmlUnknownTarget */
         $formFields = [
             'basic' => [
                 'title' => __('Basic Resurs Bank API Settings', 'trbwc'),
@@ -186,7 +187,7 @@ class FormFields extends WC_Settings_API
                     'desc_tip' => __(
                         'The applicant fields that Resurs Bank is using to handle payments is normally, inherited ' .
                         'from WooCommerce standard billing fields in the checkout. You can however enable them ' .
-                        'here, if you want your customers to see them anyway,',
+                        'here, if you want your customers to see them anyway.',
                         'trbwc'
                     ),
                 ],
@@ -309,34 +310,13 @@ class FormFields extends WC_Settings_API
                     'type' => 'title',
                     'title' => __('Advanced API', 'trbwc'),
                 ],
-                'api_wsdl' => [
-                    'id' => 'api_wsdl',
-                    'title' => __('WSDL requests are cached', 'trbwc'),
-                    'type' => 'select',
-                    'options' => [
-                        'default' => __(
-                            'Default: Only for production/live environment',
-                            'trbwc'
-                        ),
-                        'both' => __(
-                            'Both for production/live and test/staging',
-                            'trbwc'
-                        ),
-                        'none' => __(
-                            'Not at all, please',
-                            'trbwc'
-                        ),
-                    ],
-                    'default' => 'default',
-                ],
-                'store_api_history' => [
-                    'id' => 'store_api_history',
-                    'title' => __('Store API history in orders', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                'coupons_ex_tax' => [
+                    'title' => __('Coupons are added excluding tax', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
                     'desc_tip' => __(
-                        'If this setting is active, the first time you view a specific order API data will be stored ' .
-                        'for it. This means that it will be possible to go back to prior orders and view them even ' .
-                        'after you change the user credentials.',
+                        'When order rows are added to Resurs Bank API, discount amounts are added excluding tax. ' .
+                        'If you want to include the tax in the added discount amount, you can enable this feature ' .
+                        'here. Best practice is to keep it disabled.',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
@@ -359,12 +339,91 @@ class FormFields extends WC_Settings_API
                     'type' => 'checkbox',
                     'default' => 'yes',
                 ],
+                'store_api_history' => [
+                    'id' => 'store_api_history',
+                    'title' => __('Store API history in orders', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'If this setting is active, the first time you view a specific order API data will be stored ' .
+                        'for it. This means that it will be possible to go back to prior orders and view them even ' .
+                        'after you change the user credentials.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'yes',
+                ],
+                'api_wsdl' => [
+                    'id' => 'api_wsdl',
+                    'title' => __('WSDL requests are cached', 'trbwc'),
+                    'type' => 'select',
+                    'options' => [
+                        'default' => __(
+                            'Default: Only for production/live environment',
+                            'trbwc'
+                        ),
+                        'both' => __(
+                            'Both for production/live and test/staging',
+                            'trbwc'
+                        ),
+                        'none' => __(
+                            'Not at all, please',
+                            'trbwc'
+                        ),
+                    ],
+                    'default' => 'default',
+                ],
                 'complex_api_section_end' => [
                     'type' => 'sectionend',
                 ],
                 'complex_developer_section' => [
                     'type' => 'title',
                     'title' => __('Developer Section', 'trbwc'),
+                ],
+                'logging' => [
+                    'title' => __('Logging', 'trbwc'),
+                    'type' => 'title',
+                    'desc' => __(
+                        'Default for this plugin is to log a fair amount of data for you. However, there is also ' .
+                        'also much debug data for developers available, that you normally not need. In this section ' .
+                        'you can choose the extras you want to see in your logs.',
+                        'trbwc'
+                    ),
+                ],
+                'can_log_order_events' => [
+                    'id' => 'can_log_order_events',
+                    'type' => 'checkbox',
+                    'title' => __('Details at order events for merchants', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Detailed order events are data that normally passes without any sound. ' .
+                        'Things like initial order creations and clicks could show up in your logs.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'can_log_order_developer' => [
+                    'id' => 'can_log_order_developer',
+                    'type' => 'checkbox',
+                    'title' => __('Developer based details at order events', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Works like details for merchants, but this adds debugging information that may only be ' .
+                        'relevant for developers.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'can_log_junk' => [
+                    'id' => 'can_log_junk',
+                    'type' => 'checkbox',
+                    'title' => __('Deep details', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Things that only developers would have interest in. Logs may be junky with this ' .
+                        'option enabled.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
                 ],
                 'show_developer' => [
                     'title' => __('Activate developer mode', 'trbwc'),
@@ -434,7 +493,7 @@ class FormFields extends WC_Settings_API
      */
     public static function getFieldButton($formData)
     {
-        (new FormFields())->getFieldButtonApi($formData);
+        (new self())->getFieldButtonApi($formData);
     }
 
     /**
@@ -523,6 +582,7 @@ class FormFields extends WC_Settings_API
         return in_array($key, [
             'government_id',
             'government_id_contact',
+            'card_number',
         ]);
     }
 

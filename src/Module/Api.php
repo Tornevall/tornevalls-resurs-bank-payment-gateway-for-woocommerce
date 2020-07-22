@@ -1,14 +1,17 @@
 <?php
+/** @noinspection PhpUndefinedClassInspection */
 
 namespace ResursBank\Module;
 
 use Exception;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
+use ResursException;
+use RuntimeException;
 use TorneLIB\Exception\ExceptionHandler;
 
 /**
- * Class Api
+ * Class Api EComPHP Translator. Also a guide for what could be made better in the real API.
  * @package ResursBank\Module
  * @since 0.0.1.0
  */
@@ -62,126 +65,34 @@ class Api
      */
     public static function getPayment($orderId, $failover = null, $orderInfo = null)
     {
+        if ((bool)$failover) {
+            self::getResurs()->setFlag('GET_PAYMENT_BY_REST');
+        }
         try {
             if (($credentialMeta = self::getMatchingCredentials($orderInfo)) !== null) {
-                $resurs = self::getTemporaryEcom($credentialMeta->l, $credentialMeta->p, $credentialMeta->e);
-                Data::setLogNotice(
-                    sprintf(
-                        __(
-                            'Ecom request %s for %s with different credentials (%s, in environment %s).',
-                            'trbwc'
-                        ),
-                        __FUNCTION__,
-                        $orderId,
-                        $credentialMeta->l,
-                        $credentialMeta->e
-                    )
-                );
-                try {
-                    if ((bool)$failover) {
-                        $resurs->setFlag('GET_PAYMENT_BY_REST');
-                    }
-                    $return = $resurs->getPayment($orderId);
-                    $return->isCurrentCredentials = false;
-                    $return->username = $credentialMeta->l;
-                    $return->environment = $credentialMeta->e;
-                } catch (\Exception $e) {
-                    Data::setLogException($e);
-                    throw $e;
-                }
+                $resurs = self::getEcomBySecondaryCredentials($credentialMeta, $orderId);
+                $return = $resurs->getPayment($orderId);
+                $return->isCurrentCredentials = false;
+                $return->username = $credentialMeta->l;
+                $return->environment = $credentialMeta->e;
             } else {
-                try {
-                    if ((bool)$failover) {
-                        self::getResurs()->setFlag('GET_PAYMENT_BY_REST');
-                    }
-                    $return = self::getResurs()->getPayment($orderId);
-                    $return->isCurrentCredentials = true;
-                    $return->username = null;
-                    $return->environment = null;
-                } catch (\Exception $e) {
-                    Data::setLogException($e);
-                    throw $e;
-                }
+                $return = self::getResurs()->getPayment($orderId);
+                $return->isCurrentCredentials = true;
+                $return->username = null;
+                $return->environment = null;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if (!(bool)$failover && $e->getCode() === 2) {
-                Data::setLogNotice(
-                    sprintf(
-                        __(
-                            'Got exception %d in %s, will retry with REST.',
-                            'trbwc'
-                        ),
-                        $e->getCode(),
-                        __FUNCTION__
-                    )
-                );
+                self::getPaymentByRestNotice($e);
                 return self::getPayment($orderId, true);
             }
             Data::setLogException($e);
             throw $e;
         }
+        // Restore failovers.
         self::getResurs()->deleteFlag('GET_PAYMENT_BY_REST');
 
         return $return;
-    }
-
-    /**
-     * Compare current credential setup with order meta credentials.
-     * @param $orderInfo
-     * @return bool
-     * @throws ExceptionHandler
-     * @since 0.0.1.0
-     */
-    private static function getMatchingCredentials($orderInfo)
-    {
-        $credentialMeta = @json_decode(self::getApiMeta($orderInfo));
-        $return = null;
-
-        $intersected = array_intersect(
-            (array)$credentialMeta,
-            [
-                'l' => getResursOption('login'),
-                'p' => getResursOption('password'),
-                'e' => getResursOption('environment'),
-            ]
-        );
-
-        if (count($intersected) !== count((array)$credentialMeta)) {
-            $return = $credentialMeta;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $orderData
-     * @return false|string
-     * @throws ExceptionHandler
-     * @since 0.0.1.0
-     */
-    private static function getApiMeta($orderData)
-    {
-        return Data::getCrypt()->aesDecrypt(
-            Data::getOrderMeta('orderapi', $orderData)
-        );
-    }
-
-    /**
-     * @param $username
-     * @param $password
-     * @param $environment
-     * @return ResursBank
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getTemporaryEcom($username, $password, $environment)
-    {
-        // Creating a simple connection.
-        return new ResursBank(
-            $credentialMeta->l,
-            $credentialMeta->p,
-            in_array($credentialMeta->e, ['test', 'staging']) ? 1 : 0
-        );
     }
 
     /**
@@ -192,7 +103,8 @@ class Api
     public static function getResurs()
     {
         if (empty(self::$resursBank)) {
-            self::$resursBank = new Api();
+            // Instantiation.
+            self::$resursBank = new self();
         }
 
         return self::$resursBank->getConnection();
@@ -210,7 +122,7 @@ class Api
             $this->ecom = new ResursBank(
                 $this->credentials['username'],
                 $this->credentials['password'],
-                Api::getEnvironment()
+                self::getEnvironment()
             );
             $this->setWsdlCache();
         }
@@ -228,7 +140,7 @@ class Api
         $this->credentials['password'] = Data::getResursOption('password');
 
         if (empty($this->credentials['username']) || empty($this->credentials['password'])) {
-            throw new Exception('ECom credentials are not fully set.', 404);
+            throw new RuntimeException('ECom credentials are not fully set.', 404);
         }
 
         return true;
@@ -277,6 +189,112 @@ class Api
     }
 
     /**
+     * Compare current credential setup with order meta credentials.
+     *
+     * Inspection says not all necessary throws tags are here. But they are.
+     * @param $orderInfo
+     * @return bool
+     * @throws ResursException
+     * @throws ExceptionHandler
+     * @since 0.0.1.0
+     */
+    private static function getMatchingCredentials($orderInfo)
+    {
+        $credentialMeta = json_decode(self::getApiMeta($orderInfo), false);
+        $return = null;
+
+        $intersected = array_intersect(
+            (array)$credentialMeta,
+            [
+                'l' => Data::getResursOption('login'),
+                'p' => Data::getResursOption('password'),
+                'e' => Data::getResursOption('environment'),
+            ]
+        );
+
+        if (count($intersected) !== count((array)$credentialMeta)) {
+            $return = $credentialMeta;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $orderData
+     * @return false|string
+     * @throws ExceptionHandler
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    private static function getApiMeta($orderData)
+    {
+        return Data::getCrypt()->aesDecrypt(
+            Data::getOrderMeta('orderapi', $orderData)
+        );
+    }
+
+    /**
+     * @param $credentialMeta
+     * @return ResursBank
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getEcomBySecondaryCredentials($credentialMeta, $orderId)
+    {
+        Data::setLogNotice(
+            sprintf(
+                __(
+                    'Ecom request %s for %s with different credentials (%s, in environment %s).',
+                    'trbwc'
+                ),
+                __FUNCTION__,
+                $orderId,
+                $credentialMeta->l,
+                in_array($credentialMeta->e, ['test', 'staging']) ? 1 : 0
+            )
+        );
+        return self::getTemporaryEcom(
+            $credentialMeta->l, $credentialMeta->p, in_array($credentialMeta->e, ['test', 'staging']) ? 1 : 0
+        );
+    }
+
+    /**
+     * @param $username
+     * @param $password
+     * @param $environment
+     * @return ResursBank
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getTemporaryEcom($username, $password, $environment)
+    {
+        // Creating a simple connection.
+        return new ResursBank(
+            $username,
+            $password,
+            $environment
+        );
+    }
+
+    /**
+     * @param Exception $e
+     * @since 0.0.1.0
+     */
+    private static function getPaymentByRestNotice($e)
+    {
+        Data::setLogNotice(
+            sprintf(
+                __(
+                    'Got exception %d in %s, will retry with REST.',
+                    'trbwc'
+                ),
+                $e->getCode(),
+                __FUNCTION__
+            )
+        );
+    }
+
+    /**
      * Fetch annuity factors from storage or new data.
      * @param $fromStorage
      * @return array|int|mixed|null
@@ -294,14 +312,12 @@ class Api
         if (!$fromStorage || empty($return)) {
             try {
                 $annuityArray = [];
-                if (is_array($fromStorage)) {
-                    $paymentMethods = $fromStorage;
-                } else {
-                    $paymentMethods = (array)Api::getPaymentMethods();
-                }
+                // fromStorage can be called externally.
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+                $paymentMethods = is_array($fromStorage) ? $fromStorage : (array)self::getPaymentMethods();
                 if (count($paymentMethods)) {
                     foreach ($paymentMethods as $paymentMethod) {
-                        $annuityResponse = Api::getResurs()->getAnnuityFactors($paymentMethod->id);
+                        $annuityResponse = self::getResurs()->getAnnuityFactors($paymentMethod->id);
                         if (is_array($annuityResponse) || is_object($annuityResponse)) {
                             // Are we running side by side with v2.x?
                             // And is that side running ECom 1.3.41 or higher?
@@ -341,7 +357,7 @@ class Api
 
         if (!$fromStorage || empty($return)) {
             try {
-                self::$paymentMethods = Api::getResurs()->getPaymentMethods();
+                self::$paymentMethods = self::getResurs()->getPaymentMethods();
             } catch (Exception $e) {
                 // Reset.
                 Data::setResursOption('paymentMethods', null);
@@ -365,7 +381,29 @@ class Api
             $this->getResolvedCredentials();
         } catch (Exception $e) {
             $return = false;
+            Data::setLogException($e);
         }
         return $return;
+    }
+
+    /**
+     * @param $checkoutType
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function setCheckoutType($checkoutType)
+    {
+        $this->getConnection()->setPreferredPaymentFlowService($checkoutType);
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function setFraudFlags()
+    {
+        $this->getConnection()->setWaitForFraudControl(Data::getResursOption('waitForFraudControl'));
+        $this->getConnection()->setAnnulIfFrozen(Data::getResursOption('waitForFraudControl'));
+        $this->getConnection()->setFinalizeIfBooked(Data::getResursOption('waitForFraudControl'));
     }
 }
