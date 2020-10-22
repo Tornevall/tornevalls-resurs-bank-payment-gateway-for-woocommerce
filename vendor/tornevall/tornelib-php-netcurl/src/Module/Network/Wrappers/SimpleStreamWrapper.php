@@ -6,15 +6,17 @@
 
 namespace TorneLIB\Module\Network\Wrappers;
 
+use Exception;
+use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Helpers\Version;
 use TorneLIB\Model\Interfaces\WrapperInterface;
 use TorneLIB\Model\Type\authSource;
 use TorneLIB\Model\Type\authType;
 use TorneLIB\Model\Type\dataType;
 use TorneLIB\Model\Type\requestMethod;
-use TorneLIB\Helpers\GenericParser;
 use TorneLIB\Module\Config\WrapperConfig;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\Security;
@@ -29,13 +31,15 @@ try {
  * Class SimpleWrapper Fetching tool in the simplest form. Using file_get_contents.
  *
  * @package TorneLIB\Module\Network\Wrappers
- * @version 6.1.0
  */
 class SimpleStreamWrapper implements WrapperInterface
 {
+    // Note to self: Where are the static headers? Well, they are not here. For all streams
+    // we use WrapperConfig to store header setups.
+
     /**
      * @var WrapperConfig $CONFIG
-     * @version 6.1.0
+     * @since 6.1.0
      */
     private $CONFIG;
 
@@ -50,6 +54,10 @@ class SimpleStreamWrapper implements WrapperInterface
      */
     private $streamContentResponseHeader = [];
 
+    /**
+     * SimpleStreamWrapper constructor.
+     * @throws ExceptionHandler
+     */
     public function __construct()
     {
         // Base streamwrapper (file_get_contents, fopen, etc) is only allowed if allow_url_fopen is available.
@@ -69,17 +77,23 @@ class SimpleStreamWrapper implements WrapperInterface
     }
 
     /**
+     * @since 6.1.2
+     */
+    public function __destruct()
+    {
+        $this->CONFIG->resetStreamData();
+    }
+
+    /**
      * @inheritDoc
+     * @return string
+     * @throws ExceptionHandler
+     * @throws ReflectionException
      */
     public function getVersion()
     {
-        $return = $this->version;
-
-        if (empty($return)) {
-            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
-        }
-
-        return $return;
+        return isset($this->version) && !empty($this->version) ?
+            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, WrapperConfig::class);
     }
 
     /**
@@ -148,6 +162,7 @@ class SimpleStreamWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ExceptionHandler
      */
     public function getParsed()
     {
@@ -194,9 +209,9 @@ class SimpleStreamWrapper implements WrapperInterface
     {
         $return = '';
 
-        if (strtolower($key) === 'http' &&
-            isset($this->streamContentResponseHeader[0]) &&
-            preg_match('/^http\//i', $this->streamContentResponseHeader[0])
+        if (isset($this->streamContentResponseHeader[0]) &&
+            strtolower($key) === 'http' &&
+            (bool)preg_match('/^http\//i', $this->streamContentResponseHeader[0])
         ) {
             return (string)$this->streamContentResponseHeader[0];
         }
@@ -214,6 +229,38 @@ class SimpleStreamWrapper implements WrapperInterface
     }
 
     /**
+     * @param mixed $key
+     * @param string $value
+     * @param false $static
+     * @return SimpleStreamWrapper|WrapperConfig
+     * @since 6.1.2
+     */
+    public function setStreamHeader($key = '', $value = '', $static = false)
+    {
+        if (is_array($key) && empty($value)) {
+            // Handle as bulk if this request (for example) comes from NetWrapper.
+            foreach ($key as $getKey => $getValue) {
+                $this->setStreamHeader($getKey, $getValue, false);
+            }
+            return $this;
+        }
+
+        return $this->CONFIG->setHeader($key, $value, $static);
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @param false $static
+     * @return WrapperConfig
+     * @since 6.1.2
+     */
+    public function setHeader($key = '', $value = '', $static = false)
+    {
+        return $this->setStreamHeader($key, $value, $static);
+    }
+
+    /**
      * @param $proxyAddress
      * @param null $proxyType
      * @return $this
@@ -228,6 +275,7 @@ class SimpleStreamWrapper implements WrapperInterface
     }
 
     /**
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function getStreamRequest()
@@ -235,6 +283,9 @@ class SimpleStreamWrapper implements WrapperInterface
         $this->CONFIG->getStreamOptions();
         $this->setStreamRequestMethod();
         $this->setStreamRequestData();
+
+        // Make sure static headers are joined first.
+        $this->CONFIG->getStreamHeader();
 
         // Finalize.
         $this->getStreamDataContents();
@@ -315,6 +366,8 @@ class SimpleStreamWrapper implements WrapperInterface
             $httpExceptionMessage,
             $this->getCode()
         );
+
+        return $this;
     }
 
     /**
@@ -354,10 +407,12 @@ class SimpleStreamWrapper implements WrapperInterface
      * @param int $method
      * @param int $dataType
      * @return SimpleStreamWrapper
-     * @version 6.1.0
+     * @throws ExceptionHandler
+     * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
     {
+        $this->CONFIG->resetStreamData();
         if (!empty($url)) {
             $this->CONFIG->setRequestUrl($url);
         }
@@ -376,5 +431,31 @@ class SimpleStreamWrapper implements WrapperInterface
         $this->getStreamRequest();
 
         return $this;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws ExceptionHandler
+     * @since 6.1.2
+     */
+    public function __call($name, $arguments)
+    {
+        $return = null;
+
+        $compatibilityMethods = $this->CONFIG->getCompatibilityMethods();
+        if (isset($compatibilityMethods[$name])) {
+            $name = $compatibilityMethods[$name];
+            $return = call_user_func_array([$this, $name], $arguments);
+        }
+
+        if (!is_null($return)) {
+            return $return;
+        }
+        throw new ExceptionHandler(
+            sprintf('Function "%s" not available.', $name),
+            Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE
+        );
     }
 }

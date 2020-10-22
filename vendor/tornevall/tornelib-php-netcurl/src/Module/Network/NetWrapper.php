@@ -6,6 +6,7 @@
 
 namespace TorneLIB\Module\Network;
 
+use Exception;
 use ReflectionException;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
@@ -25,7 +26,6 @@ use TorneLIB\Utils\Security;
  * Taking over from v6.0 MODULE_CURL.
  *
  * @package TorneLIB\Module\Network
- * @version 6.1.0
  */
 class NetWrapper implements WrapperInterface
 {
@@ -36,23 +36,17 @@ class NetWrapper implements WrapperInterface
     private $CONFIG;
 
     /**
-     * @var bool
-     * @since 6.1.0
-     */
-    private $isSoapRequest = false;
-
-    /**
-     * @var string $version Internal version.
-     * @since 6.1.0
-     */
-    private $version;
-
-    /**
      * Chosen wrapper.
      * @var string $selectedWrapper
      * @since 6.1.0
      */
     private $selectedWrapper;
+
+    /**
+     * @var bool
+     * @since 6.1.0
+     */
+    private $isSoapRequest = false;
 
     /**
      * @var array
@@ -75,7 +69,6 @@ class NetWrapper implements WrapperInterface
     public function __construct()
     {
         $this->initializeWrappers();
-        return $this;
     }
 
     /**
@@ -103,19 +96,28 @@ class NetWrapper implements WrapperInterface
     }
 
     /**
+     * @param string $key
+     * @param string $value
+     * @param false $static
+     * @return NetWrapper
+     * @since 6.1.2
+     */
+    public function setHeader($key = '', $value = '', $static = false)
+    {
+        $this->CONFIG->setHeader($key, $value, $static);
+        return $this;
+    }
+
+    /**
      * @return string
+     * @throws ExceptionHandler
      * @throws ReflectionException
      * @since 6.1.0
      */
     public function getVersion()
     {
-        $return = $this->version;
-
-        if (empty($return)) {
-            $return = (new Generic())->getVersionByClassDoc(__CLASS__);
-        }
-
-        return $return;
+        return isset($this->version) && !empty($this->version) ?
+            $this->version : (new Generic())->getVersionByAny(__DIR__, 3, WrapperConfig::class);
     }
 
     /**
@@ -213,6 +215,10 @@ class NetWrapper implements WrapperInterface
     /**
      * Register an external wrapper/module/communicator.
      *
+     * @param $wrapperClass
+     * @param bool $tryFirst
+     * @return string
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function register($wrapperClass, $tryFirst = false)
@@ -230,9 +236,14 @@ class NetWrapper implements WrapperInterface
      */
     public function getBody($url = '')
     {
-        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
+        if (($mInstance = $this->getMultiInstance($url)) &&
+            !empty($mInstance) &&
+            method_exists($mInstance, __FUNCTION__)
+        ) {
             return $mInstance->{__FUNCTION__}();
-        } elseif (method_exists($this->instance, __FUNCTION__)) {
+        }
+
+        if (!empty($this->instance) && method_exists($this->instance, __FUNCTION__)) {
             return $this->instance->{__FUNCTION__}();
         }
 
@@ -254,9 +265,14 @@ class NetWrapper implements WrapperInterface
      */
     public function getParsed($url = '')
     {
-        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, 'getParsed')) {
+        if (($mInstance = $this->getMultiInstance($url)) &&
+            !empty($mInstance) &&
+            method_exists($mInstance, 'getParsed')
+        ) {
             return $mInstance->getParsed();
-        } elseif (method_exists($this->instance, 'getBody')) {
+        }
+
+        if (!empty($this->instance) && method_exists($this->instance, 'getBody')) {
             return $this->instance->getParsed();
         }
 
@@ -292,12 +308,20 @@ class NetWrapper implements WrapperInterface
      * @return mixed
      * @throws ExceptionHandler
      * @since 6.1.0
+     * @noinspection DuplicatedCode
      */
     public function getCode($url = '')
     {
-        if (($mInstance = $this->getMultiInstance($url)) && method_exists($mInstance, __FUNCTION__)) {
+        if (($mInstance = $this->getMultiInstance($url)) &&
+            !empty($mInstance) &&
+            method_exists($mInstance, __FUNCTION__)
+        ) {
             return $mInstance->{__FUNCTION__}();
-        } elseif (method_exists($this->instance, __FUNCTION__)) {
+        }
+
+        if (!empty($this->instance) &&
+            method_exists($this->instance, __FUNCTION__)
+        ) {
             return $this->instance->{__FUNCTION__}();
         }
 
@@ -324,6 +348,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @param $requestArray
      * @return array
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function handleMultiUrl($requestArray)
@@ -337,7 +362,7 @@ class NetWrapper implements WrapperInterface
             }
             if (isset($requestData[3]) &&
                 is_object($requestData[3]) &&
-                get_class($requestData[3]) === 'TorneLIB\Module\Config\WrapperConfig'
+                $requestData[3] instanceof WrapperConfig
             ) {
                 $this->CONFIG = $requestData[3];
             }
@@ -354,6 +379,7 @@ class NetWrapper implements WrapperInterface
     /**
      * @param $url
      * @return NetWrapper
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     private function getMultiInternalRequest($url)
@@ -364,6 +390,7 @@ class NetWrapper implements WrapperInterface
 
     /**
      * @inheritDoc
+     * @throws ExceptionHandler
      * @since 6.1.0
      */
     public function request($url, $data = [], $method = requestMethod::METHOD_GET, $dataType = dataType::NORMAL)
@@ -404,7 +431,7 @@ class NetWrapper implements WrapperInterface
             $dataType
         )) {
             $return = $hasReturnedRequest;
-        };
+        }
 
         $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Internal handles are usually throwing execptions before landing here.
@@ -443,13 +470,18 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
 
-        if (!is_array($url) && preg_match('/\?wsdl|\&wsdl/i', $url)) {
+        // Header setup is only supported by internal requests. If external requests are used,
+        // the developer is on her/his own.
+        $headerArray = $this->CONFIG->getHeader();
+
+        if (!is_array($url) && (bool)preg_match('/\?wsdl|&wsdl/i', $url)) {
             try {
                 Security::getCurrentClassState('SoapClient');
                 $dataType = dataType::SOAP;
             } catch (ExceptionHandler $e) {
                 $method = requestMethod::METHOD_POST;
                 $dataType = dataType::XML;
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (!is_string($data) && !empty($data)) {
                     $data = (new Content())->getXmlFromArray($data);
                 }
@@ -468,10 +500,14 @@ class NetWrapper implements WrapperInterface
             $this->instance->setConfig($this->getConfig());
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('CurlWrapper')) {
+            $this->instance->setHeader($headerArray, null, false);
             $this->instance->setConfig($this->getConfig());
+            /** @noinspection PhpPossiblePolymorphicInvocationInspection */
+            // No inspection since assuming this is always a curl-based call.
             $this->instance->setCurlMultiInstantException($this->instantCurlMultiErrors);
             $return = $this->instance->request($url, $data, $method, $dataType);
         } elseif ($this->getProperInstanceWrapper('SimpleStreamWrapper')) {
+            $this->instance->setHeader($headerArray, null, false);
             $currentConfig = $this->getConfig();
             // Check if auth is properly set, in case default setup is used.
             $currentConfig->setAuthStream();
@@ -485,7 +521,7 @@ class NetWrapper implements WrapperInterface
     /**
      * Set up proxy.
      *
-     * @param $proxyAddress Normal usage is address:post.
+     * @param string $proxyAddress Normal usage is address:post.
      * @param int $proxyType Default: 0 = HTTP
      * @return $this
      * @since 6.1.0
@@ -527,6 +563,17 @@ class NetWrapper implements WrapperInterface
         }
 
         return $this->instance;
+    }
+
+    /**
+     * Entry point.
+     *
+     * @return string
+     * @since 6.1.1
+     */
+    public function getSelectedWrapper()
+    {
+        return $this->selectedWrapper;
     }
 
     /**
@@ -586,6 +633,7 @@ class NetWrapper implements WrapperInterface
         $method = requestMethod::METHOD_GET,
         $dataType = dataType::NORMAL
     ) {
+        $this->CONFIG->getStreamHeader();
         $externalHasErrors = false;
         $externalRequestException = null;
         $returnable = null;
@@ -633,27 +681,18 @@ class NetWrapper implements WrapperInterface
     ) {
         $return = null;
         $hasInternalSuccess = false;
-
         $externalWrapperList = WrapperDriver::getExternalWrappers();
         // Walk through external wrappers.
         foreach ($externalWrapperList as $wrapperClass) {
             $returnable = null;
             try {
-                $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
-                $returnable = call_user_func_array(
-                    [
-                        $wrapperClass,
-                        'request',
-                    ],
-                    [
-                        $url,
-                        $data,
-                        $method,
-                        $dataType,
-                    ]
-                );
-            } catch (\Exception $externalException) {
-
+                // Assuming request is always available via registered implementations, we don't need
+                // to use call_user_func_array at all.
+                if (method_exists($wrapperClass, 'request')) {
+                    $this->CONFIG->setCurrentWrapper(get_class($wrapperClass));
+                    $returnable = $wrapperClass->request($url, $data, $method, $dataType);
+                }
+            } catch (Exception $externalException) {
             }
             // Break on first success.
             if (!is_null($returnable)) {
@@ -686,39 +725,37 @@ class NetWrapper implements WrapperInterface
      */
     public function __call($name, $arguments)
     {
-        $requestType = substr($name, 0, 3);
-
-        switch ($name) {
-            case 'setAuth':
-                // Abbreviation for setAuthentication.
-                return call_user_func_array([$this, 'setAuthentication'], $arguments);
-            default:
-                break;
+        $compatibilityMethods = $this->CONFIG->getCompatibilityMethods();
+        if (isset($compatibilityMethods[$name])) {
+            $name = $compatibilityMethods[$name];
         }
 
-        switch ($requestType) {
-            default:
-                if (method_exists($this->instance, $name)) {
-                    if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
-                        return $instanceRequest;
-                    }
-                } elseif (method_exists($this->CONFIG, $name)) {
-                    call_user_func_array(
-                        [
-                            $this->CONFIG,
-                            $name,
-                        ], $arguments
-                    );
-                    break;
-                }
-                throw new ExceptionHandler(
-                    sprintf('Undefined function: %s', $name),
-                    Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE,
-                    null,
-                    null,
-                    $name
-                );
-                break;
+        if ($name === 'setAuth') {
+            // Abbreviation for setAuthentication.
+            return call_user_func_array([$this, 'setAuthentication'], $arguments);
+        }
+
+        // From PHP 8.0 just checking instance content will fail if it is null here.
+        if (!empty($this->instance) && method_exists($this->instance, $name)) {
+            if ($instanceRequest = call_user_func_array([$this->instance, $name], $arguments)) {
+                return $instanceRequest;
+            }
+        } elseif (method_exists($this->CONFIG, $name)) {
+            call_user_func_array(
+                [
+                    $this->CONFIG,
+                    $name,
+                ],
+                $arguments
+            );
+        } else {
+            throw new ExceptionHandler(
+                sprintf('Undefined function: %s', $name),
+                Constants::LIB_METHOD_OR_LIBRARY_UNAVAILABLE,
+                null,
+                null,
+                $name
+            );
         }
 
         return $this;

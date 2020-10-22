@@ -1,6 +1,6 @@
 {
     "name": "tornevall/tornelib-php-netcurl",
-    "version": "6.1.0",
+    "version": "6.1.2",
     "description": "Yet another Curl Library to handling web calls",
     "license": "Apache-2.0",
     "require": {
@@ -8,13 +8,14 @@
         "tornevall/tornelib-php-crypto": "6.1.*",
         "tornevall/tornelib-php-io": "6.1.*",
         "tornevall/tornelib-php-flags": "6.1.*",
-        "tornevall/tornelib-php-utils": "6.1.*"
+        "tornevall/tornelib-php-utils": "6.1.*",
+        "tornevall/tornelib-php-version": "6.1.*"
     },
     "authors": [
         {
             "name": "Tomas Tornevall",
             "email": "thorne@tornevall.net",
-            "homepage": "https://www.tornevall.net",
+            "homepage": "https://developer.tornevall.net",
             "role": "Developer"
         }
     ],
