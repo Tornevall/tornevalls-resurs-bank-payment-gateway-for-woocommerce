@@ -311,16 +311,28 @@ class FormFields extends WC_Settings_API
                     'title' => __('Advanced API', 'trbwc'),
                 ],
                 'coupons_ex_tax' => [
-                    'title' => __('Coupons are added excluding tax', 'trbwc'),
+                    'title' => __('Coupon amounts should include the tax amount', 'trbwc'),
                     'desc' => __('Yes', 'trbwc'),
                     'desc_tip' => __(
-                        'When order rows are added to Resurs Bank API, discount amounts are added excluding tax. ' .
-                        'If you want to include the tax in the added discount amount, you can enable this feature ' .
-                        'here. Best practice is to keep it disabled.',
+                        'When order rows are added to Resurs Bank API, discount amounts are by default added ' .
+                        'excluding tax. If you want to include the tax amount in the added discount amount, ' .
+                        'you can enable the feature here.',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
-                    'default' => 'yes',
+                    'default' => 'no',
+                ],
+                'coupons_include_vat' => [
+                    'title' => __('Coupon order rows should include VAT', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'When adding coupons/discounts in Resurs Bank orders, the vat is normally set ' .
+                        'to 0 for different kinds of reasons. If you want to add the vat (vatPct), you should ' .
+                        'have this option enabled.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'no',
                 ],
                 'prevent_rounding_panic' => [
                     'id' => 'prevent_rounding_panic',
