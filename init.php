@@ -4,6 +4,7 @@
  * Plugin URI: https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
  * WC Tested up to: 4.2.2
+ * Requires PHP: 7.0
  * Version: 0.0.1.0
  * Author: Tomas Tornevall
  * Author URI:
