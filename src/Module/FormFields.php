@@ -314,10 +314,9 @@ class FormFields extends WC_Settings_API
                     'title' => __('Do not add VAT to discounts', 'trbwc'),
                     'desc' => __('Yes', 'trbwc'),
                     'desc_tip' => __(
-                        'When order rows are added to Resurs Bank API, VAT is added to the coupon amount without ' .
-                        'the tax included. This means that the coupon value also has vat. To discard this and ' .
-                        'instead, go with full discount directly on the including tax-price, you should enable this' .
-                        'feature.',
+                        'When order rows are added to Resurs Bank API, the VAT is applied on the coupon amount ' .
+                        'excluding tax. To handle the discount without vat and instead use the full including tax ' .
+                        'amount as a discount, you can enable this feature.',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
@@ -330,10 +329,11 @@ class FormFields extends WC_Settings_API
                     'desc_tip' => __(
                         'WooCommerce are able to show prices rounded with 0 decimals. It is however widely known ' .
                         'and confirmed that payment gateways may have problems with tax calculation, when the ' .
-                        'decimals are less With this setting enabled, the plugin will try to override the ' .
+                        'decimals are fewer than two. With this setting enabled, the plugin will try to override the ' .
                         'decimal setup as long as it is set to lower than 2. If you disable this feature, you also ' .
-                        'confirm that you are willingly using an unsupported feature. If you\'ve not already ' .
-                        'done it, it is recommended to instead raise the number of decimals to 2 or higher.',
+                        'confirm that you are willingly using a, for the platform, unsupported feature. If you\'ve ' .
+                        'not already done it, it is recommended to instead increase the number of decimals to 2 or ' .
+                        'higher.',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
