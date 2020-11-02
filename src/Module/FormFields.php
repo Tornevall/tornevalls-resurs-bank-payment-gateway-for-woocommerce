@@ -310,25 +310,14 @@ class FormFields extends WC_Settings_API
                     'type' => 'title',
                     'title' => __('Advanced API', 'trbwc'),
                 ],
-                'coupons_ex_tax' => [
-                    'title' => __('Coupon amounts should include the tax amount', 'trbwc'),
+                'discard_coupon_vat' => [
+                    'title' => __('Discard coupon vat/tax', 'trbwc'),
                     'desc' => __('Yes', 'trbwc'),
                     'desc_tip' => __(
-                        'When order rows are added to Resurs Bank API, discount amounts are by default added ' .
-                        'excluding tax. If you want to include the tax amount in the added discount amount, ' .
-                        'you can enable the feature here.',
-                        'trbwc'
-                    ),
-                    'type' => 'checkbox',
-                    'default' => 'no',
-                ],
-                'coupons_include_vat' => [
-                    'title' => __('Coupon order rows should include VAT', 'trbwc'),
-                    'desc' => __('Yes', 'trbwc'),
-                    'desc_tip' => __(
-                        'When adding coupons/discounts in Resurs Bank orders, the vat is normally set ' .
-                        'to 0 for different kinds of reasons. If you want to add the vat (vatPct), you should ' .
-                        'have this option enabled.',
+                        'When order rows are added to Resurs Bank API, VAT is added to the coupon amount without ' .
+                        'the tax included. This means that the coupon value also has vat. To discard this and ' .
+                        'instead, go with full discount directly on the including tax-price, you should enable this' .
+                        'feature.',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
@@ -340,12 +329,11 @@ class FormFields extends WC_Settings_API
                     'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'WooCommerce are able to show prices rounded with 0 decimals. It is however widely known ' .
-                        'that payment gateways may have problems with tax calculation, when the decimals are less ' .
-                        'then 2. For Resurs Bank, it is confirmed that this causes problems. ' .
-                        'With this setting enabled, the plugin will try to override the decimal setup as ' .
-                        'long as it is set to be below 2. If you disable this feature, you also confirm that you are ' .
-                        'willingly using an unsupported feature. If you\'ve not already done it, it is recommended ' .
-                        'to instead raise the number of decimals to 2 or higher.',
+                        'and confirmed that payment gateways may have problems with tax calculation, when the ' .
+                        'decimals are less With this setting enabled, the plugin will try to override the ' .
+                        'decimal setup as long as it is set to lower than 2. If you disable this feature, you also ' .
+                        'confirm that you are willingly using an unsupported feature. If you\'ve not already ' .
+                        'done it, it is recommended to instead raise the number of decimals to 2 or higher.',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
