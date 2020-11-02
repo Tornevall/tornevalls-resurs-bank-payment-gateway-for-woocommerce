@@ -1,7 +1,3 @@
---- To run with multiple instances. Below solution does not work properly due to phpunit so this is skipped ---
-
-
-
 name: PHP Composer
 
 on:
@@ -16,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ '7.3', '7.4' ]
-    name: PHP ${{ matrix.php-versions }}
+        php-version: [ '7.3', '7.4', '8.0' ]
+    name: PHP ${{ matrix.php-version }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-versions: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php-version }}
           tools: phpunit
       - name: Validate composer.json and composer.lock
         run: composer validate
@@ -38,23 +34,24 @@ jobs:
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
+      - name: Install components
+        run: composer install
       - name: Install phpunit
-        run: composer require phpunit/phpunit ^9
-      - name: Run test suite
-        run: phpunit
-
-  build-unit-6:
+        run: composer require phpunit/phpunit:^9
+      - name: vendor/bin/phpunit
+        run: vendor/bin/phpunit
+  build-unit-php5:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [ '7.0', '7.1', '7.2' ]
-    name: PHP ${{ matrix.php-versions }}
+        php-version: [ '5.6' ]
+    name: PHP ${{ matrix.php-version }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php-version }}
           tools: phpunit
       - name: Validate composer.json and composer.lock
         run: composer validate
@@ -69,7 +66,9 @@ jobs:
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-dist --no-progress --no-suggest
+      - name: Install components
+        run: composer install
       - name: Install phpunit
-        run: composer require phpunit/phpunit ^6
-      - name: Run test suite
-        run: phpunit
+        run: composer require phpunit/phpunit ^5.6
+      - name: vendor/bin/phpunit
+        run: vendor/bin/phpunit
