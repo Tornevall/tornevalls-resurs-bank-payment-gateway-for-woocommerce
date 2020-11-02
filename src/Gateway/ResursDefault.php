@@ -1067,7 +1067,7 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @return $thisapply
+     * @return $this
      * @since 0.0.1.0
      * @todo Complete this.
      */
@@ -1203,33 +1203,43 @@ class ResursDefault extends WC_Payment_Gateway
              * @var WC_Coupon $coupon
              */
             foreach ($coupons as $code => $coupon) {
-                /** @var WP_Post $couponInformation */
-                $couponInformation = get_post($coupon->get_id());
-                $couponDescription = !$couponInformation->post_excerpt ? $couponInformation->post_excerpt : __(
-                    'Coupon',
-                    'trbwc'
-                );
+                $couponDescription = $coupon->get_description();
+                if (empty($couponDescription)) {
+                    $couponDescription = $coupon->get_code();
+                }
 
-                $couponsExcludingTax = Data::getResursOption('coupons_ex_tax');
+                $couponsWithoutTax = (bool)Data::getResursOption('discard_coupon_vat');
+                $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
+                $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
+                $vatPct = (($incTax - $exTax) / $exTax) * 100;
 
                 Data::setDeveloperLog(
                     __FUNCTION__,
-                    sprintf('Apply coupon %s', $coupon->get_id())
+                    sprintf(
+                        'Apply coupon %s with VAT %d. Setting "discard_coupon_vat" is %s.',
+                        $coupon->get_id(),
+                        $vatPct,
+                        $couponsWithoutTax ? 'true' : 'false'
+                    )
                 );
 
                 $this->API->getConnection()->addOrderLine(
                     $coupon->get_id(),
-                    WordPress::applyFilters('getCouponDescription', $couponDescription),
+                    WordPress::applyFilters(
+                        'getCouponDescription',
+                        $couponDescription
+                    ),
                     0 - $this->cart->get_coupon_discount_amount(
                         $coupon->get_code(),
-                        WordPress::applyFilters('couponsExTax', $couponsExcludingTax, $coupon)
+                        WordPress::applyFilters('couponsExTax', $couponsWithoutTax, $coupon)
                     ),
-                    WordPress::applyFilters('getCouponVatPct', 0),
+                    WordPress::applyFilters('getCouponVatPct', $vatPct),
                     $this->getFromProduct('unit', null),
                     'DISCOUNT'
                 );
             }
         }
+
         return $this;
     }
 

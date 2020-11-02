@@ -833,14 +833,35 @@ class Data
             $return = $orderData['meta'][$key];
         }
         $pluginPrefixedKey = sprintf('%s_%s', self::getPrefix(), $key);
-        if (isset($orderData['meta'][$pluginPrefixedKey])) {
-            if (is_array($orderData['meta'][$pluginPrefixedKey])) {
-                $return = array_pop($orderData['meta'][$pluginPrefixedKey]);
-            } else {
-                $return = $orderData['meta'][$pluginPrefixedKey];
-            }
+        if (isset($orderData['meta'])) {
+            $return = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
         }
 
+        return $return;
+    }
+
+    /**
+     * @param $suffixedKey
+     * @param $orderDataMeta
+     * @return mixed|null
+     * @since 0.0.1.0
+     */
+    private static function getOrderMetaByKey($suffixedKey, $orderDataMeta)
+    {
+        $return = null;
+        if (is_array($orderDataMeta)) {
+            foreach (['', 'u_'] as $orderMetaKey) {
+                $currentMetaKey = sprintf('%s%s', $orderMetaKey, $suffixedKey);
+                if (isset($orderDataMeta[$currentMetaKey])) {
+                    $handleResult = $orderDataMeta[$currentMetaKey];
+                    if (is_array($handleResult)) {
+                        $return = array_pop($handleResult);
+                    } else {
+                        $return = $handleResult;
+                    }
+                }
+            }
+        }
         return $return;
     }
 
@@ -1113,7 +1134,7 @@ class Data
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderMeta($order, $key, $value, $protected = null)
+    public static function setOrderMeta($order, $key, $value, $protected = true)
     {
         $return = false;
 
@@ -1132,7 +1153,7 @@ class Data
             if ($order->get_id()) {
                 $return = update_post_meta(
                     $order->get_id(),
-                    sprintf('%s_%s', $protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
+                    sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
                     $value
                 );
             }
