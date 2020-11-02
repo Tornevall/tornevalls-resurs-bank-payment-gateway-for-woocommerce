@@ -311,7 +311,7 @@ class FormFields extends WC_Settings_API
                     'title' => __('Advanced API', 'trbwc'),
                 ],
                 'discard_coupon_vat' => [
-                    'title' => __('Discard coupon vat/tax', 'trbwc'),
+                    'title' => __('Do not add VAT to discounts', 'trbwc'),
                     'desc' => __('Yes', 'trbwc'),
                     'desc_tip' => __(
                         'When order rows are added to Resurs Bank API, VAT is added to the coupon amount without ' .
