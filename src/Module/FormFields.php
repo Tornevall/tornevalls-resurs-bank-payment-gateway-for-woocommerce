@@ -221,8 +221,8 @@ class FormFields extends WC_Settings_API
                     'type' => 'sectionend',
                 ],
             ],
-            'customers_orders' => [
-                'title' => __('Customers and orders', 'trbwc'),
+            'fraud_control' => [
+                'title' => __('Fraud control', 'trbwc'),
                 'fraud_finalization_section' => [
                     'type' => 'title',
                     'title' => __('How to handle fraud and debiting', 'trbwc'),
