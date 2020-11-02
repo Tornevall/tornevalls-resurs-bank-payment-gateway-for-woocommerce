@@ -20,7 +20,6 @@ use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
-use WP_Post;
 
 /**
  * Class ResursDefault
@@ -1208,7 +1207,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $couponDescription = $coupon->get_code();
                 }
 
-                $couponsWithoutTax = (bool)Data::getResursOption('discard_coupon_vat');
+                $discardCouponVat = (bool)Data::getResursOption('discard_coupon_vat');
                 $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
                 $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
                 $vatPct = (($incTax - $exTax) / $exTax) * 100;
@@ -1219,7 +1218,7 @@ class ResursDefault extends WC_Payment_Gateway
                         'Apply coupon %s with VAT %d. Setting "discard_coupon_vat" is %s.',
                         $coupon->get_id(),
                         $vatPct,
-                        $couponsWithoutTax ? 'true' : 'false'
+                        $discardCouponVat ? 'true' : 'false'
                     )
                 );
 
@@ -1231,9 +1230,9 @@ class ResursDefault extends WC_Payment_Gateway
                     ),
                     0 - $this->cart->get_coupon_discount_amount(
                         $coupon->get_code(),
-                        WordPress::applyFilters('couponsExTax', $couponsWithoutTax, $coupon)
+                        WordPress::applyFilters('couponsExTax', !$discardCouponVat, $coupon)
                     ),
-                    WordPress::applyFilters('getCouponVatPct', $vatPct),
+                    WordPress::applyFilters('getCouponVatPct', !$discardCouponVat ? $vatPct : 0),
                     $this->getFromProduct('unit', null),
                     'DISCOUNT'
                 );
