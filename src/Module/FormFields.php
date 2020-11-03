@@ -69,7 +69,7 @@ class FormFields extends WC_Settings_API
                 ],
                 'login' => [
                     'id' => 'login',
-                    'title' => __('Resurs Bank webservices username', 'trbwc'),
+                    'title' => __('Resurs Bank API username', 'trbwc'),
                     'type' => 'text',
                     'desc' => __(
                         'Web services username, received from Resurs Bank.',
@@ -79,11 +79,14 @@ class FormFields extends WC_Settings_API
                 ],
                 'password' => [
                     'id' => 'password',
-                    'title' => __('Resurs Bank webservices password', 'trbwc'),
+                    'title' => __('Resurs Bank API password', 'trbwc'),
                     'type' => 'password',
                     'default' => '',
                     'desc' => __(
-                        'Web services password, received from Resurs Bank.',
+                        'API password, received from Resurs Bank. To validate and store the credentials ' .
+                        'make sure you use the validation button. If you choose to not validate your credentials ' .
+                        'here, and instead just save, you have to update the methods manually in the payment ' .
+                        'methods section.',
                         'trbwc'
                     ),
                     'custom_attributes' => [

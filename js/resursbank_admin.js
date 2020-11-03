@@ -67,16 +67,19 @@ function getResursPaymentMethods()
  */
 function getResursCredentialsTestForm(pwBox)
 {
+    var pwButton = $rQuery(
+        '<button>',
+        {
+            'type': 'button',
+            'style': 'margin-left: 5px;',
+            'onclick': 'getResursCredentialsResult()'
+        }
+    ).html(getResursLocalization('resurs_test_credentials'));
+
     pwBox.after(
-        $rQuery(
-            '<button>',
-            {
-                'type': 'button',
-                'style': 'margin-left: 5px;',
-                'onclick': 'getResursCredentialsResult()'
-            }
-        ).html(getResursLocalization('resurs_test_credentials'))
+        pwButton
     );
+
     pwBox.parent().children('.description').before(
         $rQuery(
             '<div>',
