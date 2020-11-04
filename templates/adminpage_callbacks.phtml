@@ -1,0 +1,42 @@
+<h3><?php _e('Available payment methods', 'trbwc'); ?></h3>
+
+<div style="font-style: italic;margin-bottom: 5px;">
+    <?php
+    _e('Amount limits: Defines from-to which order amount a payment method will be displayed in the checkout.', 'trbwc')
+    ?><br>
+    <?php
+    _e('Customer types: Which customers that can take advantage of a specific payment method (NATURAL: ' .
+        'Private customers, LEGAL: Company based customers).', 'trbwc')
+    ?><br>
+</div>
+
+<table width="100%" style="border: none;">
+    <tr>
+        <td width="20%" class="resursMethodHead"><?php _e('Method ID', 'trbwc') ?></td>
+        <td width="20%" class="resursMethodHead"><?php _e('Description', 'trbwc') ?></td>
+        <td width="20%" class="resursMethodHead"><?php _e('Amount limits', 'trbwc') ?></td>
+        <td width="20%" class="resursMethodHead"><?php _e('Method type', 'trbwc') ?></td>
+        <td width="20%" class="resursMethodHead"><?php _e('Customer types', 'trbwc') ?></td>
+    </tr>
+    <?php foreach ($paymentMethods as $methodObject) { ?>
+        <tr>
+            <td class="resursMethodBody"><?php echo $methodObject->id ?></td>
+            <td class="resursMethodBody"><?php echo $methodObject->description ?></td>
+            <td class="resursMethodBody">
+                <?php echo $methodObject->minLimit ?> - <?php echo $methodObject->maxLimit ?>
+            </td>
+            <td class="resursMethodBody">
+                <?php echo $methodObject->type ?>
+                <?php
+                if ($methodObject->type !== $methodObject->specificType) {
+                    printf('(<i>%s</i>)', $methodObject->specificType);
+                }
+                ?>
+                <br>
+            </td>
+            <td class="resursMethodBody">
+                <?php echo implode(', ', (array)$methodObject->customerType); ?>
+            </td>
+        </tr>
+    <?php } ?>
+</table>
