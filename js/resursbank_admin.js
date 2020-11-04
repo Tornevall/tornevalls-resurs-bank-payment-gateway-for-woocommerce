@@ -143,7 +143,13 @@ function getResursCredentialsResult()
             if (data['validation']) {
                 $rQuery('#resurs_test_credentials_result').html(getResursLocalization('credential_success_notice'))
             } else {
-                $rQuery('#resurs_test_credentials_result').html(getResursLocalization('credential_failure_notice'))
+                var noValidation = getResursLocalization('credential_failure_notice');
+                if (typeof data['statusText'] === 'string') {
+                    noValidation += ' (Status: ' + data['statusText'] + ')';
+                }
+                $rQuery('#resurs_test_credentials_result').html(
+                    noValidation
+                )
             }
         });
     }

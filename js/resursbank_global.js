@@ -21,7 +21,8 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
         {
             type: requestMethod,
             url: getResursLocalization('ajaxify'),
-            data: requestData
+            data: requestData,
+            timeout: 8000
         }
     ).done(
         function (data, textStatus, jqXhr) {
@@ -30,6 +31,11 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
             } else {
                 getResursError(data);
             }
+        }
+    ).fail(
+        function (data, textStatus, jqXhr) {
+            getResursError(data.statusText);
+            callbackMethod(data, textStatus, jqXhr);
         }
     );
 }
