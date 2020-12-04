@@ -7,10 +7,12 @@ use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
+use Resursbank\RBEcomPHP\RESURS_PAYMENT_STATUS_RETURNCODES;
 use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\ExceptionHandler;
+use WC_Order;
 use WC_Session;
 use function in_array;
 
@@ -384,13 +386,10 @@ class WooCommerce
     {
         $return['ecom_short'] = [];
         $purge = [
-            'id',
             'paymentDiffs',
             'customer',
             'deliveryAddress',
             'paymentMethodId',
-            'paymentMethodName',
-            'paymentMethodType',
             'totalBonusPoints',
             'cached',
             'metaData',
@@ -504,16 +503,52 @@ class WooCommerce
      */
     public static function getHandledCallback()
     {
+        $code = 202;
+        $responseString = 'Accepted';
         $getConfirmedSalt = Api::getResurs()->getValidatedCallbackDigest(
             self::getRequest('p'),
             self::getCurrentSalt(),
-            self::getRequest('d')
+            self::getRequest('d'),
+            self::getRequest('r')
         );
+
+        Data::setLogNotice(
+            sprintf(
+                __(
+                    'Callback Received: %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
+                    'trbwc'
+                ),
+                self::getRequest('c'),
+                $getConfirmedSalt ? __('Validated', 'trbwc') : __('Not validated', 'trbwc'),
+                self::getRequest('p'),
+                Data::getOrderByEcomRef(self::getRequest('p'))
+
+            )
+        );
+
+        // If there is a payment, there must be a digest.
+        if (!empty(self::getRequest('p'))) {
+            if ($getConfirmedSalt) {
+                try {
+                    self::getUpdatedOrderByCallback(self::getRequest('p'));
+                } catch (Exception $e) {
+                    $code = $e->getCode();
+                    $responseString = $e->getMessage();
+                    Data::setLogException($e);
+                }
+            } else {
+                $code = 406; // Not acceptable
+                $responseString = 'Digest rejected';
+            }
+        }
+
         self::reply(
             [
                 'aliveConfirm' => true,
-                'digestOk' => $getConfirmedSalt,
-            ]
+                'digestCode' => $code,
+            ],
+            $code,
+            $responseString
         );
     }
 
@@ -534,6 +569,92 @@ class WooCommerce
     private static function getCurrentSalt()
     {
         return (string)Data::getResursOption('salt');
+    }
+
+    /**
+     * @param $paymentId
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getUpdatedOrderByCallback($paymentId)
+    {
+        $orderId = Data::getOrderByEcomRef($paymentId);
+        if ($orderId) {
+            $order = new WC_Order($orderId);
+            self::setOrderStatusByCallback(Api::getResurs()->getOrderStatusByPayment($paymentId), $order);
+        }
+    }
+
+    /**
+     * @param $ecomOrderStatus
+     * @param WC_Order $order
+     * @since 0.0.1.0
+     */
+    private static function setOrderStatusByCallback($ecomOrderStatus, $order)
+    {
+        switch (true) {
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_AUTOMATICALLY_DEBITED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            default:
+        }
+    }
+
+    /**
+     * @param WC_Order $order
+     * @param $ecomOrderStatus
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function setOrderStatusWithNotice($order, $ecomOrderStatus)
+    {
+        return $order->update_status(
+            self::getOrderStatuses($ecomOrderStatus),
+            sprintf(
+                __('Resurs Bank updated order status to %s.', 'trbwc'),
+                self::getOrderStatuses($ecomOrderStatus)
+            )
+        );
+    }
+
+    /**
+     * @param null $key
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getOrderStatuses($key = null)
+    {
+        $return = WordPress::applyFilters('getOrderStatuses', [
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING => 'processing',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED => 'refunded',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED => 'completed',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING => 'on-hold',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED => 'cancelled',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_STATUS_COULD_NOT_BE_SET => 'on-hold',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION => 'on-hold',
+        ]);
+        if (isset($key) && isset($return[$key])) {
+            return $return[$key];
+        }
+        return $return;
     }
 
     /**

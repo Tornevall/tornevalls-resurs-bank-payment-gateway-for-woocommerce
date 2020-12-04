@@ -602,7 +602,7 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param string $key
+     * @param null $key
      * @return array|mixed
      * @since 0.0.1.0
      */

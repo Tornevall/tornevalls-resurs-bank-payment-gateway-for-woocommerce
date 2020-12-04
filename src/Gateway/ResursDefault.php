@@ -1426,7 +1426,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getCustomerData($key, $returnType = null)
+    private function getCustomerData($key, $returnType = '')
     {
         $return = isset($this->applicantPostData[$key]) ? $this->applicantPostData[$key] : '';
 

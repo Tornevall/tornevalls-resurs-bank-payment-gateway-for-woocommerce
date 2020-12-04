@@ -231,11 +231,17 @@ class PluginApi
         ];
 
         foreach ($callbacks as $ecomCallbackId) {
-            Api::getResurs()->setRegisterCallback(
-                $ecomCallbackId,
-                self::getCallbackUrl(self::getCallbackParams($ecomCallbackId)),
-                self::getCallbackDigestData()
-            );
+            $callbackUrl = self::getCallbackUrl(self::getCallbackParams($ecomCallbackId));
+            try {
+                Data::setLogNotice(sprintf('Callback Registration: %s.', $callbackUrl));
+                Api::getResurs()->setRegisterCallback(
+                    $ecomCallbackId,
+                    $callbackUrl,
+                    self::getCallbackDigestData()
+                );
+            } catch (Exception $e) {
+                Data::setLogException($e);
+            }
 
         }
 
@@ -250,10 +256,15 @@ class PluginApi
     private static function getCallbackUrl($callbackParams)
     {
         $return = WooCommerce::getWcApiUrl();
-
         if (is_array($callbackParams)) {
             foreach ($callbackParams as $cbKey => $cbValue) {
-                $return = add_query_arg($cbKey, $cbValue, $return);
+                // Selective carefulness.
+                if (preg_match('/{|}/', $cbValue)) {
+                    // Variables specifically sent to Resurs Bank that need to be left as is.
+                    $return = rawurldecode(add_query_arg($cbKey, $cbValue, $return));
+                } else {
+                    $return = add_query_arg($cbKey, $cbValue, $return);
+                }
             }
         }
         return $return;
@@ -276,7 +287,7 @@ class PluginApi
                 $params += [
                     'p' => '{paymentId}',
                     'd' => '{digest}',
-                    'result' => 'ignored',
+                    'r' => '{result}',
                 ];
                 break;
             case RESURS_CALLBACK_TYPES::TEST:

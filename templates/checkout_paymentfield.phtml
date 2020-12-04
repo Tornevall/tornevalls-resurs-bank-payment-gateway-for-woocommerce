@@ -1,4 +1,4 @@
-<div style="display:<?php echo $displayMode; ?>">
+<div style="display:<?php echo !$streamLine ? $displayMode : ''; ?>">
     <label for="<?php echo $fieldName ?>" style="width:100%;display:block;">
         <?php echo $fieldLabel ?>
     </label>

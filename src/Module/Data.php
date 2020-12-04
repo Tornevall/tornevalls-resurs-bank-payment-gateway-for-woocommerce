@@ -16,6 +16,7 @@ use WC_Order;
 
 /**
  * Class Data Core data class for plugin. This is where we store dynamic content without dependencies those days.
+ *
  * @package ResursBank
  * @since 0.0.1.0
  */
@@ -80,9 +81,9 @@ class Data
      * @since 0.0.1.0
      */
     private static $searchArray = [
+        'resursReference',
         'paymentId',
         'paymentIdLast',
-        'resursReference',
     ];
     /**
      * @var WC_Logger $Log
@@ -210,6 +211,7 @@ class Data
 
     /**
      * Get file path for major initializer (init.php).
+     *
      * @param string $subDirectory
      * @return string
      * @version 0.0.1.0
@@ -256,6 +258,7 @@ class Data
 
     /**
      * Get waypoint for init.php.
+     *
      * @return string
      * @version 0.0.1.0
      */
@@ -333,6 +336,7 @@ class Data
 
     /**
      * Returns test mode boolean.
+     *
      * @return bool
      * @since 0.0.1.0
      */
@@ -377,6 +381,7 @@ class Data
      * woocommerce_{paymentMethod}_settings            // woocommerce_resurs_bank_nr_<method>_settings.
      * woocommerce_resurs_bank_omnicheckout_settings   // Omni/RCO section.
      * wc_resurs2_salt                                 // Salts are skipped, obviously.
+     *
      * @param string $key
      * @param string $namespace
      * @return bool|mixed|null
@@ -420,6 +425,7 @@ class Data
 
     /**
      * Anti collider.
+     *
      * @param null $extra
      * @return string
      * @since 0.0.1.0
@@ -484,6 +490,7 @@ class Data
 
     /**
      * Get current version from plugin data.
+     *
      * @return string
      * @since 0.0.1.0
      */
@@ -494,6 +501,7 @@ class Data
 
     /**
      * Get data from plugin setup (top of init.php).
+     *
      * @param $key
      * @return string
      * @version 0.0.1.0
@@ -506,6 +514,7 @@ class Data
 
     /**
      * Fetch plugin version from composer package.
+     *
      * @return string
      * @throws ExceptionHandler
      * @version 0.0.1.0
@@ -579,6 +588,7 @@ class Data
 
     /**
      * Return list of wrappers from netcurl wrapper driver.
+     *
      * @param $netWrapper
      * @return array
      * @since 0.0.1.0
@@ -609,6 +619,7 @@ class Data
 
     /**
      * Return long translations.
+     *
      * @param $key
      * @return mixed
      * @since 0.0.1.0
@@ -638,6 +649,7 @@ class Data
     /**
      * Filter based addon.
      * Do not use getResursOption in this request as this may cause infinite loops.
+     *
      * @param $currentArray
      * @param $section
      * @return array
@@ -841,33 +853,9 @@ class Data
     }
 
     /**
-     * @param $suffixedKey
-     * @param $orderDataMeta
-     * @return mixed|null
-     * @since 0.0.1.0
-     */
-    private static function getOrderMetaByKey($suffixedKey, $orderDataMeta)
-    {
-        $return = null;
-        if (is_array($orderDataMeta)) {
-            foreach (['', 'u_'] as $orderMetaKey) {
-                $currentMetaKey = sprintf('%s%s', $orderMetaKey, $suffixedKey);
-                if (isset($orderDataMeta[$currentMetaKey])) {
-                    $handleResult = $orderDataMeta[$currentMetaKey];
-                    if (is_array($handleResult)) {
-                        $return = array_pop($handleResult);
-                    } else {
-                        $return = $handleResult;
-                    }
-                }
-            }
-        }
-        return $return;
-    }
-
-    /**
      * Advanced order fetching. Make sure you use Data::canHandleOrder($paymentMethod) before running this.
      * It is not our purpose to interfere with all orders.
+     *
      * @param mixed $order
      * @param bool $orderIsResursReference
      * @return array
@@ -906,35 +894,78 @@ class Data
     }
 
     /**
-     * @param $order
+     * @param $orderReference
+     * @param null $asOrder
      * @return null
      * @since 0.0.1.0
      */
-    public static function getOrderByEcomRef($order)
+    public static function getOrderByEcomRef($orderReference, $asOrder= null)
     {
-        global $wpdb;
-        $return = null;
+        $return = 0;
 
-        $tableName = $wpdb->prefix . 'postmeta';
         foreach (self::$searchArray as $key) {
-            $getPostId = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
-                    $key,
-                    $order
-                )
-            );
-            if ((int)$getPostId) {
+            $getPostId = (int)self::getRefVarFromMeta($key, $orderReference);
+            if ($getPostId) {
                 $return = $getPostId;
                 break;
             }
         }
 
-        return (int)$return;
+        if ((int)$return && (bool)$asOrder) {
+            $return = new WC_Order($return);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @param $reference
+     * @return int
+     * @since 0.0.1.0
+     */
+    private static function getRefVarFromMeta($key, $reference)
+    {
+        $getPostId = self::getRefVarFromDatabase($key, $reference);
+        if (!$getPostId) {
+            $getPostId = self::getRefVarFromDatabase(
+                sprintf(
+                    '%s_%s',
+                    Data::getPrefix(),
+                    $key
+                ),
+                $reference
+            );
+        }
+        if ((int)$getPostId) {
+            $return = (int)$getPostId;
+        }
+
+        return isset($return) ? $return : 0;
+    }
+
+    /**
+     * @param $key
+     * @param $reference
+     * @return string|null
+     * @since 0.0.1.0
+     */
+    private static function getRefVarFromDatabase($key, $reference)
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'postmeta';
+        return $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
+                $key,
+                $reference
+            )
+        );
     }
 
     /**
      * Get locally stored payment if it is present.
+     *
      * @param $key
      * @return array
      * @since 0.0.1.0
@@ -946,6 +977,7 @@ class Data
 
     /**
      * Set and return order information.
+     *
      * @param $orderId
      * @param WC_Order $order
      * @return array|mixed
@@ -994,6 +1026,7 @@ class Data
 
     /**
      * Fetch order info from EComPHP.
+     *
      * @param $return
      * @return mixed
      * @return array
@@ -1024,6 +1057,7 @@ class Data
 
     /**
      * Prepare for exceptions.
+     *
      * @param $return
      * @return mixed
      * @since 0.0.1.0
@@ -1099,8 +1133,34 @@ class Data
     }
 
     /**
+     * @param $suffixedKey
+     * @param $orderDataMeta
+     * @return mixed|null
+     * @since 0.0.1.0
+     */
+    private static function getOrderMetaByKey($suffixedKey, $orderDataMeta)
+    {
+        $return = null;
+        if (is_array($orderDataMeta)) {
+            foreach (['', 'u_'] as $orderMetaKey) {
+                $currentMetaKey = sprintf('%s%s', $orderMetaKey, $suffixedKey);
+                if (isset($orderDataMeta[$currentMetaKey])) {
+                    $handleResult = $orderDataMeta[$currentMetaKey];
+                    if (is_array($handleResult)) {
+                        $return = array_pop($handleResult);
+                    } else {
+                        $return = $handleResult;
+                    }
+                }
+            }
+        }
+        return $return;
+    }
+
+    /**
      * Makes sure nothing interfering with orders that has not been created by us. If this returns false,
      * it means we should not be there and touch things.
+     *
      * @param $thisMethod
      * @return bool
      * @since 0.0.1.0

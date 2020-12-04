@@ -25,7 +25,7 @@
                 <td class="resursMethodBody">
                     <input class="trbwc_cb_input"
                            onblur="doResursUpdateCallback('<?php echo $callbackType; ?>')"
-                           value="<?php echo rawurldecode($callbackUrl) ?>"
+                           value="<?php echo $callbackUrl ?>"
                         <?php
                         if (!(bool)Data::getResursOption('show_developer')) {
                             echo 'readonly';
