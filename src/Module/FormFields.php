@@ -8,6 +8,7 @@ use WC_Settings_API;
 
 /**
  * Class FormFields Self contained settings.
+ *
  * @package ResursBank\Module
  * @since 0.0.1.0
  */
@@ -209,6 +210,20 @@ class FormFields extends WC_Settings_API
                     ],
                 ],
                 'payment_methods_list_end' => [
+                    'type' => 'sectionend',
+                ],
+                'callbacks_list' => [
+                    'type' => 'callbacklist',
+                ],
+                'callbacks_button' => [
+                    'type' => 'button',
+                    'action' => 'button',
+                    'title' => __('Update callbacks', 'trbwc'),
+                    'custom_attributes' => [
+                        'onclick' => 'getResursCallbacks()',
+                    ],
+                ],
+                'callbacks_list_end' => [
                     'type' => 'sectionend',
                 ],
                 'payment_method_annuity' => [
@@ -462,6 +477,7 @@ class FormFields extends WC_Settings_API
 
     /**
      * Transform options into something that fits in a WC_Settings_Page-block.
+     *
      * @param $array
      * @param $add
      * @return string
@@ -508,7 +524,12 @@ class FormFields extends WC_Settings_API
     {
         $action = isset($formData['action']) && !empty($formData['action']) ? $formData['action'] : 'button';
 
-        if (isset($formData['id']) && $formData['id'] === Data::getPrefix('admin_payment_methods_button')) {
+        $allowedFormData = [
+            Data::getPrefix('admin_payment_methods_button'),
+            Data::getPrefix('admin_callbacks_button'),
+        ];
+
+        if (isset($formData['id']) && in_array($formData['id'], $allowedFormData, true)) {
             $formArray = $formData;
             $formArray['action'] = $action; // Our action
             $formArray['custom_attributes'] = $this->get_custom_attribute_html($formData);
@@ -522,7 +543,6 @@ class FormFields extends WC_Settings_API
      */
     public static function getFieldDecimals()
     {
-
         if (wc_get_price_decimals() < 2 && Data::getResursOption('prevent_rounding_panic')) {
             echo Data::getGenericClass()->getTemplate('adminpage_general_decimals.phtml', [
                 'pluginTitle' => Data::getPluginTitle(),
@@ -532,6 +552,7 @@ class FormFields extends WC_Settings_API
 
     /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
+     *
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -544,6 +565,28 @@ class FormFields extends WC_Settings_API
                 'adminpage_paymentmethods.phtml',
                 [
                     'paymentMethods' => $paymentMethods,
+                ]
+            );
+        }
+
+        //do_action('woocommerce_admin_field_callbacklist');
+    }
+
+    /**
+     * Fetch payment methods list. formData is not necessary here since this is a very specific field.
+     *
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getFieldCallbackList()
+    {
+        $callbacks = Api::getCallbackList();
+
+        if (is_array($callbacks)) {
+            echo Data::getGenericClass()->getTemplate(
+                'adminpage_callbacks.phtml',
+                [
+                    'callbacks' => $callbacks,
                 ]
             );
         }

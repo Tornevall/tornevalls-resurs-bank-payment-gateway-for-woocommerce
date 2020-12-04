@@ -420,7 +420,7 @@ class Data
 
     /**
      * Anti collider.
-     * @param string $extra
+     * @param null $extra
      * @return string
      * @since 0.0.1.0
      */

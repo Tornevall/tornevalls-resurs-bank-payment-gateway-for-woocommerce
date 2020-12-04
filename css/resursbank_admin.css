@@ -47,3 +47,9 @@
     background: #ffffff;
     border: 1px solid #ffffff;
 }
+
+.trbwc_cb_input {
+    width: 100%;
+    border: none;
+    font-size: 11px;
+}

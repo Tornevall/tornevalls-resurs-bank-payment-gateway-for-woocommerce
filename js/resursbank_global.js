@@ -45,7 +45,7 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
  */
 function getResursError(data)
 {
-    console.log("Resurs Bank Ajax Error: ", data);
+    console.log("RBWC Ajax Backend Error: ", data);
 }
 
 /**
