@@ -223,6 +223,14 @@ class FormFields extends WC_Settings_API
                         'onclick' => 'getResursCallbacks()',
                     ],
                 ],
+                'trigger_callback_button' => [
+                    'type' => 'button',
+                    'action' => 'button',
+                    'title' => __('Request test from Resurs Bank', 'trbwc'),
+                    'custom_attributes' => [
+                        'onclick' => 'getResursCallbackTest()',
+                    ],
+                ],
                 'callbacks_list_end' => [
                     'type' => 'sectionend',
                 ],
@@ -527,6 +535,7 @@ class FormFields extends WC_Settings_API
         $allowedFormData = [
             Data::getPrefix('admin_payment_methods_button'),
             Data::getPrefix('admin_callbacks_button'),
+            Data::getPrefix('admin_trigger_callback_button'),
         ];
 
         if (isset($formData['id']) && in_array($formData['id'], $allowedFormData, true)) {

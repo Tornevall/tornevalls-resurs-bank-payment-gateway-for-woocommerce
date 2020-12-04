@@ -16,6 +16,7 @@ use function in_array;
 
 /**
  * Class WooCommerce WooCommerce related actions.
+ *
  * @package ResursBank
  * @since 0.0.1.0
  */
@@ -35,6 +36,7 @@ class WooCommerce
 
     /**
      * By this plugin lowest required woocommerce version.
+     *
      * @var string
      * @since 0.0.1.0
      */
@@ -106,6 +108,7 @@ class WooCommerce
 
     /**
      * Self aware setup link.
+     *
      * @param $links
      * @param $file
      * @param null $section
@@ -444,6 +447,7 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
+     *
      * @since 0.0.1.0
      */
     public static function getBeforeCheckoutForm()
@@ -453,6 +457,7 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation.
+     *
      * @param $customerIsInCheckout
      * @since 0.0.1.0
      */
@@ -485,16 +490,71 @@ class WooCommerce
     }
 
     /**
+     * @param string $requestBase
      * @return string
      * @since 0.0.1.0
      */
-    public static function getWcApiUrl()
+    public static function getWcApiUrl($requestBase = 'ResursDefault')
     {
-        return sprintf('%s', WC()->api_request_url('ResursDefault'));
+        return sprintf('%s', WC()->api_request_url($requestBase));
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function getHandledCallback()
+    {
+        $getConfirmedSalt = Api::getResurs()->getValidatedCallbackDigest(
+            self::getRequest('p'),
+            self::getCurrentSalt(),
+            self::getRequest('d')
+        );
+        self::reply(
+            [
+                'aliveConfirm' => true,
+                'digestOk' => $getConfirmedSalt,
+            ]
+        );
+    }
+
+    /**
+     * @param $key
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getRequest($key)
+    {
+        return isset($_REQUEST[$key]) ? $_REQUEST[$key] : null;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getCurrentSalt()
+    {
+        return (string)Data::getResursOption('salt');
+    }
+
+    /**
+     * @param array $out
+     * @param int $code
+     * @param string $httpString
+     * @since 0.0.1.0
+     */
+    private static function reply($out, $code = 202, $httpString = 'Accepted')
+    {
+        $sProtocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
+        $replyString = sprintf('%s %d %s', $sProtocol, $code, $httpString);
+        header('Content-type: application/json');
+        header($replyString, true, $code);
+        echo json_encode($out);
+        exit;
     }
 
     /**
      * v3core: Checkout vs Cart Manipulation - A moment when customer is not in checkout.
+     *
      * @since 0.0.1.0
      */
     public static function getAddToCart()
@@ -504,6 +564,7 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
+     *
      * @param $fragments
      * @return mixed
      * @since 0.0.1.0

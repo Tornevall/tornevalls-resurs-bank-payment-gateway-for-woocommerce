@@ -59,6 +59,34 @@ function getResursPaymentMethods() {
 }
 
 /**
+ * @since 0.0.1.0
+ */
+function getResursCallbacks() {
+    getResursSpin('#div_trbwc_admin_callbacks_button');
+    getResursAjaxify('post', 'resursbank_get_new_callbacks', {}, function () {
+        $rQuery('#div_trbwc_admin_callbacks_button').html(
+            $rQuery('<div>', {
+                'style': 'font-weight: bold; color: #000099;'
+            }).html(getResursLocalization('reloading'))
+        );
+        document.location.reload();
+    });
+}
+
+function getResursCallbackTest() {
+    getResursSpin('#div_trbwc_admin_trigger_callback_button');
+    getResursAjaxify('post', 'resursbank_get_trigger_test', {}, function () {
+        $rQuery('#div_trbwc_admin_callbacks_button').html(
+            $rQuery('<div>', {
+                'style': 'font-weight: bold; color: #000099;'
+            }).html(getResursLocalization('reloading'))
+        );
+        document.location.reload();
+    });
+}
+
+
+/**
  * @param pwBox
  * @since 0.0.1.0
  */
