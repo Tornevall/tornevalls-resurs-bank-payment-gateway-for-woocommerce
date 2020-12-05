@@ -2,6 +2,7 @@
     "name": "tornevall/tornelib-php-netcurl-deprecate-60",
     "description": "netcurl-6.0 deprecation library",
     "minimum-stability": "dev",
+    "version": "6.0.2",
     "license": "Apache-2.0",
     "authors": [
         {

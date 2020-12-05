@@ -13,6 +13,11 @@
     "require": {
         "resursbank/ecomphp": "^1.3"
     },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        }
+    },
     "conflict": {},
     "autoload": {
         "psr-4": {

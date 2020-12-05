@@ -1,42 +1,46 @@
-<h3><?php _e('Available payment methods', 'trbwc'); ?></h3>
+<h3><?php use ResursBank\Module\Data;
 
-<div style="font-style: italic;margin-bottom: 5px;">
-    <?php
-    _e('Amount limits: Defines from-to which order amount a payment method will be displayed in the checkout.', 'trbwc')
-    ?><br>
-    <?php
-    _e('Customer types: Which customers that can take advantage of a specific payment method (NATURAL: ' .
-        'Private customers, LEGAL: Company based customers).', 'trbwc')
-    ?><br>
-</div>
+    _e('Available callbacks', 'trbwc');
+    ?>
+</h3>
 
 <table width="100%" style="border: none;">
     <tr>
-        <td width="20%" class="resursMethodHead"><?php _e('Method ID', 'trbwc') ?></td>
-        <td width="20%" class="resursMethodHead"><?php _e('Description', 'trbwc') ?></td>
-        <td width="20%" class="resursMethodHead"><?php _e('Amount limits', 'trbwc') ?></td>
-        <td width="20%" class="resursMethodHead"><?php _e('Method type', 'trbwc') ?></td>
-        <td width="20%" class="resursMethodHead"><?php _e('Customer types', 'trbwc') ?></td>
+        <td width="20%" class="resursMethodHead"><?php _e('Callback', 'trbwc') ?></td>
+        <td width="80%" class="resursMethodHead"><?php _e('URL Template', 'trbwc') ?></td>
+        <?php
+        if ((bool)Data::getResursOption('show_developer')) {
+            ?>
+            <td width="80%" class="resursMethodHead"><?php _e('Remove', 'trbwc') ?></td>
+            <?php
+        }
+        ?>
     </tr>
-    <?php foreach ($paymentMethods as $methodObject) { ?>
-        <tr>
-            <td class="resursMethodBody"><?php echo $methodObject->id ?></td>
-            <td class="resursMethodBody"><?php echo $methodObject->description ?></td>
-            <td class="resursMethodBody">
-                <?php echo $methodObject->minLimit ?> - <?php echo $methodObject->maxLimit ?>
-            </td>
-            <td class="resursMethodBody">
-                <?php echo $methodObject->type ?>
+    <?php
+    if (isset($callbacks) && is_array($callbacks)) {
+        foreach ($callbacks as $callbackType => $callbackUrl) {
+            ?>
+            <tr>
+                <td class="resursMethodBody"><?php echo $callbackType ?></td>
+                <td class="resursMethodBody">
+                    <input class="trbwc_cb_input"
+                           onblur="doResursUpdateCallback('<?php echo $callbackType; ?>')"
+                           value="<?php echo $callbackUrl ?>"
+                        <?php
+                        if (!(bool)Data::getResursOption('show_developer')) {
+                            echo 'readonly';
+                        } ?>></td>
                 <?php
-                if ($methodObject->type !== $methodObject->specificType) {
-                    printf('(<i>%s</i>)', $methodObject->specificType);
-                }
-                ?>
-                <br>
-            </td>
-            <td class="resursMethodBody">
-                <?php echo implode(', ', (array)$methodObject->customerType); ?>
-            </td>
-        </tr>
-    <?php } ?>
+                if ((bool)Data::getResursOption('show_developer')) {
+                    ?>
+                    <td class="resursMethodBody">
+                        <button onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X</button>
+                    </td>
+                    <?php
+                } ?>
+            </tr>
+            <?php
+        }
+    }
+    ?>
 </table>

@@ -7,15 +7,18 @@ use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
+use Resursbank\RBEcomPHP\RESURS_PAYMENT_STATUS_RETURNCODES;
 use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\ExceptionHandler;
+use WC_Order;
 use WC_Session;
 use function in_array;
 
 /**
  * Class WooCommerce WooCommerce related actions.
+ *
  * @package ResursBank
  * @since 0.0.1.0
  */
@@ -35,6 +38,7 @@ class WooCommerce
 
     /**
      * By this plugin lowest required woocommerce version.
+     *
      * @var string
      * @since 0.0.1.0
      */
@@ -106,6 +110,7 @@ class WooCommerce
 
     /**
      * Self aware setup link.
+     *
      * @param $links
      * @param $file
      * @param null $section
@@ -381,13 +386,10 @@ class WooCommerce
     {
         $return['ecom_short'] = [];
         $purge = [
-            'id',
             'paymentDiffs',
             'customer',
             'deliveryAddress',
             'paymentMethodId',
-            'paymentMethodName',
-            'paymentMethodType',
             'totalBonusPoints',
             'cached',
             'metaData',
@@ -444,6 +446,7 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
+     *
      * @since 0.0.1.0
      */
     public static function getBeforeCheckoutForm()
@@ -453,6 +456,7 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation.
+     *
      * @param $customerIsInCheckout
      * @since 0.0.1.0
      */
@@ -485,16 +489,193 @@ class WooCommerce
     }
 
     /**
+     * @param string $requestBase
      * @return string
      * @since 0.0.1.0
      */
-    public static function getWcApiUrl()
+    public static function getWcApiUrl($requestBase = 'ResursDefault')
     {
-        return sprintf('%s', WC()->api_request_url('ResursDefault'));
+        return sprintf('%s', WC()->api_request_url($requestBase));
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function getHandledCallback()
+    {
+        $code = 202;
+        $responseString = 'Accepted';
+        $getConfirmedSalt = Api::getResurs()->getValidatedCallbackDigest(
+            self::getRequest('p'),
+            self::getCurrentSalt(),
+            self::getRequest('d'),
+            self::getRequest('r')
+        );
+
+        Data::setLogNotice(
+            sprintf(
+                __(
+                    'Callback Received: %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
+                    'trbwc'
+                ),
+                self::getRequest('c'),
+                $getConfirmedSalt ? __('Validated', 'trbwc') : __('Not validated', 'trbwc'),
+                self::getRequest('p'),
+                Data::getOrderByEcomRef(self::getRequest('p'))
+
+            )
+        );
+
+        // If there is a payment, there must be a digest.
+        if (!empty(self::getRequest('p'))) {
+            if ($getConfirmedSalt) {
+                try {
+                    self::getUpdatedOrderByCallback(self::getRequest('p'));
+                } catch (Exception $e) {
+                    $code = $e->getCode();
+                    $responseString = $e->getMessage();
+                    Data::setLogException($e);
+                }
+            } else {
+                $code = 406; // Not acceptable
+                $responseString = 'Digest rejected';
+            }
+        }
+
+        self::reply(
+            [
+                'aliveConfirm' => true,
+                'digestCode' => $code,
+            ],
+            $code,
+            $responseString
+        );
+    }
+
+    /**
+     * @param $key
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getRequest($key)
+    {
+        return isset($_REQUEST[$key]) ? $_REQUEST[$key] : null;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getCurrentSalt()
+    {
+        return (string)Data::getResursOption('salt');
+    }
+
+    /**
+     * @param $paymentId
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getUpdatedOrderByCallback($paymentId)
+    {
+        $orderId = Data::getOrderByEcomRef($paymentId);
+        if ($orderId) {
+            $order = new WC_Order($orderId);
+            self::setOrderStatusByCallback(Api::getResurs()->getOrderStatusByPayment($paymentId), $order);
+        }
+    }
+
+    /**
+     * @param $ecomOrderStatus
+     * @param WC_Order $order
+     * @since 0.0.1.0
+     */
+    private static function setOrderStatusByCallback($ecomOrderStatus, $order)
+    {
+        switch (true) {
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_AUTOMATICALLY_DEBITED:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION:
+                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                break;
+            default:
+        }
+    }
+
+    /**
+     * @param WC_Order $order
+     * @param $ecomOrderStatus
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function setOrderStatusWithNotice($order, $ecomOrderStatus)
+    {
+        return $order->update_status(
+            self::getOrderStatuses($ecomOrderStatus),
+            sprintf(
+                __('Resurs Bank updated order status to %s.', 'trbwc'),
+                self::getOrderStatuses($ecomOrderStatus)
+            )
+        );
+    }
+
+    /**
+     * @param null $key
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getOrderStatuses($key = null)
+    {
+        $return = WordPress::applyFilters('getOrderStatuses', [
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING => 'processing',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED => 'refunded',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED => 'completed',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING => 'on-hold',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED => 'cancelled',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_STATUS_COULD_NOT_BE_SET => 'on-hold',
+            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION => 'on-hold',
+        ]);
+        if (isset($key) && isset($return[$key])) {
+            return $return[$key];
+        }
+        return $return;
+    }
+
+    /**
+     * @param array $out
+     * @param int $code
+     * @param string $httpString
+     * @since 0.0.1.0
+     */
+    private static function reply($out, $code = 202, $httpString = 'Accepted')
+    {
+        $sProtocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
+        $replyString = sprintf('%s %d %s', $sProtocol, $code, $httpString);
+        header('Content-type: application/json');
+        header($replyString, true, $code);
+        echo json_encode($out);
+        exit;
     }
 
     /**
      * v3core: Checkout vs Cart Manipulation - A moment when customer is not in checkout.
+     *
      * @since 0.0.1.0
      */
     public static function getAddToCart()
@@ -504,6 +685,7 @@ class WooCommerce
 
     /**
      * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
+     *
      * @param $fragments
      * @return mixed
      * @since 0.0.1.0

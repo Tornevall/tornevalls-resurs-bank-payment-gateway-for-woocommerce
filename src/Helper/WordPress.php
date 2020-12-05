@@ -10,6 +10,7 @@ use TorneLIB\IO\Data\Strings;
 
 /**
  * Class WordPress WordPress related actions.
+ *
  * @package ResursBank
  * @since 0.0.1.0
  */
@@ -35,6 +36,7 @@ class WordPress
 
     /**
      * Preparing for ajax actions.
+     *
      * @since 0.0.1.0
      */
     private static function setupAjaxActions()
@@ -43,7 +45,10 @@ class WordPress
             'test_credentials',
             'import_credentials',
             'get_payment_methods',
+            'get_new_callbacks',
+            'get_trigger_test',
         ];
+
         foreach ($actionList as $action) {
             $camelCaseAction = sprintf('ResursBank\Module\PluginApi::%s', Strings::returnCamelCase($action));
             add_action(
@@ -55,6 +60,7 @@ class WordPress
 
     /**
      * Internal filter setup.
+     *
      * @since 0.0.1.0
      */
     private static function setupFilters()
@@ -75,6 +81,7 @@ class WordPress
 
     /**
      * Script preparation.
+     *
      * @since 0.0.1.0
      */
     private static function setupScripts()
@@ -85,6 +92,7 @@ class WordPress
 
     /**
      * Basic actions.
+     *
      * @since 0.0.1.0
      */
     private static function setupActions()
@@ -98,11 +106,13 @@ class WordPress
         add_action('woocommerce_admin_field_button', 'ResursBank\Module\FormFields::getFieldButton', 10, 2);
         add_action('woocommerce_admin_field_decimal_warning', 'ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', 'ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
+        add_action('woocommerce_admin_field_callbacklist', 'ResursBank\Module\FormFields::getFieldCallbackList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
     }
 
     /**
      * Admin events.
+     *
      * @since 0.0.1.0
      */
     private static function setupWoocommerceAdminActions()
@@ -123,6 +133,7 @@ class WordPress
 
     /**
      * Customer based events (checkout, etc).
+     *
      * @since 0.0.1.0
      */
     private static function setupWoocommerceCheckoutActions()
@@ -284,37 +295,6 @@ class WordPress
 
     /**
      * @param $filterName
-     * @return string
-     * @since 0.0.1.0
-     */
-    private static function getFilterName($filterName)
-    {
-        $return = $filterName;
-        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
-            $return = (new Strings())->getSnakeCase($filterName);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Clean up arguments and return the real ones.
-     * @param $args
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getFilterArgs($args)
-    {
-        if (is_array($args) && count($args) > 2) {
-            array_shift($args);
-            array_shift($args);
-        }
-
-        return $args;
-    }
-
-    /**
-     * @param $filterName
      * @param $value
      * @return mixed|void
      * @since 0.0.1.0
@@ -342,7 +322,7 @@ class WordPress
 
     /**
      * @param $scriptName
-     * @param bool $isAdmin
+     * @param null $isAdmin
      * @param null $extraLocalizationData
      * @since 0.0.1.0
      */
@@ -383,6 +363,7 @@ class WordPress
 
     /**
      * Localized variables shown in admin only.
+     *
      * @param $return
      * @return mixed
      * @since 0.0.1.0
@@ -432,6 +413,7 @@ class WordPress
 
     /**
      * Makes nonces strict based on client ip address.
+     *
      * @param $tag
      * @param bool $strictify
      * @return string
@@ -476,7 +458,40 @@ class WordPress
     }
 
     /**
+     * @param $filterName
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getFilterName($filterName)
+    {
+        $return = $filterName;
+        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
+            $return = (new Strings())->getSnakeCase($filterName);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Clean up arguments and return the real ones.
+     *
+     * @param $args
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getFilterArgs($args)
+    {
+        if (is_array($args) && count($args) > 2) {
+            array_shift($args);
+            array_shift($args);
+        }
+
+        return $args;
+    }
+
+    /**
      * Localized variables shown in all views.
+     *
      * @param $return
      * @return mixed
      * @since 0.0.1.0
@@ -496,6 +511,7 @@ class WordPress
 
     /**
      * Localized variables shown in front (customer) view only.
+     *
      * @param $return
      * @param null $scriptName
      * @return mixed

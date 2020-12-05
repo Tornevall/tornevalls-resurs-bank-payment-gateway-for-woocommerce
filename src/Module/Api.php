@@ -26,6 +26,11 @@ class Api
      */
     private static $paymentMethods;
     /**
+     * @var array $callbacks
+     * @since 0.0.1.0
+     */
+    private static $callbacks;
+    /**
      * @var array $annuityFactors
      * @since 0.0.1.0
      */
@@ -367,6 +372,35 @@ class Api
             }
             $return = self::$paymentMethods;
             Data::setResursOption('paymentMethods', json_encode(self::$paymentMethods));
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param bool $fromStorage
+     * @return array|mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
+     */
+    public static function getCallbackList($fromStorage = true)
+    {
+        $return = self::$callbacks;
+        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('callbacks'), false))) {
+            $return = $stored;
+        }
+
+        if (!$fromStorage || empty($return)) {
+            try {
+                self::$paymentMethods = self::getResurs()->getRegisteredEventCallback(255);
+            } catch (Exception $e) {
+                // Reset.
+                Data::setResursOption('callbacks', null);
+                throw $e;
+            }
+            $return = self::$paymentMethods;
+            Data::setResursOption('callbacks', json_encode(self::$paymentMethods));
         }
 
         return $return;

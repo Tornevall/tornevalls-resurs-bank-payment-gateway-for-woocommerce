@@ -3,11 +3,15 @@
 namespace ResursBank\Module;
 
 use Exception;
+use ResursBank\Helper\WooCommerce;
 use ResursBank\Helper\WordPress;
+use Resursbank\RBEcomPHP\RESURS_CALLBACK_TYPES;
+use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
 
 /**
  * Class PluginApi
+ *
  * @package ResursBank\Module
  */
 class PluginApi
@@ -65,7 +69,7 @@ class PluginApi
     }
 
     /**
-     * @param bool $expire
+     * @param null $expire
      * @return bool
      * @since 0.0.1.0
      */
@@ -106,6 +110,7 @@ class PluginApi
 
     /**
      * Make sure the used nonce can only be used once.
+     *
      * @param $nonceTag
      * @return bool
      * @since 0.0.1.0
@@ -201,11 +206,151 @@ class PluginApi
      */
     public static function getPaymentMethods()
     {
-        // Refetch.
+        // Re-fetch payment methods.
         Api::getPaymentMethods(false);
         Api::getAnnuityFactors(false);
         self::reply([
             'reload' => true,
         ]);
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getNewCallbacks()
+    {
+        $callbacks = [
+            RESURS_CALLBACK_TYPES::UNFREEZE,
+            RESURS_CALLBACK_TYPES::ANNULMENT,
+            RESURS_CALLBACK_TYPES::AUTOMATIC_FRAUD_CONTROL,
+            RESURS_CALLBACK_TYPES::FINALIZATION,
+            RESURS_CALLBACK_TYPES::TEST,
+            RESURS_CALLBACK_TYPES::UPDATE,
+            RESURS_CALLBACK_TYPES::BOOKED,
+        ];
+
+        foreach ($callbacks as $ecomCallbackId) {
+            $callbackUrl = self::getCallbackUrl(self::getCallbackParams($ecomCallbackId));
+            try {
+                Data::setLogNotice(sprintf('Callback Registration: %s.', $callbackUrl));
+                Api::getResurs()->setRegisterCallback(
+                    $ecomCallbackId,
+                    $callbackUrl,
+                    self::getCallbackDigestData()
+                );
+            } catch (Exception $e) {
+                Data::setLogException($e);
+            }
+
+        }
+
+        self::reply(['reload' => true]);
+    }
+
+    /**
+     * @param $callbackParams
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getCallbackUrl($callbackParams)
+    {
+        $return = WooCommerce::getWcApiUrl();
+        if (is_array($callbackParams)) {
+            foreach ($callbackParams as $cbKey => $cbValue) {
+                // Selective carefulness.
+                if (preg_match('/{|}/', $cbValue)) {
+                    // Variables specifically sent to Resurs Bank that need to be left as is.
+                    $return = rawurldecode(add_query_arg($cbKey, $cbValue, $return));
+                } else {
+                    $return = add_query_arg($cbKey, $cbValue, $return);
+                }
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * @param $ecomCallbackId
+     * @return array
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getCallbackParams($ecomCallbackId)
+    {
+        $params = [
+            'c' => Api::getResurs()->getCallbackTypeString($ecomCallbackId),
+            't' => time(),
+        ];
+        switch ($ecomCallbackId) {
+            case RESURS_CALLBACK_TYPES::AUTOMATIC_FRAUD_CONTROL:
+                $params += [
+                    'p' => '{paymentId}',
+                    'd' => '{digest}',
+                    'r' => '{result}',
+                ];
+                break;
+            case RESURS_CALLBACK_TYPES::TEST:
+                $params += [
+                    'ignore1' => '{param1}',
+                    'ignore2' => '{param2}',
+                    'ignore3' => '{param3}',
+                    'ignore4' => '{param4}',
+                    'ignore5' => '{param5}',
+                ];
+                unset($params['t']);
+                break;
+            default:
+                // UNFREEZE, ANNULMENT, FINALIZATION, UPDATE, BOOKED
+                $params['p'] = '{paymentId}';
+                $params['d'] = '{digest}';
+        }
+
+        return $params;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getCallbackDigestData()
+    {
+        $return = [
+            'digestSalt' => self::getTheSalt(),
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getTheSalt()
+    {
+        $currentSaltData = (int)Data::getResursOption('saltdate');
+        $saltDateControl = time() - $currentSaltData;
+        $currentSalt = ($return = Data::getResursOption('salt'));
+
+        if (empty($currentSalt) || $saltDateControl >= 86400) {
+            $return = (new Password())->mkpass();
+            Data::setResursOption('salt', $return);
+            Data::setResursOption('saltdate', time());
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getTriggerTest()
+    {
+        Api::getResurs()->triggerCallback();
+        return true;
     }
 }

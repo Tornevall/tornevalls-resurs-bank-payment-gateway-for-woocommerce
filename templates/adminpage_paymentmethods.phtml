@@ -18,7 +18,8 @@
         <td width="20%" class="resursMethodHead"><?php _e('Method type', 'trbwc') ?></td>
         <td width="20%" class="resursMethodHead"><?php _e('Customer types', 'trbwc') ?></td>
     </tr>
-    <?php foreach ($paymentMethods as $methodObject) { ?>
+    <?php foreach ($paymentMethods as $methodObject) {
+        ?>
         <tr>
             <td class="resursMethodBody"><?php echo $methodObject->id ?></td>
             <td class="resursMethodBody"><?php echo $methodObject->description ?></td>
@@ -30,13 +31,13 @@
                 <?php
                 if ($methodObject->type !== $methodObject->specificType) {
                     printf('(<i>%s</i>)', $methodObject->specificType);
-                }
-                ?>
+                } ?>
                 <br>
             </td>
             <td class="resursMethodBody">
                 <?php echo implode(', ', (array)$methodObject->customerType); ?>
             </td>
         </tr>
-    <?php } ?>
+        <?php
+    } ?>
 </table>

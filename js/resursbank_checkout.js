@@ -6,8 +6,7 @@ $rQuery(document).ready(function ($) {
     getResursHookedBillingFields();
 });
 
-function getResursGateway()
-{
+function getResursGateway() {
     resursGateway = {
         init: function () {
             var that = this;
@@ -40,8 +39,7 @@ var inheritTo = {
  * Hook key pressing into regular billing address fields and inherit data to Resurs fields.
  * @since 0.0.1.0
  */
-function getResursHookedBillingFields()
-{
+function getResursHookedBillingFields() {
     for (var inheritKey in inheritTo) {
         var inheritField = $rQuery('#' + inheritKey);
         if (inheritField.length) {
@@ -67,8 +65,7 @@ function getResursHookedBillingFields()
  * @param o
  * @since 0.0.1.0
  */
-function setBillingInherit(o)
-{
+function setBillingInherit(o) {
     var inheritTo = {
         'trbwc_phone': 'billing_phone',
         'trbwc_mobile': 'billing_phone',
@@ -89,8 +86,7 @@ function setBillingInherit(o)
  * @param thisValue
  * @since 0.0.1.0
  */
-function getResursFields(findElement, thisValue)
-{
+function getResursFields(findElement, thisValue) {
     var selectElement = $rQuery(findElement);
     if (selectElement.length) {
         for (var elementId = 0; elementId < selectElement.length; elementId++) {
@@ -105,7 +101,6 @@ function getResursFields(findElement, thisValue)
  * @param updateValue
  * @since 0.0.1.0
  */
-function setResursUpdateField(updateElement, updateValue)
-{
+function setResursUpdateField(updateElement, updateValue) {
     updateElement.value = updateValue;
 }

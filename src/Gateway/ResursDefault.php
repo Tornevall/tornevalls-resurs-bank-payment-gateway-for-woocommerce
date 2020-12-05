@@ -504,7 +504,12 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $finalRedirectUrl = wc_get_cart_url();
 
-        if ($_REQUEST['apiData']) {
+        if (isset($_REQUEST['c'])) {
+            WooCommerce::getHandledCallback();
+            die();
+        }
+
+        if (isset($_REQUEST['apiData'])) {
             $this->setApiData(json_decode(
                 (new Strings())->base64urlDecode($_REQUEST['apiData']),
                 true
@@ -1421,7 +1426,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getCustomerData($key, $returnType = null)
+    private function getCustomerData($key, $returnType = '')
     {
         $return = isset($this->applicantPostData[$key]) ? $this->applicantPostData[$key] : '';
 
