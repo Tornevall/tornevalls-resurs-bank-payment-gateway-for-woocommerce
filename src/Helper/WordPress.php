@@ -295,6 +295,38 @@ class WordPress
 
     /**
      * @param $filterName
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getFilterName($filterName)
+    {
+        $return = $filterName;
+        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
+            $return = (new Strings())->getSnakeCase($filterName);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Clean up arguments and return the real ones.
+     *
+     * @param $args
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getFilterArgs($args)
+    {
+        if (is_array($args) && count($args) > 2) {
+            array_shift($args);
+            array_shift($args);
+        }
+
+        return $args;
+    }
+
+    /**
+     * @param $filterName
      * @param $value
      * @return mixed|void
      * @since 0.0.1.0
@@ -455,38 +487,6 @@ class WordPress
         ];
 
         return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * @param $filterName
-     * @return string
-     * @since 0.0.1.0
-     */
-    private static function getFilterName($filterName)
-    {
-        $return = $filterName;
-        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
-            $return = (new Strings())->getSnakeCase($filterName);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Clean up arguments and return the real ones.
-     *
-     * @param $args
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getFilterArgs($args)
-    {
-        if (is_array($args) && count($args) > 2) {
-            array_shift($args);
-            array_shift($args);
-        }
-
-        return $args;
     }
 
     /**

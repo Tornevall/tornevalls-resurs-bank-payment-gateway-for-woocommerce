@@ -4,6 +4,7 @@ $rQuery(document).ready(function ($) {
 /**
  * @param key
  * @returns {boolean}
+ * @since 0.0.1.0
  */
 function getResursLocalization(key) {
     var returnValue = false;

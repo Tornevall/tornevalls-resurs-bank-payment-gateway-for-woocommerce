@@ -6,9 +6,9 @@ var $rQuery = jQuery.noConflict();
  * @param requestVerb
  * @param requestData
  * @param callbackMethod
+ * @since 0.0.1.0
  */
-function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMethod)
-{
+function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMethod) {
     if (typeof requestData === 'object') {
         if (typeof requestData['action'] === 'undefined') {
             requestData['action'] = requestVerb;
@@ -42,18 +42,17 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
 
 /**
  * @param data
+ * @since 0.0.1.0
  */
-function getResursError(data)
-{
+function getResursError(data) {
     console.log("RBWC Ajax Backend Error: ", data);
 }
 
 /**
- *
  * @param element
+ * @since 0.0.1.0
  */
-function getResursSpin(element)
-{
+function getResursSpin(element) {
     $rQuery(element).html(
         $rQuery('<img>', {
             'src': getResursLocalization('spin')
