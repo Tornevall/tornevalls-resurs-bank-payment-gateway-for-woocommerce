@@ -2,20 +2,27 @@
     For order info details we show a basic view with exception notification fields.
     If EComPHP triggers any exceptions they are shown here and then nowhere else.
  -->
-<?php if (isset($ecom)) { ?>
+<?php
+// If $ecom not present, something went wrong in the core functions of the plugin.
+// Payments should be fully shown even if there is no payment.
+if (isset($ecom)) {
+    ?>
     <p class="form-field form-field-wide">
         <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle">
             <?php
-            _e('Order information from Resurs Bank', 'trbwc')
+            _e('Order information and metadata for Resurs Bank', 'trbwc')
             ?>
         </label>
-        <?php if (isset($ecomException['code']) && (int)$ecomException['code']) { ?>
+        <?php if (isset($ecomException['code']) && (int)$ecomException['code']) {
+                ?>
             <span class="resursApiException">
         <?php echo $errorString; ?><br>
             <br>
         <b><?php printf('Exception %d: %s', $ecomException['code'], $ecomException['message']) ?></b>
         </span>
-        <?php } else { ?>
+            <?php
+            } else {
+                ?>
             <span>
         <?php
         if (!$ecom->isCurrentCredentials) {
@@ -25,11 +32,15 @@
 printf(__(
     'Purchased with merchant username "%s" from environment "%s".',
     'trbwc'
-), $ecom->username, $ecom->environment);
-?>
+), $ecom->username, $ecom->environment); ?>
             </span>
             <?php
-        }
+        } ?>
+    </span>
+            <?php
+            } ?>
+
+        <?php
         if (is_array($ecom_short) && count($ecom_short)) {
             foreach ($ecom_short as $key => $value) {
                 ?>
@@ -50,10 +61,9 @@ printf(__(
                 </span>
                 <?php
             }
-        }
-        ?>
-    </span>
-        <?php } ?>
-    </p>
-<?php } ?>
+        } ?>
 
+    </p>
+    <?php
+}
+?>
