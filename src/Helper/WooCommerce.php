@@ -202,6 +202,14 @@ class WooCommerce
         ) {
             $orderData = Data::getOrderInfo($order);
             self::setOrderMetaInformation($orderData);
+            $orderData['ecom_meta'] = [];
+            if (!isset($orderData['ecom'])) {
+                $orderData['ecom'] = [];
+                $orderData['ecom_short'] = [];
+            }
+            if (isset($orderData['meta']) && is_array($orderData['meta'])) {
+                $orderData['ecom_short'] = self::getMetaDataFromOrder($orderData['ecom_short'], $orderData['meta']);
+            }
             if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
                 echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
             }
@@ -254,6 +262,57 @@ class WooCommerce
                 );
             }
         }
+    }
+
+    /**
+     * @param $ecomHolder
+     * @param $metaArray
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getMetaDataFromOrder($ecomHolder, $metaArray)
+    {
+        $metaPrefix = Data::getPrefix();
+        $ecomMetaArray = [];
+        foreach ($metaArray as $metaKey => $metaValue) {
+            if (preg_match(sprintf('/^%s/', $metaPrefix), $metaKey)) {
+                $metaKey = preg_replace(sprintf('/^%s_/', $metaPrefix), '', $metaKey);
+                if (is_array($metaValue) && count($metaValue) === 1) {
+                    $metaValue = array_pop($metaValue);
+                }
+                if (is_string($metaValue)) {
+                    $ecomMetaArray[$metaKey] = $metaValue;
+                }
+            }
+        }
+        return array_merge($ecomHolder, self::getPurgedMetaData($ecomMetaArray));
+    }
+
+    /**
+     * @param $metaDataContainer
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getPurgedMetaData($metaDataContainer)
+    {
+        $purgeArray = [
+            'orderSigningPayload',
+            'orderapi',
+            'apiDataId',
+            'bookPaymentStatus',
+        ];
+        // Not necessary for customer to view.
+        $metaPrefix = Data::getPrefix();
+        foreach ($purgeArray as $purgeKey) {
+            if (isset($metaDataContainer[$purgeKey])) {
+                unset($metaDataContainer[$purgeKey]);
+            }
+            $prefixed = sprintf('%s_%s', $metaPrefix, $purgeKey);
+            if (isset($metaDataContainer[$prefixed])) {
+                unset($metaDataContainer[$prefixed]);
+            }
+        }
+        return $metaDataContainer;
     }
 
     /**
@@ -394,7 +453,7 @@ class WooCommerce
             'metaData',
             'username',
             'isCurrentCredentials',
-            'environment'
+            'environment',
         ];
         if (isset($return['ecom'])) {
             $purgedEcom = (array)$return['ecom'];
@@ -501,34 +560,29 @@ class WooCommerce
      */
     public static function getHandledCallback()
     {
+        $order = null;
         $code = 202;
         $responseString = 'Accepted';
-        $getConfirmedSalt = Api::getResurs()->getValidatedCallbackDigest(
-            self::getRequest('p'),
-            self::getCurrentSalt(),
-            self::getRequest('d'),
-            self::getRequest('r')
-        );
+        $getConfirmedSalt = self::getConfirmedSalt();
+        $logNotice = self::getCallbackLogNotice($getConfirmedSalt);
 
-        Data::setLogNotice(
-            sprintf(
-                __(
-                    'Callback Received: %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
-                    'trbwc'
-                ),
-                self::getRequest('c'),
-                $getConfirmedSalt ? __('Validated', 'trbwc') : __('Not validated', 'trbwc'),
-                self::getRequest('p'),
-                Data::getOrderByEcomRef(self::getRequest('p'))
-
-            )
-        );
+        // This should be both logged as entries and in order.
+        Data::setLogNotice($logNotice);
 
         // If there is a payment, there must be a digest.
         if (!empty(self::getRequest('p'))) {
-            if ($getConfirmedSalt) {
+            $orderId = Data::getOrderByEcomRef(self::getRequest('p'));
+
+            if ($orderId) {
+                $order = new WC_Order($orderId);
+                $order->add_order_note(
+                    $logNotice
+                );
+            }
+
+            if ($getConfirmedSalt && $orderId) {
                 try {
-                    self::getUpdatedOrderByCallback(self::getRequest('p'));
+                    self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
                 } catch (Exception $e) {
                     $code = $e->getCode();
                     $responseString = $e->getMessage();
@@ -547,6 +601,21 @@ class WooCommerce
             ],
             $code,
             $responseString
+        );
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getConfirmedSalt()
+    {
+        return Api::getResurs()->getValidatedCallbackDigest(
+            self::getRequest('p'),
+            self::getCurrentSalt(),
+            self::getRequest('d'),
+            self::getRequest('r')
         );
     }
 
@@ -570,15 +639,32 @@ class WooCommerce
     }
 
     /**
+     * @param $getConfirmedSalt
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getCallbackLogNotice($getConfirmedSalt)
+    {
+        return sprintf(
+            __(
+                'Callback received from Resurs Bank: %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
+                'trbwc'
+            ),
+            self::getRequest('c'),
+            $getConfirmedSalt ? __('Validated', 'trbwc') : __('Not validated', 'trbwc'),
+            self::getRequest('p'),
+            Data::getOrderByEcomRef(self::getRequest('p'))
+        );
+    }
+
+    /**
      * @param $paymentId
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getUpdatedOrderByCallback($paymentId)
+    private static function getUpdatedOrderByCallback($paymentId, $orderId, $order)
     {
-        $orderId = Data::getOrderByEcomRef($paymentId);
         if ($orderId) {
-            $order = new WC_Order($orderId);
             self::setOrderStatusByCallback(Api::getResurs()->getOrderStatusByPayment($paymentId), $order);
         }
     }
