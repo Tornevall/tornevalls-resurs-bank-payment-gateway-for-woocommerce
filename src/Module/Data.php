@@ -857,7 +857,7 @@ class Data
      * It is not our purpose to interfere with all orders.
      *
      * @param mixed $order
-     * @param bool $orderIsResursReference
+     * @param null $orderIsResursReference
      * @return array
      * @throws ResursException
      * @since 0.0.1.0

@@ -391,12 +391,10 @@ class WooCommerce
             'deliveryAddress',
             'paymentMethodId',
             'totalBonusPoints',
-            'cached',
             'metaData',
-            'totalAmount',
-            'limit',
             'username',
             'isCurrentCredentials',
+            'environment'
         ];
         if (isset($return['ecom'])) {
             $purgedEcom = (array)$return['ecom'];
