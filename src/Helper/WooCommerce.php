@@ -273,10 +273,10 @@ class WooCommerce
     private static function getMetaDataFromOrder($ecomHolder, $metaArray)
     {
         $metaPrefix = Data::getPrefix();
-        $ecomMetaArray = [];
+        /** @var array $ecomMetaArray */
         foreach ($metaArray as $metaKey => $metaValue) {
             if (preg_match(sprintf('/^%s/', $metaPrefix), $metaKey)) {
-                $metaKey = preg_replace(sprintf('/^%s_/', $metaPrefix), '', $metaKey);
+                $metaKey = (string)preg_replace(sprintf('/^%s_/', $metaPrefix), '', $metaKey);
                 if (is_array($metaValue) && count($metaValue) === 1) {
                     $metaValue = array_pop($metaValue);
                 }
@@ -546,16 +546,16 @@ class WooCommerce
     }
 
     /**
-     * @param string $requestBase
      * @return string
      * @since 0.0.1.0
      */
-    public static function getWcApiUrl($requestBase = 'ResursDefault')
+    public static function getWcApiUrl()
     {
-        return sprintf('%s', WC()->api_request_url($requestBase));
+        return sprintf('%s', WC()->api_request_url('ResursDefault'));
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getHandledCallback()
@@ -659,6 +659,8 @@ class WooCommerce
 
     /**
      * @param $paymentId
+     * @param $orderId
+     * @param $order
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -735,7 +737,7 @@ class WooCommerce
             RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_STATUS_COULD_NOT_BE_SET => 'on-hold',
             RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION => 'on-hold',
         ]);
-        if (isset($key) && isset($return[$key])) {
+        if (isset($key, $return[$key])) {
             return $return[$key];
         }
         return $return;
@@ -746,6 +748,7 @@ class WooCommerce
      * @param int $code
      * @param string $httpString
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     private static function reply($out, $code = 202, $httpString = 'Accepted')
     {
