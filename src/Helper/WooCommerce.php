@@ -651,7 +651,7 @@ class WooCommerce
                 'trbwc'
             ),
             self::getRequest('c'),
-            $getConfirmedSalt ? __('Validated', 'trbwc') : __('Not validated', 'trbwc'),
+            $getConfirmedSalt ? __('Valid', 'trbwc') : __('Invalid', 'trbwc'),
             self::getRequest('p'),
             Data::getOrderByEcomRef(self::getRequest('p'))
         );
