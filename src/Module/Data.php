@@ -899,7 +899,7 @@ class Data
      * @return null
      * @since 0.0.1.0
      */
-    public static function getOrderByEcomRef($orderReference, $asOrder= null)
+    public static function getOrderByEcomRef($orderReference, $asOrder = null)
     {
         $return = 0;
 
@@ -911,7 +911,7 @@ class Data
             }
         }
 
-        if ((int)$return && (bool)$asOrder) {
+        if ($return && (bool)$asOrder) {
             $return = new WC_Order($return);
         }
 
@@ -931,7 +931,7 @@ class Data
             $getPostId = self::getRefVarFromDatabase(
                 sprintf(
                     '%s_%s',
-                    Data::getPrefix(),
+                    self::getPrefix(),
                     $key
                 ),
                 $reference
@@ -949,6 +949,8 @@ class Data
      * @param $reference
      * @return string|null
      * @since 0.0.1.0
+     * @noinspection SqlResolve
+     * @noinspection UnknownInspectionInspection
      */
     private static function getRefVarFromDatabase($key, $reference)
     {
@@ -1193,6 +1195,7 @@ class Data
      * @return bool|int
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function setOrderMeta($order, $key, $value, $protected = true)
     {

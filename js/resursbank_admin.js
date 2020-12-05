@@ -73,6 +73,9 @@ function getResursCallbacks() {
     });
 }
 
+/**
+ * @since 0.0.1.0
+ */
 function getResursCallbackTest() {
     getResursSpin('#div_trbwc_admin_trigger_callback_button');
     getResursAjaxify('post', 'resursbank_get_trigger_test', {}, function () {
@@ -132,6 +135,7 @@ function getResursAdminPasswordButton() {
 /**
  * unregisterEventCallback
  * @param cbid
+ * @since 0.0.1.0
  */
 function doResursRemoveCallback(cbid) {
     alert("Remove " + cbid);
@@ -140,6 +144,7 @@ function doResursRemoveCallback(cbid) {
 /**
  * registerEventCallback
  * @param cbid
+ * @since 0.0.1.0
  */
 function doResursUpdateCallback(cbid) {
     alert("Update " + cbid);
