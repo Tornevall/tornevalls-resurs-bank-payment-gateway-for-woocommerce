@@ -5,6 +5,13 @@ $rQuery(document).ready(function ($) {
     getResursAdminFields();
 });
 
+var resursCallbackActiveTime = 0;
+var resursCallbackActiveInterval = 2;
+var resursCallbackActiveTimeout = 15;
+var resursCallbackTestHandle;
+var resursCallbackReceiveSuccess = false;
+
+
 /**
  * Handle wp-admin, and update realtime fields.
  * @since 0.0.1.0
@@ -78,16 +85,70 @@ function getResursCallbacks() {
  */
 function getResursCallbackTest() {
     getResursSpin('#div_trbwc_admin_trigger_callback_button');
-    getResursAjaxify('post', 'resursbank_get_trigger_test', {}, function () {
-        $rQuery('#div_trbwc_admin_callbacks_button').html(
+    getResursAjaxify('post', 'resursbank_get_trigger_test', {}, function (response) {
+        $rQuery('#div_trbwc_admin_trigger_callback_button').html(
             $rQuery('<div>', {
                 'style': 'font-weight: bold; color: #000099;'
-            }).html(getResursLocalization('reloading'))
+            }).html(response['html'])
         );
-        document.location.reload();
+        var testElement = $rQuery('#resursWaitingForTest');
+        if (testElement.length > 0) {
+            resursCallbackReceiveSuccess = false;
+            testElement.html(getResursLocalization('waiting_for_callback'));
+            resursCallbackTestHandle = setInterval(getResursCallbackResponse, resursCallbackActiveInterval * 1000);
+            getResursCallbackResponse();
+        }
     });
 }
 
+/**
+ * Wait for callback (TEST) data response.
+ * @since 0.0.1.0
+ */
+function getResursCallbackAnalyze() {
+    getResursAjaxify('post', 'resursbank_get_trigger_response', {"runTime": resursCallbackActiveTime}, function (response) {
+        var replyString;
+        if (typeof response['lastResponse'] !== 'undefined') {
+            replyString = response['lastResponse'];
+        } else {
+            replyString = getResursLocalization('trigger_test_fail');
+        }
+        $rQuery('#resursWaitingForTest').html(replyString);
+        if (typeof response['success'] !== 'undefined') {
+            resursCallbackReceiveSuccess = true;
+        }
+    });
+}
+
+/**
+ * Looking for callback test.
+ * @since 0.0.1.0
+ */
+function getResursCallbackResponse() {
+    resursCallbackActiveTime = resursCallbackActiveTime + resursCallbackActiveInterval;
+    console.log('getResursCallbackResponse waited ' +
+        'for ' + resursCallbackActiveTime + '/' + resursCallbackActiveTimeout + ' seconds.');
+
+    if (resursCallbackActiveTime >= resursCallbackActiveTimeout) {
+        console.log('Wait for received callback cancelled after callback timeout.');
+        clearInterval(resursCallbackTestHandle);
+        $rQuery('#resursWaitingForTest').html(
+            getResursLocalization('callback_test_timeout') + ' ' + resursCallbackActiveTime + 's.'
+        );
+        resursCallbackActiveTime = 0;
+        return;
+    }
+
+    getResursCallbackAnalyze();
+
+    // Break after second run.
+    if (resursCallbackReceiveSuccess) {
+        console.log('Wait for received callback cancelled after success.');
+        clearInterval(resursCallbackTestHandle);
+        resursCallbackActiveTime = 0;
+        return;
+    }
+}
 
 /**
  * @param pwBox
