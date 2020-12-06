@@ -487,16 +487,25 @@ class ResursDefault extends WC_Payment_Gateway
                 404
             );
         }
-
-        Data::canLog(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                __('%s: Order %s returned "%s" to WooCommerce.', 'trbwc'),
-                __FUNCTION__,
-                $order->get_id(),
-                $return['result']
-            )
-        );
+        if (is_array($return)) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __('%s: Order %s returned "%s" to WooCommerce.', 'trbwc'),
+                    __FUNCTION__,
+                    $order->get_id(),
+                    $return['result']
+                )
+            );
+        } else {
+            Data::setLogError(
+                sprintf(
+                    __('$return is not an object as expected in function %s (Checkout request type is %s).', 'trbwc'),
+                    __FUNCTION__,
+                    $checkoutRequestType
+                )
+            );
+        }
 
         return $return;
     }
