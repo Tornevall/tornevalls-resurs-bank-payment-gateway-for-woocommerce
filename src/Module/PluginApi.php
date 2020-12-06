@@ -96,10 +96,11 @@ class PluginApi
 
     /**
      * @param null $expire
+     * @param null $noReply Boolean that returns the answer instead of replying live.
      * @return bool
      * @since 0.0.1.0
      */
-    private static function getValidatedNonce($expire = null)
+    private static function getValidatedNonce($expire = null, $noReply = null)
     {
         $return = false;
         $expired = false;
@@ -124,11 +125,13 @@ class PluginApi
         }
 
         if (!$return || $expired) {
-            self::reply(
-                [
-                    'error' => $defaultNonceError,
-                ]
-            );
+            if (!(bool)$noReply) {
+                self::reply(
+                    [
+                        'error' => $defaultNonceError,
+                    ]
+                );
+            }
         }
 
         return $return;
@@ -171,13 +174,16 @@ class PluginApi
      */
     public static function testCredentials()
     {
-        self::getValidatedNonce();
+        $isValid = self::getValidatedNonce(null, true);
+        $validationResponse = false;
 
-        $validationResponse = (new Api())->getConnection()->validateCredentials(
-            (self::getParam('e') !== 'live'),
-            self::getParam('u'),
-            self::getParam('p')
-        );
+        if ($isValid) {
+            $validationResponse = (new Api())->getConnection()->validateCredentials(
+                (self::getParam('e') !== 'live'),
+                self::getParam('u'),
+                self::getParam('p')
+            );
+        }
 
         // Save when validating.
         if ($validationResponse) {

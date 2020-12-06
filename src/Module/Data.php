@@ -1177,11 +1177,20 @@ class Data
             'trbwc_',
         ];
 
+        $isResursDeprecated = false;
         foreach ($allowMethod as $methodKey) {
             if ((bool)preg_match(sprintf('/^%s/', $methodKey), $thisMethod)) {
+                if ((bool)preg_match('/^resurs_bank_/', $methodKey)) {
+                    $isResursDeprecated = true;
+                    break;
+                }
                 $return = true;
                 break;
             }
+        }
+
+        if ($isResursDeprecated && Data::getResursOption('deprecated_interference')) {
+            $return = true;
         }
 
         return $return;

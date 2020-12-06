@@ -274,6 +274,7 @@ class WooCommerce
     {
         $metaPrefix = Data::getPrefix();
         /** @var array $ecomMetaArray */
+        $ecomMetaArray = [];
         foreach ($metaArray as $metaKey => $metaValue) {
             if (preg_match(sprintf('/^%s/', $metaPrefix), $metaKey)) {
                 $metaKey = (string)preg_replace(sprintf('/^%s_/', $metaPrefix), '', $metaKey);

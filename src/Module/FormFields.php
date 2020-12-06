@@ -338,7 +338,7 @@ class FormFields extends WC_Settings_API
                 ],
                 'discard_coupon_vat' => [
                     'title' => __('Do not add VAT to discounts', 'trbwc'),
-                    'desc' => __('Yes', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
                         'When order rows are added to Resurs Bank API, the VAT is applied on the coupon amount ' .
                         'excluding tax. To handle the discount without vat and instead use the full including tax ' .
@@ -364,6 +364,17 @@ class FormFields extends WC_Settings_API
                     ),
                     'type' => 'checkbox',
                     'default' => 'yes',
+                ],
+                'deprecated_interference' => [
+                    'id' => 'deprecated_interference',
+                    'title' => __('Can interact with old-plugin orders', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'Enabling this feature allows the plugin to enter orders created with the old plugin.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'no',
                 ],
                 'store_api_history' => [
                     'id' => 'store_api_history',

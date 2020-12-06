@@ -34,7 +34,6 @@ add_filter('rbwc_get_dependent_settings', 'ResursBank\Module\Data::getDependentS
 // Making sure that we do not coexist with prior versions.
 add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Helper\WordPress::getPriorVersionsDisabled');
 
-//WordPress::initializePlugin();
 load_plugin_textdomain(
     'trbwc',
     false,

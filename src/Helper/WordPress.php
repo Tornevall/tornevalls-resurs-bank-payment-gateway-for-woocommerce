@@ -209,13 +209,143 @@ class WordPress
     }
 
     /**
+     * Check whether older plugins should be disabled at this point.
      * @return bool
      * @since 0.0.1.0
      * @noinspection PhpExpressionResultUnusedInspection
      */
     public static function getPriorVersionsDisabled()
     {
-        return Data::getResursOption('priorVersionsDisabled');
+        $isAjax = is_ajax();
+        //if (is_admin() && current_user_can('administrator')) {$return = false;}
+
+        // True means that the old plugin will be disabled at this moment
+        $return = self::getPrioVersionsDisabledLocations();
+
+        if ($isAjax) {
+            // Allow life in ajax calls.
+            $return = false;
+        } elseif ($return && self::getRequest('post')) {
+            $return = false;
+        } elseif ($return && self::getRequest('wc-api') === 'WC_Resurs_Bank') {
+            $return = false;
+        } elseif ($return) {
+            // Find more places that could be necessary to enable the plugin.
+            $return = WordPress::applyFilters('getPriorVersionsDisabled', $return);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Defaults disable for old plugin.
+     * @return bool|string|null
+     * @since 0.0.1.0
+     */
+    private static function getPrioVersionsDisabledLocations()
+    {
+        $return = Data::getResursOption('priorVersionsDisabled');
+        $appearance = self::getPriorVersionDisabledAppearances();
+        $section = self::getRequest('section');
+        $page = self::getRequest('page');
+        $tab = self::getRequest('tab');
+        $action = self::getRequest('action');
+        $isInPageSection = in_array($page, $appearance['in'], true) ||
+            in_array($section, $appearance['in'], true) ||
+            in_array($action, $appearance['in'], true) ||
+            in_array($tab, $appearance['in'], true) ||
+            (int)$page > 0;
+
+        $isInSelf = (
+            in_array($page, $appearance['notIn'], true) ||
+            in_array($section, $appearance['notIn'], true) ||
+            in_array($tab, $appearance['notIn'], true)
+        );
+        // Some sections are still allowed, for example wc-settings so that the old plugin can be configured.
+        if ($isInPageSection && !$isInSelf) {
+            $return = false;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getPriorVersionDisabledAppearances()
+    {
+        return [
+            'in' => [
+                'wc-settings',
+                'editpost',
+            ],
+            'notIn' => [
+                sprintf('%s_admin', Data::getPrefix()),
+            ],
+        ];
+    }
+
+    /**
+     * @param $request
+     * @return mixed|string
+     * @since 0.0.1.0
+     */
+    private static function getRequest($request)
+    {
+        return isset($_REQUEST[$request]) ? $_REQUEST[$request] : '';
+    }
+
+    /**
+     * @param $filterName
+     * @param $value
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function applyFilters($filterName, $value)
+    {
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                self::getFilterName($filterName)
+            ),
+            $value,
+        ];
+
+        return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
+    }
+
+    /**
+     * @param $filterName
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getFilterName($filterName)
+    {
+        $return = $filterName;
+        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
+            $return = (new Strings())->getSnakeCase($filterName);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Clean up arguments and return the real ones.
+     *
+     * @param $args
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getFilterArgs($args)
+    {
+        if (is_array($args) && count($args) > 2) {
+            array_shift($args);
+            array_shift($args);
+        }
+
+        return $args;
     }
 
     /**
@@ -292,38 +422,6 @@ class WordPress
         ];
 
         do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * @param $filterName
-     * @return string
-     * @since 0.0.1.0
-     */
-    private static function getFilterName($filterName)
-    {
-        $return = $filterName;
-        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
-            $return = (new Strings())->getSnakeCase($filterName);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Clean up arguments and return the real ones.
-     *
-     * @param $args
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getFilterArgs($args)
-    {
-        if (is_array($args) && count($args) > 2) {
-            array_shift($args);
-            array_shift($args);
-        }
-
-        return $args;
     }
 
     /**
@@ -480,26 +578,6 @@ class WordPress
     public static function getNonceTag($tag, $strictify = true)
     {
         return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
-    }
-
-    /**
-     * @param $filterName
-     * @param $value
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function applyFilters($filterName, $value)
-    {
-        $applyArray = [
-            sprintf(
-                '%s_%s',
-                'rbwc',
-                self::getFilterName($filterName)
-            ),
-            $value,
-        ];
-
-        return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
     }
 
     /**
