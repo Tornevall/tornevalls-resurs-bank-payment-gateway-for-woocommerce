@@ -47,6 +47,7 @@ class WordPress
             'get_payment_methods',
             'get_new_callbacks',
             'get_trigger_test',
+            'get_trigger_response',
         ];
 
         foreach ($actionList as $action) {
@@ -437,6 +438,18 @@ class WordPress
         );
         $return['requireFraudControl'] = __(
             'This setting requires you to enable the fraud control.',
+            'trbwc'
+        );
+        $return['waiting_for_callback'] = __(
+            'Waiting for test callback to arrive.',
+            'trbwc'
+        );
+        $return['trigger_test_fail'] = __(
+            'Callback trigger is currently not working.',
+            'trbwc'
+        );
+        $return['callback_test_timeout'] = __(
+            'Callback trigger timeout. Aborted.',
             'trbwc'
         );
 

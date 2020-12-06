@@ -568,6 +568,11 @@ class WooCommerce
 
         // This should be both logged as entries and in order.
         Data::setLogNotice($logNotice);
+        $callbackType = self::getRequest('c');
+        $replyArray = [
+            'aliveConfirm' => true,
+            'actual' => $callbackType,
+        ];
 
         // If there is a payment, there must be a digest.
         if (!empty(self::getRequest('p'))) {
@@ -592,13 +597,16 @@ class WooCommerce
                 $code = 406; // Not acceptable
                 $responseString = 'Digest rejected';
             }
+            $replyArray['digestCode'] = $code;
+        } elseif ($callbackType === 'TEST') {
+            Data::setResursOption('resurs_callback_test_response', time());
+            // There are not digest codes available in this state so we should throw the callback handler
+            // a success regardless.
+            $replyArray['digestCode'] = '200';
         }
 
         self::reply(
-            [
-                'aliveConfirm' => true,
-                'digestCode' => $code,
-            ],
+            $replyArray,
             $code,
             $responseString
         );

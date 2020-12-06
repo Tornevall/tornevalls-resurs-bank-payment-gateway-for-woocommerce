@@ -21,7 +21,10 @@ class PluginApi
      */
     public static function execApi()
     {
-        WordPress::doAction(self::getAction(), null);
+        $returnedValue = WordPress::applyFilters(self::getAction(), null, $_REQUEST);
+        if (!empty($returnedValue)) {
+            self::reply($returnedValue);
+        }
     }
 
     /**
@@ -45,6 +48,29 @@ class PluginApi
         $action = ltrim($action, 'resursbank_');
 
         return $action;
+    }
+
+    /**
+     * @param $out
+     * @since 0.0.1.0
+     */
+    private static function reply($out = null)
+    {
+        $success = true;
+
+        if (!isset($out['error'])) {
+            $out['error'] = null;
+        }
+        if (!isset($out['ajax_success'])) {
+            if (!empty($out['error'])) {
+                $success = false;
+            }
+            $out['ajax_success'] = $success;
+        }
+
+        header('Content-type: application/json; charset=utf-8', true, 200);
+        echo json_encode($out);
+        die();
     }
 
     /**
@@ -140,29 +166,6 @@ class PluginApi
     }
 
     /**
-     * @param $out
-     * @since 0.0.1.0
-     */
-    private static function reply($out = null)
-    {
-        $success = true;
-
-        if (!isset($out['error'])) {
-            $out['error'] = null;
-        }
-        if (!isset($out['ajax_success'])) {
-            if (!empty($out['error'])) {
-                $success = false;
-            }
-            $out['ajax_success'] = $success;
-        }
-
-        header('Content-type: application/json; charset=utf-8', true, 200);
-        echo json_encode($out);
-        die();
-    }
-
-    /**
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -242,10 +245,9 @@ class PluginApi
             } catch (Exception $e) {
                 Data::setLogException($e);
             }
-
         }
 
-        self::reply(['reload' => true]);
+        return ['reload' => true];
     }
 
     /**
@@ -344,13 +346,61 @@ class PluginApi
     }
 
     /**
+     * Trigger TEST callback at Resurs Bank.
+     *
      * @return bool
      * @throws Exception
      * @since 0.0.1.0
      */
     public static function getTriggerTest()
     {
-        Api::getResurs()->triggerCallback();
-        return true;
+        Data::setResursOption('resurs_callback_test_response', null);
+        $return = WordPress::applyFiltersDeprecated('resurs_trigger_test_callback', null);
+        $return['api'] = (bool)Api::getResurs()->triggerCallback();
+        $return['html'] = sprintf(
+            '<div>%s</div><div id="resursWaitingForTest"></div>',
+            sprintf(
+                __('Activated test trigger. Response "%s" received.', 'trbwc'),
+                $return['api'] ? 'success' : 'fail'
+            )
+        );
+        $return = WordPress::applyFilters('triggerCallback', $return);
+        return $return;
+    }
+
+    /**
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getTriggerResponse()
+    {
+        $runTime = 0;
+        $success = false;
+        if (isset($_REQUEST['runTime'])) {
+            $runTime = (int)$_REQUEST['runTime'];
+        }
+        if ((int)Data::getResursOption('resurs_callback_test_response') > 0) {
+            $lastResponse = sprintf(
+                '%s %s',
+                __('Received', 'trbwc'),
+                strftime('%Y-%m-%d %H:%M:%S', Data::getResursOption('resurs_callback_test_response'))
+            );
+            $success = true;
+        } else {
+            $lastResponse =
+                sprintf(
+                    __(
+                        'Waiting for callback TEST (%d seconds).'
+                    ),
+                    $runTime
+                );
+        }
+        $return = [
+            'lastResponse' => $lastResponse,
+            'runTime' => $runTime,
+            'success' => $success,
+        ];
+
+        return $return;
     }
 }
