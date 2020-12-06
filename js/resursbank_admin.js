@@ -11,7 +11,6 @@ var resursCallbackActiveTimeout = 15;
 var resursCallbackTestHandle;
 var resursCallbackReceiveSuccess = false;
 
-
 /**
  * Handle wp-admin, and update realtime fields.
  * @since 0.0.1.0
