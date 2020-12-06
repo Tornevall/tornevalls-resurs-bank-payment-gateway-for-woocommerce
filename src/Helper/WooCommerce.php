@@ -571,6 +571,7 @@ class WooCommerce
         $callbackType = self::getRequest('c');
         $replyArray = [
             'aliveConfirm' => true,
+            'actual' => $callbackType,
         ];
 
         // If there is a payment, there must be a digest.
@@ -599,9 +600,10 @@ class WooCommerce
             $replyArray['digestCode'] = $code;
         } elseif ($callbackType === 'TEST') {
             Data::setResursOption('resurs_callback_test_response', time());
+            // There are not digest codes available in this state so we should throw the callback handler
+            // a success regardless.
             $replyArray['digestCode'] = '200';
         }
-
 
         self::reply(
             $replyArray,
