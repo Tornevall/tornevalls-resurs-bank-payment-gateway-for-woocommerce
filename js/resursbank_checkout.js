@@ -104,3 +104,12 @@ function getResursFields(findElement, thisValue) {
 function setResursUpdateField(updateElement, updateValue) {
     updateElement.value = updateValue;
 }
+
+/**
+ * Handle customer type from getAddress fields.
+ * @param clickedObject
+ * @since 0.0.1.0
+ */
+function setResursGetAddressCustomerType(clickedObject) {
+    console.dir(clickedObject.value);
+}

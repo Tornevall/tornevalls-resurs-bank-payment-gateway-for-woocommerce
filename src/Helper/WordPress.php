@@ -109,6 +109,7 @@ class WordPress
         add_action('woocommerce_admin_field_methodlist', 'ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
         add_action('woocommerce_admin_field_callbacklist', 'ResursBank\Module\FormFields::getFieldCallbackList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
+        add_filter('woocommerce_before_checkout_billing_form', 'ResursBank\Module\FormFields::getGetAddressForm');
     }
 
     /**

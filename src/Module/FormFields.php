@@ -195,6 +195,18 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                 ],
+                'get_address_form' => [
+                    'id' => 'get_address_form',
+                    'type' => 'checkbox',
+                    'title' => __('Use getAddress forms in checkout', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'default' => 'yes',
+                    'desc_tip' => __(
+                        'This enables address lookup forms in checkout, when available. ' .
+                        'Countries currently supported is SE (government id) and NO (phone number).',
+                        'trbwc'
+                    ),
+                ],
                 'payment_methods_settings_end' => [
                     'type' => 'sectionend',
                 ],
@@ -568,6 +580,26 @@ class FormFields extends WC_Settings_API
                 'pluginTitle' => Data::getPluginTitle(),
             ]);
         }
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function getGetAddressForm()
+    {
+        if (!(bool)Data::getResursOption('get_address_form')) {
+            return;
+        }
+        $countryByConditions = Data::getCustomerCountry();
+        $customerTypeByConditions = Data::getCustomerType();
+
+        echo Data::getGenericClass()->getTemplate(
+            'checkout_getaddress.phtml',
+            [
+                'customer_private' => __('Private person', 'trbwc'),
+                'customer_company' => __('Company', 'trbwc'),
+            ]
+        );
     }
 
     /**
