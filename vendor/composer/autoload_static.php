@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit6436eaf807ccb5e0f017d629f90b71b0
+class ComposerStaticInit9080dfa4e0de09578ccc222f6e90e928
 {
     public static $files = array (
         'bc521b269795605ef2585a7369f0017e' => __DIR__ . '/..' . '/tornevall/tornelib-php-network/src/Network.php',
@@ -51,8 +51,8 @@ class ComposerStaticInit6436eaf807ccb5e0f017d629f90b71b0
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit6436eaf807ccb5e0f017d629f90b71b0::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit6436eaf807ccb5e0f017d629f90b71b0::$prefixDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit9080dfa4e0de09578ccc222f6e90e928::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit9080dfa4e0de09578ccc222f6e90e928::$prefixDirsPsr4;
 
         }, null, ClassLoader::class);
     }
