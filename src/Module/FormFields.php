@@ -587,7 +587,13 @@ class FormFields extends WC_Settings_API
      */
     public static function getGetAddressForm()
     {
-        if (!(bool)Data::getResursOption('get_address_form')) {
+        // Run only on correct conditions.
+        $getAddressFormDefault = Data::getResursOption('get_address_form');
+        // Being compatible. Enforced mode.
+        if ((bool)WordPress::applyFiltersDeprecated('resurs_getaddress_enabled', null)) {
+            $getAddressFormDefault = true;
+        }
+        if (!$getAddressFormDefault || (bool)WordPress::applyFilters('getAddressDisabled', true)) {
             return;
         }
         $countryByConditions = Data::getCustomerCountry();
