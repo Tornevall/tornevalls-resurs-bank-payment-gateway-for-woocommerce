@@ -4,6 +4,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Helper\WordPress;
+use WC_Checkout;
 use WC_Settings_API;
 
 /**
@@ -583,9 +584,13 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * @param WC_Checkout $checkout
+     * @param bool $returnHtml
+     * @return false|string|void
+     * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getGetAddressForm()
+    public static function getGetAddressForm($checkout, $returnHtml = false)
     {
         // Run only on correct conditions.
         $getAddressFormDefault = Data::getResursOption('get_address_form');
@@ -593,19 +598,27 @@ class FormFields extends WC_Settings_API
         if ((bool)WordPress::applyFiltersDeprecated('resurs_getaddress_enabled', null)) {
             $getAddressFormDefault = true;
         }
-        if (!$getAddressFormDefault || (bool)WordPress::applyFilters('getAddressDisabled', true)) {
+        // If $getAddressFormDefault is false (not enabled) or ...
+        // If getAddressDisabled (filter) is returning other than false.
+        if (!$getAddressFormDefault || (bool)WordPress::applyFilters('getAddressDisabled', !$getAddressFormDefault)) {
             return;
         }
-        $countryByConditions = Data::getCustomerCountry();
+        //$countryByConditions = Data::getCustomerCountry();
         $customerTypeByConditions = Data::getCustomerType();
 
-        echo Data::getGenericClass()->getTemplate(
+        $return = Data::getGenericClass()->getTemplate(
             'checkout_getaddress.phtml',
             [
                 'customer_private' => __('Private person', 'trbwc'),
                 'customer_company' => __('Company', 'trbwc'),
+                'customer_type' => (null === $customerTypeByConditions) ? 'NATURAL' : $customerTypeByConditions,
+                'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
             ]
         );
+        if ($returnHtml) {
+            return $return;
+        }
+        echo $return;
     }
 
     /**

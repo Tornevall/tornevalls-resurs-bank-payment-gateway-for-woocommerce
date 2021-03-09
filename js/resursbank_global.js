@@ -9,6 +9,10 @@ var $rQuery = jQuery.noConflict();
  * @since 0.0.1.0
  */
 function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMethod) {
+    var callbackErrorFunction;
+    if (typeof arguments[3] !== 'undefined' && typeof arguments[3] === 'function') {
+        callbackErrorFunction = arguments[3];
+    }
     if (typeof requestData === 'object') {
         if (typeof requestData['action'] === 'undefined') {
             requestData['action'] = requestVerb;
@@ -34,8 +38,8 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
         }
     ).fail(
         function (data, textStatus, jqXhr) {
-            getResursError(data.statusText);
             callbackMethod(data, textStatus, jqXhr);
+            getResursError(data.statusText);
         }
     );
 }

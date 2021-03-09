@@ -6,6 +6,9 @@ $rQuery(document).ready(function ($) {
     getResursHookedBillingFields();
 });
 
+/**
+ * @since 0.0.1.0
+ */
 function getResursGateway() {
     resursGateway = {
         init: function () {
@@ -20,7 +23,10 @@ function getResursGateway() {
                     $rQuery('body').trigger('update_checkout');
                 });
             });
-        }
+            $rQuery('#billing_company').on('change', function () {
+                $rQuery('body').trigger('update_checkout');
+            });
+        },
     };
     resursGateway.init();
 }
@@ -88,7 +94,7 @@ function setBillingInherit(o) {
  */
 function getResursFields(findElement, thisValue) {
     var selectElement = $rQuery(findElement);
-    if (selectElement.length) {
+    if (selectElement.length > 0) {
         for (var elementId = 0; elementId < selectElement.length; elementId++) {
             setResursUpdateField(selectElement[elementId], thisValue);
         }
@@ -111,5 +117,35 @@ function setResursUpdateField(updateElement, updateValue) {
  * @since 0.0.1.0
  */
 function setResursGetAddressCustomerType(clickedObject) {
-    console.dir(clickedObject.value);
+    $rQuery('body').trigger('update_checkout');
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function getResursAddress() {
+    var ssnIdentification = $rQuery('#resursSsnIdentification');
+    if (
+        $rQuery('#resursSsnIdentification').length > 0 &&
+        ssnIdentification.val() !== ''
+    ) {
+        getResursAjaxify(
+            'post',
+            'resursbank_get_address',
+            {'identification': ssnIdentification.val()},
+            function(response) {
+                if (response['api_error'] !== '') {
+                    $rQuery('.resursGetAddressError').text(response['api_error']);
+                    $rQuery('.resursGetAddressError').show();
+                    $rQuery('.resursGetAddressError').delay('4000').fadeOut('medium');
+                } else {
+                    for (var responseKey in response) {
+                        if ($rQuery('#' + responseKey).length > 0) {
+                            $rQuery('#' + responseKey).val(response[responseKey]);
+                        }
+                    }
+                }
+            }
+        );
+    }
 }

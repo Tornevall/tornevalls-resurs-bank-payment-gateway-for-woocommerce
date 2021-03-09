@@ -1,11 +1,32 @@
 <span id="rbGetAddressFields">
-    <input type="radio" id="ssnCustomerType"
-           onclick="setResursGetAddressCustomerType(this)"
-           name="ssnCustomerType"
-           value="NATURAL"> <?php echo $customer_private ;?>
-    <input type="radio"
-           id="ssnCustomerType"
-           onclick="setResursGetAddressCustomerType(this)"
-           name="ssnCustomerType"
-           value="LEGAL">  <?php echo $customer_company ;?>
+    <div>
+        <input type="radio"
+               id="resursSsnCustomerType"
+               onclick="setResursGetAddressCustomerType(this)"
+               name="resursSsnCustomerType"
+               value="NATURAL"
+               <?php
+               echo $customer_type === 'NATURAL' ? 'checked=checked' : ''
+               ?>
+        > <?php echo $customer_private; ?>
+        <input type="radio"
+               id="resursSsnCustomerType"
+               onclick="setResursGetAddressCustomerType(this)"
+               name="resursSsnCustomerType"
+               value="LEGAL"
+               <?php echo $customer_type === 'LEGAL' ? 'checked=checked' : '' ?>
+        > <?php echo $customer_company; ?>
+    </div>
+    <div class="woocommerce-input-wrapper">
+        <input
+                class="input-text"
+                type="text" size="32"
+                id="resursSsnIdentification"
+                name="resursSsnIdentification"
+        >
+    </div>
+    <div style="display: none;" class="resursGetAddressError"></div>
+    <div>
+        <button onclick="getResursAddress();return false;"><?php echo $customer_button_text; ?></button>
+    </div>
 </span>

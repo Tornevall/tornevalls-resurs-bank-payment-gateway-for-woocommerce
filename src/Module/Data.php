@@ -1333,14 +1333,40 @@ class Data
     }
 
     /**
+     * @since 0.0.1.0
+     */
+    private static function setCustomerTypeToSession()
+    {
+        $customerTypeByGetAddress = WooCommerce::getRequest('resursSsnCustomerType', true);
+
+        if (!empty($customerTypeByGetAddress)) {
+            WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
+        }
+    }
+
+    /**
+     * @return array|mixed|string|null
+     * @since 0.0.1.0
+     */
+    private static function getCustomerTypeFromSession()
+    {
+        $return = WooCommerce::getSessionValue('resursSsnCustomerType');
+        $customerTypeByCompanyName = WooCommerce::getRequest('billing_company', true);
+
+        return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+    }
+
+    /**
      * @return string
      * @since 0.0.1.0
      */
     public static function getCustomerType()
     {
+        global $woocommerce;
+
         $return = 'NATURAL';
 
-        global $woocommerce;
+        self::setCustomerTypeToSession();
         /** @var WC_Customer $wcCustomer */
         $wcCustomer = $woocommerce->customer;
         $billingCompany = $wcCustomer->get_billing_company();
@@ -1350,6 +1376,10 @@ class Data
          */
         if (!empty($billingCompany)) {
             $return = 'LEGAL';
+        }
+
+        if ($return === 'NATURAL' && ($differentType = Data::getCustomerTypeFromSession()) !== 'NATURAL') {
+            $return = $differentType;
         }
 
         return $return;

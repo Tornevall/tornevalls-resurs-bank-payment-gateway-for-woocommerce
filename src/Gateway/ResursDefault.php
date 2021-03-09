@@ -20,6 +20,7 @@ use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
+use function in_array;
 
 /**
  * Class ResursDefault
@@ -262,6 +263,7 @@ class ResursDefault extends WC_Payment_Gateway
     public function is_available()
     {
         $return = parent::is_available();
+        $customerType = Data::getCustomerType();
         if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
             $minMax = Api::getResurs()->getMinMax(
                 $this->get_order_total(),
@@ -270,6 +272,14 @@ class ResursDefault extends WC_Payment_Gateway
             );
             if (!$minMax) {
                 $return = false;
+            }
+
+            if (!empty($customerType) && $return) {
+                $return = in_array(
+                    $customerType,
+                    (array)$this->paymentMethodInformation->customerType,
+                    true
+                ) ? true : false;
             }
         }
 

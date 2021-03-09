@@ -7,6 +7,7 @@ use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
+use ResursBank\Module\FormFields;
 use Resursbank\RBEcomPHP\RESURS_PAYMENT_STATUS_RETURNCODES;
 use ResursException;
 use RuntimeException;
@@ -630,12 +631,22 @@ class WooCommerce
 
     /**
      * @param $key
+     * @param bool $post_data
      * @return string
      * @since 0.0.1.0
      */
-    private static function getRequest($key)
+    public static function getRequest($key, $post_data = null)
     {
-        return isset($_REQUEST[$key]) ? $_REQUEST[$key] : null;
+        $return = isset($_REQUEST[$key]) ? $_REQUEST[$key] : null;
+
+        if (null === $return && (bool)$post_data && isset($_REQUEST['post_data'])) {
+            parse_str($_REQUEST['post_data'], $newPostData);
+            if (is_array($newPostData) && isset($newPostData[$key])) {
+                $return = $newPostData[$key];
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -784,10 +795,12 @@ class WooCommerce
      *
      * @param $fragments
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getReviewFragments($fragments)
     {
+        $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
         self::setCustomerCheckoutLocation(true);
 
         return $fragments;
