@@ -1369,7 +1369,10 @@ class Data
         self::setCustomerTypeToSession();
         /** @var WC_Customer $wcCustomer */
         $wcCustomer = $woocommerce->customer;
-        $billingCompany = $wcCustomer->get_billing_company();
+        $billingCompany = null;
+        if (null !== $wcCustomer) {
+            $billingCompany = $wcCustomer->get_billing_company();
+        }
 
         /**
          * @todo Get customer from session when live changes are being made.
