@@ -274,7 +274,9 @@ class ResursDefault extends WC_Payment_Gateway
                 $return = false;
             }
 
-            if (!empty($customerType) && $return) {
+            // We decide at this level if the payment method should be available,
+            // based on current chosen country. Beware of the admin parts.
+            if (!is_admin() && !empty($customerType) && $return) {
                 $return = in_array(
                     $customerType,
                     (array)$this->paymentMethodInformation->customerType,
