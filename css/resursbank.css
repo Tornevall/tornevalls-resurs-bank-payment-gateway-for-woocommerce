@@ -1,3 +1,11 @@
 /**
  * Front CSS
  */
+
+.resursGetAddressError {
+    border: 1px solid #990000;
+    background: #f8bbbb;
+    padding: 5px;
+    margin: 5px;
+    font-size: 10px;
+}

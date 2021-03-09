@@ -4,6 +4,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Helper\WordPress;
+use WC_Checkout;
 use WC_Settings_API;
 
 /**
@@ -192,6 +193,18 @@ class FormFields extends WC_Settings_API
                         'The applicant fields that Resurs Bank is using to handle payments is normally, inherited ' .
                         'from WooCommerce standard billing fields in the checkout. You can however enable them ' .
                         'here, if you want your customers to see them anyway.',
+                        'trbwc'
+                    ),
+                ],
+                'get_address_form' => [
+                    'id' => 'get_address_form',
+                    'type' => 'checkbox',
+                    'title' => __('Use getAddress forms in checkout', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'default' => 'yes',
+                    'desc_tip' => __(
+                        'This enables address lookup forms in checkout, when available. ' .
+                        'Countries currently supported is SE (government id) and NO (phone number).',
                         'trbwc'
                     ),
                 ],
@@ -568,6 +581,44 @@ class FormFields extends WC_Settings_API
                 'pluginTitle' => Data::getPluginTitle(),
             ]);
         }
+    }
+
+    /**
+     * @param WC_Checkout $checkout
+     * @param bool $returnHtml
+     * @return false|string|void
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getGetAddressForm($checkout, $returnHtml = false)
+    {
+        // Run only on correct conditions.
+        $getAddressFormDefault = Data::getResursOption('get_address_form');
+        // Being compatible. Enforced mode.
+        if ((bool)WordPress::applyFiltersDeprecated('resurs_getaddress_enabled', null)) {
+            $getAddressFormDefault = true;
+        }
+        // If $getAddressFormDefault is false (not enabled) or ...
+        // If getAddressDisabled (filter) is returning other than false.
+        if (!$getAddressFormDefault || (bool)WordPress::applyFilters('getAddressDisabled', !$getAddressFormDefault)) {
+            return;
+        }
+        //$countryByConditions = Data::getCustomerCountry();
+        $customerTypeByConditions = Data::getCustomerType();
+
+        $return = Data::getGenericClass()->getTemplate(
+            'checkout_getaddress.phtml',
+            [
+                'customer_private' => __('Private person', 'trbwc'),
+                'customer_company' => __('Company', 'trbwc'),
+                'customer_type' => (null === $customerTypeByConditions) ? 'NATURAL' : $customerTypeByConditions,
+                'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
+            ]
+        );
+        if ($returnHtml) {
+            return $return;
+        }
+        echo $return;
     }
 
     /**

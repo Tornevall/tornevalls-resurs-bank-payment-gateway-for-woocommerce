@@ -48,6 +48,7 @@ class WordPress
             'get_new_callbacks',
             'get_trigger_test',
             'get_trigger_response',
+            'get_address',
         ];
 
         foreach ($actionList as $action) {
@@ -78,6 +79,7 @@ class WordPress
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateways');
         add_filter('is_protected_meta', 'ResursBank\Helper\WooCommerce::getProtectedMetaData', 10, 3);
+        add_filter('rbwc_get_address_field_controller', '\ResursBank\Helper\WordPress::getAddressFieldController');
     }
 
     /**
@@ -109,6 +111,7 @@ class WordPress
         add_action('woocommerce_admin_field_methodlist', 'ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
         add_action('woocommerce_admin_field_callbacklist', 'ResursBank\Module\FormFields::getFieldCallbackList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
+        add_filter('woocommerce_before_checkout_billing_form', 'ResursBank\Module\FormFields::getGetAddressForm');
     }
 
     /**
@@ -555,6 +558,29 @@ class WordPress
     }
 
     /**
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getAddressFieldController()
+    {
+        $return = [
+            'billing_first_name' => 'firstName',
+            'billing_last_name' => 'lastName',
+            'applicant-full-name' => 'firstName:lastName',
+            'billing_address_1' => 'addressRow1',
+            'billing_address_2' => 'addressRow2',
+            'billing_postcode' => 'postalCode',
+            'billing_city' => 'postalArea',
+        ];
+
+        if (Data::getCustomerType() === 'LEGAL') {
+            $return['billing_company'] = 'fullName';
+        }
+
+        return $return;
+    }
+
+    /**
      * Makes nonces strict based on client ip address.
      *
      * @param $tag
@@ -596,6 +622,7 @@ class WordPress
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
         $return['checkout_fields'] = FormFields::getFieldString();
+        $return['getAddressFieldController'] = self::applyFilters('getAddressFieldController', []);
 
         return self::applyFilters('localizationsGlobal', $return);
     }

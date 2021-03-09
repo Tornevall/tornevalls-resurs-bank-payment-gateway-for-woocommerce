@@ -409,4 +409,90 @@ class PluginApi
 
         return $return;
     }
+
+    /**
+     * @return array
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getAddress()
+    {
+        $apiRequest = Api::getResurs();
+        $addressResponse = [];
+        $identification = WooCommerce::getRequest('identification');
+        $customerType = Data::getCustomerType();
+        $customerCountry = Data::getCustomerCountry();
+
+        $return = [
+            'api_error' => '',
+            'code' => 0,
+            'identificationResponse' => [],
+        ];
+
+        try {
+            WooCommerce::setSessionValue('identification', WooCommerce::getRequest('$identification'));
+            switch ($customerCountry) {
+                case 'NO':
+                    // This request works only on norwegian accounts.
+                    try {
+                        $addressResponse = (array)$apiRequest->getAddressByPhone($identification, $customerType);
+                    } catch (Exception $e) {
+                        // If we get an error here, it might be cause by credential errors.
+                        // In that case lets fall back to the default lookup.
+                        $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
+                    }
+                    break;
+                case 'SE':
+                    $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
+                    break;
+                default:
+            }
+            $return['identificationResponse'] = $addressResponse;
+        } catch (Exception $e) {
+            $return['api_error'] = $e->getMessage();
+            $return['code'] = $e->getCode();
+        }
+
+        if (is_array($addressResponse) && count($addressResponse)) {
+            $return = self::getTransformedAddressResponse($return, $addressResponse);
+        }
+
+        self::reply($return);
+    }
+
+    /**
+     * Transform getAddress responses into WooCommerce friendly data fields so that they
+     * can be easily pushed out to the default forms.
+     * @param $return
+     * @param $addressResponse
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getTransformedAddressResponse($return, $addressResponse)
+    {
+        $compileKeys = [];
+        $compileInfo = [];
+        $addressFields = WordPress::applyFilters('getAddressFieldController', []);
+        foreach ($addressFields as $addressField => $addressTransform) {
+            // Check if the session is currently holding something that we want to put up in some fields.
+            $wooSessionData = trim(WooCommerce::getRequest($addressTransform));
+            if (!empty($wooSessionData)) {
+                $addressResponse[$addressTransform] = $wooSessionData;
+            }
+            if (!preg_match('/:/', $addressTransform)) {
+                $return[$addressField] = isset($addressResponse[$addressTransform]) ?
+                    $addressResponse[$addressTransform] : '';
+            } else {
+                $splitInfo = explode(':', $addressTransform);
+                foreach ($splitInfo as $splitKey) {
+                    $compileInfo[] = '%s';
+                    $compileKeys[] = isset($addressResponse[$splitKey]) ? $addressResponse[$splitKey] : '';
+                }
+                $return[$addressField] = vsprintf(implode(' ', $compileInfo), $compileKeys);
+            }
+        }
+
+        return $return;
+    }
+
 }

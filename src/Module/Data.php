@@ -11,6 +11,7 @@ use TorneLIB\Data\Aes;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
+use WC_Customer;
 use WC_Logger;
 use WC_Order;
 
@@ -1311,6 +1312,77 @@ class Data
             $currentValue = 2;
         }
         return $currentValue;
+    }
+
+    /**
+     * @return false|mixed|void
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getCustomerCountry()
+    {
+        global $woocommerce;
+        /** @var WC_Customer $wcCustomer */
+        $wcCustomer = $woocommerce->customer;
+
+        $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
+        $return = !empty($woocommerceCustomerCountry) ?
+            $woocommerceCustomerCountry : get_option('woocommerce_default_country');
+
+        return $return;
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private static function setCustomerTypeToSession()
+    {
+        $customerTypeByGetAddress = WooCommerce::getRequest('resursSsnCustomerType', true);
+
+        if (!empty($customerTypeByGetAddress)) {
+            WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
+        }
+    }
+
+    /**
+     * @return array|mixed|string|null
+     * @since 0.0.1.0
+     */
+    private static function getCustomerTypeFromSession()
+    {
+        $return = WooCommerce::getSessionValue('resursSsnCustomerType');
+        $customerTypeByCompanyName = WooCommerce::getRequest('billing_company', true);
+
+        return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getCustomerType()
+    {
+        global $woocommerce;
+
+        $return = 'NATURAL';
+
+        self::setCustomerTypeToSession();
+        /** @var WC_Customer $wcCustomer */
+        $wcCustomer = $woocommerce->customer;
+        $billingCompany = $wcCustomer->get_billing_company();
+
+        /**
+         * @todo Get customer from session when live changes are being made.
+         */
+        if (!empty($billingCompany)) {
+            $return = 'LEGAL';
+        }
+
+        if ($return === 'NATURAL' && ($differentType = Data::getCustomerTypeFromSession()) !== 'NATURAL') {
+            $return = $differentType;
+        }
+
+        return $return;
     }
 
     /**
