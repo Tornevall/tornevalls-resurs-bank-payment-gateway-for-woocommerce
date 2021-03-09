@@ -461,6 +461,8 @@ class PluginApi
     }
 
     /**
+     * Transform getAddress responses into WooCommerce friendly data fields so that they
+     * can be easily pushed out to the default forms.
      * @param $return
      * @param $addressResponse
      * @return mixed
