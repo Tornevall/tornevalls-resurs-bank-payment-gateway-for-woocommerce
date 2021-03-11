@@ -1,6 +1,6 @@
 <?php
 
-namespace ResursBank\Helper;
+namespace ResursBank\Helpers;
 
 use Exception;
 use ResursBank\Gateway\AdminPage;

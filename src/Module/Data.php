@@ -3,8 +3,8 @@
 namespace ResursBank\Module;
 
 use Exception;
-use ResursBank\Helper\WooCommerce;
-use ResursBank\Helper\WordPress;
+use ResursBank\Helpers\WooCommerce;
+use ResursBank\Helpers\WordPress;
 use ResursException;
 use RuntimeException;
 use TorneLIB\Data\Aes;

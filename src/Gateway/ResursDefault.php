@@ -3,8 +3,8 @@
 namespace ResursBank\Gateway;
 
 use Exception;
-use ResursBank\Helper\WooCommerce;
-use ResursBank\Helper\WordPress;
+use ResursBank\Helpers\WooCommerce;
+use ResursBank\Helpers\WordPress;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;

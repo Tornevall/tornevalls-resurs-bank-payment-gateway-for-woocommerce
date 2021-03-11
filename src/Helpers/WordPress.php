@@ -1,6 +1,6 @@
 <?php
 
-namespace ResursBank\Helper;
+namespace ResursBank\Helpers;
 
 use Exception;
 use ResursBank\Module\Api;
@@ -68,18 +68,18 @@ class WordPress
     private static function setupFilters()
     {
         // Generic calls.
-        add_filter('plugin_action_links', 'ResursBank\Helper\WooCommerce::getPluginAdminUrl', 10, 2);
+        add_filter('plugin_action_links', 'ResursBank\Helpers\WooCommerce::getPluginAdminUrl', 10, 2);
         // Other calls.
         add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
         // Localization.
-        add_filter('rbwc_localizations_generic', 'ResursBank\Helper\WooCommerce::getGenericLocalization', 10, 2);
+        add_filter('rbwc_localizations_generic', 'ResursBank\Helpers\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
-        add_filter('woocommerce_get_settings_pages', 'ResursBank\Helper\WooCommerce::getSettingsPages');
-        add_filter('woocommerce_payment_gateways', 'ResursBank\Helper\WooCommerce::getGateways');
-        add_filter('is_protected_meta', 'ResursBank\Helper\WooCommerce::getProtectedMetaData', 10, 3);
-        add_filter('rbwc_get_address_field_controller', '\ResursBank\Helper\WordPress::getAddressFieldController');
+        add_filter('woocommerce_get_settings_pages', 'ResursBank\Helpers\WooCommerce::getSettingsPages');
+        add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
+        add_filter('is_protected_meta', 'ResursBank\Helpers\WooCommerce::getProtectedMetaData', 10, 3);
+        add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
     }
 
     /**
@@ -89,8 +89,8 @@ class WordPress
      */
     private static function setupScripts()
     {
-        add_action('wp_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScripts');
-        add_action('admin_enqueue_scripts', 'ResursBank\Helper\WordPress::setResursBankScriptsAdmin');
+        add_action('wp_enqueue_scripts', 'ResursBank\Helpers\WordPress::setResursBankScripts');
+        add_action('admin_enqueue_scripts', 'ResursBank\Helpers\WordPress::setResursBankScriptsAdmin');
     }
 
     /**
@@ -101,9 +101,9 @@ class WordPress
     private static function setupActions()
     {
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-        add_action('admin_notices', 'ResursBank\Helper\WordPress::getAdminNotices');
-        add_action('rbwc_get_localized_scripts', 'ResursBank\Helper\WordPress::getLocalizedScripts', 10, 3);
-        add_action('rbwc_localizations_admin', 'ResursBank\Helper\WordPress::getLocalizedScriptsDeprecated', 10, 2);
+        add_action('admin_notices', 'ResursBank\Helpers\WordPress::getAdminNotices');
+        add_action('rbwc_get_localized_scripts', 'ResursBank\Helpers\WordPress::getLocalizedScripts', 10, 3);
+        add_action('rbwc_localizations_admin', 'ResursBank\Helpers\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
         add_action('woocommerce_admin_field_button', 'ResursBank\Module\FormFields::getFieldButton', 10, 2);
@@ -123,15 +123,15 @@ class WordPress
     {
         add_action(
             'woocommerce_admin_order_data_after_order_details',
-            'ResursBank\Helper\WooCommerce::getAdminAfterOrderDetails'
+            'ResursBank\Helpers\WooCommerce::getAdminAfterOrderDetails'
         );
         add_action(
             'woocommerce_admin_order_data_after_billing_address',
-            'ResursBank\Helper\WooCommerce::getAdminAfterBilling'
+            'ResursBank\Helpers\WooCommerce::getAdminAfterBilling'
         );
         add_action(
             'woocommerce_admin_order_data_after_shipping_address',
-            'ResursBank\Helper\WooCommerce::getAdminAfterShipping'
+            'ResursBank\Helpers\WooCommerce::getAdminAfterShipping'
         );
     }
 
@@ -145,26 +145,26 @@ class WordPress
         // v3core: Customer is in checkout.
         add_action(
             'woocommerce_before_checkout_form',
-            'ResursBank\Helper\WooCommerce::getBeforeCheckoutForm'
+            'ResursBank\Helpers\WooCommerce::getBeforeCheckoutForm'
         );
         // v3core: Customer is not in checkout.
         add_action(
             'woocommerce_add_to_cart',
-            'ResursBank\Helper\WooCommerce::getAddToCart'
+            'ResursBank\Helpers\WooCommerce::getAddToCart'
         );
         // v3core: Customer is not in checkout.
         add_action(
             'woocommerce_cart_updated',
-            'ResursBank\Helper\WooCommerce::getAddToCart'
+            'ResursBank\Helpers\WooCommerce::getAddToCart'
         );
         // v3core: Customer is not in checkout.
         add_action(
             'woocommerce_update_order_review_fragments',
-            'ResursBank\Helper\WooCommerce::getReviewFragments'
+            'ResursBank\Helpers\WooCommerce::getReviewFragments'
         );
         add_action(
             'woocommerce_checkout_update_order_review',
-            'ResursBank\Helper\WooCommerce::getOrderReviewSettings'
+            'ResursBank\Helpers\WooCommerce::getOrderReviewSettings'
         );
     }
 

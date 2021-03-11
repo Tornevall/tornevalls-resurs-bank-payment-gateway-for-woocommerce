@@ -3,7 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
-use ResursBank\Helper\WordPress;
+use ResursBank\Helpers\WordPress;
 use WC_Checkout;
 use WC_Settings_API;
 
