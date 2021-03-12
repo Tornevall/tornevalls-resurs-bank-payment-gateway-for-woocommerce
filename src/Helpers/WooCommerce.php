@@ -816,4 +816,14 @@ class WooCommerce
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
         }
     }
+
+    /**
+     * @param $return
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getAllowResursRun($return)
+    {
+        return $return;
+    }
 }

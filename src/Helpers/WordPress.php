@@ -80,6 +80,7 @@ class WordPress
         add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
         add_filter('is_protected_meta', 'ResursBank\Helpers\WooCommerce::getProtectedMetaData', 10, 3);
         add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
+        add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
     }
 
     /**
@@ -200,7 +201,6 @@ class WordPress
                 WooCommerce::testRequiredVersion(false);
             }
         } catch (Exception $e) {
-            //Data::setLogInternal(Data::LOG_NOTICE, $requiredVersionNotice);
             Data::setLogException($e);
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_woocommerce_requirement',
@@ -209,6 +209,32 @@ class WordPress
                 ]
             );
         }
+
+        $selfAwareness = self::applyFiltersDeprecated('v22_woo_appearance', false);
+        if ($selfAwareness) {
+            self::getOldSelfAwareness();
+        }
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    private static function getOldSelfAwareness()
+    {
+        echo Data::getGenericClass()->getTemplate(
+            'adminpage_woocommerce_version22',
+            [
+                'wooPlug22VersionInfo' => sprintf(
+                    __(
+                        'It seems that you still have another plugin enabled (%s %s) in this platform that works ' .
+                        'as Resurs Bank Payment Gateway. If this is intended, you can ignore this message.',
+                        'trbwc'
+                    ),
+                    defined('RB_WOO_CLIENTNAME') ? RB_WOO_CLIENTNAME : 'Resurs Bank for WooCommerce',
+                    defined('RB_WOO_VERSION') ? RB_WOO_VERSION : 'v2.x'
+                ),
+            ]
+        );
     }
 
     /**

@@ -476,12 +476,12 @@ class FormFields extends WC_Settings_API
                     'default' => 'no',
                 ],
                 'show_developer' => [
-                    'title' => __('Activate developer mode', 'trbwc'),
-                    'desc' => __('Activate developer mode (you might need an extra reload after save)', 'trbwc'),
+                    'title' => __('Activate Advanced Tweaking Mode (Developer)', 'trbwc'),
+                    'desc' => __('Activate Advanced Tweaking Mode (you might need an extra reload after save)', 'trbwc'),
                     'desc_tip' => __(
                         'The developer section is normally nothing you will need, unless you are a very advanced ' .
-                        'administrator that likes to configure a little bit over the limits. If you know what you ' .
-                        'are doing, feel free to activate this section.',
+                        'administrator/developer/merchant that likes to configure a little bit over the limits. ' .
+                        'If you know what you are doing, feel free to activate this section.',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
