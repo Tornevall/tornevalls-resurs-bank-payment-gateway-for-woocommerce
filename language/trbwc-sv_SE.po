@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2021-03-12 07:23+0100\n"
-"PO-Revision-Date: 2021-03-12 07:27+0100\n"
+"POT-Creation-Date: 2021-03-17 12:26+0100\n"
+"PO-Revision-Date: 2021-03-17 12:28+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -981,6 +981,31 @@ msgstr "Mottagen"
 #, php-format
 msgid "Waiting for callback TEST (%d seconds)."
 msgstr "Väntar på callback TEST (%d sekunder)."
+
+#: src/Module/PluginApi.php:426
+#, php-format
+msgid "getAddress request (country %s, type %s) for %s: %s"
+msgstr "getAddress förfrågan (land %s, typ %s) för %s: %s"
+
+#: src/Module/PluginApi.php:463
+msgid "By phone request."
+msgstr "Via telefonnummer."
+
+#: src/Module/PluginApi.php:471
+msgid "By phone request failed, executed failover by government id."
+msgstr ""
+"Via telefonnummer misslyckades, exekverade backuplösning för personnummer."
+
+#: src/Module/PluginApi.php:480
+msgid "By government id/company id (See customer type)."
+msgstr "Via personnummer/organisationsnummer (Se kundtypen)."
+
+#: src/Module/PluginApi.php:490
+#, php-format
+msgid "By government id/company id (See customer type), but failed: (%d) %s."
+msgstr ""
+"Via personnummer/organisationsnummer (Se kundtypen), men misslyckades: (%d) "
+"%s."
 
 #: templates/adminpage_billing.phtml:5
 msgid "Resurs Bank Billing Address"

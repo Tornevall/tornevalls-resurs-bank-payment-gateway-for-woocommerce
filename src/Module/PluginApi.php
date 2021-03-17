@@ -411,6 +411,28 @@ class PluginApi
     }
 
     /**
+     * Log an event of getAddress.
+     *
+     * @param $customerCountry
+     * @param $identification
+     * @param $runFunctionInfo
+     * @since 0.0.1.0
+     */
+    private static function getAddressLog($customerCountry, $customerType, $identification, $runFunctionInfo)
+    {
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                __('getAddress request (country %s, type %s) for %s: %s', 'trbwc'),
+                $customerCountry,
+                $customerType,
+                $identification,
+                $runFunctionInfo
+            )
+        );
+    }
+
+    /**
      * @return array
      * @throws Exception
      * @since 0.0.1.0
@@ -431,19 +453,48 @@ class PluginApi
 
         try {
             WooCommerce::setSessionValue('identification', WooCommerce::getRequest('$identification'));
+
             switch ($customerCountry) {
                 case 'NO':
                     // This request works only on norwegian accounts.
                     try {
                         $addressResponse = (array)$apiRequest->getAddressByPhone($identification, $customerType);
+                        self::getAddressLog($customerCountry, $customerType, $identification, __(
+                            'By phone request.',
+                            'trbwc'
+                        ));
                     } catch (Exception $e) {
                         // If we get an error here, it might be cause by credential errors.
                         // In that case lets fall back to the default lookup.
                         $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
+                        self::getAddressLog($customerCountry, $customerType, $identification, __(
+                            'By phone request failed, executed failover by government id.',
+                            'trbwc'
+                        ));
                     }
                     break;
                 case 'SE':
-                    $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
+                    try {
+                        $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
+                        self::getAddressLog($customerCountry, $customerType, $identification, __(
+                            'By government id/company id (See customer type).',
+                            'trbwc'
+                        ));
+                    } catch (Exception $e) {
+                        self::getAddressLog(
+                            $customerCountry,
+                            $customerType,
+                            $identification,
+                            sprintf(
+                                __(
+                                    'By government id/company id (See customer type), but failed: (%d) %s.',
+                                    'trbwc'
+                                ),
+                                $e->getCode(),
+                                $e->getMessage()
+                            )
+                        );
+                    }
                     break;
                 default:
             }
