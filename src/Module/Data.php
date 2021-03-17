@@ -1363,10 +1363,7 @@ class Data
     public static function getCustomerType()
     {
         self::setCustomerTypeToSession();
-
-        $return = self::getCustomerTypeFromSession();
-
-        return $return;
+        return self::getCustomerTypeFromSession();
     }
 
     /**
