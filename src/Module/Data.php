@@ -1362,28 +1362,9 @@ class Data
      */
     public static function getCustomerType()
     {
-        global $woocommerce;
-
-        $return = 'NATURAL';
-
         self::setCustomerTypeToSession();
-        /** @var WC_Customer $wcCustomer */
-        $wcCustomer = $woocommerce->customer;
-        $billingCompany = null;
-        if (null !== $wcCustomer) {
-            $billingCompany = $wcCustomer->get_billing_company();
-        }
 
-        /**
-         * @todo Get customer from session when live changes are being made.
-         */
-        if (!empty($billingCompany)) {
-            $return = 'LEGAL';
-        }
-
-        if ($return === 'NATURAL' && ($differentType = Data::getCustomerTypeFromSession()) !== 'NATURAL') {
-            $return = $differentType;
-        }
+        $return = self::getCustomerTypeFromSession();
 
         return $return;
     }
