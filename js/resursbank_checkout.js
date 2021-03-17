@@ -36,9 +36,11 @@ function getResursGateway() {
  * @type {{billing_phone: string, billing_email: string}}
  * @since 0.0.1.0
  */
-var inheritTo = {
+var resursFieldInheritList = {
     'billing_phone': 'trbwc_phone',
     'billing_email': 'trbwc_email',
+    'trbwc_mobile': 'billing_phone',
+    'resursSsnIdentification': 'trbwc_government_id'
 };
 
 /**
@@ -46,18 +48,18 @@ var inheritTo = {
  * @since 0.0.1.0
  */
 function getResursHookedBillingFields() {
-    for (var inheritKey in inheritTo) {
+    for (var inheritKey in resursFieldInheritList) {
         var inheritField = $rQuery('#' + inheritKey);
         if (inheritField.length) {
             inheritField.on('change', function () {
-                if (typeof inheritTo[this.id] !== 'undefined') {
-                    getResursFields('input[id^="' + inheritTo[this.id] + '"]', this.value);
-                    if (inheritTo[this.id] === 'trbwc_phone') {
+                if (typeof resursFieldInheritList[this.id] !== 'undefined') {
+                    getResursFields('input[id^="' + resursFieldInheritList[this.id] + '"]', this.value);
+                    if (resursFieldInheritList[this.id] === 'trbwc_phone') {
                         getResursFields('input[id^="trbwc_mobile"]', this.value);
                     }
                 }
             });
-            getResursFields('input[id^="' + inheritTo[inheritField.attr('id')] + '"]', inheritField.val());
+            getResursFields('input[id^="' + resursFieldInheritList[inheritField.attr('id')] + '"]', inheritField.val());
             if (inheritKey === 'billing_phone') {
                 // Use standard phone to store mobile.
                 getResursFields('input[id^="trbwc_mobile"]', inheritField.val());
@@ -72,17 +74,15 @@ function getResursHookedBillingFields() {
  * @since 0.0.1.0
  */
 function setBillingInherit(o) {
-    var inheritTo = {
-        'trbwc_phone': 'billing_phone',
-        'trbwc_mobile': 'billing_phone',
-        'trbwc_email': 'billing_email',
-    };
     var shortIdArray = o.id.split('_');
     if (shortIdArray.length === 3) {
         var inheritShort = shortIdArray[0] + '_' + shortIdArray[1];
-        if (o.value && typeof inheritTo[inheritShort] !== 'undefined') {
-            $rQuery('#' + inheritTo[inheritShort]).val(o.value);
+        if (o.value !== '' && typeof resursFieldInheritList[inheritShort] !== 'undefined') {
+            //$rQuery('#' + resursFieldInheritList[inheritShort]).val(o.value);
+            $rQuery('input[id^=' + resursFieldInheritList[inheritShort]).val(o.value);
         }
+    } else if (o.id === 'resursSsnIdentification' && o.value !== '') {
+        $rQuery('input[id^=' + resursFieldInheritList[o.id]).val(o.value);
     }
 }
 
@@ -117,6 +117,7 @@ function setResursUpdateField(updateElement, updateValue) {
  * @since 0.0.1.0
  */
 function setResursGetAddressCustomerType(clickedObject) {
+    resursGetAddressCustomerType = clickedObject.value;
     $rQuery('body').trigger('update_checkout');
 }
 

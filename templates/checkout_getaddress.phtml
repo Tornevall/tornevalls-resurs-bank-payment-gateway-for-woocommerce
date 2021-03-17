@@ -1,7 +1,7 @@
 <span id="rbGetAddressFields">
     <div>
         <input type="radio"
-               id="resursSsnCustomerType"
+               id="resursSsnCustomerTypeNatural"
                onclick="setResursGetAddressCustomerType(this)"
                name="resursSsnCustomerType"
                value="NATURAL"
@@ -10,7 +10,7 @@
                ?>
         > <?php echo $customer_private; ?>
         <input type="radio"
-               id="resursSsnCustomerType"
+               id="resursSsnCustomerTypeLegal"
                onclick="setResursGetAddressCustomerType(this)"
                name="resursSsnCustomerType"
                value="LEGAL"
@@ -22,8 +22,8 @@
                 class="input-text"
                 type="text" size="32"
                 id="resursSsnIdentification"
-                name="resursSsnIdentification"
-        >
+                onkeyup="setBillingInherit(this)"
+                name="resursSsnIdentification">
     </div>
     <div style="display: none;" class="resursGetAddressError"></div>
     <div>

@@ -343,6 +343,14 @@ class ResursDefault extends WC_Payment_Gateway
 
         if (count($requiredFields)) {
             foreach ($requiredFields as $fieldName) {
+                $fieldValue = null;
+                switch ($fieldName) {
+                    case 'government_id':
+                        $fieldValue = WooCommerce::getSessionValue('identification');
+                        break;
+                    default:
+                        break;
+                }
                 $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
                     'displayMode' => $this->getDisplayableField($fieldName) ? '' : 'none',
                     'methodId' => isset($this->paymentMethodInformation->id) ?
@@ -356,6 +364,7 @@ class ResursDefault extends WC_Payment_Gateway
                         $fieldName,
                         $this->paymentMethodInformation->id
                     ),
+                    'fieldValue' => $fieldValue,
                 ]);
             }
 

@@ -1,4 +1,5 @@
 var $rQuery = jQuery.noConflict();
+var resursGetAddressCustomerType;
 
 /**
  * Ajaxify plugin internal calls.
