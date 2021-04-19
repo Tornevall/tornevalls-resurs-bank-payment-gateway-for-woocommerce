@@ -190,6 +190,29 @@ class WooCommerce
     }
 
     /**
+     * @param $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getAdminAfterOldCheck($order)
+    {
+        if ($order->meta_exists('resursBankPaymentFlow') &&
+            !Data::hasOldGateway() &&
+            !Data::getResursOption('deprecated_interference')
+        ) {
+            echo Data::getGenericClass()->getTemplate(
+                'adminpage_woocommerce_version22',
+                [
+                    'wooPlug22VersionInfo' => __(
+                        'This order has not been created by this plugin and the other plugin is currently unavailable.',
+                        'trbwc'
+                    ),
+                ]
+            );
+        }
+    }
+
+    /**
      * @param mixed $order
      * @throws ResursException
      * @throws ExceptionHandler
@@ -198,6 +221,8 @@ class WooCommerce
      */
     public static function getAdminAfterOrderDetails($order = null)
     {
+        self::getAdminAfterOldCheck($order);
+
         if (!empty($order) &&
             Data::canHandleOrder($order->get_payment_method())
         ) {
