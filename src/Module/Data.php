@@ -895,6 +895,15 @@ class Data
     }
 
     /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function hasOldGateway()
+    {
+        return defined('RB_WOO_VERSION') ? true : false;
+    }
+
+    /**
      * @param $orderReference
      * @param null $asOrder
      * @return null
