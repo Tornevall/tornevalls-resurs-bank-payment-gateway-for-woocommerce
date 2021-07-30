@@ -1,13 +1,9 @@
-# Guides: https://confluence.atlassian.com/x/e8YWN for more examples.
-#          - apt-add-repository ppa:sergey-dryabzhinsky/php53
-#          - apt-add-repository ppa:sergey-dryabzhinsky/packages
-
 pipelines:
   default:
     - parallel:
         - step:
             name: NetCURL 6.1/PHP 8.0
-            image: php:8.0-rc
+            image: php:8.0
             caches:
               - composer
             script:
