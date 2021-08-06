@@ -11,8 +11,11 @@ $rQuery(document).ready(function ($) {
  */
 function getResursGateway() {
     resursGateway = {
+        getLegacy: function () {
+            return typeof $ResursCheckout === 'undefined';
+        },
         init: function () {
-            var that = this;
+            let that = this;
             $rQuery(document).ajaxStop(function () {
                 that.register_payment_update();
             });
@@ -32,7 +35,7 @@ function getResursGateway() {
 }
 
 /**
- * Fields to inherit.
+ * Field key translations.
  * @type {{billing_phone: string, billing_email: string}}
  * @since 0.0.1.0
  */
@@ -134,7 +137,7 @@ function getResursAddress() {
             'post',
             'resursbank_get_address',
             {'identification': ssnIdentification.val()},
-            function(response) {
+            function (response) {
                 if (response['api_error'] !== '') {
                     $rQuery('.resursGetAddressError').text(response['api_error']);
                     $rQuery('.resursGetAddressError').show();

@@ -3,12 +3,12 @@
 namespace ResursBank\Gateway;
 
 use Exception;
+use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use Resursbank\RBEcomPHP\RESURS_FLOW_TYPES;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -983,7 +983,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function processSimplified()
     {
         // Section #1: Prepare order.
-        $this->API->setCheckoutType(RESURS_FLOW_TYPES::SIMPLIFIED_FLOW);
+        $this->API->setCheckoutType(CheckoutType::SIMPLIFIED_FLOW);
         $this->API->setFraudFlags();
         $this->setOrderData();
         $this->setCreatePaymentNotice(__FUNCTION__);
@@ -1527,7 +1527,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function processHosted()
     {
-        $this->API->setCheckoutType(RESURS_FLOW_TYPES::HOSTED_FLOW);
+        $this->API->setCheckoutType(CheckoutType::HOSTED_FLOW);
         $this->API->setFraudFlags();
         $this->setOrderData();
         $this->setCreatePaymentNotice(__FUNCTION__);
@@ -1586,7 +1586,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function processRco($return)
     {
-        $this->API->setCheckoutType(RESURS_FLOW_TYPES::RESURS_CHECKOUT);
+        $this->API->setCheckoutType(CheckoutType::RESURS_CHECKOUT);
         // setFraudFlags can not be set for this checkout type.
         $this->setOrderData();
 
