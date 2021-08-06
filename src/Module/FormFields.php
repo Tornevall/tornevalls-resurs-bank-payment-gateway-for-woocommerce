@@ -726,7 +726,6 @@ class FormFields extends WC_Settings_API
             ],
             'CARD' => [
                 'government_id',
-                'card_number',
             ],
             'REVOLVING_CREDIT' => [
                 'government_id',
