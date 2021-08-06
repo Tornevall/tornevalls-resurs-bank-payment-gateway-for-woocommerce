@@ -6,6 +6,7 @@ use Exception;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
 use Resursbank\RBEcomPHP\RESURS_CALLBACK_TYPES;
+use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
 
@@ -178,11 +179,25 @@ class PluginApi
         $validationResponse = false;
 
         if ($isValid) {
-            $validationResponse = (new Api())->getConnection()->validateCredentials(
-                (self::getParam('e') !== 'live'),
-                self::getParam('u'),
-                self::getParam('p')
-            );
+            try {
+                $validationResponse = (new Api())->getConnection()->validateCredentials(
+                    (self::getParam('e') !== 'live'),
+                    self::getParam('u'),
+                    self::getParam('p')
+                );
+            } catch (RuntimeException $e) {
+                $validationResponse = $e->getMessage();
+                Data::setLogNotice(
+                    sprintf(
+                        __(
+                            'An error occured during credential checking: %s (%d).',
+                            'trbwc'
+                        ),
+                        $e->getMessage(),
+                        $e->getCode()
+                    )
+                );
+            }
         }
 
         // Save when validating.
