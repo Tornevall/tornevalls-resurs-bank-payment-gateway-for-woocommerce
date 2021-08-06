@@ -15,7 +15,7 @@ function getResursGateway() {
             return typeof $ResursCheckout === 'undefined';
         },
         init: function () {
-            let that = this;
+            var that = this;
             $rQuery(document).ajaxStop(function () {
                 that.register_payment_update();
             });
