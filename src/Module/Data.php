@@ -3,6 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use ResursBank\Gateway\ResursDefault;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
 use ResursException;
@@ -344,6 +345,30 @@ class Data
     public static function getTestMode()
     {
         return in_array(self::getResursOption('environment'), ['test', 'staging']);
+    }
+
+    /**
+     * Get the name of current checkout in use.
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getCheckoutType()
+    {
+        switch (Data::getResursOption('checkout_type')) {
+            case 'simplified':
+                $return = ResursDefault::TYPE_SIMPLIFIED;
+                break;
+            case 'hosted':
+                $return = ResursDefault::TYPE_HOSTED;
+                break;
+            case 'rco':
+                $return = ResursDefault::TYPE_RCO;
+                break;
+            default:
+                $return = '';
+        };
+
+        return $return;
     }
 
     /**

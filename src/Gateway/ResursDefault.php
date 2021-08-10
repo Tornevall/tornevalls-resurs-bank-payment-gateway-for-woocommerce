@@ -13,6 +13,7 @@ use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\IO\Data\Strings;
+use TorneLIB\Module\Network\Domain;
 use TorneLIB\Utils\Generic;
 use WC_Cart;
 use WC_Coupon;
@@ -139,6 +140,20 @@ class ResursDefault extends WC_Payment_Gateway
     private $paymentMethodInformation;
 
     /**
+     * The iframe. Rendered once. When rendered, it won't be requested again.
+     * @var string
+     * @since 0.0.1.0
+     */
+    private $rcoFrame;
+
+    /**
+     * The iframe container from Resurs Bank.
+     * @var array
+     * @since 0.0.1.0
+     */
+    private $rcoFrameData;
+
+    /**
      * @var Generic $generic Generic library, mainly used for automatically handling templates.
      * @since 0.0.1.0
      */
@@ -228,6 +243,19 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @param $pageId
+     * @return int|mixed
+     * @since 0.0.1.0
+     */
+    public function getTermsByRco($pageId)
+    {
+        if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+            $pageId = 0;
+        }
+        return $pageId;
+    }
+
+    /**
      * @return bool
      * @since 0.0.1.0
      */
@@ -244,6 +272,7 @@ class ResursDefault extends WC_Payment_Gateway
         add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
         add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
         add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
+        add_filter('woocommerce_get_terms_page_id', [$this, 'getTermsByRco'], 1);
     }
 
     /**
@@ -252,6 +281,22 @@ class ResursDefault extends WC_Payment_Gateway
     private function setActions()
     {
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
+        add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
+            add_action(sprintf('woocommerce_%s', Data::getResursOption('rco_iframe_position')), [$this, 'getRcoIframe']);
+        }
+    }
+
+    /**
+     * Enqueue scripts that is necessary for RCO (v2) to run properly.
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getHeaderScripts()
+    {
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
+            $this->processRco();
+        }
     }
 
     /**
@@ -281,7 +326,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $customerType,
                     (array)$this->paymentMethodInformation->customerType,
                     true
-                ) ? true : false;
+                );
             }
         }
 
@@ -297,7 +342,9 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getOrderButtonHtml($classButtonHtml)
     {
-        return $classButtonHtml;
+        if (Data::getCheckoutType() !== self::TYPE_RCO) {
+            return $classButtonHtml;
+        }
     }
 
     /**
@@ -970,6 +1017,19 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @since 0.0.1.0
+     */
+    public function getRcoIframe()
+    {
+        echo WordPress::applyFilters(
+            'getRcoContainerHtml',
+            sprintf(
+                '<div id="resursbank_rco_container"></div>'
+            )
+        );
+    }
+
+    /**
      * Simplified shop flow.
      * All flows should have three sections:
      * #1 Prepare order
@@ -1019,8 +1079,14 @@ class ResursDefault extends WC_Payment_Gateway
     private function setOrderData()
     {
         Data::setDeveloperLog(__FUNCTION__, 'Start.');
+
+        // Handle customer data from checkout only if this is not RCO (unless there is an order ready). RCO handles them externally.
+        if (!$this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
+            $this
+                ->setCustomer();
+        }
+
         $this
-            ->setCustomer()
             ->setCustomerId()
             ->setStoreId()
             ->setOrderLines()
@@ -1047,11 +1113,14 @@ class ResursDefault extends WC_Payment_Gateway
             $this->getSigningUrl(['success' => false, 'urlType' => 'back'])
         );
 
-        // The data id is the hey value for finding prior orders on landing pages etc.
-        Data::setOrderMeta($this->order, 'checkoutType', Data::getResursOption('checkout_type'));
-        Data::setOrderMeta($this->order, 'apiDataId', $this->apiDataId);
-        Data::setOrderMeta($this->order, 'orderSigningPayload', $this->getApiData());
-        Data::setOrderMeta($this->order, 'resursReference', $this->getPaymentId());
+        // Running in RCO mode we most likely don't have any order to put metadata into, yet.
+        if (!$this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
+            // The data id is the hay value for finding prior orders on landing pages etc.
+            Data::setOrderMeta($this->order, 'checkoutType', Data::getResursOption('checkout_type'));
+            Data::setOrderMeta($this->order, 'apiDataId', $this->apiDataId);
+            Data::setOrderMeta($this->order, 'orderSigningPayload', $this->getApiData());
+            Data::setOrderMeta($this->order, 'resursReference', $this->getPaymentId());
+        }
 
         return $this;
     }
@@ -1577,19 +1646,55 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Standard Resurs Checkout. Not interceptor ready.
-     * @param $return
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection PhpUnusedPrivateMethodInspection
-     * @todo Finish RCO.
      */
-    private function processRco($return)
+    private function processRco()
     {
+        $return = '';
         $this->API->setCheckoutType(CheckoutType::RESURS_CHECKOUT);
         // setFraudFlags can not be set for this checkout type.
         $this->setOrderData();
+        $this->setCreatePaymentNotice(__FUNCTION__);
+        $pid = $this->API->getConnection()->getPreferredPaymentId();
+        $this->rcoFrame = $this->API->getConnection()->createPayment($pid);
+        $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
 
-        return $return;
+        $urlList = (new Domain())->getUrlsFromHtml($this->rcoFrameData->script);
+        if (isset($this->rcoFrameData->script) && !empty($this->rcoFrameData->script) && count($urlList)) {
+            wp_enqueue_script(
+                sprintf('%s_rco', Data::getPrefix()),
+                array_pop($urlList)
+            );
+            wp_enqueue_script(
+                'resursbank_rco_v2',
+                sprintf(
+                    '%s/js/%s?%s',
+                    Data::getGatewayUrl(),
+                    'resursbank_rco_v2.js',
+                    Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
+                ),
+                ['jquery']
+            );
+            unset($this->rcoFrameData->customer);
+            wp_localize_script(sprintf('%s_rco', Data::getPrefix()), sprintf('%s_rco', Data::getPrefix()), (array)$this->rcoFrameData);
+        }
+
+
+        // Section #3: Log, handle and return response
+        /*Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->getBookPaymentStatus());
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                '%s: %s:bookPaymentStatus:%s, signingUrl: %s',
+                __FUNCTION__,
+                $this->getPaymentId(),
+                $this->getBookPaymentStatus(),
+                $this->getBookSigningUrl()
+            )
+        );*/
+        //return $return;
     }
 }

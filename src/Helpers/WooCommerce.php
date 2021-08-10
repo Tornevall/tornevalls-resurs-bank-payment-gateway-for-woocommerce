@@ -4,6 +4,7 @@ namespace ResursBank\Helpers;
 
 use Exception;
 use ResursBank\Gateway\AdminPage;
+use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
@@ -98,12 +99,18 @@ class WooCommerce
     {
         $methodList = Api::getPaymentMethods();
 
-        foreach ($methodList as $methodClass) {
-            $gatewayClass = new ResursDefault($methodClass);
-            // Ask itself.
-            if ($gatewayClass->is_available()) {
-                $gateways[] = $gatewayClass;
+        $currentCheckoutType = Data::getCheckoutType();
+        if ($currentCheckoutType !== ResursDefault::TYPE_RCO) {
+            foreach ($methodList as $methodClass) {
+                $gatewayClass = new ResursDefault($methodClass);
+                // Ask itself.
+                if ($gatewayClass->is_available()) {
+                    $gateways[] = $gatewayClass;
+                }
             }
+        } else {
+            $gatewayClass = new ResursDefault(new ResursCheckout());
+            $gateways[] = $gatewayClass;
         }
 
         return $gateways;

@@ -49,6 +49,7 @@ class WordPress
             'get_trigger_test',
             'get_trigger_response',
             'get_address',
+            'checkout_create_order'
         ];
 
         foreach ($actionList as $action) {

@@ -208,6 +208,18 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                 ],
+                'rco_iframe_position' => [
+                    'id' => 'rco_iframe_position',
+                    'type' => 'select',
+                    'options' => [
+                        'after_checkout_form' => __('After checkout form (Default).', 'trbwc'),
+                        'checkout_before_order_review' => __('Before order review.', 'trbwc'),
+                    ], // The options are based on available filters in WooCommerce.
+                    'default' => 'after_checkout_form',
+                    'custom_attributes' => [
+                        'size' => 2,
+                    ],
+                ],
                 'payment_methods_settings_end' => [
                     'type' => 'sectionend',
                 ],

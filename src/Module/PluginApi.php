@@ -170,6 +170,13 @@ class PluginApi
     }
 
     /**
+     * @since 0.0.1.0
+     */
+    public static function checkoutCreateOrder() {
+        $haltHere = true;
+    }
+
+    /**
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -429,6 +436,7 @@ class PluginApi
      * Log an event of getAddress.
      *
      * @param $customerCountry
+     * @param $customerType
      * @param $identification
      * @param $runFunctionInfo
      * @since 0.0.1.0
@@ -557,5 +565,4 @@ class PluginApi
 
         return $return;
     }
-
 }
