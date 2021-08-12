@@ -131,7 +131,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @var WC_Order $order
      * @since 0.0.1.0
      */
-    private $order;
+    protected $order;
 
     /**
      * @var array $paymentMethodInformation
@@ -148,7 +148,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * The iframe container from Resurs Bank.
-     * @var array
+     * @var object
      * @since 0.0.1.0
      */
     private $rcoFrameData;
@@ -202,6 +202,21 @@ class ResursDefault extends WC_Payment_Gateway
             // Applicant post data should be the final request.
             $this->applicantPostData = $this->getApplicantPostData();
         }
+        // Running in RCO mode, we will only have one method available and therefore we change the current id to
+        // that method.
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
+            $this->paymentMethodInformation = new ResursCheckout();
+            $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
+        }
+    }
+
+    /**
+     * @return WC_Order
+     * @since 0.0.1.0
+     */
+    public function getOrder()
+    {
+        return $this->order;
     }
 
     /**
@@ -283,7 +298,10 @@ class ResursDefault extends WC_Payment_Gateway
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
         add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
         if (Data::getCheckoutType() === self::TYPE_RCO) {
-            add_action(sprintf('woocommerce_%s', Data::getResursOption('rco_iframe_position')), [$this, 'getRcoIframe']);
+            add_action(
+                sprintf('woocommerce_%s', Data::getResursOption('rco_iframe_position')),
+                [$this, 'getRcoIframe']
+            );
         }
     }
 
@@ -443,14 +461,20 @@ class ResursDefault extends WC_Payment_Gateway
         /** @noinspection PhpUnusedLocalVariableInspection */
         // Return template.
         $return = [
+            'ajax_success' => true,
             'result' => 'failure',
             'redirect' => $this->getReturnUrl($order),
         ];
 
         // Developers can put their last veto here.
-        WordPress::doAction('canProcessOrder', $order);
-        $this->preProcessOrder($order);
-        $return = $this->processResursOrder($order);
+        //WordPress::doAction('canProcessOrder', $order);
+        $allowInternalPaymentProcess = WordPress::applyFilters('canProcessOrder', true);
+        if ($allowInternalPaymentProcess) {
+            $this->preProcessOrder($order);
+            $return = $this->processResursOrder($order);
+        } else {
+            $return = WordPress::applyFilters('canProcessOrderResponse', $return, $order);
+        }
 
         return $return;
     }
@@ -1653,33 +1677,34 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function processRco()
     {
-        $return = '';
         $this->API->setCheckoutType(CheckoutType::RESURS_CHECKOUT);
         // setFraudFlags can not be set for this checkout type.
         $this->setOrderData();
         $this->setCreatePaymentNotice(__FUNCTION__);
-        $pid = $this->API->getConnection()->getPreferredPaymentId();
-        $this->rcoFrame = $this->API->getConnection()->createPayment($pid);
+        $paymentId = $this->API->getConnection()->getPreferredPaymentId();
+        $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
         $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
+        $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
+
+        // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.
+        WooCommerce::setSessionValue('rco_legacy', $this->rcoFrameData->legacy);
+
+        // Store the payment id for later use.
+        WooCommerce::setSessionValue('rco_order_id', $paymentId);
 
         $urlList = (new Domain())->getUrlsFromHtml($this->rcoFrameData->script);
         if (isset($this->rcoFrameData->script) && !empty($this->rcoFrameData->script) && count($urlList)) {
             wp_enqueue_script(
-                sprintf('%s_rco', Data::getPrefix()),
-                array_pop($urlList)
-            );
-            wp_enqueue_script(
-                'resursbank_rco_v2',
-                sprintf(
-                    '%s/js/%s?%s',
-                    Data::getGatewayUrl(),
-                    'resursbank_rco_v2.js',
-                    Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
-                ),
+                'trbwc_rco',
+                array_pop($urlList),
                 ['jquery']
             );
             unset($this->rcoFrameData->customer);
-            wp_localize_script(sprintf('%s_rco', Data::getPrefix()), sprintf('%s_rco', Data::getPrefix()), (array)$this->rcoFrameData);
+            wp_localize_script(
+                'trbwc_rco',
+                'trbwc_rco',
+                (array)$this->rcoFrameData
+            );
         }
 
 
@@ -1695,6 +1720,5 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->getBookSigningUrl()
             )
         );*/
-        //return $return;
     }
 }

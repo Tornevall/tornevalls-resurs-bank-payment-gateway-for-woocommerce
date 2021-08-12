@@ -6,6 +6,7 @@ use Exception;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\Plugin;
 use TorneLIB\IO\Data\Strings;
 
 /**
@@ -26,6 +27,8 @@ class WordPress
             return;
         }
 
+        // Initialize plugin functions.
+        new Plugin();
         self::setupAjaxActions();
         self::setupFilters();
         self::setupScripts();

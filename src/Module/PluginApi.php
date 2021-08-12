@@ -3,12 +3,14 @@
 namespace ResursBank\Module;
 
 use Exception;
+use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
 use Resursbank\RBEcomPHP\RESURS_CALLBACK_TYPES;
 use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
+use WC_Checkout;
 
 /**
  * Class PluginApi
@@ -172,8 +174,70 @@ class PluginApi
     /**
      * @since 0.0.1.0
      */
-    public static function checkoutCreateOrder() {
-        $haltHere = true;
+    public static function checkoutCreateOrder()
+    {
+        WooCommerce::setSessionValue('rco_customer_session_request', $_REQUEST['rco_customer']);
+
+        self::getPreparedRcoOrder();
+        self::getCreatedOrder();
+    }
+
+    /**
+     * What will be created on success.
+     * @return WC_Checkout
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getPreparedRcoOrder()
+    {
+        $resursCheckout = new ResursCheckout();
+        $billingAddress = $resursCheckout->getCustomerFieldsByApiVersion();
+        $deliveryAddress = $resursCheckout->getCustomerFieldsByApiVersion('deliveryAddress');
+
+        foreach ($billingAddress as $billingDataKey => $billingDataValue) {
+            self::getDeliveryFrom($billingDataKey, $deliveryAddress, $billingAddress);
+        }
+
+        self::setCustomerAddressRequest($billingAddress);
+        self::setCustomerAddressRequest($deliveryAddress, 'shipping');
+    }
+
+    /**
+     * Get delivery address by delivery address with fallback on billing.
+     * This has also been used in the old plugin to match data correctly.
+     *
+     * @param $key
+     * @param $deliveryArray
+     * @param $billingArray
+     * @return mixed|string
+     * @since 0.0.1.0
+     */
+    private static function getDeliveryFrom($key, $deliveryArray, $billingArray)
+    {
+        if (isset($deliveryArray[$key]) && !empty($deliveryArray[$key])) {
+            $return = $deliveryArray[$key];
+        } elseif (isset($billingArray[$key]) && !empty($billingArray[$key])) {
+            $return = $billingArray[$key];
+        } else {
+            $return = '';
+        }
+
+        return $return;
+    }
+
+    /**
+     * Rewrite post and request data on fly so the woocommerce data fields matches those that come from RCO.
+     *
+     * @param $checkoutCustomer
+     * @since 0.0.1.0
+     */
+    private static function setCustomerAddressRequest($checkoutCustomer, $type = 'billing')
+    {
+        foreach ($checkoutCustomer as $item => $value) {
+            $itemVar = sprintf('%s_%s', $type, $item);
+            $_REQUEST[$itemVar] = $value;
+            $_POST[$itemVar] = $value;
+        }
     }
 
     /**
@@ -561,6 +625,37 @@ class PluginApi
                 }
                 $return[$addressField] = vsprintf(implode(' ', $compileInfo), $compileKeys);
             }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private static function getCreatedOrder()
+    {
+        $return = [
+            'success' => false,
+            'errorString' => '',
+            'errorCode' => 0,
+            'orderId' => 0,
+        ];
+        try {
+            $order = new WC_Checkout();
+
+            $processResult = $order->process_checkout();
+        } catch (Exception $e) {
+            $return['errorCode'] = $e->getCode();
+            $return['errorString'] = $e->getMessage();
+        }
+        $errorNotices = Data::getErrorNotices();
+        if (empty($errorNotices)) {
+            $return['orderId'] = WC()->session->get('order_awaiting_payment');
+            $return['success'] = true;
+        } else {
+            // Append exceptions ore skip if there are none.
+            $return['errorString'] .= empty($return['errorString']) ? $errorNotices : "<br>\n" . $errorNotices;
         }
 
         return $return;

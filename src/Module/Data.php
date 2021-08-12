@@ -103,13 +103,20 @@ class Data
      * @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list.
      * @since 0.0.1.0
      */
-    private static $jsLoaders = ['resursbank_all' => 'resursbank_global.js', 'resursbank' => 'resursbank.js'];
+    private static $jsLoaders = [
+        'resursbank_all' => 'resursbank_global.js',
+        'resursbank' => 'resursbank.js',
+    ];
 
     /**
      * @var array $jsLoadersCheckout Loadable scripts, only from checkout.
      * @since 0.0.1.0
      */
-    private static $jsLoadersCheckout = ['resursbank_checkout' => 'resursbank_checkout.js'];
+    private static $jsLoadersCheckout = [
+        'resursbank_checkout' => 'resursbank_checkout.js',
+        'resursbank_rco_v1' => 'resursbank_rco_v1.js',
+        'resursbank_rco_v2' => 'resursbank_rco_v2.js',
+    ];
 
     /**
      * @var array
@@ -136,7 +143,11 @@ class Data
      * @var array $jsDependencies List of dependencies for the scripts in this plugin.
      * @since 0.0.1.0
      */
-    private static $jsDependencies = ['resursbank' => ['jquery']];
+    private static $jsDependencies = [
+        'resursbank' => ['jquery'],
+        'resursbank_rco_v1' => ['jquery'],
+        'resursbank_rco_v2' => ['jquery'],
+    ];
 
     /**
      * @var array $jsDependenciesAdmin
@@ -1364,6 +1375,28 @@ class Data
             $woocommerceCustomerCountry : get_option('woocommerce_default_country');
 
         return $return;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getErrorNotices()
+    {
+        $wcNotices = wc_get_notices();
+        $internalErrorMessage = '';
+        if (isset($wcNotices['error']) && count($wcNotices['error'])) {
+            $wcErrorCollection = [];
+            foreach ($wcNotices['error'] as $arr) {
+                $wcErrorCollection[] = $arr['notice'];
+            }
+            $internalErrorMessage = implode("<br>\n", $wcErrorCollection);
+            Data::canLog(
+                Data::LOG_ERROR,
+                $internalErrorMessage
+            );
+        }
+        return $internalErrorMessage;
     }
 
     /**

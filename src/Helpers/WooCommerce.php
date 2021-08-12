@@ -3,6 +3,7 @@
 namespace ResursBank\Helpers;
 
 use Exception;
+use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
@@ -731,25 +732,25 @@ class WooCommerce
     private static function setOrderStatusByCallback($ecomOrderStatus, $order)
     {
         switch (true) {
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING:
+            case $ecomOrderStatus & OrderStatus::PENDING:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING:
+            case $ecomOrderStatus & OrderStatus::PROCESSING:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED:
+            case $ecomOrderStatus & OrderStatus::COMPLETED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED:
+            case $ecomOrderStatus & OrderStatus::ANNULLED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED:
+            case $ecomOrderStatus & OrderStatus::CREDITED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_AUTOMATICALLY_DEBITED:
+            case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION:
+            case $ecomOrderStatus & OrderStatus::MANUAL_INSPECTION:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
             default:
@@ -781,13 +782,13 @@ class WooCommerce
     private static function getOrderStatuses($key = null)
     {
         $return = WordPress::applyFilters('getOrderStatuses', [
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING => 'processing',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED => 'refunded',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED => 'completed',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING => 'on-hold',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED => 'cancelled',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_STATUS_COULD_NOT_BE_SET => 'on-hold',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION => 'on-hold',
+            OrderStatus::PROCESSING => 'processing',
+            OrderStatus::CREDITED => 'refunded',
+            OrderStatus::COMPLETED => 'completed',
+            OrderStatus::PENDING => 'on-hold',
+            OrderStatus::ANNULLED => 'cancelled',
+            OrderStatus::ERROR => 'on-hold',
+            OrderStatus::MANUAL_INSPECTION => 'on-hold',
         ]);
         if (isset($key, $return[$key])) {
             return $return[$key];

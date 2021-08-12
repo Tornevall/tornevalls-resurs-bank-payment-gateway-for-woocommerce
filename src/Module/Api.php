@@ -20,26 +20,31 @@ class Api
      * @var ResursBank $resursBank
      */
     public static $resursBank;
+
     /**
      * @var array $paymentMethods
      * @since 0.0.1.0
      */
     private static $paymentMethods;
+
     /**
      * @var array $callbacks
      * @since 0.0.1.0
      */
     private static $callbacks;
+
     /**
      * @var array $annuityFactors
      * @since 0.0.1.0
      */
     private static $annuityFactors;
+
     /**
      * @var ResursBank $ecom
      * @since 0.0.1.0
      */
     private $ecom;
+
     /**
      * @var array $credentials
      * @since 0.0.1.0

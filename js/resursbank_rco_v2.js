@@ -4,8 +4,8 @@
  * @since 0.0.1.0
  */
 var resursBankRcoDataContainer = {
-    customer: {},
-    payment: {},
+    rco_customer: {},
+    rco_payment: {},
 };
 
 /**
@@ -49,23 +49,42 @@ function getResursRcoContainer(key) {
 }
 
 /**
+ * Returns current Resurs Bank frontend API.
+ * @returns {number}
+ */
+function getResursApiVersion() {
+    if (typeof $ResursCheckout !== 'undefined') {
+        var returnValue = 2;
+    } else {
+        returnValue = 1;
+    }
+
+    return returnValue;
+}
+
+/**
  * @since 0.0.1.0
  */
 jQuery(document).ready(function ($) {
     if (typeof $ResursCheckout !== 'undefined') {
         $ResursCheckout.onSubmit(function (event) {
             // TODO: Use nonce.
-            getResursAjaxify('post', 'resursbank_checkout_create_order', getResursWooCommerceCustomer(),
+            getResursAjaxify(
+                'post',
+                'resursbank_checkout_create_order',
+                getResursWooCommerceCustomer(),
                 function (response) {
-                    console.dir(response)
+                    if (response['result'] === 'success') {
+                        $ResursCheckout.release();
+                    }
                 }
             )
-        })
+        });
         $ResursCheckout.onCustomerChange(function (event) {
-            resursBankRcoDataContainer.customer = event
+            resursBankRcoDataContainer.rco_customer = event
         });
         $ResursCheckout.onPaymentChange(function (event) {
-            resursBankRcoDataContainer.payment = event
+            resursBankRcoDataContainer.rco_payment = event
         });
         $ResursCheckout.onPaymentFail(function (event) {
         })
