@@ -3,6 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use ResursBank\Gateway\ResursDefault;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
 use ResursException;
@@ -102,13 +103,20 @@ class Data
      * @var array $jsLoaders List of loadable scripts. Localizations should be named as the scripts in this list.
      * @since 0.0.1.0
      */
-    private static $jsLoaders = ['resursbank_all' => 'resursbank_global.js', 'resursbank' => 'resursbank.js'];
+    private static $jsLoaders = [
+        'resursbank_all' => 'resursbank_global.js',
+        'resursbank' => 'resursbank.js',
+    ];
 
     /**
      * @var array $jsLoadersCheckout Loadable scripts, only from checkout.
      * @since 0.0.1.0
      */
-    private static $jsLoadersCheckout = ['resursbank_checkout' => 'resursbank_checkout.js'];
+    private static $jsLoadersCheckout = [
+        'resursbank_checkout' => 'resursbank_checkout.js',
+        'resursbank_rco_v1' => 'resursbank_rco_v1.js',
+        'resursbank_rco_v2' => 'resursbank_rco_v2.js',
+    ];
 
     /**
      * @var array
@@ -135,7 +143,11 @@ class Data
      * @var array $jsDependencies List of dependencies for the scripts in this plugin.
      * @since 0.0.1.0
      */
-    private static $jsDependencies = ['resursbank' => ['jquery']];
+    private static $jsDependencies = [
+        'resursbank' => ['jquery'],
+        'resursbank_rco_v1' => ['jquery'],
+        'resursbank_rco_v2' => ['jquery'],
+    ];
 
     /**
      * @var array $jsDependenciesAdmin
@@ -344,6 +356,30 @@ class Data
     public static function getTestMode()
     {
         return in_array(self::getResursOption('environment'), ['test', 'staging']);
+    }
+
+    /**
+     * Get the name of current checkout in use.
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getCheckoutType()
+    {
+        switch (Data::getResursOption('checkout_type')) {
+            case 'simplified':
+                $return = ResursDefault::TYPE_SIMPLIFIED;
+                break;
+            case 'hosted':
+                $return = ResursDefault::TYPE_HOSTED;
+                break;
+            case 'rco':
+                $return = ResursDefault::TYPE_RCO;
+                break;
+            default:
+                $return = '';
+        };
+
+        return $return;
     }
 
     /**
@@ -1218,30 +1254,38 @@ class Data
      */
     public static function setOrderMeta($order, $key, $value, $protected = true)
     {
-        $return = false;
-
         if (method_exists($order, 'get_id')) {
+            $orderId = $order->get_id();
+        } elseif ((int)$order > 0) {
+            $orderId = $order;
+        }
+
+        if (isset($orderId)) {
             self::canLog(
                 self::CAN_LOG_JUNK,
                 sprintf(
                     '%s (%s): %s=%s (protected=%s).',
                     __FUNCTION__,
-                    $order->get_id(),
+                    $orderId,
                     $key,
                     $value,
                     ($protected ? 'true' : 'false')
                 )
             );
-            if ($order->get_id()) {
-                $return = update_post_meta(
-                    $order->get_id(),
-                    sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
-                    $value
-                );
-            }
+            $return = update_post_meta(
+                $orderId,
+                sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
+                $value
+            );
         } else {
             throw new RuntimeException(
-                'Unable to update order meta - object $order is of wrong type.',
+                sprintf(
+                    __(
+                        'Unable to update order meta in %s - object $order is of wrong type or not an integer.',
+                        'trbwc'
+                    ),
+                    __FUNCTION__
+                ),
                 400
             );
         }
@@ -1339,6 +1383,28 @@ class Data
             $woocommerceCustomerCountry : get_option('woocommerce_default_country');
 
         return $return;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getErrorNotices()
+    {
+        $wcNotices = wc_get_notices();
+        $internalErrorMessage = '';
+        if (isset($wcNotices['error']) && count($wcNotices['error'])) {
+            $wcErrorCollection = [];
+            foreach ($wcNotices['error'] as $arr) {
+                $wcErrorCollection[] = $arr['notice'];
+            }
+            $internalErrorMessage = implode("<br>\n", $wcErrorCollection);
+            Data::canLog(
+                Data::LOG_ERROR,
+                $internalErrorMessage
+            );
+        }
+        return $internalErrorMessage;
     }
 
     /**

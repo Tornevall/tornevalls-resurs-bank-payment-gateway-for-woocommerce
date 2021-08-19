@@ -3,12 +3,13 @@
 namespace ResursBank\Helpers;
 
 use Exception;
+use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\AdminPage;
+use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use Resursbank\RBEcomPHP\RESURS_PAYMENT_STATUS_RETURNCODES;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -30,6 +31,15 @@ class WooCommerce
      * @since 0.0.1.0
      */
     private static $session;
+
+    /**
+     * Key in session to mark whether customer is in checkout or not. This is now global since RCO will
+     * set that key on the backend request.
+     *
+     * @var string
+     * @since 0.0.1.0
+     */
+    public static $inCheckoutKey = 'customerWasInCheckout';
 
     /**
      * @var $basename
@@ -89,6 +99,8 @@ class WooCommerce
     }
 
     /**
+     * Handle payment method gateways.
+     *
      * @param $gateways
      * @return mixed
      * @throws Exception
@@ -98,12 +110,23 @@ class WooCommerce
     {
         $methodList = Api::getPaymentMethods();
 
-        foreach ($methodList as $methodClass) {
-            $gatewayClass = new ResursDefault($methodClass);
-            // Ask itself.
-            if ($gatewayClass->is_available()) {
-                $gateways[] = $gatewayClass;
+        $currentCheckoutType = Data::getCheckoutType();
+        if ($currentCheckoutType !== ResursDefault::TYPE_RCO) {
+            // For simplified flow and hosted flow, we create individual class modules for all payment methods
+            // that has been received from the getPaymentMethods call.
+            foreach ($methodList as $methodClass) {
+                $gatewayClass = new ResursDefault($methodClass);
+                // Ask itself if it is enabled.
+                if ($gatewayClass->is_available()) {
+                    $gateways[] = $gatewayClass;
+                }
             }
+        } else {
+            // In RCO mode, we don't have to handle all separate payment methods as a gateway since
+            // the iframe keeps track of them, so in this case will create a smaller class gateway through the
+            // ResursCheckout module.
+            $gatewayClass = new ResursDefault(new ResursCheckout());
+            $gateways[] = $gatewayClass;
         }
 
         return $gateways;
@@ -457,7 +480,7 @@ class WooCommerce
     {
         if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
             $return[sprintf('%s_rco_suggest_id', Data::getPrefix())] = Api::getResurs()->getPreferredPaymentId();
-            $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getResursOption('checkout_type');
+            $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
         }
 
         return $return;
@@ -546,16 +569,15 @@ class WooCommerce
      */
     private static function setCustomerCheckoutLocation($customerIsInCheckout)
     {
-        $sessionKey = 'customerWasInCheckout';
         Data::canLog(
             Data::CAN_LOG_JUNK,
             sprintf(
                 __('Session value %s set to %s.', 'trbwc'),
-                $sessionKey,
+                self::$inCheckoutKey,
                 $customerIsInCheckout ? 'true' : 'false'
             )
         );
-        self::setSessionValue($sessionKey, $customerIsInCheckout);
+        self::setSessionValue(self::$inCheckoutKey, $customerIsInCheckout);
     }
 
     /**
@@ -724,25 +746,25 @@ class WooCommerce
     private static function setOrderStatusByCallback($ecomOrderStatus, $order)
     {
         switch (true) {
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING:
+            case $ecomOrderStatus & OrderStatus::PENDING:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING:
+            case $ecomOrderStatus & OrderStatus::PROCESSING:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED:
+            case $ecomOrderStatus & OrderStatus::COMPLETED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED:
+            case $ecomOrderStatus & OrderStatus::ANNULLED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED:
+            case $ecomOrderStatus & OrderStatus::CREDITED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_AUTOMATICALLY_DEBITED:
+            case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
-            case $ecomOrderStatus & RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION:
+            case $ecomOrderStatus & OrderStatus::MANUAL_INSPECTION:
                 self::setOrderStatusWithNotice($order, $ecomOrderStatus);
                 break;
             default:
@@ -774,13 +796,13 @@ class WooCommerce
     private static function getOrderStatuses($key = null)
     {
         $return = WordPress::applyFilters('getOrderStatuses', [
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PROCESSING => 'processing',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_CREDITED => 'refunded',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_COMPLETED => 'completed',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_PENDING => 'on-hold',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_ANNULLED => 'cancelled',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_STATUS_COULD_NOT_BE_SET => 'on-hold',
-            RESURS_PAYMENT_STATUS_RETURNCODES::PAYMENT_MANUAL_INSPECTION => 'on-hold',
+            OrderStatus::PROCESSING => 'processing',
+            OrderStatus::CREDITED => 'refunded',
+            OrderStatus::COMPLETED => 'completed',
+            OrderStatus::PENDING => 'on-hold',
+            OrderStatus::ANNULLED => 'cancelled',
+            OrderStatus::ERROR => 'on-hold',
+            OrderStatus::MANUAL_INSPECTION => 'on-hold',
         ]);
         if (isset($key, $return[$key])) {
             return $return[$key];

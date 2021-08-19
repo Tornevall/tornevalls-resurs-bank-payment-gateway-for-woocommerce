@@ -3,6 +3,7 @@
 namespace ResursBank\Gateway;
 
 use Exception;
+use JsonException;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
@@ -13,6 +14,7 @@ use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\IO\Data\Strings;
+use TorneLIB\Module\Network\Domain;
 use TorneLIB\Utils\Generic;
 use WC_Cart;
 use WC_Coupon;
@@ -20,6 +22,7 @@ use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
+use function count;
 use function in_array;
 
 /**
@@ -130,13 +133,27 @@ class ResursDefault extends WC_Payment_Gateway
      * @var WC_Order $order
      * @since 0.0.1.0
      */
-    private $order;
+    protected $order;
 
     /**
      * @var array $paymentMethodInformation
      * @since 0.0.1.0
      */
     private $paymentMethodInformation;
+
+    /**
+     * The iframe. Rendered once. When rendered, it won't be requested again.
+     * @var string
+     * @since 0.0.1.0
+     */
+    private $rcoFrame;
+
+    /**
+     * The iframe container from Resurs Bank.
+     * @var object
+     * @since 0.0.1.0
+     */
+    private $rcoFrameData;
 
     /**
      * @var Generic $generic Generic library, mainly used for automatically handling templates.
@@ -160,7 +177,7 @@ class ResursDefault extends WC_Payment_Gateway
         $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'trbwc');
         $this->title = __('Resurs Bank AB', 'trbwc');
         $this->setPaymentMethodInformation($resursPaymentMethodObject);
-        $this->has_fields = Data::getResursOption('checkout_type') === 'simplified';
+        $this->has_fields = (Data::getCheckoutType() === self::TYPE_SIMPLIFIED || Data::getCheckoutType() === self::TYPE_HOSTED);
         $this->setFilters();
         $this->setActions();
     }
@@ -172,10 +189,10 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setPaymentMethodInformation($paymentMethodInformation)
     {
+        // Generic setup regardless of payment method.
+        $this->setPaymentApiData();
+
         if (is_object($paymentMethodInformation)) {
-            $this->apiData['checkoutType'] = Data::getResursOption('checkout_type');
-            $this->apiDataId = sha1(uniqid('wc-api', true));
-            $this->API = new Api();
             $this->paymentMethodInformation = $paymentMethodInformation;
             $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
             $this->title = $this->paymentMethodInformation->description;
@@ -187,6 +204,35 @@ class ResursDefault extends WC_Payment_Gateway
             // Applicant post data should be the final request.
             $this->applicantPostData = $this->getApplicantPostData();
         }
+        // Running in RCO mode, we will only have one method available and therefore we change the current id to
+        // that method.
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
+            $this->paymentMethodInformation = new ResursCheckout();
+            $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
+        }
+    }
+
+    /**
+     * Generic setup regardless of payment method.
+     * @return $this
+     * @since 0.0.1.0
+     */
+    private function setPaymentApiData()
+    {
+        $this->apiData['checkoutType'] = Data::getCheckoutType();
+        $this->apiDataId = sha1(uniqid('wc-api', true));
+        $this->API = new Api();
+
+        return $this;
+    }
+
+    /**
+     * @return WC_Order
+     * @since 0.0.1.0
+     */
+    public function getOrder()
+    {
+        return $this->order;
     }
 
     /**
@@ -228,6 +274,19 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @param $pageId
+     * @return int|mixed
+     * @since 0.0.1.0
+     */
+    public function getTermsByRco($pageId)
+    {
+        if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+            $pageId = 0;
+        }
+        return $pageId;
+    }
+
+    /**
      * @return bool
      * @since 0.0.1.0
      */
@@ -244,6 +303,7 @@ class ResursDefault extends WC_Payment_Gateway
         add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
         add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
         add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
+        add_filter('woocommerce_get_terms_page_id', [$this, 'getTermsByRco'], 1);
     }
 
     /**
@@ -252,6 +312,27 @@ class ResursDefault extends WC_Payment_Gateway
     private function setActions()
     {
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
+        add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
+            add_action(
+                sprintf('woocommerce_%s', Data::getResursOption('rco_iframe_position')),
+                [$this, 'getRcoIframe']
+            );
+        }
+    }
+
+    /**
+     * Enqueue scripts that is necessary for RCO (v2) to run properly.
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getHeaderScripts()
+    {
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
+            WooCommerce::setSessionValue(WooCommerce::$inCheckoutKey, true);
+
+            $this->processRco();
+        }
     }
 
     /**
@@ -281,7 +362,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $customerType,
                     (array)$this->paymentMethodInformation->customerType,
                     true
-                ) ? true : false;
+                );
             }
         }
 
@@ -297,7 +378,9 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getOrderButtonHtml($classButtonHtml)
     {
-        return $classButtonHtml;
+        if (Data::getCheckoutType() !== self::TYPE_RCO) {
+            return $classButtonHtml;
+        }
     }
 
     /**
@@ -336,7 +419,7 @@ class ResursDefault extends WC_Payment_Gateway
         /** @noinspection PhpUndefinedFieldInspection */
         $requiredFields = (array)FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
 
-        if (Data::getResursOption('checkout_type') === 'rco') {
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
             // TODO: No fields should be active on RCO. Make sure we never land here at all.
             return;
         }
@@ -393,17 +476,30 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $order = new WC_Order($order_id);
         $this->order = $order;
-        /** @noinspection PhpUnusedLocalVariableInspection */
         // Return template.
         $return = [
+            'ajax_success' => true,
             'result' => 'failure',
             'redirect' => $this->getReturnUrl($order),
         ];
 
         // Developers can put their last veto here.
-        WordPress::doAction('canProcessOrder', $order);
+        $allowInternalPaymentProcess = WordPress::applyFilters('canProcessOrder', true);
+
+        // We will most likely land here if order_awaiting_payment was null at first init and checkout was of type RCO.
+        // As RCO is very much backwards handled, we have to update meta data on order succession so that
+        // we can match the correct order on successUrl later on.
+        $metaCheckoutType = Data::getOrderMeta($order_id, 'checkoutType');
+        if (empty($metaCheckoutType)) {
+            $this->setOrderCheckoutMeta($order_id);
+        }
+
         $this->preProcessOrder($order);
-        $return = $this->processResursOrder($order);
+        if ($allowInternalPaymentProcess) {
+            $return = $this->processResursOrder($order);
+        } else {
+            $return = WordPress::applyFilters('canProcessOrderResponse', $return, $order);
+        }
 
         return $return;
     }
@@ -431,7 +527,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function preProcessOrder(WC_Order $order)
+    private function preProcessOrder($order)
     {
         $this->apiData['wc_order_id'] = $order->get_id();
         $this->apiData['preferred_id'] = $this->getPaymentId();
@@ -458,7 +554,10 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'ecom':
             default:
-                $return = Api::getResurs()->getPreferredPaymentId();
+                $sessionPaymentId = WooCommerce::getSessionValue('rco_order_id');
+                // It is necessary to fetch payment id from session if exists, so we can keep it both in frontend
+                // and the backend API. If not set, we'll let ecomPHP fetch a new.
+                $return = !empty($sessionPaymentId) ? $sessionPaymentId : Api::getResurs()->getPreferredPaymentId();
                 break;
         }
 
@@ -473,7 +572,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function processResursOrder($order)
     {
         // Available options: simplified, hosted, rco. Methods should exists for each of them.
-        $checkoutRequestType = sprintf('process%s', ucfirst(Data::getResursOption('checkout_type')));
+        $checkoutRequestType = sprintf('process%s', ucfirst(Data::getCheckoutType()));
 
         if (method_exists($this, $checkoutRequestType)) {
             $this->order->add_order_note(
@@ -545,12 +644,14 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         if (isset($_REQUEST['apiData'])) {
+            $this->getApiByRco();
             $this->setApiData(json_decode(
                 (new Strings())->base64urlDecode($_REQUEST['apiData']),
                 true
             ));
 
             $this->order = $this->getCurrentOrder();
+
             $this->apiData['isReturningCustomer'] = false;
             if ($this->getApiValue('wc_order_id') && $this->getApiValue('preferred_id')) {
                 $this->apiData['isReturningCustomer'] = true;
@@ -574,7 +675,7 @@ class ResursDefault extends WC_Payment_Gateway
                     ) {
                         $finalRedirectUrl = $this->get_return_url($this->order);
                     }
-                } elseif ($this->getCheckoutType() === self::TYPE_HOSTED) {
+                } elseif ($this->getCheckoutType() === self::TYPE_HOSTED || $this->getCheckoutType() === self::TYPE_RCO) {
                     $finalRedirectUrl = $this->get_return_url($this->order);
                 }
             } else {
@@ -618,6 +719,49 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * If API request is based on RCO, we can not entirely trust the landing page API content.
+     * In that case we have to remerge some data from the session instead as the "signing success url"
+     * is empty when the iframe is rendered.
+     *
+     * @return $this
+     * @throws JsonException
+     * @since 0.0.1.0
+     */
+    private function getApiByRco()
+    {
+        $baseHandler = new Strings();
+        $apiRequestContent = json_decode($baseHandler->base64urlDecode($_REQUEST['apiData']), true);
+
+        if ($apiRequestContent['checkoutType'] === ResursDefault::TYPE_RCO) {
+            $requestSession = [
+                'preferred_id' => 'rco_order_id',
+                'wc_order_id' => 'order_awaiting_payment',
+            ];
+            $apiRequestContent = $this->getSessionApiData($apiRequestContent, $requestSession);
+            // Reencode the data again.
+            $_REQUEST['apiData'] = $baseHandler->base64urlEncode(json_encode($apiRequestContent, JSON_THROW_ON_ERROR));
+        }
+        return $this;
+    }
+
+    /**
+     * @param $apiRequestContent
+     * @param $requestArray
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private function getSessionApiData($apiRequestContent, $requestArray)
+    {
+        foreach ($requestArray as $itemKey => $fromItemKey) {
+            $sessionValue = WooCommerce::getSessionValue($fromItemKey);
+            if ((!empty($sessionValue) && !isset($apiRequestContent[$itemKey])) || empty($apiRequestContent[$itemKey])) {
+                $apiRequestContent[$itemKey] = $sessionValue;
+            }
+        }
+        return $apiRequestContent;
+    }
+
+    /**
      * @param $apiArray
      * @return $this
      * @since 0.0.1.0
@@ -634,7 +778,13 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getCurrentOrder()
     {
-        return new WC_Order($this->getApiValue('wc_order_id'));
+        $return = new WC_Order($this->getApiValue('wc_order_id'));
+        $awaitingOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
+        if (!$return->get_id() && $awaitingOrderId) {
+            $return = new WC_Order($awaitingOrderId);
+        }
+
+        return $return;
     }
 
     /**
@@ -970,6 +1120,19 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @since 0.0.1.0
+     */
+    public function getRcoIframe()
+    {
+        echo WordPress::applyFilters(
+            'getRcoContainerHtml',
+            sprintf(
+                '<div id="resursbank_rco_container"></div>'
+            )
+        );
+    }
+
+    /**
      * Simplified shop flow.
      * All flows should have three sections:
      * #1 Prepare order
@@ -1019,8 +1182,14 @@ class ResursDefault extends WC_Payment_Gateway
     private function setOrderData()
     {
         Data::setDeveloperLog(__FUNCTION__, 'Start.');
+
+        // Handle customer data from checkout only if this is not RCO (unless there is an order ready).
+        // RCO handles them externally.
+        if (!$this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
+            $this
+                ->setCustomer();
+        }
         $this
-            ->setCustomer()
             ->setCustomerId()
             ->setStoreId()
             ->setOrderLines()
@@ -1047,13 +1216,29 @@ class ResursDefault extends WC_Payment_Gateway
             $this->getSigningUrl(['success' => false, 'urlType' => 'back'])
         );
 
-        // The data id is the hey value for finding prior orders on landing pages etc.
-        Data::setOrderMeta($this->order, 'checkoutType', Data::getResursOption('checkout_type'));
-        Data::setOrderMeta($this->order, 'apiDataId', $this->apiDataId);
-        Data::setOrderMeta($this->order, 'orderSigningPayload', $this->getApiData());
-        Data::setOrderMeta($this->order, 'resursReference', $this->getPaymentId());
+        // Running in RCO mode we most likely don't have any order to put metadata into, yet.
+        if (!$this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
+            // The data id is the hay value for finding prior orders on landing pages etc.
+            $this->setOrderCheckoutMeta($this->order);
+        }
 
         return $this;
+    }
+
+    /**
+     * Generic method to handle metadata depending on which direction the checkout is set into.
+     * RCO needs this, but from the frontend calls. Simplified and hosted is the "regular" way,
+     * so it's easier to handle.
+     *
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function setOrderCheckoutMeta($order)
+    {
+        Data::setOrderMeta($order, 'checkoutType', Data::getCheckoutType());
+        Data::setOrderMeta($order, 'apiDataId', $this->apiDataId);
+        Data::setOrderMeta($order, 'orderSigningPayload', $this->getApiData());
+        Data::setOrderMeta($order, 'resursReference', $this->getPaymentId());
     }
 
     /**
@@ -1285,7 +1470,9 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setOrderLines()
     {
-        if (count($currentCart = $this->cart->get_cart())) {
+        $currentCart = $this->cart->get_cart();
+
+        if (count($currentCart)) {
             foreach ($currentCart as $item) {
                 /**
                  * Data object is of type WC_Product_Simple actually.
@@ -1577,19 +1764,49 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Standard Resurs Checkout. Not interceptor ready.
-     * @param $return
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection PhpUnusedPrivateMethodInspection
-     * @todo Finish RCO.
      */
-    private function processRco($return)
+    private function processRco()
     {
-        $this->API->setCheckoutType(CheckoutType::RESURS_CHECKOUT);
         // setFraudFlags can not be set for this checkout type.
-        $this->setOrderData();
+        $this->API->setCheckoutType(CheckoutType::RESURS_CHECKOUT);
 
-        return $return;
+        $inCheckout = WooCommerce::getSessionValue(WooCommerce::$inCheckoutKey);
+        $currentCart = isset($this->cart) ? $this->cart->get_cart() : [];
+
+        // Prevent recreation of an iframe, when it is not needed.
+        // This could crash the order completion (at the successUrl).
+        if ($inCheckout && count($currentCart)) {
+            $this->setOrderData();
+            $this->setCreatePaymentNotice(__FUNCTION__);
+            $paymentId = $this->API->getConnection()->getPreferredPaymentId();
+            $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+            $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
+            $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
+
+            // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.
+            WooCommerce::setSessionValue('rco_legacy', $this->rcoFrameData->legacy);
+
+            // Store the payment id for later use.
+            WooCommerce::setSessionValue('rco_order_id', $paymentId);
+
+            $urlList = (new Domain())->getUrlsFromHtml($this->rcoFrameData->script);
+            if (isset($this->rcoFrameData->script) && !empty($this->rcoFrameData->script) && count($urlList)) {
+                wp_enqueue_script(
+                    'trbwc_rco',
+                    array_pop($urlList),
+                    ['jquery']
+                );
+                unset($this->rcoFrameData->customer);
+                wp_localize_script(
+                    'trbwc_rco',
+                    'trbwc_rco',
+                    (array)$this->rcoFrameData
+                );
+            }
+        }
     }
 }

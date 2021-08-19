@@ -1,3 +1,5 @@
+// resursbank_checkout.js --- Generic Checkout Handler.
+
 /**
  * @since 0.0.1.0
  */
