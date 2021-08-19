@@ -99,6 +99,8 @@ class WooCommerce
     }
 
     /**
+     * Handle payment method gateways.
+     *
      * @param $gateways
      * @return mixed
      * @throws Exception
@@ -110,14 +112,19 @@ class WooCommerce
 
         $currentCheckoutType = Data::getCheckoutType();
         if ($currentCheckoutType !== ResursDefault::TYPE_RCO) {
+            // For simplified flow and hosted flow, we create individual class modules for all payment methods
+            // that has been received from the getPaymentMethods call.
             foreach ($methodList as $methodClass) {
                 $gatewayClass = new ResursDefault($methodClass);
-                // Ask itself.
+                // Ask itself if it is enabled.
                 if ($gatewayClass->is_available()) {
                     $gateways[] = $gatewayClass;
                 }
             }
         } else {
+            // In RCO mode, we don't have to handle all separate payment methods as a gateway since
+            // the iframe keeps track of them, so in this case will create a smaller class gateway through the
+            // ResursCheckout module.
             $gatewayClass = new ResursDefault(new ResursCheckout());
             $gateways[] = $gatewayClass;
         }
