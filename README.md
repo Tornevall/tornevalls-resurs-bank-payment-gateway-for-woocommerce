@@ -33,25 +33,4 @@ As mentioned above, in the first section, there might be several breaking change
 
 ## Configuring
 
-WooCommerce has a quite static configuration setup that makes it hard to create new options.
-
-## Importing to Resurs Bank Repo
-
-If the above text wasn't read from Resurs Bank repo and the intentions is/has been to import the content from "RBWC" into Resurs Bank - have no worries. Most of the code is written with those intentions. It should therefore be possible to just copy/paste the structure. Just make sure that the old base is removed before doing this.
-
-### Other Considerations
-
-You should also take a look at a few other things too, that are listed below.
- 
-#### composer.json
- 
-The package namespace is specifically pointing to  `tornevall/resurs-bank-payment-gateway-for-woocommerce` which you probably want to change. Also take an important note that the branches may get desynched if different developing is being made in the repos. Once you decide to synchronize, you could just add another remote to your forked gitrepo and synch them.
-
-#### readme.txt
-
-The readme.txt contains another head title. Change it.
-
-
-# Notes to self
-
-* json-configurables instead of static content
+Most of the configuring are made through the admin panel, which includes tweaking when advanced mode is enabled.
