@@ -26,8 +26,6 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-14'>RWC-14</a>] -         Handle or abort deprecated actions and filters.
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-17'>RWC-17</a>] -         RCO section (activate by flow selection)
-</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-18'>RWC-18</a>] -         Data::getTestMode() should be retreived from environment option
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-19'>RWC-19</a>] -         Add getResursOption for deprecated plugin
@@ -143,6 +141,10 @@ ChangeLog is based on what has reached the master branch.
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-139'>RWC-139</a>] -         Warn for Resurs Bank old gateway payments when old gateway is disabled
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-166'>RWC-166</a>] -         Checkout: Resurs Checkout (facelift) -- Payment failures
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-176'>RWC-176</a>] -         Hide getAddress button on unsupported countries.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-177'>RWC-177</a>] -         When getAddress fields are not present
 </li>
 </ul>
 
