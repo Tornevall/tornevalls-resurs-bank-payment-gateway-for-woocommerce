@@ -1,17 +1,35 @@
 # RBWC
 
-This is a plugin written for WooCommerce and WordPress. It follows that standards (as much as possible) of WooCommerce. This means that if you do not upgrade your WooCommerce plugin from time to time, the plugin for Resurs Bank may become obsolete also.
+This is a plugin written for WooCommerce and WordPress. It is no longer a fork of the [prior repository that can be found at Resurs Bank](https://bitbucket.org/resursbankplugins/resurs-bank-payment-gateway-for-woocommerce) since much of that codebase has been impossible to reuse.
 
-If you read this text from within the resurs-bank-payment-gateway-for-woocommerce, you should know that the codebase and README content is not entirely the original content.
-If you read this text from [this bitbucket repo](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce), consider it the original base as of july 2020. This might change in future also.
-This plugin will however give you a wider support for filters and actions to simplify the "pluggables". There is also an older version alive here [here](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce/browse/init.php?at=refs%2Fheads%2Fobsolete%2Fv1-old) that was intended to the first new version. This is also reverted.
- 
+## Documents and links
+
+[Documentation is for the moment located here](https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway).
+[The official bitbucket repo as of v0.0](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce).
+[Github Synchronized repository](https://github.com/Tornevall/wpwc-resurs) will probably be the new official repository as bitbucket server will shut down in a few years from now.
+
+## Disclaimer
+
+There is breaking changes in this plugin if you tend to re-use it as it was the prior version (2.x).
+This is a standalone edition that - if you import it straight up as it was the older release - it definitely *could* break, not your site, but the recent setup.
+However, there are bridging over from the old version to the new version even if most of the old filters has dropped developer support.
+The external repo at [github](https://github.com/Tornevall/wpwc-resurs) and [bitbucket](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce) is not itself supported by Resurs Bank, but the intentions with this plugin is to eventually import it as a "next major version" update so it could be officially supported there.
+
+If you read this text from within the resurs-bank-payment-gateway-for-woocommerce, you should know that the codebase and README content is not entirely the original content. If this has happened, the project is importend and forked out to a Resurs supported release.
+If you read this text from some of the mentioned repos above, you can consider it the original codebase as of july 2020, when the project was initialized.
+
+### What has changed?
+
+This plugin do have much wider support for filters and actions to simplify work for developers that need to connect their own features to whatever they need to do.
+It has also covered some serious security issues in the prior release.
+The fact that this is a standalone release of a payment gateway, it also gives the opportunity to move around freely in other codebases and API usages. For example, we could make use of an external URL link checker to verify whether your site is reachable from the outside or not.
+As mentioned above, in the first section, there might be several breaking changes compared with Resurs version 2.x
+
 ## Requirements and security considerations
 
-* WooCommerce 3.4.0 or higher.
-* Do not run anything lower than [PHP 5.6.20](https://wordpress.org/news/2019/04/minimum-php-version-update/).
-* Version 2.x had some flaws, at least one of the to consider quite severe; the payment methods was written as file libraries and the directory structure has to be writable. The imports of those methods was also written dynamically, meaning the directory structure was [globbed](https://www.php.net/manual/en/function.glob.php) into the runtime. If an attacker was aware of this (which is possible by reading the code), arbitrary files could be written into this structure and get executed by the plugin. For this release, all such elements are removed.
-* [WordPress PHP recommendation](https://meta.trac.wordpress.org/ticket/5257) is raised to 7.2 - you should upgrade too. [You can also read more here](https://wpastra.com/changing-wordpress-php-version/).
+* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug 2021, both WooCommerce and WordPress is about to jump into 7.4 and higher. Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions of PHP.
+* WooCommerce: v3.4.0 or higher (old features are ditched) and the actual support is set much higher.
+* Do not run anything lower than [PHP 5.6.20]().
 
 ## Configuring
 
