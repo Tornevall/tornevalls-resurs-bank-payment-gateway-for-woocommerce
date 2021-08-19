@@ -1254,30 +1254,38 @@ class Data
      */
     public static function setOrderMeta($order, $key, $value, $protected = true)
     {
-        $return = false;
-
         if (method_exists($order, 'get_id')) {
+            $orderId = $order->get_id();
+        } elseif ((int)$order > 0) {
+            $orderId = $order;
+        }
+
+        if (isset($orderId)) {
             self::canLog(
                 self::CAN_LOG_JUNK,
                 sprintf(
                     '%s (%s): %s=%s (protected=%s).',
                     __FUNCTION__,
-                    $order->get_id(),
+                    $orderId,
                     $key,
                     $value,
                     ($protected ? 'true' : 'false')
                 )
             );
-            if ($order->get_id()) {
-                $return = update_post_meta(
-                    $order->get_id(),
-                    sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
-                    $value
-                );
-            }
+            $return = update_post_meta(
+                $orderId,
+                sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
+                $value
+            );
         } else {
             throw new RuntimeException(
-                'Unable to update order meta - object $order is of wrong type.',
+                sprintf(
+                    __(
+                        'Unable to update order meta in %s - object $order is of wrong type or not an integer.',
+                        'trbwc'
+                    ),
+                    __FUNCTION__
+                ),
                 400
             );
         }

@@ -4,6 +4,7 @@ namespace ResursBank\Module;
 
 use ResursBank\Gateway\ResursDefault;
 use WC_Order;
+use WC_Payment_Gateway;
 
 /**
  * Class Plugin Internal plugin handler.
@@ -42,10 +43,10 @@ class Plugin
      */
     public function canProcessOrderResponse($return, $order)
     {
-        $returnUrl = \WC_Payment_Gateway::get_return_url($order);
+        $returnUrl = WC_Payment_Gateway::get_return_url($order);
         if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
             $return['result'] = 'success';
-            //$return['redirect'] = $returnUrl;
+            $return['redirect'] = $returnUrl;
         }
         return $return;
     }

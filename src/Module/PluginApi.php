@@ -4,6 +4,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Gateway\ResursCheckout;
+use ResursBank\Gateway\ResursDefault;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
 use Resursbank\RBEcomPHP\RESURS_CALLBACK_TYPES;
@@ -19,6 +20,17 @@ use WC_Checkout;
  */
 class PluginApi
 {
+    /**
+     * @var ResursDefault
+     * @since 0.0.1.0
+     */
+    private static $resursCheckout;
+    /**
+     * @var ResursDefault
+     * @since 0.0.1.0
+     */
+    private static $resursDefault;
+
     /**
      * @since 0.0.1.0
      */
@@ -190,12 +202,13 @@ class PluginApi
      */
     private static function getPreparedRcoOrder()
     {
-        $resursCheckout = new ResursCheckout();
-        $billingAddress = $resursCheckout->getCustomerFieldsByApiVersion();
-        $deliveryAddress = $resursCheckout->getCustomerFieldsByApiVersion('deliveryAddress');
+        self::$resursDefault = new ResursDefault();
+        self::$resursCheckout = new ResursCheckout();
+        $billingAddress = self::$resursCheckout->getCustomerFieldsByApiVersion();
+        $deliveryAddress = self::$resursCheckout->getCustomerFieldsByApiVersion('deliveryAddress');
 
         foreach ($billingAddress as $billingDataKey => $billingDataValue) {
-            self::getDeliveryFrom($billingDataKey, $deliveryAddress, $billingAddress);
+            $deliveryAddress[$billingDataKey] = self::getDeliveryFrom($billingDataKey, $deliveryAddress, $billingAddress);
         }
 
         self::setCustomerAddressRequest($billingAddress);
@@ -643,15 +656,15 @@ class PluginApi
         ];
         try {
             $order = new WC_Checkout();
-
-            $processResult = $order->process_checkout();
+            $expectedOrderId = WC()->session->get('order_awaiting_payment');
+            $order->process_checkout();
         } catch (Exception $e) {
             $return['errorCode'] = $e->getCode();
             $return['errorString'] = $e->getMessage();
         }
         $errorNotices = Data::getErrorNotices();
         if (empty($errorNotices)) {
-            $return['orderId'] = WC()->session->get('order_awaiting_payment');
+            $return['orderId'] = $expectedOrderId;
             $return['success'] = true;
         } else {
             // Append exceptions ore skip if there are none.
