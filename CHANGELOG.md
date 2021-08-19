@@ -1,3 +1,4 @@
+ChangeLog is based on what has reached the master branch.
 
 # Release Notes - WPWC_RESURS - Version 0.0.1.0
 
