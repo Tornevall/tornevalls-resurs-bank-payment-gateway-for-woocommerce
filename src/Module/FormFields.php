@@ -489,7 +489,10 @@ class FormFields extends WC_Settings_API
                 ],
                 'show_developer' => [
                     'title' => __('Activate Advanced Tweaking Mode (Developer)', 'trbwc'),
-                    'desc' => __('Activate Advanced Tweaking Mode (you might need an extra reload after save)', 'trbwc'),
+                    'desc' => __(
+                        'Activate Advanced Tweaking Mode (you might need an extra reload after save)',
+                        'trbwc'
+                    ),
                     'desc_tip' => __(
                         'The developer section is normally nothing you will need, unless you are a very advanced ' .
                         'administrator/developer/merchant that likes to configure a little bit over the limits. ' .
@@ -625,6 +628,7 @@ class FormFields extends WC_Settings_API
                 'customer_company' => __('Company', 'trbwc'),
                 'customer_type' => (null === $customerTypeByConditions) ? 'NATURAL' : $customerTypeByConditions,
                 'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
+                'supported_country' => Data::isGetAddressSupported(),
             ]
         );
         if ($returnHtml) {

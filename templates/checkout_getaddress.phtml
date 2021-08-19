@@ -26,7 +26,9 @@
                 name="resursSsnIdentification">
     </div>
     <div style="display: none;" class="resursGetAddressError"></div>
-    <div>
-        <button onclick="getResursAddress();return false;"><?php echo $customer_button_text; ?></button>
-    </div>
+    <?php if ($supported_country) { ?>
+        <div>
+            <button onclick="getResursAddress();return false;"><?php echo $customer_button_text; ?></button>
+        </div>
+    <?php } ?>
 </span>
