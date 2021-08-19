@@ -44,6 +44,8 @@ class WordPress
      */
     private static function setupAjaxActions()
     {
+        // Take a not on checkout_create_order, which is breaking some kind of internal standard here.
+        // The intentions from the beginning was to just use an rco-naming here.
         $actionList = [
             'test_credentials',
             'import_credentials',
@@ -52,7 +54,7 @@ class WordPress
             'get_trigger_test',
             'get_trigger_response',
             'get_address',
-            'checkout_create_order'
+            'checkout_create_order',
         ];
 
         foreach ($actionList as $action) {
