@@ -2,6 +2,10 @@
 
 This is a plugin written for WooCommerce and WordPress. It is no longer a fork of the [prior repository that can be found at Resurs Bank](https://bitbucket.org/resursbankplugins/resurs-bank-payment-gateway-for-woocommerce) since much of that codebase has been impossible to reuse.
 
+## Contribute
+
+If you'd like to contribute to this project, you can either sign up to the [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) or create an issue directly on [github](https://github.com/Tornevall/wpwc-resurs/issues). Both trackers are currently used.
+
 ## Documents and links
 
 * [Documentation is for the moment located here](https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway).
