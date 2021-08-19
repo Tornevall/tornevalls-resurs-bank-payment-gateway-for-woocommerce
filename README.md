@@ -15,7 +15,7 @@ This is a standalone edition that - if you import it straight up as it was the o
 However, there are bridging over from the old version to the new version even if most of the old filters has dropped developer support.
 The external repo at [github](https://github.com/Tornevall/wpwc-resurs) and [bitbucket](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce) is not itself supported by Resurs Bank, but the intentions with this plugin is to eventually import it as a "next major version" update so it could be officially supported there.
 
-If you read this text from within the resurs-bank-payment-gateway-for-woocommerce, you should know that the codebase and README content is not entirely the original content. If this has happened, the project is importend and forked out to a Resurs supported release.
+If you read this text from within the resurs-bank-payment-gateway-for-woocommerce, you should know that the codebase and README content is not entirely the original content. If this has happened, the project is imported and forked out to a Resurs supported release.
 If you read this text from some of the mentioned repos above, you can consider it the original codebase as of july 2020, when the project was initialized.
 
 ### What has changed?
