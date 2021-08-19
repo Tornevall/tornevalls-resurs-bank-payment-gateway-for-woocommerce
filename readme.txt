@@ -9,11 +9,11 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Resurs Bank Payment Gateway for WooCommerce. Requires at least WooCommerce 3.4.0.
-WooCommerce requires PHP 7.0 which makes this plugin raise to at least 7.0.
+Check the full README.md for more information and link updates.
 
 == Description ==
 
-Payment gateway for Resurs Bank AB with support for the most shop flows.
+Payment gateway for Resurs Bank AB with support for the most recent shop flows.
 SoapClient is required for AfterShop related actions like debiting, crediting, annulments, etc.
 
 == Installation ==
