@@ -3,7 +3,6 @@
 namespace ResursBank\Module;
 
 use ResursBank\Gateway\ResursDefault;
-use WC_Order;
 use WC_Payment_Gateway;
 
 /**

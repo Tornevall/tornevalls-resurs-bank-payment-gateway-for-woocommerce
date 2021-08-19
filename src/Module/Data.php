@@ -1386,6 +1386,16 @@ class Data
     }
 
     /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function isGetAddressSupported()
+    {
+        return in_array(self::getCustomerCountry(), ['NO', 'SE'], true);
+    }
+
+    /**
      * @return string
      * @since 0.0.1.0
      */
