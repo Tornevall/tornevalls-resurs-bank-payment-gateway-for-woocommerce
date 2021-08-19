@@ -551,7 +551,7 @@ class PluginApi
             'identificationResponse' => [],
         ];
 
-        WooCommerce::setSessionValue('identification', WooCommerce::getRequest('$identification'));
+        WooCommerce::setSessionValue('identification', WooCommerce::getRequest('identification'));
 
         switch ($customerCountry) {
             case 'NO':
