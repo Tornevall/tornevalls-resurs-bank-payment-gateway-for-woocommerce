@@ -655,6 +655,7 @@ class WordPress
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
         $return['checkout_fields'] = FormFields::getFieldString();
         $return['getAddressFieldController'] = self::applyFilters('getAddressFieldController', []);
+        $return['checkoutType'] = Data::getCheckoutType();
 
         return self::applyFilters('localizationsGlobal', $return);
     }

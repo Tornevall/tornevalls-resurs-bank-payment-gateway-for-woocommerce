@@ -307,7 +307,7 @@ class Data
         } else {
             $return = array_merge(
                 self::$jsLoaders,
-                is_checkout() ? self::$jsLoadersCheckout : []
+                is_checkout() ? WordPress::applyFilters('jsLoadersCheckout', self::$jsLoadersCheckout) : []
             );
         }
 
@@ -356,6 +356,15 @@ class Data
     public static function getTestMode()
     {
         return in_array(self::getResursOption('environment'), ['test', 'staging']);
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getPaymentMethodBySession()
+    {
+        return WooCommerce::getSessionValue('paymentMethod');
     }
 
     /**

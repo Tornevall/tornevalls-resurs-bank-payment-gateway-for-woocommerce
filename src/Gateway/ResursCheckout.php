@@ -79,6 +79,24 @@ class ResursCheckout
     }
 
     /**
+     * @param $getType
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getCustomerFieldsTypeByLegacy($getType)
+    {
+        switch ($getType) {
+            case 'deliveryAddress':
+                $getType = 'delivery';
+                break;
+            default:
+                $getType = 'address';
+        }
+
+        return $getType;
+    }
+
+    /**
      * Make sure we get form field data from RCO depending on legacy state.
      *
      * @return array
@@ -88,9 +106,14 @@ class ResursCheckout
     public function getCustomerFieldsByApiVersion($getType = 'billingAddress')
     {
         $rcoCustomerData = (array)WooCommerce::getSessionValue('rco_customer_session_request');
+
         // Make sure that the arrays exists before validate them.
-        $customerAddressBlock = isset($rcoCustomerData[$getType]) ? $rcoCustomerData[$getType] : [];
         if (WooCommerce::getSessionValue('rco_legacy')) {
+            WooCommerce::setSessionValue('paymentMethod', $rcoCustomerData['paymentMethod']);
+            $getType = $this->getCustomerFieldsTypeByLegacy($getType);
+            $customerAddressBlock = isset($rcoCustomerData['customerData'][$getType]) ?
+                $rcoCustomerData['customerData'][$getType] : [];
+
             $return = [
                 'first_name' => !empty($customerAddressBlock['firstname']) ? $customerAddressBlock['firstname'] : '',
                 'last_name' => !empty($customerAddressBlock['surname']) ? $customerAddressBlock['surname'] : '',
@@ -103,6 +126,8 @@ class ResursCheckout
                 'phone' => !empty($customerAddressBlock['telephone']) ? $customerAddressBlock['telephone'] : '',
             ];
         } else {
+            $customerAddressBlock = isset($rcoCustomerData[$getType]) ? $rcoCustomerData[$getType] : [];
+
             // Observe that RCOv2 does not have any country code available, so it has to be
             // fetched elsewhere.
             $return = [

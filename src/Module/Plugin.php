@@ -15,7 +15,22 @@ class Plugin
     public function __construct()
     {
         add_filter('rbwc_can_process_order', [$this, 'canProcessOrder']);
+        add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
         add_filter('rbwc_can_process_order_response', [$this, 'canProcessOrderResponse'], 10, 2);
+    }
+
+    /**
+     * @param $scriptList
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public function getRcoLoaderScripts($scriptList)
+    {
+        if (Data::getCheckoutType()===ResursDefault::TYPE_RCO) {
+            $scriptList['resursbank_rco_legacy'] = 'resurscheckoutjs/resurscheckout.js';
+        }
+
+        return $scriptList;
     }
 
     /**

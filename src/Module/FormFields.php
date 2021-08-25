@@ -208,6 +208,25 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                 ],
+                'rco_method_titling' => [
+                    'id' => 'rco_method_titling',
+                    'type' => 'select',
+                    'options' => [
+                        'default' => __('Default title.', 'trbwc'),
+                        'id' => __('Use the ID of the chosen payment method.', 'trbwc'),
+                        'description' => __('Use the description of the chosen payment method.', 'trbwc'),
+                    ],
+                    'default' => 'default',
+                    'custom_attributes' => [
+                        'size' => 3,
+                    ],
+                    'desc' => __(
+                        'When payment methods are mentioned in order data and Resurs Checkout payments, you can ' .
+                        'choose how it should be displayed. Selecting anything but the default value will display ' .
+                        'the ID or description of a chosen payment method instead of "Resurs Bank AB".',
+                        'trbwc'
+                    ),
+                ],
                 'rco_iframe_position' => [
                     'id' => 'rco_iframe_position',
                     'type' => 'select',

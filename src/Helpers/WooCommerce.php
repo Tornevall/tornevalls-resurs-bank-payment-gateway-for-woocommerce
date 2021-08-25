@@ -487,6 +487,25 @@ class WooCommerce
     }
 
     /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getValidCart($returnCart = false)
+    {
+        $return = false;
+
+        if (isset(WC()->cart)) {
+            $return = (WC()->cart->get_cart_contents_count() > 0);
+
+            if (!empty(WC()->cart) && $return && $returnCart) {
+                $return = WC()->cart->get_cart();
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @param $return
      * @return mixed
      * @since 0.0.1.0
