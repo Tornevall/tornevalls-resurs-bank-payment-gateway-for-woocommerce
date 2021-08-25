@@ -492,10 +492,14 @@ class WooCommerce
      */
     public static function getValidCart($returnCart = false)
     {
-        $return = (WC()->cart->get_cart_contents_count() > 0);
+        $return = false;
 
-        if (isset(WC()->cart) && !empty(WC()->cart) && $return && $returnCart) {
-            $return = WC()->cart->get_cart();
+        if (isset(WC()->cart)) {
+            $return = (WC()->cart->get_cart_contents_count() > 0);
+
+            if (!empty(WC()->cart) && $return && $returnCart) {
+                $return = WC()->cart->get_cart();
+            }
         }
 
         return $return;
