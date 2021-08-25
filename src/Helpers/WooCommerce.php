@@ -391,7 +391,7 @@ class WooCommerce
         /** @noinspection NotOptimalRegularExpressionsInspection */
         // Order meta that is protected against editing.
         if (($metaType === 'post') && preg_match(sprintf('/^%s/i', Data::getPrefix()), $metaKey)) {
-            $protected = false;
+            $protected = true;
         }
         return $protected;
     }
