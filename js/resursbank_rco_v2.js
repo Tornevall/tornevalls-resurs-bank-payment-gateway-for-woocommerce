@@ -1,12 +1,4 @@
-/**
- * Collection from RCO.
- * @type {{wooCommerce: {}, payment: {}, customer: {}}}
- * @since 0.0.1.0
- */
-var resursBankRcoDataContainer = {
-    rco_customer: {},
-    rco_payment: {},
-};
+// Note: nonces is already active in processpayment. We don't have to use the extra layer.
 
 /**
  * Pick up data from the primary order form and render it into a completion set for RCO.
@@ -56,7 +48,7 @@ function getResursApiVersion() {
     if (typeof $ResursCheckout !== 'undefined') {
         var returnValue = 2;
     } else {
-        returnValue = 1;
+        var returnValue = 1;
     }
 
     return returnValue;
@@ -66,9 +58,8 @@ function getResursApiVersion() {
  * @since 0.0.1.0
  */
 jQuery(document).ready(function ($) {
-    if (typeof $ResursCheckout !== 'undefined') {
+    if (getResursLocalization('checkoutType') === 'rco' && typeof $ResursCheckout !== 'undefined') {
         $ResursCheckout.onSubmit(function (event) {
-            // TODO: Use nonce.
             getResursAjaxify(
                 'post',
                 'resursbank_checkout_create_order',
@@ -87,7 +78,7 @@ jQuery(document).ready(function ($) {
             resursBankRcoDataContainer.rco_payment = event
         });
         $ResursCheckout.onPaymentFail(function (event) {
-        })
+        });
         $ResursCheckout.create({
             paymentSessionId: getResursRcoContainer('paymentSessionId'),
             baseUrl: getResursRcoContainer('baseUrl'),

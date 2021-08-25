@@ -220,6 +220,9 @@ class ResursDefault extends WC_Payment_Gateway
     private function setPaymentApiData()
     {
         $this->apiData['checkoutType'] = Data::getCheckoutType();
+        if (!empty(Data::getPaymentMethodBySession())) {
+            $this->apiData['paymentMethod'] = Data::getPaymentMethodBySession();
+        }
         $this->apiDataId = sha1(uniqid('wc-api', true));
         $this->API = new Api();
 
@@ -304,6 +307,74 @@ class ResursDefault extends WC_Payment_Gateway
         add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
         add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
         add_filter('woocommerce_get_terms_page_id', [$this, 'getTermsByRco'], 1);
+        add_filter('woocommerce_order_get_payment_method_title', [$this, 'getPaymentMethodTitle'], 10, 2);
+    }
+
+    /**
+     * Internal payment method title fetching, based on checkout type and the real payment method when in RCO.
+     *
+     * @return string
+     * @since 0.0.1.0
+     */
+    public function get_title()
+    {
+        global $theorder;
+
+        $return = parent::get_title();
+
+        if (!empty($theorder)) {
+            try {
+                $internalPaymentTitle = $this->getPaymentMethodTitle($return, $theorder);
+                if (!empty($internalPaymentTitle)) {
+                    $return = $internalPaymentTitle;
+                }
+            } catch (\Exception $e) {
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * Get the correct (or incorrect) payment method title when order or payment method is pointing at RCO.
+     *
+     * @param $title
+     * @param $order
+     * @return mixed
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    public function getPaymentMethodTitle($title, $order)
+    {
+        $orderMethodType = Data::getOrderMeta(
+            'checkoutType',
+            $order
+        );
+        if (empty($orderMethodType)) {
+            $orderMethodType = Data::getCheckoutType();
+        }
+
+        // Use the current order checkout type, not the current configured checkout type.
+        if ($orderMethodType === self::TYPE_RCO &&
+            Data::getResursOption('rco_method_titling') !== 'default'
+        ) {
+            $this->order = $order;
+            $internalTitle = Data::getOrderMeta('paymentMethod', $order);
+            if (!empty($internalTitle)) {
+                try {
+                    $paymentMethodDetails = json_decode(Data::getResursOption('paymentMethods'), JSON_THROW_ON_ERROR);
+                    if (is_array($paymentMethodDetails)) {
+                        foreach ($paymentMethodDetails as $method) {
+                            if (isset($method['id']) && $method['id'] === $internalTitle) {
+                                $title = $method[Data::getResursOption('rco_method_titling')];
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                }
+            }
+        }
+        return $title;
     }
 
     /**
@@ -492,6 +563,9 @@ class ResursDefault extends WC_Payment_Gateway
         $metaCheckoutType = Data::getOrderMeta($order_id, 'checkoutType');
         if (empty($metaCheckoutType)) {
             $this->setOrderCheckoutMeta($order_id);
+            if ($metaCheckoutType === ResursDefault::TYPE_RCO && !empty(Data::getPaymentMethodBySession())) {
+                $order->set_payment_method(Data::getPaymentMethodBySession());
+            }
         }
 
         $this->preProcessOrder($order);
@@ -1239,6 +1313,9 @@ class ResursDefault extends WC_Payment_Gateway
         Data::setOrderMeta($order, 'apiDataId', $this->apiDataId);
         Data::setOrderMeta($order, 'orderSigningPayload', $this->getApiData());
         Data::setOrderMeta($order, 'resursReference', $this->getPaymentId());
+        if (!empty(Data::getPaymentMethodBySession())) {
+            Data::setOrderMeta($order, 'paymentMethod', Data::getPaymentMethodBySession());
+        }
     }
 
     /**
@@ -1470,9 +1547,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setOrderLines()
     {
-        $currentCart = $this->cart->get_cart();
-
-        if (count($currentCart)) {
+        if (WooCommerce::getValidCart()) {
+            $currentCart = WooCommerce::getValidCart(true);
             foreach ($currentCart as $item) {
                 /**
                  * Data object is of type WC_Product_Simple actually.
@@ -1774,12 +1850,9 @@ class ResursDefault extends WC_Payment_Gateway
         // setFraudFlags can not be set for this checkout type.
         $this->API->setCheckoutType(CheckoutType::RESURS_CHECKOUT);
 
-        $inCheckout = WooCommerce::getSessionValue(WooCommerce::$inCheckoutKey);
-        $currentCart = isset($this->cart) ? $this->cart->get_cart() : [];
-
         // Prevent recreation of an iframe, when it is not needed.
         // This could crash the order completion (at the successUrl).
-        if ($inCheckout && count($currentCart)) {
+        if (WooCommerce::getValidCart() && WooCommerce::getSessionValue(WooCommerce::$inCheckoutKey)) {
             $this->setOrderData();
             $this->setCreatePaymentNotice(__FUNCTION__);
             $paymentId = $this->API->getConnection()->getPreferredPaymentId();
@@ -1795,6 +1868,7 @@ class ResursDefault extends WC_Payment_Gateway
 
             $urlList = (new Domain())->getUrlsFromHtml($this->rcoFrameData->script);
             if (isset($this->rcoFrameData->script) && !empty($this->rcoFrameData->script) && count($urlList)) {
+                $this->rcoFrameData->originHostName = $this->API->getConnection()->getIframeOrigin($this->rcoFrameData->baseUrl);
                 wp_enqueue_script(
                     'trbwc_rco',
                     array_pop($urlList),

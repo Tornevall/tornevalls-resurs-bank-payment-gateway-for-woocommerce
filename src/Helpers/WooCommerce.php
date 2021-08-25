@@ -391,7 +391,7 @@ class WooCommerce
         /** @noinspection NotOptimalRegularExpressionsInspection */
         // Order meta that is protected against editing.
         if (($metaType === 'post') && preg_match(sprintf('/^%s/i', Data::getPrefix()), $metaKey)) {
-            $protected = true;
+            $protected = false;
         }
         return $protected;
     }
@@ -481,6 +481,21 @@ class WooCommerce
         if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
             $return[sprintf('%s_rco_suggest_id', Data::getPrefix())] = Api::getResurs()->getPreferredPaymentId();
             $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getValidCart($returnCart = false)
+    {
+        $return = (WC()->cart->get_cart_contents_count() > 0);
+
+        if (isset(WC()->cart) && !empty(WC()->cart) && $return && $returnCart) {
+            $return = WC()->cart->get_cart();
         }
 
         return $return;

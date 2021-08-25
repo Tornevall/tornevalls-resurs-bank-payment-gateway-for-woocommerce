@@ -2,6 +2,32 @@ var $rQuery = jQuery.noConflict();
 var resursGetAddressCustomerType;
 
 /**
+ * Collection from RCO.
+ * @type {{wooCommerce: {}, payment: {}, customer: {}}}
+ * @since 0.0.1.0
+ */
+var resursBankRcoDataContainer = {
+    rco_customer: {},
+    rco_payment: {},
+};
+
+/**
+ * RCO Legacy variable to define allowed communication source.
+ * @type {string}
+ * @since 0.0.1.0
+ */
+var RESURSCHECKOUT_IFRAME_URL = '';
+
+/**
+ * Logging.
+ * @param consEntry
+ * @since 0.0.1.0
+ */
+function trbwcLog(consEntry) {
+    console.log('[trbwc] ' + consEntry);
+}
+
+/**
  * Ajaxify plugin internal calls.
  * @param requestMethod
  * @param requestVerb
