@@ -58,7 +58,7 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-61'>RWC-61</a>] -         Checkout: Hosted Flow
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-63'>RWC-63</a>] -         Checkout: Resurs Checkout (postmsg/legacy)
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-63'>RWC-63</a>] -         Implement RCO legacy (postMsg)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-64'>RWC-64</a>] -         Checkout: Resurs Checkout (facelift) -- HappyFlow
 </li>
@@ -145,6 +145,24 @@ ChangeLog is based on what has reached the master branch.
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-176'>RWC-176</a>] -         Hide getAddress button on unsupported countries.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-177'>RWC-177</a>] -         When getAddress fields are not present
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-179'>RWC-179</a>] -         Denied payment, change govId, try again (v2)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-180'>RWC-180</a>] -         Synchronize billing address with getPayment
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-181'>RWC-181</a>] -         Allow JS debugging in v2-mode
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-182'>RWC-182</a>] -         Activate script enqueue for RCO only if there is a cart
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-184'>RWC-184</a>] -         Resurs Checkout: Store and use payment method on purchase
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-186'>RWC-186</a>] -         RCOv2 Resurs Checkout: Store and use payment method on purchase
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-187'>RWC-187</a>] -         Make sure we validate AES methods BEFORE using them in wc-api
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-189'>RWC-189</a>] -         setOrderMeta after RCO session should include paymentMethodInformation
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-191'>RWC-191</a>] -         Update initial translations explicitly created during RCO
 </li>
 </ul>
 
