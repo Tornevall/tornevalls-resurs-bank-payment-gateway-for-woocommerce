@@ -1259,7 +1259,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         // Handle customer data from checkout only if this is not RCO (unless there is an order ready).
         // RCO handles them externally.
-        if (!$this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
+        if ($this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
             $this
                 ->setCustomer();
         }
@@ -1291,7 +1291,7 @@ class ResursDefault extends WC_Payment_Gateway
         );
 
         // Running in RCO mode we most likely don't have any order to put metadata into, yet.
-        if (!$this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
+        if ($this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
             // The data id is the hay value for finding prior orders on landing pages etc.
             $this->setOrderCheckoutMeta($this->order);
         }
