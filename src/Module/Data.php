@@ -1252,16 +1252,17 @@ class Data
     }
 
     /**
-     * @param $order
-     * @param $key
-     * @param $value
-     * @param bool $protected
+     * @param WC_Order|int $order Order or orderId
+     * @param string $key
+     * @param string $value
+     * @param bool $protected Set to false if you want the metadata to be stored as unprotected data.
+     * @param bool $insert Update metadata if already exists (false). Add more metadata if already exists (true).
      * @return bool|int
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection ParameterDefaultValueIsNotNullInspection
      */
-    public static function setOrderMeta($order, $key, $value, $protected = true)
+    public static function setOrderMeta($order, $key, $value, $protected = true, $insert = false)
     {
         if (method_exists($order, 'get_id')) {
             $orderId = $order->get_id();
@@ -1281,11 +1282,19 @@ class Data
                     ($protected ? 'true' : 'false')
                 )
             );
-            $return = update_post_meta(
-                $orderId,
-                sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
-                $value
-            );
+            if ($insert) {
+                $return = add_post_meta(
+                    $orderId,
+                    sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
+                    $value
+                );
+            } else {
+                $return = update_post_meta(
+                    $orderId,
+                    sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
+                    $value
+                );
+            }
         } else {
             throw new RuntimeException(
                 sprintf(
