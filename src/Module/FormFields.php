@@ -710,7 +710,7 @@ class FormFields extends WC_Settings_API
             'phone' => __('Phone number', 'trbwc'),
             'mobile' => __('Mobile number', 'trbwc'),
             'email' => __('E-mail address', 'trbwc'),
-            'government_id_contact' => __('Applicant government id'),
+            'government_id_contact' => __('Applicant government id', 'trbwc'),
             'card_number' => __('Card number', 'trbwc'),
         ];
 
