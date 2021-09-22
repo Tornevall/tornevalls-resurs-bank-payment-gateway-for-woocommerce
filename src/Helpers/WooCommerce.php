@@ -673,6 +673,10 @@ class WooCommerce
             $replyArray['digestCode'] = '200';
         }
 
+        Data::setLogNotice(
+            __('Callback Handling Finished.', 'trbwc')
+        );
+
         self::reply(
             $replyArray,
             $code,
@@ -798,13 +802,36 @@ class WooCommerce
      */
     private static function setOrderStatusWithNotice($order, $ecomOrderStatus)
     {
-        return $order->update_status(
-            self::getOrderStatuses($ecomOrderStatus),
-            sprintf(
-                __('Resurs Bank updated order status to %s.', 'trbwc'),
-                self::getOrderStatuses($ecomOrderStatus)
-            )
-        );
+        $currentStatus = $order->get_status();
+        $requestedStatus = self::getOrderStatuses($ecomOrderStatus);
+
+        if ($currentStatus !== $requestedStatus) {
+            $return = $order->update_status(
+                self::getOrderStatuses($ecomOrderStatus),
+                sprintf(
+                    __('Resurs Bank updated order status to %s.', 'trbwc'),
+                    self::getOrderStatuses($ecomOrderStatus)
+                )
+            );
+        } else {
+            $orderStatusUpdateNotice = __(
+                sprintf(
+                    '%s-%s notice: Request to set order to status "%s" but current status is already set.',
+                    Data::getPrefix(),
+                    __FUNCTION__,
+                    $requestedStatus
+                ),
+                'trbwc'
+            );
+            $order->add_order_note(
+                $orderStatusUpdateNotice
+            );
+            Data::setLogNotice($orderStatusUpdateNotice);
+            // Tell them that this went almost well, if they ask.
+            $return = true;
+        }
+
+        return $return;
     }
 
     /**
