@@ -816,8 +816,7 @@ class WooCommerce
         } else {
             $orderStatusUpdateNotice = __(
                 sprintf(
-                    '%s-%s notice: Request to set order to status "%s" but current status is already set.',
-                    Data::getPrefix(),
+                    '%s notice: Request to set order to status "%s" but current status is already set.',
                     __FUNCTION__,
                     $requestedStatus
                 ),
