@@ -321,8 +321,7 @@ class FormFields extends WC_Settings_API
                     'desc_tip' => __(
                         'The checkout process waits until the fraud control is finished at Resurs Bank ' .
                         'and the order is handled synchronously. If this setting is disabled, Resurs Bank must be ' .
-                        'able to reach your system with callbacks to be able to deliver the result. ' .
-                        'Callback event name is AUTOMATIC_FRAUD_CONTROL.',
+                        'able to reach your system with callbacks to be able to deliver the result.',
                         'trbwc'
                     ),
                     'default' => 'no',
