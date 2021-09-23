@@ -3,11 +3,11 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
-use Resursbank\RBEcomPHP\RESURS_CALLBACK_TYPES;
 use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
@@ -208,7 +208,8 @@ class PluginApi
         $deliveryAddress = self::$resursCheckout->getCustomerFieldsByApiVersion('deliveryAddress');
 
         foreach ($billingAddress as $billingDataKey => $billingDataValue) {
-            $deliveryAddress[$billingDataKey] = self::getDeliveryFrom($billingDataKey, $deliveryAddress, $billingAddress);
+            $deliveryAddress[$billingDataKey] = self::getDeliveryFrom($billingDataKey, $deliveryAddress,
+                $billingAddress);
         }
 
         self::setCustomerAddressRequest($billingAddress);
@@ -251,6 +252,37 @@ class PluginApi
             $_REQUEST[$itemVar] = $value;
             $_POST[$itemVar] = $value;
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private static function getCreatedOrder()
+    {
+        $return = [
+            'success' => false,
+            'errorString' => '',
+            'errorCode' => 0,
+            'orderId' => 0,
+        ];
+        try {
+            $order = new WC_Checkout();
+            $expectedOrderId = WC()->session->get('order_awaiting_payment');
+            $order->process_checkout();
+        } catch (Exception $e) {
+            $return['errorCode'] = $e->getCode();
+            $return['errorString'] = $e->getMessage();
+        }
+        $errorNotices = Data::getErrorNotices();
+        if (empty($errorNotices)) {
+            $return['orderId'] = $expectedOrderId;
+            $return['success'] = true;
+        } else {
+            // Append exceptions ore skip if there are none.
+            $return['errorString'] .= empty($return['errorString']) ? $errorNotices : "<br>\n" . $errorNotices;
+        }
+
+        return $return;
     }
 
     /**
@@ -329,15 +361,16 @@ class PluginApi
     public static function getNewCallbacks()
     {
         $callbacks = [
-            RESURS_CALLBACK_TYPES::UNFREEZE,
-            RESURS_CALLBACK_TYPES::ANNULMENT,
-            RESURS_CALLBACK_TYPES::AUTOMATIC_FRAUD_CONTROL,
-            RESURS_CALLBACK_TYPES::FINALIZATION,
-            RESURS_CALLBACK_TYPES::TEST,
-            RESURS_CALLBACK_TYPES::UPDATE,
-            RESURS_CALLBACK_TYPES::BOOKED,
+            Callback::UNFREEZE,
+            Callback::TEST,
+            Callback::UPDATE,
+            Callback::BOOKED,
         ];
 
+        Api::getResurs()->unregisterEventCallback(
+            Callback::FINALIZATION & Callback::ANNULMENT & Callback::AUTOMATIC_FRAUD_CONTROL,
+            true
+        );
         foreach ($callbacks as $ecomCallbackId) {
             $callbackUrl = self::getCallbackUrl(self::getCallbackParams($ecomCallbackId));
             try {
@@ -390,14 +423,7 @@ class PluginApi
             't' => time(),
         ];
         switch ($ecomCallbackId) {
-            case RESURS_CALLBACK_TYPES::AUTOMATIC_FRAUD_CONTROL:
-                $params += [
-                    'p' => '{paymentId}',
-                    'd' => '{digest}',
-                    'r' => '{result}',
-                ];
-                break;
-            case RESURS_CALLBACK_TYPES::TEST:
+            case Callback::TEST:
                 $params += [
                     'ignore1' => '{param1}',
                     'ignore2' => '{param2}',
@@ -510,29 +536,6 @@ class PluginApi
     }
 
     /**
-     * Log an event of getAddress.
-     *
-     * @param $customerCountry
-     * @param $customerType
-     * @param $identification
-     * @param $runFunctionInfo
-     * @since 0.0.1.0
-     */
-    private static function getAddressLog($customerCountry, $customerType, $identification, $runFunctionInfo)
-    {
-        Data::canLog(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                __('getAddress request (country %s, type %s) for %s: %s', 'trbwc'),
-                $customerCountry,
-                $customerType,
-                $identification,
-                $runFunctionInfo
-            )
-        );
-    }
-
-    /**
      * @return array
      * @throws Exception
      * @since 0.0.1.0
@@ -609,6 +612,29 @@ class PluginApi
     }
 
     /**
+     * Log an event of getAddress.
+     *
+     * @param $customerCountry
+     * @param $customerType
+     * @param $identification
+     * @param $runFunctionInfo
+     * @since 0.0.1.0
+     */
+    private static function getAddressLog($customerCountry, $customerType, $identification, $runFunctionInfo)
+    {
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                __('getAddress request (country %s, type %s) for %s: %s', 'trbwc'),
+                $customerCountry,
+                $customerType,
+                $identification,
+                $runFunctionInfo
+            )
+        );
+    }
+
+    /**
      * Transform getAddress responses into WooCommerce friendly data fields so that they
      * can be easily pushed out to the default forms.
      * @param $return
@@ -638,37 +664,6 @@ class PluginApi
                 }
                 $return[$addressField] = vsprintf(implode(' ', $compileInfo), $compileKeys);
             }
-        }
-
-        return $return;
-    }
-
-    /**
-     * @throws Exception
-     */
-    private static function getCreatedOrder()
-    {
-        $return = [
-            'success' => false,
-            'errorString' => '',
-            'errorCode' => 0,
-            'orderId' => 0,
-        ];
-        try {
-            $order = new WC_Checkout();
-            $expectedOrderId = WC()->session->get('order_awaiting_payment');
-            $order->process_checkout();
-        } catch (Exception $e) {
-            $return['errorCode'] = $e->getCode();
-            $return['errorString'] = $e->getMessage();
-        }
-        $errorNotices = Data::getErrorNotices();
-        if (empty($errorNotices)) {
-            $return['orderId'] = $expectedOrderId;
-            $return['success'] = true;
-        } else {
-            // Append exceptions ore skip if there are none.
-            $return['errorString'] .= empty($return['errorString']) ? $errorNotices : "<br>\n" . $errorNotices;
         }
 
         return $return;
