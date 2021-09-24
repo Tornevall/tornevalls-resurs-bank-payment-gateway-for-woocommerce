@@ -1,20 +1,26 @@
 === Tornevall Networks Resurs Bank payment gateway for WooCommerce ===
 Contributors: RB-Tornevall, Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments
-Requires at least: 3.0.1
-Tested up to: 5.7
+Requires at least: 5.0
+Tested up to: 5.8.1
 Requires PHP: 7.0
 Stable tag: 0.0.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Resurs Bank Payment Gateway for WooCommerce. Requires at least WooCommerce 3.4.0.
-Check the full README.md for more information and link updates.
+Resurs Bank Payment Gateway for WooCommerce.
+Requires at least WooCommerce 3.4.0.
 
 == Description ==
 
 Payment gateway for Resurs Bank AB with support for the most recent shop flows.
 SoapClient is required for AfterShop related actions like debiting, crediting, annulments, etc.
+
+There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you tend
+to use **this** plugin as it is an upgrade from the Resurs supported release.
+
+Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details.
+
 
 == Installation ==
 
@@ -23,7 +29,8 @@ SoapClient is required for AfterShop related actions like debiting, crediting, a
 3. Configure the plugin via admin control panel
 
 (Or install and activate the plugin through the WordPress plugin installer)
-If you are installing the plugin manually, make sure that the plugin folder contains a folder named includes and that includes directory are writable, since that's where the payment methods are stored.
+If you are installing the plugin manually, make sure that the plugin folder contains a folder named includes and that
+includes directory are writable, since that's where the payment methods are stored.
 
 == Frequently Asked Questions ==
 
