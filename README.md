@@ -56,7 +56,6 @@ The original codebase was initialized july 2020.
 * WooCommerce: v3.4.0 or higher (old features are ditched) and the actual support is set much higher.
 * WordPress: v5.5. It has supported, and probably will, older releases but it is highly recommended to upgrade ASAP in
   that case.
-* Do not run anything lower than PHP 5.6.20. WordPress recommends 7.4 or greater.
 
 ### NEWS AND UPDATES
 
