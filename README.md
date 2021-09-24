@@ -11,7 +11,6 @@ on [github](https://github.com/Tornevall/wpwc-resurs/issues).
 ## DOCUMENTS AND LINKS
 
 * [The current work-repository as of v0.0](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
-  .
 * [Github Synchronized repository](https://github.com/Tornevall/wpwc-resurs) will probably be the new official
   repository as bitbucket server will shut down in a few years from now.
 * [Documentation](https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway).
