@@ -3,7 +3,6 @@
 namespace ResursBank\Module;
 
 use ResursBank\Gateway\ResursDefault;
-use WC_Payment_Gateway;
 
 /**
  * Class Plugin Internal plugin handler.
@@ -24,7 +23,7 @@ class Plugin
      */
     public function getRcoLoaderScripts($scriptList)
     {
-        if (Data::getCheckoutType()===ResursDefault::TYPE_RCO) {
+        if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
             $scriptList['resursbank_rco_legacy'] = 'resurscheckoutjs/resurscheckout.js';
         }
 

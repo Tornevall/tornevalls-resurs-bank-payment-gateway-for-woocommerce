@@ -79,24 +79,6 @@ class ResursCheckout
     }
 
     /**
-     * @param $getType
-     * @return string
-     * @since 0.0.1.0
-     */
-    private function getCustomerFieldsTypeByLegacy($getType)
-    {
-        switch ($getType) {
-            case 'deliveryAddress':
-                $getType = 'delivery';
-                break;
-            default:
-                $getType = 'address';
-        }
-
-        return $getType;
-    }
-
-    /**
      * Make sure we get form field data from RCO depending on legacy state.
      *
      * @return array
@@ -146,5 +128,23 @@ class ResursCheckout
             ];
         }
         return $return;
+    }
+
+    /**
+     * @param $getType
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getCustomerFieldsTypeByLegacy($getType)
+    {
+        switch ($getType) {
+            case 'deliveryAddress':
+                $getType = 'delivery';
+                break;
+            default:
+                $getType = 'address';
+        }
+
+        return $getType;
     }
 }

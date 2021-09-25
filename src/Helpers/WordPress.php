@@ -223,6 +223,65 @@ class WordPress
     }
 
     /**
+     * @param $filterName
+     * @param $value
+     * @return mixed|void
+     * @since 0.0.1.0
+     * @deprecated Marked deprecated, use the new definitions instead.
+     */
+    public static function applyFiltersDeprecated($filterName, $value)
+    {
+        $return = apply_filters(
+            sprintf('%s_%s', 'resurs_bank', self::getFilterName($filterName)),
+            $value,
+            self::getFilterArgs(func_get_args())
+        );
+
+        // This dual filter solutions isn't very clever.
+        if ($return === null) {
+            $return = apply_filters(
+                sprintf('%s_%s', 'resursbank', self::getFilterName($filterName)),
+                $value,
+                self::getFilterArgs(func_get_args())
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $filterName
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getFilterName($filterName)
+    {
+        $return = $filterName;
+        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
+            $return = (new Strings())->getSnakeCase($filterName);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Clean up arguments and return the real ones.
+     *
+     * @param $args
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getFilterArgs($args)
+    {
+        if (is_array($args) && count($args) > 2) {
+            array_shift($args);
+            array_shift($args);
+        }
+
+        return $args;
+    }
+
+    /**
      * @since 0.0.1.0
      */
     private static function getOldSelfAwareness()
@@ -352,38 +411,6 @@ class WordPress
     }
 
     /**
-     * @param $filterName
-     * @return string
-     * @since 0.0.1.0
-     */
-    private static function getFilterName($filterName)
-    {
-        $return = $filterName;
-        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
-            $return = (new Strings())->getSnakeCase($filterName);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Clean up arguments and return the real ones.
-     *
-     * @param $args
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getFilterArgs($args)
-    {
-        if (is_array($args) && count($args) > 2) {
-            array_shift($args);
-            array_shift($args);
-        }
-
-        return $args;
-    }
-
-    /**
      * @since 0.0.1.0
      */
     public static function setResursBankScriptsAdmin()
@@ -457,33 +484,6 @@ class WordPress
         ];
 
         do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * @param $filterName
-     * @param $value
-     * @return mixed|void
-     * @since 0.0.1.0
-     * @deprecated Marked deprecated, use the new definitions instead.
-     */
-    public static function applyFiltersDeprecated($filterName, $value)
-    {
-        $return = apply_filters(
-            sprintf('%s_%s', 'resurs_bank', self::getFilterName($filterName)),
-            $value,
-            self::getFilterArgs(func_get_args())
-        );
-
-        // This dual filter solutions isn't very clever.
-        if ($return === null) {
-            $return = apply_filters(
-                sprintf('%s_%s', 'resursbank', self::getFilterName($filterName)),
-                $value,
-                self::getFilterArgs(func_get_args())
-            );
-        }
-
-        return $return;
     }
 
     /**
@@ -590,29 +590,6 @@ class WordPress
     }
 
     /**
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getAddressFieldController()
-    {
-        $return = [
-            'billing_first_name' => 'firstName',
-            'billing_last_name' => 'lastName',
-            'applicant-full-name' => 'firstName:lastName',
-            'billing_address_1' => 'addressRow1',
-            'billing_address_2' => 'addressRow2',
-            'billing_postcode' => 'postalCode',
-            'billing_city' => 'postalArea',
-        ];
-
-        if (Data::getCustomerType() === 'LEGAL') {
-            $return['billing_company'] = 'fullName';
-        }
-
-        return $return;
-    }
-
-    /**
      * Makes nonces strict based on client ip address.
      *
      * @param $tag
@@ -673,6 +650,29 @@ class WordPress
         $return['noncify'] = self::getNonce('simple');
 
         return self::applyFilters('localizationsGeneric', $return, $scriptName);
+    }
+
+    /**
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getAddressFieldController()
+    {
+        $return = [
+            'billing_first_name' => 'firstName',
+            'billing_last_name' => 'lastName',
+            'applicant-full-name' => 'firstName:lastName',
+            'billing_address_1' => 'addressRow1',
+            'billing_address_2' => 'addressRow2',
+            'billing_postcode' => 'postalCode',
+            'billing_city' => 'postalArea',
+        ];
+
+        if (Data::getCustomerType() === 'LEGAL') {
+            $return['billing_company'] = 'fullName';
+        }
+
+        return $return;
     }
 
     /**
