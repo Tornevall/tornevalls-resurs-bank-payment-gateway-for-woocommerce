@@ -3,9 +3,6 @@ Also, github referenses are now added.
 
 # 0.0.1.0
 
-<h2>        Bug
-</h2>
-<ul>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-22'>RWC-22</a>] -         CRITICAL Uncaught Error: Maximum function nesting level of &#39;500&#39; reached
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-97'>RWC-97</a>] -         The blue box may not show properly when payments are not finished
@@ -14,11 +11,6 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-200'>RWC-200</a>] -         #7: simplified customerdata is not properly created
 </li>
-</ul>
-
-<h2>        Task
-</h2>
-<ul>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-3'>RWC-3</a>] -         composerize package PSR-4 formatted
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-7'>RWC-7</a>] -         Basic administration Interface
@@ -215,11 +207,6 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-222'>RWC-222</a>] -         Synchronize billing address in synchronous mode
 </li>
-</ul>
-
-<h2>        Sub-task
-</h2>
-<ul>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-33'>RWC-33</a>] -         woocommerce_resurs_bank_&#39; . $type . &#39;_checkout_icon (iconified method)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-38'>RWC-38</a>] -         resurs_trigger_test_callback
@@ -230,12 +217,5 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-48'>RWC-48</a>] -         resursbank_custom_annuity_string
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-49'>RWC-49</a>] -         resurs_match_getpayment_keys
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-52'>RWC-52</a>] -         #16: resursbank_temporary_disable_checkout
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-50'>RWC-50</a>] -         resurs_refund_price_override
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-52'>RWC-52</a>] -         resursbank_temporary_disable_checkout
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-55'>RWC-55</a>] -         resursbank_location_last_checkout
-</li>
-</ul>
