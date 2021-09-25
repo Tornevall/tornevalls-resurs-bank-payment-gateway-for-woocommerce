@@ -27,12 +27,6 @@ use function in_array;
 class WooCommerce
 {
     /**
-     * @var WC_Session
-     * @since 0.0.1.0
-     */
-    private static $session;
-
-    /**
      * Key in session to mark whether customer is in checkout or not. This is now global since RCO will
      * set that key on the backend request.
      *
@@ -40,7 +34,21 @@ class WooCommerce
      * @since 0.0.1.0
      */
     public static $inCheckoutKey = 'customerWasInCheckout';
-
+    /**
+     * @var WC_Session
+     * @since 0.0.1.0
+     */
+    private static $session;
+    /** @var array getAddress form fields translated into wooCommerce address data */
+    private static $getAddressTranslation = [
+        'first_name' => 'firstName',
+        'last_name' => 'lastName',
+        'address_1' => 'addressRow1',
+        'address_2' => 'addressRow2',
+        'city' => 'postalArea',
+        'postcode' => 'postalCode',
+        'country' => 'country',
+    ];
     /**
      * @var $basename
      * @since 0.0.1.0
@@ -213,29 +221,6 @@ class WooCommerce
     }
 
     /**
-     * @param $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getAdminAfterOldCheck($order)
-    {
-        if ($order->meta_exists('resursBankPaymentFlow') &&
-            !Data::hasOldGateway() &&
-            !Data::getResursOption('deprecated_interference')
-        ) {
-            echo Data::getGenericClass()->getTemplate(
-                'adminpage_woocommerce_version22',
-                [
-                    'wooPlug22VersionInfo' => __(
-                        'This order has not been created by this plugin and the other plugin is currently unavailable.',
-                        'trbwc'
-                    ),
-                ]
-            );
-        }
-    }
-
-    /**
      * @param mixed $order
      * @throws ResursException
      * @throws ExceptionHandler
@@ -265,6 +250,29 @@ class WooCommerce
             // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
             // if someone wants to create their own view.
             WordPress::doAction('showOrderDetails', $orderData);
+        }
+    }
+
+    /**
+     * @param $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getAdminAfterOldCheck($order)
+    {
+        if ($order->meta_exists('resursBankPaymentFlow') &&
+            !Data::hasOldGateway() &&
+            !Data::getResursOption('deprecated_interference')
+        ) {
+            echo Data::getGenericClass()->getTemplate(
+                'adminpage_woocommerce_version22',
+                [
+                    'wooPlug22VersionInfo' => __(
+                        'This order has not been created by this plugin and the other plugin is currently unavailable.',
+                        'trbwc'
+                    ),
+                ]
+            );
         }
     }
 
@@ -758,6 +766,7 @@ class WooCommerce
     {
         if ($orderId) {
             self::setOrderStatusByCallback(Api::getResurs()->getOrderStatusByPayment($paymentId), $order);
+            self::getCustomerRealAddress($paymentId, $order);
         }
     }
 
@@ -852,6 +861,52 @@ class WooCommerce
         if (isset($key, $return[$key])) {
             return $return[$key];
         }
+        return $return;
+    }
+
+    /**
+     * @param $paymentId
+     * @param $order
+     * @return bool
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    private static function getCustomerRealAddress($paymentId, $order)
+    {
+        $return = false;
+        $resursPayment = Data::getOrderMeta('resurspayment', $order);
+        if (is_object($resursPayment) && isset($resursPayment->customer)) {
+            $billingAddress = $order->get_address('billing');
+            $orderId = $order->get_id();
+            if ($orderId > 0 && isset($resursPayment->customer->address)) {
+                foreach (self::$getAddressTranslation as $item => $value) {
+                    if (isset($billingAddress[$item], $resursPayment->customer->address->{$value}) &&
+                        $billingAddress[$item] !== $resursPayment->customer->address->{$value}
+                    ) {
+                        update_post_meta(
+                            $orderId,
+                            sprintf('_billing_%s', $item),
+                            $resursPayment->customer->address->{$value}
+                        );
+                        $return = true;
+                    }
+                }
+            }
+        }
+
+        if ($return) {
+            $synchNotice = __(
+                'Resurs Bank billing address mismatch with current address in order. ' .
+                'Data has synchronized with Resurs Bank billing data.',
+                'resurs-bank-payment-gateway-for-woocommerce'
+            );
+            Data::setOrderMeta($order, 'customerSynchronization', time());
+            Data::setLogNotice($synchNotice);
+            $order->add_order_note(
+                $synchNotice
+            );
+        }
+
         return $return;
     }
 
