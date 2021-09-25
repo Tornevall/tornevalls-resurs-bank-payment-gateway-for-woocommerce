@@ -931,8 +931,8 @@ class ResursDefault extends WC_Payment_Gateway
     {
         /** @noinspection PhpDeprecationInspection */
         $deprecatedStoreId = WordPress::applyFiltersDeprecated('set_storeid', null);
-        $storeId = (int)WordPress::applyFilters('setStoreId', $deprecatedStoreId);
-        if ($storeId) {
+        $storeId = WordPress::applyFilters('setStoreId', $deprecatedStoreId);
+        if (!empty($storeId)) {
             $this->API->getConnection()->setStoreId($storeId);
         }
 
