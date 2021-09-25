@@ -1659,10 +1659,26 @@ class ResursDefault extends WC_Payment_Gateway
             $this->order->payment_complete();
             $this->order->add_order_note($statusNotification);
         } else {
-            $this->order->update_status(
-                $woocommerceStatus,
-                $statusNotification
-            );
+            $currentOrderStatus = $this->order->get_status();
+            if ($currentOrderStatus !== $woocommerceStatus) {
+                $this->order->update_status(
+                    $woocommerceStatus,
+                    $statusNotification
+                );
+            } else {
+                $orderStatusUpdateNotice = __(
+                    sprintf(
+                        '%s notice: Request to set order to status "%s" but current status is already set.',
+                        __FUNCTION__,
+                        $woocommerceStatus
+                    ),
+                    'trbwc'
+                );
+                $this->order->add_order_note(
+                    $orderStatusUpdateNotice
+                );
+                Data::setLogNotice($orderStatusUpdateNotice);
+            }
         }
 
         $this->order->save();
