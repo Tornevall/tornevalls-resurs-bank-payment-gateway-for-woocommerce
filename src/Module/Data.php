@@ -8,6 +8,7 @@ use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
 use ResursException;
 use RuntimeException;
+use stdClass;
 use TorneLIB\Data\Aes;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Module\Network\NetWrapper;
@@ -359,39 +360,6 @@ class Data
     }
 
     /**
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getPaymentMethodBySession()
-    {
-        return WooCommerce::getSessionValue('paymentMethod');
-    }
-
-    /**
-     * Get the name of current checkout in use.
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getCheckoutType()
-    {
-        switch (Data::getResursOption('checkout_type')) {
-            case 'simplified':
-                $return = ResursDefault::TYPE_SIMPLIFIED;
-                break;
-            case 'hosted':
-                $return = ResursDefault::TYPE_HOSTED;
-                break;
-            case 'rco':
-                $return = ResursDefault::TYPE_RCO;
-                break;
-            default:
-                $return = '';
-        };
-
-        return $return;
-    }
-
-    /**
      * @param string $key
      * @param null $namespace
      * @return bool|string
@@ -516,6 +484,39 @@ class Data
         foreach ($array as $section => $content) {
             $return += $content;
         }
+
+        return $return;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getPaymentMethodBySession()
+    {
+        return WooCommerce::getSessionValue('paymentMethod');
+    }
+
+    /**
+     * Get the name of current checkout in use.
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getCheckoutType()
+    {
+        switch (Data::getResursOption('checkout_type')) {
+            case 'simplified':
+                $return = ResursDefault::TYPE_SIMPLIFIED;
+                break;
+            case 'hosted':
+                $return = ResursDefault::TYPE_HOSTED;
+                break;
+            case 'rco':
+                $return = ResursDefault::TYPE_RCO;
+                break;
+            default:
+                $return = '';
+        };
 
         return $return;
     }
@@ -940,15 +941,6 @@ class Data
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function hasOldGateway()
-    {
-        return defined('RB_WOO_VERSION') ? true : false;
-    }
-
-    /**
      * @param $orderReference
      * @param null $asOrder
      * @return null
@@ -1215,6 +1207,38 @@ class Data
     }
 
     /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function hasOldGateway()
+    {
+        return defined('RB_WOO_VERSION') ? true : false;
+    }
+
+    /**
+     * @param $paymentMethodId
+     * @return array|stdClass
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getPaymentMethodById($paymentMethodId)
+    {
+        $return = [];
+
+        $storedMethods = Api::getPaymentMethods(true);
+        if (is_array($storedMethods)) {
+            foreach ($storedMethods as $method) {
+                if (isset($method->id) && $method->id === $paymentMethodId) {
+                    $return = $method;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Makes sure nothing interfering with orders that has not been created by us. If this returns false,
      * it means we should not be there and touch things.
      *
@@ -1386,6 +1410,16 @@ class Data
     }
 
     /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function isGetAddressSupported()
+    {
+        return in_array(self::getCustomerCountry(), ['NO', 'SE'], true);
+    }
+
+    /**
      * @return false|mixed|void
      * @throws Exception
      * @since 0.0.1.0
@@ -1401,16 +1435,6 @@ class Data
             $woocommerceCustomerCountry : get_option('woocommerce_default_country');
 
         return $return;
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function isGetAddressSupported()
-    {
-        return in_array(self::getCustomerCountry(), ['NO', 'SE'], true);
     }
 
     /**
@@ -1436,6 +1460,16 @@ class Data
     }
 
     /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getCustomerType()
+    {
+        self::setCustomerTypeToSession();
+        return self::getCustomerTypeFromSession();
+    }
+
+    /**
      * @since 0.0.1.0
      */
     private static function setCustomerTypeToSession()
@@ -1457,16 +1491,6 @@ class Data
         $customerTypeByCompanyName = WooCommerce::getRequest('billing_company', true);
 
         return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getCustomerType()
-    {
-        self::setCustomerTypeToSession();
-        return self::getCustomerTypeFromSession();
     }
 
     /**
