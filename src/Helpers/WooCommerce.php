@@ -335,10 +335,12 @@ class WooCommerce
         foreach ($metaArray as $metaKey => $metaValue) {
             if (preg_match(sprintf('/^%s/', $metaPrefix), $metaKey)) {
                 $metaKey = (string)preg_replace(sprintf('/^%s_/', $metaPrefix), '', $metaKey);
-                if (is_array($metaValue) && count($metaValue) === 1) {
-                    $metaValue = array_pop($metaValue);
+                if (is_array($metaValue)) {
+                    if (count($metaValue) === 1) {
+                        $metaValue = array_pop($metaValue);
+                    }
                 }
-                if (is_string($metaValue)) {
+                if (is_string($metaValue) || is_array($metaValue)) {
                     $ecomMetaArray[$metaKey] = $metaValue;
                 }
             }

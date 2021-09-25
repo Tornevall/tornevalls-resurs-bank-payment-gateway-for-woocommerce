@@ -95,7 +95,6 @@ class ResursCheckout
             $getType = $this->getCustomerFieldsTypeByLegacy($getType);
             $customerAddressBlock = isset($rcoCustomerData['customerData'][$getType]) ?
                 $rcoCustomerData['customerData'][$getType] : [];
-
             $return = [
                 'first_name' => !empty($customerAddressBlock['firstname']) ? $customerAddressBlock['firstname'] : '',
                 'last_name' => !empty($customerAddressBlock['surname']) ? $customerAddressBlock['surname'] : '',
