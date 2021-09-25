@@ -28,8 +28,9 @@ if (isset($ecom)) {
             $errorString = __(
                 'Payment could not be found at Resurs Bank. The metadata in the plugin however has ' .
                 'been marked as a payment failure at least once during the initial process of the ' .
-                'purchase. The customer in question may have failed or been declined during the payment process ' .
-                'and the did not proceed.',
+                'purchase. The customer in question may have been declined and then did not proceed. ' .
+                'The purchase could also have failed by other reasons, like internal server errors ' .
+                'at Resurs Bank.',
                 'trbwc'
             );
             $exceptionString = '';

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2021-09-25 18:48+0200\n"
-"PO-Revision-Date: 2021-09-25 18:48+0200\n"
+"POT-Creation-Date: 2021-09-25 23:49+0200\n"
+"PO-Revision-Date: 2021-09-25 23:49+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -44,53 +44,53 @@ msgstr "Resurs Bank betalnings-gateway med dynamiska betalsätt."
 msgid "Resurs Bank AB"
 msgstr "Resurs Bank AB"
 
-#: src/Gateway/ResursDefault.php:606
+#: src/Gateway/ResursDefault.php:619
 #, php-format
 msgid "ECom setSigning: %s"
 msgstr "ECom setSigning: %s"
 
-#: src/Gateway/ResursDefault.php:613
+#: src/Gateway/ResursDefault.php:626
 #, php-format
 msgid "ECom setSigning parameters: %s"
 msgstr "ECom setSigning parametrar: %s"
 
-#: src/Gateway/ResursDefault.php:707
+#: src/Gateway/ResursDefault.php:720
 msgid "Shipping"
 msgstr "Frakt"
 
-#: src/Gateway/ResursDefault.php:738
+#: src/Gateway/ResursDefault.php:751
 msgid "Article description is missing."
 msgstr "Artikelbeskrivning saknas."
 
-#: src/Gateway/ResursDefault.php:885
+#: src/Gateway/ResursDefault.php:898
 #, php-format
 msgid "%s: Could not create order from an empty cart."
 msgstr "%s: Det gick inte att skapa order från en tom kundvagn."
 
-#: src/Gateway/ResursDefault.php:888
+#: src/Gateway/ResursDefault.php:901
 msgid "Cart is empty!"
 msgstr "Varukorgen är tom!"
 
-#: src/Gateway/ResursDefault.php:1250
+#: src/Gateway/ResursDefault.php:1266
 #, php-format
 msgid "Resurs Bank processing order (%s)."
 msgstr "Resurs Bank behandlar order (%s)."
 
-#: src/Gateway/ResursDefault.php:1258
+#: src/Gateway/ResursDefault.php:1274
 #, php-format
 msgid "%s: Initialize Resurs Bank process, order %s (%s) via %s."
 msgstr "%s: Initierar Resurs Bank-procedur, order %s (%s) via %s."
 
-#: src/Gateway/ResursDefault.php:1276
+#: src/Gateway/ResursDefault.php:1292
 msgid "Chosen checkout type is currently unsupported"
 msgstr "Vald utcheckningstyp stöds för närvarande inte"
 
-#: src/Gateway/ResursDefault.php:1285
+#: src/Gateway/ResursDefault.php:1301
 #, php-format
 msgid "%s: Order %s returned \"%s\" to WooCommerce."
 msgstr "%s: Order %s returnerades %s till WooCommerce."
 
-#: src/Gateway/ResursDefault.php:1294
+#: src/Gateway/ResursDefault.php:1310
 #, php-format
 msgid ""
 "$return is not an object as expected in function %s (Checkout request type "
@@ -98,58 +98,58 @@ msgid ""
 msgstr ""
 "$return är inte ett objekt som förväntat i funktion %s (Checkout-typ är %s)."
 
-#: src/Gateway/ResursDefault.php:1333
+#: src/Gateway/ResursDefault.php:1349
 #, php-format
 msgid "API data request: %s."
 msgstr "API-databegäran: %s."
 
-#: src/Gateway/ResursDefault.php:1335
+#: src/Gateway/ResursDefault.php:1351
 msgid ""
 "Customer returned from Resurs Bank. WooCommerce order validation in progress."
 msgstr ""
 "Kund återvände från Resurs Bank. Ordervalidering från WooCommerce pågår."
 
-#: src/Gateway/ResursDefault.php:1336
+#: src/Gateway/ResursDefault.php:1352
 msgid "wc_order_id + preferred_id not present"
 msgstr "wc_order_id + preferred_id saknas"
 
-#: src/Gateway/ResursDefault.php:1385
+#: src/Gateway/ResursDefault.php:1401
 #, php-format
 msgid "Finishing. Ready to redirect customer. Using URL %s"
 msgstr "Avslutar. Redo att omdirigera kunden. Använder URL %s"
 
-#: src/Gateway/ResursDefault.php:1533
+#: src/Gateway/ResursDefault.php:1549
 #, php-format
 msgid "Customer returned from Resurs Bank to complete order %s."
 msgstr "Kunden återvände från Resurs Bank för att slutföra order %s."
 
-#: src/Gateway/ResursDefault.php:1565
+#: src/Gateway/ResursDefault.php:1581
 msgid "Order is debited and completed."
 msgstr "Beställningen är debiterad och slutförd."
 
-#: src/Gateway/ResursDefault.php:1573
+#: src/Gateway/ResursDefault.php:1589
 msgid "Order is booked and ready to handle."
 msgstr "Beställningen är bokad och klar att hantera."
 
-#: src/Gateway/ResursDefault.php:1581
+#: src/Gateway/ResursDefault.php:1597
 msgid "Order is frozen and waiting for manual inspection."
 msgstr "Beställningen är frusen och väntar på manuell inspektion."
 
-#: src/Gateway/ResursDefault.php:1590
+#: src/Gateway/ResursDefault.php:1606
 msgid "Resurs Bank requires signing on this order. Customer redirected."
 msgstr "Resurs Bank kräver signering av ordern. Kunden omdirigeras."
 
-#: src/Gateway/ResursDefault.php:1598
+#: src/Gateway/ResursDefault.php:1614
 #, php-format
 msgid "The booking failed with status %s. Customer notified in checkout."
 msgstr "Bokningen misslyckades med status %s. Kunden meddelas i kassan."
 
-#: src/Gateway/ResursDefault.php:1602
+#: src/Gateway/ResursDefault.php:1618
 msgid ""
 "The payment can not complete. Contact customer services for more information."
 msgstr "Ordern kan inte slutföras. Kontakta kundservice för mer information."
 
-#: src/Gateway/ResursDefault.php:1727
+#: src/Gateway/ResursDefault.php:1743
 #, php-format
 msgid ""
 "Booking this signed payment has been running multiple times but failed with "
@@ -158,7 +158,7 @@ msgstr ""
 "Bokningen av den här signerade betalningen har pågått flera gånger men "
 "misslyckades med fel %s."
 
-#: src/Gateway/ResursDefault.php:1737
+#: src/Gateway/ResursDefault.php:1753
 #, php-format
 msgid ""
 "Tried to book signed payment but skipped: This has happened before and an "
@@ -167,21 +167,21 @@ msgstr ""
 "Försökte boka signerad betalning men hoppades över: Detta har gjorts "
 "tidigare och ett fel med kod %d inträffade den gången."
 
-#: src/Gateway/ResursDefault.php:1774
+#: src/Gateway/ResursDefault.php:1790
 msgid ""
 "Could not complete your order. Please contact support for more information."
 msgstr ""
 "Det gick inte att slutföra din beställning. Vänligen kontakta supporten för "
 "mer information."
 
-#: src/Gateway/ResursDefault.php:1780
+#: src/Gateway/ResursDefault.php:1796
 msgid ""
 "Could not complete order due to signing problems. Did you cancel your order?"
 msgstr ""
 "Det gick inte att slutföra ordern på grund av signeringsproblem. Har du "
 "avbrutit din köp?"
 
-#: src/Gateway/ResursDefault.php:1796
+#: src/Gateway/ResursDefault.php:1812
 #, php-format
 msgid ""
 "Customer returned via urlType \"%s\" - failed or cancelled payment (signing "
@@ -190,20 +190,20 @@ msgstr ""
 "Kunden returnerades via urltyp \"%s\" - misslyckades eller avbröt "
 "betalningen (signering krävdes: %s)."
 
-#: src/Gateway/ResursDefault.php:1798 src/Module/FormFields.php:476
+#: src/Gateway/ResursDefault.php:1814 src/Module/FormFields.php:476
 #: src/Module/FormFields.php:488 src/Module/FormFields.php:500
 msgid "Yes"
 msgstr "Ja"
 
-#: src/Gateway/ResursDefault.php:1798
+#: src/Gateway/ResursDefault.php:1814
 msgid "No"
 msgstr "Nej"
 
-#: src/Helpers/WooCommerce.php:162
+#: src/Helpers/WooCommerce.php:164
 msgid "Settings"
 msgstr "Inställningar"
 
-#: src/Helpers/WooCommerce.php:271
+#: src/Helpers/WooCommerce.php:273
 msgid ""
 "This order has not been created by this plugin and the other plugin is "
 "currently unavailable."
@@ -211,21 +211,21 @@ msgstr ""
 "Den här ordern har inte skapats med denna tilläggsmodul och den tidigare "
 "moduler är för närvarande inte tillgänglig."
 
-#: src/Helpers/WooCommerce.php:301
+#: src/Helpers/WooCommerce.php:303
 #, php-format
 msgid "EComPHP data present. Saving metadata for order %s."
 msgstr "Det finns data från EComPHP. Sparar metadata för order %s."
 
-#: src/Helpers/WooCommerce.php:602
+#: src/Helpers/WooCommerce.php:606
 #, php-format
 msgid "Session value %s set to %s."
 msgstr "Sessionsvärdet %s är inställt på %s."
 
-#: src/Helpers/WooCommerce.php:685
+#: src/Helpers/WooCommerce.php:697
 msgid "Callback Handling Finished."
 msgstr "Callbackhanteringen är klar."
 
-#: src/Helpers/WooCommerce.php:748
+#: src/Helpers/WooCommerce.php:760
 #, php-format
 msgid ""
 "Callback received from Resurs Bank: %s (Digest Status: %s, External ID: %s, "
@@ -234,20 +234,20 @@ msgstr ""
 "Callback mottagen från Resurs Bank: %s (Digest Status: %s, Externt ID: %s, "
 "Internt ID: %d)."
 
-#: src/Helpers/WooCommerce.php:752
+#: src/Helpers/WooCommerce.php:764
 msgid "Valid"
 msgstr "Giltig"
 
-#: src/Helpers/WooCommerce.php:752
+#: src/Helpers/WooCommerce.php:764
 msgid "Invalid"
 msgstr "Ogiltig"
 
-#: src/Helpers/WooCommerce.php:821
+#: src/Helpers/WooCommerce.php:833
 #, php-format
 msgid "Resurs Bank updated order status to %s."
 msgstr "Resurs Bank uppdaterade orderstatusen till %s."
 
-#: src/Helpers/WooCommerce.php:898
+#: src/Helpers/WooCommerce.php:910
 msgid ""
 "Resurs Bank billing address mismatch with current address in order. Data has "
 "synchronized with Resurs Bank billing data."
@@ -255,7 +255,7 @@ msgstr ""
 "Resurs Banks faktureringsadress matchar inte den aktuella adressen i ordern. "
 "Data har synkroniserats med Resurs Banks fakturadata."
 
-#: src/Helpers/WordPress.php:196
+#: src/Helpers/WordPress.php:205
 #, php-format
 msgid ""
 "The current plugin \"%s\" requires at least version %s - for the moment, you "
@@ -264,7 +264,7 @@ msgstr ""
 "Det nuvarande tillägget \"%s\" kräver som minst version %s - för tillfället "
 "använder du version %s. Du bör överväga att uppgradera så snart som möjligt."
 
-#: src/Helpers/WordPress.php:294
+#: src/Helpers/WordPress.php:303
 #, php-format
 msgid ""
 "It seems that you still have another plugin enabled (%s %s) in this platform "
@@ -275,7 +275,7 @@ msgstr ""
 "denna plattform som fungerar som Resurs Bank Payment Gateway. Om detta är "
 "avsiktligt så kan du ignorera det här meddelandet."
 
-#: src/Helpers/WordPress.php:543
+#: src/Helpers/WordPress.php:552
 msgid ""
 "Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an "
 "iframe on the checkout page. It is intended to give you a full scale payment "
@@ -285,7 +285,7 @@ msgstr ""
 "på kassasidan. Syftet är att ge dig en fullskalig betallösning med alla "
 "betalningsmetoder ihopsamlade hos Resurs Bank."
 
-#: src/Helpers/WordPress.php:549
+#: src/Helpers/WordPress.php:558
 msgid ""
 "The integrated checkout (also known as the \"simplified shop flow\") is a "
 "direct integration with WooCommerce which uses intended APIs to interact "
@@ -296,7 +296,7 @@ msgstr ""
 "använder avsedda API:er för att interagera med dina kunder, medan de "
 "avslutar ett köp."
 
-#: src/Helpers/WordPress.php:554
+#: src/Helpers/WordPress.php:563
 msgid ""
 "\"Resurs Hosted Checkout\" works similarly as the integrated simplified "
 "checkout, but on the checkout itself the customer are redirected to a hosted "
@@ -308,11 +308,11 @@ msgstr ""
 "Bank där köpet avslutas. Lösningen kan relativt enkelt jämföras med en "
 "Paypal-lösning."
 
-#: src/Helpers/WordPress.php:560
+#: src/Helpers/WordPress.php:569
 msgid "Validate and save credentials and payment methods"
 msgstr "Validera och spara autentiseringsuppgifter och betalningsmetoder"
 
-#: src/Helpers/WordPress.php:564
+#: src/Helpers/WordPress.php:573
 msgid ""
 "The credential check failed. If you save the current data we can not "
 "guarantee that your store will properly work."
@@ -320,49 +320,49 @@ msgstr ""
 "Autentiseringskontrollen misslyckades. Om du sparar aktuella data kan vi "
 "inte garantera att din butik kommer att fungera korrekt."
 
-#: src/Helpers/WordPress.php:569
+#: src/Helpers/WordPress.php:578
 msgid ""
 "The credential check was successful. You may now save the rest of your data."
 msgstr ""
 "Autentiseringskontrollen lyckades. Du kan nu spara resten av uppgifterna."
 
-#: src/Helpers/WordPress.php:573
+#: src/Helpers/WordPress.php:582
 msgid "This setting requires you to enable the fraud control."
 msgstr "Den här inställningen kräver att bedrägerikontrollen är aktiverad."
 
-#: src/Helpers/WordPress.php:577
+#: src/Helpers/WordPress.php:586
 msgid "Waiting for test callback to arrive."
 msgstr "Väntar på att testanrop ska komma fram."
 
-#: src/Helpers/WordPress.php:581
+#: src/Helpers/WordPress.php:590
 msgid "Callback trigger is currently not working."
 msgstr "Motanropsutlösare fungerar för närvarande inte."
 
-#: src/Helpers/WordPress.php:585
+#: src/Helpers/WordPress.php:594
 msgid "Callback trigger timeout. Aborted."
 msgstr "Timeout för callback-utlösare. Avbröts."
 
-#: src/Helpers/WordPress.php:630
+#: src/Helpers/WordPress.php:639
 msgid "Successful."
 msgstr "Lyckades."
 
-#: src/Helpers/WordPress.php:631
+#: src/Helpers/WordPress.php:640
 msgid "Failed."
 msgstr "Misslyckades."
 
-#: src/Helpers/WordPress.php:632
+#: src/Helpers/WordPress.php:641
 msgid "Please wait while reloading..."
 msgstr "Vänligen vänta medan omladdning sker..."
 
-#: src/Helpers/WordPress.php:690
+#: src/Helpers/WordPress.php:699
 msgid "Import credentials from Resurs v2.x"
 msgstr "Importera loginuppgifter från Resurs v2.x"
 
-#: src/Helpers/WordPress.php:694
+#: src/Helpers/WordPress.php:703
 msgid "Import successful."
 msgstr "Importen lyckades."
 
-#: src/Helpers/WordPress.php:698
+#: src/Helpers/WordPress.php:707
 msgid "Import failed."
 msgstr "Importen misslyckades."
 
@@ -378,40 +378,40 @@ msgstr ""
 msgid "Got exception %d in %s, will retry with REST."
 msgstr "Fel %d uppstod i %s, kommer försöka igen med REST."
 
-#: src/Module/Data.php:607
+#: src/Module/Data.php:614
 msgid "Plugin version"
 msgstr "Plugin-version"
 
-#: src/Module/Data.php:608
+#: src/Module/Data.php:615
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: src/Module/Data.php:610
+#: src/Module/Data.php:617
 #, php-format
 msgid "%s, at least %s are required."
 msgstr "%s, åtminstone %s krävs."
 
-#: src/Module/Data.php:616
+#: src/Module/Data.php:623
 msgid "Composer version"
 msgstr "Composer-version"
 
-#: src/Module/Data.php:617
+#: src/Module/Data.php:624
 msgid "PHP Version"
 msgstr "PHP-Version"
 
-#: src/Module/Data.php:618
+#: src/Module/Data.php:625
 msgid "Webservice Library"
 msgstr "Webservice-Bibliotek"
 
-#: src/Module/Data.php:619
+#: src/Module/Data.php:626
 msgid "Communication Library"
 msgstr "Kommunikationsbibliotek"
 
-#: src/Module/Data.php:620
+#: src/Module/Data.php:627
 msgid "Communication Drivers"
 msgstr "Kommunikations-drivrutiner"
 
-#: src/Module/Data.php:678
+#: src/Module/Data.php:685
 msgid ""
 "If something is wrong and you are unsure of where to begin, take a look at "
 "the communication drivers. Wrappers that must be available for this plugin "
@@ -425,7 +425,7 @@ msgstr ""
 "SimpleStreamWrapper -och- SoapClientWrapper. Resurs Bank erbjuder flera "
 "olika tjänster över både Soap/XML och REST, så de måste finnas tillgängliga."
 
-#: src/Module/Data.php:685
+#: src/Module/Data.php:692
 msgid ""
 "If you ever need support with this plugin, you should primarily check this "
 "page before sending support requests. When you send the requests, make sure "
@@ -438,15 +438,15 @@ msgstr ""
 "ditt meddelande. Om du gör detta, blir det i slutänden mycket lättare att "
 "hjälpa dig."
 
-#: src/Module/Data.php:711
+#: src/Module/Data.php:718
 msgid "Developer Settings"
 msgstr "Utvecklar-inställningar"
 
-#: src/Module/Data.php:718
+#: src/Module/Data.php:725
 msgid "Disable RB 2.x"
 msgstr "Stäng av RB 2.x"
 
-#: src/Module/Data.php:721
+#: src/Module/Data.php:728
 msgid ""
 "Disable prior similar versions of the Resurs Bank plugin (v2.x-series) - You "
 "might need an extra reload after save"
@@ -454,7 +454,7 @@ msgstr ""
 "Stäng av tidigare versioner av Resurs Bank-pluginet (v2.x-serien) - Det kan "
 "behövas en extra omladdning efter spara"
 
-#: src/Module/Data.php:726
+#: src/Module/Data.php:733
 msgid ""
 "This setting will disable, not entirely, but the functions in Resurs Bank "
 "Gateway v2.x with help from filters in that release."
@@ -462,12 +462,12 @@ msgstr ""
 "Denna inställningen stänger ned, ej helt, funktioner i Resurs Bank Gateway "
 "v2.x, med hjälp av filter i den releasen."
 
-#: src/Module/Data.php:828
+#: src/Module/Data.php:845
 #, php-format
 msgid "DevLog Method \"%s\" message: %s."
 msgstr "DevLog-funktion \"%s\" meddelande: %s."
 
-#: src/Module/Data.php:1120
+#: src/Module/Data.php:1137
 msgid ""
 "An error occurred during the payment information retrieval from Resurs Bank "
 "so we can not show the current order status for the moment."
@@ -475,12 +475,12 @@ msgstr ""
 "Ett fel uppstod under tiden som betalningsinformationen skulle tas emot från "
 "Resurs Bank så vi kan för närvarande inte visa nuvarande orderstatus."
 
-#: src/Module/Data.php:1145
+#: src/Module/Data.php:1162
 #, php-format
 msgid "%s internal generic exception %s: %s"
 msgstr "%s internt generiskt fel %s: %s"
 
-#: src/Module/Data.php:1329
+#: src/Module/Data.php:1346
 #, php-format
 msgid ""
 "Unable to update order meta in %s - object $order is of wrong type or not an "
@@ -489,7 +489,7 @@ msgstr ""
 "Kan ej uppdatera order-meta i %s - objektet $order är av fel typ eller inte "
 "ett heltal."
 
-#: src/Module/Data.php:1391
+#: src/Module/Data.php:1408
 msgid "Number of decimals headsup message"
 msgstr "Antal decimaler - Observera"
 
@@ -497,9 +497,17 @@ msgstr "Antal decimaler - Observera"
 msgid "Basic Resurs Bank API Settings"
 msgstr "Inställningar för Resurs Bank API"
 
-#: src/Module/FormFields.php:38 src/Module/FormFields.php:39
-msgid "Enable/Disable"
-msgstr "Aktivera/Inaktivera"
+#: src/Module/FormFields.php:38
+msgid "Enable plugin checkout functions"
+msgstr "Aktivera pluginfunktioner för kassa"
+
+#: src/Module/FormFields.php:39 src/Module/FormFields.php:190
+#: src/Module/FormFields.php:203 src/Module/FormFields.php:320
+#: src/Module/FormFields.php:336 src/Module/FormFields.php:352
+#: src/Module/FormFields.php:384 src/Module/FormFields.php:397
+#: src/Module/FormFields.php:414 src/Module/FormFields.php:425
+msgid "Enabled"
+msgstr "Aktiverad"
 
 #: src/Module/FormFields.php:41
 msgid "Enable Resurs Bank"
@@ -644,14 +652,6 @@ msgstr "Visa logotyper så som WooCommerce visar dem"
 #: src/Module/FormFields.php:189
 msgid "Applicant fields are always visible"
 msgstr "Fält för sökande kund är alltid synliga"
-
-#: src/Module/FormFields.php:190 src/Module/FormFields.php:203
-#: src/Module/FormFields.php:320 src/Module/FormFields.php:336
-#: src/Module/FormFields.php:352 src/Module/FormFields.php:384
-#: src/Module/FormFields.php:397 src/Module/FormFields.php:414
-#: src/Module/FormFields.php:425
-msgid "Enabled"
-msgstr "Aktiverad"
 
 #: src/Module/FormFields.php:193
 msgid ""
@@ -1024,54 +1024,85 @@ msgstr "Sökande personnummer"
 msgid "Card number"
 msgstr "Kortnummer"
 
-#: src/Module/PluginApi.php:313
+#: src/Module/Plugin.php:30
+#, php-format
+msgid ""
+"The filter \"%s\" is currently put in an active state by an unknown third "
+"party plugin. This setting is deprecated and no longer fully supported. It "
+"is highly recommended to disable or remove the filter entirely and solve the "
+"problem that required this from start somehow else."
+msgstr ""
+"Filtret \"%s\" är för närvarande satt i ett aktivt tillstånd av ett okänt "
+"plugin från tredje part. Den här inställningen är inaktuell och stöds inte "
+"längre fullt ut. Det rekommenderas starkt att inaktivera eller ta bort "
+"filtret helt och lösa problemet som krävde detta från början på något annat "
+"sätt."
+
+#: src/Module/PluginApi.php:314
 #, php-format
 msgid "An error occured during credential checking: %s (%d)."
 msgstr "Ett fel uppstod under kontrollen av användaruppgifter:  %s (%d)."
 
-#: src/Module/PluginApi.php:335
+#: src/Module/PluginApi.php:336
 #, php-format
 msgid "Credentials for Resurs was validated before saving. Response was %s."
 msgstr "Användaruppgifterna valideras innan de sparades. Svaret var %s."
 
-#: src/Module/PluginApi.php:501
+#: src/Module/PluginApi.php:502
 #, php-format
 msgid "Activated test trigger. Response \"%s\" received."
 msgstr "Aktiverad testutlösare. Svar \"%s\" mottaget."
 
-#: src/Module/PluginApi.php:523
+#: src/Module/PluginApi.php:524
 msgid "Received"
 msgstr "Mottagen"
 
-#: src/Module/PluginApi.php:531
+#: src/Module/PluginApi.php:532
 #, php-format
 msgid "Waiting for callback TEST (%d seconds)."
 msgstr "Väntar på callback TEST (%d sekunder)."
 
-#: src/Module/PluginApi.php:572
+#: src/Module/PluginApi.php:573
 msgid "By phone request."
 msgstr "Via telefonnummer."
 
-#: src/Module/PluginApi.php:580
+#: src/Module/PluginApi.php:581
 msgid "By phone request failed, executed failover by government id."
 msgstr ""
 "Via telefonnummer misslyckades, exekverade backuplösning för personnummer."
 
-#: src/Module/PluginApi.php:589
+#: src/Module/PluginApi.php:590
 msgid "By government id/company id (See customer type)."
 msgstr "Via personnummer/organisationsnummer (Se kundtypen)."
 
-#: src/Module/PluginApi.php:599
+#: src/Module/PluginApi.php:600
 #, php-format
 msgid "By government id/company id (See customer type), but failed: (%d) %s."
 msgstr ""
 "Via personnummer/organisationsnummer (Se kundtypen), men misslyckades: (%d) "
 "%s."
 
-#: src/Module/PluginApi.php:635
+#: src/Module/PluginApi.php:636
 #, php-format
 msgid "getAddress request (country %s, type %s) for %s: %s"
 msgstr "getAddress förfrågan (land %s, typ %s) för %s: %s"
+
+#: src/Module/PluginApi.php:697
+msgid "Failed"
+msgstr "Misslyckades"
+
+#: src/Module/PluginApi.php:698
+msgid "Denied"
+msgstr "Nekad"
+
+#: src/Module/PluginApi.php:707
+#, php-format
+msgid "Order was rejected by Resurs Bank with status \"%s\"."
+msgstr "Ordern avslogs av Resurs Bank med statusen \"%s\"."
+
+#: src/Module/PluginApi.php:736
+msgid "Please contact customer service for more information."
+msgstr "Kontakta kundtjänst för mer information."
 
 #: templates/adminpage_billing.phtml:5
 msgid "Resurs Bank Billing Address"
@@ -1093,16 +1124,30 @@ msgstr "Callback URL"
 msgid "Remove"
 msgstr "Ta bort"
 
-#: templates/adminpage_details.phtml:13
+#: templates/adminpage_details.phtml:15
 msgid "Order information and metadata for Resurs Bank"
 msgstr "Order-information och metadata från Resurs Bank"
 
-#: templates/adminpage_details.phtml:35
+#: templates/adminpage_details.phtml:29
+msgid ""
+"Payment could not be found at Resurs Bank. The metadata in the plugin "
+"however has been marked as a payment failure at least once during the "
+"initial process of the purchase. The customer in question may have been "
+"declined and then did not proceed. The purchase could also have failed by "
+"other reasons, like internal server errors at Resurs Bank."
+msgstr ""
+"Betalning kunde inte hittas hos Resurs Bank. Metadata i pluginet har dock "
+"markerats med ett betalningsfel som uppstått minst en gång under den första "
+"processen för köpet. Kunden i fråga kan ha nekats och sedan inte gått "
+"vidare. Köpet kan också ha misslyckats av andra orsaker, såsom interna "
+"serverfel på Resurs Bank."
+
+#: templates/adminpage_details.phtml:54
 #, php-format
 msgid "Purchased with merchant username \"%s\" from environment \"%s\"."
 msgstr "Betalad med användarnamn \"%s\" från miljö \"%s\"."
 
-#: templates/adminpage_details.phtml:60
+#: templates/adminpage_details.phtml:79
 msgid ""
 "This data is only displayed if the purchase has been made with another "
 "merchant account than the current in use."
@@ -1110,7 +1155,7 @@ msgstr ""
 "Dessa data visas bara om köpet har gjorts med ett annat webservicekonto än "
 "det aktuella som används."
 
-#: templates/adminpage_details.phtml:68
+#: templates/adminpage_details.phtml:88
 msgid ""
 "This data is shown to you since the purchase has been made with another "
 "merchant account than the current in use."
@@ -1118,11 +1163,11 @@ msgstr ""
 "Dessa data visas för dig eftersom köpet har gjorts med ett annat "
 "webservicekonto än det aktuella som används."
 
-#: templates/adminpage_details.phtml:87
+#: templates/adminpage_details.phtml:109
 msgid "Yes."
 msgstr "Ja."
 
-#: templates/adminpage_details.phtml:87
+#: templates/adminpage_details.phtml:109
 msgid "No."
 msgstr "Nej."
 
@@ -1215,6 +1260,9 @@ msgstr "Anslut Resurs Bank som WooCommerce betalningsgateway."
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
 msgstr "Tomas Tornevall"
+
+#~ msgid "Enable/Disable"
+#~ msgstr "Aktivera/Inaktivera"
 
 #~ msgid "Activate developer mode"
 #~ msgstr "Aktivera utvecklar-sektionen"
