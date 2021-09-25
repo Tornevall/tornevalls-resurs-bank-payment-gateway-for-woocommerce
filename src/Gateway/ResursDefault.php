@@ -197,7 +197,9 @@ class ResursDefault extends WC_Payment_Gateway
         }
         // Running in RCO mode, we will only have one method available and therefore we change the current id to
         // that method.
-        if (Data::getCheckoutType() === self::TYPE_RCO) {
+        if (Data::getCheckoutType() === self::TYPE_RCO &&
+            !(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
+        ) {
             $this->paymentMethodInformation = new ResursCheckout();
             $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
         }
@@ -390,7 +392,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getHeaderScripts()
     {
-        if (Data::getCheckoutType() === self::TYPE_RCO) {
+        if (!(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) && Data::getCheckoutType() === self::TYPE_RCO) {
             WooCommerce::setSessionValue(WooCommerce::$inCheckoutKey, true);
 
             $this->processRco();

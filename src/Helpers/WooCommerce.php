@@ -119,7 +119,9 @@ class WooCommerce
         $methodList = Api::getPaymentMethods();
 
         $currentCheckoutType = Data::getCheckoutType();
-        if ($currentCheckoutType !== ResursDefault::TYPE_RCO) {
+        if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
+            $currentCheckoutType !== ResursDefault::TYPE_RCO
+        ) {
             // For simplified flow and hosted flow, we create individual class modules for all payment methods
             // that has been received from the getPaymentMethods call.
             foreach ($methodList as $methodClass) {
