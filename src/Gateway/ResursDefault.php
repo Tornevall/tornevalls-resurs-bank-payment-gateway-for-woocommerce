@@ -1319,6 +1319,7 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Generate signing url for success/thank you page.
      * @param null $params
      * @return string
      * @since 0.0.1.0

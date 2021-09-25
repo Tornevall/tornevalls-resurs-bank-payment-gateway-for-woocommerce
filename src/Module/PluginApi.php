@@ -208,8 +208,11 @@ class PluginApi
         $deliveryAddress = self::$resursCheckout->getCustomerFieldsByApiVersion('deliveryAddress');
 
         foreach ($billingAddress as $billingDataKey => $billingDataValue) {
-            $deliveryAddress[$billingDataKey] = self::getDeliveryFrom($billingDataKey, $deliveryAddress,
-                $billingAddress);
+            $deliveryAddress[$billingDataKey] = self::getDeliveryFrom(
+                $billingDataKey,
+                $deliveryAddress,
+                $billingAddress
+            );
         }
 
         self::setCustomerAddressRequest($billingAddress);
