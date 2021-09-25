@@ -11,6 +11,8 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-171'>RWC-171</a>] -         adminpage_details.phtml bugs out due to RCO.
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-200'>RWC-200</a>] -         simplified customerdata is not properly created
+</li>
 </ul>
 
 <h2>        Task
@@ -140,7 +142,13 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-139'>RWC-139</a>] -         Warn for Resurs Bank old gateway payments when old gateway is disabled
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-148'>RWC-148</a>] -         Clarify if card number for &quot;befintligt kort&quot; is mandatory
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-166'>RWC-166</a>] -         Checkout: Resurs Checkout (facelift) -- Payment failures
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-168'>RWC-168</a>] -         Check out if we can use the &quot;orderCreatedCallback&quot; in RCO.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-174'>RWC-174</a>] -         Is this really a proper value?
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-176'>RWC-176</a>] -         Hide getAddress button on unsupported countries.
 </li>
@@ -154,6 +162,8 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-182'>RWC-182</a>] -         Activate script enqueue for RCO only if there is a cart
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-183'>RWC-183</a>] -         Checkout: Resurs Checkout PaymentFail (Legacy)
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-184'>RWC-184</a>] -         Resurs Checkout: Store and use payment method on purchase
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-186'>RWC-186</a>] -         RCOv2 Resurs Checkout: Store and use payment method on purchase
@@ -162,7 +172,47 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-189'>RWC-189</a>] -         setOrderMeta after RCO session should include paymentMethodInformation
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-190'>RWC-190</a>] -         Docs only
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-191'>RWC-191</a>] -         Update initial translations explicitly created during RCO
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-195'>RWC-195</a>] -         setStoreId filter should not be an integer (prepare for future api&#39;s)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-196'>RWC-196</a>] -         Link actions to resurs statuses and callbacks
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-197'>RWC-197</a>] -         Orderdata layout (Blue box or WooCommerce standard?) -- configurable
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-199'>RWC-199</a>] -         setOrderMeta should have an insert function
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-201'>RWC-201</a>] -         Facelift: Make sure that payment method is updated, if clicked twice (during denied at first)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-202'>RWC-202</a>] -         Store last registered callback url locally so that we can see if the urls need to be reupdated
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-203'>RWC-203</a>] -         On admin main front where credentials are set make sure data will be resynched on save
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-204'>RWC-204</a>] -         Test what happens if checkout type is switched in middle of a payment
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-208'>RWC-208</a>] -         When credentials are saved, make sure callbacks are resynched in background
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-213'>RWC-213</a>] -         Make sure this customerForm checker is handling unspecified types
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-214'>RWC-214</a>] -         Refuse to set a status that is already set.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-215'>RWC-215</a>] -         Necessary callbacks, remove the rest (if not already removed).
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-216'>RWC-216</a>] -         updatePaymentReference and exceptions +logging when it happens
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-217'>RWC-217</a>] -         forceSigning is deprecated.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-218'>RWC-218</a>] -         setSigningUrl missing a developer filter.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-219'>RWC-219</a>] -         According to how RCO works in the docs we probably should change canProcessOrder to avoid conflicts in the payment flow
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-220'>RWC-220</a>] -         Refuse to set a status that is already set in synchronous mode
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-221'>RWC-221</a>] -         During getMetaData-requests, make it possible to fetch getPaymentinfo
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-222'>RWC-222</a>] -         Synchronize billing address in synchronous mode
 </li>
 </ul>
 
@@ -186,7 +236,5 @@ ChangeLog is based on what has reached the master branch.
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-52'>RWC-52</a>] -         resursbank_temporary_disable_checkout
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-55'>RWC-55</a>] -         resursbank_location_last_checkout
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-56'>RWC-56</a>] -         resurs_hook_&lt;type&gt;
 </li>
 </ul>
