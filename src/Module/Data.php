@@ -821,6 +821,16 @@ class Data
     }
 
     /**
+     * If plugin is enabled on admin level.
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isEnabled()
+    {
+        return Data::getResursOption('enabled');
+    }
+
+    /**
      * @param $fromFunction
      * @param $message
      * @return bool
