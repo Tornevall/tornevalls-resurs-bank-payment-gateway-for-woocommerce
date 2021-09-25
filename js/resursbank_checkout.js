@@ -46,9 +46,9 @@ $rQuery(document).ready(function () {
 
 /**
  * Make currenct checkout view ready for RCO mode (hidden billing/shipping).
+ * @since 0.0.1.0
  */
-function getRcoBillingSetup()
-{
+function getRcoBillingSetup() {
     if (typeof trbwc_rco !== 'undefined') {
         $rQuery('.woocommerce-billing-fields').hide();
         $rQuery('.woocommerce-shipping-fields').hide();
@@ -59,8 +59,7 @@ function getRcoBillingSetup()
  * Activates RCO based functions.
  * @since 0.0.1.0
  */
-function getRbwcRcoMode()
-{
+function getRbwcRcoMode() {
     if (typeof trbwc_rco !== 'undefined') {
         trbwcLog('trbwc_rco is present, activating triggers for RCO comms.');
         getRcoTriggerHook();
@@ -71,8 +70,7 @@ function getRbwcRcoMode()
 /**
  * @since 0.0.1.0
  */
-function getResursGateway()
-{
+function getResursGateway() {
     resursGateway = {
         getLegacy: function () {
             return typeof $ResursCheckout === 'undefined';
@@ -113,8 +111,7 @@ var resursFieldInheritList = {
  * Hook key pressing into regular billing address fields and inherit data to Resurs fields.
  * @since 0.0.1.0
  */
-function getResursHookedBillingFields()
-{
+function getResursHookedBillingFields() {
     for (var inheritKey in resursFieldInheritList) {
         var inheritField = $rQuery('#' + inheritKey);
         if (inheritField.length) {
@@ -140,8 +137,7 @@ function getResursHookedBillingFields()
  * @param o
  * @since 0.0.1.0
  */
-function setBillingInherit(o)
-{
+function setBillingInherit(o) {
     var shortIdArray = o.id.split('_');
     if (shortIdArray.length === 3) {
         var inheritShort = shortIdArray[0] + '_' + shortIdArray[1];
@@ -160,8 +156,7 @@ function setBillingInherit(o)
  * @param thisValue
  * @since 0.0.1.0
  */
-function getResursFields(findElement, thisValue)
-{
+function getResursFields(findElement, thisValue) {
     var selectElement = $rQuery(findElement);
     if (selectElement.length > 0) {
         for (var elementId = 0; elementId < selectElement.length; elementId++) {
@@ -176,8 +171,7 @@ function getResursFields(findElement, thisValue)
  * @param updateValue
  * @since 0.0.1.0
  */
-function setResursUpdateField(updateElement, updateValue)
-{
+function setResursUpdateField(updateElement, updateValue) {
     updateElement.value = updateValue;
 }
 
@@ -186,8 +180,7 @@ function setResursUpdateField(updateElement, updateValue)
  * @param clickedObject
  * @since 0.0.1.0
  */
-function setResursGetAddressCustomerType(clickedObject)
-{
+function setResursGetAddressCustomerType(clickedObject) {
     resursGetAddressCustomerType = clickedObject.value;
     $rQuery('body').trigger('update_checkout');
 }
@@ -195,8 +188,7 @@ function setResursGetAddressCustomerType(clickedObject)
 /**
  * @since 0.0.1.0
  */
-function getResursAddress()
-{
+function getResursAddress() {
     var ssnIdentification = $rQuery('#resursSsnIdentification');
     if (
         $rQuery('#resursSsnIdentification').length > 0 &&
@@ -227,8 +219,7 @@ function getResursAddress()
  * Activate trigger for datasynch in RCO.
  * @since 0.0.1.0
  */
-function getRcoTriggerHook()
-{
+function getRcoTriggerHook() {
     $rQuery('body').on('rbwc_customer_synchronize', function (event, data) {
         setRbwcCustomerDataByVersion(data.version);
     });
@@ -239,8 +230,7 @@ function getRcoTriggerHook()
  * @param version
  * @since 0.0.1.0
  */
-function setRbwcCustomerDataByVersion(version)
-{
+function setRbwcCustomerDataByVersion(version) {
     var useFields = rbwcCustomerTransformationContainer[version];
     rbwcHandleAddress('billing', useFields, version);
     rbwcHandleAddress('shipping', useFields, version);
@@ -251,8 +241,7 @@ function setRbwcCustomerDataByVersion(version)
  * @param rbwcHasDelivery
  * @since 0.0.1.0
  */
-function rbwcDeliveryAddressToggle(rbwcHasDelivery)
-{
+function rbwcDeliveryAddressToggle(rbwcHasDelivery) {
     var deliveryPropChecked = $rQuery('#ship-to-different-address-checkbox').prop('checked');
     if (rbwcHasDelivery && !deliveryPropChecked) {
         $rQuery('#ship-to-different-address-checkbox').click();
@@ -269,8 +258,7 @@ function rbwcDeliveryAddressToggle(rbwcHasDelivery)
  * @param version
  * @since 0.0.1.0
  */
-function rbwcHandleAddress(type, fields, version)
-{
+function rbwcHandleAddress(type, fields, version) {
     var billingData = {};
     var deliveryData = {};
     var phoneData = '';
@@ -325,8 +313,7 @@ function rbwcHandleAddress(type, fields, version)
  * @returns {boolean}
  * @since 0.0.1.0
  */
-function getRbwcDeliveryTruth(contentArray)
-{
+function getRbwcDeliveryTruth(contentArray) {
     var numKeys = 0;
     for (var contentKey in contentArray) {
         if (null !== contentArray[contentKey] && contentArray[contentKey] !== '') {
