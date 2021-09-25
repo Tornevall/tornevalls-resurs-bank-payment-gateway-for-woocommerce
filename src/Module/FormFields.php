@@ -35,8 +35,8 @@ class FormFields extends WC_Settings_API
                 'title' => __('Basic Resurs Bank API Settings', 'trbwc'),
                 'enabled' => [
                     'id' => 'enabled',
-                    'title' => __('Enable/Disable', 'trbwc'),
-                    'desc' => __('Enable/Disable', 'trbwc'),
+                    'title' => __('Enable plugin checkout functions', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
                     'type' => 'checkbox',
                     'label' => __('Enable Resurs Bank', 'trbwc'),
                     'desc_tip' => __(

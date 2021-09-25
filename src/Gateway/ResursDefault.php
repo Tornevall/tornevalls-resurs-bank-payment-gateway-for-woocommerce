@@ -279,11 +279,13 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setFilters()
     {
-        add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
-        add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
-        add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
-        add_filter('woocommerce_get_terms_page_id', [$this, 'getTermsByRco'], 1);
-        add_filter('woocommerce_order_get_payment_method_title', [$this, 'getPaymentMethodTitle'], 10, 2);
+        if (Data::isEnabled()) {
+            add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
+            add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
+            add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
+            add_filter('woocommerce_get_terms_page_id', [$this, 'getTermsByRco'], 1);
+            add_filter('woocommerce_order_get_payment_method_title', [$this, 'getPaymentMethodTitle'], 10, 2);
+        }
     }
 
     /**
@@ -292,12 +294,14 @@ class ResursDefault extends WC_Payment_Gateway
     private function setActions()
     {
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
-        add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
-        if (Data::getCheckoutType() === self::TYPE_RCO) {
-            add_action(
-                sprintf('woocommerce_%s', Data::getResursOption('rco_iframe_position')),
-                [$this, 'getRcoIframe']
-            );
+        if (Data::isEnabled()) {
+            add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
+            if (Data::getCheckoutType() === self::TYPE_RCO) {
+                add_action(
+                    sprintf('woocommerce_%s', Data::getResursOption('rco_iframe_position')),
+                    [$this, 'getRcoIframe']
+                );
+            }
         }
     }
 
@@ -341,7 +345,7 @@ class ResursDefault extends WC_Payment_Gateway
                 if (!empty($internalPaymentTitle)) {
                     $return = $internalPaymentTitle;
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
@@ -383,7 +387,7 @@ class ResursDefault extends WC_Payment_Gateway
                             }
                         }
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                 }
             }
         }
@@ -397,8 +401,9 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getHeaderScripts()
     {
-        if (!(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout',
-                null) && Data::getCheckoutType() === self::TYPE_RCO) {
+        if (!(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) &&
+            Data::getCheckoutType() === self::TYPE_RCO
+        ) {
             WooCommerce::setSessionValue(WooCommerce::$inCheckoutKey, true);
 
             $this->processRco();
@@ -1036,6 +1041,10 @@ class ResursDefault extends WC_Payment_Gateway
             }
         }
 
+        if (!is_admin() && Data::isEnabled()) {
+            $return = false;
+        }
+
         return $return;
     }
 
@@ -1090,7 +1099,6 @@ class ResursDefault extends WC_Payment_Gateway
         $requiredFields = (array)FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
 
         if (Data::getCheckoutType() === self::TYPE_RCO) {
-            // TODO: No fields should be active on RCO. Make sure we never land here at all.
             return;
         }
 

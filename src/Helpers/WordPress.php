@@ -84,10 +84,13 @@ class WordPress
         add_filter('rbwc_localizations_generic', 'ResursBank\Helpers\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helpers\WooCommerce::getSettingsPages');
-        add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
         add_filter('is_protected_meta', 'ResursBank\Helpers\WooCommerce::getProtectedMetaData', 10, 3);
-        add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
-        add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
+
+        if (Data::isEnabled()) {
+            add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
+            add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
+            add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
+        }
     }
 
     /**
@@ -119,7 +122,10 @@ class WordPress
         add_action('woocommerce_admin_field_methodlist', 'ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
         add_action('woocommerce_admin_field_callbacklist', 'ResursBank\Module\FormFields::getFieldCallbackList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
-        add_filter('woocommerce_before_checkout_billing_form', 'ResursBank\Module\FormFields::getGetAddressForm');
+        // Checkout Actions.
+        if (Data::isEnabled()) {
+            add_filter('woocommerce_before_checkout_billing_form', 'ResursBank\Module\FormFields::getGetAddressForm');
+        }
     }
 
     /**
@@ -129,18 +135,20 @@ class WordPress
      */
     private static function setupWoocommerceAdminActions()
     {
-        add_action(
-            'woocommerce_admin_order_data_after_order_details',
-            'ResursBank\Helpers\WooCommerce::getAdminAfterOrderDetails'
-        );
-        add_action(
-            'woocommerce_admin_order_data_after_billing_address',
-            'ResursBank\Helpers\WooCommerce::getAdminAfterBilling'
-        );
-        add_action(
-            'woocommerce_admin_order_data_after_shipping_address',
-            'ResursBank\Helpers\WooCommerce::getAdminAfterShipping'
-        );
+        if (Data::isEnabled()) {
+            add_action(
+                'woocommerce_admin_order_data_after_order_details',
+                'ResursBank\Helpers\WooCommerce::getAdminAfterOrderDetails'
+            );
+            add_action(
+                'woocommerce_admin_order_data_after_billing_address',
+                'ResursBank\Helpers\WooCommerce::getAdminAfterBilling'
+            );
+            add_action(
+                'woocommerce_admin_order_data_after_shipping_address',
+                'ResursBank\Helpers\WooCommerce::getAdminAfterShipping'
+            );
+        }
     }
 
     /**
