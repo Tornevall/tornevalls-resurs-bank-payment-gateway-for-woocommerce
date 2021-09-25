@@ -1,17 +1,78 @@
 // resursbank_checkout.js --- Generic Checkout Handler.
 
 /**
+ * Transformation data container for RCO billing/delivery fields.
+ * @type {{"1": {address: string, city: string, phone: string, addressExtra: string, postcode: string, last_name: string, first_name: string, email: string}, "2": {city: string, phone: null, address_1: string, address_2: string, postcode: string, last_name: string, first_name: string, email: null}}}
  * @since 0.0.1.0
  */
-$rQuery(document).ready(function ($) {
-    getResursGateway();
-    getResursHookedBillingFields();
-});
+var rbwcCustomerTransformationContainer = {
+    '1': {
+        "first_name": "firstname",
+        "last_name": "surname",
+        "address": "address_1",
+        "addressExtra": "address_2",
+        "postcode": "postal",
+        "city": "city",
+        "phone": "telephone",
+        "email": "email"
+    },
+    '2': {
+        "first_name": "firstName",
+        "last_name": "lastName",
+        "address_1": "addressRow1",
+        "address_2": "addressRow2",
+        "postcode": "postalCode",
+        "city": "city",
+        "phone": null,
+        "email": null
+    }
+};
+
+/**
+ * Boolean set depending on if RCO has a delivery address or not.
+ * @type {boolean}
+ * @since 0.0.1.0
+ */
+var rbwcHasDelivery = false;
 
 /**
  * @since 0.0.1.0
  */
-function getResursGateway() {
+$rQuery(document).ready(function () {
+    getResursGateway();
+    getResursHookedBillingFields();
+    getRbwcRcoMode();
+});
+
+/**
+ * Make currenct checkout view ready for RCO mode (hidden billing/shipping).
+ */
+function getRcoBillingSetup()
+{
+    if (typeof trbwc_rco !== 'undefined') {
+        $rQuery('.woocommerce-billing-fields').hide();
+        $rQuery('.woocommerce-shipping-fields').hide();
+    }
+}
+
+/**
+ * Activates RCO based functions.
+ * @since 0.0.1.0
+ */
+function getRbwcRcoMode()
+{
+    if (typeof trbwc_rco !== 'undefined') {
+        trbwcLog('trbwc_rco is present, activating triggers for RCO comms.');
+        getRcoTriggerHook();
+        getRcoBillingSetup();
+    }
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function getResursGateway()
+{
     resursGateway = {
         getLegacy: function () {
             return typeof $ResursCheckout === 'undefined';
@@ -52,7 +113,8 @@ var resursFieldInheritList = {
  * Hook key pressing into regular billing address fields and inherit data to Resurs fields.
  * @since 0.0.1.0
  */
-function getResursHookedBillingFields() {
+function getResursHookedBillingFields()
+{
     for (var inheritKey in resursFieldInheritList) {
         var inheritField = $rQuery('#' + inheritKey);
         if (inheritField.length) {
@@ -78,7 +140,8 @@ function getResursHookedBillingFields() {
  * @param o
  * @since 0.0.1.0
  */
-function setBillingInherit(o) {
+function setBillingInherit(o)
+{
     var shortIdArray = o.id.split('_');
     if (shortIdArray.length === 3) {
         var inheritShort = shortIdArray[0] + '_' + shortIdArray[1];
@@ -97,7 +160,8 @@ function setBillingInherit(o) {
  * @param thisValue
  * @since 0.0.1.0
  */
-function getResursFields(findElement, thisValue) {
+function getResursFields(findElement, thisValue)
+{
     var selectElement = $rQuery(findElement);
     if (selectElement.length > 0) {
         for (var elementId = 0; elementId < selectElement.length; elementId++) {
@@ -112,7 +176,8 @@ function getResursFields(findElement, thisValue) {
  * @param updateValue
  * @since 0.0.1.0
  */
-function setResursUpdateField(updateElement, updateValue) {
+function setResursUpdateField(updateElement, updateValue)
+{
     updateElement.value = updateValue;
 }
 
@@ -121,7 +186,8 @@ function setResursUpdateField(updateElement, updateValue) {
  * @param clickedObject
  * @since 0.0.1.0
  */
-function setResursGetAddressCustomerType(clickedObject) {
+function setResursGetAddressCustomerType(clickedObject)
+{
     resursGetAddressCustomerType = clickedObject.value;
     $rQuery('body').trigger('update_checkout');
 }
@@ -129,7 +195,8 @@ function setResursGetAddressCustomerType(clickedObject) {
 /**
  * @since 0.0.1.0
  */
-function getResursAddress() {
+function getResursAddress()
+{
     var ssnIdentification = $rQuery('#resursSsnIdentification');
     if (
         $rQuery('#resursSsnIdentification').length > 0 &&
@@ -154,4 +221,117 @@ function getResursAddress() {
             }
         );
     }
+}
+
+/**
+ * Activate trigger for datasynch in RCO.
+ * @since 0.0.1.0
+ */
+function getRcoTriggerHook()
+{
+    $rQuery('body').on('rbwc_customer_synchronize', function (event, data) {
+        setRbwcCustomerDataByVersion(data.version);
+    });
+}
+
+/**
+ * Synchronize address fields depending on RCO version.
+ * @param version
+ * @since 0.0.1.0
+ */
+function setRbwcCustomerDataByVersion(version)
+{
+    var useFields = rbwcCustomerTransformationContainer[version];
+    rbwcHandleAddress('billing', useFields, version);
+    rbwcHandleAddress('shipping', useFields, version);
+}
+
+/**
+ * Toggle deliver address checkbox on and off depending on RCO.
+ * @param rbwcHasDelivery
+ * @since 0.0.1.0
+ */
+function rbwcDeliveryAddressToggle(rbwcHasDelivery)
+{
+    var deliveryPropChecked = $rQuery('#ship-to-different-address-checkbox').prop('checked');
+    if (rbwcHasDelivery && !deliveryPropChecked) {
+        $rQuery('#ship-to-different-address-checkbox').click();
+    }
+    if (!rbwcHasDelivery && deliveryPropChecked) {
+        $rQuery('#ship-to-different-address-checkbox').click();
+    }
+}
+
+/**
+ * Handle customer address in WooCommerce address fields depending on type.
+ * @param type
+ * @param fields
+ * @param version
+ * @since 0.0.1.0
+ */
+function rbwcHandleAddress(type, fields, version)
+{
+    var billingData = {};
+    var deliveryData = {};
+    var phoneData = '';
+    var mailData = '';
+    if (version === 1) {
+        billingData = resursBankRcoDataContainer.rco_customer.customerData.address;
+        deliveryData = resursBankRcoDataContainer.rco_customer.customerData.delivery;
+        phoneData = billingData.telephone;
+        mailData = billingData.email;
+        rbwcHasDelivery = getRbwcDeliveryTruth(deliveryData);
+    } else if (version === 2) {
+        billingData = resursBankRcoDataContainer.rco_customer.billingAddress;
+        deliveryData = resursBankRcoDataContainer.rco_customer.deliveryAddress;
+        phoneData = resursBankRcoDataContainer.rco_customer.phone;
+        mailData = resursBankRcoDataContainer.rco_customer.email;
+        rbwcHasDelivery = getRbwcDeliveryTruth(deliveryData);
+    }
+    rbwcDeliveryAddressToggle(rbwcHasDelivery);
+
+    var setValue;
+    for (var fieldName in fields) {
+        setValue = '';
+        if (version === 2 && (fieldName === 'email' || fieldName === 'phone')) {
+            switch (fieldName) {
+                case 'email':
+                    setValue = mailData;
+                    break;
+                case 'phone':
+                    setValue = phoneData;
+                    break;
+                default:
+            }
+        } else {
+            if (type === 'billing') {
+                if (typeof billingData[fields[fieldName]] !== "undefined") {
+                    setValue = billingData[fields[fieldName]];
+                }
+            }
+            if (type === 'shipping') {
+                if (typeof deliveryData[fields[fieldName]] !== "undefined") {
+                    setValue = deliveryData[fields[fieldName]]
+                }
+            }
+        }
+        $rQuery('#' + type + "_" + fieldName).val(setValue);
+    }
+}
+
+/**
+ * Find out if our delivery address container has something inside.
+ * @param contentArray
+ * @returns {boolean}
+ * @since 0.0.1.0
+ */
+function getRbwcDeliveryTruth(contentArray)
+{
+    var numKeys = 0;
+    for (var contentKey in contentArray) {
+        if (null !== contentArray[contentKey] && contentArray[contentKey] !== '') {
+            numKeys++;
+        }
+    }
+    return numKeys > 0;
 }

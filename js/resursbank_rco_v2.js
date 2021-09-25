@@ -60,6 +60,9 @@ function getResursApiVersion() {
 jQuery(document).ready(function ($) {
     if (getResursLocalization('checkoutType') === 'rco' && typeof $ResursCheckout !== 'undefined') {
         $ResursCheckout.onSubmit(function (event) {
+            $('body').trigger('rbwc_customer_synchronize', {
+                version: 2
+            });
             getResursAjaxify(
                 'post',
                 'resursbank_checkout_create_order',
@@ -73,6 +76,9 @@ jQuery(document).ready(function ($) {
         });
         $ResursCheckout.onCustomerChange(function (event) {
             resursBankRcoDataContainer.rco_customer = event
+            $('body').trigger('rbwc_customer_synchronize', {
+                version: 2
+            });
         });
         $ResursCheckout.onPaymentChange(function (event) {
             resursBankRcoDataContainer.rco_payment = event

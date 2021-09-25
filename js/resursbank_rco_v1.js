@@ -32,6 +32,9 @@ function getRbwcLegacyInit(rcoLegacyElement, $) {
     rcoLegacy.setCustomerChangedEventCallback(function (customer) {
         resursBankRcoDataContainer.rco_customer = customer;
         resursBankRcoDataContainer.rco_payment = customer.paymentMethod;
+        $('body').trigger('rbwc_customer_synchronize', {
+            version: 1
+        });
     });
     rcoLegacy.setBookingCallback(function (rcoLegacyData) {
         getResursAjaxify(
