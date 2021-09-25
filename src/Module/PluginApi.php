@@ -714,9 +714,20 @@ class PluginApi
             Data::setLogNotice(
                 $failNote
             );
+
             // Insert new row each time this section is triggered. That makes the try count traceable.
             Data::setOrderMeta($currentOrder, 'rco_rejected_once', true);
-            Data::setOrderMeta($currentOrder, 'rco_rejected', sprintf('%s (%d)', $rejectType, time()), true, true);
+            Data::setOrderMeta(
+                $currentOrder,
+                'rco_rejected',
+                sprintf(
+                    '%s (%s)',
+                    $rejectType,
+                    strftime('%Y-%m-%d %H:%M:%S', time())
+                ),
+                true,
+                true
+            );
 
             // When status update is finished, add more information since it goes out to customer front too.
             $failNote .= ' ' .

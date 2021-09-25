@@ -24,11 +24,9 @@ function getRbwcLegacyInit(rcoLegacyElement) {
     $rQuery(rcoLegacyElement).html(getResursRcoContainer('html'));
 
     rcoLegacy.setPurchaseFailCallback(function (o) {
-        console.dir(o);
         $rQuery('body').trigger('rbwc_purchase_reject', {type: 'fail'});
     });
     rcoLegacy.setPurchaseDeniedCallback(function (o) {
-        console.dir(o);
         $rQuery('body').trigger('rbwc_purchase_reject', {type: 'deny'});
     });
     rcoLegacy.setCustomerChangedEventCallback(function (customer) {
@@ -49,7 +47,6 @@ function getRbwcLegacyInit(rcoLegacyElement) {
                 }
             }
         )
-        console.dir(rcoLegacyData);
         return false;
     });
 }

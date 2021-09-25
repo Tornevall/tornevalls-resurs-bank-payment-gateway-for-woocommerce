@@ -108,6 +108,8 @@ printf(__(
                         echo $value ? __('Yes.', 'trbwc') : __('No.', 'trbwc');
                     } elseif ($key === 'status') {
                         echo implode(', ', (array)$value);
+                    } elseif (is_array($value)) {
+                        echo implode('<br>', $value);
                     } else {
                         echo $value;
                     } ?>
