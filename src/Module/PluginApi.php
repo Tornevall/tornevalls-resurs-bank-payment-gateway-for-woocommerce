@@ -129,7 +129,8 @@ class PluginApi
         ];
 
         // Not recommended as this expires immediately and stays expired.
-        if ((bool)$expire && ($expired = self::expireNonce(__FUNCTION__))) {
+        $expired = self::expireNonce(__FUNCTION__);
+        if ((bool)$expire && ($expired)) {
             $defaultNonceError = 'nonce_expire';
         }
 
