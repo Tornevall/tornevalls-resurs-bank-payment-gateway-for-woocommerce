@@ -895,6 +895,9 @@ class Data
         if (isset($orderData['meta'])) {
             $return = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
         }
+        if ($key === 'resurspayment' && isset($orderData['ecom']) && is_object($orderData['ecom'])) {
+            $return = $orderData['ecom'];
+        }
 
         return $return;
     }
