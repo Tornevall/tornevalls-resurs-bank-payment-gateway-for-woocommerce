@@ -316,7 +316,7 @@ function rbwcHandleAddress(type, fields, version) {
 function getRbwcDeliveryTruth(contentArray) {
     var numKeys = 0;
     for (var contentKey in contentArray) {
-        if (null !== contentArray[contentKey] && contentArray[contentKey] !== '') {
+        if (null !== contentArray[contentKey]) {
             numKeys++;
         }
     }
