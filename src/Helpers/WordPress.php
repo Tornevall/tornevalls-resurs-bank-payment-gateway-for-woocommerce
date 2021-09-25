@@ -84,14 +84,13 @@ class WordPress
         add_filter('rbwc_localizations_generic', 'ResursBank\Helpers\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helpers\WooCommerce::getSettingsPages');
+        add_filter('is_protected_meta', 'ResursBank\Helpers\WooCommerce::getProtectedMetaData', 10, 3);
 
         if (Data::isEnabled()) {
             add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
+            add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
+            add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
         }
-
-        add_filter('is_protected_meta', 'ResursBank\Helpers\WooCommerce::getProtectedMetaData', 10, 3);
-        add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
-        add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
     }
 
     /**
