@@ -8,6 +8,7 @@ use Resursbank\RBEcomPHP\ResursBank;
 use ResursException;
 use RuntimeException;
 use TorneLIB\Exception\ExceptionHandler;
+use function is_array;
 
 /**
  * Class Api EComPHP Translator. Also a guide for what could be made better in the real API.
@@ -362,9 +363,11 @@ class Api
     public static function getPaymentMethods($fromStorage = true)
     {
         $return = self::$paymentMethods;
-
-        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('paymentMethods'), false))) {
-            $return = $stored;
+        if ($fromStorage) {
+            $stored = json_decode(Data::getResursOption('paymentMethods'));
+            if (is_array($stored)) {
+                $return = $stored;
+            }
         }
 
         if (!$fromStorage || empty($return)) {

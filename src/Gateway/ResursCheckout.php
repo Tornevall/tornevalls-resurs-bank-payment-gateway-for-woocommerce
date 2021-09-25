@@ -127,6 +127,9 @@ class ResursCheckout
             ];
         } else {
             $customerAddressBlock = isset($rcoCustomerData[$getType]) ? $rcoCustomerData[$getType] : [];
+            // This should absolutely not be empty!
+            $rcoPaymentData = isset($_REQUEST['rco_payment']) ? $_REQUEST['rco_payment'] : [];
+            WooCommerce::setSessionValue('paymentMethod', $rcoPaymentData['id']);
 
             // Observe that RCOv2 does not have any country code available, so it has to be
             // fetched elsewhere.

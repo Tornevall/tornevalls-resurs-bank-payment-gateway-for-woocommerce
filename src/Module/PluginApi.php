@@ -270,21 +270,22 @@ class PluginApi
         ];
         try {
             $order = new WC_Checkout();
-            $expectedOrderId = WC()->session->get('order_awaiting_payment');
+
+            // This value is needed during process_payment, since that's where we get.
+            WooCommerce::setSessionValue('resursCheckoutType', Data::getCheckoutType());
+
+            // Note handing over responsibily makes it most plausably that the return section here
+            // will only fire up if something goes terribly wrong as the process_checkout is handling the
+            // return section individually from somewhere else. Take a look at ResursDefault.php for the
+            // rest of this process. At this moment we therefore don't need to worry about metadata and
+            // stored apiData since it is entirely unavailable.
             $order->process_checkout();
         } catch (Exception $e) {
             $return['errorCode'] = $e->getCode();
             $return['errorString'] = $e->getMessage();
         }
-        $errorNotices = Data::getErrorNotices();
-        if (empty($errorNotices)) {
-            $return['orderId'] = $expectedOrderId;
-            $return['success'] = true;
-        } else {
-            // Append exceptions ore skip if there are none.
-            $return['errorString'] .= empty($return['errorString']) ? $errorNotices : "<br>\n" . $errorNotices;
-        }
 
+        // This return point only occurs on severe errors.
         return $return;
     }
 
@@ -360,6 +361,7 @@ class PluginApi
     /**
      * @throws Exception
      * @since 0.0.1.0
+     * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
     public static function getNewCallbacks()
     {
@@ -395,6 +397,7 @@ class PluginApi
      * @param $callbackParams
      * @return string
      * @since 0.0.1.0
+     * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
     private static function getCallbackUrl($callbackParams)
     {
@@ -418,6 +421,7 @@ class PluginApi
      * @return array
      * @throws Exception
      * @since 0.0.1.0
+     * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
     private static function getCallbackParams($ecomCallbackId)
     {
