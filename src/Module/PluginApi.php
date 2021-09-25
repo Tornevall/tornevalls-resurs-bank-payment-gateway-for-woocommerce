@@ -12,6 +12,7 @@ use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
 use WC_Checkout;
+use WC_Order;
 
 /**
  * Class PluginApi
@@ -671,6 +672,64 @@ class PluginApi
                 }
                 $return[$addressField] = vsprintf(implode(' ', $compileInfo), $compileKeys);
             }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function purchaseReject()
+    {
+        $return = [
+            'error' => false,
+            'rejectUpdate' => false,
+            'message' => '',
+        ];
+        $rejectType = WooCommerce::getRequest('type');
+
+        // Presumably this is available for us to handle the order with.
+        $wooOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
+
+        $transReject = [
+            'fail' => __('Failed', 'trbwc'),
+            'deny' => __('Denied', 'trbwc'),
+        ];
+
+        // Fallback to the standard reject reason if nothing is found.
+        $transRejectMessage = isset($transReject[$rejectType]) ? $transReject[$rejectType] : $rejectType;
+
+        if ($wooOrderId) {
+            $currentOrder = new WC_Order($wooOrderId);
+            $failNote = sprintf(
+                __('Order was rejected by Resurs Bank with status "%s".', 'trbwc'),
+                $transRejectMessage
+            );
+            $updateStatus = $currentOrder->update_status(
+                'failed',
+                $failNote
+            );
+            Data::setLogNotice(
+                $failNote
+            );
+            // Insert new row each time this section is triggered. That makes the try count traceable.
+            Data::setOrderMeta($currentOrder, 'rco_rejected_once', true);
+            Data::setOrderMeta($currentOrder, 'rco_rejected', sprintf('%s (%d)', $rejectType, time()), true, true);
+
+            // When status update is finished, add more information since it goes out to customer front too.
+            $failNote .= ' ' .
+                WordPress::applyFilters(
+                    'purchaseRejectCustomerMessage',
+                    __('Please contact customer service for more information.', 'trbwc')
+                );
+
+            Data::setOrderMeta($currentOrder, 'rco_reject_message', $failNote);
+
+            $return['rejectUpdate'] = $updateStatus;
+            $return['message'] = $failNote;
+            return $return;
         }
 
         return $return;

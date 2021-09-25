@@ -3,6 +3,8 @@
     If EComPHP triggers any exceptions they are shown here and then nowhere else.
  -->
 <?php
+$isDifferentAccount = false;
+
 // If $ecom not present, something went wrong in the core functions of the plugin.
 // Payments should be fully shown even if there is no payment.
 if (isset($ecom)) {
@@ -13,22 +15,38 @@ if (isset($ecom)) {
             _e('Order information and metadata for Resurs Bank', 'trbwc')
             ?>
         </label>
-        <?php if (isset($ecomException['code']) && (int)$ecomException['code']) {
+        <?php
+        if (isset($ecomException['code']) && (int)$ecomException['code']) {
             ?>
             <span class="resursApiException">
-        <?php echo $errorString; ?><br>
+        <?php
+        $exceptionString = sprintf('Exception %d: %s', $ecomException['code'], $ecomException['message']);
+        // Error code 8 = Payment unexistent.
+        // Error code 3 = Payment unexistent by REST.
+        // Error code 404 = Well. It doesn't exist either.
+        if (isset($ecom_short['rco_rejected_once']) && (in_array($ecomException['code'], [8, 3, 404], true))) {
+            $errorString = __(
+                'Payment could not be found at Resurs Bank. The metadata in the plugin however has ' .
+                'been marked as a payment failure at least once during the initial process of the ' .
+                'purchase. The customer in question may have failed or been declined during the payment process ' .
+                'and the did not proceed.',
+                'trbwc'
+            );
+            $exceptionString = '';
+        }
+        echo $errorString; ?><br>
             <br>
-        <b><?php printf('Exception %d: %s', $ecomException['code'], $ecomException['message']) ?></b>
+        <b><?php
+            echo $exceptionString; ?>
+        </b>
         </span>
             <?php
         } else {
             ?>
             <span>
         <?php
-        $isDifferentAccount = false;
         if (isset($ecom->isCurrentCredentials) && !$ecom->isCurrentCredentials) {
-            $isDifferentAccount = true;
-            ?>
+            $isDifferentAccount = true; ?>
             <span style="display:block;" class="resursOrderInfoDifferentCredentials">
 <?php
 printf(__(
@@ -64,7 +82,8 @@ printf(__(
                         } else {
                             $jsonPayment = json_decode($value, true);
                             if (is_array($jsonPayment)) {
-                                $newValue = __(
+                                $newValue =
+                                    __(
                                         'This data is shown to you since the purchase has been made with another ' .
                                         'merchant account than the current in use.',
                                         'trbwc'
@@ -73,7 +92,9 @@ printf(__(
                                 foreach ($jsonPayment as $methodKey => $methodValue) {
                                     if (is_string($methodValue)) {
                                         $newValue .= sprintf(
-                                            '<div class="row"><b>%s</b>: %s</div>', $methodKey, $methodValue
+                                            '<div class="row"><b>%s</b>: %s</div>',
+                                            $methodKey,
+                                            $methodValue
                                         );
                                     }
                                 }

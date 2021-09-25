@@ -62,8 +62,8 @@ function getRcoBillingSetup() {
 function getRbwcRcoMode() {
     if (typeof trbwc_rco !== 'undefined') {
         trbwcLog('trbwc_rco is present, activating triggers for RCO comms.');
-        getRcoTriggerHook();
         getRcoBillingSetup();
+        getRcoTriggerHook();
     }
 }
 
@@ -216,12 +216,31 @@ function getResursAddress() {
 }
 
 /**
+ * Handle rejected payments in RCO mode.
+ * @param data
+ * @since 0.0.1.0
+ */
+function setRbwcPurchaseReject(data) {
+    getResursAjaxify(
+        'post',
+        'resursbank_purchase_reject',
+        data,
+        function (d) {
+            setRbwcGenericError(d.message)
+        }
+    );
+}
+
+/**
  * Activate trigger for datasynch in RCO.
  * @since 0.0.1.0
  */
 function getRcoTriggerHook() {
     $rQuery('body').on('rbwc_customer_synchronize', function (event, data) {
         setRbwcCustomerDataByVersion(data.version);
+    });
+    $rQuery('body').on('rbwc_purchase_reject', function (event, data) {
+        setRbwcPurchaseReject(data);
     });
 }
 
@@ -321,4 +340,21 @@ function getRbwcDeliveryTruth(contentArray) {
         }
     }
     return numKeys > 0;
+}
+
+/**
+ * Display errors for this plugin.
+ * @param errorMessage
+ * @since 0.0.1.0
+ */
+function setRbwcGenericError(errorMessage) {
+    var checkoutForm = $rQuery('form.checkout');
+    $rQuery('.woocommerce-error, .woocommerce-message').remove();
+    checkoutForm.prepend(
+        $rQuery('<div>', {class: 'woocommerce-error'}).html(errorMessage)
+    );
+
+    $rQuery('html, body').animate({
+        scrollTop: ($rQuery('.woocommerce').offset().top - 100)
+    }, 1000);
 }

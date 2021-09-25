@@ -55,6 +55,7 @@ class WordPress
             'get_trigger_response',
             'get_address',
             'checkout_create_order',
+            'purchase_reject',
         ];
 
         foreach ($actionList as $action) {

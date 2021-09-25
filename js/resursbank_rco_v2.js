@@ -45,10 +45,11 @@ function getResursRcoContainer(key) {
  * @returns {number}
  */
 function getResursApiVersion() {
+    var returnValue;
     if (typeof $ResursCheckout !== 'undefined') {
-        var returnValue = 2;
+        returnValue = 2;
     } else {
-        var returnValue = 1;
+        returnValue = 1;
     }
 
     return returnValue;
@@ -84,6 +85,7 @@ jQuery(document).ready(function ($) {
             resursBankRcoDataContainer.rco_payment = event
         });
         $ResursCheckout.onPaymentFail(function (event) {
+            $('body').trigger('rbwc_purchase_reject', {type: 'fail'});
         });
         $ResursCheckout.create({
             paymentSessionId: getResursRcoContainer('paymentSessionId'),
