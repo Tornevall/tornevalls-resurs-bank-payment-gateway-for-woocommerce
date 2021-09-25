@@ -766,7 +766,7 @@ class WooCommerce
     {
         if ($orderId) {
             self::setOrderStatusByCallback(Api::getResurs()->getOrderStatusByPayment($paymentId), $order);
-            self::getCustomerRealAddress($paymentId, $order);
+            self::getCustomerRealAddress($order);
         }
     }
 
@@ -865,13 +865,12 @@ class WooCommerce
     }
 
     /**
-     * @param $paymentId
      * @param $order
      * @return bool
      * @throws ResursException
      * @since 0.0.1.0
      */
-    private static function getCustomerRealAddress($paymentId, $order)
+    private static function getCustomerRealAddress($order)
     {
         $return = false;
         $resursPayment = Data::getOrderMeta('resurspayment', $order);
