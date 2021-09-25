@@ -14,6 +14,29 @@ class Plugin
     public function __construct()
     {
         add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
+        add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
+    }
+
+    /**
+     * @param $filterIsActive
+     */
+    public function setRcoDisabledWarning($filterIsActive)
+    {
+        if ($filterIsActive) {
+            Data::setLogInternal(
+                Data::LOG_WARNING,
+                sprintf(
+                    __(
+                        'The filter "%s" is currently put in an active state by an unknown third party plugin. This ' .
+                        'setting is deprecated and no longer fully supported. It is highly recommended to disable ' .
+                        'or remove the filter entirely and solve the problem that required this from start somehow ' .
+                        'else.',
+                        'trbwc'
+                    ),
+                    'resursbank_temporary_disable_checkout'
+                )
+            );
+        }
     }
 
     /**

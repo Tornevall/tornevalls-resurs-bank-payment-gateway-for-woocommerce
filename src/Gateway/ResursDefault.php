@@ -168,7 +168,12 @@ class ResursDefault extends WC_Payment_Gateway
         $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'trbwc');
         $this->title = __('Resurs Bank AB', 'trbwc');
         $this->setPaymentMethodInformation($resursPaymentMethodObject);
-        $this->has_fields = (Data::getCheckoutType() === self::TYPE_SIMPLIFIED || Data::getCheckoutType() === self::TYPE_HOSTED);
+        $this->has_fields = (Data::getCheckoutType() === self::TYPE_SIMPLIFIED ||
+            Data::getCheckoutType() === self::TYPE_HOSTED
+        );
+        if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)) {
+            $this->has_fields = true;
+        }
         $this->setFilters();
         $this->setActions();
     }
@@ -392,7 +397,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getHeaderScripts()
     {
-        if (!(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) && Data::getCheckoutType() === self::TYPE_RCO) {
+        if (!(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout',
+                null) && Data::getCheckoutType() === self::TYPE_RCO) {
             WooCommerce::setSessionValue(WooCommerce::$inCheckoutKey, true);
 
             $this->processRco();

@@ -39,3 +39,12 @@ load_plugin_textdomain(
     false,
     dirname(plugin_basename(__FILE__)) . '/language'
 );
+
+/**
+ * @param $currentState
+ * @return mixed
+ */
+function disableThisIdiot($currentState) {
+    return true;
+}
+add_filter('resursbank_temporary_disable_checkout', 'disableThisIdiot');

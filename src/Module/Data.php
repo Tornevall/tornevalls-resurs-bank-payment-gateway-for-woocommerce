@@ -504,7 +504,14 @@ class Data
      */
     public static function getCheckoutType()
     {
-        switch (Data::getResursOption('checkout_type')) {
+        $currentCheckoutType = Data::getResursOption('checkout_type');
+        // Warning: Filter makes this plugin feel very bad.
+        if ($currentCheckoutType === ResursDefault::TYPE_RCO &&
+            (bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
+        ) {
+            $currentCheckoutType = ResursDefault::TYPE_SIMPLIFIED;
+        }
+        switch ($currentCheckoutType) {
             case 'simplified':
                 $return = ResursDefault::TYPE_SIMPLIFIED;
                 break;
@@ -516,7 +523,7 @@ class Data
                 break;
             default:
                 $return = '';
-        };
+        }
 
         return $return;
     }
