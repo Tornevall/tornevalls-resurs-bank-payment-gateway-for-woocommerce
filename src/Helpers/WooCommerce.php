@@ -665,6 +665,14 @@ class WooCommerce
                 );
             }
 
+            Data::setOrderMeta(
+                $order,
+                sprintf('callback_%s_receive', $callbackType),
+                strftime('%Y-%m-%d %H:%M:%S', time()),
+                true,
+                true
+            );
+
             if ($getConfirmedSalt && $orderId) {
                 try {
                     self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
