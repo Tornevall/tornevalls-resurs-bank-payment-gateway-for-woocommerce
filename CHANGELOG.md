@@ -1,6 +1,7 @@
-ChangeLog is based on what has reached the master branch.
+Current ChangeLog is based on what has reached the master branch.
+Also, github referenses are now added.
 
-# Release Notes - WPWC_RESURS - Version 0.0.1.0
+# 0.0.1.0
 
 <h2>        Bug
 </h2>
@@ -11,7 +12,7 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-171'>RWC-171</a>] -         adminpage_details.phtml bugs out due to RCO.
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-200'>RWC-200</a>] -         simplified customerdata is not properly created
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-200'>RWC-200</a>] -         #7: simplified customerdata is not properly created
 </li>
 </ul>
 
@@ -60,7 +61,7 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-61'>RWC-61</a>] -         Checkout: Hosted Flow
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-63'>RWC-63</a>] -         Implement RCO legacy (postMsg)
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-63'>RWC-63</a>] -         #1: Implement RCO legacy (postMsg)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-64'>RWC-64</a>] -         Checkout: Resurs Checkout (facelift) -- HappyFlow
 </li>
@@ -144,7 +145,7 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-148'>RWC-148</a>] -         Clarify if card number for &quot;befintligt kort&quot; is mandatory
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-166'>RWC-166</a>] -         Checkout: Resurs Checkout (facelift) -- Payment failures
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-166'>RWC-166</a>] -         #15: Checkout: Resurs Checkout (facelift) -- Payment failures
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-168'>RWC-168</a>] -         Check out if we can use the &quot;orderCreatedCallback&quot; in RCO.
 </li>
@@ -156,25 +157,25 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-179'>RWC-179</a>] -         Denied payment, change govId, try again (v2)
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-180'>RWC-180</a>] -         Synchronize billing address with getPayment
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-180'>RWC-180</a>] -         #2: Synchronize billing address with getPayment
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-181'>RWC-181</a>] -         Allow JS debugging in v2-mode
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-182'>RWC-182</a>] -         Activate script enqueue for RCO only if there is a cart
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-183'>RWC-183</a>] -         Checkout: Resurs Checkout PaymentFail (Legacy)
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-183'>RWC-183</a>] -         #15: Checkout: Resurs Checkout PaymentFail (Legacy)
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-184'>RWC-184</a>] -         Resurs Checkout: Store and use payment method on purchase
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-184'>RWC-184</a>] -         #3: Resurs Checkout: Store and use payment method on purchase
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-186'>RWC-186</a>] -         RCOv2 Resurs Checkout: Store and use payment method on purchase
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-186'>RWC-186</a>] -         #4: RCOv2 Resurs Checkout: Store and use payment method on purchase
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-187'>RWC-187</a>] -         Make sure we validate AES methods BEFORE using them in wc-api
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-189'>RWC-189</a>] -         setOrderMeta after RCO session should include paymentMethodInformation
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-189'>RWC-189</a>] -         #11: setOrderMeta after RCO session should include paymentMethodInformation
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-190'>RWC-190</a>] -         Docs only
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-191'>RWC-191</a>] -         Update initial translations explicitly created during RCO
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-191'>RWC-191</a>] -         #5: Update initial translations explicitly created during RCO
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-195'>RWC-195</a>] -         setStoreId filter should not be an integer (prepare for future api&#39;s)
 </li>
@@ -182,7 +183,7 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-197'>RWC-197</a>] -         Orderdata layout (Blue box or WooCommerce standard?) -- configurable
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-199'>RWC-199</a>] -         setOrderMeta should have an insert function
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-199'>RWC-199</a>] -         #6: setOrderMeta should have an insert function
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-201'>RWC-201</a>] -         Facelift: Make sure that payment method is updated, if clicked twice (during denied at first)
 </li>
@@ -196,9 +197,9 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-213'>RWC-213</a>] -         Make sure this customerForm checker is handling unspecified types
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-214'>RWC-214</a>] -         Refuse to set a status that is already set.
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-214'>RWC-214</a>] -         #13, #8: Refuse to set a status that is already set.
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-215'>RWC-215</a>] -         Necessary callbacks, remove the rest (if not already removed).
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-215'>RWC-215</a>] -         #9: Necessary callbacks, remove the rest (if not already removed).
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-216'>RWC-216</a>] -         updatePaymentReference and exceptions +logging when it happens
 </li>
@@ -206,11 +207,11 @@ ChangeLog is based on what has reached the master branch.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-218'>RWC-218</a>] -         setSigningUrl missing a developer filter.
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-219'>RWC-219</a>] -         According to how RCO works in the docs we probably should change canProcessOrder to avoid conflicts in the payment flow
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-219'>RWC-219</a>] -         #10: According to how RCO works in the docs we probably should change canProcessOrder to avoid conflicts in the payment flow
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-220'>RWC-220</a>] -         Refuse to set a status that is already set in synchronous mode
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-220'>RWC-220</a>] -         #13: Refuse to set a status that is already set in synchronous mode
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-221'>RWC-221</a>] -         During getMetaData-requests, make it possible to fetch getPaymentinfo
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-221'>RWC-221</a>] -         #14: During getMetaData-requests, make it possible to fetch getPaymentinfo
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-222'>RWC-222</a>] -         Synchronize billing address in synchronous mode
 </li>
