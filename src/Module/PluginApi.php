@@ -204,7 +204,7 @@ class PluginApi
      */
     private static function getPreparedRcoOrder()
     {
-        self::$resursDefault = new ResursDefault();
+        //self::$resursDefault = new ResursDefault();
         self::$resursCheckout = new ResursCheckout();
         $billingAddress = self::$resursCheckout->getCustomerFieldsByApiVersion();
         $deliveryAddress = self::$resursCheckout->getCustomerFieldsByApiVersion('deliveryAddress');

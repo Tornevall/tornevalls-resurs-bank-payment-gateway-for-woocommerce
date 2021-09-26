@@ -8,6 +8,7 @@ use Resursbank\RBEcomPHP\ResursBank;
 use ResursException;
 use RuntimeException;
 use TorneLIB\Exception\ExceptionHandler;
+use function in_array;
 use function is_array;
 
 /**
@@ -164,10 +165,12 @@ class Api
     {
         return in_array(
             Data::getResursOption('environment'),
-            ['live', 'production'],
+            [
+                'live',
+                'production',
+            ],
             true
-        ) ?
-            RESURS_ENVIRONMENTS::PRODUCTION : RESURS_ENVIRONMENTS::TEST;
+        ) ? RESURS_ENVIRONMENTS::PRODUCTION : RESURS_ENVIRONMENTS::TEST;
     }
 
     /**

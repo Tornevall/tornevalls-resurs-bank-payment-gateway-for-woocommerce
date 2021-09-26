@@ -71,6 +71,15 @@ jQuery(document).ready(function ($) {
                 function (response) {
                     if (response['result'] === 'success') {
                         $ResursCheckout.release();
+                    } else {
+                        if (typeof response['messages'] !== "undefined") {
+                            setRbwcGenericError(response['messages'])
+                        }
+                    }
+                },
+                function (response) {
+                    if (typeof response['messages'] !== "undefined") {
+                        setRbwcGenericError(response['messages'])
                     }
                 }
             )
