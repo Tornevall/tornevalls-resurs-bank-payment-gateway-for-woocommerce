@@ -21,7 +21,7 @@
         if (isset($callbacks) && is_array($callbacks)) {
             foreach ($callbacks as $callbackType => $callbackUrl) {
                 ?>
-                <tr>
+                <tr id="callback_row_<?php echo $callbackType ?>">
                     <td class="resursMethodBody"><?php echo $callbackType ?></td>
                     <td class="resursMethodBody">
                         <input class="trbwc_cb_input"
@@ -34,8 +34,8 @@
                     <?php
                     if ((bool)Data::getResursOption('show_developer')) {
                         ?>
-                        <td class="resursMethodBody">
-                            <button onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X</button>
+                        <td class="resursMethodBody" id="remove_cb_btn_<?php echo $callbackType; ?>">
+                            <button type="button" onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X</button>
                         </td>
                         <?php
                     } ?>

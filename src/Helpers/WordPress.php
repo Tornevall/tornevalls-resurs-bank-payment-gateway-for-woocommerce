@@ -7,6 +7,7 @@ use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\Plugin;
+use ResursBank\Module\PluginApi;
 use TorneLIB\IO\Data\Strings;
 
 /**
@@ -56,6 +57,7 @@ class WordPress
             'get_address',
             'checkout_create_order',
             'purchase_reject',
+            'callback_unregister'
         ];
 
         foreach ($actionList as $action) {
@@ -120,7 +122,12 @@ class WordPress
         add_action('woocommerce_admin_field_button', '\ResursBank\Module\FormFields::getFieldButton', 10, 2);
         add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
-        add_action('woocommerce_admin_field_callbacklist', '\ResursBank\Module\FormFields::getFieldCallbackList', 10, 2);
+        add_action(
+            'woocommerce_admin_field_callbacklist',
+            '\ResursBank\Module\FormFields::getFieldCallbackList',
+            10,
+            2
+        );
         add_filter('woocommerce_get_settings_general', '\ResursBank\Module\Data::getGeneralSettings');
         add_action('updated_option', '\ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         // Checkout Actions.
@@ -596,6 +603,10 @@ class WordPress
             'Callback trigger timeout. Aborted.',
             'trbwc'
         );
+        $return['remove_callback_confirm'] = __(
+            'Are you sure you want to remove callback ',
+            'trbwc'
+        );
 
         return self::applyFilters('localizationsAdmin', $return);
     }
@@ -644,6 +655,7 @@ class WordPress
         $return['success'] = __('Successful.', 'trbwc');
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
+        $return['nonce_error'] = __('The page security (nonce) has expired or is wrong. You may want to reload it.', 'trbwc');
         $return['checkout_fields'] = FormFields::getFieldString();
         $return['getAddressFieldController'] = self::applyFilters('getAddressFieldController', []);
         $return['checkoutType'] = Data::getCheckoutType();
