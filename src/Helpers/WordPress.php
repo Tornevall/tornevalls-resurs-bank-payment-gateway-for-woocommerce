@@ -635,8 +635,11 @@ class WordPress
      */
     private static function getLocalizationDataGlobal($return)
     {
+        $defaultTimeout = 8000;
+        $setAjaxifyTimeout = WordPress::applyFilters('ajaxifyTimeout', $defaultTimeout);
         $return['noncify'] = self::getNonce('all');
         $return['ajaxify'] = admin_url('admin-ajax.php');
+        $return['ajaxifyTimeout'] = (int)$setAjaxifyTimeout ? $setAjaxifyTimeout : $defaultTimeout;
         $return['spin'] = Data::getImage('spin.gif');
         $return['success'] = __('Successful.', 'trbwc');
         $return['failed'] = __('Failed.', 'trbwc');

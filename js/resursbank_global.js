@@ -53,7 +53,7 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
             type: requestMethod,
             url: getResursLocalization('ajaxify'),
             data: requestData,
-            timeout: 8000
+            timeout: parseInt(getResursLocalization('ajaxifyTimeout'))
         }
     ).done(
         function (data, textStatus, jqXhr) {

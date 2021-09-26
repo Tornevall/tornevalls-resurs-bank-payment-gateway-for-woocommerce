@@ -368,11 +368,21 @@ class PluginApi
         // Re-fetch payment methods.
         Api::getPaymentMethods(false);
         Api::getAnnuityFactors(false);
-        if ($reply) {
+        if (self::canReply($reply)) {
             self::reply([
                 'reload' => true,
             ]);
         }
+    }
+
+    /**
+     * @param $reply
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private static function canReply($reply)
+    {
+        return is_null($reply) || (bool)$reply === true;
     }
 
     /**
@@ -382,7 +392,7 @@ class PluginApi
      * @since 0.0.1.0
      * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
-    public static function getNewCallbacks($reply = true)
+    public static function getNewCallbacks()
     {
         $callbacks = [
             Callback::UNFREEZE,
