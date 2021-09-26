@@ -362,6 +362,30 @@ class PluginApi
     }
 
     /**
+     * Monitor credential changes.
+     * @param $option
+     * @param $old
+     * @param $new
+     * @since 0.0.1.0
+     */
+    public static function getOptionsControl($option, $old, $new)
+    {
+        $actOn = [
+            sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getNewMethods'],
+            sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
+            sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
+        ];
+        if ($old !== $new && isset($actOn[$option])) {
+            foreach ($actOn[$option] as $execFunction) {
+                try {
+                    self::{$execFunction}();
+                } catch (Exception $e) {
+                }
+            }
+        }
+    }
+
+    /**
      * @throws Exception
      * @since 0.0.1.0
      * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
