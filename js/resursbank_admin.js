@@ -205,9 +205,10 @@ function doResursRemoveCallback(cbid) {
  * registerEventCallback
  * @param cbid
  * @since 0.0.1.0
+ * @deprecated Not in use.
  */
 function doResursUpdateCallback(cbid) {
-    alert("Update " + cbid);
+    //alert("Update " + cbid);
 }
 
 /**
