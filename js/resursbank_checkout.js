@@ -190,6 +190,8 @@ function setResursGetAddressCustomerType(clickedObject) {
  */
 function getResursAddress() {
     var ssnIdentification = $rQuery('#resursSsnIdentification');
+    $rQuery('#resursGetAddressSpinnify').show();
+    getResursSpin('#resursGetAddressSpinnify');
     if (
         $rQuery('#resursSsnIdentification').length > 0 &&
         ssnIdentification.val() !== ''
@@ -199,6 +201,7 @@ function getResursAddress() {
             'resursbank_get_address',
             {'identification': ssnIdentification.val()},
             function (response) {
+                $rQuery('#resursGetAddressSpinnify').hide();
                 if (response['api_error'] !== '') {
                     $rQuery('.resursGetAddressError').text(response['api_error']);
                     $rQuery('.resursGetAddressError').show();
