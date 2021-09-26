@@ -7,7 +7,6 @@ use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\Plugin;
-use ResursBank\Module\PluginApi;
 use TorneLIB\IO\Data\Strings;
 
 /**
@@ -57,7 +56,7 @@ class WordPress
             'get_address',
             'checkout_create_order',
             'purchase_reject',
-            'callback_unregister'
+            'callback_unregister',
         ];
 
         foreach ($actionList as $action) {
@@ -655,7 +654,10 @@ class WordPress
         $return['success'] = __('Successful.', 'trbwc');
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
-        $return['nonce_error'] = __('The page security (nonce) has expired or is wrong. You may want to reload it.', 'trbwc');
+        $return['nonce_error'] = __(
+            'The page security (nonce) has expired or is wrong. You may want to reload it.',
+            'trbwc'
+        );
         $return['checkout_fields'] = FormFields::getFieldString();
         $return['getAddressFieldController'] = self::applyFilters('getAddressFieldController', []);
         $return['checkoutType'] = Data::getCheckoutType();
