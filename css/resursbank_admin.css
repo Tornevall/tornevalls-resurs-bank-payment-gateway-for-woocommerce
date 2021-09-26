@@ -51,5 +51,6 @@
 .trbwc_cb_input {
     width: 100%;
     border: none;
-    font-size: 11px;
+    font-size: 12px;
+    background: #ffffff !important;
 }

@@ -25,12 +25,12 @@
                     <td class="resursMethodBody"><?php echo $callbackType ?></td>
                     <td class="resursMethodBody">
                         <input class="trbwc_cb_input"
-                               onblur="doResursUpdateCallback('<?php echo $callbackType; ?>')"
                                value="<?php echo $callbackUrl ?>"
+                               readonly="readonly"
                             <?php
-                            if (!(bool)Data::getResursOption('show_developer')) {
+                            /*if (!(bool)Data::getResursOption('show_developer')) {
                                 echo 'readonly';
-                            } ?>></td>
+                            }*/ ?>></td>
                     <?php
                     if ((bool)Data::getResursOption('show_developer')) {
                         ?>
