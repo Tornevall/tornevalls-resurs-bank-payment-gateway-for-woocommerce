@@ -20,12 +20,12 @@
             'dev_requirement' => false,
         ),
         'resursbank/ecomphp-deprecated' => array(
-            'pretty_version' => '0.0.8',
-            'version' => '0.0.8.0',
+            'pretty_version' => '0.0.9',
+            'version' => '0.0.9.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../resursbank/ecomphp-deprecated',
             'aliases' => array(),
-            'reference' => '44fbf0cbdd043529895bd3c17db77ba91a98dfb1',
+            'reference' => '267b9521b3bb7463abf8f6e6b1ae7affd8b135ea',
             'dev_requirement' => false,
         ),
         'tornevall/resurs-bank-payment-gateway-for-woocommerce' => array(
