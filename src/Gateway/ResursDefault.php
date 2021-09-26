@@ -588,7 +588,7 @@ class ResursDefault extends WC_Payment_Gateway
         $this->API->getConnection()->setSigning(
             $this->getSigningUrl(['success' => true, 'urlType' => 'success']),
             $this->getSigningUrl(['success' => false, 'urlType' => 'fail']),
-            Data::getResursOption('always_sign'),
+            false,
             $this->getSigningUrl(['success' => false, 'urlType' => 'back'])
         );
 
