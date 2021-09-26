@@ -291,7 +291,10 @@ function getResursLocalization(key) {
         returnValue = l_trbwc_resursbank_admin[key]
     } else if (typeof l_trbwc_resursbank_all[key] !== 'undefined') {
         returnValue = l_trbwc_resursbank_all[key];
-    } else if (typeof l_trbwc_resursbank_order[key] !== 'undefined') {
+    } else if (typeof l_trbwc_resursbank_order !== 'undefined' &&
+        typeof l_trbwc_resursbank_order[key] !== 'undefined'
+    ) {
+        // Order localization box is not always present.
         returnValue = l_trbwc_resursbank_order[key];
     }
     return returnValue;
