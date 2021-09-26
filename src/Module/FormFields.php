@@ -663,18 +663,23 @@ class FormFields extends WC_Settings_API
      */
     public static function getFieldMethodList()
     {
-        $paymentMethods = Api::getPaymentMethods();
+        $exception = null;
+        $paymentMethods = [];
+        try {
+            $paymentMethods = Api::getPaymentMethods();
+        } catch (Exception $e) {
+            $exception = $e;
+        }
 
         if (is_array($paymentMethods)) {
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_paymentmethods.phtml',
                 [
                     'paymentMethods' => $paymentMethods,
+                    'exception' => $exception,
                 ]
             );
         }
-
-        //do_action('woocommerce_admin_field_callbacklist');
     }
 
     /**
@@ -685,13 +690,20 @@ class FormFields extends WC_Settings_API
      */
     public static function getFieldCallbackList()
     {
-        $callbacks = Api::getCallbackList();
+        $exception = null;
+        $callbacks = [];
+        try {
+            $callbacks = Api::getCallbackList();
+        } catch (Exception $e) {
+            $exception = $e;
+        }
 
         if (is_array($callbacks)) {
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_callbacks.phtml',
                 [
                     'callbacks' => $callbacks,
+                    'exception' => $exception,
                 ]
             );
         }

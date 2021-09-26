@@ -1,46 +1,52 @@
-<h3><?php use ResursBank\Module\Data;
+<h3>
+    <?php use ResursBank\Module\Data;
 
-_e('Available callbacks', 'trbwc');
+    _e('Available callbacks', 'trbwc');
     ?>
 </h3>
-
-<table width="100%" style="border: none;">
-    <tr>
-        <td width="20%" class="resursMethodHead"><?php _e('Callback', 'trbwc') ?></td>
-        <td width="80%" class="resursMethodHead"><?php _e('Callback URL', 'trbwc') ?></td>
-        <?php
-        if ((bool)Data::getResursOption('show_developer')) {
-            ?>
-            <td width="80%" class="resursMethodHead"><?php _e('Remove', 'trbwc') ?></td>
+<?php if ($exception === null) { ?>
+    <table width="100%" style="border: none;">
+        <tr>
+            <td width="20%" class="resursMethodHead"><?php _e('Callback', 'trbwc') ?></td>
+            <td width="80%" class="resursMethodHead"><?php _e('Callback URL', 'trbwc') ?></td>
             <?php
+            if ((bool)Data::getResursOption('show_developer')) {
+                ?>
+                <td width="80%" class="resursMethodHead"><?php _e('Remove', 'trbwc') ?></td>
+                <?php
+            }
+            ?>
+        </tr>
+        <?php
+        if (isset($callbacks) && is_array($callbacks)) {
+            foreach ($callbacks as $callbackType => $callbackUrl) {
+                ?>
+                <tr>
+                    <td class="resursMethodBody"><?php echo $callbackType ?></td>
+                    <td class="resursMethodBody">
+                        <input class="trbwc_cb_input"
+                               onblur="doResursUpdateCallback('<?php echo $callbackType; ?>')"
+                               value="<?php echo $callbackUrl ?>"
+                            <?php
+                            if (!(bool)Data::getResursOption('show_developer')) {
+                                echo 'readonly';
+                            } ?>></td>
+                    <?php
+                    if ((bool)Data::getResursOption('show_developer')) {
+                        ?>
+                        <td class="resursMethodBody">
+                            <button onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X</button>
+                        </td>
+                        <?php
+                    } ?>
+                </tr>
+                <?php
+            }
         }
         ?>
-    </tr>
-    <?php
-    if (isset($callbacks) && is_array($callbacks)) {
-        foreach ($callbacks as $callbackType => $callbackUrl) {
-            ?>
-            <tr>
-                <td class="resursMethodBody"><?php echo $callbackType ?></td>
-                <td class="resursMethodBody">
-                    <input class="trbwc_cb_input"
-                           onblur="doResursUpdateCallback('<?php echo $callbackType; ?>')"
-                           value="<?php echo $callbackUrl ?>"
-                        <?php
-                        if (!(bool)Data::getResursOption('show_developer')) {
-                            echo 'readonly';
-                        } ?>></td>
-                <?php
-                if ((bool)Data::getResursOption('show_developer')) {
-                    ?>
-                    <td class="resursMethodBody">
-                        <button onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X</button>
-                    </td>
-                    <?php
-                } ?>
-            </tr>
-            <?php
-        }
-    }
-    ?>
-</table>
+    </table>
+<?php } else { ?>
+    <div style="border: 1px solid darkred; padding: 5px; background: #EA9090FF; margin-bottom: 5px;">
+        <?php echo $exception->getMessage() ?> (Code <?php echo $exception->getCode() ?>)
+    </div>
+<?php } ?>
