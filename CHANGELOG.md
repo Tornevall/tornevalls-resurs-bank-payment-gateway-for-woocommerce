@@ -11,6 +11,10 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-200'>RWC-200</a>] -         #7: simplified customerdata is not properly created
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-223'>RWC-223</a>] -         Weird behaviour in order process after delivery tests
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-229'>RWC-229</a>] -         #25: Password validation button disappeared
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-3'>RWC-3</a>] -         composerize package PSR-4 formatted
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-7'>RWC-7</a>] -         Basic administration Interface
@@ -34,8 +38,6 @@ Also, github referenses are now added.
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-25'>RWC-25</a>] -         Is hasCredentials even in use anymore?
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-26'>RWC-26</a>] -         Logging
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-27'>RWC-27</a>] -         StoreId owners
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-28'>RWC-28</a>] -         Test callback urls before using them (prod only)
 </li>
@@ -151,8 +153,6 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-180'>RWC-180</a>] -         #2: Synchronize billing address with getPayment
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-181'>RWC-181</a>] -         Allow JS debugging in v2-mode
-</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-182'>RWC-182</a>] -         Activate script enqueue for RCO only if there is a cart
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-183'>RWC-183</a>] -         #15: Checkout: Resurs Checkout PaymentFail (Legacy)
@@ -169,7 +169,7 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-191'>RWC-191</a>] -         #5: Update initial translations explicitly created during RCO
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-195'>RWC-195</a>] -         setStoreId filter should not be an integer (prepare for future api&#39;s)
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-195'>RWC-195</a>] -         #17: setStoreId filter should not be an integer (prepare for future api&#39;s)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-196'>RWC-196</a>] -         Link actions to resurs statuses and callbacks
 </li>
@@ -187,7 +187,7 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-208'>RWC-208</a>] -         When credentials are saved, make sure callbacks are resynched in background
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-213'>RWC-213</a>] -         Make sure this customerForm checker is handling unspecified types
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-209'>RWC-209</a>] -         Monitor saved data to update methods and callbacks on credendial updates
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-214'>RWC-214</a>] -         #13, #8: Refuse to set a status that is already set.
 </li>
@@ -197,7 +197,7 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-217'>RWC-217</a>] -         forceSigning is deprecated.
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-218'>RWC-218</a>] -         setSigningUrl missing a developer filter.
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-218'>RWC-218</a>] -         Allow data to be added to setSigningUrl
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-219'>RWC-219</a>] -         #10: According to how RCO works in the docs we probably should change canProcessOrder to avoid conflicts in the payment flow
 </li>
@@ -206,6 +206,10 @@ Also, github referenses are now added.
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-221'>RWC-221</a>] -         #14: During getMetaData-requests, make it possible to fetch getPaymentinfo
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-222'>RWC-222</a>] -         Synchronize billing address in synchronous mode
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-225'>RWC-225</a>] -         When activating other delivery address make sure to match the addressrow, to avoid weird addressing
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-228'>RWC-228</a>] -         #23: Credential validations by ajax must not activate getOptionsControl.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-33'>RWC-33</a>] -         woocommerce_resurs_bank_&#39; . $type . &#39;_checkout_icon (iconified method)
 </li>
