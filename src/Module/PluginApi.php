@@ -68,9 +68,10 @@ class PluginApi
 
     /**
      * @param $out
+     * @param bool $dieInstantly Set to exit after reply if true.
      * @since 0.0.1.0
      */
-    private static function reply($out = null)
+    private static function reply($out = null, $dieInstantly = true)
     {
         $success = true;
 
@@ -86,7 +87,9 @@ class PluginApi
 
         header('Content-type: application/json; charset=utf-8', true, 200);
         echo json_encode($out);
-        die();
+        if ($dieInstantly) {
+            die();
+        }
     }
 
     /**
@@ -344,59 +347,42 @@ class PluginApi
         );
 
         if ($validationResponse) {
-            self::getPaymentMethods();
+            self::getPaymentMethods(false);
             self::getNewCallbacks();
         }
 
-        self::reply([
-            'validation' => $validationResponse,
-        ]);
+        self::reply(
+            [
+                'validation' => $validationResponse,
+            ]
+        );
     }
 
     /**
+     * @param bool $reply
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getPaymentMethods()
+    public static function getPaymentMethods($reply = true)
     {
         // Re-fetch payment methods.
         Api::getPaymentMethods(false);
         Api::getAnnuityFactors(false);
-        self::reply([
-            'reload' => true,
-        ]);
-    }
-
-    /**
-     * Monitor credential changes.
-     * @param $option
-     * @param $old
-     * @param $new
-     * @since 0.0.1.0
-     */
-    public static function getOptionsControl($option, $old, $new)
-    {
-        $actOn = [
-            sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getNewMethods'],
-            sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
-            sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
-        ];
-        if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
-            foreach ($actOn[$option] as $execFunction) {
-                try {
-                    self::{$execFunction}();
-                } catch (Exception $e) {
-                }
-            }
+        if ($reply) {
+            self::reply([
+                'reload' => true,
+            ]);
         }
     }
 
     /**
+     * @param bool $reply
+     * @return bool[]
      * @throws Exception
      * @since 0.0.1.0
      * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
-    public static function getNewCallbacks()
+    public static function getNewCallbacks($reply = true)
     {
         $callbacks = [
             Callback::UNFREEZE,
@@ -514,6 +500,30 @@ class PluginApi
         }
 
         return $return;
+    }
+
+    /**
+     * Monitor credential changes.
+     * @param $option
+     * @param $old
+     * @param $new
+     * @since 0.0.1.0
+     */
+    public static function getOptionsControl($option, $old, $new)
+    {
+        $actOn = [
+            sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getNewMethods'],
+            sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
+            sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
+        ];
+        if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
+            foreach ($actOn[$option] as $execFunction) {
+                try {
+                    self::{$execFunction}();
+                } catch (Exception $e) {
+                }
+            }
+        }
     }
 
     /**
