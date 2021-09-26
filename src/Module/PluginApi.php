@@ -342,6 +342,11 @@ class PluginApi
             )
         );
 
+        if ($validationResponse) {
+            self::getPaymentMethods();
+            self::getNewCallbacks();
+        }
+
         self::reply([
             'validation' => $validationResponse,
         ]);
@@ -375,7 +380,7 @@ class PluginApi
             sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
             sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
         ];
-        if ($old !== $new && isset($actOn[$option])) {
+        if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
             foreach ($actOn[$option] as $execFunction) {
                 try {
                     self::{$execFunction}();
