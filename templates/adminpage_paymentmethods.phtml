@@ -19,6 +19,7 @@
             <td width="20%" class="resursMethodHead"><?php _e('Amount limits', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Method type', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Customer types', 'trbwc') ?></td>
+            <!--<td width="20%" class="resursMethodHead"><?php _e('Fee', 'trbwc') ?></td>-->
         </tr>
         <?php
         if (is_array($paymentMethods) && count($paymentMethods)) {
@@ -41,6 +42,12 @@
                     <td class="resursMethodBody">
                         <?php echo implode(', ', (array)$methodObject->customerType); ?>
                     </td>
+                    <!--<td class="resursMethodBody">
+                        <?php
+/*                        // Adaptive section for editing fee in future.
+                        //echo isset($methodObject->fee) ? $methodObject->fee : 0
+                        */?>
+                    </td>-->
                 </tr>
                 <?php
             }
@@ -50,4 +57,4 @@
     <div style="border: 1px solid darkred; padding: 5px; background: #EA9090FF; margin-bottom: 5px;">
         <?php echo $exception->getMessage() ?> (Code <?php echo $exception->getCode() ?>)
     </div>
-<?php }?>
+<?php } ?>
