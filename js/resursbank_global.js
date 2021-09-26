@@ -36,6 +36,10 @@ function trbwcLog(consEntry) {
  * @since 0.0.1.0
  */
 function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMethod) {
+    var failMethod = null;
+    if (typeof arguments[4] !== 'undefined') {
+        failMethod = arguments[4];
+    }
     if (typeof requestData === 'object') {
         if (typeof requestData['action'] === 'undefined') {
             requestData['action'] = requestVerb;
@@ -57,6 +61,9 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
                 callbackMethod(data, textStatus, jqXhr)
             } else {
                 getResursError(data);
+                if (typeof failMethod === 'function') {
+                    failMethod(data, textStatus, jqXhr);
+                }
             }
         }
     ).fail(

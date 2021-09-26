@@ -1041,7 +1041,7 @@ class ResursDefault extends WC_Payment_Gateway
             }
         }
 
-        if (!is_admin() && Data::isEnabled()) {
+        if (!is_admin() && !Data::isEnabled()) {
             $return = false;
         }
 

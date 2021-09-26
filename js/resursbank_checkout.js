@@ -349,7 +349,8 @@ function getRbwcDeliveryTruth(contentArray) {
  */
 function setRbwcGenericError(errorMessage) {
     var checkoutForm = $rQuery('form.checkout');
-    $rQuery('.woocommerce-error, .woocommerce-message').remove();
+    $rQuery('.woocommerce-error').remove();
+    $rQuery('.woocommerce-message').remove();
     checkoutForm.prepend(
         $rQuery('<div>', {class: 'woocommerce-error'}).html(errorMessage)
     );
