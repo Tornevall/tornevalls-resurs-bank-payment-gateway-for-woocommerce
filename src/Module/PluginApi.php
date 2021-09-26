@@ -204,6 +204,7 @@ class PluginApi
      */
     private static function getPreparedRcoOrder()
     {
+        // Remove this, when it's safe. As it seems, this class is never used when RCO is initiated.
         //self::$resursDefault = new ResursDefault();
         self::$resursCheckout = new ResursCheckout();
         $billingAddress = self::$resursCheckout->getCustomerFieldsByApiVersion();
