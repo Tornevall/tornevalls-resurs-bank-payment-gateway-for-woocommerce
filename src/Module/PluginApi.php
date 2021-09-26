@@ -119,7 +119,7 @@ class PluginApi
      * @return bool
      * @since 0.0.1.0
      */
-    private static function getValidatedNonce($expire = null, $noReply = null)
+    public static function getValidatedNonce($expire = null, $noReply = null)
     {
         $return = false;
         $expired = false;
@@ -365,6 +365,8 @@ class PluginApi
      */
     public static function getPaymentMethods($reply = true)
     {
+        self::getValidatedNonce();
+
         // Re-fetch payment methods.
         Api::getPaymentMethods(false);
         Api::getAnnuityFactors(false);
@@ -386,7 +388,6 @@ class PluginApi
     }
 
     /**
-     * @param bool $reply
      * @return bool[]
      * @throws Exception
      * @since 0.0.1.0
@@ -394,6 +395,7 @@ class PluginApi
      */
     public static function getNewCallbacks()
     {
+        self::getValidatedNonce();
         $callbacks = [
             Callback::UNFREEZE,
             Callback::TEST,
@@ -510,6 +512,32 @@ class PluginApi
         }
 
         return $return;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function callbackUnregister()
+    {
+        $successRemoval = false;
+        $callback = WooCommerce::getRequest('callback');
+        $message = '';
+        if ((bool)Data::getResursOption('show_developer')) {
+            $successRemoval = Api::getResurs()->unregisterEventCallback(
+                Api::getResurs()->getCallbackTypeByString($callback)
+            );
+        } else {
+            $message = __('Advanced mode is disabled. You can not make this change.', 'trbwc');
+        }
+
+        self::reply(
+            [
+                'unreg' => $successRemoval,
+                'callback' => $callback,
+                'message' => $message,
+            ]
+        );
     }
 
     /**

@@ -44,7 +44,7 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
         if (typeof requestData['action'] === 'undefined') {
             requestData['action'] = requestVerb;
         }
-        if (typeof requestData['n'] === 'undefined' || requestData['n'] === '') {
+        if (typeof requestData['n'] === 'undefined' || requestData['n'] === '' || requestData['n'] === true) {
             requestData['n'] = getResursLocalization('noncify');
         }
     }
@@ -83,6 +83,9 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
  * @since 0.0.1.0
  */
 function getResursError(data) {
+    if (typeof data['error'] !== 'undefined') {
+        alert(getResursLocalization('nonce_error'));
+    }
     console.log("RBWC Ajax Backend Error: ", data);
 }
 

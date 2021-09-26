@@ -54,7 +54,7 @@ function getDeprecatedCredentialsForm() {
  */
 function getResursPaymentMethods() {
     getResursSpin('#div_trbwc_admin_payment_methods_button');
-    getResursAjaxify('post', 'resursbank_get_payment_methods', {}, function () {
+    getResursAjaxify('post', 'resursbank_get_payment_methods', {'n': true}, function () {
         $rQuery('#div_trbwc_admin_payment_methods_button').html(
             $rQuery('<div>', {
                 'style': 'font-weight: bold; color: #000099;'
@@ -69,7 +69,7 @@ function getResursPaymentMethods() {
  */
 function getResursCallbacks() {
     getResursSpin('#div_trbwc_admin_callbacks_button');
-    getResursAjaxify('post', 'resursbank_get_new_callbacks', {}, function () {
+    getResursAjaxify('post', 'resursbank_get_new_callbacks', {'n': ''}, function () {
         $rQuery('#div_trbwc_admin_callbacks_button').html(
             $rQuery('<div>', {
                 'style': 'font-weight: bold; color: #000099;'
@@ -193,12 +193,51 @@ function getResursAdminPasswordButton() {
 }
 
 /**
+ * Restore the removal button after spinner.
+ * @param cbid
+ * @since 0.0.1.0
+ */
+function getCallbackButtonRestored(cbid) {
+    $rQuery('#remove_cb_btn_' + cbid).html($rQuery('<button>', {
+        type: 'button',
+        click: function () {
+            doResursRemoveCallback(cbid)
+        }
+    }).html('X'));
+}
+
+/**
  * unregisterEventCallback
  * @param cbid
  * @since 0.0.1.0
  */
 function doResursRemoveCallback(cbid) {
-    alert("Remove " + cbid);
+    if (confirm(getResursLocalization('remove_callback_confirm') + cbid + '?')) {
+        getResursSpin('#remove_cb_btn_' + cbid);
+
+        getResursAjaxify(
+            'post',
+            'resursbank_callback_unregister',
+            {
+                'callback': cbid,
+                'n': true
+            },
+            function (data) {
+                if (typeof data['unreg'] !== 'undefined' &&
+                    data['unreg'] === true &&
+                    data['callback'] !== ''
+                ) {
+                    $rQuery('#callback_row_' + data['callback']).hide('medium');
+                } else {
+                    getCallbackButtonRestored(data['callback']);
+                    // There might be a denial here that needs to be alerted.
+                    if (data['message'] !== '') {
+                        alert(data['message']);
+                    }
+                }
+            }
+        );
+    }
 }
 
 /**
@@ -212,6 +251,7 @@ function doResursUpdateCallback(cbid) {
 }
 
 /**
+ * Handle credentials from legacy versions.
  * @since 0.0.1.0
  */
 function getResursDeprecatedLogin() {
