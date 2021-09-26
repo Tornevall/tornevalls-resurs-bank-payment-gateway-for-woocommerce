@@ -68,7 +68,11 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
         }
     ).fail(
         function (data, textStatus, jqXhr) {
-            callbackMethod(data, textStatus, jqXhr);
+            if (typeof failMethod === 'function') {
+                failMethod(data, textStatus, jqXhr);
+            } else {
+                callbackMethod(data, textStatus, jqXhr);
+            }
             getResursError(data.statusText);
         }
     );
