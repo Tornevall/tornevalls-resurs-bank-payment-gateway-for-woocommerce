@@ -292,6 +292,7 @@ class WordPress
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getOldSelfAwareness()

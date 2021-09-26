@@ -879,7 +879,7 @@ class WooCommerce
     /**
      * @param $order
      * @return bool
-     * @throws ResursException
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getCustomerRealAddress($order)
