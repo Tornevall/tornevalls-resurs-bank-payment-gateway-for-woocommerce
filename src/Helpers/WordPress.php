@@ -112,16 +112,16 @@ class WordPress
     private static function setupActions()
     {
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-        add_action('admin_notices', 'ResursBank\Helpers\WordPress::getAdminNotices');
-        add_action('rbwc_get_localized_scripts', 'ResursBank\Helpers\WordPress::getLocalizedScripts', 10, 3);
-        add_action('rbwc_localizations_admin', 'ResursBank\Helpers\WordPress::getLocalizedScriptsDeprecated', 10, 2);
-        add_action('wp_ajax_' . $action, 'ResursBank\Module\PluginApi::execApi');
-        add_action('wp_ajax_nopriv_' . $action, 'ResursBank\Module\PluginApi::execApiNoPriv');
-        add_action('woocommerce_admin_field_button', 'ResursBank\Module\FormFields::getFieldButton', 10, 2);
-        add_action('woocommerce_admin_field_decimal_warning', 'ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
-        add_action('woocommerce_admin_field_methodlist', 'ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
-        add_action('woocommerce_admin_field_callbacklist', 'ResursBank\Module\FormFields::getFieldCallbackList', 10, 2);
-        add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
+        add_action('admin_notices', '\ResursBank\Helpers\WordPress::getAdminNotices');
+        add_action('rbwc_get_localized_scripts', '\ResursBank\Helpers\WordPress::getLocalizedScripts', 10, 3);
+        add_action('rbwc_localizations_admin', '\ResursBank\Helpers\WordPress::getLocalizedScriptsDeprecated', 10, 2);
+        add_action('wp_ajax_' . $action, '\ResursBank\Module\PluginApi::execApi');
+        add_action('wp_ajax_nopriv_' . $action, '\ResursBank\Module\PluginApi::execApiNoPriv');
+        add_action('woocommerce_admin_field_button', '\ResursBank\Module\FormFields::getFieldButton', 10, 2);
+        add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
+        add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
+        add_action('woocommerce_admin_field_callbacklist', '\ResursBank\Module\FormFields::getFieldCallbackList', 10, 2);
+        add_filter('woocommerce_get_settings_general', '\ResursBank\Module\Data::getGeneralSettings');
         add_action('updated_option', '\ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         // Checkout Actions.
         if (Data::isEnabled()) {
