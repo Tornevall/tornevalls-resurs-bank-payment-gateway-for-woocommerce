@@ -565,14 +565,18 @@ class PluginApi
             'errorstring' => '',
             'errorcode' => 0,
         ];
-        self::getValidatedNonce();
-        try {
-            self::getNewCallbacks(false);
-            Api::getPaymentMethods(false);
-            Api::getAnnuityFactors(false);
-        } catch (\Exception $e) {
-            $return['errorstring'] = $e->getMessage();
-            $return['errorcode'] = $e->getCode();
+        if (is_admin()) {
+            try {
+                self::getNewCallbacks(false);
+                Api::getPaymentMethods(false);
+                Api::getAnnuityFactors(false);
+            } catch (\Exception $e) {
+                $return['errorstring'] = $e->getMessage();
+                $return['errorcode'] = $e->getCode();
+            }
+        } else {
+            $return['errorstring'] = 'Not admin';
+            $return['errorcode'] = 401;
         }
 
         self::reply(
