@@ -1020,6 +1020,14 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $return = parent::is_available();
         $customerType = Data::getCustomerType();
+        // This feature is primarily for the storefront.
+        if (!method_exists($this, 'get_order_total') || !is_admin()) {
+            return Data::isEnabled();
+        }
+        // If this feature is not missing the method, we now know that there is chance that we're
+        // located in a checkout. We will in this moment run through the min-max amount that resides
+        // in each payment method that is requested here. If the payment method is not present,
+        // this one will be skipped and the rest of the function will fail over to the parent value.
         if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
             $minMax = Api::getResurs()->getMinMax(
                 $this->get_order_total(),
@@ -1039,10 +1047,6 @@ class ResursDefault extends WC_Payment_Gateway
                     true
                 );
             }
-        }
-
-        if (!is_admin() && !Data::isEnabled()) {
-            $return = false;
         }
 
         return $return;
