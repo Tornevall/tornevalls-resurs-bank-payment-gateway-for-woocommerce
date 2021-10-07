@@ -37,7 +37,21 @@ function getCallbackMatches() {
                 var canUpdate = confirm(getResursLocalization('update_callbacks_required'));
                 if (canUpdate) {
                     getResursAjaxify('post', 'get_internal_resynch', {'n': true}, function () {
-                        alert(getResursLocalization('update_callbacks_refresh'));
+                        if ($rQuery('#button_trbwc_admin_payment_methods_button').length > 0) {
+                            $rQuery('#div_trbwc_admin_payment_methods_button').html(
+                                $rQuery('<div>', {
+                                    'style': 'font-weight: bold; color: #000099;'
+                                }).html(getResursLocalization('reloading'))
+                            );
+                            $rQuery('#div_trbwc_admin_callbacks_button').html(
+                                $rQuery('<div>', {
+                                    'style': 'font-weight: bold; color: #000099;'
+                                }).html(getResursLocalization('reloading'))
+                            );
+                            document.location.reload();
+                        } else {
+                            alert(getResursLocalization('update_callbacks_refresh'));
+                        }
                     });
                 }
             }
