@@ -655,7 +655,8 @@ class WooCommerce
         ];
 
         // If there is a payment, there must be a digest.
-        if (!empty(self::getRequest('p'))) {
+        $pRequest = self::getRequest('p');
+        if (!empty($pRequest)) {
             $orderId = Data::getOrderByEcomRef(self::getRequest('p'));
 
             if ($orderId) {
@@ -665,13 +666,31 @@ class WooCommerce
                 );
             }
 
-            Data::setOrderMeta(
-                $order,
-                sprintf('callback_%s_receive', $callbackType),
-                strftime('%Y-%m-%d %H:%M:%S', time()),
-                true,
-                true
-            );
+            if ($order === null) {
+                Data::setLogError(
+                    sprintf(
+                        __(
+                            'Callback with parameter %s received, but failed because $order could not instantiate and remained null.',
+                            'trbwc'
+                        ),
+                        $pRequest
+                    )
+                );
+            }
+
+            try {
+                Data::setOrderMeta(
+                    $order,
+                    sprintf('callback_%s_receive', $callbackType),
+                    strftime('%Y-%m-%d %H:%M:%S', time()),
+                    true,
+                    true
+                );
+            } catch (Exception $e) {
+                Data::setLogException(
+                    $e
+                );
+            }
 
             if ($getConfirmedSalt && $orderId) {
                 try {

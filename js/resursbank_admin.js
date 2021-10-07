@@ -3,6 +3,7 @@
  */
 $rQuery(document).ready(function ($) {
     getResursAdminFields();
+    getCallbackMatches();
 });
 
 var resursCallbackActiveTime = 0;
@@ -18,6 +19,30 @@ var resursCallbackReceiveSuccess = false;
 function getResursAdminFields() {
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
+}
+
+/**
+ * Make sure we have data up-to-date.
+ * @since 0.0.1.0
+ */
+function getCallbackMatches() {
+    getResursAjaxify(
+        'GET',
+        'resursbank_get_callback_matches',
+        {
+            'n': true
+        },
+        function (data) {
+            if (typeof data['requireRefresh'] !== "undefined" && data['requireRefresh'] === true) {
+                var canUpdate = confirm(getResursLocalization('update_callbacks_required'));
+                if (canUpdate) {
+                    getResursAjaxify('post', 'get_internal_resynch', {'n': true}, function () {
+                        alert(getResursLocalization('update_callbacks_refresh'));
+                    });
+                }
+            }
+        }
+    )
 }
 
 /**

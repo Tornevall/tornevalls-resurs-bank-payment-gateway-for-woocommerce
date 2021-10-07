@@ -57,6 +57,9 @@ class WordPress
             'checkout_create_order',
             'purchase_reject',
             'callback_unregister',
+            'get_callback_matches',
+            'get_callback_matches',
+            'get_internal_resynch',
         ];
 
         foreach ($actionList as $action) {
@@ -604,6 +607,14 @@ class WordPress
         );
         $return['remove_callback_confirm'] = __(
             'Are you sure you want to remove callback ',
+            'trbwc'
+        );
+        $return['update_callbacks_required'] = __(
+            'Callback URLs for Resurs Bank may be outdated. Do you want to refresh the current data?',
+            'trbwc'
+        );
+        $return['update_callbacks_refresh'] = __(
+            'Refresh has finished. Please check your new settings to confirm the update.',
             'trbwc'
         );
 

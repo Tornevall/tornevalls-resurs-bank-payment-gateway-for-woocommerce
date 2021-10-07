@@ -33,6 +33,18 @@ class PluginApi
     private static $resursDefault;
 
     /**
+     * List of callbacks required for this plugin to handle payments properly.
+     * @var array
+     * @since 0.0.1.0
+     */
+    private static $callbacks = [
+        Callback::UNFREEZE,
+        Callback::TEST,
+        Callback::UPDATE,
+        Callback::BOOKED,
+    ];
+
+    /**
      * @since 0.0.1.0
      */
     public static function execApi()
@@ -393,21 +405,17 @@ class PluginApi
      * @since 0.0.1.0
      * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
-    public static function getNewCallbacks()
+    public static function getNewCallbacks($validate = true)
     {
-        self::getValidatedNonce();
-        $callbacks = [
-            Callback::UNFREEZE,
-            Callback::TEST,
-            Callback::UPDATE,
-            Callback::BOOKED,
-        ];
+        if ($validate) {
+            self::getValidatedNonce();
+        }
 
         Api::getResurs()->unregisterEventCallback(
             Callback::FINALIZATION & Callback::ANNULMENT & Callback::AUTOMATIC_FRAUD_CONTROL,
             true
         );
-        foreach ($callbacks as $ecomCallbackId) {
+        foreach (self::$callbacks as $ecomCallbackId) {
             $callbackUrl = self::getCallbackUrl(self::getCallbackParams($ecomCallbackId));
             try {
                 Data::setLogNotice(sprintf('Callback Registration: %s.', $callbackUrl));
@@ -512,6 +520,64 @@ class PluginApi
         }
 
         return $return;
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function getCallbackMatches()
+    {
+        $callbackConstant = 0;
+        $return['requireRefresh'] = false;
+        $return['similarity'] = 0;
+
+        foreach (self::$callbacks as $callback) {
+            $callbackConstant += $callback;
+        }
+
+        $freshCallbackList = Api::getResurs()->getRegisteredEventCallback($callbackConstant);
+        $storedCallbacks = Data::getResursOption('callbacks');
+
+        if (empty($storedCallbacks)) {
+            $return['requireRefresh'] = true;
+        } else {
+            foreach (self::$callbacks as $callback) {
+                $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
+                similar_text($expectedUrl, $freshCallbackList[Api::getResurs()->getCallbackTypeString($callback)],
+                    $percentualValue);
+                if ($percentualValue < 90) {
+                    $return['requireRefresh'] = true;
+                }
+                $return['similarity'] = $percentualValue;
+            }
+        }
+
+        self::reply($return);
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function getInternalResynch()
+    {
+        $return = [
+            'reload' => false,
+            'errorstring' => '',
+            'errorcode' => 0,
+        ];
+        self::getValidatedNonce();
+        try {
+            self::getNewCallbacks(false);
+            Api::getPaymentMethods(false);
+            Api::getAnnuityFactors(false);
+        } catch (\Exception $e) {
+            $return['errorstring'] = $e->getMessage();
+            $return['errorcode'] = $e->getCode();
+        }
+
+        self::reply(
+            $return
+        );
     }
 
     /**
