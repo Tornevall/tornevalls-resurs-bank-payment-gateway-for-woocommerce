@@ -19,6 +19,19 @@ SoapClient is required for AfterShop related actions like debiting, crediting, a
 There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you tend
 to use **this** plugin as it is an upgrade from the Resurs supported release.
 
+= Requirements =
+* WooCommerce: v3.4.0 or higher (old features are ditched) and the actual support is set much higher.
+* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly
+  recommended to go for the latest version as soon as possible if you're not already there.
+* HTTPS *must* be enabled in both directions. This is a callback security measure.
+* XML and SoapClient must be available.
+* Curl is *recommended* but not necessary.
+* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug
+  2021, both WooCommerce and WordPress is about to jump into 7.4 and higher.
+  Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions
+  of PHP.
+
+
 Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details.
 
 
