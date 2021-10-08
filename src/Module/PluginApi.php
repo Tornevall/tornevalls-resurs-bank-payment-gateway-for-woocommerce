@@ -639,7 +639,7 @@ class PluginApi
                     }
                 } catch (Exception $e) {
                     if (is_admin() && $e->getCode() === 401) {
-                        // Add error note.
+                        // @todo RWC-234 github #32
                     }
                 }
             }
