@@ -638,6 +638,9 @@ class PluginApi
                             self::{$execFunction}();
                     }
                 } catch (Exception $e) {
+                    if (is_admin() && $e->getCode() === 401) {
+                        // Add error note.
+                    }
                 }
             }
         }
