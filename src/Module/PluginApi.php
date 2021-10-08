@@ -627,7 +627,13 @@ class PluginApi
         if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
             foreach ($actOn[$option] as $execFunction) {
                 try {
-                    self::{$execFunction}();
+                    switch ($execFunction) {
+                        case 'getNewCallbacks':
+                            self::{$execFunction}(false);
+                            break;
+                        default:
+                            self::{$execFunction}();
+                    }
                 } catch (Exception $e) {
                 }
             }

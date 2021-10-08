@@ -242,11 +242,12 @@ class WordPress
     }
 
     /**
+     * Run deprecated filter features, use the new definitions instead. This handler should not even be necessary.
+     *
      * @param $filterName
      * @param $value
      * @return mixed|void
      * @since 0.0.1.0
-     * @deprecated Marked deprecated, use the new definitions instead.
      */
     public static function applyFiltersDeprecated($filterName, $value)
     {

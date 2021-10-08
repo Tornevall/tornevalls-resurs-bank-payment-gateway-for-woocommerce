@@ -168,7 +168,8 @@ class ResursDefault extends WC_Payment_Gateway
         $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'trbwc');
         $this->title = __('Resurs Bank AB', 'trbwc');
         $this->setPaymentMethodInformation($resursPaymentMethodObject);
-        $this->has_fields = (Data::getCheckoutType() === self::TYPE_SIMPLIFIED ||
+        $this->has_fields = (
+            Data::getCheckoutType() === self::TYPE_SIMPLIFIED ||
             Data::getCheckoutType() === self::TYPE_HOSTED
         );
         if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)) {
@@ -1019,11 +1020,11 @@ class ResursDefault extends WC_Payment_Gateway
     public function is_available()
     {
         $return = parent::is_available();
-        $customerType = Data::getCustomerType();
         // This feature is primarily for the storefront.
         if (!method_exists($this, 'get_order_total') || !is_admin()) {
             return Data::isEnabled();
         }
+        $customerType = Data::getCustomerType();
         // If this feature is not missing the method, we now know that there is chance that we're
         // located in a checkout. We will in this moment run through the min-max amount that resides
         // in each payment method that is requested here. If the payment method is not present,

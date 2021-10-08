@@ -117,7 +117,6 @@ class WooCommerce
     private static function getGatewaysFromPaymentMethods($gateways)
     {
         $methodList = Api::getPaymentMethods();
-
         $currentCheckoutType = Data::getCheckoutType();
         if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
             $currentCheckoutType !== ResursDefault::TYPE_RCO
