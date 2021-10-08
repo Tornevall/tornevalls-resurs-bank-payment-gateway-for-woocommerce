@@ -629,6 +629,9 @@ class PluginApi
                 try {
                     switch ($execFunction) {
                         case 'getNewCallbacks':
+                            // This function is called from front-end too and in such cases it does nonce
+                            // checks. When saving from admin, nonce checks are not needed - it rather breaks
+                            // the saving itself. So in this particular case, nonce checks are disabled.
                             self::{$execFunction}(false);
                             break;
                         default:
