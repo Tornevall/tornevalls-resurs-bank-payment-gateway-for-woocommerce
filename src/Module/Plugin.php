@@ -15,7 +15,25 @@ class Plugin
     {
         add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
         add_filter('rbwc_get_payment_method_icon', [$this, 'getMethodIconByContent'], 10, 2);
+        add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
+    }
+
+    /**
+     * Custom content for part payment data.
+     * @return string
+     * @since 0.0.1.0
+     */
+    public function getPartPaymentWidgetPage()
+    {
+        $return = '';
+
+        $partPaymentWidgetId = Data::getResursOption('part_payment_template');
+        if ($partPaymentWidgetId) {
+            $return = get_post($partPaymentWidgetId)->post_content;
+        }
+
+        return $return;
     }
 
     /**

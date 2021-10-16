@@ -285,78 +285,19 @@ class Data
     }
 
     /**
-     * @return string
-     * @version 0.0.1.0
+     * @since 0.0.1.0
      */
-    public static function getGatewayBackend()
+    public static function getAnnuityFactors()
     {
-        return sprintf(
-            '%s?action=resurs_bank_backend',
-            admin_url('admin-ajax.php')
-        );
-    }
+        global $product;
 
-    /**
-     * @param bool $isAdmin
-     * @return array
-     * @version 0.0.1.0
-     */
-    public static function getPluginScripts($isAdmin = null)
-    {
-        if ($isAdmin) {
-            $return = self::$jsLoadersAdmin;
-        } else {
-            $return = array_merge(
-                self::$jsLoaders,
-                is_checkout() ? WordPress::applyFilters('jsLoadersCheckout', self::$jsLoadersCheckout) : []
+        if (is_object($product) && !empty(self::getResursOption('currentAnnuityFactor'))) {
+            self::getAnnuityHtml(
+                wc_get_price_to_display($product),
+                self::getResursOption('currentAnnuityFactor'),
+                (int)self::getResursOption('currentAnnuityDuration')
             );
         }
-
-        return $return;
-    }
-
-    /**
-     * @param bool $isAdmin
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getPluginStyles($isAdmin = null)
-    {
-        if ($isAdmin) {
-            $return = self::$stylesAdmin;
-        } else {
-            $return = self::$styles;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $scriptName
-     * @param $isAdmin
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getJsDependencies($scriptName, $isAdmin)
-    {
-        if ($isAdmin) {
-            $return = isset(self::$jsDependenciesAdmin[$scriptName]) ? self::$jsDependenciesAdmin[$scriptName] : [];
-        } else {
-            $return = isset(self::$jsDependencies[$scriptName]) ? self::$jsDependencies[$scriptName] : [];
-        }
-
-        return $return;
-    }
-
-    /**
-     * Returns test mode boolean.
-     *
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getTestMode()
-    {
-        return in_array(self::getResursOption('environment'), ['test', 'staging']);
     }
 
     /**
@@ -486,6 +427,219 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @param $wcDisplayPrice
+     * @param $annuityMethod
+     * @param $annuityDuration
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getAnnuityHtml($wcDisplayPrice, $annuityMethod, $annuityDuration)
+    {
+        $customerCountry = self::getCustomerCountry();
+        switch ($customerCountry) {
+            case 'FI':
+                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15);
+                break;
+            default:
+                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150);
+        }
+
+        $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
+        if ($monthlyPrice >= $minimumPaymentLimit || Data::getResursOption('environment') === 'test') {
+            $partPayString = self::getPartPayStringByTags(
+                WordPress::applyFilters(
+                    'partPaymentString',
+                    sprintf(
+                        __('Part pay from %s per month.', 'trbwc'),
+                        self::getWcPriceSpan($monthlyPrice)
+                    )
+                ),
+                [
+                    'monthlyPrice' => $monthlyPrice,
+                    'monthlyDuration' => $annuityDuration,
+                    'paymentLimit' => $minimumPaymentLimit
+                ]
+            );
+            $annuityTemplate = Data::getGenericClass()->getTemplate(
+                'product_annuity.phtml',
+                [
+                    'monthlyPrice' => $monthlyPrice,
+                    'monthlyDuration' => $annuityDuration,
+                    'partPayString' => $partPayString,
+                ]
+            );
+
+            echo $annuityTemplate;
+        }
+    }
+
+    /**
+     * @return false|mixed|void
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getCustomerCountry()
+    {
+        global $woocommerce;
+        /** @var WC_Customer $wcCustomer */
+        $wcCustomer = $woocommerce->customer;
+
+        $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
+        $return = !empty($woocommerceCustomerCountry) ?
+            $woocommerceCustomerCountry : get_option('woocommerce_default_country');
+
+        return $return;
+    }
+
+    /**
+     * @param $content
+     * @since 0.0.1.0
+     */
+    private static function getPartPayStringByTags($content, $data)
+    {
+        $tags = self::getCompatibleTags(
+            [
+                'monthlyPrice' => $data['monthlyPrice'],
+                'monthlyDuration' => $data['monthlyDuration'],
+            ],
+            $data
+        );
+        $replaceTags = [];
+        $replaceWith = [];
+        foreach ($tags as $tagKey => $tagValue) {
+            $replaceTags[] = sprintf('/\[%s\]/i', $tagKey);
+            $replaceWith[] = $tagValue;
+        }
+
+        return preg_replace(
+            $replaceTags,
+            $replaceWith,
+            $content
+        );
+    }
+
+    /**
+     * @param $replaceTags
+     * @param $data
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getCompatibleTags($replaceTags, $data)
+    {
+        $v2 = [
+            'payFromAnnuity' => wc_price($data['monthlyPrice']),
+            'payFrom' => $data['monthlyPrice'],
+            'paymentLimit' => $data['paymentLimit'],
+            'annuityDuration' => $data['monthlyDuration'],
+            'costOfPurchase' => null,
+            'defaultAnnuityString' => null,
+            'annuityFactors' => null,
+        ];
+
+
+        return array_merge($replaceTags, $v2);
+    }
+
+    /**
+     * @param $monthlyPrice
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getWcPriceSpan($monthlyPrice)
+    {
+        return sprintf('<span id="r_annuity_price">%s</span>', wc_price($monthlyPrice));
+    }
+
+    /**
+     * @return Generic
+     * @since 0.0.1.0
+     */
+    public static function getGenericClass()
+    {
+        if (self::$genericClass !== Generic::class) {
+            self::$genericClass = new Generic();
+            self::$genericClass->setTemplatePath(self::getGatewayPath('templates'));
+        }
+
+        return self::$genericClass;
+    }
+
+    /**
+     * @return string
+     * @version 0.0.1.0
+     */
+    public static function getGatewayBackend()
+    {
+        return sprintf(
+            '%s?action=resurs_bank_backend',
+            admin_url('admin-ajax.php')
+        );
+    }
+
+    /**
+     * @param bool $isAdmin
+     * @return array
+     * @version 0.0.1.0
+     */
+    public static function getPluginScripts($isAdmin = null)
+    {
+        if ($isAdmin) {
+            $return = self::$jsLoadersAdmin;
+        } else {
+            $return = array_merge(
+                self::$jsLoaders,
+                is_checkout() ? WordPress::applyFilters('jsLoadersCheckout', self::$jsLoadersCheckout) : []
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param bool $isAdmin
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getPluginStyles($isAdmin = null)
+    {
+        if ($isAdmin) {
+            $return = self::$stylesAdmin;
+        } else {
+            $return = self::$styles;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $scriptName
+     * @param $isAdmin
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getJsDependencies($scriptName, $isAdmin)
+    {
+        if ($isAdmin) {
+            $return = isset(self::$jsDependenciesAdmin[$scriptName]) ? self::$jsDependenciesAdmin[$scriptName] : [];
+        } else {
+            $return = isset(self::$jsDependencies[$scriptName]) ? self::$jsDependencies[$scriptName] : [];
+        }
+
+        return $return;
+    }
+
+    /**
+     * Returns test mode boolean.
+     *
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getTestMode()
+    {
+        return in_array(self::getResursOption('environment'), ['test', 'staging']);
     }
 
     /**
@@ -655,20 +809,6 @@ class Data
         }
 
         return $wrapperList;
-    }
-
-    /**
-     * @return Generic
-     * @since 0.0.1.0
-     */
-    public static function getGenericClass()
-    {
-        if (self::$genericClass !== Generic::class) {
-            self::$genericClass = new Generic();
-            self::$genericClass->setTemplatePath(self::getGatewayPath('templates'));
-        }
-
-        return self::$genericClass;
     }
 
     /**
@@ -1437,24 +1577,6 @@ class Data
     public static function isGetAddressSupported()
     {
         return in_array(self::getCustomerCountry(), ['NO', 'SE'], true);
-    }
-
-    /**
-     * @return false|mixed|void
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getCustomerCountry()
-    {
-        global $woocommerce;
-        /** @var WC_Customer $wcCustomer */
-        $wcCustomer = $woocommerce->customer;
-
-        $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
-        $return = !empty($woocommerceCustomerCountry) ?
-            $woocommerceCustomerCountry : get_option('woocommerce_default_country');
-
-        return $return;
     }
 
     /**

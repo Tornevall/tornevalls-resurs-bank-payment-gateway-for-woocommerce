@@ -1,0 +1,20 @@
+<div id="r_annuity_p_<?php echo $id ?>">
+    <select class="r_annuity" id="r_annuity_select_<?php echo $id ?>"
+            onclick="setResursAnnuityClick(this, '<?php echo $id ?>', 'set')"
+    >
+        <?php echo $options ?>
+    </select>
+    <div id="r_activity_<?php echo $id ?>"></div>
+</div>
+<!--
+<button id="r_annuity_button_<?php echo $id ?>" type="button"
+        onclick="setResursAnnuityClick(this, '<?php echo $id ?>', 'click')"
+>
+<?php
+    if (!$enabled) {
+        _e('Enable', 'trbwc');
+    } else {
+        _e('Disable', 'trbwc');
+    }
+    ?></button><span id="r_activity_<?php echo $id ?>"></span>
+-->

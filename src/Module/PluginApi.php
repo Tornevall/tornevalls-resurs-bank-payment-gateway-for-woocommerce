@@ -73,7 +73,7 @@ class PluginApi
      */
     private static function getTrimmedActionString($action)
     {
-        $action = ltrim($action, 'resursbank_');
+        $action = preg_replace('/^resursbank_/i', '', $action);
 
         return $action;
     }
@@ -528,6 +528,62 @@ class PluginApi
         }
 
         return $return;
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function setNewAnnuity()
+    {
+        //self::getValidatedNonce();
+
+        $mode = WooCommerce::getRequest('mode');
+
+        switch ($mode) {
+            case 'e':
+                Data::setResursOption(
+                    'currentAnnuityFactor',
+                    WooCommerce::getRequest('id')
+                );
+                Data::setResursOption(
+                    'currentAnnuityDuration',
+                    (int)WooCommerce::getRequest('duration')
+                );
+                break;
+            case 'd':
+                Data::delResursOption('currentAnnuityFactor');
+                Data::delResursOption('currentAnnuityDuration');
+                break;
+            default:
+        }
+
+        // Confirm Request.
+        self::reply(
+            [
+                'id' => WooCommerce::getRequest('id'),
+                'duration' => Data::getResursOption('currentAnnuityDuration'),
+                'mode' => WooCommerce::getRequest('mode'),
+            ]
+        );
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getNewAnnuityCalculation()
+    {
+        self::reply(
+            [
+                'price' => wc_price(
+                    Api::getResurs()->getAnnuityPriceByDuration(
+                        WooCommerce::getRequest('price'),
+                        Data::getResursOption('currentAnnuityFactor'),
+                        (int)Data::getResursOption('currentAnnuityDuration')
+                    )
+                ),
+            ]
+        );
     }
 
     /**

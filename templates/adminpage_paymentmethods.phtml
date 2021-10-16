@@ -3,22 +3,28 @@
 <?php if ($exception === null) { ?>
     <div style="font-style: italic;margin-bottom: 5px;">
         <?php
-        _e('Amount limits: Defines from-to which order amount a payment method will be displayed in the checkout.',
-            'trbwc')
+        _e(
+            'Amount limits: Defines from-to which order amount a payment method will be displayed in the checkout.',
+            'trbwc'
+        )
         ?><br>
         <?php
-        _e('Customer types: Which customers that can take advantage of a specific payment method (NATURAL: ' .
-            'Private customers, LEGAL: Company based customers).', 'trbwc')
+        _e(
+            'Customer types: Which customers that can take advantage of a specific payment method (NATURAL: ' .
+            'Private customers, LEGAL: Company based customers).',
+            'trbwc'
+        )
         ?><br>
     </div>
 
     <table width="100%" style="border: none;">
         <tr>
-            <td width="20%" class="resursMethodHead"><?php _e('Method ID', 'trbwc') ?></td>
+            <td width="10%" class="resursMethodHead"><?php _e('Method ID', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Description', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Amount limits', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Method type', 'trbwc') ?></td>
-            <td width="20%" class="resursMethodHead"><?php _e('Customer types', 'trbwc') ?></td>
+            <td width="10%" class="resursMethodHead"><?php _e('Customer types', 'trbwc') ?></td>
+            <td width="20%" class="resursMethodHead"><?php _e('Part payment options', 'trbwc') ?></td>
             <!--<td width="20%" class="resursMethodHead"><?php _e('Fee', 'trbwc') ?></td>-->
         </tr>
         <?php
@@ -42,11 +48,23 @@
                     <td class="resursMethodBody">
                         <?php echo implode(', ', (array)$methodObject->customerType); ?>
                     </td>
+                    <?php
+                    $annuityClass = ($annuityEnabled === $methodObject->id) ? 'r_annuity_enabled' : 'r_annuity_disabled';
+                    if ($methodObject->type !== 'REVOLVING_CREDIT') {
+                        $annuityClass = 'r_annuity_idle';
+                    }
+                    ?>
+                    <td class="resursMethodBody <?php echo $annuityClass ?>"
+                        id="r_annuity_field_<?php echo $methodObject->id; ?>"
+                    ><?php
+                        if ($methodObject->type === 'REVOLVING_CREDIT') {
+                            echo $annuityFactors[$methodObject->id];
+                        } ?></td>
                     <!--<td class="resursMethodBody">
                         <?php
-/*                        // Adaptive section for editing fee in future.
-                        //echo isset($methodObject->fee) ? $methodObject->fee : 0
-                        */?>
+                    /*                        // Adaptive section for editing fee in future.
+                                            //echo isset($methodObject->fee) ? $methodObject->fee : 0
+                                            */ ?>
                     </td>-->
                 </tr>
                 <?php
