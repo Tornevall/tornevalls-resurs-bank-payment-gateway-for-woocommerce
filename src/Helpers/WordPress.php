@@ -60,6 +60,8 @@ class WordPress
             'get_callback_matches',
             'get_callback_matches',
             'get_internal_resynch',
+            'set_new_annuity',
+            'get_new_annuity_calculation',
         ];
 
         foreach ($actionList as $action) {
@@ -89,6 +91,7 @@ class WordPress
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Helpers\WooCommerce::getSettingsPages');
         add_filter('is_protected_meta', 'ResursBank\Helpers\WooCommerce::getProtectedMetaData', 10, 3);
+        add_filter('rbwc_get_part_payment_page', 'ResursBank\Helpers\WordPress::getPartPaymentPage');
 
         if (Data::isEnabled()) {
             add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
@@ -131,6 +134,7 @@ class WordPress
             2
         );
         add_filter('woocommerce_get_settings_general', '\ResursBank\Module\Data::getGeneralSettings');
+        add_action('woocommerce_single_product_summary', 'ResursBank\Module\Data::getAnnuityFactors');
         add_action('updated_option', '\ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         // Checkout Actions.
         if (Data::isEnabled()) {
@@ -195,26 +199,23 @@ class WordPress
     }
 
     /**
-     * Generate admin notices the ugly way since there is no proper front end script to push
-     * out such notices.
+     * Render an options list array for custom part payment widgets.
+     *
+     * @return array
      * @since 0.0.1.0
      */
-    private static function getCredentialError() {
-        $frontCredentialCheck = Data::getResursOption('front_credential_error');
-        try {
-            if (!empty($frontCredentialCheck)) {
-                $credentialMessage = json_decode($frontCredentialCheck);
-                // Generate an exeception the ugly way.
-                if (isset($credentialMessage->message)) {
-                    throw new Exception($credentialMessage->message, $credentialMessage->code);
-                }
-            }
-        } catch (Exception $e) {
-            if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
-                $_SESSION[Data::getPrefix()]['exception'] = [];
-            }
-            $_SESSION[Data::getPrefix()]['exception'][] = $e;
+    public static function getPartPaymentPage()
+    {
+        $pagelist = get_pages();
+        $widgetPages = [
+            '0' => '',
+        ];
+        /** @var WP_Post $pages */
+        foreach ($pagelist as $page) {
+            $widgetPages[$page->ID] = $page->post_title;
         }
+
+        return $widgetPages;
     }
 
     /**
@@ -265,6 +266,30 @@ class WordPress
         $selfAwareness = self::applyFiltersDeprecated('v22_woo_appearance', false);
         if ($selfAwareness) {
             self::getOldSelfAwareness();
+        }
+    }
+
+    /**
+     * Generate admin notices the ugly way since there is no proper front end script to push
+     * out such notices.
+     * @since 0.0.1.0
+     */
+    private static function getCredentialError()
+    {
+        $frontCredentialCheck = Data::getResursOption('front_credential_error');
+        try {
+            if (!empty($frontCredentialCheck)) {
+                $credentialMessage = json_decode($frontCredentialCheck);
+                // Generate an exeception the ugly way.
+                if (isset($credentialMessage->message)) {
+                    throw new Exception($credentialMessage->message, $credentialMessage->code);
+                }
+            }
+        } catch (Exception $e) {
+            if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
+                $_SESSION[Data::getPrefix()]['exception'] = [];
+            }
+            $_SESSION[Data::getPrefix()]['exception'][] = $e;
         }
     }
 
@@ -647,6 +672,8 @@ class WordPress
             'trbwc'
         );
         $return['current_tab'] = $current_tab;
+        $return['enable'] = __('Enable', 'trbwc');
+        $return['disable'] = __('Disable', 'trbwc');
 
         return self::applyFilters('localizationsAdmin', $return);
     }

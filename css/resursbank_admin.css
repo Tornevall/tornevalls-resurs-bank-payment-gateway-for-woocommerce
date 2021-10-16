@@ -54,3 +54,13 @@
     font-size: 12px;
     background: #ffffff !important;
 }
+
+.r_annuity {
+    font-size: 12px !important;
+}
+.r_annuity_enabled {
+    background: #CCFFCC !important;
+}
+.r_annuity_disabled {
+    background: #FFCCCC !important;
+}

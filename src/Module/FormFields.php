@@ -7,6 +7,7 @@ use ResursBank\Helpers\WordPress;
 use WC_Checkout;
 use WC_Settings_API;
 use function in_array;
+use function is_array;
 
 /**
  * Class FormFields Self contained settings.
@@ -254,6 +255,19 @@ class FormFields extends WC_Settings_API
                     'custom_attributes' => [
                         'size' => 2,
                     ],
+                ],
+                'part_payment_template' => [
+                    'id' => 'part_payment_template',
+                    'title' => __('Part payment template', 'rbwc'),
+                    'desc' => __(
+                        'When you enable the part payment options for products, you can choose your own ' .
+                        'template to display. Templates are built on WordPress pages. If you want to show a custom ' .
+                        'page, you may choose one that page here. Shortcodes that can be use: [monthlyPrice], ' .
+                        '[monthlyDuration].',
+                        'trbwc'
+                    ),
+                    'type' => 'select',
+                    'options' => WordPress::applyFilters('getPartPaymentPage', [])
                 ],
                 'payment_methods_settings_end' => [
                     'type' => 'sectionend',
@@ -681,21 +695,82 @@ class FormFields extends WC_Settings_API
     {
         $exception = null;
         $paymentMethods = [];
+        $theFactor = Data::getResursOption('currentAnnuityFactor');
+        $theDuration = (int)Data::getResursOption('currentAnnuityDuration');
+
         try {
             $paymentMethods = Api::getPaymentMethods();
+            $annuityFactors = self::getAnnuityDropDown(Api::getAnnuityFactors(), $theFactor, $theDuration);
         } catch (Exception $e) {
             $exception = $e;
         }
 
         if (is_array($paymentMethods)) {
+            $annuityEnabled = Data::getResursOption('currentAnnuityFactor');
+
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_paymentmethods.phtml',
                 [
                     'paymentMethods' => $paymentMethods,
+                    'annuityFactors' => $annuityFactors,
                     'exception' => $exception,
+                    'annuityEnabled' => $annuityEnabled,
                 ]
             );
         }
+    }
+
+    /**
+     * @param $annuityFactors
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getAnnuityDropDown($annuityFactors, $theFactor, $theDuration)
+    {
+        $return = [];
+
+        foreach ($annuityFactors as $id => $factorArray) {
+            if (count($factorArray)) {
+                $return[$id] = self::getRenderedFactors($id, $factorArray, $theFactor, $theDuration);
+            } else {
+                $return[$id] = '';
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $id
+     * @param $factorArray
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getRenderedFactors($id, $factorArray, $theFactor, $theDuration)
+    {
+        $options = null;
+        foreach ($factorArray as $item) {
+            $selected = '';
+            if (($id === $theFactor) && (int)$theDuration === (int)$item->duration && empty($selected)) {
+                $selected = 'selected';
+            }
+            $options .= sprintf(
+                '<option value="%s" %s>%s</option>',
+                $item->duration,
+                $selected,
+                $item->paymentPlanName
+            );
+        }
+
+        $isFactorEnabled = Data::getResursOption('currentAnnuityFactor');
+        $enabled = ($isFactorEnabled === $id) ? true : false;
+        return Data::getGenericClass()->getTemplate('adminpage_annuity_selector.phtml', [
+            'id' => $id,
+            'options' => $options,
+            'enabled' => $enabled,
+        ]);
     }
 
     /**

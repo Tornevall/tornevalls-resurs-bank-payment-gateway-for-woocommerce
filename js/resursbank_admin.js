@@ -17,6 +17,10 @@ var resursCallbackReceiveSuccess = false;
  * @since 0.0.1.0
  */
 function getResursAdminFields() {
+    $rQuery('select[id*=r_annuity_select]').click(function (e) {
+        window.onbeforeunload = null;
+        e.preventDefault();
+    });
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
 }
@@ -463,4 +467,71 @@ function getResursFraudFlags(clickObject) {
             }
         }
     }
+}
+
+/**
+ * Find out whether chosen annuity element is disabled or not.
+ * @param currentAnnuityField
+ * @returns {boolean}
+ * @since 0.0.1.0
+ */
+function isResursAnnuityDisabled(currentAnnuityField) {
+    return currentAnnuityField.attr('class').indexOf('r_annuity_disabled') > -1 ? true : false;
+}
+
+/**
+ * Select a new annuity factor.
+ * @param id
+ * @since 0.0.1.0
+ */
+function setResursAnnuityClick(o, id, action) {
+    var currentAnnuityField = $rQuery('#r_annuity_field_' + id);
+    var selectAnnuity = $rQuery('#r_annuity_select_' + id);
+    if (isResursAnnuityDisabled(currentAnnuityField)) {
+        var mode = 'e';
+    } else {
+        var mode = 'd';
+    }
+
+    if (action === 'set') {
+        if (mode === 'd') {
+            mode = 'e';
+        }
+    }
+
+    getResursSpin('#r_activity_' + id);
+    getResursAjaxify(
+        'post',
+        'resursbank_set_new_annuity',
+        {
+            'n': '',
+            'id': id,
+            'duration': selectAnnuity.find(':selected').val(),
+            'mode': mode
+        },
+        function (data) {
+            if (typeof data['mode'] !== "undefined") {
+                var annuityElement = $rQuery('#r_annuity_field_' + data['id']);
+                var annuityButton = $rQuery('#r_annuity_button_' + data['id']);
+                if (data['mode'] === 'd') {
+                    annuityElement.addClass('r_annuity_disabled');
+                    annuityElement.removeClass('r_annuity_enabled');
+                    annuityButton.text(getResursLocalization('enable'));
+                } else {
+                    annuityElement.removeClass('r_annuity_disabled');
+                    annuityElement.addClass('r_annuity_enabled');
+                    annuityButton.text(getResursLocalization('disable'));
+
+                    $rQuery('select[id^=r_annuity_select_]').parent().parent().each(function (p, i) {
+                        if (i.id !== "r_annuity_field_" + id) {
+                            $rQuery(i).removeClass('r_annuity_enabled');
+                            $rQuery(i).addClass('r_annuity_disabled');
+                            $rQuery(i).children('button').text(getResursLocalization('enable'));
+                        }
+                    });
+                }
+                $rQuery('#r_activity_' + id).html('');
+            }
+        }
+    );
 }
