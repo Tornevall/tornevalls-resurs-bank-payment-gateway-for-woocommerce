@@ -3,8 +3,7 @@
  */
 $rQuery(document).ready(function ($) {
     getResursAdminFields();
-    getCallbackMatches();
-    //setTimeout('getCallbackMatches()', 1000);
+    setTimeout('getCallbackMatches()', 5000);
 });
 
 var resursCallbackActiveTime = 0;
