@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpAssignmentInConditionInspection */
+
 namespace ResursBank\Gateway;
 
 use Exception;
@@ -194,8 +196,22 @@ class ResursDefault extends WC_Payment_Gateway
             $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
             $this->title = $this->paymentMethodInformation->description;
             $this->method_description = '';
-            if (Data::getResursOption('payment_method_icons') === 'woocommerce_icon') {
+
+            // Separated this setting to make it easier to expand for future.
+            $iconType = Data::getResursOption('payment_method_icons');
+            $specificIcon = $this->getMethodIconUrl();
+            $useSpecificRule = (
+                $iconType === 'only_specifics' ||
+                $iconType === 'specifics_and_resurs'
+            );
+            if ($iconType === 'woocommerce_icon') {
+                // Default is set to the internal logo.
                 $this->icon = Data::getImage('resurs-logo.png');
+                if ($specificIcon !== null) {
+                    $this->icon = $specificIcon;
+                }
+            } elseif ($useSpecificRule && $specificIcon !== null) {
+                $this->icon = $specificIcon;
             }
 
             // Applicant post data should be the final request.
@@ -226,6 +242,65 @@ class ResursDefault extends WC_Payment_Gateway
         $this->API = new Api();
 
         return $this;
+    }
+
+    /**
+     * Decide how to use method icons in the checkout.
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getMethodIconUrl()
+    {
+        $return = null;
+        // Data::getImage('resurs-logo.png')
+
+        if (!empty($this->paymentMethodInformation)) {
+            foreach (['type', 'specificType'] as $typeCheck) {
+                if (($deprecatedIcon = $this->getMethodIconDeprecated($typeCheck))) {
+                    $return = $deprecatedIcon;
+                }
+                if (($icon = $this->getIconByFilter($typeCheck))) {
+                    $return = $icon;
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $typeCheck
+     * @return string
+     * @since 0.0.1.0
+     */
+    private function getMethodIconDeprecated($typeCheck)
+    {
+        return !isset($this->paymentMethodInformation->{$typeCheck}) ? WordPress::applyFiltersDeprecated(
+            sprintf(
+                'woocommerce_resurs_bank_%s_checkout_icon',
+                $this->paymentMethodInformation->{$typeCheck}
+            ),
+            ''
+        ) : '';
+    }
+
+    /**
+     * @param $type
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private function getIconByFilter($type)
+    {
+        return WordPress::applyFilters(
+            'getPaymentMethodIcon',
+            null,
+            [
+                'id' => $this->paymentMethodInformation->id,
+                'type' => $this->paymentMethodInformation->type,
+                'specificType' => $this->paymentMethodInformation->specificType,
+            ]
+        );
     }
 
     /**
@@ -1119,8 +1194,9 @@ class ResursDefault extends WC_Payment_Gateway
                 }
                 $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
                     'displayMode' => $this->getDisplayableField($fieldName) ? '' : 'none',
-                    'methodId' => isset($this->paymentMethodInformation->id) ?
-                        $this->paymentMethodInformation->id : '?',
+                    'methodId' => isset(
+                        $this->paymentMethodInformation->id
+                    ) ? $this->paymentMethodInformation->id : '?',
                     'fieldSize' => WordPress::applyFilters('getPaymentFieldSize', 24, $fieldName),
                     'streamLine' => Data::getResursOption('streamline_payment_fields'),
                     'fieldLabel' => FormFields::getFieldString($fieldName),

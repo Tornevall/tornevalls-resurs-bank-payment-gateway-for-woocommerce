@@ -635,7 +635,7 @@ class WordPress
             'trbwc'
         );
         $return['remove_callback_confirm'] = __(
-            'Are you sure you want to remove callback ',
+            'Are you sure you want to remove callback',
             'trbwc'
         );
         $return['update_callbacks_required'] = __(
@@ -696,7 +696,7 @@ class WordPress
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
         $return['nonce_error'] = __(
-            'The page security (nonce) has expired or is wrong. You may want to reload it.',
+            'The page security (nonce) has expired or is wrong. You may want to reload your browser.',
             'trbwc'
         );
         $return['checkout_fields'] = FormFields::getFieldString();

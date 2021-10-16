@@ -6,6 +6,7 @@ use Exception;
 use ResursBank\Helpers\WordPress;
 use WC_Checkout;
 use WC_Settings_API;
+use function in_array;
 
 /**
  * Class FormFields Self contained settings.
@@ -178,10 +179,19 @@ class FormFields extends WC_Settings_API
                     'options' => [
                         'none' => __('Prefer to not display logotypes', 'trbwc'),
                         'woocommerce_icon' => __('Display logotypes as WooCommerce default', 'trbwc'),
+                        'only_specifics' => __('Display icons only if they are of customized', 'trbwc'),
+                        'specifics_and_resurs' => __('Display Resurs branded and customized icons', 'trbwc'),
                     ],
                     'custom_attributes' => [
-                        'size' => 2,
+                        'size' => 4,
                     ],
+                    'desc' => __(
+                        'If there are branded payment methods in your checkout, that you prefer to display, choose ' .
+                        'your best option here. Observe that this option is entirely dependent on your theme and ' .
+                        'no layout are rendered through this as we use the default icon setup in WooCommerce to ' .
+                        'show the icons.',
+                        'trbwc'
+                    ),
                 ],
                 'streamline_payment_fields' => [
                     'id' => 'streamline_payment_fields',
@@ -229,6 +239,12 @@ class FormFields extends WC_Settings_API
                 ],
                 'rco_iframe_position' => [
                     'id' => 'rco_iframe_position',
+                    'title' => 'Resurs Checkout Position',
+                    'desc' => __(
+                        'Defines where in the checkout the iframe should be placed. Preferred position is after ' .
+                        'the checkout form and also default. This setting is also configurable with filters.',
+                        'trbwc'
+                    ),
                     'type' => 'select',
                     'options' => [
                         'after_checkout_form' => __('After checkout form (Default).', 'trbwc'),
@@ -784,12 +800,20 @@ class FormFields extends WC_Settings_API
                 'mobile',
                 'email',
             ],
+            'undefined' => [
+                'government_id',
+                'phone',
+                'mobile',
+                'email',
+            ],
         ];
 
         if (!empty($key) && isset($return[$key])) {
             $return = $return[$key];
+        } else {
+            $return = $return['undefined'];
         }
 
-        return $return;
+        return WordPress::applyFilters('getSpecificTypeFields', $return, $key);
     }
 }

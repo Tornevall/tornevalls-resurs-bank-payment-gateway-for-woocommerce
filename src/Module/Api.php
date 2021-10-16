@@ -375,7 +375,7 @@ class Api
 
         if (!$fromStorage || empty($return)) {
             try {
-                self::$paymentMethods = self::getResurs()->getPaymentMethods();
+                self::$paymentMethods = self::getResurs()->getPaymentMethods([], true);
             } catch (Exception $e) {
                 // Reset.
                 Data::setResursOption('paymentMethods', null);
