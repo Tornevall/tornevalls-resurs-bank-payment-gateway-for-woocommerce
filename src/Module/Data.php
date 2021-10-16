@@ -441,10 +441,10 @@ class Data
         $customerCountry = self::getCustomerCountry();
         switch ($customerCountry) {
             case 'FI':
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15);
+                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
                 break;
             default:
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150);
+                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
         }
 
         $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
@@ -538,7 +538,6 @@ class Data
             'defaultAnnuityString' => null,
             'annuityFactors' => null,
         ];
-
 
         return array_merge($replaceTags, $v2);
     }
