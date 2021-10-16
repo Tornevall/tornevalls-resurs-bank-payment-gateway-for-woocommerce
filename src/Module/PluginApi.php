@@ -135,8 +135,10 @@ class PluginApi
     {
         $return = false;
         $expired = false;
+        $preExpired = self::expireNonce(__FUNCTION__);
         $defaultNonceError = 'nonce_validation';
 
+        $isSafe = (is_admin() && is_ajax());
         $nonceArray = [
             'admin',
             'all',
@@ -144,8 +146,8 @@ class PluginApi
         ];
 
         // Not recommended as this expires immediately and stays expired.
-        $expired = self::expireNonce(__FUNCTION__);
-        if ((bool)$expire && ($expired)) {
+        if ((bool)$expire && $preExpired) {
+            $expired = $preExpired;
             $defaultNonceError = 'nonce_expire';
         }
 
@@ -154,6 +156,11 @@ class PluginApi
                 $return = true;
                 break;
             }
+        }
+        if (!$return && $isSafe && (bool)Data::getResursOption('nonce_trust_admin_session')) {
+            // If request is based on ajax and admin.
+            $return = true;
+            $expired = false;
         }
 
         if (!$return || $expired) {

@@ -60,16 +60,22 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
             if (data['ajax_success']) {
                 callbackMethod(data, textStatus, jqXhr)
             } else {
-                getResursError(data);
                 if (typeof failMethod === 'function') {
+                    console.log(
+                        typeof data['error'] !== 'undefined' ? data['error'] : 'Error found without error message.'
+                    );
                     failMethod(data, textStatus, jqXhr);
+                } else {
+                    getResursError(data);
                 }
             }
         }
     ).fail(
         function (data, textStatus, jqXhr) {
             if (typeof failMethod === 'function') {
+                console.dir(data);
                 failMethod(data, textStatus, jqXhr);
+                return;
             } else {
                 callbackMethod(data, textStatus, jqXhr);
             }
@@ -83,10 +89,23 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
  * @since 0.0.1.0
  */
 function getResursError(data) {
-    if (typeof data['error'] !== 'undefined') {
+    var useVisibleElement;
+    if (typeof arguments[1] !== 'undefined') {
+        if ($rQuery(arguments[1]).length > 0) {
+            useVisibleElement = $rQuery(arguments[1]);
+            useVisibleElement.html(data['error']);
+            if (typeof data['error'] !== 'undefined' && data['error'] === 'nonce_validation') {
+                useVisibleElement.html(getResursLocalization('nonce_error'));
+                return;
+            }
+        }
+    } else {
+        console.log('RBWC Ajax Backend Error: ', data);
+    }
+
+    if (typeof data['error'] !== 'undefined' && data['error'] === 'nonce_validation') {
         alert(getResursLocalization('nonce_error'));
     }
-    console.log("RBWC Ajax Backend Error: ", data);
 }
 
 /**
