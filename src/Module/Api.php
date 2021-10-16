@@ -252,13 +252,12 @@ class Api
     /**
      * @param $orderData
      * @return false|string
-     * @throws ExceptionHandler
      * @throws ResursException
      * @since 0.0.1.0
      */
     private static function getApiMeta($orderData)
     {
-        return Data::getCrypt()->aesDecrypt(
+        return Data::getDecryptData(
             Data::getOrderMeta('orderapi', $orderData)
         );
     }
