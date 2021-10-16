@@ -560,7 +560,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    public static function getPluginDataContent($key)
+    private static function getPluginDataContent($key)
     {
         $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
         return $pluginContent[$key];
