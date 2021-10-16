@@ -195,12 +195,39 @@ class WordPress
     }
 
     /**
+     * Generate admin notices the ugly way since there is no proper front end script to push
+     * out such notices.
+     * @since 0.0.1.0
+     */
+    private static function getCredentialError() {
+        $frontCredentialCheck = Data::getResursOption('front_credential_error');
+        try {
+            if (!empty($frontCredentialCheck)) {
+                $credentialMessage = json_decode($frontCredentialCheck);
+                // Generate an exeception the ugly way.
+                if (isset($credentialMessage->message)) {
+                    throw new Exception($credentialMessage->message, $credentialMessage->code);
+                }
+            }
+        } catch (Exception $e) {
+            if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
+                $_SESSION[Data::getPrefix()]['exception'] = [];
+            }
+            $_SESSION[Data::getPrefix()]['exception'][] = $e;
+        }
+    }
+
+    /**
+     * Look for admin notices.
      * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAdminNotices()
     {
         global $current_tab, $parent_file;
+
+        // See if there is a credential error for Resurs Bank.
+        self::getCredentialError();
 
         if (isset($_SESSION[Data::getPrefix()]['exception'])) {
             $class = 'notice notice-error is-dismissible';
@@ -557,6 +584,7 @@ class WordPress
      */
     private static function getLocalizationDataAdmin($return)
     {
+        global $current_tab;
         $return['noncify'] = self::getNonce('admin');
         $return['environment'] = Api::getEnvironment();
         $return['wsdl'] = Api::getWsdlMode();
@@ -618,6 +646,7 @@ class WordPress
             'Refresh has finished. Please check your new settings to confirm the update.',
             'trbwc'
         );
+        $return['current_tab'] = $current_tab;
 
         return self::applyFilters('localizationsAdmin', $return);
     }

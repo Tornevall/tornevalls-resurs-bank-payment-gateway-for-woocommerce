@@ -560,7 +560,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    private static function getPluginDataContent($key)
+    public static function getPluginDataContent($key)
     {
         $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
         return $pluginContent[$key];
@@ -1511,6 +1511,45 @@ class Data
         $customerTypeByCompanyName = WooCommerce::getRequest('billing_company', true);
 
         return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function clearCredentialNotice()
+    {
+        return self::delResursOption('front_credential_error');
+    }
+
+    /**
+     * Remove self settings from option.
+     * @param $key
+     * @return bool
+     */
+    public static function delResursOption($key)
+    {
+        return delete_option(sprintf('%s_%s', self::getPrefix('admin'), $key));
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getCredentialNotice()
+    {
+        return Data::setResursOption(
+            'front_credential_error',
+            json_encode(
+                [
+                    'code' => 401,
+                    'message' => __(
+                        'Received an error message from Resurs Bank that indicates that you credentials are incorrect.',
+                        'trbwc'
+                    ),
+                ]
+            )
+        );
     }
 
     /**

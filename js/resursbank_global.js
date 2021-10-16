@@ -100,3 +100,25 @@ function getResursSpin(element) {
         })
     );
 }
+
+/**
+ * Display errors for this plugin.
+ * @param errorMessage
+ * @since 0.0.1.0
+ */
+function setRbwcGenericError(errorMessage) {
+    var checkoutForm = $rQuery('form.checkout');
+    if (checkoutForm.length > 0) {
+        $rQuery('.woocommerce-error').remove();
+        $rQuery('.woocommerce-message').remove();
+        checkoutForm.prepend(
+            $rQuery('<div>', {class: 'woocommerce-error'}).html(errorMessage)
+        );
+
+        $rQuery('html, body').animate({
+            scrollTop: ($rQuery('.woocommerce').offset().top - 100)
+        }, 1000);
+    } else {
+        console.log(errorMessage);
+    }
+}
