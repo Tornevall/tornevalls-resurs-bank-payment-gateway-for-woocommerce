@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2021-10-16 18:04+0200\n"
-"PO-Revision-Date: 2021-10-16 18:05+0200\n"
+"POT-Creation-Date: 2021-10-16 18:22+0200\n"
+"PO-Revision-Date: 2021-10-16 18:22+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -427,40 +427,40 @@ msgstr "Fel %d uppstod i %s, kommer försöka igen med REST."
 msgid "Part pay from %s per month."
 msgstr "Delbetala från %s per månad."
 
-#: src/Module/Data.php:768
+#: src/Module/Data.php:769
 msgid "Plugin version"
 msgstr "Plugin-version"
 
-#: src/Module/Data.php:769
+#: src/Module/Data.php:770
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: src/Module/Data.php:771
+#: src/Module/Data.php:772
 #, php-format
 msgid "%s, at least %s are required."
 msgstr "%s, åtminstone %s krävs."
 
-#: src/Module/Data.php:777
+#: src/Module/Data.php:778
 msgid "Composer version"
 msgstr "Composer-version"
 
-#: src/Module/Data.php:778
+#: src/Module/Data.php:779
 msgid "PHP Version"
 msgstr "PHP-Version"
 
-#: src/Module/Data.php:779
+#: src/Module/Data.php:780
 msgid "Webservice Library"
 msgstr "Webservice-Bibliotek"
 
-#: src/Module/Data.php:780
+#: src/Module/Data.php:781
 msgid "Communication Library"
 msgstr "Kommunikationsbibliotek"
 
-#: src/Module/Data.php:781
+#: src/Module/Data.php:782
 msgid "Communication Drivers"
 msgstr "Kommunikations-drivrutiner"
 
-#: src/Module/Data.php:825
+#: src/Module/Data.php:826
 msgid ""
 "If something is wrong and you are unsure of where to begin, take a look at "
 "the communication drivers. Wrappers that must be available for this plugin "
@@ -474,7 +474,7 @@ msgstr ""
 "SimpleStreamWrapper -och- SoapClientWrapper. Resurs Bank erbjuder flera "
 "olika tjänster över både Soap/XML och REST, så de måste finnas tillgängliga."
 
-#: src/Module/Data.php:832
+#: src/Module/Data.php:833
 msgid ""
 "If you ever need support with this plugin, you should primarily check this "
 "page before sending support requests. When you send the requests, make sure "
@@ -487,15 +487,15 @@ msgstr ""
 "ditt meddelande. Om du gör detta, blir det i slutänden mycket lättare att "
 "hjälpa dig."
 
-#: src/Module/Data.php:858
+#: src/Module/Data.php:859
 msgid "Developer Settings"
 msgstr "Utvecklar-inställningar"
 
-#: src/Module/Data.php:865
+#: src/Module/Data.php:866
 msgid "Disable RB 2.x"
 msgstr "Stäng av RB 2.x"
 
-#: src/Module/Data.php:868
+#: src/Module/Data.php:869
 msgid ""
 "Disable prior similar versions of the Resurs Bank plugin (v2.x-series) - You "
 "might need an extra reload after save"
@@ -503,7 +503,7 @@ msgstr ""
 "Stäng av tidigare versioner av Resurs Bank-pluginet (v2.x-serien) - Det kan "
 "behövas en extra omladdning efter spara"
 
-#: src/Module/Data.php:873
+#: src/Module/Data.php:874
 msgid ""
 "This setting will disable, not entirely, but the functions in Resurs Bank "
 "Gateway v2.x with help from filters in that release."
@@ -511,12 +511,12 @@ msgstr ""
 "Denna inställningen stänger ned, ej helt, funktioner i Resurs Bank Gateway "
 "v2.x, med hjälp av filter i den releasen."
 
-#: src/Module/Data.php:985
+#: src/Module/Data.php:986
 #, php-format
 msgid "DevLog Method \"%s\" message: %s."
 msgstr "DevLog-funktion \"%s\" meddelande: %s."
 
-#: src/Module/Data.php:1277
+#: src/Module/Data.php:1278
 msgid ""
 "An error occurred during the payment information retrieval from Resurs Bank "
 "so we can not show the current order status for the moment."
@@ -524,12 +524,12 @@ msgstr ""
 "Ett fel uppstod under tiden som betalningsinformationen skulle tas emot från "
 "Resurs Bank så vi kan för närvarande inte visa nuvarande orderstatus."
 
-#: src/Module/Data.php:1302
+#: src/Module/Data.php:1303
 #, php-format
 msgid "%s internal generic exception %s: %s"
 msgstr "%s internt generiskt fel %s: %s"
 
-#: src/Module/Data.php:1486
+#: src/Module/Data.php:1487
 #, php-format
 msgid ""
 "Unable to update order meta in %s - object $order is of wrong type or not an "
@@ -538,11 +538,11 @@ msgstr ""
 "Kan ej uppdatera order-meta i %s - objektet $order är av fel typ eller inte "
 "ett heltal."
 
-#: src/Module/Data.php:1548
+#: src/Module/Data.php:1549
 msgid "Number of decimals headsup message"
 msgstr "Antal decimaler - Observera"
 
-#: src/Module/Data.php:1669
+#: src/Module/Data.php:1670
 msgid ""
 "Received an error message from Resurs Bank that indicates that you "
 "credentials are incorrect."
