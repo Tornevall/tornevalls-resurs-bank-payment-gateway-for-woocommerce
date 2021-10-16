@@ -142,6 +142,30 @@ class WooCommerce
     }
 
     /**
+     * @param $gateways
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getAvailableGateways($gateways)
+    {
+        $customerCountry = Data::getCustomerCountry();
+
+        if ($customerCountry !== get_option('woocommerce_default_country')) {
+            foreach ($gateways as $gatewayName => $gatewayClass) {
+                if ($gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
+                    (bool)preg_match('/card/i', $gatewayClass->getSpecificType())
+                ) {
+                    continue;
+                }
+                unset($gateways[$gatewayName]);
+            }
+        }
+
+        return $gateways;
+    }
+
+    /**
      * Self aware setup link.
      *
      * @param $links
