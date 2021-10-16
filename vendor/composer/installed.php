@@ -11,12 +11,12 @@
     ),
     'versions' => array(
         'resursbank/ecomphp' => array(
-            'pretty_version' => '1.3.61',
-            'version' => '1.3.61.0',
+            'pretty_version' => '1.3.62',
+            'version' => '1.3.62.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../resursbank/ecomphp',
             'aliases' => array(),
-            'reference' => '9af61323d149d84e9586137a3dd896bd2dcc180e',
+            'reference' => 'b29f8e941aa278c9477b5a3a48d4975456856add',
             'dev_requirement' => false,
         ),
         'resursbank/ecomphp-deprecated' => array(
