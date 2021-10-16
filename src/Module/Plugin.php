@@ -14,7 +14,41 @@ class Plugin
     public function __construct()
     {
         add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
+        add_filter('rbwc_get_payment_method_icon', [$this, 'getMethodIconByContent'], 10, 2);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
+    }
+
+    /**
+     * @param $url
+     * @param $methodInformation
+     * @since 0.0.1.0
+     * @noinspection NotOptimalRegularExpressionsInspection
+     */
+    public function getMethodIconByContent($url, $methodInformation)
+    {
+        $iconSetting = Data::getResursOption('payment_method_icons');
+        foreach ($methodInformation as $item) {
+            $itemName = strtolower($item);
+            if (preg_match('/^pspcard_/i', strtolower($item))) {
+                // Shorten up credit cards.
+                $itemName = 'pspcard';
+            }
+            $byItem = sprintf('method_%s.png', $itemName);
+
+            if (($imageByMethodContent = Data::getImage($byItem))) {
+                $url = $imageByMethodContent;
+                break;
+            }
+        }
+
+        if (empty($url) &&
+            $iconSetting === 'specifics_and_resurs' &&
+            $methodInformation['type'] !== 'PAYMENT_PROVIDER'
+        ) {
+            $url = Data::getImage('resurs-logo.png');
+        }
+
+        return $url;
     }
 
     /**

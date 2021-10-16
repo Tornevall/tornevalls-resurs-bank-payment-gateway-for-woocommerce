@@ -270,7 +270,7 @@ function getCallbackButtonRestored(cbid) {
  * @since 0.0.1.0
  */
 function doResursRemoveCallback(cbid) {
-    if (confirm(getResursLocalization('remove_callback_confirm') + cbid + '?')) {
+    if (confirm(getResursLocalization('remove_callback_confirm') + ' ' + cbid + '?')) {
         getResursSpin('#remove_cb_btn_' + cbid);
 
         getResursAjaxify(
