@@ -11,6 +11,7 @@ use RuntimeException;
 use stdClass;
 use TorneLIB\Data\Aes;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
 use WC_Customer;
@@ -470,7 +471,7 @@ class Data
                     'monthlyPrice' => $monthlyPrice,
                     'monthlyDuration' => $annuityDuration,
                     'partPayString' => $partPayString,
-                    'isTest' => self::getTestMode()
+                    'isTest' => self::getTestMode(),
                 ]
             );
 
@@ -990,6 +991,79 @@ class Data
                 self::$Log->notice($message);
                 break;
         }
+    }
+
+    /**
+     * @param $data
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function setEncryptData($data)
+    {
+        try {
+            $crypt = self::getCrypt();
+            $return = $crypt->aesEncrypt($data);
+        } catch (Exception $e) {
+            $return = (new Strings())->base64urlEncode($data);
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * @return Aes
+     * @throws ExceptionHandler
+     * @since 0.0.1.0
+     */
+    public static function getCrypt()
+    {
+        if (empty(self::$encrypt)) {
+            $aesKey = self::getResursOption('key');
+            $aesIv = self::getResursOption('iv');
+
+            if (empty($aesKey) && empty($aesIv)) {
+                $aesKey = uniqid('k_' . microtime(true), true);
+                $aesIv = uniqid('i_' . microtime(true), true);
+                self::setResursOption('key', $aesKey);
+                self::setResursOption('iv', $aesIv);
+            }
+
+            self::$encrypt = new Aes();
+            self::$encrypt->setAesKeys(
+                self::getPrefix() . $aesKey,
+                self::getPrefix() . $aesIv
+            );
+        }
+
+        return self::$encrypt;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setResursOption($key, $value)
+    {
+        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
+    }
+
+    /**
+     * @param $data
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getDecryptData($data)
+    {
+        try {
+            $crypt = self::getCrypt();
+            $return = $crypt->aesDecrypt($data);
+        } catch (Exception $e) {
+            $return = (new Strings())->base64urlDecode($data);
+        }
+
+        return $return;
     }
 
     /**
@@ -1525,44 +1599,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * @return Aes
-     * @throws ExceptionHandler
-     */
-    public static function getCrypt()
-    {
-        $aesKey = self::getResursOption('key');
-        $aesIv = self::getResursOption('iv');
-
-        if (empty($aesKey) && empty($aesIv)) {
-            $aesKey = uniqid('k_' . microtime(true), true);
-            $aesIv = uniqid('i_' . microtime(true), true);
-            self::setResursOption('key', $aesKey);
-            self::setResursOption('iv', $aesIv);
-        }
-
-        if (empty(self::$encrypt)) {
-            self::$encrypt = new Aes();
-            self::$encrypt->setAesKeys(
-                self::getPrefix() . $aesKey,
-                self::getPrefix() . $aesIv
-            );
-        }
-
-        return self::$encrypt;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function setResursOption($key, $value)
-    {
-        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
     }
 
     /**

@@ -308,7 +308,7 @@ class WooCommerce
                 Data::setOrderMeta(
                     $orderData['order'],
                     'orderapi',
-                    Data::getCrypt()->aesEncrypt(
+                    Data::setEncryptData(
                         json_encode(
                             [
                                 'l' => $login,
