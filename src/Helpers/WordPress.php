@@ -95,6 +95,7 @@ class WordPress
 
         if (Data::isEnabled()) {
             add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
+            add_filter('woocommerce_available_payment_gateways', 'ResursBank\Helpers\WooCommerce::getAvailableGateways');
             add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
             add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
         }

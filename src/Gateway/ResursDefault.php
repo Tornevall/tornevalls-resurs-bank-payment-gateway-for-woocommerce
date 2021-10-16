@@ -382,6 +382,34 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @return null
+     * @since 0.0.1.0
+     */
+    public function getType()
+    {
+        return $this->getMethodInformation('type');
+    }
+
+    /**
+     * @param $key
+     * @return null
+     * @since 0.0.1.0
+     */
+    private function getMethodInformation($key)
+    {
+        return isset($this->paymentMethodInformation->{$key}) ? $this->paymentMethodInformation->{$key} : null;
+    }
+
+    /**
+     * @return null
+     * @since 0.0.1.0
+     */
+    public function getSpecificType()
+    {
+        return $this->getMethodInformation('specificType');
+    }
+
+    /**
      * @return WC_Order
      * @since 0.0.1.0
      */
