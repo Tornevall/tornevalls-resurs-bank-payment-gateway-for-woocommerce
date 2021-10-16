@@ -30,9 +30,19 @@ function getCallbackMatches() {
         'GET',
         'resursbank_get_callback_matches',
         {
-            'n': true
+            'n': true,
+            't': getResursLocalization('current_tab')
         },
         function (data) {
+            if (typeof data['errors'] !== 'undefined' &&
+                parseInt(data['errors']['code']) > 0
+            ) {
+                if ($rQuery('#resurs_credentials_username_box').length > 0) {
+                    $rQuery('#resurs_credentials_username_box').css('font-weight', 'bold');
+                    $rQuery('#resurs_credentials_username_box').css('color', '#990000');
+                    $rQuery('#resurs_credentials_username_box').html(data['errors']['message']);
+                }
+            }
             if (typeof data['requireRefresh'] !== "undefined" && data['requireRefresh'] === true) {
                 var canUpdate = confirm(getResursLocalization('update_callbacks_required'));
                 if (canUpdate) {
@@ -213,6 +223,15 @@ function getResursCredentialsTestForm(pwBox) {
                 'id': 'resurs_test_credentials_result',
                 'style': 'margin-top: 3px; padding 5px; width: 400px; ' +
                     'font-style: italic; font-weight: bold; color: #000099;'
+            }
+        )
+    );
+    // Create an empty div here for credentials stuff.
+    $rQuery('#trbwc_admin_login').parent().children('.description').before(
+        $rQuery(
+            '<div>',
+            {
+                'id': 'resurs_credentials_username_box'
             }
         )
     );

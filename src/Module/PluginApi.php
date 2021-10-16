@@ -324,6 +324,7 @@ class PluginApi
                     self::getParam('u'),
                     self::getParam('p')
                 );
+                Data::delResursOption('front_credential_error');
             } catch (RuntimeException $e) {
                 $validationResponse = $e->getMessage();
                 Data::setLogNotice(
@@ -410,11 +411,17 @@ class PluginApi
         if ($validate) {
             self::getValidatedNonce();
         }
-
-        Api::getResurs()->unregisterEventCallback(
-            Callback::FINALIZATION & Callback::ANNULMENT & Callback::AUTOMATIC_FRAUD_CONTROL,
-            true
-        );
+        try {
+            Api::getResurs()->unregisterEventCallback(
+                Callback::FINALIZATION & Callback::ANNULMENT & Callback::AUTOMATIC_FRAUD_CONTROL,
+                true
+            );
+        } catch (Exception $e) {
+            if ($e->getCode() === 401) {
+                Data::getCredentialNotice();
+                throw $e;
+            }
+        }
         foreach (self::$callbacks as $ecomCallbackId) {
             $callbackUrl = self::getCallbackUrl(self::getCallbackParams($ecomCallbackId));
             try {
@@ -428,6 +435,7 @@ class PluginApi
                 Data::setLogException($e);
             }
         }
+        Api::getCallbackList(false);
 
         return ['reload' => true];
     }
@@ -535,22 +543,54 @@ class PluginApi
             $callbackConstant += $callback;
         }
 
-        $freshCallbackList = Api::getResurs()->getRegisteredEventCallback($callbackConstant);
-        $storedCallbacks = Data::getResursOption('callbacks');
+        $current_tab = WooCommerce::getRequest('t');
+        $hasErrors = false;
+        $freshCallbackList = [];
+        $e = null;
 
-        if (empty($storedCallbacks)) {
-            $return['requireRefresh'] = true;
-        } else {
-            foreach (self::$callbacks as $callback) {
-                $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
-                similar_text($expectedUrl, $freshCallbackList[Api::getResurs()->getCallbackTypeString($callback)],
-                    $percentualValue);
-                if ($percentualValue < 90) {
-                    $return['requireRefresh'] = true;
-                }
-                $return['similarity'] = $percentualValue;
+        try {
+            $freshCallbackList = Api::getResurs()->getRegisteredEventCallback($callbackConstant);
+            Data::clearCredentialNotice();
+        } catch (Exception $e) {
+            $hasErrors = true;
+
+            if ($e->getCode() === 401) {
+                Data::getCredentialNotice();
+            } else {
+                Data::setResursOption(
+                    'front_credential_error',
+                    json_encode(['code' => $e->getCode(), 'message' => $e->getMessage()])
+                );
             }
         }
+
+        if ($current_tab === sprintf('%s_admin', Data::getPrefix()) &&
+            (time() - (int)Data::getResursOption('lastCallbackCheck')) > 60) {
+            $storedCallbacks = Data::getResursOption('callbacks');
+
+            if (!$hasErrors) {
+                if (empty($storedCallbacks)) {
+                    $return['requireRefresh'] = true;
+                } else {
+                    foreach (self::$callbacks as $callback) {
+                        $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
+                        similar_text(
+                            $expectedUrl,
+                            $freshCallbackList[Api::getResurs()->getCallbackTypeString($callback)],
+                            $percentualValue
+                        );
+                        if ($percentualValue < 90) {
+                            $return['requireRefresh'] = true;
+                        }
+                        $return['similarity'] = $percentualValue;
+                    }
+                }
+            }
+        }
+        $return['errors'] = [
+            'code' => isset($e) ? $e->getCode() : 0,
+            'message' => isset($e) ? $e->getMessage() : null,
+        ];
 
         self::reply($return);
     }
@@ -637,9 +677,11 @@ class PluginApi
                         default:
                             self::{$execFunction}();
                     }
+                    Data::clearCredentialNotice();
                 } catch (Exception $e) {
                     if (is_admin() && $e->getCode() === 401) {
                         // @todo RWC-234 github #32
+                        Data::getCredentialNotice();
                     }
                 }
             }
