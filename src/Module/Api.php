@@ -225,7 +225,6 @@ class Api
      * @param $orderInfo
      * @return bool
      * @throws ResursException
-     * @throws ExceptionHandler
      * @since 0.0.1.0
      */
     private static function getMatchingCredentials($orderInfo)
@@ -257,9 +256,16 @@ class Api
      */
     private static function getApiMeta($orderData)
     {
-        return Data::getDecryptData(
+        $return = Data::getDecryptData(
             Data::getOrderMeta('orderapi', $orderData)
         );
+
+        if (empty($return)) {
+            // Encryption may have failed.
+            $return = Data::getDecryptData(Data::getOrderMeta('orderapi', $orderData), true);
+        }
+
+        return $return;
     }
 
     /**

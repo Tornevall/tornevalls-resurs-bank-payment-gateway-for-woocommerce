@@ -944,6 +944,75 @@ class Data
     }
 
     /**
+     * @param $data
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function setEncryptData($data)
+    {
+        try {
+            $crypt = self::getCrypt();
+            $return = $crypt->aesEncrypt($data);
+            $dataEncryptionState = null;
+        } catch (Exception $e) {
+            $return = (new Strings())->base64urlEncode($data);
+            $dataEncryptionState = $e;
+        }
+
+        if (!empty($e)) {
+            Data::setLogNotice(
+                sprintf(
+                    __('%s failed encryption (%d): %s. Failover to base64.', 'trbwc'),
+                    __FUNCTION__,
+                    $e->getCode(),
+                    $e->getMessage()
+                )
+            );
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * @return Aes
+     * @throws ExceptionHandler
+     * @since 0.0.1.0
+     */
+    public static function getCrypt()
+    {
+        if (empty(self::$encrypt)) {
+            $aesKey = self::getResursOption('key');
+            $aesIv = self::getResursOption('iv');
+
+            if (empty($aesKey) && empty($aesIv)) {
+                $aesKey = uniqid('k_' . microtime(true), true);
+                $aesIv = uniqid('i_' . microtime(true), true);
+                self::setResursOption('key', $aesKey);
+                self::setResursOption('iv', $aesIv);
+            }
+
+            self::$encrypt = new Aes();
+            self::$encrypt->setAesKeys(
+                self::getPrefix() . $aesKey,
+                self::getPrefix() . $aesIv
+            );
+        }
+
+        return self::$encrypt;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setResursOption($key, $value)
+    {
+        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
+    }
+
+    /**
      * @param $logMessage
      * @since 0.0.1.0
      */
@@ -995,70 +1064,19 @@ class Data
 
     /**
      * @param $data
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function setEncryptData($data)
-    {
-        try {
-            $crypt = self::getCrypt();
-            $return = $crypt->aesEncrypt($data);
-        } catch (Exception $e) {
-            $return = (new Strings())->base64urlEncode($data);
-        }
-
-        return (string)$return;
-    }
-
-    /**
-     * @return Aes
-     * @throws ExceptionHandler
-     * @since 0.0.1.0
-     */
-    public static function getCrypt()
-    {
-        if (empty(self::$encrypt)) {
-            $aesKey = self::getResursOption('key');
-            $aesIv = self::getResursOption('iv');
-
-            if (empty($aesKey) && empty($aesIv)) {
-                $aesKey = uniqid('k_' . microtime(true), true);
-                $aesIv = uniqid('i_' . microtime(true), true);
-                self::setResursOption('key', $aesKey);
-                self::setResursOption('iv', $aesIv);
-            }
-
-            self::$encrypt = new Aes();
-            self::$encrypt->setAesKeys(
-                self::getPrefix() . $aesKey,
-                self::getPrefix() . $aesIv
-            );
-        }
-
-        return self::$encrypt;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function setResursOption($key, $value)
-    {
-        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
-    }
-
-    /**
-     * @param $data
+     * @param bool $base64
      * @return mixed
      * @since 0.0.1.0
      */
-    public static function getDecryptData($data)
+    public static function getDecryptData($data, $base64 = false)
     {
         try {
-            $crypt = self::getCrypt();
-            $return = $crypt->aesDecrypt($data);
+            if (!$base64) {
+                $crypt = self::getCrypt();
+                $return = $crypt->aesDecrypt($data);
+            } else {
+                $return = (new Strings())->base64urlDecode($data);
+            }
         } catch (Exception $e) {
             $return = (new Strings())->base64urlDecode($data);
         }
