@@ -114,6 +114,8 @@ function getResursPaymentMethods() {
             }).html(getResursLocalization('reloading'))
         );
         document.location.reload();
+    }, function (d) {
+        getResursError(d, '#div_trbwc_admin_payment_methods_button');
     });
 }
 
@@ -344,19 +346,27 @@ function getResursCredentialsResult() {
             'u': $rQuery('#trbwc_admin_login').val(),
             'e': $rQuery('#trbwc_admin_environment').val()
         };
-        getResursAjaxify('post', 'resursbank_test_credentials', uData, function (data) {
-            if (data['validation']) {
-                $rQuery('#resurs_test_credentials_result').html(getResursLocalization('credential_success_notice'))
-            } else {
-                var noValidation = getResursLocalization('credential_failure_notice');
-                if (typeof data['statusText'] === 'string') {
-                    noValidation += ' (Status: ' + data['statusText'] + ')';
+        getResursAjaxify(
+            'post',
+            'resursbank_test_credentials',
+            uData,
+            function (data) {
+                if (data['validation']) {
+                    $rQuery('#resurs_test_credentials_result').html(getResursLocalization('credential_success_notice'))
+                } else {
+                    var noValidation = getResursLocalization('credential_failure_notice');
+                    if (typeof data['statusText'] === 'string') {
+                        noValidation += ' (Status: ' + data['statusText'] + ')';
+                    }
+                    $rQuery('#resurs_test_credentials_result').html(
+                        noValidation
+                    )
                 }
-                $rQuery('#resurs_test_credentials_result').html(
-                    noValidation
-                )
+            },
+            function (error) {
+                getResursError(error, '#resurs_test_credentials_result')
             }
-        });
+        );
     }
 }
 
