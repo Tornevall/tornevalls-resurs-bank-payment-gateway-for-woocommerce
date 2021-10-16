@@ -723,7 +723,9 @@ class WordPress
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
         $return['nonce_error'] = __(
-            'The page security (nonce) has expired or is wrong. You may want to reload your browser.',
+            'The page security (nonce) is reportedly expired or is wrong. This can also be caused by the ' .
+            'fact that you have already interacted with the page you are trying to update information on. ' .
+            'You may want to reload your browser before proceeding.',
             'trbwc'
         );
         $return['checkout_fields'] = FormFields::getFieldString();

@@ -136,6 +136,7 @@ class Api
                 self::getEnvironment()
             );
             $this->setWsdlCache();
+            $this->setEcomConfiguration();
         }
 
         return $this->ecom;
@@ -199,6 +200,22 @@ class Api
         }
 
         return $wsdlMode;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setEcomConfiguration()
+    {
+        $this->ecom->setUserAgent(
+            sprintf(
+                '%s_%s_%s',
+                Data::getPluginTitle(true),
+                Data::getCurrentVersion(),
+                Data::getCheckoutType()
+            )
+        );
     }
 
     /**

@@ -856,6 +856,17 @@ class Data
 
         $developerArray = [
             'developer' => [
+                'dev_section' => [
+                    'type' => 'title',
+                    'title' => __('Developers Section', 'trbwc'),
+                    'desc' => sprintf(
+                        __(
+                            'This section is for very advanced tweaking only. It is not enabled and visible by ' .
+                            'default for security reasons. Proceed at your own risk',
+                            'trbwc'
+                        )
+                    ),
+                ],
                 'title' => __('Developer Settings', 'trbwc'),
                 'plugin_section' => [
                     'type' => 'title',
@@ -880,9 +891,29 @@ class Data
                 'dev_section_end' => [
                     'type' => 'sectionend',
                 ],
-                'testing_section' => [
+                'admin_tweaking_section' => [
                     'type' => 'title',
-                    'title' => 'Test Section',
+                    'title' => 'Administration Tweaking',
+                ],
+                'nonce_trust_admin_session' => [
+                    'id' => 'nonce_trust_admin_session',
+                    'title' => __('Trust is_admin frontend nonces', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Yes, do trust them please.',
+                        'trbwc'
+                    ),
+                    'desc_top' => __(
+                        'For some places in the admin panel, we use nonces as an extra security layer when it comes ' .
+                        'to requests like updating callbacks, payment methods, etc. Sometimes nonces expires too ' .
+                        'quickly or breaks too fast. Enable this feature to start trusting is_admin() during ajax ' .
+                        'request primarily and nonces secondarily.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'admin_tweaking_section_end' => [
+                    'type' => 'sectionend',
                 ],
             ],
         ];
