@@ -448,7 +448,7 @@ class Data
         }
 
         $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
-        if ($monthlyPrice >= $minimumPaymentLimit || Data::getResursOption('environment') === 'test') {
+        if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
             $partPayString = self::getPartPayStringByTags(
                 WordPress::applyFilters(
                     'partPaymentString',
@@ -460,7 +460,8 @@ class Data
                 [
                     'monthlyPrice' => $monthlyPrice,
                     'monthlyDuration' => $annuityDuration,
-                    'paymentLimit' => $minimumPaymentLimit
+                    'paymentLimit' => $minimumPaymentLimit,
+                    'isTest' => self::getTestMode(),
                 ]
             );
             $annuityTemplate = Data::getGenericClass()->getTemplate(
@@ -469,6 +470,7 @@ class Data
                     'monthlyPrice' => $monthlyPrice,
                     'monthlyDuration' => $annuityDuration,
                     'partPayString' => $partPayString,
+                    'isTest' => self::getTestMode()
                 ]
             );
 
@@ -492,6 +494,17 @@ class Data
             $woocommerceCustomerCountry : get_option('woocommerce_default_country');
 
         return $return;
+    }
+
+    /**
+     * Returns test mode boolean.
+     *
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getTestMode()
+    {
+        return in_array(self::getResursOption('environment'), ['test', 'staging']);
     }
 
     /**
@@ -628,17 +641,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * Returns test mode boolean.
-     *
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getTestMode()
-    {
-        return in_array(self::getResursOption('environment'), ['test', 'staging']);
     }
 
     /**
