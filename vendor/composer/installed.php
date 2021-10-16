@@ -38,12 +38,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-crypto' => array(
-            'pretty_version' => '6.1.3',
-            'version' => '6.1.3.0',
+            'pretty_version' => '6.1.4',
+            'version' => '6.1.4.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-crypto',
             'aliases' => array(),
-            'reference' => 'a2551fd0e396ac88a666aeef1eec0fc9a5f91427',
+            'reference' => 'dc53bcbd3d0327c4dee21e1368cdb831ed320176',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-errorhandler' => array(
