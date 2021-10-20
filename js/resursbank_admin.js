@@ -33,9 +33,13 @@ function getResursAdminFields() {
     getResursAdminPasswordButton();
 }
 
+/**
+ * Disable popup warnings about config changes for all elements added here.
+ * @param elements
+ * @since 0.0.1.0
+ */
 function getResursConfigPopupPrevention(elements) {
     for (var i = 0; i < elements.length; i++) {
-        console.log('Update Element ' + elements[i]);
         $rQuery(elements[i]).click(function (e) {
             window.onbeforeunload = null;
             e.preventDefault();
@@ -82,15 +86,15 @@ function getCallbackMatches() {
             if (typeof data['errors'] !== 'undefined' &&
                 parseInt(data['errors']['code']) > 0
             ) {
-                if ($rQuery('#resurs_credentials_username_box').length > 0) {
+                if ($rQuery('#resurs_credentials_test_username_box').length > 0) {
                     if (resursEnvironment === 'test') {
-                        $rQuery('#resurs_credentials_username_box').css('font-weight', 'bold');
-                        $rQuery('#resurs_credentials_username_box').css('color', '#990000');
-                        $rQuery('#resurs_credentials_username_box').html(data['errors']['message']);
+                        $rQuery('#resurs_credentials_test_username_box').css('font-weight', 'bold');
+                        $rQuery('#resurs_credentials_test_username_box').css('color', '#990000');
+                        $rQuery('#resurs_credentials_test_username_box').html(data['errors']['message']);
                     } else {
-                        $rQuery('#resurs_credentials_username_box').css('font-weight', 'bold');
-                        $rQuery('#resurs_credentials_username_box').css('color', '#990000');
-                        $rQuery('#resurs_credentials_username_box').html(data['errors']['message']);
+                        $rQuery('#resurs_credentials_production_username_box').css('font-weight', 'bold');
+                        $rQuery('#resurs_credentials_production_username_box').css('color', '#990000');
+                        $rQuery('#resurs_credentials_production_username_box').html(data['errors']['message']);
                     }
                 }
             }
@@ -306,7 +310,15 @@ function getResursCredentialDivs() {
         $rQuery(
             '<div>',
             {
-                'id': 'resurs_credentials_username_box'
+                'id': 'resurs_credentials_test_username_box'
+            }
+        )
+    );
+    $rQuery('#trbwc_admin_login_production').parent().children('.description').before(
+        $rQuery(
+            '<div>',
+            {
+                'id': 'resurs_credentials_production_username_box'
             }
         )
     );
