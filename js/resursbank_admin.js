@@ -255,7 +255,7 @@ function getResursCallbackResponse() {
  * @param pwBox
  * @since 0.0.1.0
  */
-function getResursCredentialsTestForm(pwBox) {
+function getResursCredentialsTestForm(pwBox, pwBoxId) {
     var pwButton = $rQuery(
         '<button>',
         {
@@ -269,30 +269,15 @@ function getResursCredentialsTestForm(pwBox) {
         pwButton
     );
 
+    var pwBoxResultName = pwBoxId + '_result';
+
     pwBox.parent().children('.description').before(
         $rQuery(
             '<div>',
             {
-                'id': 'resurs_test_credentials_result',
+                'id': pwBoxResultName,
                 'style': 'margin-top: 3px; padding 5px; width: 400px; ' +
                     'font-style: italic; font-weight: bold; color: #000099;'
-            }
-        )
-    );
-    // Create an empty div here for credentials stuff.
-    $rQuery('#trbwc_admin_login').parent().children('.description').before(
-        $rQuery(
-            '<div>',
-            {
-                'id': 'resurs_credentials_username_box'
-            }
-        )
-    );
-    $rQuery('#trbwc_admin_login_production').parent().children('.description').before(
-        $rQuery(
-            '<div>',
-            {
-                'id': 'resurs_credentials_username_production_box'
             }
         )
     );
@@ -302,14 +287,30 @@ function getResursCredentialsTestForm(pwBox) {
  * @since 0.0.1.0
  */
 function getResursAdminPasswordButton() {
-    var pwBox = $rQuery('#trbwc_admin_password');
     // This box became too big so functions are split up.
-    if (pwBox.length > 0) {
+    if ($rQuery('#trbwc_admin_password').length > 0) {
         // One time nonce controlled credential importer.
         getDeprecatedCredentialsForm();
-        getResursCredentialsTestForm(pwBox);
-        getResursCredentialsTestForm($rQuery('#trbwc_admin_password_production'));
+        getResursCredentialsTestForm($rQuery('#trbwc_admin_password'), 'trbwc_admin_password');
+        getResursCredentialsTestForm($rQuery('#trbwc_admin_password_production'), 'trbwc_admin_password_production');
+        getResursCredentialDivs();
     }
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function getResursCredentialDivs() {
+    // Create an empty div here for credentials stuff.
+    $rQuery('#trbwc_admin_login').parent().children('.description').before(
+        $rQuery(
+            '<div>',
+            {
+                'id': 'resurs_credentials_username_box'
+            }
+        )
+    );
+
 }
 
 /**
@@ -397,18 +398,22 @@ function getResursDeprecatedLogin() {
 function getResursCredentialsResult() {
     var apiLoginBox;
     var apiPwBox;
+    var resultBox;
+
     switch (resursEnvironment) {
         case 'live':
             apiLoginBox = '#trbwc_admin_login_production';
             apiPwBox = '#trbwc_admin_password_production';
+            resultBox = '#trbwc_admin_password_production_result';
             break;
         default:
             apiLoginBox = '#trbwc_admin_login';
             apiPwBox = '#trbwc_admin_password';
+            resultBox = '#trbwc_admin_password_result';
     }
 
     if ($rQuery('#trbwc_admin_password').length > 0) {
-        getResursSpin('#resurs_test_credentials_result');
+        getResursSpin(resultBox);
         var uData = {
             'p': $rQuery(apiPwBox).val(),
             'u': $rQuery(apiLoginBox).val(),
@@ -420,19 +425,19 @@ function getResursCredentialsResult() {
             uData,
             function (data) {
                 if (data['validation']) {
-                    $rQuery('#resurs_test_credentials_result').html(getResursLocalization('credential_success_notice'))
+                    $rQuery(resultBox).html(getResursLocalization('credential_success_notice'))
                 } else {
                     var noValidation = getResursLocalization('credential_failure_notice');
                     if (typeof data['statusText'] === 'string') {
                         noValidation += ' (Status: ' + data['statusText'] + ')';
                     }
-                    $rQuery('#resurs_test_credentials_result').html(
+                    $rQuery(resultBox).html(
                         noValidation
-                    )
+                    );
                 }
             },
             function (error) {
-                getResursError(error, '#resurs_test_credentials_result')
+                getResursError(error, resultBox);
             }
         );
     }
