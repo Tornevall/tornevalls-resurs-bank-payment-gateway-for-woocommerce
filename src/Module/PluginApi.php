@@ -321,8 +321,7 @@ class PluginApi
      */
     public static function testCredentials()
     {
-        //$isValid = self::getValidatedNonce(null, true);
-        $isValid = true;
+        $isValid = self::getValidatedNonce(null, true);
         $validationResponse = false;
 
         $isLiveChange = Data::getResursOption('environment') === self::getParam('e') ? false : true;
