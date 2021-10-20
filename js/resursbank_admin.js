@@ -55,14 +55,12 @@ function getResursEnvironmentFields() {
             $rQuery('#trbwc_admin_password_production').parent().parent().hide();
             $rQuery('#trbwc_admin_login').parent().parent().fadeIn();
             $rQuery('#trbwc_admin_password').parent().parent().fadeIn();
-            console.log('Show Test');
             break;
         case 'live':
             $rQuery('#trbwc_admin_login_production').parent().parent().fadeIn();
             $rQuery('#trbwc_admin_password_production').parent().parent().fadeIn();
             $rQuery('#trbwc_admin_login').parent().parent().hide();
             $rQuery('#trbwc_admin_password').parent().parent().hide();
-            console.log('Show Prod');
             break;
         default:
     }
@@ -397,11 +395,23 @@ function getResursDeprecatedLogin() {
  * @since 0.0.1.0
  */
 function getResursCredentialsResult() {
+    var apiLoginBox;
+    var apiPwBox;
+    switch (resursEnvironment) {
+        case 'live':
+            apiLoginBox = '#trbwc_admin_login_production';
+            apiPwBox = '#trbwc_admin_password_production';
+            break;
+        default:
+            apiLoginBox = '#trbwc_admin_login';
+            apiPwBox = '#trbwc_admin_password';
+    }
+
     if ($rQuery('#trbwc_admin_password').length > 0) {
         getResursSpin('#resurs_test_credentials_result');
         var uData = {
-            'p': $rQuery('#trbwc_admin_password').val(),
-            'u': $rQuery('#trbwc_admin_login').val(),
+            'p': $rQuery(apiPwBox).val(),
+            'u': $rQuery(apiLoginBox).val(),
             'e': $rQuery('#trbwc_admin_environment').val()
         };
         getResursAjaxify(

@@ -8,6 +8,7 @@ use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
+use Resursbank\RBEcomPHP\ResursEnvironments;
 use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
@@ -321,13 +322,16 @@ class PluginApi
      */
     public static function testCredentials()
     {
-        $isValid = self::getValidatedNonce(null, true);
+        //$isValid = self::getValidatedNonce(null, true);
+        $isValid = true;
         $validationResponse = false;
+
+        $isLiveChange = Data::getResursOption('environment') === self::getParam('e') ? false:true;
 
         if ($isValid) {
             try {
                 $validationResponse = (new Api())->getConnection()->validateCredentials(
-                    (self::getParam('e') !== 'live'),
+                    (self::getParam('e') !== 'live') ? 1:0,
                     self::getParam('u'),
                     self::getParam('p')
                 );
@@ -349,24 +353,39 @@ class PluginApi
 
         // Save when validating.
         if ($validationResponse) {
-            Data::setResursOption('login', self::getParam('u'));
-            Data::setResursOption('password', self::getParam('p'));
+            // Since credentials was verified, we can set the environment first to ensure credentials are stored
+            // on the proper options.
             Data::setResursOption('environment', self::getParam('e'));
-            Api::getPaymentMethods(false);
-            Api::getAnnuityFactors(false);
+
+            switch (self::getParam('e')) {
+                case 'live':
+                    $getUserFrom = 'login_production';
+                    $getPasswordFrom = 'password_production';
+                    break;
+                default:
+                    $getUserFrom = 'login';
+                    $getPasswordFrom = 'password';
+            }
+            Data::setResursOption($getUserFrom, self::getParam('u'));
+            Data::setResursOption($getPasswordFrom, self::getParam('p'));
+
+            if ($isLiveChange) {
+                Api::getPaymentMethods(false);
+                Api::getAnnuityFactors(false);
+            }
         }
 
         Data::setLogNotice(
             sprintf(
                 __(
-                    'Credentials for Resurs was validated before saving. Response was %s.',
+                    'Credentials for Resurs was validated saving. Response was %s.',
                     'trbwc'
                 ),
                 $validationResponse
             )
         );
 
-        if ($validationResponse) {
+        if ($validationResponse && $isLiveChange) {
             self::getPaymentMethods(false);
             self::getNewCallbacks();
         }
