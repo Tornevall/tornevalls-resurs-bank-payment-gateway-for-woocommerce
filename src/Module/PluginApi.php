@@ -399,12 +399,15 @@ class PluginApi
 
     /**
      * @param bool $reply
+     * @param bool $validate
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getPaymentMethods($reply = true)
+    public static function getPaymentMethods($reply = true, $validate = true)
     {
-        self::getValidatedNonce();
+        if ($validate) {
+            self::getValidatedNonce();
+        }
 
         // Re-fetch payment methods.
         Api::getPaymentMethods(false);
@@ -745,6 +748,8 @@ class PluginApi
             sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getPaymentMethods'],
             sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
             sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
+            sprintf('%s_admin_login_production', Data::getPrefix()) => ['getNewCallbacks'],
+            sprintf('%s_admin_password_production', Data::getPrefix()) => ['getPaymentMethods'],
         ];
         if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
             foreach ($actOn[$option] as $execFunction) {
@@ -755,6 +760,9 @@ class PluginApi
                             // checks. When saving from admin, nonce checks are not needed - it rather breaks
                             // the saving itself. So in this particular case, nonce checks are disabled.
                             self::{$execFunction}(false);
+                            break;
+                        case 'getPaymentMethods':
+                            self::{$execFunction}(false, false);
                             break;
                         default:
                             self::{$execFunction}();

@@ -741,6 +741,7 @@ class FormFields extends WC_Settings_API
                     'annuityFactors' => $annuityFactors,
                     'exception' => $exception,
                     'annuityEnabled' => $annuityEnabled,
+                    'environment' => Data::getResursOption('environment')
                 ]
             );
         }
