@@ -324,6 +324,13 @@ class PluginApi
         $isValid = self::getValidatedNonce(null, true);
         $validationResponse = false;
 
+        /**
+         * Defines whether this is a live change or just a test. This occurs when the user is switching
+         * environment without saving the data. This allows us - for example - to validate production
+         * before switching over.
+         *
+         * @var bool $isLiveChange
+         */
         $isLiveChange = Data::getResursOption('environment') === self::getParam('e') ? false : true;
 
         if ($isValid) {
