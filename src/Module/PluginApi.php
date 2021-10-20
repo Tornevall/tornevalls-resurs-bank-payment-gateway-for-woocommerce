@@ -723,7 +723,7 @@ class PluginApi
     public static function getOptionsControl($option, $old, $new)
     {
         $actOn = [
-            sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getNewMethods'],
+            sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getPaymentMethods'],
             sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
             sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
         ];
