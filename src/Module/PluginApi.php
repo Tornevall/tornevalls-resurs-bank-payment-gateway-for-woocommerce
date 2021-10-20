@@ -8,7 +8,6 @@ use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
-use Resursbank\RBEcomPHP\ResursEnvironments;
 use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
@@ -326,12 +325,12 @@ class PluginApi
         $isValid = true;
         $validationResponse = false;
 
-        $isLiveChange = Data::getResursOption('environment') === self::getParam('e') ? false:true;
+        $isLiveChange = Data::getResursOption('environment') === self::getParam('e') ? false : true;
 
         if ($isValid) {
             try {
                 $validationResponse = (new Api())->getConnection()->validateCredentials(
-                    (self::getParam('e') !== 'live') ? 1:0,
+                    (self::getParam('e') !== 'live') ? 1 : 0,
                     self::getParam('u'),
                     self::getParam('p')
                 );
@@ -355,7 +354,9 @@ class PluginApi
         if ($validationResponse) {
             // Since credentials was verified, we can set the environment first to ensure credentials are stored
             // on the proper options.
-            Data::setResursOption('environment', self::getParam('e'));
+            if (!$isLiveChange) {
+                Data::setResursOption('environment', self::getParam('e'));
+            }
 
             switch (self::getParam('e')) {
                 case 'live':
