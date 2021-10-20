@@ -11,18 +11,61 @@ var resursCallbackActiveInterval = 2;
 var resursCallbackActiveTimeout = 15;
 var resursCallbackTestHandle;
 var resursCallbackReceiveSuccess = false;
+var resursEnvironment;
 
 /**
  * Handle wp-admin, and update realtime fields.
  * @since 0.0.1.0
  */
 function getResursAdminFields() {
-    $rQuery('select[id*=r_annuity_select]').click(function (e) {
-        window.onbeforeunload = null;
-        e.preventDefault();
-    });
+    getResursConfigPopupPrevention(
+        [
+            '#trbwc_admin_environment',
+            '#trbwc_admin_login',
+            '#trbwc_admin_password',
+            '#trbwc_admin_login_production',
+            '#trbwc_admin_password_production',
+            'select[id*=r_annuity_select]'
+        ]
+    );
+    getResursEnvironmentFields();
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
+}
+
+function getResursConfigPopupPrevention(elements) {
+    for (var i = 0; i < elements.length; i++) {
+        console.log('Update Element ' + elements[i]);
+        $rQuery(elements[i]).click(function (e) {
+            window.onbeforeunload = null;
+            e.preventDefault();
+            getResursEnvironmentFields();
+        });
+    }
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function getResursEnvironmentFields() {
+    resursEnvironment = $rQuery('#trbwc_admin_environment').find(':selected').val();
+    switch (resursEnvironment) {
+        case 'test':
+            $rQuery('#trbwc_admin_login_production').parent().parent().hide();
+            $rQuery('#trbwc_admin_password_production').parent().parent().hide();
+            $rQuery('#trbwc_admin_login').parent().parent().fadeIn();
+            $rQuery('#trbwc_admin_password').parent().parent().fadeIn();
+            console.log('Show Test');
+            break;
+        case 'live':
+            $rQuery('#trbwc_admin_login_production').parent().parent().fadeIn();
+            $rQuery('#trbwc_admin_password_production').parent().parent().fadeIn();
+            $rQuery('#trbwc_admin_login').parent().parent().hide();
+            $rQuery('#trbwc_admin_password').parent().parent().hide();
+            console.log('Show Prod');
+            break;
+        default:
+    }
 }
 
 /**
@@ -42,9 +85,15 @@ function getCallbackMatches() {
                 parseInt(data['errors']['code']) > 0
             ) {
                 if ($rQuery('#resurs_credentials_username_box').length > 0) {
-                    $rQuery('#resurs_credentials_username_box').css('font-weight', 'bold');
-                    $rQuery('#resurs_credentials_username_box').css('color', '#990000');
-                    $rQuery('#resurs_credentials_username_box').html(data['errors']['message']);
+                    if (resursEnvironment === 'test') {
+                        $rQuery('#resurs_credentials_username_box').css('font-weight', 'bold');
+                        $rQuery('#resurs_credentials_username_box').css('color', '#990000');
+                        $rQuery('#resurs_credentials_username_box').html(data['errors']['message']);
+                    } else {
+                        $rQuery('#resurs_credentials_username_box').css('font-weight', 'bold');
+                        $rQuery('#resurs_credentials_username_box').css('color', '#990000');
+                        $rQuery('#resurs_credentials_username_box').html(data['errors']['message']);
+                    }
                 }
             }
             if (typeof data['requireRefresh'] !== "undefined" && data['requireRefresh'] === true) {
@@ -241,6 +290,14 @@ function getResursCredentialsTestForm(pwBox) {
             }
         )
     );
+    $rQuery('#trbwc_admin_login_production').parent().children('.description').before(
+        $rQuery(
+            '<div>',
+            {
+                'id': 'resurs_credentials_username_production_box'
+            }
+        )
+    );
 }
 
 /**
@@ -253,6 +310,7 @@ function getResursAdminPasswordButton() {
         // One time nonce controlled credential importer.
         getDeprecatedCredentialsForm();
         getResursCredentialsTestForm(pwBox);
+        getResursCredentialsTestForm($rQuery('#trbwc_admin_password_production'));
     }
 }
 

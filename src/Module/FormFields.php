@@ -48,70 +48,6 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'yes',
                 ],
-                'environment' => [
-                    'id' => 'environment',
-                    'title' => __('Environment', 'trbwc'),
-                    'type' => 'select',
-                    'options' => [
-                        'test' => __(
-                            'Test/Staging',
-                            'trbwc'
-                        ),
-                        'live' => __(
-                            'Production/Live',
-                            'trbwc'
-                        ),
-                    ],
-                    'custom_attributes' => [
-                        'size' => 2,
-                    ],
-                    'default' => 'test',
-                    'desc' => __(
-                        'Defines if you are are live or just in test/staging. Default: test.',
-                        'trbwc'
-                    ),
-                ],
-                'login' => [
-                    'id' => 'login',
-                    'title' => __('Resurs Bank API username', 'trbwc'),
-                    'type' => 'text',
-                    'desc' => __(
-                        'Web services username, received from Resurs Bank.',
-                        'trbwc'
-                    ),
-                    'default' => '',
-                ],
-                'password' => [
-                    'id' => 'password',
-                    'title' => __('Resurs Bank API password', 'trbwc'),
-                    'type' => 'password',
-                    'default' => '',
-                    'desc' => __(
-                        'API password, received from Resurs Bank. To validate and store the credentials ' .
-                        'make sure you use the validation button. If you choose to not validate your credentials ' .
-                        'here, and instead just save, you have to update the methods manually in the payment ' .
-                        'methods section.',
-                        'trbwc'
-                    ),
-                    'custom_attributes' => [
-                        'onload' => 'resursAppendCredentialCheck()',
-                    ],
-                ],
-                'country' => [
-                    'id' => 'country',
-                    'title' => __('Chosen merchant country', 'trbwc'),
-                    'type' => 'text',
-                    'default' => get_option('woocommerce_default_country'),
-                    'css' => 'width: 100px',
-                    'custom_attributes' => [
-                        'readonly' => 'readonly',
-                    ],
-                    'desc' => __(
-                        'Defines which country this plugin operates from. Credentials given by Resurs Bank are ' .
-                        'limited to a specifc country. Default: Store address country.',
-                        'trbwc'
-                    ),
-                ],
                 'checkout_type' => [
                     'id' => 'checkout_type',
                     'title' => __('Checkout Type', 'trbwc'),
@@ -137,6 +73,96 @@ class FormFields extends WC_Settings_API
                     'default' => 'rco',
                     'desc' => __(
                         'Chosen checkout type.',
+                        'trbwc'
+                    ),
+                ],
+                'environment' => [
+                    'id' => 'environment',
+                    'title' => __('Environment', 'trbwc'),
+                    'type' => 'select',
+                    'options' => [
+                        'test' => __(
+                            'Test',
+                            'trbwc'
+                        ),
+                        'live' => __(
+                            'Production',
+                            'trbwc'
+                        ),
+                    ],
+                    'custom_attributes' => [
+                        'size' => 2,
+                    ],
+                    'default' => 'test',
+                    'desc' => __(
+                        'Defines if you are are live or just in test/staging. Default: test.',
+                        'trbwc'
+                    ),
+                ],
+                'login' => [
+                    'id' => 'login',
+                    'title' => __('Username', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Web services username, received from Resurs Bank.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'login_production' => [
+                    'id' => 'login_production',
+                    'title' => __('Username (Production).', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Web services username, received from Resurs Bank.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'password' => [
+                    'id' => 'password',
+                    'title' => __('Resurs Bank API password', 'trbwc'),
+                    'type' => 'password',
+                    'default' => '',
+                    'desc' => __(
+                        'API password, received from Resurs Bank. To validate and store the credentials ' .
+                        'make sure you use the validation button. If you choose to not validate your credentials ' .
+                        'here, and instead just save, you have to update the methods manually in the payment ' .
+                        'methods section.',
+                        'trbwc'
+                    ),
+                    'custom_attributes' => [
+                        'onload' => 'resursAppendCredentialCheck()',
+                    ],
+                ],
+                'password_production' => [
+                    'id' => 'password_production',
+                    'title' => __('Resurs Bank API Password (Production).', 'trbwc'),
+                    'type' => 'password',
+                    'default' => '',
+                    'desc' => __(
+                        'API password, received from Resurs Bank. To validate and store the credentials ' .
+                        'make sure you use the validation button. If you choose to not validate your credentials ' .
+                        'here, and instead just save, you have to update the methods manually in the payment ' .
+                        'methods section.',
+                        'trbwc'
+                    ),
+                    'custom_attributes' => [
+                        'onload' => 'resursAppendCredentialCheck()',
+                    ],
+                ],
+                'country' => [
+                    'id' => 'country',
+                    'title' => __('Chosen merchant country', 'trbwc'),
+                    'type' => 'text',
+                    'default' => get_option('woocommerce_default_country'),
+                    'css' => 'width: 100px',
+                    'custom_attributes' => [
+                        'readonly' => 'readonly',
+                    ],
+                    'desc' => __(
+                        'Defines which country this plugin operates from. Credentials given by Resurs Bank are ' .
+                        'limited to a specifc country. Default: Store address country.',
                         'trbwc'
                     ),
                 ],
