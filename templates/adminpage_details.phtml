@@ -47,7 +47,8 @@ if (isset($ecom)) {
             <span>
         <?php
         if (isset($ecom->isCurrentCredentials) && !$ecom->isCurrentCredentials) {
-            $isDifferentAccount = true; ?>
+            $isDifferentAccount = true;
+            ?>
             <span style="display:block;" class="resursOrderInfoDifferentCredentials">
 <?php
 printf(__(

@@ -149,16 +149,18 @@ class WooCommerce
      */
     public static function getAvailableGateways($gateways)
     {
-        $customerCountry = Data::getCustomerCountry();
+        if (!is_admin()) {
+            $customerCountry = Data::getCustomerCountry();
 
-        if ($customerCountry !== get_option('woocommerce_default_country')) {
-            foreach ($gateways as $gatewayName => $gatewayClass) {
-                if ($gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
-                    (bool)preg_match('/card/i', $gatewayClass->getSpecificType())
-                ) {
-                    continue;
+            if ($customerCountry !== get_option('woocommerce_default_country')) {
+                foreach ($gateways as $gatewayName => $gatewayClass) {
+                    if ($gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
+                        (bool)preg_match('/card/i', $gatewayClass->getSpecificType())
+                    ) {
+                        continue;
+                    }
+                    unset($gateways[$gatewayName]);
                 }
-                unset($gateways[$gatewayName]);
             }
         }
 
@@ -270,6 +272,7 @@ class WooCommerce
                 $orderData['ecom_short'] = self::getMetaDataFromOrder($orderData['ecom_short'], $orderData['meta']);
             }
             if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
+                $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
                 echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
             }
             // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
@@ -398,6 +401,29 @@ class WooCommerce
             }
         }
         return $metaDataContainer;
+    }
+
+    /**
+     * @param $orderData
+     * @since 0.0.1.0
+     */
+    private static function getEcomHadProblemsInfo($orderData)
+    {
+        $return = false;
+        if (isset($orderData['ecom_had_reference_problems']) && $orderData['ecom_had_reference_problems']) {
+            $return = sprintf(
+                __(
+                    'This payment is marked with reference problems. This means that there might have been ' .
+                    'problems when the payment was executed and tried to update the payment reference (%s) to a new ' .
+                    'id (%s). You can check the UpdatePaymentReference values for errors.',
+                    'trbwc'
+                ),
+                isset($orderData['resurs_secondary']) ? $orderData['resurs_secondary'] : '[missing reference]',
+                $orderData['resurs']
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -684,7 +710,8 @@ class WooCommerce
 
             if ($orderId) {
                 $order = new WC_Order($orderId);
-                $order->add_order_note(
+                self::setOrderNote(
+                    new WC_Order($orderId),
                     $logNotice
                 );
             }
@@ -693,7 +720,8 @@ class WooCommerce
                 Data::setLogError(
                     sprintf(
                         __(
-                            'Callback with parameter %s received, but failed because $order could not instantiate and remained null.',
+                            'Callback with parameter %s received, but failed because $order could not ' .
+                            'instantiate and remained null.',
                             'trbwc'
                         ),
                         $pRequest
@@ -810,6 +838,69 @@ class WooCommerce
     }
 
     /**
+     * Set order note, but prefixed by plugin name.
+     * @param $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function setOrderNote($order, $orderNote, $is_customer_note = 0)
+    {
+        self::getProperOrder($order, 'order')->add_order_note(
+            self::getOrderNotePrefixed($orderNote),
+            $is_customer_note
+        );
+    }
+
+    /**
+     * Centralized order retrieval.
+     * @param $orderContainer
+     * @param $returnAs
+     * @return int|WC_Order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getProperOrder($orderContainer, $returnAs)
+    {
+        if (method_exists($orderContainer, 'get_id')) {
+            $orderId = $orderContainer->get_id();
+            $order = $orderContainer;
+        } elseif ((int)$orderContainer > 0) {
+            $order = new WC_Order($orderContainer);
+        } else {
+            throw new Exception(
+                sprintf('Order id not found when looked up in %s.', __FUNCTION__),
+                400
+            );
+        }
+
+        switch ($returnAs) {
+            case 'order':
+                $return = $order;
+                break;
+            default:
+                $return = $orderId;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Render prefixed order note.
+     *
+     * @param $orderNote
+     * @return string
+     * @since 0.0.1.0
+     */
+    private static function getOrderNotePrefixed($orderNote)
+    {
+        return sprintf(
+            '[%s] %s',
+            WordPress::applyFilters('getOrderNotePrefix', Data::getPrefix()),
+            $orderNote
+        );
+    }
+
+    /**
      * @param $paymentId
      * @param $orderId
      * @param $order
@@ -827,31 +918,32 @@ class WooCommerce
     /**
      * @param $ecomOrderStatus
      * @param WC_Order $order
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function setOrderStatusByCallback($ecomOrderStatus, $order)
     {
         switch (true) {
             case $ecomOrderStatus & OrderStatus::PENDING:
-                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                self::setOrderStatusWithNotice($order, OrderStatus::PENDING);
                 break;
             case $ecomOrderStatus & OrderStatus::PROCESSING:
-                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                self::setOrderStatusWithNotice($order, OrderStatus::PROCESSING);
                 break;
             case $ecomOrderStatus & OrderStatus::COMPLETED:
-                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                self::setOrderStatusWithNotice($order, OrderStatus::COMPLETED);
                 break;
             case $ecomOrderStatus & OrderStatus::ANNULLED:
-                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                self::setOrderStatusWithNotice($order, OrderStatus::ANNULLED);
                 break;
             case $ecomOrderStatus & OrderStatus::CREDITED:
-                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                self::setOrderStatusWithNotice($order, OrderStatus::CREDITED);
                 break;
             case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
-                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                self::setOrderStatusWithNotice($order, OrderStatus::AUTO_DEBITED);
                 break;
             case $ecomOrderStatus & OrderStatus::MANUAL_INSPECTION:
-                self::setOrderStatusWithNotice($order, $ecomOrderStatus);
+                self::setOrderStatusWithNotice($order, OrderStatus::MANUAL_INSPECTION);
                 break;
             default:
         }
@@ -861,6 +953,7 @@ class WooCommerce
      * @param WC_Order $order
      * @param $ecomOrderStatus
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function setOrderStatusWithNotice($order, $ecomOrderStatus)
@@ -869,7 +962,8 @@ class WooCommerce
         $requestedStatus = self::getOrderStatuses($ecomOrderStatus);
 
         if ($currentStatus !== $requestedStatus) {
-            $return = $order->update_status(
+            $return = self::setOrderStatusUpdate(
+                $order,
                 self::getOrderStatuses($ecomOrderStatus),
                 sprintf(
                     __('Resurs Bank updated order status to %s.', 'trbwc'),
@@ -885,7 +979,8 @@ class WooCommerce
                 ),
                 'trbwc'
             );
-            $order->add_order_note(
+            self::setOrderNote(
+                $order,
                 $orderStatusUpdateNotice
             );
             Data::setLogNotice($orderStatusUpdateNotice);
@@ -916,6 +1011,24 @@ class WooCommerce
             return $return[$key];
         }
         return $return;
+    }
+
+    /**
+     * Set order status with prefixed note.
+     *
+     * @param $order
+     * @param $newOrderStatus
+     * @param $orderNote
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
+    {
+        return self::getProperOrder($order, 'order')->update_status(
+            $newOrderStatus,
+            self::getOrderNotePrefixed($orderNote)
+        );
     }
 
     /**
@@ -955,7 +1068,8 @@ class WooCommerce
             );
             Data::setOrderMeta($order, 'customerSynchronization', time());
             Data::setLogNotice($synchNotice);
-            $order->add_order_note(
+            WooCommerce::setOrderNote(
+                $order,
                 $synchNotice
             );
         }

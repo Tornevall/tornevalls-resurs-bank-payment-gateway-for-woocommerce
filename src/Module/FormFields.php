@@ -731,6 +731,13 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'admin_tweaking_section_end' => [
+                    'type' => 'sectionend',
+                ],
+                'customer_checkout_tweaking_section' => [
+                    'type' => 'title',
+                    'title' => 'Customer & Checkout Tweaking',
+                ],
                 'simulate_real_getaddress' => [
                     'id' => 'simulate_real_getaddress',
                     'title' => __('Activate "real people"-mode in test, for getAddress.', 'trbwc'),
@@ -746,7 +753,25 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
-                'admin_tweaking_section_end' => [
+                'customer_checkout_tweaking_section_end' => [
+                    'type' => 'sectionend',
+                ],
+                'order_tweaking_section' => [
+                    'type' => 'title',
+                    'title' => 'Order Tweaking',
+                ],
+                'order_note_prefix' => [
+                    'id' => 'order_note_prefix',
+                    'title' => __('Prefix for order and status notes', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'When orders are updated with new statuses, or gets new notifications this is how we are ' .
+                        'prefixing the notes. Default (empty) is "trbwc".',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'order_tweaking_section_end' => [
                     'type' => 'sectionend',
                 ],
             ],

@@ -766,6 +766,7 @@ class ResursDefault extends WC_Payment_Gateway
         Data::setOrderMeta($order, 'apiDataId', $this->apiDataId);
         Data::setOrderMeta($order, 'orderSigningPayload', $this->getApiData());
         Data::setOrderMeta($order, 'resursReference', $this->getPaymentId());
+        Data::setOrderMeta($order, 'resursDefaultReference', $this->getPaymentIdBySession());
         if (!empty(Data::getPaymentMethodBySession())) {
             Data::setOrderMeta($order, 'paymentMethod', Data::getPaymentMethodBySession());
         }
@@ -776,22 +777,36 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function getPaymentId()
+    private function getPaymentId($overrideOrderIdType = false)
     {
         switch (Data::getResursOption('order_id_type')) {
             case 'postid':
                 $return = $this->order->get_id();
                 break;
             case 'ecom':
+                $return = $this->getPaymentIdBySession();
+                break;
             default:
-                $sessionPaymentId = WooCommerce::getSessionValue('rco_order_id');
-                // It is necessary to fetch payment id from session if exists, so we can keep it both in frontend
-                // and the backend API. If not set, we'll let ecomPHP fetch a new.
-                $return = !empty($sessionPaymentId) ? $sessionPaymentId : Api::getResurs()->getPreferredPaymentId();
                 break;
         }
 
         return (string)$return;
+    }
+
+    /**
+     * Retrieve the default Resurs order reference regardless of the rco order id type.
+     * This is used for tracking failures.
+     *
+     * @return array|mixed|string|null
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getPaymentIdBySession()
+    {
+        // It is necessary to fetch payment id from session if exists, so we can keep it both in frontend
+        // and the backend API. If not set, we'll let ecomPHP fetch a new.
+        $sessionPaymentId = WooCommerce::getSessionValue('rco_order_id');
+        return !empty($sessionPaymentId) ? $sessionPaymentId : Api::getResurs()->getPreferredPaymentId();
     }
 
     /**
@@ -1334,7 +1349,15 @@ class ResursDefault extends WC_Payment_Gateway
                 )
             );
             $this->setOrderCheckoutMeta($order_id);
+            WooCommerce::setOrderNote(
+                $order_id,
+                sprintf(
+                    __('Order process initialized by customer with checkout %s.'),
+                    Data::getCheckoutType()
+                )
+            );
             $order->set_payment_method(Data::getPaymentMethodBySession());
+            $this->setProperPaymentReference($order);
             // From here, we can handle the order at regular basis.
         }
 
@@ -1388,6 +1411,57 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Handler for updatePaymentReference.
+     *
+     * @param $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setProperPaymentReference($order)
+    {
+        $referenceType = Data::getResursOption('order_id_type');
+
+        switch ($referenceType) {
+            case 'postid';
+                $idBeforeChange = $this->getPaymentIdBySession();
+                try {
+                    Api::getResurs()->updatePaymentReference($idBeforeChange, $this->getPaymentId());
+                    Data::setOrderMeta($order, 'updatePaymentReference', 'OK');
+                    WooCommerce::setOrderNote(
+                        $order,
+                        sprintf(
+                            __('Order reference updated (updatePaymentReference) with no errors.', 'trbwc')
+                        )
+                    );
+                } catch (Exception $e) {
+                    Data::setLogNotice(
+                        sprintf(
+                            'updatePaymentReference failed: %s (code %s).',
+                            $e->getMessage(),
+                            $e->getCode()
+                        )
+                    );
+                    WooCommerce::setOrderNote(
+                        $order,
+                        sprintf(
+                            __('updatePaymentReference failure (code %s): %s.', 'trbwc'),
+                            $e->getCode(),
+                            $e->getMessage()
+                        )
+                    );
+                    Data::setOrderMeta(
+                        $order,
+                        'updatePaymentReference',
+                        sprintf('%s (%s).', $e->getMessage(), $e->getCode())
+                    );
+                }
+                break;
+            default:
+                // Do nothing and live your life if default is used.
+        }
+    }
+
+    /**
      * @param WC_Order $order
      * @throws Exception
      * @since 0.0.1.0
@@ -1417,8 +1491,12 @@ class ResursDefault extends WC_Payment_Gateway
         $checkoutRequestType = sprintf('process%s', ucfirst(Data::getCheckoutType()));
 
         if (method_exists($this, $checkoutRequestType)) {
-            $this->order->add_order_note(
-                sprintf(__('Resurs Bank processing order (%s).', 'trbwc'), $checkoutRequestType)
+            WooCommerce::setOrderNote(
+                $this->order,
+                sprintf(
+                    __('Resurs Bank processing order (%s).', 'trbwc'),
+                    $checkoutRequestType
+                )
             );
             // Automatically process orders with a checkout type that is supported by this plugin.
             // Checkout types will become available as the method starts to exist.
@@ -1699,6 +1777,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @param $bookSignedOrderReference
+     * @throws Exception
      * @since 0.0.1.0
      */
     private function setFinalSigningNotes($bookSignedOrderReference)
@@ -1711,7 +1790,10 @@ class ResursDefault extends WC_Payment_Gateway
             Data::CAN_LOG_ORDER_EVENTS,
             $customerSignedMessage
         );
-        $this->order->add_order_note($customerSignedMessage);
+        WooCommerce::setOrderNote(
+            $this->order,
+            $customerSignedMessage
+        );
     }
 
     /**
@@ -1768,14 +1850,20 @@ class ResursDefault extends WC_Payment_Gateway
             default:
                 // Everything received without a proper status usually fails.
                 // This includes DENIED (and FAILED if it still exists).
-                $this->order->add_order_note(
-                    sprintf(__('The booking failed with status %s. Customer notified in checkout.', 'trbwc')),
-                    $this->getBookPaymentStatus()
+                WooCommerce::setOrderNote(
+                    $this->order,
+                    sprintf(
+                        __('The booking failed with status %s. Customer notified in checkout.', 'trbwc'),
+                        $this->getBookPaymentStatus()
+                    )
                 );
-                wc_add_notice(__(
-                    'The payment can not complete. Contact customer services for more information.',
-                    'trbwc'
-                ), 'error');
+                wc_add_notice(
+                    __(
+                        'The payment can not complete. Contact customer services for more information.',
+                        'trbwc'
+                    ),
+                    'error'
+                );
                 $return = $this->getResult('failed');
                 break;
         }
@@ -1820,6 +1908,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @param $woocommerceStatus
      * @param $statusNotification
+     * @throws Exception
      * @since 0.0.1.0
      */
     private function updateOrderStatus($woocommerceStatus, $statusNotification)
@@ -1831,11 +1920,15 @@ class ResursDefault extends WC_Payment_Gateway
 
         if ($woocommerceStatus === self::STATUS_FINALIZED) {
             $this->order->payment_complete();
-            $this->order->add_order_note($statusNotification);
+            WooCommerce::setOrderNote(
+                $this->order,
+                $statusNotification
+            );
         } else {
             $currentOrderStatus = $this->order->get_status();
             if ($currentOrderStatus !== $woocommerceStatus) {
-                $this->order->update_status(
+                WooCommerce::setOrderStatusUpdate(
+                    $this->order,
                     $woocommerceStatus,
                     $statusNotification
                 );
@@ -1848,7 +1941,8 @@ class ResursDefault extends WC_Payment_Gateway
                     ),
                     'trbwc'
                 );
-                $this->order->add_order_note(
+                WooCommerce::setOrderNote(
+                    $this->order,
                     $orderStatusUpdateNotice
                 );
                 Data::setLogNotice($orderStatusUpdateNotice);
@@ -1891,11 +1985,13 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @param $lastExceptionCode
+     * @throws Exception
      * @since 0.0.1.0
      */
     private function setFinalSigningProblemNotes($lastExceptionCode)
     {
-        $this->order->add_order_note(
+        WooCommerce::setOrderNote(
+            $this->order,
             sprintf(
                 __(
                     'Booking this signed payment has been running multiple times but failed ' .
