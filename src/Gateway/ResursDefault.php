@@ -777,7 +777,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function getPaymentId($overrideOrderIdType = false)
+    private function getPaymentId()
     {
         switch (Data::getResursOption('order_id_type')) {
             case 'postid':
