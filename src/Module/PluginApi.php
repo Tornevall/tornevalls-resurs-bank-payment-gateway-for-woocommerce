@@ -921,6 +921,7 @@ class PluginApi
             default:
         }
         $return['identificationResponse'] = $addressResponse;
+        $return['billing_country'] = $customerCountry;
 
         if (is_array($addressResponse) && count($addressResponse)) {
             $return = self::getTransformedAddressResponse($return, $addressResponse);
