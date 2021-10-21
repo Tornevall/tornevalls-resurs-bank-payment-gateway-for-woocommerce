@@ -863,7 +863,7 @@ class Data
                     'desc' => sprintf(
                         __(
                             'This section is for very advanced tweaking only. It is not enabled and visible by ' .
-                            'default for security reasons. Proceed at your own risk',
+                            'default for security reasons. Proceed at your own risk!',
                             'trbwc'
                         )
                     ),
@@ -898,7 +898,7 @@ class Data
                 ],
                 'nonce_trust_admin_session' => [
                     'id' => 'nonce_trust_admin_session',
-                    'title' => __('Trust is_admin frontend nonces', 'trbwc'),
+                    'title' => __('Trust is_admin before frontend nonces.', 'trbwc'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Yes, do trust them please.',
@@ -907,15 +907,16 @@ class Data
                     'desc_top' => __(
                         'For some places in the admin panel, we use nonces as an extra security layer when it comes ' .
                         'to requests like updating callbacks, payment methods, etc. Sometimes nonces expires too ' .
-                        'quickly or breaks too fast. Enable this feature to start trusting is_admin() during ajax ' .
-                        'request primarily and nonces secondarily.',
+                        'quickly and breaks requests in wp_admin. Enable this feature to start trusting is_admin() ' .
+                        'during ajax request primarily and nonces secondarily. is_admin is normally a security layer ' .
+                        'that prevents unknonwn requests to be executed.',
                         'trbwc'
                     ),
                     'default' => 'no',
                 ],
                 'simulate_real_getaddress' => [
                     'id' => 'simulate_real_getaddress',
-                    'title' => __('Activate "real people"-mode in test, for getAddress', 'trbwc'),
+                    'title' => __('Activate "real people"-mode in test, for getAddress.', 'trbwc'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',

@@ -386,7 +386,7 @@ class PluginApi
         Data::setLogNotice(
             sprintf(
                 __(
-                    'Credentials for Resurs was validated saving. Response was %s.',
+                    'Credentials for Resurs was validated successfully. Response was %s.',
                     'trbwc'
                 ),
                 $validationResponse
