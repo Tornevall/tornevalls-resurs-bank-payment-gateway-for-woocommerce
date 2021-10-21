@@ -913,6 +913,21 @@ class Data
                     ),
                     'default' => 'no',
                 ],
+                'simulate_real_getaddress' => [
+                    'id' => 'simulate_real_getaddress',
+                    'title' => __('Activate "real people"-mode in test, for getAddress', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_top' => __(
+                        'Required production credentials available: When activating this mode, getAddress will use ' .
+                        'real lookups for getAddress rather than the mocked data.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'admin_tweaking_section_end' => [
                     'type' => 'sectionend',
                 ],
@@ -941,6 +956,27 @@ class Data
         }
 
         return (bool)self::$settingStorage['showDeveloper'];
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isTest()
+    {
+        return (self::getResursOption('environment') === 'test');
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isProductionAvailable()
+    {
+        return (
+            !empty(Data::getResursOption('login_production')) &&
+            !empty(Data::getResursOption('password_production'))
+        );
     }
 
     /**
