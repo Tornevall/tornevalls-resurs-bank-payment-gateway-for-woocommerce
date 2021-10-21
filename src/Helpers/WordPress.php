@@ -632,7 +632,7 @@ class WordPress
             'trbwc'
         );
         $return['resurs_test_credentials'] = __(
-            'Validate and save credentials and payment methods',
+            'Validate and save credentials',
             'trbwc'
         );
         $return['credential_failure_notice'] = __(

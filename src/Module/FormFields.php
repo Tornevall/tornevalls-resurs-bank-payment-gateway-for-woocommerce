@@ -125,10 +125,10 @@ class FormFields extends WC_Settings_API
                     'type' => 'password',
                     'default' => '',
                     'desc' => __(
-                        'API password, received from Resurs Bank. To validate and store the credentials ' .
-                        'make sure you use the validation button. If you choose to not validate your credentials ' .
-                        'here, and instead just save, you have to update the methods manually in the payment ' .
-                        'methods section.',
+                        'API password, received from Resurs Bank. If your credentials are saved within the same ' .
+                        'environment as the chosen one and you decide to validate them before saving, payment ' .
+                        'methods and necessary data will update the same time. Otherwise, only credentials will be ' .
+                        'saved.',
                         'trbwc'
                     ),
                     'custom_attributes' => [
@@ -293,7 +293,7 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                     'type' => 'select',
-                    'options' => WordPress::applyFilters('getPartPaymentPage', [])
+                    'options' => WordPress::applyFilters('getPartPaymentPage', []),
                 ],
                 'payment_methods_settings_end' => [
                     'type' => 'sectionend',
@@ -741,7 +741,7 @@ class FormFields extends WC_Settings_API
                     'annuityFactors' => $annuityFactors,
                     'exception' => $exception,
                     'annuityEnabled' => $annuityEnabled,
-                    'environment' => Data::getResursOption('environment')
+                    'environment' => Data::getResursOption('environment'),
                 ]
             );
         }

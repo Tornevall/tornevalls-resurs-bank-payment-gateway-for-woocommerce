@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2021-10-21 08:49+0200\n"
-"PO-Revision-Date: 2021-10-21 08:50+0200\n"
+"POT-Creation-Date: 2021-10-21 12:35+0200\n"
+"PO-Revision-Date: 2021-10-21 12:35+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -318,8 +318,8 @@ msgstr ""
 "Paypal-lösning."
 
 #: src/Helpers/WordPress.php:635
-msgid "Validate and save credentials and payment methods"
-msgstr "Validera och spara autentiseringsuppgifter och betalningsmetoder"
+msgid "Validate and save credentials"
+msgstr "Verifiera och spara autentiseringsuppgifter"
 
 #: src/Helpers/WordPress.php:639
 msgid ""
@@ -695,7 +695,23 @@ msgstr "Användarnamn (Produktion)."
 msgid "Resurs Bank API password"
 msgstr "Lösenord för Resurs Bank-API"
 
-#: src/Module/FormFields.php:128 src/Module/FormFields.php:144
+#: src/Module/FormFields.php:128
+msgid ""
+"API password, received from Resurs Bank. If your credentials are saved "
+"within the same environment as the chosen one and you decide to validate "
+"them before saving, payment methods and necessary data will update the same "
+"time. Otherwise, only credentials will be saved."
+msgstr ""
+"API-lösenord, mottaget från Resurs Bank. Om dina autentiseringsuppgifter "
+"sparas mot samma miljö som den valda och du bestämmer dig för att validera "
+"dem innan du sparar, uppdateras betalningsmetoder och nödvändiga data "
+"samtidigt. Annars sparas bara autentiseringsuppgifterna."
+
+#: src/Module/FormFields.php:140
+msgid "Resurs Bank API Password (Production)."
+msgstr "Lösenord för Resurs Bank-API (Produktion)."
+
+#: src/Module/FormFields.php:144
 msgid ""
 "API password, received from Resurs Bank. To validate and store the "
 "credentials make sure you use the validation button. If you choose to not "
@@ -707,10 +723,6 @@ msgstr ""
 "väljer att inte validera dina autentiseringsuppgifter här, och i stället "
 "bara spara, måste du uppdatera metoderna manuellt i sektionen för "
 "betalningsmetoder."
-
-#: src/Module/FormFields.php:140
-msgid "Resurs Bank API Password (Production)."
-msgstr "Lösenord för Resurs Bank-API (Produktion)."
 
 #: src/Module/FormFields.php:156
 msgid "Chosen merchant country"
