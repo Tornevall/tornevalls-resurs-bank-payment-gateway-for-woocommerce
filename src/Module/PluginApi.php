@@ -8,6 +8,7 @@ use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Helpers\WooCommerce;
 use ResursBank\Helpers\WordPress;
+use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
@@ -856,6 +857,14 @@ class PluginApi
         $identification = WooCommerce::getRequest('identification');
         $customerType = Data::getCustomerType();
         $customerCountry = Data::getCustomerCountry();
+
+        if (Data::isTest() && Data::isProductionAvailable() && Data::getResursOption('simulate_real_getaddress')) {
+            $apiRequest->setEnvironment(RESURS_ENVIRONMENTS::PRODUCTION);
+            $apiRequest->setAuthentication(
+                Data::getResursOption('login_production'),
+                Data::getResursOption('password_production')
+            );
+        }
 
         $return = [
             'api_error' => '',
