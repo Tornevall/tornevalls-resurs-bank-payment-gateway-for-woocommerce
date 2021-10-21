@@ -212,6 +212,9 @@ function getResursAddress() {
                             $rQuery('#' + responseKey).val(response[responseKey]);
                         }
                     }
+                    if (typeof response.billing_country !== 'undefined' && $rQuery("#billing_country").length > 0) {
+                        $rQuery("#billing_country").val(response.billing_country).change();
+                    }
                 }
             }
         );
