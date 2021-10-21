@@ -29,7 +29,7 @@ define('RESURSBANK_SNAKECASE_FILTERS', true);
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
 add_action('plugins_loaded', 'ResursBank\Helpers\WordPress::initializePlugin');
 // Necessary on an early level.
-add_filter('rbwc_get_dependent_settings', 'ResursBank\Module\Data::getDependentSettings', 10, 2);
+add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 
 // Making sure that we do not coexist with prior versions.
 add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Helpers\WordPress::getPriorVersionsDisabled');

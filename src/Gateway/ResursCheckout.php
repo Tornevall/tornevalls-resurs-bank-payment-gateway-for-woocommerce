@@ -7,7 +7,8 @@ use ResursBank\Helpers\WooCommerce;
 use ResursBank\Module\Data;
 
 /**
- * Class ResursCheckout
+ * Class ResursCheckout RCO iframe based class, that acts like it was a real payment method.
+ *
  * @package ResursBank\Gateway
  * @since 0.0.1.0
  */

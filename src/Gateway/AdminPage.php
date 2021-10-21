@@ -113,7 +113,7 @@ class AdminPage extends WC_Settings_Page
         $return = [];
         $formFields = Data::getFormFields('all');
 
-        if ($fromFunction === 'get_sections' && !Data::getShowDeveloper()) {
+        if ($fromFunction === 'get_sections' && !FormFields::getShowDeveloper()) {
             unset($formFields['developer']);
         }
 

@@ -1654,6 +1654,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * Final signing: Checks and update order if signing was required initially. Let it through on hosted but
      * keep logging the details.
+     *
      * @return bool
      * @throws Exception
      * @since 0.0.1.0
@@ -1686,6 +1687,8 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Get checkout type by API call.
+     *
      * @return string
      * @since 0.0.1.0
      */
@@ -1762,9 +1765,9 @@ class ResursDefault extends WC_Payment_Gateway
                 );
                 $return = $this->getResult('success', $this->getBookSigningUrl());
                 break;
-            case 'FAILED':
-            case 'DENIED':
             default:
+                // Everything received without a proper status usually fails.
+                // This includes DENIED (and FAILED if it still exists).
                 $this->order->add_order_note(
                     sprintf(__('The booking failed with status %s. Customer notified in checkout.', 'trbwc')),
                     $this->getBookPaymentStatus()
