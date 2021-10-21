@@ -324,10 +324,19 @@ class PluginApi
         $isValid = self::getValidatedNonce(null, true);
         $validationResponse = false;
 
+        /**
+         * Defines whether this is a live change or just a test. This occurs when the user is switching
+         * environment without saving the data. This allows us - for example - to validate production
+         * before switching over.
+         *
+         * @var bool $isLiveChange
+         */
+        $isLiveChange = Data::getResursOption('environment') === self::getParam('e') ? false : true;
+
         if ($isValid) {
             try {
                 $validationResponse = (new Api())->getConnection()->validateCredentials(
-                    (self::getParam('e') !== 'live'),
+                    (self::getParam('e') !== 'live') ? 1 : 0,
                     self::getParam('u'),
                     self::getParam('p')
                 );
@@ -349,24 +358,41 @@ class PluginApi
 
         // Save when validating.
         if ($validationResponse) {
-            Data::setResursOption('login', self::getParam('u'));
-            Data::setResursOption('password', self::getParam('p'));
-            Data::setResursOption('environment', self::getParam('e'));
-            Api::getPaymentMethods(false);
-            Api::getAnnuityFactors(false);
+            // Since credentials was verified, we can set the environment first to ensure credentials are stored
+            // on the proper options.
+            if (!$isLiveChange) {
+                Data::setResursOption('environment', self::getParam('e'));
+            }
+
+            switch (self::getParam('e')) {
+                case 'live':
+                    $getUserFrom = 'login_production';
+                    $getPasswordFrom = 'password_production';
+                    break;
+                default:
+                    $getUserFrom = 'login';
+                    $getPasswordFrom = 'password';
+            }
+            Data::setResursOption($getUserFrom, self::getParam('u'));
+            Data::setResursOption($getPasswordFrom, self::getParam('p'));
+
+            if ($isLiveChange) {
+                Api::getPaymentMethods(false);
+                Api::getAnnuityFactors(false);
+            }
         }
 
         Data::setLogNotice(
             sprintf(
                 __(
-                    'Credentials for Resurs was validated before saving. Response was %s.',
+                    'Credentials for Resurs was validated saving. Response was %s.',
                     'trbwc'
                 ),
                 $validationResponse
             )
         );
 
-        if ($validationResponse) {
+        if ($validationResponse && $isLiveChange) {
             self::getPaymentMethods(false);
             self::getNewCallbacks();
         }
@@ -380,12 +406,15 @@ class PluginApi
 
     /**
      * @param bool $reply
+     * @param bool $validate
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getPaymentMethods($reply = true)
+    public static function getPaymentMethods($reply = true, $validate = true)
     {
-        self::getValidatedNonce();
+        if ($validate) {
+            self::getValidatedNonce();
+        }
 
         // Re-fetch payment methods.
         Api::getPaymentMethods(false);
@@ -726,6 +755,8 @@ class PluginApi
             sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getPaymentMethods'],
             sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
             sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
+            sprintf('%s_admin_login_production', Data::getPrefix()) => ['getNewCallbacks'],
+            sprintf('%s_admin_password_production', Data::getPrefix()) => ['getPaymentMethods'],
         ];
         if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
             foreach ($actOn[$option] as $execFunction) {
@@ -736,6 +767,9 @@ class PluginApi
                             // checks. When saving from admin, nonce checks are not needed - it rather breaks
                             // the saving itself. So in this particular case, nonce checks are disabled.
                             self::{$execFunction}(false);
+                            break;
+                        case 'getPaymentMethods':
+                            self::{$execFunction}(false, false);
                             break;
                         default:
                             self::{$execFunction}();

@@ -11,18 +11,63 @@ var resursCallbackActiveInterval = 2;
 var resursCallbackActiveTimeout = 15;
 var resursCallbackTestHandle;
 var resursCallbackReceiveSuccess = false;
+var resursEnvironment;
 
 /**
  * Handle wp-admin, and update realtime fields.
  * @since 0.0.1.0
  */
 function getResursAdminFields() {
-    $rQuery('select[id*=r_annuity_select]').click(function (e) {
-        window.onbeforeunload = null;
-        e.preventDefault();
-    });
+    getResursConfigPopupPrevention(
+        [
+            '#trbwc_admin_environment',
+            '#trbwc_admin_login',
+            '#trbwc_admin_password',
+            '#trbwc_admin_login_production',
+            '#trbwc_admin_password_production',
+            'select[id*=r_annuity_select]'
+        ]
+    );
+    getResursEnvironmentFields();
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
+}
+
+/**
+ * Disable popup warnings about config changes for all elements added here.
+ * @param elements
+ * @since 0.0.1.0
+ */
+function getResursConfigPopupPrevention(elements) {
+    for (var i = 0; i < elements.length; i++) {
+        $rQuery(elements[i]).click(function (e) {
+            window.onbeforeunload = null;
+            e.preventDefault();
+            getResursEnvironmentFields();
+        });
+    }
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function getResursEnvironmentFields() {
+    resursEnvironment = $rQuery('#trbwc_admin_environment').find(':selected').val();
+    switch (resursEnvironment) {
+        case 'test':
+            $rQuery('#trbwc_admin_login_production').parent().parent().hide();
+            $rQuery('#trbwc_admin_password_production').parent().parent().hide();
+            $rQuery('#trbwc_admin_login').parent().parent().fadeIn();
+            $rQuery('#trbwc_admin_password').parent().parent().fadeIn();
+            break;
+        case 'live':
+            $rQuery('#trbwc_admin_login_production').parent().parent().fadeIn();
+            $rQuery('#trbwc_admin_password_production').parent().parent().fadeIn();
+            $rQuery('#trbwc_admin_login').parent().parent().hide();
+            $rQuery('#trbwc_admin_password').parent().parent().hide();
+            break;
+        default:
+    }
 }
 
 /**
@@ -41,10 +86,16 @@ function getCallbackMatches() {
             if (typeof data['errors'] !== 'undefined' &&
                 parseInt(data['errors']['code']) > 0
             ) {
-                if ($rQuery('#resurs_credentials_username_box').length > 0) {
-                    $rQuery('#resurs_credentials_username_box').css('font-weight', 'bold');
-                    $rQuery('#resurs_credentials_username_box').css('color', '#990000');
-                    $rQuery('#resurs_credentials_username_box').html(data['errors']['message']);
+                if ($rQuery('#resurs_credentials_test_username_box').length > 0) {
+                    if (resursEnvironment === 'test') {
+                        $rQuery('#resurs_credentials_test_username_box').css('font-weight', 'bold');
+                        $rQuery('#resurs_credentials_test_username_box').css('color', '#990000');
+                        $rQuery('#resurs_credentials_test_username_box').html(data['errors']['message']);
+                    } else {
+                        $rQuery('#resurs_credentials_production_username_box').css('font-weight', 'bold');
+                        $rQuery('#resurs_credentials_production_username_box').css('color', '#990000');
+                        $rQuery('#resurs_credentials_production_username_box').html(data['errors']['message']);
+                    }
                 }
             }
             if (typeof data['requireRefresh'] !== "undefined" && data['requireRefresh'] === true) {
@@ -208,7 +259,7 @@ function getResursCallbackResponse() {
  * @param pwBox
  * @since 0.0.1.0
  */
-function getResursCredentialsTestForm(pwBox) {
+function getResursCredentialsTestForm(pwBox, pwBoxId) {
     var pwButton = $rQuery(
         '<button>',
         {
@@ -222,22 +273,15 @@ function getResursCredentialsTestForm(pwBox) {
         pwButton
     );
 
+    var pwBoxResultName = pwBoxId + '_result';
+
     pwBox.parent().children('.description').before(
         $rQuery(
             '<div>',
             {
-                'id': 'resurs_test_credentials_result',
+                'id': pwBoxResultName,
                 'style': 'margin-top: 3px; padding 5px; width: 400px; ' +
                     'font-style: italic; font-weight: bold; color: #000099;'
-            }
-        )
-    );
-    // Create an empty div here for credentials stuff.
-    $rQuery('#trbwc_admin_login').parent().children('.description').before(
-        $rQuery(
-            '<div>',
-            {
-                'id': 'resurs_credentials_username_box'
             }
         )
     );
@@ -247,13 +291,38 @@ function getResursCredentialsTestForm(pwBox) {
  * @since 0.0.1.0
  */
 function getResursAdminPasswordButton() {
-    var pwBox = $rQuery('#trbwc_admin_password');
     // This box became too big so functions are split up.
-    if (pwBox.length > 0) {
+    if ($rQuery('#trbwc_admin_password').length > 0) {
         // One time nonce controlled credential importer.
         getDeprecatedCredentialsForm();
-        getResursCredentialsTestForm(pwBox);
+        getResursCredentialsTestForm($rQuery('#trbwc_admin_password'), 'trbwc_admin_password');
+        getResursCredentialsTestForm($rQuery('#trbwc_admin_password_production'), 'trbwc_admin_password_production');
+        getResursCredentialDivs();
     }
+}
+
+/**
+ * @since 0.0.1.0
+ */
+function getResursCredentialDivs() {
+    // Create an empty div here for credentials stuff.
+    $rQuery('#trbwc_admin_login').parent().children('.description').before(
+        $rQuery(
+            '<div>',
+            {
+                'id': 'resurs_credentials_test_username_box'
+            }
+        )
+    );
+    $rQuery('#trbwc_admin_login_production').parent().children('.description').before(
+        $rQuery(
+            '<div>',
+            {
+                'id': 'resurs_credentials_production_username_box'
+            }
+        )
+    );
+
 }
 
 /**
@@ -339,11 +408,27 @@ function getResursDeprecatedLogin() {
  * @since 0.0.1.0
  */
 function getResursCredentialsResult() {
+    var apiLoginBox;
+    var apiPwBox;
+    var resultBox;
+
+    switch (resursEnvironment) {
+        case 'live':
+            apiLoginBox = '#trbwc_admin_login_production';
+            apiPwBox = '#trbwc_admin_password_production';
+            resultBox = '#trbwc_admin_password_production_result';
+            break;
+        default:
+            apiLoginBox = '#trbwc_admin_login';
+            apiPwBox = '#trbwc_admin_password';
+            resultBox = '#trbwc_admin_password_result';
+    }
+
     if ($rQuery('#trbwc_admin_password').length > 0) {
-        getResursSpin('#resurs_test_credentials_result');
+        getResursSpin(resultBox);
         var uData = {
-            'p': $rQuery('#trbwc_admin_password').val(),
-            'u': $rQuery('#trbwc_admin_login').val(),
+            'p': $rQuery(apiPwBox).val(),
+            'u': $rQuery(apiLoginBox).val(),
             'e': $rQuery('#trbwc_admin_environment').val()
         };
         getResursAjaxify(
@@ -352,19 +437,19 @@ function getResursCredentialsResult() {
             uData,
             function (data) {
                 if (data['validation']) {
-                    $rQuery('#resurs_test_credentials_result').html(getResursLocalization('credential_success_notice'))
+                    $rQuery(resultBox).html(getResursLocalization('credential_success_notice'))
                 } else {
                     var noValidation = getResursLocalization('credential_failure_notice');
                     if (typeof data['statusText'] === 'string') {
                         noValidation += ' (Status: ' + data['statusText'] + ')';
                     }
-                    $rQuery('#resurs_test_credentials_result').html(
+                    $rQuery(resultBox).html(
                         noValidation
-                    )
+                    );
                 }
             },
             function (error) {
-                getResursError(error, '#resurs_test_credentials_result')
+                getResursError(error, resultBox);
             }
         );
     }

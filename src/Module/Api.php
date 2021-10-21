@@ -148,8 +148,20 @@ class Api
      */
     private function getResolvedCredentials()
     {
-        $this->credentials['username'] = Data::getResursOption('login');
-        $this->credentials['password'] = Data::getResursOption('password');
+        $environment = Data::getResursOption('environment');
+
+        switch ($environment) {
+            case 'live':
+                $getUserFrom = 'login_production';
+                $getPasswordFrom = 'password_production';
+                break;
+            default:
+                $getUserFrom = 'login';
+                $getPasswordFrom = 'password';
+        }
+
+        $this->credentials['username'] = Data::getResursOption($getUserFrom);
+        $this->credentials['password'] = Data::getResursOption($getPasswordFrom);
 
         if (empty($this->credentials['username']) || empty($this->credentials['password'])) {
             throw new RuntimeException('ECom credentials are not fully set.', 404);
