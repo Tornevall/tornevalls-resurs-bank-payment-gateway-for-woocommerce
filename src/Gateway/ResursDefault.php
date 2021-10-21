@@ -1124,7 +1124,7 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $return = parent::is_available();
         // This feature is primarily for the storefront.
-        if (!method_exists($this, 'get_order_total') || !is_admin()) {
+        if (!method_exists($this, 'get_order_total')) {
             return Data::isEnabled();
         }
         $customerType = Data::getCustomerType();
@@ -1135,8 +1135,8 @@ class ResursDefault extends WC_Payment_Gateway
         if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
             $minMax = Api::getResurs()->getMinMax(
                 $this->get_order_total(),
-                $this->paymentMethodInformation->minLimit,
-                $this->paymentMethodInformation->maxLimit
+                $this->getRealMin($this->paymentMethodInformation->minLimit),
+                $this->getRealMax($this->paymentMethodInformation->maxLimit)
             );
             if (!$minMax) {
                 $return = false;
@@ -1154,6 +1154,52 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         return $return;
+    }
+
+    /**
+     * Customize minimum allowed amount for a payment method. Can never be lower than the lowest minimum from method.
+     *
+     * @param int $minLimit
+     * @return int
+     * @link https://github.com/Tornevall/wpwc-resurs/issues/42
+     * @since 0.0.1.0
+     */
+    private function getRealMin($minLimit)
+    {
+        $requestedMinLimit = (int)WordPress::applyFilters(
+            'methodMinLimit',
+            $minLimit,
+            $this->paymentMethodInformation
+        );
+
+        if ($requestedMinLimit < $this->paymentMethodInformation->minLimit) {
+            $requestedMinLimit = $this->paymentMethodInformation->minLimit;
+        }
+
+        return $requestedMinLimit;
+    }
+
+    /**
+     * Customize maximum allowed amount for a payment method. Can never be higher than the highest maximum from method.
+     *
+     * @param int $maxLimit
+     * @return int
+     * @link https://github.com/Tornevall/wpwc-resurs/issues/42
+     * @since 0.0.1.0
+     */
+    private function getRealMax($maxLimit)
+    {
+        $requestedMaxLimit = (int)WordPress::applyFilters(
+            'methodMaxLimit',
+            $maxLimit,
+            $this->paymentMethodInformation
+        );
+
+        if ($requestedMaxLimit > $this->paymentMethodInformation->maxLimit) {
+            $requestedMaxLimit = $this->paymentMethodInformation->maxLimit;
+        }
+
+        return $requestedMaxLimit;
     }
 
     /**
