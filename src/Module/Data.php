@@ -121,12 +121,6 @@ class Data
     ];
 
     /**
-     * @var array
-     * @since 0.0.1.0
-     */
-    private static $settingStorage = [];
-
-    /**
      * @var array $jsLoadersAdmin List of loadable scripts for admin.
      * @since 0.0.1.0
      */
@@ -840,123 +834,6 @@ class Data
         ];
 
         return isset($array[$key]) ? $array[$key] : '';
-    }
-
-    /**
-     * Filter based addon.
-     * Do not use getResursOption in this request as this may cause infinite loops.
-     *
-     * @param $currentArray
-     * @param $section
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getDependentSettings($currentArray, $section)
-    {
-        $return = $currentArray;
-
-        $developerArray = [
-            'developer' => [
-                'dev_section' => [
-                    'type' => 'title',
-                    'title' => __('Developers Section', 'trbwc'),
-                    'desc' => sprintf(
-                        __(
-                            'This section is for very advanced tweaking only. It is not enabled and visible by ' .
-                            'default for security reasons. Proceed at your own risk!',
-                            'trbwc'
-                        )
-                    ),
-                ],
-                'title' => __('Developer Settings', 'trbwc'),
-                'plugin_section' => [
-                    'type' => 'title',
-                    'title' => 'Plugin Settings',
-                ],
-                'priorVersionsDisabled' => [
-                    'id' => 'priorVersionsDisabled',
-                    'title' => __('Disable RB 2.x', 'trbwc'),
-                    'type' => 'checkbox',
-                    'desc' => __(
-                        'Disable prior similar versions of the Resurs Bank plugin (v2.x-series) - ' .
-                        'You might need an extra reload after save',
-                        'trbwc'
-                    ),
-                    'desc_top' => __(
-                        'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
-                        'with help from filters in that release.',
-                        'trbwc'
-                    ),
-                    'default' => 'yes',
-                ],
-                'dev_section_end' => [
-                    'type' => 'sectionend',
-                ],
-                'admin_tweaking_section' => [
-                    'type' => 'title',
-                    'title' => 'Administration Tweaking',
-                ],
-                'nonce_trust_admin_session' => [
-                    'id' => 'nonce_trust_admin_session',
-                    'title' => __('Trust is_admin before frontend nonces.', 'trbwc'),
-                    'type' => 'checkbox',
-                    'desc' => __(
-                        'Yes, do trust them please.',
-                        'trbwc'
-                    ),
-                    'desc_top' => __(
-                        'For some places in the admin panel, we use nonces as an extra security layer when it comes ' .
-                        'to requests like updating callbacks, payment methods, etc. Sometimes nonces expires too ' .
-                        'quickly and breaks requests in wp_admin. Enable this feature to start trusting is_admin() ' .
-                        'during ajax request primarily and nonces secondarily. is_admin is normally a security layer ' .
-                        'that prevents unknonwn requests to be executed.',
-                        'trbwc'
-                    ),
-                    'default' => 'no',
-                ],
-                'simulate_real_getaddress' => [
-                    'id' => 'simulate_real_getaddress',
-                    'title' => __('Activate "real people"-mode in test, for getAddress.', 'trbwc'),
-                    'type' => 'checkbox',
-                    'desc' => __(
-                        'Enable.',
-                        'trbwc'
-                    ),
-                    'desc_top' => __(
-                        'Required production credentials available: When activating this mode, getAddress will use ' .
-                        'real lookups for getAddress rather than the mocked data.',
-                        'trbwc'
-                    ),
-                    'default' => 'no',
-                ],
-                'admin_tweaking_section_end' => [
-                    'type' => 'sectionend',
-                ],
-            ],
-        ];
-
-        if ($section === 'all' || self::getShowDeveloper()) {
-            $return = array_merge($return, $developerArray);
-        }
-
-        return $return;
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getShowDeveloper()
-    {
-        if (!isset(self::$settingStorage['showDeveloper'])) {
-            self::$settingStorage['showDeveloper'] = self::getTruth(
-                get_option(
-                    sprintf('%s_%s', self::getPrefix('admin'), 'show_developer')
-                )
-            );
-        }
-
-        return (bool)self::$settingStorage['showDeveloper'];
     }
 
     /**
