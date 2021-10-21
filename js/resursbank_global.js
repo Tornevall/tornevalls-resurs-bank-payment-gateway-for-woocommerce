@@ -74,12 +74,12 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
         function (data, textStatus, jqXhr) {
             if (typeof failMethod === 'function') {
                 console.dir(data);
-                failMethod(data, textStatus, jqXhr);
+                failMethod(data, typeof data.statusText !== 'undefined' ? data.statusText : textStatus, jqXhr);
                 return;
             } else {
-                callbackMethod(data, textStatus, jqXhr);
+                callbackMethod(data, typeof data.statusText !== 'undefined' ? data.statusText : textStatus, jqXhr);
             }
-            getResursError(data.statusText);
+            getResursError(typeof data.statusText !== 'undefined' ? data.statusText : textStatus);
         }
     );
 }

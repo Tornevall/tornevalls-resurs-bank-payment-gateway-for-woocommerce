@@ -1015,10 +1015,11 @@ class PluginApi
         if ($wooOrderId) {
             $currentOrder = new WC_Order($wooOrderId);
             $failNote = sprintf(
-                __('Order was rejected by Resurs Bank with status "%s".', 'trbwc'),
+                __('Order was rejected with status "%s".', 'trbwc'),
                 $transRejectMessage
             );
-            $updateStatus = $currentOrder->update_status(
+            $updateStatus = WooCommerce::setOrderStatusUpdate(
+                $currentOrder,
                 'failed',
                 $failNote
             );

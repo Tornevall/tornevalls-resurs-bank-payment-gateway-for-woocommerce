@@ -86,6 +86,7 @@ class Data
      */
     private static $searchArray = [
         'resursReference',
+        'resursDefaultReference',
         'paymentId',
         'paymentIdLast',
     ];
@@ -484,9 +485,12 @@ class Data
         /** @var WC_Customer $wcCustomer */
         $wcCustomer = $woocommerce->customer;
 
-        $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
-        $return = !empty($woocommerceCustomerCountry) ?
-            $woocommerceCustomerCountry : get_option('woocommerce_default_country');
+        $return = null;
+        if (!empty($wcCustomer)) {
+            $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
+            $return = !empty($woocommerceCustomerCountry) ?
+                $woocommerceCustomerCountry : get_option('woocommerce_default_country');
+        }
 
         return $return;
     }
@@ -1235,6 +1239,7 @@ class Data
         $return['order'] = $order;
         $return['meta'] = (int)$orderId ? get_post_custom($orderId) : [];
         $return['resurs'] = self::getResursReference($return);
+        $return['resurs_secondary'] = self::getResursReference($return, ['resursDefaultReference']);
 
         if (!empty($return['resurs'])) {
             $return = self::getPreparedDataByEcom($return);
@@ -1248,14 +1253,16 @@ class Data
 
     /**
      * @param $orderDataArray
+     * @param string $searchFor
      * @return string
      */
-    public static function getResursReference($orderDataArray)
+    public static function getResursReference($orderDataArray, $searchFor = '')
     {
         $return = '';
 
+        $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
         if (isset($orderDataArray['meta']) && is_array($orderDataArray)) {
-            foreach (self::$searchArray as $searchKey) {
+            foreach ($searchUsing as $searchKey) {
                 $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
                 if (isset($orderDataArray['meta'][$searchKey])) {
                     $return = array_pop($orderDataArray['meta'][$searchKey]);
@@ -1284,7 +1291,15 @@ class Data
         $return = self::getOrderInfoExceptionData($return);
         try {
             if (!$return['ecomException']['code']) {
-                $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
+                try {
+                    $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
+                    $return['ecom_had_reference_problems'] = false;
+                } catch (Exception $e) {
+                    if (!empty($return['resurs_secondary'])) {
+                        $return['ecom'] = Api::getPayment($return['resurs_secondary'], null, $return);
+                    }
+                    $return['ecom_had_reference_problems'] = true;
+                }
                 $return = WooCommerce::getFormattedPaymentData($return);
                 $return = WooCommerce::getPaymentInfoDetails($return);
             }
