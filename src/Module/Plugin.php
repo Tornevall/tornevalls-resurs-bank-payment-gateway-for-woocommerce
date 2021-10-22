@@ -16,7 +16,7 @@ class Plugin
         add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
         add_filter('rbwc_get_payment_method_icon', [$this, 'getMethodIconByContent'], 10, 2);
         add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);
-        add_filter('getOrderNotePrefix', [$this, 'getDefaultOrderNotePrefix'], 1);
+        add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
     }
 
