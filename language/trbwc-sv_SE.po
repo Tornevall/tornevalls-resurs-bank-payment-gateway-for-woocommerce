@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2021-10-22 12:12+0200\n"
-"PO-Revision-Date: 2021-10-22 12:15+0200\n"
+"POT-Creation-Date: 2021-10-22 12:23+0200\n"
+"PO-Revision-Date: 2021-10-22 12:23+0200\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language: sv_SE\n"
@@ -453,45 +453,45 @@ msgstr ""
 msgid "Got exception %d in %s, will retry with REST."
 msgstr "Fel %d uppstod i %s, kommer försöka igen med REST."
 
-#: src/Module/Data.php:469
+#: src/Module/Data.php:434
 #, php-format
 msgid "Part pay from %s per month."
 msgstr "Delbetala från %s per månad."
 
-#: src/Module/Data.php:837
+#: src/Module/Data.php:831
 msgid "Plugin version"
 msgstr "Plugin-version"
 
-#: src/Module/Data.php:838
+#: src/Module/Data.php:832
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: src/Module/Data.php:840
+#: src/Module/Data.php:834
 #, php-format
 msgid "%s, at least %s are required."
 msgstr "%s, åtminstone %s krävs."
 
-#: src/Module/Data.php:846
+#: src/Module/Data.php:840
 msgid "Composer version"
 msgstr "Composer-version"
 
-#: src/Module/Data.php:847
+#: src/Module/Data.php:841
 msgid "PHP Version"
 msgstr "PHP-Version"
 
-#: src/Module/Data.php:848
+#: src/Module/Data.php:842
 msgid "Webservice Library"
 msgstr "Webservice-Bibliotek"
 
-#: src/Module/Data.php:849
+#: src/Module/Data.php:843
 msgid "Communication Library"
 msgstr "Kommunikationsbibliotek"
 
-#: src/Module/Data.php:850
+#: src/Module/Data.php:844
 msgid "Communication Drivers"
 msgstr "Kommunikations-drivrutiner"
 
-#: src/Module/Data.php:894
+#: src/Module/Data.php:888
 msgid ""
 "If something is wrong and you are unsure of where to begin, take a look at "
 "the communication drivers. Wrappers that must be available for this plugin "
@@ -505,7 +505,7 @@ msgstr ""
 "SimpleStreamWrapper -och- SoapClientWrapper. Resurs Bank erbjuder flera "
 "olika tjänster över både Soap/XML och REST, så de måste finnas tillgängliga."
 
-#: src/Module/Data.php:901
+#: src/Module/Data.php:895
 msgid ""
 "If you ever need support with this plugin, you should primarily check this "
 "page before sending support requests. When you send the requests, make sure "
@@ -518,17 +518,17 @@ msgstr ""
 "ditt meddelande. Om du gör detta, blir det i slutänden mycket lättare att "
 "hjälpa dig."
 
-#: src/Module/Data.php:943
+#: src/Module/Data.php:937
 #, php-format
 msgid "%s failed encryption (%d): %s. Failover to base64."
 msgstr "%s misslyckade kryptering (%d): %s. Redundansväxling till bas64."
 
-#: src/Module/Data.php:1076
+#: src/Module/Data.php:1070
 #, php-format
 msgid "DevLog Method \"%s\" message: %s."
 msgstr "DevLog-funktion \"%s\" meddelande: %s."
 
-#: src/Module/Data.php:1379
+#: src/Module/Data.php:1373
 msgid ""
 "An error occurred during the payment information retrieval from Resurs Bank "
 "so we can not show the current order status for the moment."
@@ -536,12 +536,12 @@ msgstr ""
 "Ett fel uppstod under tiden som betalningsinformationen skulle tas emot från "
 "Resurs Bank så vi kan för närvarande inte visa nuvarande orderstatus."
 
-#: src/Module/Data.php:1404
+#: src/Module/Data.php:1398
 #, php-format
 msgid "%s internal generic exception %s: %s"
 msgstr "%s internt generiskt fel %s: %s"
 
-#: src/Module/Data.php:1588
+#: src/Module/Data.php:1582
 #, php-format
 msgid ""
 "Unable to update order meta in %s - object $order is of wrong type or not an "
@@ -550,11 +550,11 @@ msgstr ""
 "Kan ej uppdatera order-meta i %s - objektet $order är av fel typ eller inte "
 "ett heltal."
 
-#: src/Module/Data.php:1612
+#: src/Module/Data.php:1606
 msgid "Number of decimals headsup message"
 msgstr "Antal decimaler - Observera"
 
-#: src/Module/Data.php:1733
+#: src/Module/Data.php:1727
 msgid ""
 "Received an error message from Resurs Bank that indicates that you "
 "credentials are incorrect."
