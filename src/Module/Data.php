@@ -17,6 +17,8 @@ use TorneLIB\Utils\Generic;
 use WC_Customer;
 use WC_Logger;
 use WC_Order;
+use function count;
+use function is_array;
 
 /**
  * Class Data Core data class for plugin. This is where we store dynamic content without dependencies those days.
@@ -299,16 +301,21 @@ class Data
     /**
      * @param string $key
      * @param null $namespace
+     * @param bool $getDefaults
      * @return bool|string
      * @since 0.0.1.0
      */
-    public static function getResursOption($key, $namespace = null)
+    public static function getResursOption($key, $namespace = null, $getDefaults = true)
     {
+        $return = null;
         if (preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
         $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin'), $key);
-        $return = self::getDefault($key);
+        if ($getDefaults) {
+            self::getDefaultsInit();
+            $return = self::getDefault($key);
+        }
         $getOptionReturn = get_option($optionKeyPrefix);
 
         if (!empty($getOptionReturn)) {
@@ -391,23 +398,17 @@ class Data
     }
 
     /**
-     * @param $key
-     * @return null
+     * Initialize default data from formFields.
+     *
      * @since 0.0.1.0
      */
-    private static function getDefault($key)
+    private static function getDefaultsInit()
     {
-        $return = '';
-
         if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
             self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
         }
 
-        if (isset(self::$formFieldDefaults[$key]['default'])) {
-            $return = self::$formFieldDefaults[$key]['default'];
-        }
-
-        return $return;
+        return self::$formFieldDefaults;
     }
 
     /**
@@ -420,6 +421,22 @@ class Data
         $return = [];
         foreach ($array as $section => $content) {
             $return += $content;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @return null
+     * @since 0.0.1.0
+     */
+    private static function getDefault($key)
+    {
+        $return = '';
+
+        if (isset(self::$formFieldDefaults[$key]['default'])) {
+            $return = self::$formFieldDefaults[$key]['default'];
         }
 
         return $return;
@@ -576,6 +593,24 @@ class Data
         }
 
         return self::$genericClass;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function canMock()
+    {
+        return (bool)Data::getResursOption('allow_mocking', null, false);
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function hasDefaults()
+    {
+        return is_array(self::$formFieldDefaults) && count(self::$formFieldDefaults);
     }
 
     /**

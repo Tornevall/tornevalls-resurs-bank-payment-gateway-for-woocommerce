@@ -18,6 +18,18 @@ use function is_array;
 class FormFields extends WC_Settings_API
 {
     /**
+     * @var bool
+     * @since 0.0.1.0
+     */
+    private static $allowMocking;
+
+    /**
+     * @var bool
+     * @since 0.0.1.0
+     */
+    private static $showDeveloper;
+
+    /**
      * @param string $section
      * @param string $id
      * @return array
@@ -753,6 +765,20 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'allow_mocking' => [
+                    'id' => 'allow_mocking',
+                    'title' => __('Allow mocking during tests.', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_top' => __(
+                        'This setting enables the ability to mock data on fly, during tests.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'customer_checkout_tweaking_section_end' => [
                     'type' => 'sectionend',
                 ],
@@ -785,12 +811,52 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * @param $currentArray
+     * @param $section
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getMockingTweaks($currentArray, $section)
+    {
+        $return = $currentArray;
+
+        if (!isset(self::$allowMocking)) {
+            self::$allowMocking = Data::getResursOption('allow_mocking', null, false);
+        }
+
+        if ($section === 'all' && self::$allowMocking && Data::getResursOption('environment', null, false) === 'test') {
+            $return['mocking'] = [
+                'title' => __('Mocking & Testing', 'trbwc'),
+                'mocking_section' => [
+                    'type' => 'title',
+                    'title' => __('Mocking Section', 'trbwc'),
+                    'desc' => sprintf(
+                        __(
+                            'This is a developer section that is normally not required for you to enable. It only ' .
+                            'available when your environment is set to test.',
+                            'trbwc'
+                        )
+                    ),
+                ],
+                'mocking_section_end' => [
+                    'type'=>'sectionend'
+                ]
+            ];
+        }
+
+        return $return;
+    }
+
+    /**
      * @return bool
      * @since 0.0.1.0
      */
     public static function getShowDeveloper()
     {
-        return Data::getResursOption('show_developer');
+        if (!isset(self::$showDeveloper)) {
+            self::$showDeveloper = Data::getResursOption('show_developer', null, false);
+        }
+        return self::$showDeveloper;
     }
 
     /**
