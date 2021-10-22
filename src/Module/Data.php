@@ -308,12 +308,12 @@ class Data
     public static function getResursOption($key, $namespace = null, $getDefaults = true)
     {
         $return = null;
+
         if (preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
         $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin'), $key);
         if ($getDefaults) {
-            // RUn defaultchecker once.
             $return = self::getDefault($key);
         }
         $getOptionReturn = get_option($optionKeyPrefix);
@@ -398,48 +398,13 @@ class Data
     }
 
     /**
-     * Initialize default data from formFields.
-     *
-     * @since 0.0.1.0
-     */
-    public static function getDefaultsInit()
-    {
-        if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
-            self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
-        }
-
-        return self::$formFieldDefaults;
-    }
-
-    /**
-     * @param $array
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getDefaultsFromSections($array)
-    {
-        $return = [];
-        foreach ($array as $section => $content) {
-            $return += $content;
-        }
-
-        return $return;
-    }
-
-    /**
      * @param $key
      * @return null
      * @since 0.0.1.0
      */
     private static function getDefault($key)
     {
-        $return = '';
-
-        if (isset(self::$formFieldDefaults[$key]['default'])) {
-            $return = self::$formFieldDefaults[$key]['default'];
-        }
-
-        return $return;
+        return isset(self::$formFieldDefaults[$key]['default']) ? self::$formFieldDefaults[$key]['default'] : '';
     }
 
     /**
@@ -593,6 +558,35 @@ class Data
         }
 
         return self::$genericClass;
+    }
+
+    /**
+     * Initialize default data from formFields.
+     *
+     * @since 0.0.1.0
+     */
+    public static function getDefaultsInit()
+    {
+        if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
+            self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
+        }
+
+        return self::$formFieldDefaults;
+    }
+
+    /**
+     * @param $array
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getDefaultsFromSections($array)
+    {
+        $return = [];
+        foreach ($array as $section => $content) {
+            $return += $content;
+        }
+
+        return $return;
     }
 
     /**
