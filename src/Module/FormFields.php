@@ -767,14 +767,14 @@ class FormFields extends WC_Settings_API
                 ],
                 'allow_mocking' => [
                     'id' => 'allow_mocking',
-                    'title' => __('Allow mocking during tests.', 'trbwc'),
+                    'title' => __('Allow mocked behaviours', 'trbwc'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
                         'trbwc'
                     ),
                     'desc_top' => __(
-                        'This setting enables the ability to mock data on fly, during tests.',
+                        'This setting enables mocked behaviours and data on fly, during tests.',
                         'trbwc'
                     ),
                     'default' => 'no',
@@ -803,8 +803,10 @@ class FormFields extends WC_Settings_API
             ],
         ];
 
-        if ($section === 'all' || self::getShowDeveloper()) {
-            $return = array_merge($return, $developerArray);
+        $mockingTweaks = self::getMockingTweaks();
+
+        if ((isset($section) && $section === 'all') || self::getShowDeveloper()) {
+            $return = array_merge($return, $developerArray, $mockingTweaks);
         }
 
         return $return;
@@ -816,15 +818,14 @@ class FormFields extends WC_Settings_API
      * @return mixed
      * @since 0.0.1.0
      */
-    public static function getMockingTweaks($currentArray, $section)
+    public static function getMockingTweaks()
     {
-        $return = $currentArray;
-
+        $return = [];
         if (!isset(self::$allowMocking)) {
             self::$allowMocking = Data::getResursOption('allow_mocking', null, false);
         }
 
-        if ($section === 'all' && self::$allowMocking && Data::getResursOption('environment', null, false) === 'test') {
+        if (self::$allowMocking && Data::getResursOption('environment', null, false) === 'test') {
             $return['mocking'] = [
                 'title' => __('Mocking & Testing', 'trbwc'),
                 'mocking_section' => [
@@ -832,15 +833,36 @@ class FormFields extends WC_Settings_API
                     'title' => __('Mocking Section', 'trbwc'),
                     'desc' => sprintf(
                         __(
-                            'This is a developer section that is normally not required for you to enable. It only ' .
-                            'available when your environment is set to test.',
+                            'Section of Mocking & Tests. Are you not developing this plugin? Then you probably do ' .
+                            'not need it either. The section is specifically placed hiddenly here, since the options ' .
+                            'here are used to recreate events under very specific circumstances. For example, you ' .
+                            'can mock errors from here, that you otherwise had to hardcode into the plugin. Options ' .
+                            'here are normally enabled until the feature has been trigged once. After first ' .
+                            'execution it will instantly become disabled automatically. The mocking section can only ' .
+                            'be enabled when your environment is set to test and you explicitly allowed mocking on ' .
+                            'your site.',
                             'trbwc'
                         )
                     ),
                 ],
+                'mock_update_payment_reference_failure' => [
+                    'id' => 'mock_update_payment_reference_failure',
+                    'title' => __('Fail on updatePaymentReference', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_top' => __(
+                        'This setting enables a fictive error on front-to-back calls during order creations where ' .
+                        'updatePaymentReference occurs.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'mocking_section_end' => [
-                    'type'=>'sectionend'
-                ]
+                    'type' => 'sectionend',
+                ],
             ];
         }
 

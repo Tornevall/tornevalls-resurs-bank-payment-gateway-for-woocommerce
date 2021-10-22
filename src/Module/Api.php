@@ -401,7 +401,7 @@ class Api
     {
         $return = self::$paymentMethods;
         if ($fromStorage) {
-            $stored = json_decode(Data::getResursOption('paymentMethods'));
+            $stored = json_decode(Data::getResursOption('paymentMethods', null, false));
             if (is_array($stored)) {
                 $return = $stored;
             }

@@ -29,6 +29,8 @@ class WordPress
 
         // Initialize plugin functions.
         new Plugin();
+        // Always initialize defaults once on plugin loaded (performance saver).
+        Data::getDefaultsInit();
         self::setupAjaxActions();
         self::setupFilters();
         self::setupScripts();

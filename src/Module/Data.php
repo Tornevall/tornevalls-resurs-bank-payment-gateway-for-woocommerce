@@ -313,7 +313,7 @@ class Data
         }
         $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin'), $key);
         if ($getDefaults) {
-            self::getDefaultsInit();
+            // RUn defaultchecker once.
             $return = self::getDefault($key);
         }
         $getOptionReturn = get_option($optionKeyPrefix);
@@ -402,7 +402,7 @@ class Data
      *
      * @since 0.0.1.0
      */
-    private static function getDefaultsInit()
+    public static function getDefaultsInit()
     {
         if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
             self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
@@ -599,9 +599,43 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canMock()
+    public static function canMock($specificMock)
     {
-        return (bool)Data::getResursOption('allow_mocking', null, false);
+        $return = false;
+        if (self::isTest() && (bool)Data::getResursOption('allow_mocking', null, false)) {
+            $mockOptionName = Strings::returnSnakeCase(sprintf('mock%s', ucfirst($specificMock)));
+            if (Data::getResursOption(
+                $mockOptionName,
+                null,
+                false
+            )) {
+                // Disable mockoption after first execution.
+                Data::setResursOption($mockOptionName, false);
+                return true;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isTest()
+    {
+        return (self::getResursOption('environment', null, false) === 'test');
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setResursOption($key, $value)
+    {
+        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
     }
 
     /**
@@ -879,15 +913,6 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function isTest()
-    {
-        return (self::getResursOption('environment') === 'test');
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
     public static function isProductionAvailable()
     {
         return (
@@ -952,17 +977,6 @@ class Data
         }
 
         return self::$encrypt;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function setResursOption($key, $value)
-    {
-        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
     }
 
     /**
@@ -1044,7 +1058,7 @@ class Data
      */
     public static function isEnabled()
     {
-        return Data::getResursOption('enabled');
+        return Data::getResursOption('enabled', null, false);
     }
 
     /**
