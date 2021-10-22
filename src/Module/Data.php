@@ -17,6 +17,8 @@ use TorneLIB\Utils\Generic;
 use WC_Customer;
 use WC_Logger;
 use WC_Order;
+use function count;
+use function is_array;
 
 /**
  * Class Data Core data class for plugin. This is where we store dynamic content without dependencies those days.
@@ -299,16 +301,21 @@ class Data
     /**
      * @param string $key
      * @param null $namespace
+     * @param bool $getDefaults
      * @return bool|string
      * @since 0.0.1.0
      */
-    public static function getResursOption($key, $namespace = null)
+    public static function getResursOption($key, $namespace = null, $getDefaults = true)
     {
+        $return = null;
+
         if (preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
         $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin'), $key);
-        $return = self::getDefault($key);
+        if ($getDefaults) {
+            $return = self::getDefault($key);
+        }
         $getOptionReturn = get_option($optionKeyPrefix);
 
         if (!empty($getOptionReturn)) {
@@ -397,32 +404,7 @@ class Data
      */
     private static function getDefault($key)
     {
-        $return = '';
-
-        if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
-            self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
-        }
-
-        if (isset(self::$formFieldDefaults[$key]['default'])) {
-            $return = self::$formFieldDefaults[$key]['default'];
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $array
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getDefaultsFromSections($array)
-    {
-        $return = [];
-        foreach ($array as $section => $content) {
-            $return += $content;
-        }
-
-        return $return;
+        return isset(self::$formFieldDefaults[$key]['default']) ? self::$formFieldDefaults[$key]['default'] : '';
     }
 
     /**
@@ -576,6 +558,87 @@ class Data
         }
 
         return self::$genericClass;
+    }
+
+    /**
+     * Initialize default data from formFields.
+     *
+     * @since 0.0.1.0
+     */
+    public static function getDefaultsInit()
+    {
+        if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
+            self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
+        }
+
+        return self::$formFieldDefaults;
+    }
+
+    /**
+     * @param $array
+     * @return array
+     * @since 0.0.1.0
+     */
+    private static function getDefaultsFromSections($array)
+    {
+        $return = [];
+        foreach ($array as $section => $content) {
+            $return += $content;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function canMock($specificMock)
+    {
+        $return = false;
+        if (self::isTest() && (bool)Data::getResursOption('allow_mocking', null, false)) {
+            $mockOptionName = Strings::returnSnakeCase(sprintf('mock%s', ucfirst($specificMock)));
+            if (Data::getResursOption(
+                $mockOptionName,
+                null,
+                false
+            )) {
+                // Disable mockoption after first execution.
+                Data::setResursOption($mockOptionName, false);
+                return true;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isTest()
+    {
+        return (self::getResursOption('environment', null, false) === 'test');
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setResursOption($key, $value)
+    {
+        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function hasDefaults()
+    {
+        return is_array(self::$formFieldDefaults) && count(self::$formFieldDefaults);
     }
 
     /**
@@ -844,15 +907,6 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function isTest()
-    {
-        return (self::getResursOption('environment') === 'test');
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
     public static function isProductionAvailable()
     {
         return (
@@ -917,17 +971,6 @@ class Data
         }
 
         return self::$encrypt;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function setResursOption($key, $value)
-    {
-        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
     }
 
     /**
@@ -1009,7 +1052,7 @@ class Data
      */
     public static function isEnabled()
     {
-        return Data::getResursOption('enabled');
+        return Data::getResursOption('enabled', null, false);
     }
 
     /**

@@ -1425,6 +1425,7 @@ class ResursDefault extends WC_Payment_Gateway
             case 'postid';
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
+                    WooCommerce::applyMock('updatePaymentReferenceFailure');
                     Api::getResurs()->updatePaymentReference($idBeforeChange, $this->getPaymentId());
                     Data::setOrderMeta($order, 'updatePaymentReference', 'OK');
                     WooCommerce::setOrderNote(

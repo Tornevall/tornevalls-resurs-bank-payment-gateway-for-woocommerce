@@ -14,6 +14,7 @@ use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\IO\Data\Strings;
 use WC_Order;
 use WC_Session;
 use function in_array;
@@ -424,6 +425,21 @@ class WooCommerce
         }
 
         return $return;
+    }
+
+    /**
+     * Create a mocked moment if test and allowed mocking is enabled.
+     * @param $mock
+     * @since 0.0.1.0
+     */
+    public static function applyMock($mock)
+    {
+        if (Data::canMock($mock)) {
+            WordPress::doAction(
+                sprintf('mock%s', ucfirst($mock)),
+                null
+            );
+        }
     }
 
     /**

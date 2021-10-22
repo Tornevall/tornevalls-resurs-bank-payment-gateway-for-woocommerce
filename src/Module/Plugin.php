@@ -2,6 +2,7 @@
 
 namespace ResursBank\Module;
 
+use Exception;
 use ResursBank\Gateway\ResursDefault;
 
 /**
@@ -17,7 +18,16 @@ class Plugin
         add_filter('rbwc_get_payment_method_icon', [$this, 'getMethodIconByContent'], 10, 2);
         add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
+        add_action('rbwc_mock_update_payment_reference_failure', [$this, 'mockUpdatePaymentFailure']);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    function mockUpdatePaymentFailure()
+    {
+        throw new Exception('MockException: updatePaymentFailure.', 470);
     }
 
     /**

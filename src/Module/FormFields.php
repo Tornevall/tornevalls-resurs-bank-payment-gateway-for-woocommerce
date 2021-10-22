@@ -18,6 +18,18 @@ use function is_array;
 class FormFields extends WC_Settings_API
 {
     /**
+     * @var bool
+     * @since 0.0.1.0
+     */
+    private static $allowMocking;
+
+    /**
+     * @var bool
+     * @since 0.0.1.0
+     */
+    private static $showDeveloper;
+
+    /**
      * @param string $section
      * @param string $id
      * @return array
@@ -753,6 +765,20 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'allow_mocking' => [
+                    'id' => 'allow_mocking',
+                    'title' => __('Allow mocked behaviours', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_top' => __(
+                        'This setting enables mocked behaviours and data on fly, during tests.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'customer_checkout_tweaking_section_end' => [
                     'type' => 'sectionend',
                 ],
@@ -777,8 +803,67 @@ class FormFields extends WC_Settings_API
             ],
         ];
 
-        if ($section === 'all' || self::getShowDeveloper()) {
-            $return = array_merge($return, $developerArray);
+        $mockingTweaks = self::getMockingTweaks();
+
+        if ((isset($section) && $section === 'all') || self::getShowDeveloper()) {
+            $return = array_merge($return, $developerArray, $mockingTweaks);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $currentArray
+     * @param $section
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getMockingTweaks()
+    {
+        $return = [];
+        if (!isset(self::$allowMocking)) {
+            self::$allowMocking = Data::getResursOption('allow_mocking', null, false);
+        }
+
+        if (self::$allowMocking && Data::getResursOption('environment', null, false) === 'test') {
+            $return['mocking'] = [
+                'title' => __('Mocking & Testing', 'trbwc'),
+                'mocking_section' => [
+                    'type' => 'title',
+                    'title' => __('Mocking Section', 'trbwc'),
+                    'desc' => sprintf(
+                        __(
+                            'Section of Mocking & Tests. Are you not developing this plugin? Then you probably do ' .
+                            'not need it either. The section is specifically placed hiddenly here, since the options ' .
+                            'here are used to recreate events under very specific circumstances. For example, you ' .
+                            'can mock errors from here, that you otherwise had to hardcode into the plugin. Options ' .
+                            'here are normally enabled until the feature has been trigged once. After first ' .
+                            'execution it will instantly become disabled automatically. The mocking section can only ' .
+                            'be enabled when your environment is set to test and you explicitly allowed mocking on ' .
+                            'your site.',
+                            'trbwc'
+                        )
+                    ),
+                ],
+                'mock_update_payment_reference_failure' => [
+                    'id' => 'mock_update_payment_reference_failure',
+                    'title' => __('Fail on updatePaymentReference', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_top' => __(
+                        'This setting enables a fictive error on front-to-back calls during order creations where ' .
+                        'updatePaymentReference occurs.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mocking_section_end' => [
+                    'type' => 'sectionend',
+                ],
+            ];
         }
 
         return $return;
@@ -790,7 +875,10 @@ class FormFields extends WC_Settings_API
      */
     public static function getShowDeveloper()
     {
-        return Data::getResursOption('show_developer');
+        if (!isset(self::$showDeveloper)) {
+            self::$showDeveloper = Data::getResursOption('show_developer', null, false);
+        }
+        return self::$showDeveloper;
     }
 
     /**

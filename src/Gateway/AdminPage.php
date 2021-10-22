@@ -144,6 +144,10 @@ class AdminPage extends WC_Settings_Page
         WC_Admin_Settings::output_fields($settings);
         $outputHtml = ob_get_clean();
 
+        if (!isset($sectionNames[$current_section])) {
+            return;
+        }
+
         // This displays the entire configuration.
         echo Data::getGenericClass()->getTemplate(
             'adminpage_main',
