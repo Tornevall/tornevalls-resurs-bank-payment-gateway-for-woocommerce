@@ -71,12 +71,38 @@ class ResursCheckout
     public $specificType;
 
     /**
+     * @var bool Defines if RCO is used as PUSH or regular ecommerce.
+     * @link https://test.resurs.com/docs/display/ecom/Resurs+Checkout+PUSH
+     * @link https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web
+     */
+    private $push = false;
+
+    /**
      * @return bool
      * @since 0.0.1.0
      */
     public function isLegacyIframe($iframeContainer)
     {
         return (isset($iframeContainer) && preg_match('/oc-shop.js/', $iframeContainer->script) ? true : false);
+    }
+
+    /**
+     * @return $this
+     * @since 0.0.1.0
+     */
+    public function setPushEnabled()
+    {
+        $this->push = true;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPushEnabled()
+    {
+        return $this->push;
     }
 
     /**
