@@ -99,11 +99,11 @@ class WooCommerce
      */
     public static function getGateways($gateways)
     {
-        if (is_admin()) {
-            $gateways[] = ResursDefault::class;
-        } else {
-            $gateways = self::getGatewaysFromPaymentMethods($gateways);
-        }
+        // For generic order creations through wp-admin (/wp-admin/post-new.php?post_type=shop_order) the plugin
+        // is unable to offer any front end payment methods.
+        //$gateways[] = ResursDefault::class;
+        $gateways = self::getGatewaysFromPaymentMethods($gateways);
+
         return $gateways;
     }
 

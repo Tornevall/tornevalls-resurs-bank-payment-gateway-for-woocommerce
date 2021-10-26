@@ -1375,18 +1375,18 @@ class ResursDefault extends WC_Payment_Gateway
         if (empty($metaCheckoutType)) {
             $this->setOrderCheckoutMeta($order_id);
             $paymentMethodBySession = Data::getPaymentMethodBySession();
-            if ($metaCheckoutType === ResursDefault::TYPE_RCO && !empty($paymentMethodBySession)) {
+            if ($metaCheckoutType === self::TYPE_RCO && !empty($paymentMethodBySession)) {
                 $order->set_payment_method(Data::getPaymentMethodBySession());
             }
         }
 
         $this->preProcessOrder($order);
-        if (Data::getCheckoutType() !== ResursDefault::TYPE_RCO) {
+        if (Data::getCheckoutType() !== self::TYPE_RCO) {
             $return = $this->processResursOrder($order);
-        } elseif (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+        } elseif (Data::getCheckoutType() === self::TYPE_RCO) {
             // Rules applicable on RCO only.
             $return['result'] = 'success';
-            $return['redirect'] = WC_Payment_Gateway::get_return_url($order);
+            $return['redirect'] = $this->get_return_url($order);
         }
 
         return $return;
