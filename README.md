@@ -2,6 +2,13 @@
 
 This is a third party plugin written to work as a payment gateway for WooCommerce and WordPress.
 
+# IMPORTANT -- First time running should be a dedicated test environment
+
+If you are entirely new to this plugin, I'd suggest you to run it in a dedicated test environment that is supposedly
+equals to a production environment when you install the plugin AFTER testing. Primary newly detected errors should be
+discovered in TEST rather than production. If something fails in production it also means that YOU are the one that
+potentially looses traffic to your site. This responsibility is YOURS and it is only about self-preservation.
+
 ## CONTRIBUTION
 
 If you'd like to contribute to this project, you can either sign up to
@@ -47,8 +54,8 @@ The original codebase was initialized july 2020.
 ## REQUIREMENTS AND SECURITY CONSIDERATIONS
 
 * WooCommerce: v3.4.0 or higher (old features are ditched) and the actual support is set much higher.
-* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly
-  recommended to go for the latest version as soon as possible if you're not already there.
+* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly recommended
+  to go for the latest version as soon as possible if you're not already there.
 * HTTPS *must* be enabled in both directions. This is a callback security measure.
 * XML and SoapClient must be available.
 * Curl is *recommended* but not necessary.

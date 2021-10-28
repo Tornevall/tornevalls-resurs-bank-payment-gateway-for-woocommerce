@@ -1019,7 +1019,6 @@ class Data
                 break;
             default:
                 self::$Log->notice($message);
-                break;
         }
     }
 
