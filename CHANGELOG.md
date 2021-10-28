@@ -1,7 +1,6 @@
-Current ChangeLog is based on what has reached the master branch.
-Also, github referenses are now added.
+Current ChangeLog is based on what has reached the master branch. Also, github referenses are now added.
 
-# 0.0.1.0
+# 0.0.1.0 / 1.0.0
 
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-22'>RWC-22</a>] -         CRITICAL Uncaught Error: Maximum function nesting level of &#39;500&#39; reached
 </li>
@@ -9,11 +8,21 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-171'>RWC-171</a>] -         adminpage_details.phtml bugs out due to RCO.
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-198'>RWC-198</a>] -         Simplified flow does not fill in country on getAddress
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-200'>RWC-200</a>] -         #7: simplified customerdata is not properly created
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-207'>RWC-207</a>] -         The credential validation Button when updating credentials is not present. 
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-223'>RWC-223</a>] -         Weird behaviour in order process after delivery tests
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-229'>RWC-229</a>] -         #25: Password validation button disappeared
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-231'>RWC-231</a>] -         Check if this is ours (Trying to get property &#39;total&#39; of non-object in /usr/local/apache2/htdocs/ecommerceweb.se/woocommerce.ecommerceweb.se/wp-content/plugins/woocommerce/includes/abstracts/abstract-wc-payment-gateway.php on line 270)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-232'>RWC-232</a>] -         RCO positioning missing a title
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-233'>RWC-233</a>] -         Saving data with credential validation
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-3'>RWC-3</a>] -         composerize package PSR-4 formatted
 </li>
@@ -91,11 +100,9 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-82'>RWC-82</a>] -         Make sure payment gateways are country based
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-83'>RWC-83</a>] -         When dev mode is on make callbacks editable
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-87'>RWC-87</a>] -         Order status handler actions/filter should have lower priority than default
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-85'>RWC-85</a>] -         Test and production credentials side by side?
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-88'>RWC-88</a>] -         Stock balance handling (during callbacks/payments)
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-90'>RWC-90</a>] -         Discount applies with/without tax = Remember setting on annul/credit
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-98'>RWC-98</a>] -         Change behaviour output of discount handling as the first part has been handled wrong
 </li>
@@ -107,13 +114,17 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-105'>RWC-105</a>] -         Support &quot;instant finalizations&quot;
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-107'>RWC-107</a>] -         Unregister or edit callbacks one by one
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-107'>RWC-107</a>] -         #26: Unregister callbacks one by one
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-108'>RWC-108</a>] -         Documentation allowedFormData (what&#39;s allowed in the buttonApi)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-110'>RWC-110</a>] -         Logging of errors should not crash when $return is something else than expected in the flow selector
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-111'>RWC-111</a>] -         Prevent interference with old orders and still allow old plugin handle old orders
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-117'>RWC-117</a>] -         applyFilter-logging
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-113'>RWC-113</a>] -         Add information about selected flow in user-agent
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-114'>RWC-114</a>] -         govid should always be shown regardless of fields for getaddress
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-122'>RWC-122</a>] -         Inherit government id from getAddress to resurs form fields
 </li>
@@ -121,11 +132,11 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-124'>RWC-124</a>] -         Log getAddress events
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-125'>RWC-125</a>] -         Add filter with ability to temporarily disable a (deprecated) gateway (simplified, hosted, rco)
-</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-126'>RWC-126</a>] -         Logged in companies should not have a getAddress visible (Run as option)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-127'>RWC-127</a>] -         Ability to disable getAddress for logged in users completely
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-128'>RWC-128</a>] -         Custom translations for javascript/template sections
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-132'>RWC-132</a>] -         Avoid locking company field as the chosen customer type as this field is not always updated in session
 </li>
@@ -135,13 +146,37 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-136'>RWC-136</a>] -         On field submission errors, make sure we translate which fields that is a problem
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-138'>RWC-138</a>] -         Optional setting to exclude company from billing fields
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-139'>RWC-139</a>] -         Warn for Resurs Bank old gateway payments when old gateway is disabled
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-141'>RWC-141</a>] -         Using getaddress should render setting country if exists. Country is also missing in customersync for RCO
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-143'>RWC-143</a>] -         Logged in company customers should not have getAddress visible (on demand)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-145'>RWC-145</a>] -         (Always validate on credential/environmental changes -- monitor updates) Switching between test and production does not validate accounts.
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-148'>RWC-148</a>] -         Clarify if card number for &quot;befintligt kort&quot; is mandatory
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-152'>RWC-152</a>] -         Resurs Payment gateway country limitations
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-153'>RWC-153</a>] -         Implement updatePaymentReference in RCO
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-158'>RWC-158</a>] -         Track API history with metadata (?)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-159'>RWC-159</a>] -         Use filters to change min-max amount based on customizations
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-160'>RWC-160</a>] -         NOTICE ONLY: Part credit not supported by PSP methods
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-161'>RWC-161</a>] -         Deprecated functions from ECom 1.3.59 and inspections
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-163'>RWC-163</a>] -         Make sure the cart is always synchronizing in rco
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-166'>RWC-166</a>] -         #15: Checkout: Resurs Checkout (facelift) -- Payment failures
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-168'>RWC-168</a>] -         Check out if we can use the &quot;orderCreatedCallback&quot; in RCO.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-173'>RWC-173</a>] -         Add proper extended logging to RCO sessions
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-174'>RWC-174</a>] -         Is this really a proper value?
 </li>
@@ -159,6 +194,8 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-184'>RWC-184</a>] -         #3: Resurs Checkout: Store and use payment method on purchase
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-185'>RWC-185</a>] -         Resurs Checkout Handle failures (signing=&gt;mockfail) -- FailUrl Redirect
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-186'>RWC-186</a>] -         #4: RCOv2 Resurs Checkout: Store and use payment method on purchase
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-187'>RWC-187</a>] -         Make sure we validate AES methods BEFORE using them in wc-api
@@ -171,7 +208,7 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-195'>RWC-195</a>] -         #17: setStoreId filter should not be an integer (prepare for future api&#39;s)
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-196'>RWC-196</a>] -         Link actions to resurs statuses and callbacks
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-196'>RWC-196</a>] -         do_action at resurs statuses and callbacks
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-197'>RWC-197</a>] -         Orderdata layout (Blue box or WooCommerce standard?) -- configurable
 </li>
@@ -189,6 +226,8 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-209'>RWC-209</a>] -         Monitor saved data to update methods and callbacks on credendial updates
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-210'>RWC-210</a>] -         price variations?
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-214'>RWC-214</a>] -         #13, #8: Refuse to set a status that is already set.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-215'>RWC-215</a>] -         #9: Necessary callbacks, remove the rest (if not already removed).
@@ -196,8 +235,6 @@ Also, github referenses are now added.
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-216'>RWC-216</a>] -         updatePaymentReference and exceptions +logging when it happens
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-217'>RWC-217</a>] -         forceSigning is deprecated.
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-218'>RWC-218</a>] -         Allow data to be added to setSigningUrl
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-219'>RWC-219</a>] -         #10: According to how RCO works in the docs we probably should change canProcessOrder to avoid conflicts in the payment flow
 </li>
@@ -207,9 +244,33 @@ Also, github referenses are now added.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-222'>RWC-222</a>] -         Synchronize billing address in synchronous mode
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-224'>RWC-224</a>] -         Errors caused by woocommerce thrown to setRbwcGenericError gets double div&#39;s for .woocommerce-error
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-225'>RWC-225</a>] -         When activating other delivery address make sure to match the addressrow, to avoid weird addressing
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-227'>RWC-227</a>] -         nonces for background processing in wp-admin
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-228'>RWC-228</a>] -         #23: Credential validations by ajax must not activate getOptionsControl.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-230'>RWC-230</a>] -         Make sure we synchronize order after successful orders with getPayment
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-234'>RWC-234</a>] -         Add error report note when changing credentials and the credentials is failing
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-237'>RWC-237</a>] -         $order-&gt;status_update() should be cast into notes that can be identified as the plugin.
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-241'>RWC-241</a>] -         Validate button for credentials fix
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-242'>RWC-242</a>] -         Special feature: getAddress resolve non mocked data
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-243'>RWC-243</a>] -         Move to getDependentSettings plugin-file (This is filter based)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-245'>RWC-245</a>] -         Tweak for note prefix might not work properly
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-246'>RWC-246</a>] -         Log frontend facelift and intercepting to backend
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-247'>RWC-247</a>] -         mock mode (fake error in test by intentionally throw errors by config - - time limited enabled.. ex throw on updatePaymentReference
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-251'>RWC-251</a>] -         Orders with orderTotal of 0.
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-33'>RWC-33</a>] -         woocommerce_resurs_bank_&#39; . $type . &#39;_checkout_icon (iconified method)
 </li>
