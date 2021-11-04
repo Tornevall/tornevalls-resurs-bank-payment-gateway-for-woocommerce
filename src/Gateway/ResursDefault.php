@@ -532,6 +532,7 @@ class ResursDefault extends WC_Payment_Gateway
             $this->setOrderData();
             $this->setCreatePaymentNotice(__FUNCTION__);
             $paymentId = $this->API->getConnection()->getPreferredPaymentId();
+
             $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
             $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
@@ -576,6 +577,7 @@ class ResursDefault extends WC_Payment_Gateway
             $this
                 ->setCustomer();
         }
+
         $this
             ->setCustomerId()
             ->setStoreId()
@@ -993,6 +995,8 @@ class ResursDefault extends WC_Payment_Gateway
     private function setOrderLines()
     {
         if (WooCommerce::getValidCart()) {
+            // This is the first point we store the cart total for the current session.
+            WooCommerce::setSessionValue('customerCartTotal', WC()->cart->total);
             $currentCart = WooCommerce::getValidCart(true);
             foreach ($currentCart as $item) {
                 /**

@@ -44,6 +44,10 @@ function getRbwcLegacyInit(rcoLegacyElement) {
             function (response) {
                 if (response['result'] === 'success') {
                     rcoLegacy.confirmOrder(true);
+                } else {
+                    if (typeof response['messages'] !== "undefined") {
+                        setRbwcGenericError(response['messages'])
+                    }
                 }
             }
         )

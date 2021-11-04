@@ -216,8 +216,28 @@ class PluginApi
     {
         WooCommerce::setSessionValue('rco_customer_session_request', $_REQUEST['rco_customer']);
 
-        self::getPreparedRcoOrder();
-        self::getCreatedOrder();
+        $finalCartTotal = WC()->cart->total;
+        $lastSeenCartTotal = WooCommerce::getSessionValue('customerCartTotal');
+        if ($finalCartTotal === $lastSeenCartTotal) {
+            self::getPreparedRcoOrder();
+            self::getCreatedOrder();
+        } else {
+            $elseWhereMessage = __(
+                'While you were in the checkout, the cart has been updated somewhere else. If you have more tabs ' .
+                'open in your browser, make sure you only use one of them during the payment. You may want to ' .
+                'reload this page to make it right.',
+                'trbwc'
+            );
+            $return = [
+                'success' => false,
+                'errorString' => $elseWhereMessage,
+                'messages' => $elseWhereMessage,
+                'errorCode' => 400,
+                'orderId' => 0,
+            ];
+        }
+
+        return $return;
     }
 
     /**

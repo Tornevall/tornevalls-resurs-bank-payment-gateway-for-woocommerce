@@ -72,6 +72,7 @@ jQuery(document).ready(function ($) {
                     if (response['result'] === 'success') {
                         $ResursCheckout.release();
                     } else {
+                        $ResursCheckout.recreate();
                         if (typeof response['messages'] !== "undefined") {
                             setRbwcGenericError(response['messages'])
                         }
