@@ -181,18 +181,22 @@ class WordPress
         // v3core: Customer is in checkout.
         add_action(
             'woocommerce_before_checkout_form',
-            'ResursBank\Helpers\WooCommerce::getBeforeCheckoutForm'
+            'ResursBank\Helpers\WooCommerce::setIsInCheckout'
+        );
+        add_action(
+            'woocommerce_is_checkout',
+            'ResursBank\Helpers\WooCommerce::setIsInCheckout'
         );
         // v3core: Customer is not in checkout.
         add_action(
             'woocommerce_add_to_cart',
-            'ResursBank\Helpers\WooCommerce::getAddToCart'
+            'ResursBank\Helpers\WooCommerce::setAddToCart'
         );
-        // v3core: Customer is not in checkout.
-        add_action(
-            'woocommerce_cart_updated',
-            'ResursBank\Helpers\WooCommerce::getAddToCart'
-        );
+        // v3core: Customer is not in checkout. This is incompatible with RCO.
+        /*        add_action(
+                    'woocommerce_cart_updated',
+                    'ResursBank\Helpers\WooCommerce::setUpdatedCart'
+                );*/
         // v3core: Customer is not in checkout.
         add_action(
             'woocommerce_update_order_review_fragments',

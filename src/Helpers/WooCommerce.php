@@ -14,7 +14,6 @@ use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\IO\Data\Strings;
 use WC_Order;
 use WC_Session;
 use function in_array;
@@ -652,7 +651,7 @@ class WooCommerce
      *
      * @since 0.0.1.0
      */
-    public static function getBeforeCheckoutForm()
+    public static function setIsInCheckout()
     {
         self::setCustomerCheckoutLocation(true);
     }
@@ -1115,9 +1114,18 @@ class WooCommerce
      *
      * @since 0.0.1.0
      */
-    public static function getAddToCart()
+    public static function setAddToCart()
     {
         self::setCustomerCheckoutLocation(false);
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function setUpdatedCart()
+    {
+        $isCheckout = is_checkout();
+        self::setCustomerCheckoutLocation($isCheckout);
     }
 
     /**
@@ -1145,6 +1153,15 @@ class WooCommerce
         if (isset($_POST['payment_method']) && Data::isResursMethod($_POST['payment_method'])) {
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
         }
+        self::setCustomerCheckoutLocation(true);
+    }
+
+    /**
+     * @return array|mixed|string|null
+     */
+    public static function getCustomerCheckoutLocation()
+    {
+        return self::getSessionValue(self::$inCheckoutKey);
     }
 
     /**
