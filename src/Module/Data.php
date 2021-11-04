@@ -427,6 +427,8 @@ class Data
 
         $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
+
+            // Customized string.
             $partPayString = self::getPartPayStringByTags(
                 WordPress::applyFilters(
                     'partPaymentString',
@@ -444,6 +446,7 @@ class Data
                 ]
             );
 
+            // Fetch the rest from the template.
             $annuityTemplate = Data::getGenericClass()->getTemplate(
                 'product_annuity.phtml',
                 [
