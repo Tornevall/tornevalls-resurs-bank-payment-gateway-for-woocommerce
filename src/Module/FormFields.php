@@ -301,8 +301,9 @@ class FormFields extends WC_Settings_API
                         'When you enable the part payment options for products, you can choose your own ' .
                         'template to display. Templates are built on WordPress pages. If you want to show a custom ' .
                         'page, you may choose one that page here. Shortcodes that can be use: [currency], ' .
-                        '[monthlyPrice], [monthlyDuration]. If you use a custom text [monthlyPrice] will be ' .
-                        'delivered without the currency, so you have to add that part yourself.',
+                        '[monthlyPrice], [monthlyDuration], [methodId], [methodDescription]. If you use a custom ' .
+                        'text [monthlyPrice] will be delivered without the currency, so you have to add that ' .
+                        'part yourself.',
                         'trbwc'
                     ),
                     'type' => 'select',

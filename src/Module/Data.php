@@ -427,6 +427,8 @@ class Data
 
         $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
+            $annuityPaymentMethod = (array)Data::getPaymentMethodById($annuityMethod);
+            // Customized string.
             $partPayString = self::getPartPayStringByTags(
                 WordPress::applyFilters(
                     'partPaymentString',
@@ -440,17 +442,20 @@ class Data
                     'monthlyPrice' => $monthlyPrice,
                     'monthlyDuration' => $annuityDuration,
                     'paymentLimit' => $minimumPaymentLimit,
+                    'paymentMethod' => $annuityPaymentMethod,
                     'isTest' => self::getTestMode(),
                 ]
             );
 
-            $annuityTemplate = Data::getGenericClass()->getTemplate(
+            // Fetch the rest from the template.
+            $annuityTemplate = self::getGenericClass()->getTemplate(
                 'product_annuity.phtml',
                 [
                     'currency' => get_woocommerce_currency_symbol(),
                     'monthlyPrice' => $monthlyPrice,
                     'monthlyDuration' => $annuityDuration,
                     'partPayString' => $partPayString,
+                    'paymentMethod' => $annuityPaymentMethod,
                     'isTest' => self::getTestMode(),
                 ]
             );
@@ -467,7 +472,10 @@ class Data
     public static function getCustomerCountry()
     {
         global $woocommerce;
-        /** @var WC_Customer $wcCustomer */
+
+        /**
+         * @var WC_Customer $wcCustomer
+         */
         $wcCustomer = $woocommerce->customer;
 
         $return = null;
@@ -516,6 +524,19 @@ class Data
             }
             $replaceTags[] = sprintf('/\[%s\]/i', $tagKey);
             $replaceWith[] = $tagValue;
+        }
+
+        $methodTags = [
+            'id', 'description', 'type', 'specificType'
+        ];
+
+        if (!empty($data['paymentMethod'])) {
+            foreach ($data['paymentMethod'] as $methodKey => $methodValue) {
+                if (in_array($methodKey, $methodTags) && is_string($methodValue)) {
+                    $replaceTags[] = sprintf('/\[method%s\]/i', ucFirst($methodKey));
+                    $replaceWith[] = $methodValue;
+                }
+            }
         }
 
         return preg_replace(
@@ -1490,7 +1511,7 @@ class Data
     {
         $return = [];
 
-        $storedMethods = Api::getPaymentMethods(true);
+        $storedMethods = Api::getPaymentMethods();
         if (is_array($storedMethods)) {
             foreach ($storedMethods as $method) {
                 if (isset($method->id) && $method->id === $paymentMethodId) {
