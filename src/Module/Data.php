@@ -427,7 +427,6 @@ class Data
 
         $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
-
             // Customized string.
             $partPayString = self::getPartPayStringByTags(
                 WordPress::applyFilters(
@@ -447,7 +446,7 @@ class Data
             );
 
             // Fetch the rest from the template.
-            $annuityTemplate = Data::getGenericClass()->getTemplate(
+            $annuityTemplate = self::getGenericClass()->getTemplate(
                 'product_annuity.phtml',
                 [
                     'currency' => get_woocommerce_currency_symbol(),
@@ -470,7 +469,10 @@ class Data
     public static function getCustomerCountry()
     {
         global $woocommerce;
-        /** @var WC_Customer $wcCustomer */
+
+        /**
+         * @var WC_Customer $wcCustomer
+         */
         $wcCustomer = $woocommerce->customer;
 
         $return = null;
