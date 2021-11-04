@@ -2,12 +2,12 @@
 
 This is a third party plugin written to work as a payment gateway for WooCommerce and WordPress.
 
-# IMPORTANT -- First time running should be a dedicated test environment
+# IMPORTANT -- First time running should be on a dedicated test environment
 
 If you are entirely new to this plugin, I'd suggest you to run it in a dedicated test environment that is supposedly
 equals to a production environment when you install the plugin AFTER testing. Primary newly detected errors should be
 discovered in TEST rather than production. If something fails in production it also means that YOU are the one that
-potentially looses traffic to your site. This responsibility is YOURS and it is only about self-preservation.
+potentially looses traffic to your site. This responsibility is yours and this handling is for your safety only!
 
 ## CONTRIBUTION
 

@@ -48,10 +48,8 @@ class Plugin
      * @return string
      * @since 0.0.1.0
      */
-    public function getPartPaymentWidgetPage()
+    public function getPartPaymentWidgetPage($return)
     {
-        $return = '';
-
         $partPaymentWidgetId = Data::getResursOption('part_payment_template');
         if ($partPaymentWidgetId) {
             $return = get_post($partPaymentWidgetId)->post_content;

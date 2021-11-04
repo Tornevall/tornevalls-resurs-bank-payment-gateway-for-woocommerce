@@ -97,7 +97,10 @@ class WordPress
 
         if (Data::isEnabled()) {
             add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
-            add_filter('woocommerce_available_payment_gateways', 'ResursBank\Helpers\WooCommerce::getAvailableGateways');
+            add_filter(
+                'woocommerce_available_payment_gateways',
+                'ResursBank\Helpers\WooCommerce::getAvailableGateways'
+            );
             add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
             add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
         }
@@ -236,7 +239,12 @@ class WordPress
         if (isset($_SESSION[Data::getPrefix()]['exception'])) {
             $class = 'notice notice-error is-dismissible';
             foreach ($_SESSION[Data::getPrefix()]['exception'] as $index => $item) {
-                printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($item->getMessage()));
+                printf(
+                    '<div class="%1$s"><p>[%3$s] %2$s</p></div>',
+                    esc_attr($class),
+                    esc_html($item->getMessage()),
+                    Data::getPrefix()
+                );
             }
             unset($_SESSION[Data::getPrefix()]['exception']);
         }
@@ -279,13 +287,21 @@ class WordPress
      */
     private static function getCredentialError()
     {
-        $frontCredentialCheck = Data::getResursOption('front_credential_error');
+        $frontCredentialCheck = Data::getResursOption('front_callbacks_credential_error');
         try {
             if (!empty($frontCredentialCheck)) {
                 $credentialMessage = json_decode($frontCredentialCheck);
                 // Generate an exeception the ugly way.
                 if (isset($credentialMessage->message)) {
-                    throw new Exception($credentialMessage->message, $credentialMessage->code);
+                    throw new Exception(
+                        sprintf(
+                            'Resurs Bank %s (%s): %s',
+                            isset($credentialMessage->function) ? $credentialMessage->function : __FUNCTION__,
+                            $credentialMessage->code,
+                            $credentialMessage->message
+                        ),
+                        $credentialMessage->code
+                    );
                 }
             }
         } catch (Exception $e) {

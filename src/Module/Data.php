@@ -436,15 +436,18 @@ class Data
                     )
                 ),
                 [
+                    'currency' => get_woocommerce_currency_symbol(),
                     'monthlyPrice' => $monthlyPrice,
                     'monthlyDuration' => $annuityDuration,
                     'paymentLimit' => $minimumPaymentLimit,
                     'isTest' => self::getTestMode(),
                 ]
             );
+
             $annuityTemplate = Data::getGenericClass()->getTemplate(
                 'product_annuity.phtml',
                 [
+                    'currency' => get_woocommerce_currency_symbol(),
                     'monthlyPrice' => $monthlyPrice,
                     'monthlyDuration' => $annuityDuration,
                     'partPayString' => $partPayString,
@@ -496,6 +499,7 @@ class Data
     {
         $tags = self::getCompatibleTags(
             [
+                'currency' => get_woocommerce_currency_symbol(),
                 'monthlyPrice' => $data['monthlyPrice'],
                 'monthlyDuration' => $data['monthlyDuration'],
             ],
@@ -504,6 +508,12 @@ class Data
         $replaceTags = [];
         $replaceWith = [];
         foreach ($tags as $tagKey => $tagValue) {
+            switch ($tagKey) {
+                case 'payFrom':
+                    $tagValue = self::getWcPriceSpan($data['monthlyPrice'], ['currency' => ' ']);
+                    break;
+                default:
+            }
             $replaceTags[] = sprintf('/\[%s\]/i', $tagKey);
             $replaceWith[] = $tagValue;
         }
@@ -541,9 +551,9 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    private static function getWcPriceSpan($monthlyPrice)
+    private static function getWcPriceSpan($monthlyPrice, $wcPriceRequest = [])
     {
-        return sprintf('<span id="r_annuity_price">%s</span>', wc_price($monthlyPrice));
+        return sprintf('<span id="r_annuity_price">%s</span>', wc_price($monthlyPrice, $wcPriceRequest));
     }
 
     /**
@@ -1698,7 +1708,7 @@ class Data
      */
     public static function clearCredentialNotice()
     {
-        return self::delResursOption('front_credential_error');
+        return self::delResursOption('front_callbacks_credential_error');
     }
 
     /**
@@ -1718,7 +1728,7 @@ class Data
     public static function getCredentialNotice()
     {
         return Data::setResursOption(
-            'front_credential_error',
+            'front_callbacks_credential_error',
             json_encode(
                 [
                     'code' => 401,

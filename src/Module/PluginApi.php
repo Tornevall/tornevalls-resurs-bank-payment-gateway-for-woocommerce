@@ -610,6 +610,8 @@ class PluginApi
      */
     public static function getNewAnnuityCalculation()
     {
+        $currencyRequest = empty(Data::getResursOption('part_payment_template')) ? [] : ['currency' => ' '];
+
         self::reply(
             [
                 'price' => wc_price(
@@ -617,7 +619,8 @@ class PluginApi
                         WooCommerce::getRequest('price'),
                         Data::getResursOption('currentAnnuityFactor'),
                         (int)Data::getResursOption('currentAnnuityDuration')
-                    )
+                    ),
+                    $currencyRequest
                 ),
             ]
         );
@@ -651,8 +654,8 @@ class PluginApi
                 Data::getCredentialNotice();
             } else {
                 Data::setResursOption(
-                    'front_credential_error',
-                    json_encode(['code' => $e->getCode(), 'message' => $e->getMessage()])
+                    'front_callbacks_credential_error',
+                    json_encode(['code' => $e->getCode(), 'message' => $e->getMessage(), 'function' => __FUNCTION__])
                 );
             }
         }

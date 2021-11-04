@@ -1,6 +1,6 @@
 === Tornevall Networks Resurs Bank payment gateway for WooCommerce ===
 Contributors: RB-Tornevall, Tornevall
-Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments
+Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, resurs checkout, checkout, RCO, hosted, simplified, hostedflow
 Requires at least: 5.0
 Tested up to: 5.8.1
 Requires PHP: 7.0
@@ -20,7 +20,8 @@ If you are entirely new to this plugin, I'd suggest you to run it in a dedicated
 supposedly equals to a production environment when you install the plugin AFTER testing. Primary newly detected
 errors should be discovered in TEST rather than production. If something fails in production it also means that
 YOU are the one that potentially looses traffic to your site.
-This responsibility is YOURS and it is only about self-preservation.
+
+This responsibility is yours and this handling is for your safety only!
 
 = Description and requirements =
 
