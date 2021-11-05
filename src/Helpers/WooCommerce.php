@@ -1168,10 +1168,13 @@ class WooCommerce
                     $orderHandler->setCart(WC()->cart);
                     $orderHandler->setPreparedOrderLines();
                     self::setSessionValue('customerCartTotal', WC()->cart->total);
-                    Api::getResurs()->updateCheckoutOrderLines(
-                        WooCommerce::getSessionValue('rco_order_id'),
-                        $orderHandler->getOrderLines()
-                    );
+                    // Only update payment session if in RCO mode.
+                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                        Api::getResurs()->updateCheckoutOrderLines(
+                            WooCommerce::getSessionValue('rco_order_id'),
+                            $orderHandler->getOrderLines()
+                        );
+                    }
                 }
             }
         } catch (Exception $e) {

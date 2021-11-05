@@ -534,6 +534,7 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Find out which order reference that should be used in RCO.
      * @return $this
      * @throws Exception
      * @since 0.0.1.0
@@ -1574,6 +1575,7 @@ class ResursDefault extends WC_Payment_Gateway
                     __('Session value rco_order_id has been reset after successful return to landing page.', 'trbwc')
                 );
                 WooCommerce::setSessionValue('rco_order_id', null);
+                WooCommerce::setSessionValue('customerCartTotal', null);
                 if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
                     // When someone returns with a successful call.
                     if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData)) {
