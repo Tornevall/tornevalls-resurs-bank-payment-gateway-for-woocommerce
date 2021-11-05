@@ -449,6 +449,20 @@ class FormFields extends WC_Settings_API
                     'type' => 'title',
                     'title' => __('Advanced API', 'trbwc'),
                 ],
+                'rco_paymentid_age' => [
+                    'id' => 'rco_paymentid_age',
+                    'title' => __('Resurs Checkout paymentId maximum age.', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Defined in seconds, how long a preferred payment id can live before it is renewed in a ' .
+                        'current session. This setting is necessary as we use the id to track cart updates ' .
+                        'which very much prevents malicious cart manipulation. It also allows customers to reload ' .
+                        'the checkout page and still use the same payment id. When a payment is successful, the ' .
+                        'preferred payment id will also be reset.',
+                        'trbwc'
+                    ),
+                    'default' => '3600',
+                ],
                 'discard_coupon_vat' => [
                     'title' => __('Do not add VAT to discounts', 'trbwc'),
                     'desc' => __('Enabled', 'trbwc'),

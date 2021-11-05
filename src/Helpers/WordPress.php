@@ -64,7 +64,7 @@ class WordPress
             'get_internal_resynch',
             'set_new_annuity',
             'get_new_annuity_calculation',
-            'get_cost_of_purchase'
+            'get_cost_of_purchase',
         ];
 
         foreach ($actionList as $action) {
@@ -179,7 +179,7 @@ class WordPress
      */
     private static function setupWoocommerceCheckoutActions()
     {
-        // v3core: Customer is in checkout.
+        // Customer is in checkout.
         add_action(
             'woocommerce_before_checkout_form',
             'ResursBank\Helpers\WooCommerce::setIsInCheckout'
@@ -188,16 +188,16 @@ class WordPress
             'woocommerce_is_checkout',
             'ResursBank\Helpers\WooCommerce::setIsInCheckout'
         );
-        // v3core: Customer is not in checkout.
+        // Customer is not in checkout.
         add_action(
             'woocommerce_add_to_cart',
             'ResursBank\Helpers\WooCommerce::setAddToCart'
         );
-        // v3core: Customer is not in checkout. This is incompatible with RCO.
-        /*        add_action(
-                    'woocommerce_cart_updated',
-                    'ResursBank\Helpers\WooCommerce::setUpdatedCart'
-                );*/
+        // Customer is not in checkout. RCO helper, updating order rows on fly in this section.
+        add_action(
+            'woocommerce_cart_updated',
+            'ResursBank\Helpers\WooCommerce::setUpdatedCart'
+        );
         // v3core: Customer is not in checkout.
         add_action(
             'woocommerce_update_order_review_fragments',
