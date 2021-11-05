@@ -179,7 +179,7 @@ class WordPress
      */
     private static function setupWoocommerceCheckoutActions()
     {
-        // v3core: Customer is in checkout.
+        // Customer is in checkout.
         add_action(
             'woocommerce_before_checkout_form',
             'ResursBank\Helpers\WooCommerce::setIsInCheckout'
@@ -188,12 +188,12 @@ class WordPress
             'woocommerce_is_checkout',
             'ResursBank\Helpers\WooCommerce::setIsInCheckout'
         );
-        // v3core: Customer is not in checkout.
+        // Customer is not in checkout.
         add_action(
             'woocommerce_add_to_cart',
             'ResursBank\Helpers\WooCommerce::setAddToCart'
         );
-        // v3core: Customer is not in checkout. This is incompatible with RCO.
+        // Customer is not in checkout. RCO helper, updating order rows on fly in this section.
         add_action(
             'woocommerce_cart_updated',
             'ResursBank\Helpers\WooCommerce::setUpdatedCart'
