@@ -160,6 +160,10 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * Returns a Resurs API Link to a parent caller (ResursDefault). After order rows are created, it is important
+     * for the already created link to only update changes that occurred during the order line rendering here as
+     * the link may already contain customer data.
+     *
      * @return Api
      * @since 0.0.1.0
      */
@@ -169,6 +173,9 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * Sets up a Resurs API Link that is already in use instead of recreating the API link. This is an important
+     * step for ResursDefault to be able to pass orderline handling to this section.
+     *
      * @param $api
      * @return $this
      * @since 0.0.1.0
