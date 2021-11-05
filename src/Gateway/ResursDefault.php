@@ -964,11 +964,13 @@ class ResursDefault extends WC_Payment_Gateway
             $orderHandler->setApi($this->API);
             $orderHandler->setPreparedOrderLines();
             $this->API = $orderHandler->getApi();
-            //$orderLines = $orderHandler->getOrderLines();
         } else {
-            Data::setLogError(sprintf(
-                __('%s: Could not create order from an empty cart.', 'trbwc')
-            ));
+            Data::setLogError(
+                sprintf(
+                    __('%s: Could not create order from an empty cart.', 'trbwc'),
+                    __FUNCTION__
+                )
+            );
             throw new RuntimeException(
                 __('Cart is empty!', 'trbwc')
             );

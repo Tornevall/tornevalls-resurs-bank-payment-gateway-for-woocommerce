@@ -1178,7 +1178,12 @@ class WooCommerce
                 }
             }
         } catch (Exception $e) {
-
+            Data::setLogError(
+                sprintf(
+                    __('%s: Could not create order from an empty cart.', 'trbwc'),
+                    __FUNCTION__
+                )
+            );
         }
 
         self::setCustomerCheckoutLocation($isCheckout);
