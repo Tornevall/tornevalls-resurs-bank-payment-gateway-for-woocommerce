@@ -347,20 +347,3 @@ function getRbwcDeliveryTruth(contentArray) {
     }
     return numKeys > 0;
 }
-
-/**
- * Render cost of purchase popup.
- * @param method
- * @param total
- * @since 0.0.1.0
- */
-function getRbReadMoreClicker(method, total) {
-    var costOfPurchaseUrl = getResursLocalization('ajaxify');
-    var costOfPurchaseVars = '?action=resursbank_get_cost_of_purchase&method=' + method + '&total=' + total;
-    //console.log(costOfPurchaseUrl+costOfPurchaseVars);
-    window.open(
-        costOfPurchaseUrl + costOfPurchaseVars,
-        'costOfPurchasePopup',
-        'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=yes,width=650px,height=740px'
-    )
-}
