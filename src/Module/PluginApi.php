@@ -127,6 +127,35 @@ class PluginApi
     }
 
     /**
+     * @since 0.0.1.0
+     */
+    public static function getCostOfPurchase()
+    {
+        $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
+        $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
+
+        $method = WooCommerce::getRequest('method');
+        $total = WooCommerce::getRequest('total');
+        if (Data::getCustomerCountry() !== 'DK') {
+            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation($method, $total, true, true);
+        } else {
+            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation(Api::getPaymentMethods(), $total, false, true);
+        }
+
+        echo Data::getGenericClass()
+            ->getTemplate(
+                'checkout_costofpurchase_default.phtml',
+                [
+                    'wooCommerceStyleSheet' => $wooCommerceStyleSheet,
+                    'resursStyleSheet' => $resursStyleSheet,
+                    'priceInfoHtml' => $priceInfoHtml,
+                ]
+            );
+
+        die;
+    }
+
+    /**
      * @param null $expire
      * @param null $noReply Boolean that returns the answer instead of replying live.
      * @return bool

@@ -1,0 +1,9 @@
+<div class="resursReadMoreSpace">
+    <?php if ($method->specificType !== 'CARD' && $method->type !== 'PAYMENT_PROVIDER') { ?>
+        <button type="button" class="btn btn-info active resursReadMoreButton"
+                onclick="getRbReadMoreClicker('<?php echo $method->id ?>', <?php echo (float)$total ?>)"
+        >
+            <?php _e('Read more', 'trbwc') ?>
+        </button>
+    <?php } ?>
+</div>
