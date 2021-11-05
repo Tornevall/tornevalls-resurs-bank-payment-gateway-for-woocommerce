@@ -428,13 +428,15 @@ class Data
         $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
             $annuityPaymentMethod = (array)Data::getPaymentMethodById($annuityMethod);
+
             // Customized string.
             $partPayString = self::getPartPayStringByTags(
                 WordPress::applyFilters(
                     'partPaymentString',
                     sprintf(
-                        __('Part pay from %s per month.', 'trbwc'),
-                        self::getWcPriceSpan($monthlyPrice)
+                        __('Part pay from %s per month. | %s', 'trbwc'),
+                        self::getWcPriceSpan($monthlyPrice),
+                        self::getReadMoreString($annuityPaymentMethod, $monthlyPrice)
                     )
                 ),
                 [
@@ -444,6 +446,7 @@ class Data
                     'paymentLimit' => $minimumPaymentLimit,
                     'paymentMethod' => $annuityPaymentMethod,
                     'isTest' => self::getTestMode(),
+                    'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
                 ]
             );
 
@@ -457,6 +460,7 @@ class Data
                     'partPayString' => $partPayString,
                     'paymentMethod' => $annuityPaymentMethod,
                     'isTest' => self::getTestMode(),
+                    'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
                 ]
             );
 
@@ -500,6 +504,22 @@ class Data
     }
 
     /**
+     * @param $annuityPaymentMethod
+     * @param $monthlyPrice
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getReadMoreString($annuityPaymentMethod, $monthlyPrice)
+    {
+        return sprintf(
+            '<span style="cursor:pointer !important; font-weight:bold;" onclick="getRbReadMoreClicker(\'%s\', %s)">%s</span>',
+            $annuityPaymentMethod['id'],
+            $monthlyPrice,
+            WordPress::applyFilters('partPaymentReadMoreString', __('Read more.', 'trbwc'))
+        );
+    }
+
+    /**
      * @param $content
      * @since 0.0.1.0
      */
@@ -510,6 +530,7 @@ class Data
                 'currency' => get_woocommerce_currency_symbol(),
                 'monthlyPrice' => $data['monthlyPrice'],
                 'monthlyDuration' => $data['monthlyDuration'],
+                'readmore' => $data['readmore'],
             ],
             $data
         );
@@ -527,7 +548,10 @@ class Data
         }
 
         $methodTags = [
-            'id', 'description', 'type', 'specificType'
+            'id',
+            'description',
+            'type',
+            'specificType',
         ];
 
         if (!empty($data['paymentMethod'])) {

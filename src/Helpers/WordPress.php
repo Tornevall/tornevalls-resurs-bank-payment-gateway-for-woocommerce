@@ -64,6 +64,7 @@ class WordPress
             'get_internal_resynch',
             'set_new_annuity',
             'get_new_annuity_calculation',
+            'get_cost_of_purchase'
         ];
 
         foreach ($actionList as $action) {

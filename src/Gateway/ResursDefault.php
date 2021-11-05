@@ -1308,6 +1308,11 @@ class ResursDefault extends WC_Payment_Gateway
                 ]);
             }
 
+            $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
+                'method' => $this->paymentMethodInformation,
+                'total' => isset($this->cart->total) ? $this->cart->total : 0
+            ]);
+
             echo $fieldHtml;
         }
     }
