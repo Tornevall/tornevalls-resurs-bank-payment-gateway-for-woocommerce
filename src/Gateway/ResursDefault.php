@@ -1570,10 +1570,13 @@ class ResursDefault extends WC_Payment_Gateway
             $this->wcOrderData = Data::getOrderInfo($this->order);
 
             if ($this->isSuccess() && $this->setFinalSigning()) {
-                Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS,
-                    __('Session value rco_order_id has been reset after successful return to landing page.', 'trbwc')
-                );
+                if (Data::getCheckoutType() === self::TYPE_RCO) {
+                    Data::canLog(
+                        Data::CAN_LOG_ORDER_EVENTS,
+                        __('Session value rco_order_id has been reset after successful return to landing page.',
+                            'trbwc')
+                    );
+                }
                 WooCommerce::setSessionValue('rco_order_id', null);
                 WooCommerce::setSessionValue('customerCartTotal', null);
                 if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
