@@ -70,7 +70,11 @@ jQuery(document).ready(function ($) {
                 getResursWooCommerceCustomer(),
                 function (response) {
                     if (response['result'] === 'success') {
-                        $ResursCheckout.release();
+                        if (typeof response['total'] !== 'undefined' && response['total'] === 0 && resursHasPlaceOrder) {
+                            $rQuery('#place_order').click();
+                        } else {
+                            $ResursCheckout.release();
+                        }
                     } else {
                         $ResursCheckout.recreate();
                         if (typeof response['messages'] !== "undefined") {
@@ -86,7 +90,7 @@ jQuery(document).ready(function ($) {
             )
         });
         $ResursCheckout.onCustomerChange(function (event) {
-            resursBankRcoDataContainer.rco_customer = event
+            resursBankRcoDataContainer.rco_customer = event;
             $('body').trigger('rbwc_customer_synchronize', {
                 version: 2
             });

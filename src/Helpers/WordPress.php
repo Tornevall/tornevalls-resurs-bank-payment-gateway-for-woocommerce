@@ -198,8 +198,8 @@ class WordPress
             'woocommerce_cart_updated',
             'ResursBank\Helpers\WooCommerce::setUpdatedCart'
         );
-        // v3core: Customer is not in checkout.
-        add_action(
+        // Customer is not in checkout.
+        add_filter(
             'woocommerce_update_order_review_fragments',
             'ResursBank\Helpers\WooCommerce::getReviewFragments'
         );

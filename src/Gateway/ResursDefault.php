@@ -1181,14 +1181,18 @@ class ResursDefault extends WC_Payment_Gateway
      * How to handle the submit order button. For future RCO.
      *
      * @param $classButtonHtml
-     * @return mixed
+     * @return string
      * @since 0.0.1.0
      */
     public function getOrderButtonHtml($classButtonHtml)
     {
+        $return = '';
+
         if (Data::getCheckoutType() !== self::TYPE_RCO) {
-            return $classButtonHtml;
+            $return = $classButtonHtml;
         }
+
+        return $return;
     }
 
     /**
@@ -1351,6 +1355,7 @@ class ResursDefault extends WC_Payment_Gateway
         } elseif (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
             // Rules applicable on RCO only.
             $return['result'] = 'success';
+            $return['total'] = (float)$this->cart->total;
             $return['redirect'] = WC_Payment_Gateway::get_return_url($order);
         }
 
