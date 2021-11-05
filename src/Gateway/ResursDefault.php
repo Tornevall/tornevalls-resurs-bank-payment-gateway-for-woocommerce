@@ -1418,7 +1418,7 @@ class ResursDefault extends WC_Payment_Gateway
                         WooCommerce::setOrderNote(
                             $order,
                             sprintf(
-                                __('Order reference not updated: Event already occurred.', 'trbwc')
+                                __('Order reference not updated: Reference is already updated.', 'trbwc')
                             )
                         );
                     }
