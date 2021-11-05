@@ -1200,7 +1200,7 @@ class WooCommerce
     public static function getReviewFragments($fragments)
     {
         $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
-        $fragments['rbwc_cart_total'] = WooCommerce::getValidCart() ? (float)WC()->cart->total : 0.00;
+        $fragments['rbwc_cart_total'] = (float)(WooCommerce::getValidCart() ? WC()->cart->total : 0.00);
         self::setCustomerCheckoutLocation(true);
 
         return $fragments;
