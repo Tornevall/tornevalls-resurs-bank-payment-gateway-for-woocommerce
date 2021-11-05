@@ -70,6 +70,7 @@ jQuery(document).ready(function ($) {
                 getResursWooCommerceCustomer(),
                 function (response) {
                     if (response['result'] === 'success') {
+                        // backup plan if something goes wrong.
                         if (typeof response['total'] !== 'undefined' && response['total'] === 0 && resursHasPlaceOrder) {
                             $rQuery('#place_order').click();
                         } else {
