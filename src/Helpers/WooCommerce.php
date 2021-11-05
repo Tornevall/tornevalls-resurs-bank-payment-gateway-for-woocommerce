@@ -1200,15 +1200,17 @@ class WooCommerce
     public static function getReviewFragments($fragments)
     {
         $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
+        $fragments['rbwc_cart_total'] = WooCommerce::getValidCart() ? (float)WC()->cart->total : 0.00;
         self::setCustomerCheckoutLocation(true);
 
         return $fragments;
     }
 
     /**
+     * @param $arrayRequest
      * @since 0.0.1.0
      */
-    public static function getOrderReviewSettings()
+    public static function getOrderReviewSettings($arrayRequest)
     {
         // Rounding panic prevention.
         if (isset($_POST['payment_method']) && Data::isResursMethod($_POST['payment_method'])) {

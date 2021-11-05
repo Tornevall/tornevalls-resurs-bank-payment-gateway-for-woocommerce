@@ -77,6 +77,12 @@ function getResursGateway() {
         },
         init: function () {
             var that = this;
+            $rQuery('body').on('updated_checkout', function (e, info) {
+                if (typeof info.fragments !== 'undefined' && typeof info.fragments.rbwc_cart_total) {
+                    resursTemporaryCartTotal = info.fragments.rbwc_cart_total;
+                    resursPlaceOrderControl();
+                }
+            });
             $rQuery(document).ajaxStop(function () {
                 that.register_payment_update();
             });
