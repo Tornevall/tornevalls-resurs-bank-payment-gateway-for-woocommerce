@@ -387,7 +387,6 @@ class WooCommerce
             'orderSigningPayload',
             'orderapi',
             'apiDataId',
-            'bookPaymentStatus',
         ];
         // Not necessary for customer to view.
         $metaPrefix = Data::getPrefix();
@@ -699,6 +698,29 @@ class WooCommerce
     }
 
     /**
+     * @param $orderId
+     * @throws ResursException
+     */
+    private static function setSigningMarked($orderId, $byCallback)
+    {
+        if (Data::getOrderMeta('signingRedirectTime', $orderId) &&
+            Data::getOrderMeta('bookPaymentStatus', $orderId) &&
+            empty(Data::getOrderMeta('signingOk', $orderId))
+        ) {
+            Data::setOrderMeta($orderId, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setOrderMeta(
+                $orderId,
+                'signingConfirmed',
+                sprintf(
+                    'Callback:%s-%s',
+                    $byCallback,
+                    strftime('%Y-%m-%d %H:%M:%S', time())
+                )
+            );
+        }
+    }
+
+    /**
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -761,6 +783,7 @@ class WooCommerce
             if ($getConfirmedSalt && $orderId) {
                 try {
                     self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
+                    self::setSigningMarked($orderId, $callbackType);
                 } catch (Exception $e) {
                     $code = $e->getCode();
                     $responseString = $e->getMessage();
@@ -1081,7 +1104,7 @@ class WooCommerce
                 'Data has synchronized with Resurs Bank billing data.',
                 'resurs-bank-payment-gateway-for-woocommerce'
             );
-            Data::setOrderMeta($order, 'customerSynchronization', time());
+            Data::setOrderMeta($order, 'customerSynchronization', strftime('%Y-%m-%d %H:%M:%S', time()));
             Data::setLogNotice($synchNotice);
             WooCommerce::setOrderNote(
                 $order,

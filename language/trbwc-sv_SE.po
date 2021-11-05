@@ -150,8 +150,8 @@ msgid "Order is frozen and waiting for manual inspection."
 msgstr "Beställningen är frusen och väntar på manuell inspektion."
 
 #: src/Gateway/ResursDefault.php:1851
-msgid "Resurs Bank requires signing on this order. Customer redirected."
-msgstr "Resurs Bank kräver signering av ordern. Kunden omdirigeras."
+msgid "Resurs Bank requires external handling/signing on this order. Customer redirected."
+msgstr "Resurs Bank kräver extrahantering/signering av ordern. Kunden omdirigeras."
 
 #: src/Gateway/ResursDefault.php:1861
 #, php-format
@@ -1449,10 +1449,10 @@ msgstr "Betalad med användarnamn \"%s\" från miljö \"%s\"."
 
 #: templates/adminpage_details.phtml:80
 msgid ""
-"This data is only displayed if the purchase has been made with another "
+"Data will only be displayed if the purchase has been made with another "
 "merchant account than the current in use."
 msgstr ""
-"Dessa data visas bara om köpet har gjorts med ett annat webservicekonto än "
+"Data visas bara om köpet har gjorts med ett annat webservicekonto än "
 "det aktuella som används."
 
 #: templates/adminpage_details.phtml:89

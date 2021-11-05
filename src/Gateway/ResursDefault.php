@@ -1141,17 +1141,23 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function is_available()
     {
-        $return = parent::is_available();
+        global $woocommerce;
+
         // This feature is primarily for the storefront.
-        if (!method_exists($this, 'get_order_total')) {
+        $return = parent::is_available();
+
+        // @link https://wordpress.org/support/topic/php-notice-trying-to-get-property-total-of-non-object-2/
+        if (!method_exists($this, 'get_order_total') || !isset($woocommerce->cart)) {
             return Data::isEnabled();
         }
+
+        $orderTotal = $this->get_order_total();
         $customerType = Data::getCustomerType();
         // If this feature is not missing the method, we now know that there is chance that we're
         // located in a checkout. We will in this moment run through the min-max amount that resides
         // in each payment method that is requested here. If the payment method is not present,
         // this one will be skipped and the rest of the function will fail over to the parent value.
-        if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
+        if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit) && $orderTotal) {
             $minMax = Api::getResurs()->getMinMax(
                 $this->get_order_total(),
                 $this->getRealMin($this->paymentMethodInformation->minLimit),
@@ -1595,9 +1601,7 @@ class ResursDefault extends WC_Payment_Gateway
             if ($this->isSuccess() && $this->setFinalSigning()) {
                 if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
                     // When someone returns with a successful call.
-                    if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
-                        !Data::getOrderMeta('signingOk', $this->wcOrderData)
-                    ) {
+                    if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData)) {
                         $finalRedirectUrl = $this->get_return_url($this->order);
                     }
                 } elseif ($this->getCheckoutType() === self::TYPE_HOSTED ||
@@ -1608,9 +1612,7 @@ class ResursDefault extends WC_Payment_Gateway
             } else {
                 // Landing here is complex, but this part of the method is based on failures.
                 $signing = false;       // Initially, we presume no signing was in action.
-                if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData) &&
-                    !Data::getOrderMeta('signingOk', $this->wcOrderData)
-                ) {
+                if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData)) {
                     // If we however find the order flagged with signing requirement metas, we presume
                     // customer aborted payment or failed the signing.
                     $signing = true;
@@ -1808,19 +1810,19 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getResultByPaymentStatus()
     {
+        $bookPaymentStatus = $this->getBookPaymentStatus();
         Data::canLog(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
                 '%s bookPaymentStatus order %s:%s',
                 __FUNCTION__,
                 $this->order->get_id(),
-                $this->getBookPaymentStatus()
+                $bookPaymentStatus
             )
         );
-        switch ($this->getBookPaymentStatus()) {
+        switch ($bookPaymentStatus) {
             case 'FINALIZED':
                 $this->setSigningMarked();
-                WC()->session->set('order_awaiting_payment', true);
                 $this->updateOrderStatus(
                     self::STATUS_FINALIZED,
                     __('Order is debited and completed.', 'trbwc')
@@ -1844,11 +1846,10 @@ class ResursDefault extends WC_Payment_Gateway
                 $return = $this->getResult('success');
                 break;
             case 'SIGNING':
-                Data::setOrderMeta($this->order, 'signingOk', false);
-                Data::setOrderMeta($this->order, 'signingRedirectTime', time());
+                Data::setOrderMeta($this->order, 'signingRedirectTime', strftime('%Y-%m-%d %H:%M:%S', time()));
                 $this->updateOrderStatus(
                     self::STATUS_SIGNING,
-                    __('Resurs Bank requires signing on this order. Customer redirected.', 'trbwc')
+                    __('Resurs Bank requires external handling/signing on this order. Customer redirected.', 'trbwc')
                 );
                 $return = $this->getResult('success', $this->getBookSigningUrl());
                 break;
@@ -1902,10 +1903,19 @@ class ResursDefault extends WC_Payment_Gateway
     private function setSigningMarked()
     {
         $return = false;
-        if (Data::getOrderMeta($this->order, 'signingRedirectTime') &&
-            Data::getOrderMeta($this->order, 'bookPaymentStatus')
+        if (Data::getOrderMeta('signingRedirectTime', $this->order) &&
+            Data::getOrderMeta('bookPaymentStatus', $this->order) &&
+            empty(Data::getOrderMeta('signingOk', $this->order))
         ) {
-            $return = Data::setOrderMeta($this->order, 'signingOk', true);
+            $return = Data::setOrderMeta($this->order, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setOrderMeta(
+                $this->order,
+                'signingConfirmed',
+                sprintf(
+                    'CustomerLanding:%s',
+                    strftime('%Y-%m-%d %H:%M:%S', time())
+                )
+            );
         }
         return $return;
     }
