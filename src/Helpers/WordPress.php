@@ -64,7 +64,7 @@ class WordPress
             'get_internal_resynch',
             'set_new_annuity',
             'get_new_annuity_calculation',
-            'get_cost_of_purchase'
+            'get_cost_of_purchase',
         ];
 
         foreach ($actionList as $action) {
@@ -194,10 +194,10 @@ class WordPress
             'ResursBank\Helpers\WooCommerce::setAddToCart'
         );
         // v3core: Customer is not in checkout. This is incompatible with RCO.
-        /*        add_action(
-                    'woocommerce_cart_updated',
-                    'ResursBank\Helpers\WooCommerce::setUpdatedCart'
-                );*/
+        add_action(
+            'woocommerce_cart_updated',
+            'ResursBank\Helpers\WooCommerce::setUpdatedCart'
+        );
         // v3core: Customer is not in checkout.
         add_action(
             'woocommerce_update_order_review_fragments',

@@ -10,6 +10,7 @@ use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Service\OrderHandler;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -17,6 +18,7 @@ use TorneLIB\Exception\ExceptionHandler;
 use WC_Order;
 use WC_Session;
 use function in_array;
+use function is_string;
 
 /**
  * Class WooCommerce WooCommerce related actions.
@@ -681,6 +683,15 @@ class WooCommerce
      */
     public static function setSessionValue($key, $value)
     {
+        Data::canLog(
+            Data::CAN_LOG_JUNK,
+            sprintf(
+                '%s, %s=%s',
+                __FUNCTION__,
+                $key,
+                is_string($value) ? $value : print_r($value, true)
+            )
+        );
         if (self::getSession()) {
             WC()->session->set($key, $value);
         } else {
@@ -1148,6 +1159,25 @@ class WooCommerce
     public static function setUpdatedCart()
     {
         $isCheckout = is_checkout();
+
+        try {
+            if (WooCommerce::getValidCart()) {
+                $currentTotal = WC()->cart->total;
+                if ($currentTotal !== WooCommerce::getSessionValue('customerCartTotal')) {
+                    $orderHandler = new OrderHandler();
+                    $orderHandler->setCart(WC()->cart);
+                    $orderHandler->setPreparedOrderLines();
+                    self::setSessionValue('customerCartTotal', WC()->cart->total);
+                    Api::getResurs()->updateCheckoutOrderLines(
+                        WooCommerce::getSessionValue('rco_order_id'),
+                        $orderHandler->getOrderLines()
+                    );
+                }
+            }
+        } catch (Exception $e) {
+
+        }
+
         self::setCustomerCheckoutLocation($isCheckout);
     }
 

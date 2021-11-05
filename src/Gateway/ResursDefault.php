@@ -12,6 +12,7 @@ use ResursBank\Helpers\WordPress;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Service\OrderHandler;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -19,7 +20,6 @@ use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\Domain;
 use TorneLIB\Utils\Generic;
 use WC_Cart;
-use WC_Coupon;
 use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
@@ -122,7 +122,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @var Api $API
      * @since 0.0.1.0
      */
-    private $API;
+    protected $API;
     /**
      * @var WC_Cart $cart
      * @since 0.0.1.0
@@ -515,6 +515,69 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Find out if payment id is too old to be kept in session.
+     * @param bool $returnAgeValue
+     * @return bool|int
+     * @since 0.0.1.0
+     */
+    private function getRcoPaymentIdTooOld($returnAgeValue = false)
+    {
+        $rcoOrderIdAge = (int)WooCommerce::getSessionValue('rco_order_id_age');
+        $calculateAge = time() - $rcoOrderIdAge;
+        $optionMaxAge = (int)Data::getResursOption('rco_paymentid_age');
+        $rcoOrderAgeLimit = (int)WordPress::applyFilters(
+            'getRcoOrderAgeLimit',
+            $optionMaxAge > 0 ? $optionMaxAge : 3600
+        );
+
+        return !$returnAgeValue ? ($calculateAge > $rcoOrderAgeLimit) : $calculateAge;
+    }
+
+    /**
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function getProperPaymentId()
+    {
+        $paymentId = $this->API->getConnection()->getPreferredPaymentId();
+        $lastRcoOrderId = WooCommerce::getSessionValue('rco_order_id');
+
+        if ($this->getRcoPaymentIdTooOld()) {
+            $lastRcoOrderId = null;
+            WooCommerce::setSessionValue('rco_order_id', $lastRcoOrderId);
+        }
+
+        // Store the payment id for later use.
+        if ($lastRcoOrderId !== $paymentId && !empty($lastRcoOrderId)) {
+            $paymentId = $lastRcoOrderId;
+            $this->API->getConnection()->setPreferredId($paymentId);
+
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __('Reusing preferred payment id "%s" for customer, age %d seconds old.', 'trbwc'),
+                    $lastRcoOrderId,
+                    $this->getRcoPaymentIdTooOld(true)
+                )
+            );
+        } else {
+            WooCommerce::setSessionValue('rco_order_id_age', time());
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __('Preferred payment id set to "%s" for customer.', 'trbwc'),
+                    $paymentId
+                )
+            );
+        }
+
+        WooCommerce::setSessionValue('rco_order_id', $paymentId);
+
+        return $paymentId;
+    }
+
+    /**
      * Standard Resurs Checkout. Not interceptor ready.
      * @return mixed
      * @throws Exception
@@ -531,17 +594,14 @@ class ResursDefault extends WC_Payment_Gateway
         if (WooCommerce::getValidCart() && WooCommerce::getSessionValue(WooCommerce::$inCheckoutKey)) {
             $this->setOrderData();
             $this->setCreatePaymentNotice(__FUNCTION__);
-            $paymentId = $this->API->getConnection()->getPreferredPaymentId();
 
+            $paymentId = $this->getProperPaymentId();
             $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
             $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
 
             // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.
             WooCommerce::setSessionValue('rco_legacy', $this->rcoFrameData->legacy);
-
-            // Store the payment id for later use.
-            WooCommerce::setSessionValue('rco_order_id', $paymentId);
 
             $urlList = (new Domain())->getUrlsFromHtml($this->rcoFrameData->script);
             if (isset($this->rcoFrameData->script) && !empty($this->rcoFrameData->script) && count($urlList)) {
@@ -582,9 +642,6 @@ class ResursDefault extends WC_Payment_Gateway
             ->setCustomerId()
             ->setStoreId()
             ->setOrderLines()
-            ->setCoupon()
-            ->setShipping()
-            ->setFee()
             ->setSigning();
         Data::setDeveloperLog(__FUNCTION__, 'Done.');
 
@@ -812,54 +869,13 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @return $this
-     * @since 0.0.1.0
-     * @todo Complete this.
-     */
-    private function setFee()
-    {
-        return $this;
-    }
-
-    /**
-     * @return $this
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setShipping()
-    {
-        // Add when not free.
-        if ($this->cart->get_shipping_total() > 0) {
-            Data::setDeveloperLog(
-                __FUNCTION__,
-                sprintf('Apply shipping fee %s', $this->cart->get_shipping_total())
-            );
-
-            // Rounding is ironically used with wc settings.
-            $this->API->getConnection()->addOrderLine(
-                WordPress::applyFilters('getShippingName', 'shipping'),
-                WordPress::applyFilters('getShippingDescription', __('Shipping', 'rbwc')),
-                $this->cart->get_shipping_total(),
-                (float)round(
-                    $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
-                    wc_get_price_decimals()
-                ) * 100,
-                $this->getFromProduct('unit', null),
-                'SHIPPING_FEE'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
      * @param string $getValueType
      * @param WC_Product $productObject
      * @return string
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function getFromProduct($getValueType, $productObject)
+    protected function getFromProduct($getValueType, $productObject)
     {
         $return = '';
 
@@ -934,61 +950,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @return $this
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setCoupon()
-    {
-        if (wc_coupons_enabled()) {
-            $coupons = $this->cart->get_coupons();
-
-            /**
-             * @var string $code
-             * @var WC_Coupon $coupon
-             */
-            foreach ($coupons as $code => $coupon) {
-                $couponDescription = $coupon->get_description();
-                if (empty($couponDescription)) {
-                    $couponDescription = $coupon->get_code();
-                }
-
-                $discardCouponVat = (bool)Data::getResursOption('discard_coupon_vat');
-                $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
-                $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
-                $vatPct = (($incTax - $exTax) / $exTax) * 100;
-
-                Data::setDeveloperLog(
-                    __FUNCTION__,
-                    sprintf(
-                        'Apply coupon %s with VAT %d. Setting "discard_coupon_vat" is %s.',
-                        $coupon->get_id(),
-                        $vatPct,
-                        $discardCouponVat ? 'true' : 'false'
-                    )
-                );
-
-                $this->API->getConnection()->addOrderLine(
-                    $coupon->get_id(),
-                    WordPress::applyFilters(
-                        'getCouponDescription',
-                        $couponDescription
-                    ),
-                    0 - $this->cart->get_coupon_discount_amount(
-                        $coupon->get_code(),
-                        WordPress::applyFilters('couponsExTax', !$discardCouponVat, $coupon)
-                    ),
-                    WordPress::applyFilters('getCouponVatPct', !$discardCouponVat ? $vatPct : 0),
-                    $this->getFromProduct('unit', null),
-                    'DISCOUNT'
-                );
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -997,25 +958,12 @@ class ResursDefault extends WC_Payment_Gateway
         if (WooCommerce::getValidCart()) {
             // This is the first point we store the cart total for the current session.
             WooCommerce::setSessionValue('customerCartTotal', WC()->cart->total);
-            $currentCart = WooCommerce::getValidCart(true);
-            foreach ($currentCart as $item) {
-                /**
-                 * Data object is of type WC_Product_Simple actually.
-                 * @var WC_Product $productData
-                 */
-                $productData = $item['data'];
-
-                if ($productData !== null) {
-                    Data::setDeveloperLog(
-                        __FUNCTION__,
-                        sprintf(
-                            'Add orderline %s.',
-                            $productData->get_id()
-                        )
-                    );
-                    $this->setOrderRow('ORDER_LINE', $productData, $item);
-                }
-            }
+            $orderHandler = new OrderHandler();
+            $orderHandler->setCart($this->cart);
+            $orderHandler->setApi($this->API);
+            $orderHandler->setPreparedOrderLines();
+            $this->API = $orderHandler->getApi();
+            //$orderLines = $orderHandler->getOrderLines();
         } else {
             Data::setLogError(sprintf(
                 __('%s: Could not create order from an empty cart.', 'trbwc')
@@ -1036,7 +984,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setOrderRow($rowType, $productData, $item)
+    public function setOrderRow($rowType, $productData, $item)
     {
         $this->API->getConnection()->addOrderLine(
             $this->getFromProduct('artNo', $productData),
@@ -1310,7 +1258,7 @@ class ResursDefault extends WC_Payment_Gateway
 
             $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
                 'method' => $this->paymentMethodInformation,
-                'total' => isset($this->cart->total) ? $this->cart->total : 0
+                'total' => isset($this->cart->total) ? $this->cart->total : 0,
             ]);
 
             echo $fieldHtml;
@@ -1440,14 +1388,32 @@ class ResursDefault extends WC_Payment_Gateway
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
                     WooCommerce::applyMock('updatePaymentReferenceFailure');
-                    Api::getResurs()->updatePaymentReference($idBeforeChange, $this->getPaymentId());
-                    Data::setOrderMeta($order, 'updatePaymentReference', 'OK');
-                    WooCommerce::setOrderNote(
-                        $order,
-                        sprintf(
-                            __('Order reference updated (updatePaymentReference) with no errors.', 'trbwc')
-                        )
-                    );
+                    $newPaymentId = $this->getPaymentId();
+                    if ($idBeforeChange !== $newPaymentId) {
+                        Api::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
+                        Data::setOrderMeta(
+                            $order,
+                            'initialUpdatePaymentReference',
+                            sprintf('%s:%s', $idBeforeChange, $newPaymentId)
+                        );
+                        Data::setOrderMeta($order, 'updatePaymentReference', strftime('%Y-%m-%d %H:%M:%S', time()));
+                        WooCommerce::setOrderNote(
+                            $order,
+                            sprintf(
+                                __('Order reference updated (updatePaymentReference) with no errors.', 'trbwc')
+                            )
+                        );
+                        // If order id is updated properly, our session based order id should also be updated in case
+                        // of reloads.
+                        WooCommerce::setSessionValue('rco_order_id', $newPaymentId);
+                    } else {
+                        WooCommerce::setOrderNote(
+                            $order,
+                            sprintf(
+                                __('Order reference not updated: Event already occurred.', 'trbwc')
+                            )
+                        );
+                    }
                 } catch (Exception $e) {
                     Data::setLogNotice(
                         sprintf(
@@ -1603,6 +1569,11 @@ class ResursDefault extends WC_Payment_Gateway
             $this->wcOrderData = Data::getOrderInfo($this->order);
 
             if ($this->isSuccess() && $this->setFinalSigning()) {
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    __('Session value rco_order_id has been reset after successful return to landing page.', 'trbwc')
+                );
+                WooCommerce::setSessionValue('rco_order_id', null);
                 if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
                     // When someone returns with a successful call.
                     if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData)) {
