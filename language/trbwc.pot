@@ -4,7 +4,7 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2021-11-06 01:59+0100\n"
+"POT-Creation-Date: 2021-11-06 02:15+0100\n"
 "PO-Revision-Date: 2021-11-06 00:23+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
@@ -1228,7 +1228,7 @@ msgid "Shipping"
 msgstr ""
 
 #: templates/adminpage_billing.phtml:5
-msgid "Resurs Bank Billing Address"
+msgid "Billing Address"
 msgstr ""
 
 #: templates/adminpage_callbacks.phtml:4
@@ -1343,7 +1343,7 @@ msgid "Payment Fee"
 msgstr ""
 
 #: templates/adminpage_shipping.phtml:5
-msgid "Resurs Bank Shippingaddress"
+msgid "Shipping Address"
 msgstr ""
 
 #. Plugin Name of the plugin/theme

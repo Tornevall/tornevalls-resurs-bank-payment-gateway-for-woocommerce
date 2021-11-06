@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: trwbc\n"
-"POT-Creation-Date: 2021-11-06 01:59+0100\n"
-"PO-Revision-Date: 2021-11-06 01:01\n"
+"POT-Creation-Date: 2021-11-06 02:15+0100\n"
+"PO-Revision-Date: 2021-11-06 02:29+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Danish\n"
 "MIME-Version: 1.0\n"
@@ -15,69 +15,69 @@ msgstr ""
 "X-Poedit-WPHeader: init.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
-"X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: *.min.js\n"
-"X-Poedit-SearchPathExcluded-1: vendor\n"
 "X-Crowdin-Project: trwbc\n"
 "X-Crowdin-Project-ID: 483875\n"
 "X-Crowdin-Language: da\n"
 "X-Crowdin-File: trbwc.po\n"
 "X-Crowdin-File-ID: 31\n"
 "Language: da_DK\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.min.js\n"
+"X-Poedit-SearchPathExcluded-1: vendor\n"
 
 #: src/Gateway/AdminPage.php:123
 msgid "Plugin and account settings"
-msgstr ""
+msgstr "Indstillinger for plugin og konto"
 
 #: src/Gateway/AdminPage.php:157
 #, php-format
 msgid "Extended configuration view for Resurs Bank: %s"
-msgstr ""
+msgstr "Udvidet konfigurationsvisning for Resurs Bank: %s"
 
 #: src/Gateway/ResursDefault.php:169
 msgid "Resurs Bank"
-msgstr ""
+msgstr "Resurs Bank"
 
 #: src/Gateway/ResursDefault.php:170
 msgid "Resurs Bank Payment Gateway with dynamic payment methods."
-msgstr ""
+msgstr "Resurs Bank Payment Gateway med dynamiske betalingsmetoder."
 
 #: src/Gateway/ResursDefault.php:171
 msgid "Resurs Bank AB"
-msgstr ""
+msgstr "Resurs Bank AB"
 
 #: src/Gateway/ResursDefault.php:560
 #, php-format
 msgid "Reusing preferred payment id \"%s\" for customer, age %d seconds old."
-msgstr ""
+msgstr "Genbrug foretrukket betalings-id \"%s\" for kunde, alder %d sekunder gamle."
 
 #: src/Gateway/ResursDefault.php:570
 #, php-format
 msgid "Preferred payment id set to \"%s\" for customer."
-msgstr ""
+msgstr "Foretrukken betalings-id sat til \"%s\" for kunden."
 
 #: src/Gateway/ResursDefault.php:783
 #, php-format
 msgid "Base URL for signing: %s"
-msgstr ""
+msgstr "Basis-URL-adresse til signering: %s"
 
 #: src/Gateway/ResursDefault.php:790
 #, php-format
 msgid "Signing parameters for %s: %s"
-msgstr ""
+msgstr "Signeringsparametre for %s: %s"
 
 #: src/Gateway/ResursDefault.php:890
 msgid "Article description is missing."
-msgstr ""
+msgstr "Artikelbeskrivelsen mangler."
 
 #: src/Gateway/ResursDefault.php:971 src/Helpers/WooCommerce.php:1183
 #, php-format
 msgid "%s: Could not create order from an empty cart."
-msgstr ""
+msgstr "%s: Ordren kunne ikke oprettes fra en tom indkøbsvogn."
 
 #: src/Gateway/ResursDefault.php:976
 msgid "Cart is empty!"
-msgstr ""
+msgstr "Vognen er tom!"
 
 #: src/Gateway/ResursDefault.php:1325
 #, php-format
@@ -109,12 +109,12 @@ msgstr ""
 
 #: src/Gateway/ResursDefault.php:1515
 msgid "Chosen checkout type is currently unsupported"
-msgstr ""
+msgstr "Den valgte checkout type understøttes ikke i øjeblikket"
 
 #: src/Gateway/ResursDefault.php:1524
 #, php-format
 msgid "%s: Order %s returned \"%s\" to WooCommerce."
-msgstr ""
+msgstr "%s: Ordre %s returnerede \"%s\" til WooCommerce."
 
 #: src/Gateway/ResursDefault.php:1533
 #, php-format
@@ -132,7 +132,7 @@ msgstr ""
 
 #: src/Gateway/ResursDefault.php:1575
 msgid "wc_order_id + preferred_id not present"
-msgstr ""
+msgstr "wc_order_id + preferred_id findes ikke"
 
 #: src/Gateway/ResursDefault.php:1585
 msgid "Session value rco_order_id has been reset after successful return to landing page."
@@ -141,7 +141,7 @@ msgstr ""
 #: src/Gateway/ResursDefault.php:1631
 #, php-format
 msgid "Finishing. Ready to redirect customer. Using URL %s"
-msgstr ""
+msgstr "Afslutter. Klar til at omdirigere kunden. Brug af URL %s"
 
 #: src/Gateway/ResursDefault.php:1783
 #, php-format
@@ -150,11 +150,11 @@ msgstr ""
 
 #: src/Gateway/ResursDefault.php:1818
 msgid "Order is debited and completed."
-msgstr ""
+msgstr "Ordre er debiteret og afsluttet."
 
 #: src/Gateway/ResursDefault.php:1826
 msgid "Order is booked and ready to handle."
-msgstr ""
+msgstr "Bestillingen er booket og klar til håndtering."
 
 #: src/Gateway/ResursDefault.php:1834
 msgid "Order is frozen and waiting for manual inspection."
@@ -199,15 +199,15 @@ msgstr ""
 #: src/Gateway/ResursDefault.php:2073 src/Module/FormFields.php:560
 #: src/Module/FormFields.php:572 src/Module/FormFields.php:584
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: src/Gateway/ResursDefault.php:2073
 msgid "No"
-msgstr ""
+msgstr "Nej"
 
 #: src/Helpers/WooCommerce.php:191
 msgid "Settings"
-msgstr ""
+msgstr "Indstillinger"
 
 #: src/Helpers/WooCommerce.php:301
 msgid "This order has not been created by this plugin and the other plugin is currently unavailable."
@@ -226,7 +226,7 @@ msgstr ""
 #: src/Helpers/WooCommerce.php:671
 #, php-format
 msgid "Session value %s set to %s."
-msgstr ""
+msgstr "Sessionsværdien %s er angivet til %s."
 
 #: src/Helpers/WooCommerce.php:771
 #, php-format
@@ -323,19 +323,19 @@ msgstr ""
 
 #: src/Helpers/WordPress.php:699 templates/adminpage_annuity_selector.phtml:14
 msgid "Enable"
-msgstr ""
+msgstr "Aktiver"
 
 #: src/Helpers/WordPress.php:700 templates/adminpage_annuity_selector.phtml:16
 msgid "Disable"
-msgstr ""
+msgstr "Deaktiver"
 
 #: src/Helpers/WordPress.php:746
 msgid "Successful."
-msgstr ""
+msgstr "Gennemført."
 
 #: src/Helpers/WordPress.php:747
 msgid "Failed."
-msgstr ""
+msgstr "Mislykkedes."
 
 #: src/Helpers/WordPress.php:748
 msgid "Please wait while reloading..."
@@ -1024,12 +1024,12 @@ msgid "Shipping"
 msgstr ""
 
 #: templates/adminpage_billing.phtml:5
-msgid "Resurs Bank Billing Address"
+msgid "Billing Address"
 msgstr ""
 
 #: templates/adminpage_callbacks.phtml:4
 msgid "Available callbacks"
-msgstr ""
+msgstr "Tilgængelige callbacks"
 
 #: templates/adminpage_callbacks.phtml:10
 msgid "Callback"
@@ -1041,7 +1041,7 @@ msgstr "URL for callbacks"
 
 #: templates/adminpage_callbacks.phtml:15
 msgid "Remove"
-msgstr ""
+msgstr "Fjern"
 
 #: templates/adminpage_details.phtml:15
 msgid "Order information and metadata for Resurs Bank"
@@ -1073,8 +1073,8 @@ msgid "No."
 msgstr "Nej."
 
 #: templates/adminpage_general_decimals.phtml:2
-msgid "Number of decimals - Heads up!"
-msgstr "Antal decimaler - Pas på!"
+msgid "Number of decimals - Beware!"
+msgstr ""
 
 #: templates/adminpage_general_decimals.phtml:7
 #, php-format
@@ -1091,23 +1091,23 @@ msgstr ""
 
 #: templates/adminpage_paymentmethods.phtml:22
 msgid "Method ID"
-msgstr ""
+msgstr "Metode-id"
 
 #: templates/adminpage_paymentmethods.phtml:23
 msgid "Description"
-msgstr ""
+msgstr "Beskrivelse"
 
 #: templates/adminpage_paymentmethods.phtml:24
 msgid "Amount limits"
-msgstr ""
+msgstr "Beløbsgrænser"
 
 #: templates/adminpage_paymentmethods.phtml:25
 msgid "Method type"
-msgstr ""
+msgstr "Metodetype"
 
 #: templates/adminpage_paymentmethods.phtml:26
 msgid "Customer types"
-msgstr ""
+msgstr "Kundetyper"
 
 #: templates/adminpage_paymentmethods.phtml:27
 msgid "Part payment options"
@@ -1115,24 +1115,24 @@ msgstr ""
 
 #: templates/adminpage_paymentmethods.phtml:28
 msgid "Payment Fee"
-msgstr ""
+msgstr "Betalingsgebyr"
 
 #: templates/adminpage_shipping.phtml:5
-msgid "Resurs Bank Shippingaddress"
+msgid "Shipping Address"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
 msgid "Tornevall Networks Resurs Bank payment gateway for WooCommerce"
-msgstr ""
+msgstr "Tornevall Networks Resurs Bank betaling gateway til WooCommerce"
 
 #. Plugin URI of the plugin/theme
 msgid "https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce"
-msgstr ""
+msgstr "https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce"
 
 #. Description of the plugin/theme
 msgid "Connect Resurs Bank as WooCommerce payment gateway."
-msgstr ""
+msgstr "Connect Resurs Bank som WooCommerce betalingsgateway."
 
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
-msgstr ""
+msgstr "Tomas Tornevall"
