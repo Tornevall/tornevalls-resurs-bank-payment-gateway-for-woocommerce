@@ -1,17 +1,16 @@
 msgid ""
 msgstr ""
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: trwbc\n"
-"POT-Creation-Date: 2021-11-05 23:13+0100\n"
-"PO-Revision-Date: 2021-11-05 23:54+0100\n"
+"POT-Creation-Date: 2021-11-06 00:58+0100\n"
+"PO-Revision-Date: 2021-11-06 01:00+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Swedish\n"
-"Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.0\n"
 "X-Poedit-Basepath: ..\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Flags-xgettext: --add-comments=translators:\n"
 "X-Poedit-WPHeader: init.php\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -21,6 +20,7 @@ msgstr ""
 "X-Crowdin-Language: sv-SE\n"
 "X-Crowdin-File: trbwc.po\n"
 "X-Crowdin-File-ID: 31\n"
+"Language: sv_SE\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
@@ -58,150 +58,150 @@ msgstr "Föredraget betalningsid s på \"%s\" för kunden."
 
 #: src/Gateway/ResursDefault.php:783
 #, php-format
-msgid "ECom setSigning: %s"
-msgstr "ECom setSigning: %s"
+msgid "Base URL for signing: %s"
+msgstr "Bas-URL för signering: %s"
 
 #: src/Gateway/ResursDefault.php:790
 #, php-format
-msgid "ECom setSigning parameters: %s"
-msgstr "ECom setSigning parametrar: %s"
+msgid "Signing parameters for %s: %s"
+msgstr "Signeringsparametrar för %s: %s"
 
-#: src/Gateway/ResursDefault.php:889
+#: src/Gateway/ResursDefault.php:890
 msgid "Article description is missing."
 msgstr "Artikelbeskrivning saknas."
 
-#: src/Gateway/ResursDefault.php:970 src/Helpers/WooCommerce.php:1183
+#: src/Gateway/ResursDefault.php:971 src/Helpers/WooCommerce.php:1183
 #, php-format
 msgid "%s: Could not create order from an empty cart."
 msgstr "%s: Det gick inte att skapa order från en tom kundvagn."
 
-#: src/Gateway/ResursDefault.php:975
+#: src/Gateway/ResursDefault.php:976
 msgid "Cart is empty!"
 msgstr "Varukorgen är tom!"
 
-#: src/Gateway/ResursDefault.php:1324
+#: src/Gateway/ResursDefault.php:1325
 #, php-format
 msgid "Order process initialized by customer with checkout %s."
 msgstr "Orderprocessen initieras av kunden med %s."
 
-#: src/Gateway/ResursDefault.php:1411
+#: src/Gateway/ResursDefault.php:1412
 msgid "Order reference updated (updatePaymentReference) with no errors."
 msgstr "Orderreferensen har uppdaterats (updatePaymentReference) utan fel."
 
-#: src/Gateway/ResursDefault.php:1421
+#: src/Gateway/ResursDefault.php:1422
 msgid "Order reference not updated: Reference is already updated."
 msgstr "Orderreferensen har inte uppdaterats: Referensen har redan uppdaterats."
 
-#: src/Gateway/ResursDefault.php:1436
+#: src/Gateway/ResursDefault.php:1437
 #, php-format
 msgid "updatePaymentReference failure (code %s): %s."
 msgstr "updatePaymentReference-fel (kod %s): %s."
 
-#: src/Gateway/ResursDefault.php:1486
+#: src/Gateway/ResursDefault.php:1487
 #, php-format
 msgid "Resurs Bank processing order (%s)."
 msgstr "Resurs Bank behandlar order (%s)."
 
-#: src/Gateway/ResursDefault.php:1496
+#: src/Gateway/ResursDefault.php:1497
 #, php-format
 msgid "%s: Initialize Resurs Bank process, order %s (%s) via %s."
 msgstr "%s: Initierar Resurs Bank-procedur, order %s (%s) via %s."
 
-#: src/Gateway/ResursDefault.php:1514
+#: src/Gateway/ResursDefault.php:1515
 msgid "Chosen checkout type is currently unsupported"
 msgstr "Vald utcheckningstyp stöds för närvarande inte"
 
-#: src/Gateway/ResursDefault.php:1523
+#: src/Gateway/ResursDefault.php:1524
 #, php-format
 msgid "%s: Order %s returned \"%s\" to WooCommerce."
 msgstr "%s: Order %s returnerades %s till WooCommerce."
 
-#: src/Gateway/ResursDefault.php:1532
+#: src/Gateway/ResursDefault.php:1533
 #, php-format
 msgid "$return is not an object as expected in function %s (Checkout request type is %s)."
 msgstr "$return är inte ett objekt som förväntat i funktion %s (Checkout-typ är %s)."
 
-#: src/Gateway/ResursDefault.php:1571
+#: src/Gateway/ResursDefault.php:1572
 #, php-format
 msgid "API data request: %s."
 msgstr "API-databegäran: %s."
 
-#: src/Gateway/ResursDefault.php:1573
+#: src/Gateway/ResursDefault.php:1574
 msgid "Customer returned from Resurs Bank. WooCommerce order validation in progress."
 msgstr "Kund återvände från Resurs Bank. Ordervalidering från WooCommerce pågår."
 
-#: src/Gateway/ResursDefault.php:1574
+#: src/Gateway/ResursDefault.php:1575
 msgid "wc_order_id + preferred_id not present"
 msgstr "wc_order_id + preferred_id saknas"
 
-#: src/Gateway/ResursDefault.php:1584
+#: src/Gateway/ResursDefault.php:1585
 msgid "Session value rco_order_id has been reset after successful return to landing page."
 msgstr "Sessionsvärdet rco_order_id har återställts efter lyckad återgång till landningssidan."
 
-#: src/Gateway/ResursDefault.php:1630
+#: src/Gateway/ResursDefault.php:1631
 #, php-format
 msgid "Finishing. Ready to redirect customer. Using URL %s"
 msgstr "Avslutar. Redo att omdirigera kunden. Använder URL %s"
 
-#: src/Gateway/ResursDefault.php:1782
+#: src/Gateway/ResursDefault.php:1783
 #, php-format
 msgid "Customer returned from Resurs Bank to complete order %s."
 msgstr "Kunden återvände från Resurs Bank för att slutföra order %s."
 
-#: src/Gateway/ResursDefault.php:1817
+#: src/Gateway/ResursDefault.php:1818
 msgid "Order is debited and completed."
 msgstr "Beställningen är debiterad och slutförd."
 
-#: src/Gateway/ResursDefault.php:1825
+#: src/Gateway/ResursDefault.php:1826
 msgid "Order is booked and ready to handle."
 msgstr "Beställningen är bokad och klar att hantera."
 
-#: src/Gateway/ResursDefault.php:1833
+#: src/Gateway/ResursDefault.php:1834
 msgid "Order is frozen and waiting for manual inspection."
 msgstr "Beställningen är frusen och väntar på manuell inspektion."
 
-#: src/Gateway/ResursDefault.php:1841
+#: src/Gateway/ResursDefault.php:1842
 msgid "Resurs Bank requires external handling/signing on this order. Customer redirected."
 msgstr "Resurs Bank kräver extrahantering/signering av ordern. Kunden omdirigeras."
 
-#: src/Gateway/ResursDefault.php:1851
+#: src/Gateway/ResursDefault.php:1852
 #, php-format
 msgid "The booking failed with status %s. Customer notified in checkout."
 msgstr "Bokningen misslyckades med status %s. Kunden meddelas i kassan."
 
-#: src/Gateway/ResursDefault.php:1857
+#: src/Gateway/ResursDefault.php:1858
 msgid "The payment can not complete. Contact customer services for more information."
 msgstr "Ordern kan inte slutföras. Kontakta kundservice för mer information."
 
-#: src/Gateway/ResursDefault.php:2001
+#: src/Gateway/ResursDefault.php:2002
 #, php-format
 msgid "Booking this signed payment has been running multiple times but failed with exception %s."
 msgstr "Bokningen av den här signerade betalningen har pågått flera gånger men misslyckades med fel %s."
 
-#: src/Gateway/ResursDefault.php:2011
+#: src/Gateway/ResursDefault.php:2012
 #, php-format
 msgid "Tried to book signed payment but skipped: This has happened before and an exception with code %d occurred that time."
 msgstr "Försökte boka signerad betalning men hoppades över: Detta har gjorts tidigare och ett fel med kod %d inträffade den gången."
 
-#: src/Gateway/ResursDefault.php:2048
+#: src/Gateway/ResursDefault.php:2049
 msgid "Could not complete your order. Please contact support for more information."
 msgstr "Det gick inte att slutföra din beställning. Vänligen kontakta supporten för mer information."
 
-#: src/Gateway/ResursDefault.php:2054
+#: src/Gateway/ResursDefault.php:2055
 msgid "Could not complete order due to signing problems. Did you cancel your order?"
 msgstr "Det gick inte att slutföra ordern på grund av signeringsproblem. Har du avbrutit din köp?"
 
-#: src/Gateway/ResursDefault.php:2070
+#: src/Gateway/ResursDefault.php:2071
 #, php-format
 msgid "Customer returned via urlType \"%s\" - failed or cancelled payment (signing required: %s)."
 msgstr "Kunden returnerades via urltyp \"%s\" - misslyckades eller avbröt betalningen (signering krävdes: %s)."
 
-#: src/Gateway/ResursDefault.php:2072 src/Module/FormFields.php:560
+#: src/Gateway/ResursDefault.php:2073 src/Module/FormFields.php:560
 #: src/Module/FormFields.php:572 src/Module/FormFields.php:584
 msgid "Yes"
 msgstr "Ja"
 
-#: src/Gateway/ResursDefault.php:2072
+#: src/Gateway/ResursDefault.php:2073
 msgid "No"
 msgstr "Nej"
 
@@ -1136,124 +1136,3 @@ msgstr "Anslut Resurs Bank som WooCommerce betalningsgateway."
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
 msgstr "Tomas Tornevall"
-
-#~ msgid "Read more"
-#~ msgstr "Läs mer"
-
-#~ msgid "Allow mocking during tests."
-#~ msgstr "Tillåt påhittad data under tester."
-
-#~ msgid "The page security (nonce) has expired or is wrong. You may want to reload your browser."
-#~ msgstr "Sidsäkerheten (nonce) har upphört att gälla eller är felaktig. Du kanske vill ladda om webbläsaren."
-
-#~ msgid "Test/Staging"
-#~ msgstr "Test/Staging"
-
-#~ msgid "Resurs Bank API username"
-#~ msgstr "Användarnamn för Resurs Bank API"
-
-#~ msgid "Available payment methods"
-#~ msgstr "Tillgängliga betalningsmetoder"
-
-#, fuzzy
-#~| msgid "Part payment settings"
-#~ msgid "Part payment"
-#~ msgstr "Delbetalningsinställningar"
-
-#~ msgid "Enable/Disable"
-#~ msgstr "Aktivera/Inaktivera"
-
-#~ msgid "Activate developer mode"
-#~ msgstr "Aktivera utvecklar-sektionen"
-
-#~ msgid "HostedFlow returned \"%s\" to WooCommerce. Redirect URL is logged as metadata."
-#~ msgstr "HostedFlow returnerade \"%s\" till WooCommerce. Omdirigeringslänk loggas som metadata."
-
-#~ msgid "Not validated"
-#~ msgstr "Ej validerad"
-
-#~ msgid "Web services password, received from Resurs Bank."
-#~ msgstr "Webservicens lösenord, vilket du erhållit från Resurs Bank."
-
-#~ msgid "Coupon"
-#~ msgstr "Kupong"
-
-#~ msgid "Customers and orders"
-#~ msgstr "Kunder och beställningar"
-
-#~ msgid "Coupons are added excluding tax"
-#~ msgstr "Kuponger läggs till exklusive moms"
-
-#~ msgid "When order rows are added to Resurs Bank API, discount amounts are added excluding tax. If you want to include the tax in the added discount amount, you can enable this feature here. Best practice is to keep it disabled."
-#~ msgstr "När orderrader läggs till i Resurs Bank API läggs rabattbelopp till exklusive moms. Om du vill inkludera momsen i det tillagda rabattbeloppet kan du aktivera den här funktionen här. Bästa praxis är att hålla den inaktiverad."
-
-#, fuzzy
-#~| msgid "Returning customer. Validating order with WooCommerce."
-#~ msgid "Returning customer - Thank you request. Validating order with WooCommerce."
-#~ msgstr "Återvändande kund. Validerar order med WooCommerce."
-
-#~ msgid "Merchant based details at order events"
-#~ msgstr "Detaljer vid orderhändelser"
-
-#~ msgid "Order %s handled by %s."
-#~ msgstr "Order %s hanteras av %s."
-
-#~ msgid "Order %s handled with result %s."
-#~ msgstr "Ordern %s hanteras med resultatet %s."
-
-#~ msgid "Activate spam logging"
-#~ msgstr "Aktivera spamloggning"
-
-#~ msgid "WooCommerce are able to show prices rounded with 0 decimals. It is however widely known that payment gateways can not. By dropping the decimals entirely will somehow gurantee that your tax calculations with Resurs Bank will panic. To allow this kind of roundings you actively have to disable this protective feature."
-#~ msgstr "WooCommerce kan avrunda priser med 0 decimaler. Det är dock vida känt att betalningsmetoder inte klarar det."
-
-#~ msgid "Prefer to not show logotypes at payment methods in checkout"
-#~ msgstr "Föredra att inte visa logotyper vid betalmetoderna i kassan"
-
-#~ msgid "Method type: Internally defined type of method we are dealing with."
-#~ msgstr "Metodtyp: Internt definierad typ av metod som vi har att göra med."
-
-#~ msgid "Orders are automatically debited (finalized) if the fraud control passes. "
-#~ msgstr "Ordrar debiteras automatiskt om bedrägerikontrollen går bra. "
-
-#~ msgid "Cache WSDL calls"
-#~ msgstr "Cacha WSDL"
-
-#~ msgid "Country"
-#~ msgstr "Land"
-
-#~ msgid "After shop handling"
-#~ msgstr "Hantering efter handel"
-
-#~ msgid "Activate developer mode."
-#~ msgstr "Aktivera utvecklar-sektionen."
-
-#, fuzzy
-#~| msgid "Figure out what happens when WooCommerce version (%s) does not meet the requirements."
-#~ msgid "Figure out what happens when WooCommerce version does not meet the requirements."
-#~ msgstr "Testa vad som händer när WooCommerce-versionen (%s) inte möter kraven."
-
-#~ msgid "%s, requires at least %s."
-#~ msgstr "%s, kräver minst %s."
-
-#~ msgid "This plugin offers a lot of settings, which has been traditionally been kept in a separate tab. The page you are currently visiting only contains the vital settings for the plugin."
-#~ msgstr "Det här pluginet erbjuder många inställningar, vilka traditionellt har funnits i en separat flik. Sidan som du för tillfället besöker innehåller enbart de vitala inställningarna för pluginet."
-
-#~ msgid "You should also be aware of that this switch does not enable nor disable the entire plugin. Just the basic functionality for it."
-#~ msgstr "Du bör också vara medveten om att denna inställningen varken aktiverar eller stänger av pluginet helt och hållet. Bara basfunktionaliteten för det."
-
-#~ msgid "You can reach the other settings here!"
-#~ msgstr "Du når de andra inställningarna här!"
-
-#~ msgid "Title"
-#~ msgstr "Titel"
-
-#~ msgid "This controls the title which the user sees during checkout."
-#~ msgstr "Detta bestämmer rubriken på fraktsättet som kunden ser i kassan."
-
-#, fuzzy
-#~ msgid "Cheque Payment"
-#~ msgstr "Betalning av check"
-
-#~ msgid "Enable Cheque Payment"
-#~ msgstr "Aktivera checkbetalning"

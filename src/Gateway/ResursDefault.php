@@ -780,14 +780,15 @@ class ResursDefault extends WC_Payment_Gateway
         Data::setDeveloperLog(
             __FUNCTION__,
             sprintf(
-                __('ECom setSigning: %s', 'trbwc'),
+                __('Base URL for signing: %s', 'trbwc'),
                 $signingBaseUrl
             )
         );
         Data::setDeveloperLog(
             __FUNCTION__,
             sprintf(
-                __('ECom setSigning parameters: %s', 'trbwc'),
+                __('Signing parameters for %s: %s', 'trbwc'),
+                $signingBaseUrl,
                 print_r($this->getApiData((array)$params), true)
             )
         );
