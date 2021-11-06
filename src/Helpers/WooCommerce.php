@@ -915,6 +915,9 @@ class WooCommerce
             $order = $orderContainer;
         } elseif ((int)$orderContainer > 0) {
             $order = new WC_Order($orderContainer);
+        } elseif (is_object($orderContainer) && isset($orderContainer->id)) {
+            $orderId = $orderContainer->id;
+            $order = new WC_Order($orderId);
         } else {
             throw new Exception(
                 sprintf('Order id not found when looked up in %s.', __FUNCTION__),
