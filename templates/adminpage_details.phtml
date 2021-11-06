@@ -67,8 +67,8 @@ printf(__(
             foreach ($ecom_short as $key => $value) {
                 ?>
                 <span style="display: block;" class="resursOrderInfoContainer">
-                    <label for="resurs_order_<?php echo md5($key) ?>"
-                           style="font-weight: bold;"><?php echo ucfirst($key) ?>
+                    <label for="resurs_order_<?php echo sha1($key) ?>" style="font-weight: bold;">
+                        <?php echo ucfirst($key) ?>
                     </label>
                     <?php
                     if ($key === 'paymentMethodInformation' && !empty($value)) {
@@ -105,7 +105,16 @@ printf(__(
                         }
                     }
                     if (is_numeric($value)) {
-                        echo round($value, 2);
+                        echo strtolower(
+                            sprintf('<span id="rbwc_value_%s">%s</span>',
+                                preg_replace(
+                                    '/^a-z0-9$/i',
+                                    '',
+                                    $key
+                                ),
+                                $value
+                            )
+                        );
                     } elseif (is_bool($value)) {
                         echo $value ? __('Yes.', 'trbwc') : __('No.', 'trbwc');
                     } elseif ($key === 'status') {
@@ -114,7 +123,8 @@ printf(__(
                         echo implode('<br>', $value);
                     } else {
                         echo $value;
-                    } ?>
+                    }
+                    ?>
                 </span>
                 <?php
             }
