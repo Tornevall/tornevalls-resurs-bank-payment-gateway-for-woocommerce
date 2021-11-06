@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: trwbc\n"
-"POT-Creation-Date: 2021-11-06 00:58+0100\n"
-"PO-Revision-Date: 2021-11-06 01:49+0100\n"
+"POT-Creation-Date: 2021-11-06 02:15+0100\n"
+"PO-Revision-Date: 2021-11-06 02:38+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -1024,8 +1024,8 @@ msgid "Shipping"
 msgstr "Frakt"
 
 #: templates/adminpage_billing.phtml:5
-msgid "Resurs Bank Billing Address"
-msgstr "Resurs Bank Faktureringsadress"
+msgid "Billing Address"
+msgstr "Faktureringsadress"
 
 #: templates/adminpage_callbacks.phtml:4
 msgid "Available callbacks"
@@ -1073,7 +1073,7 @@ msgid "No."
 msgstr "Nej."
 
 #: templates/adminpage_general_decimals.phtml:2
-msgid "Number of decimals - Heads up!"
+msgid "Number of decimals - Beware!"
 msgstr "Antal decimaler - Observera!"
 
 #: templates/adminpage_general_decimals.phtml:7
@@ -1114,12 +1114,12 @@ msgid "Part payment options"
 msgstr "Alternativ för delbetalning"
 
 #: templates/adminpage_paymentmethods.phtml:28
-msgid "Fee"
-msgstr "Avgift"
+msgid "Payment Fee"
+msgstr "Betalningsavgift"
 
 #: templates/adminpage_shipping.phtml:5
-msgid "Resurs Bank Shippingaddress"
-msgstr "Resurs Bank Fraktadress"
+msgid "Shipping Address"
+msgstr "Leveransadress"
 
 #. Plugin Name of the plugin/theme
 msgid "Tornevall Networks Resurs Bank payment gateway for WooCommerce"
