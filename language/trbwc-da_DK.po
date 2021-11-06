@@ -3,7 +3,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: trwbc\n"
 "POT-Creation-Date: 2021-11-06 01:43+0100\n"
-"PO-Revision-Date: 2021-11-06 01:55+0100\n"
+"PO-Revision-Date: 2021-11-06 02:00+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Danish\n"
 "MIME-Version: 1.0\n"
@@ -1033,11 +1033,11 @@ msgstr ""
 
 #: templates/adminpage_callbacks.phtml:10
 msgid "Callback"
-msgstr ""
+msgstr "Callback"
 
 #: templates/adminpage_callbacks.phtml:11
 msgid "Callback URL"
-msgstr ""
+msgstr "URL for callbacks"
 
 #: templates/adminpage_callbacks.phtml:15
 msgid "Remove"
@@ -1070,11 +1070,11 @@ msgstr "Ja."
 
 #: templates/adminpage_details.phtml:110
 msgid "No."
-msgstr ""
+msgstr "Nej."
 
 #: templates/adminpage_general_decimals.phtml:2
 msgid "Number of decimals - Heads up!"
-msgstr ""
+msgstr "Antal decimaler - Pas på!"
 
 #: templates/adminpage_general_decimals.phtml:7
 #, php-format
@@ -1135,4 +1135,4 @@ msgstr ""
 
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
-msgstr ""
+msgstr "Tomas Tornevall"
