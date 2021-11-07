@@ -11,12 +11,13 @@ potentially looses traffic to your site. This responsibility is yours and this h
 
 ## CONTRIBUTION
 
-If you'd like to contribute to this project, you can either sign up to
-the [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) or create an issue directly
-on [github](https://github.com/Tornevall/wpwc-resurs/issues).
+If you'd like to contribute to this project, you can either sign up
+to [github](https://github.com/Tornevall/wpwc-resurs/issues) and create an issue or use the
+old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this on.
 
 ## DOCUMENTS AND LINKS
 
+* [Help us translate the plugin](https://crwd.in/trwbc)
 * [The current work-repository as of v0.0](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
 * [Github Synchronized repository](https://github.com/Tornevall/wpwc-resurs) will probably be the new official
   repository as bitbucket server will shut down in a few years from now.
