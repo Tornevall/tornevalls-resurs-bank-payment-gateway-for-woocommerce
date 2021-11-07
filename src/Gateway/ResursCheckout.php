@@ -3,8 +3,8 @@
 namespace ResursBank\Gateway;
 
 use Exception;
-use ResursBank\Service\WooCommerce;
 use ResursBank\Module\Data;
+use ResursBank\Service\WooCommerce;
 
 /**
  * Class ResursCheckout RCO iframe based class, that acts like it was a real payment method.

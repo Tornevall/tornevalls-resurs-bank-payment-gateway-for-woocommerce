@@ -3,9 +3,9 @@
 namespace ResursBank\Module;
 
 use Exception;
-use ResursBank\Service\WordPress;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
+use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
 use function in_array;

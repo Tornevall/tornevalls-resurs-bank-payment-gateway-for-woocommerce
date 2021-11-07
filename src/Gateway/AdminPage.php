@@ -3,9 +3,9 @@
 namespace ResursBank\Gateway;
 
 use Exception;
-use ResursBank\Service\WordPress;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Service\WordPress;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
