@@ -826,30 +826,34 @@ class WooCommerce
 
     /**
      * Set order note, but prefixed by plugin name.
+     *
      * @param $order
      * @param $orderNote
      * @param int $is_customer_note
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function setOrderNote($order, $orderNote, $is_customer_note = 0)
     {
         $properOrder = self::getProperOrder($order, 'order');
-        Data::canLog(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                __(
-                    'setOrderNote for %s: %s'
-                ),
-                $properOrder->get_id(),
-                $orderNote
-            )
-        );
+        if (method_exists($properOrder, 'get_id') && $properOrder->get_id()) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __(
+                        'setOrderNote for %s: %s'
+                    ),
+                    $properOrder->get_id(),
+                    $orderNote
+                )
+            );
 
-        self::getProperOrder($order, 'order')->add_order_note(
-            self::getOrderNotePrefixed($orderNote),
-            $is_customer_note
-        );
+            self::getProperOrder($order, 'order')->add_order_note(
+                self::getOrderNotePrefixed($orderNote),
+                $is_customer_note
+            );
+        }
     }
 
     /**
