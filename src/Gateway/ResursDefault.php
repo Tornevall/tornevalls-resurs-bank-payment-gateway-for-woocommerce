@@ -92,6 +92,12 @@ class ResursDefault extends WC_Payment_Gateway
      */
     protected $order;
     /**
+     * Main API. Use as primary communicator. Acts like a bridge between the real API.
+     * @var Api $API
+     * @since 0.0.1.0
+     */
+    protected $API;
+    /**
      * @var array $applicantPostData Applicant request.
      * @since 0.0.1.0
      */
@@ -117,12 +123,6 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      */
     private $apiDataId = '';
-    /**
-     * Main API. Use as primary communicator. Acts like a bridge between the real API.
-     * @var Api $API
-     * @since 0.0.1.0
-     */
-    protected $API;
     /**
      * @var WC_Cart $cart
      * @since 0.0.1.0
@@ -514,70 +514,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Find out if payment id is too old to be kept in session.
-     * @param bool $returnAgeValue
-     * @return bool|int
-     * @since 0.0.1.0
-     */
-    private function getRcoPaymentIdTooOld($returnAgeValue = false)
-    {
-        $rcoOrderIdAge = (int)WooCommerce::getSessionValue('rco_order_id_age');
-        $calculateAge = time() - $rcoOrderIdAge;
-        $optionMaxAge = (int)Data::getResursOption('rco_paymentid_age');
-        $rcoOrderAgeLimit = (int)WordPress::applyFilters(
-            'getRcoOrderAgeLimit',
-            $optionMaxAge > 0 ? $optionMaxAge : 3600
-        );
-
-        return !$returnAgeValue ? ($calculateAge > $rcoOrderAgeLimit) : $calculateAge;
-    }
-
-    /**
-     * Find out which order reference that should be used in RCO.
-     * @return $this
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function getProperPaymentId()
-    {
-        $paymentId = $this->API->getConnection()->getPreferredPaymentId();
-        $lastRcoOrderId = WooCommerce::getSessionValue('rco_order_id');
-
-        if ($this->getRcoPaymentIdTooOld()) {
-            $lastRcoOrderId = null;
-            WooCommerce::setSessionValue('rco_order_id', $lastRcoOrderId);
-        }
-
-        // Store the payment id for later use.
-        if ($lastRcoOrderId !== $paymentId && !empty($lastRcoOrderId)) {
-            $paymentId = $lastRcoOrderId;
-            $this->API->getConnection()->setPreferredId($paymentId);
-
-            Data::canLog(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
-                    __('Reusing preferred payment id "%s" for customer, age %d seconds old.', 'trbwc'),
-                    $lastRcoOrderId,
-                    $this->getRcoPaymentIdTooOld(true)
-                )
-            );
-        } else {
-            WooCommerce::setSessionValue('rco_order_id_age', time());
-            Data::canLog(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
-                    __('Preferred payment id set to "%s" for customer.', 'trbwc'),
-                    $paymentId
-                )
-            );
-        }
-
-        WooCommerce::setSessionValue('rco_order_id', $paymentId);
-
-        return $paymentId;
-    }
-
-    /**
      * Standard Resurs Checkout. Not interceptor ready.
      * @return mixed
      * @throws Exception
@@ -596,7 +532,24 @@ class ResursDefault extends WC_Payment_Gateway
             $this->setCreatePaymentNotice(__FUNCTION__);
 
             $paymentId = $this->getProperPaymentId();
-            $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+            try {
+                WooCommerce::applyMock('createIframeException');
+                $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+            } catch (Exception $e) {
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS, sprintf(
+                        __(
+                            'An error (%s, code %s) occurred during the iframe creation. Retrying with a new ' .
+                            'payment id.',
+                            'trbwc'
+                        ),
+                        $e->getMessage(),
+                        $e->getCode()
+                    )
+                );
+                $paymentId = $this->getProperPaymentId(true);
+                $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+            }
             $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
 
@@ -870,87 +823,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param string $getValueType
-     * @param WC_Product $productObject
-     * @return string
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    protected function getFromProduct($getValueType, $productObject)
-    {
-        $return = '';
-
-        switch ($getValueType) {
-            case 'artNo':
-                $return = $this->getProperArticleNumber($productObject);
-                break;
-            case 'title':
-                $return = !empty($useTitle = $productObject->get_title()) ? $useTitle : __(
-                    'Article description is missing.',
-                    'trbwc'
-                );
-                break;
-            case 'unitAmountWithoutVat':
-                // Special reflection of what Resurs Bank wants.
-                $return = wc_get_price_excluding_tax($productObject);
-                break;
-            case 'vatPct':
-                $return = $this->getProductVat($productObject);
-                break;
-            case 'unit':
-                // Using default measure from ECom for now.
-                $return = $this->API->getConnection()->getDefaultUnitMeasure();
-                break;
-            default:
-                if (method_exists($productObject, sprintf('get_%s', $getValueType))) {
-                    $return = $productObject->{sprintf('get_%s', $getValueType)}();
-                }
-                break;
-        }
-
-        return $return;
-    }
-
-    /**
-     * Different way to fetch article numbers.
-     * @param WC_Product $product
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    private function getProperArticleNumber($product)
-    {
-        $return = $product->get_id();
-        $productSkuValue = $product->get_sku();
-        if (!empty($productSkuValue) &&
-            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
-        ) {
-            $return = $productSkuValue;
-        }
-
-        return WordPress::applyFilters('getArticleNumber', $return, $product);
-    }
-
-    /**
-     * @param WC_Product $product
-     * @return float|int
-     * @since 0.0.1.0
-     */
-    private function getProductVat($product)
-    {
-        $taxClass = $product->get_tax_class();
-        $ratesArray = WC_Tax::get_rates($taxClass);
-
-        $rates = array_shift($ratesArray);
-        if (isset($rates['rate'])) {
-            $return = (double)$rates['rate'];
-        } else {
-            $return = 0;
-        }
-
-        return $return;
-    }
-
-    /**
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -975,29 +847,6 @@ class ResursDefault extends WC_Payment_Gateway
                 __('Cart is empty!', 'trbwc')
             );
         }
-
-        return $this;
-    }
-
-    /**
-     * @param string $rowType
-     * @param WC_Product $productData
-     * @param array $item
-     * @return ResursDefault
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function setOrderRow($rowType, $productData, $item)
-    {
-        $this->API->getConnection()->addOrderLine(
-            $this->getFromProduct('artNo', $productData),
-            $this->getFromProduct('title', $productData),
-            $this->getFromProduct('unitAmountWithoutVat', $productData),
-            $this->getFromProduct('vatPct', $productData),
-            $this->getFromProduct('unit', $productData),
-            $rowType,
-            $item['quantity']
-        );
 
         return $this;
     }
@@ -1082,6 +931,181 @@ class ResursDefault extends WC_Payment_Gateway
     {
         /** @noinspection PhpUndefinedFieldInspection */
         return (string)isset($this->paymentMethodInformation->id) ? $this->paymentMethodInformation->id : '';
+    }
+
+    /**
+     * Find out which order reference that should be used in RCO.
+     *
+     * @param bool $forceNew
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function getProperPaymentId($forceNew = null)
+    {
+        $paymentId = $this->API->getConnection()->getPreferredPaymentId();
+
+        if ((bool)$forceNew) {
+            $lastRcoOrderId = $this->API->getConnection()->getPreferredPaymentId(25, '', true, true);
+        } else {
+            $lastRcoOrderId = WooCommerce::getSessionValue('rco_order_id');
+        }
+
+        if (!$forceNew && $this->getRcoPaymentIdTooOld()) {
+            $lastRcoOrderId = null;
+            WooCommerce::setSessionValue('rco_order_id', $lastRcoOrderId);
+        }
+
+        // Store the payment id for later use.
+        if ($lastRcoOrderId !== $paymentId && !empty($lastRcoOrderId)) {
+            $paymentId = $lastRcoOrderId;
+            $this->API->getConnection()->setPreferredId($paymentId);
+
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __('Reusing preferred payment id "%s" for customer, age %d seconds old.', 'trbwc'),
+                    $lastRcoOrderId,
+                    $this->getRcoPaymentIdTooOld(true)
+                )
+            );
+        } else {
+            WooCommerce::setSessionValue('rco_order_id_age', time());
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __('Preferred payment id set to "%s" for customer.', 'trbwc'),
+                    $paymentId
+                )
+            );
+        }
+
+        WooCommerce::setSessionValue('rco_order_id', $paymentId);
+
+        return $paymentId;
+    }
+
+    /**
+     * Find out if payment id is too old to be kept in session.
+     * @param bool $returnAgeValue
+     * @return bool|int
+     * @since 0.0.1.0
+     */
+    private function getRcoPaymentIdTooOld($returnAgeValue = false)
+    {
+        $rcoOrderIdAge = (int)WooCommerce::getSessionValue('rco_order_id_age');
+        $calculateAge = time() - $rcoOrderIdAge;
+        $optionMaxAge = (int)Data::getResursOption('rco_paymentid_age');
+        $rcoOrderAgeLimit = (int)WordPress::applyFilters(
+            'getRcoOrderAgeLimit',
+            $optionMaxAge > 0 ? $optionMaxAge : 3600
+        );
+
+        return !$returnAgeValue ? ($calculateAge > $rcoOrderAgeLimit) : $calculateAge;
+    }
+
+    /**
+     * @param string $rowType
+     * @param WC_Product $productData
+     * @param array $item
+     * @return ResursDefault
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function setOrderRow($rowType, $productData, $item)
+    {
+        $this->API->getConnection()->addOrderLine(
+            $this->getFromProduct('artNo', $productData),
+            $this->getFromProduct('title', $productData),
+            $this->getFromProduct('unitAmountWithoutVat', $productData),
+            $this->getFromProduct('vatPct', $productData),
+            $this->getFromProduct('unit', $productData),
+            $rowType,
+            $item['quantity']
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param string $getValueType
+     * @param WC_Product $productObject
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    protected function getFromProduct($getValueType, $productObject)
+    {
+        $return = '';
+
+        switch ($getValueType) {
+            case 'artNo':
+                $return = $this->getProperArticleNumber($productObject);
+                break;
+            case 'title':
+                $return = !empty($useTitle = $productObject->get_title()) ? $useTitle : __(
+                    'Article description is missing.',
+                    'trbwc'
+                );
+                break;
+            case 'unitAmountWithoutVat':
+                // Special reflection of what Resurs Bank wants.
+                $return = wc_get_price_excluding_tax($productObject);
+                break;
+            case 'vatPct':
+                $return = $this->getProductVat($productObject);
+                break;
+            case 'unit':
+                // Using default measure from ECom for now.
+                $return = $this->API->getConnection()->getDefaultUnitMeasure();
+                break;
+            default:
+                if (method_exists($productObject, sprintf('get_%s', $getValueType))) {
+                    $return = $productObject->{sprintf('get_%s', $getValueType)}();
+                }
+                break;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Different way to fetch article numbers.
+     * @param WC_Product $product
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private function getProperArticleNumber($product)
+    {
+        $return = $product->get_id();
+        $productSkuValue = $product->get_sku();
+        if (!empty($productSkuValue) &&
+            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
+        ) {
+            $return = $productSkuValue;
+        }
+
+        return WordPress::applyFilters('getArticleNumber', $return, $product);
+    }
+
+    /**
+     * @param WC_Product $product
+     * @return float|int
+     * @since 0.0.1.0
+     */
+    private function getProductVat($product)
+    {
+        $taxClass = $product->get_tax_class();
+        $ratesArray = WC_Tax::get_rates($taxClass);
+
+        $rates = array_shift($ratesArray);
+        if (isset($rates['rate'])) {
+            $return = (double)$rates['rate'];
+        } else {
+            $return = 0;
+        }
+
+        return $return;
     }
 
     /**

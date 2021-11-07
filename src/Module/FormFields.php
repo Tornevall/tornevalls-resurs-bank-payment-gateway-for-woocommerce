@@ -183,7 +183,7 @@ class FormFields extends WC_Settings_API
                 'title' => __('Payment methods and order handling', 'trbwc'),
                 'payment_methods_settings' => [
                     'type' => 'title',
-                    'title' => __('Payment methods and order handling', 'trbwc'),
+                    'title' => __('Payment methods, products and checkout', 'trbwc'),
                     'desc' => __(
                         'This section covers information for your current payment methods that is linked with your ' .
                         'API settings. You can not edit titles or descriptions at this page so if you need to ' .
@@ -310,6 +310,41 @@ class FormFields extends WC_Settings_API
                     'options' => WordPress::applyFilters('getPartPaymentPage', []),
                 ],
                 'payment_methods_settings_end' => [
+                    'id' => 'payment_methods_settings_end',
+                    'type' => 'sectionend',
+                ],
+                'order_status_section' => [
+                    'id' => 'order_status_section',
+                    'type' => 'title',
+                    'title' => 'Order Status Mapping',
+                ],
+                'order_instant_finalization_status' => [
+                    'id' => 'order_instant_finalization_status',
+                    'title' => 'Automatically debited order status',
+                    'type' => 'select',
+                    'default' => 'default',
+                    'options' => [
+                        'default' => __('Use default (Completed)', 'resurs-bank-payment-gateway-for-woocommerce'),
+                        'processing' => __('Processing', 'resurs-bank-payment-gateway-for-woocommerce'),
+                        'credited' => __('Credited (refunded)', 'resurs-bank-payment-gateway-for-woocommerce'),
+                        'completed' => __('Completed', 'resurs-bank-payment-gateway-for-woocommerce'),
+                        'pending' => __('Pending (on-hold)', 'resurs-bank-payment-gateway-for-woocommerce'),
+                        'annulled' => __('Annulled (cancelled)', 'resurs-bank-payment-gateway-for-woocommerce'),
+                    ],
+                ],
+                'order_instant_finalization_methods' => [
+                    'id' => 'order_instant_finalization_methods',
+                    'title' => 'Payment methods defined as automatically debited',
+                    'type' => 'select',
+                    'options' => WordPress::applyFilters('getAvailableAutoDebitMethods', []),
+                    'default' => 'default',
+                    'custom_attributes' => [
+                        'size' => count(WordPress::applyFilters('getAvailableAutoDebitMethods', [])),
+                        'multiple' => 'multiple',
+                    ],
+                ],
+                'order_status_section_end' => [
+                    'id' => 'order_status_section_end',
                     'type' => 'sectionend',
                 ],
                 'payment_methods_list' => [
@@ -573,6 +608,17 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'can_log_info' => [
+                    'id' => 'can_log_info',
+                    'type' => 'checkbox',
+                    'title' => __('Log INFO events', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Log events that flows under severity INFO. Logs affected is for example mocking events.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'can_log_order_developer' => [
                     'id' => 'can_log_order_developer',
                     'type' => 'checkbox',
@@ -735,7 +781,7 @@ class FormFields extends WC_Settings_API
                         'You might need an extra reload after save',
                         'trbwc'
                     ),
-                    'desc_top' => __(
+                    'desc_tip' => __(
                         'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
                         'with help from filters in that release.',
                         'trbwc'
@@ -757,7 +803,7 @@ class FormFields extends WC_Settings_API
                         'Yes, do trust them please.',
                         'trbwc'
                     ),
-                    'desc_top' => __(
+                    'desc_tip' => __(
                         'For some places in the admin panel, we use nonces as an extra security layer when it comes ' .
                         'to requests like updating callbacks, payment methods, etc. Sometimes nonces expires too ' .
                         'quickly and breaks requests in wp_admin. Enable this feature to start trusting is_admin() ' .
@@ -782,7 +828,7 @@ class FormFields extends WC_Settings_API
                         'Enable.',
                         'trbwc'
                     ),
-                    'desc_top' => __(
+                    'desc_tip' => __(
                         'Required production credentials available: When activating this mode, getAddress will use ' .
                         'real lookups for getAddress rather than the mocked data.',
                         'trbwc'
@@ -797,7 +843,7 @@ class FormFields extends WC_Settings_API
                         'Enable.',
                         'trbwc'
                     ),
-                    'desc_top' => __(
+                    'desc_tip' => __(
                         'This setting enables mocked behaviours and data on fly, during tests.',
                         'trbwc'
                     ),
@@ -877,9 +923,28 @@ class FormFields extends WC_Settings_API
                         'Enable.',
                         'trbwc'
                     ),
-                    'desc_top' => __(
+                    'desc_tip' => __(
                         'This setting enables a fictive error on front-to-back calls during order creations where ' .
                         'updatePaymentReference occurs.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_create_iframe_exception' => [
+                    'id' => 'mock_create_iframe_exception',
+                    'title' => __(
+                        'Fail on iframe creation',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'This setting enables a fictive error in the checkout where the iframe fails to render. This ' .
+                        'has happened during development, where the current payment id used by the plugin ' .
+                        'collided with an already existing order id at Resurs Bank.',
                         'trbwc'
                     ),
                     'default' => 'no',

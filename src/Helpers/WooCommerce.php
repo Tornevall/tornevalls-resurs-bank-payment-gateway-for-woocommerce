@@ -564,25 +564,6 @@ class WooCommerce
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getValidCart($returnCart = false)
-    {
-        $return = false;
-
-        if (isset(WC()->cart)) {
-            $return = (WC()->cart->get_cart_contents_count() > 0);
-
-            if (!empty(WC()->cart) && $return && $returnCart) {
-                $return = WC()->cart->get_cart();
-            }
-        }
-
-        return $return;
-    }
-
-    /**
      * @param $return
      * @return mixed
      * @since 0.0.1.0
@@ -610,40 +591,6 @@ class WooCommerce
             }
             $return['ecom_short'] = $purgedEcom;
         }
-        return $return;
-    }
-
-    /**
-     * @param $key
-     * @return array|mixed|string
-     * @since 0.0.1.0
-     */
-    public static function getSessionValue($key)
-    {
-        $return = null;
-
-        if (self::getSession()) {
-            $return = WC()->session->get($key);
-        } elseif (isset($_SESSION[$key])) {
-            $return = $_SESSION[$key];
-        }
-
-        return $return;
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private static function getSession()
-    {
-        global $woocommerce;
-
-        $return = false;
-        if (isset($woocommerce->session) && !empty($woocommerce->session)) {
-            $return = true;
-        }
-
         return $return;
     }
 
@@ -700,35 +647,28 @@ class WooCommerce
     }
 
     /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private static function getSession()
+    {
+        global $woocommerce;
+
+        $return = false;
+        if (isset($woocommerce->session) && !empty($woocommerce->session)) {
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
      * @return string
      * @since 0.0.1.0
      */
     public static function getWcApiUrl()
     {
         return sprintf('%s', WC()->api_request_url('ResursDefault'));
-    }
-
-    /**
-     * @param $orderId
-     * @throws ResursException
-     */
-    private static function setSigningMarked($orderId, $byCallback)
-    {
-        if (Data::getOrderMeta('signingRedirectTime', $orderId) &&
-            Data::getOrderMeta('bookPaymentStatus', $orderId) &&
-            empty(Data::getOrderMeta('signingOk', $orderId))
-        ) {
-            Data::setOrderMeta($orderId, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
-            Data::setOrderMeta(
-                $orderId,
-                'signingConfirmed',
-                sprintf(
-                    'Callback:%s-%s',
-                    $byCallback,
-                    strftime('%Y-%m-%d %H:%M:%S', time())
-                )
-            );
-        }
     }
 
     /**
@@ -764,18 +704,7 @@ class WooCommerce
                 );
             }
 
-            if ($order === null) {
-                Data::setLogError(
-                    sprintf(
-                        __(
-                            'Callback with parameter %s received, but failed because $order could not ' .
-                            'instantiate and remained null.',
-                            'trbwc'
-                        ),
-                        $pRequest
-                    )
-                );
-            }
+            self::getHandledCallbackNullOrder($order, $pRequest);
 
             try {
                 Data::setOrderMeta(
@@ -813,7 +742,11 @@ class WooCommerce
         }
 
         Data::setLogNotice(
-            __('Callback Handling Finished.', 'trbwc')
+            sprintf(
+                __('Callback (%s) Handling for %s Finished.', 'trbwc'),
+                $callbackType,
+                $pRequest
+            )
         );
 
         self::reply(
@@ -953,6 +886,27 @@ class WooCommerce
     }
 
     /**
+     * @param $order
+     * @param $pRequest
+     * @since 0.0.1.0
+     */
+    private static function getHandledCallbackNullOrder($order, $pRequest)
+    {
+        if ($order === null) {
+            Data::setLogError(
+                sprintf(
+                    __(
+                        'Callback with parameter %s received, but failed because $order could not ' .
+                        'instantiate and remained null.',
+                        'trbwc'
+                    ),
+                    $pRequest
+                )
+            );
+        }
+    }
+
+    /**
      * @param $paymentId
      * @param $orderId
      * @param $order
@@ -982,6 +936,9 @@ class WooCommerce
             case $ecomOrderStatus & OrderStatus::PROCESSING:
                 self::setOrderStatusWithNotice($order, OrderStatus::PROCESSING);
                 break;
+            case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
+                self::setOrderStatusWithNotice($order, OrderStatus::AUTO_DEBITED);
+                break;
             case $ecomOrderStatus & OrderStatus::COMPLETED:
                 self::setOrderStatusWithNotice($order, OrderStatus::COMPLETED);
                 break;
@@ -990,9 +947,6 @@ class WooCommerce
                 break;
             case $ecomOrderStatus & OrderStatus::CREDITED:
                 self::setOrderStatusWithNotice($order, OrderStatus::CREDITED);
-                break;
-            case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
-                self::setOrderStatusWithNotice($order, OrderStatus::AUTO_DEBITED);
                 break;
             case $ecomOrderStatus & OrderStatus::MANUAL_INSPECTION:
                 self::setOrderStatusWithNotice($order, OrderStatus::MANUAL_INSPECTION);
@@ -1013,13 +967,22 @@ class WooCommerce
         $currentStatus = $order->get_status();
         $requestedStatus = self::getOrderStatuses($ecomOrderStatus);
 
+        if ($ecomOrderStatus & OrderStatus::AUTO_DEBITED) {
+            WooCommerce::setOrderNote(
+                $order,
+                __(
+                    'Resurs Bank order status update indicates direct debited payment method.',
+                    'trbwc'
+                )
+            );
+        }
         if ($currentStatus !== $requestedStatus) {
             $return = self::setOrderStatusUpdate(
                 $order,
-                self::getOrderStatuses($ecomOrderStatus),
+                $requestedStatus,
                 sprintf(
                     __('Resurs Bank updated order status to %s.', 'trbwc'),
-                    self::getOrderStatuses($ecomOrderStatus)
+                    $requestedStatus
                 )
             );
         } else {
@@ -1050,19 +1013,24 @@ class WooCommerce
      */
     private static function getOrderStatuses($key = null)
     {
+        $returnStatusString = 'on-hold';
+        $autoFinalizationString = Data::getResursOption('order_instant_finalization_status');
+
         $return = WordPress::applyFilters('getOrderStatuses', [
             OrderStatus::PROCESSING => 'processing',
             OrderStatus::CREDITED => 'refunded',
             OrderStatus::COMPLETED => 'completed',
+            OrderStatus::AUTO_DEBITED => $autoFinalizationString !== 'default' ? $autoFinalizationString : 'completed',
             OrderStatus::PENDING => 'on-hold',
             OrderStatus::ANNULLED => 'cancelled',
             OrderStatus::ERROR => 'on-hold',
             OrderStatus::MANUAL_INSPECTION => 'on-hold',
         ]);
         if (isset($key, $return[$key])) {
-            return $return[$key];
+            $returnStatusString = $return[$key];
         }
-        return $return;
+
+        return $returnStatusString;
     }
 
     /**
@@ -1130,6 +1098,30 @@ class WooCommerce
     }
 
     /**
+     * @param $orderId
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    private static function setSigningMarked($orderId, $byCallback)
+    {
+        if (Data::getOrderMeta('signingRedirectTime', $orderId) &&
+            Data::getOrderMeta('bookPaymentStatus', $orderId) &&
+            empty(Data::getOrderMeta('signingOk', $orderId))
+        ) {
+            Data::setOrderMeta($orderId, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setOrderMeta(
+                $orderId,
+                'signingConfirmed',
+                sprintf(
+                    'Callback:%s-%s',
+                    $byCallback,
+                    strftime('%Y-%m-%d %H:%M:%S', time())
+                )
+            );
+        }
+    }
+
+    /**
      * @param array $out
      * @param int $code
      * @param string $httpString
@@ -1190,6 +1182,43 @@ class WooCommerce
         }
 
         self::setCustomerCheckoutLocation($isCheckout);
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getValidCart($returnCart = false)
+    {
+        $return = false;
+
+        if (isset(WC()->cart)) {
+            $return = (WC()->cart->get_cart_contents_count() > 0);
+
+            if (!empty(WC()->cart) && $return && $returnCart) {
+                $return = WC()->cart->get_cart();
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @return array|mixed|string
+     * @since 0.0.1.0
+     */
+    public static function getSessionValue($key)
+    {
+        $return = null;
+
+        if (self::getSession()) {
+            $return = WC()->session->get($key);
+        } elseif (isset($_SESSION[$key])) {
+            $return = $_SESSION[$key];
+        }
+
+        return $return;
     }
 
     /**

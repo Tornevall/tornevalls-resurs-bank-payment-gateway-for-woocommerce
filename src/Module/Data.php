@@ -77,6 +77,12 @@ class Data
     const CAN_LOG_ORDER_DEVELOPER = 'order_developer';
 
     /**
+     * @var string
+     * @since 0.0.1.0
+     */
+    const CAN_LOG_INFO = 'info';
+
+    /**
      * @var array
      * @since 0.0.1.0
      */
@@ -1392,7 +1398,7 @@ class Data
                     $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
                     $return['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
-                    if (!empty($return['resurs_secondary'])) {
+                    if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
                         $return['ecom'] = Api::getPayment($return['resurs_secondary'], null, $return);
                     }
                     $return['ecom_had_reference_problems'] = true;
@@ -1449,12 +1455,14 @@ class Data
         self::setLogError(
             sprintf(
                 __(
-                    '%s internal generic exception %s: %s',
+                    '%s internal generic exception %s: %s --- File %s, line %s.',
                     'trbwc'
                 ),
                 self::getPrefix(),
                 $exception->getCode(),
-                $exception->getMessage()
+                $exception->getMessage(),
+                $exception->getFile(),
+                $exception->getLine()
             )
         );
     }
