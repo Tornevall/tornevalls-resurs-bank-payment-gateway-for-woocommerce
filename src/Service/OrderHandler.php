@@ -4,8 +4,8 @@ namespace ResursBank\Service;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Helpers\WooCommerce;
-use ResursBank\Helpers\WordPress;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use WC_Coupon;

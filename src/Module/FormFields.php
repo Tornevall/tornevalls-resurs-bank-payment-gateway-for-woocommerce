@@ -3,7 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
-use ResursBank\Helpers\WordPress;
+use ResursBank\Service\WordPress;
 use WC_Checkout;
 use WC_Settings_API;
 use function in_array;

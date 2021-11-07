@@ -1,6 +1,6 @@
 <?php
 
-namespace ResursBank\Helpers;
+namespace ResursBank\Service;
 
 use Exception;
 use ResursBank\Module\Api;
@@ -84,26 +84,26 @@ class WordPress
     private static function setupFilters()
     {
         // Generic calls.
-        add_filter('plugin_action_links', 'ResursBank\Helpers\WooCommerce::getPluginAdminUrl', 10, 2);
+        add_filter('plugin_action_links', 'ResursBank\Service\WooCommerce::getPluginAdminUrl', 10, 2);
         // Other calls.
         add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
         // Localization.
-        add_filter('rbwc_localizations_generic', 'ResursBank\Helpers\WooCommerce::getGenericLocalization', 10, 2);
+        add_filter('rbwc_localizations_generic', 'ResursBank\Service\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
-        add_filter('woocommerce_get_settings_pages', 'ResursBank\Helpers\WooCommerce::getSettingsPages');
-        add_filter('is_protected_meta', 'ResursBank\Helpers\WooCommerce::getProtectedMetaData', 10, 3);
-        add_filter('rbwc_get_part_payment_page', 'ResursBank\Helpers\WordPress::getPartPaymentPage');
+        add_filter('woocommerce_get_settings_pages', 'ResursBank\Service\WooCommerce::getSettingsPages');
+        add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
+        add_filter('rbwc_get_part_payment_page', 'ResursBank\Service\WordPress::getPartPaymentPage');
 
         if (Data::isEnabled()) {
-            add_filter('woocommerce_payment_gateways', 'ResursBank\Helpers\WooCommerce::getGateways');
+            add_filter('woocommerce_payment_gateways', 'ResursBank\Service\WooCommerce::getGateways');
             add_filter(
                 'woocommerce_available_payment_gateways',
-                'ResursBank\Helpers\WooCommerce::getAvailableGateways'
+                'ResursBank\Service\WooCommerce::getAvailableGateways'
             );
-            add_filter('rbwc_get_address_field_controller', 'ResursBank\Helpers\WordPress::getAddressFieldController');
-            add_filter('allow_resurs_run', 'ResursBank\Helpers\WooCommerce::getAllowResursRun');
+            add_filter('rbwc_get_address_field_controller', 'ResursBank\Service\WordPress::getAddressFieldController');
+            add_filter('allow_resurs_run', 'ResursBank\Service\WooCommerce::getAllowResursRun');
         }
     }
 
@@ -114,8 +114,8 @@ class WordPress
      */
     private static function setupScripts()
     {
-        add_action('wp_enqueue_scripts', 'ResursBank\Helpers\WordPress::setResursBankScripts');
-        add_action('admin_enqueue_scripts', 'ResursBank\Helpers\WordPress::setResursBankScriptsAdmin');
+        add_action('wp_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScripts');
+        add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
     /**
@@ -126,9 +126,9 @@ class WordPress
     private static function setupActions()
     {
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-        add_action('admin_notices', '\ResursBank\Helpers\WordPress::getAdminNotices');
-        add_action('rbwc_get_localized_scripts', '\ResursBank\Helpers\WordPress::getLocalizedScripts', 10, 3);
-        add_action('rbwc_localizations_admin', '\ResursBank\Helpers\WordPress::getLocalizedScriptsDeprecated', 10, 2);
+        add_action('admin_notices', '\ResursBank\Service\WordPress::getAdminNotices');
+        add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
+        add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         add_action('wp_ajax_' . $action, '\ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, '\ResursBank\Module\PluginApi::execApiNoPriv');
         add_action('woocommerce_admin_field_button', '\ResursBank\Module\FormFields::getFieldButton', 10, 2);
@@ -159,15 +159,15 @@ class WordPress
         if (Data::isEnabled()) {
             add_action(
                 'woocommerce_admin_order_data_after_order_details',
-                'ResursBank\Helpers\WooCommerce::getAdminAfterOrderDetails'
+                'ResursBank\Service\WooCommerce::getAdminAfterOrderDetails'
             );
             add_action(
                 'woocommerce_admin_order_data_after_billing_address',
-                'ResursBank\Helpers\WooCommerce::getAdminAfterBilling'
+                'ResursBank\Service\WooCommerce::getAdminAfterBilling'
             );
             add_action(
                 'woocommerce_admin_order_data_after_shipping_address',
-                'ResursBank\Helpers\WooCommerce::getAdminAfterShipping'
+                'ResursBank\Service\WooCommerce::getAdminAfterShipping'
             );
         }
     }
@@ -182,30 +182,30 @@ class WordPress
         // Customer is in checkout.
         add_action(
             'woocommerce_before_checkout_form',
-            'ResursBank\Helpers\WooCommerce::setIsInCheckout'
+            'ResursBank\Service\WooCommerce::setIsInCheckout'
         );
         add_action(
             'woocommerce_is_checkout',
-            'ResursBank\Helpers\WooCommerce::setIsInCheckout'
+            'ResursBank\Service\WooCommerce::setIsInCheckout'
         );
         // Customer is not in checkout.
         add_action(
             'woocommerce_add_to_cart',
-            'ResursBank\Helpers\WooCommerce::setAddToCart'
+            'ResursBank\Service\WooCommerce::setAddToCart'
         );
         // Customer is not in checkout. RCO helper, updating order rows on fly in this section.
         add_action(
             'woocommerce_cart_updated',
-            'ResursBank\Helpers\WooCommerce::setUpdatedCart'
+            'ResursBank\Service\WooCommerce::setUpdatedCart'
         );
         // Customer is not in checkout.
         add_filter(
             'woocommerce_update_order_review_fragments',
-            'ResursBank\Helpers\WooCommerce::getReviewFragments'
+            'ResursBank\Service\WooCommerce::getReviewFragments'
         );
         add_action(
             'woocommerce_checkout_update_order_review',
-            'ResursBank\Helpers\WooCommerce::getOrderReviewSettings'
+            'ResursBank\Service\WooCommerce::getOrderReviewSettings'
         );
     }
 
