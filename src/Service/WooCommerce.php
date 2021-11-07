@@ -155,6 +155,19 @@ class WooCommerce
             $customerCountry = Data::getCustomerCountry();
 
             if ($customerCountry !== get_option('woocommerce_default_country')) {
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
+                        __(
+                            'The country (%s) this customer is using are not matching the one currently set in ' .
+                            'WooCommerce (%s). It is not guaranteed that all payment methods is shown in this mode.',
+                            'trbwc'
+                        ),
+                        $customerCountry,
+                        get_option('woocommerce_default_country')
+                    )
+                );
+
                 foreach ($gateways as $gatewayName => $gatewayClass) {
                     if ($gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
                         (bool)preg_match('/card/i', $gatewayClass->getSpecificType())
@@ -163,19 +176,6 @@ class WooCommerce
                     }
                     unset($gateways[$gatewayName]);
                 }
-            } else {
-                Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS,
-                    sprintf(
-                        __(
-                            'Chosen customer country is "%s" and not matching the one currently set in ' .
-                            'WooCommerce (%s). It is not guaranteed that all payment methods is shown in this mode.',
-                            'trbwc'
-                        ),
-                        $customerCountry,
-                        get_option('woocommerce_default_country')
-                    )
-                );
             }
         }
 
