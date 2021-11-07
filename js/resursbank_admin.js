@@ -630,3 +630,11 @@ function setResursAnnuityClick(o, id, action) {
         }
     );
 }
+
+/**
+ * @since 0.0.1.0
+ */
+function resursToggleMetaData() {
+    $rQuery('.resurs_order_meta_container').toggle('medium');
+    $rQuery('#resurs_meta_expand_button').toggle();
+}

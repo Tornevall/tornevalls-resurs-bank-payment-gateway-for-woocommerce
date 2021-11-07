@@ -10,7 +10,8 @@ $isDifferentAccount = false;
 if (isset($ecom)) {
     ?>
     <p class="form-field form-field-wide">
-        <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle">
+        <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle"
+               onclick="resursToggleMetaData()">
             <?php
             _e('Order information and metadata for Resurs Bank', 'trbwc')
             ?>
@@ -64,10 +65,29 @@ printf(__(
 
         <?php
         if (is_array($ecom_short) && count($ecom_short)) {
+            $addExpanderAfter = 'paymentMethodType';
+            $setExpander = false;
+            $hasExpander = false;
             foreach ($ecom_short as $key => $value) {
+                if ($setExpander) {
+                    $hasExpander = true;
+                    $setExpander = false;
+                    ?>
+                    <button type="button"
+                            class="button"
+                            id="resurs_meta_expand_button"
+                            onclick="resursToggleMetaData()"
+                    ><?php echo __('Expand metadata view', 'trbwc'); ?>
+                    </button>
+                    <span class="resurs_order_meta_container">
+                    <?php
+                }
+                if (!empty($addExpanderAfter) && $key === $addExpanderAfter) {
+                    $setExpander = true;
+                }
                 ?>
                 <span style="display: block;" class="resursOrderInfoContainer">
-                    <label for="resurs_order_<?php echo sha1($key) ?>" style="font-weight: bold;">
+                    <label for="resurs_order_<?php echo sha1($key) ?>" class="resursOrderInfoLabel">
                         <?php echo ucfirst($key) ?>
                     </label>
                     <?php
@@ -128,6 +148,11 @@ printf(__(
                 </span>
                 <?php
             }
+
+            if ($hasExpander) {
+                ?>
+                </span>
+            <?php }
         } ?>
 
     </p>

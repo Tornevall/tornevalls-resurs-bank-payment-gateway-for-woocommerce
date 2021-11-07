@@ -6,6 +6,10 @@
     color: #FFFFFF !important;
     padding: 5px !important;
 }
+.resursOrderInfoLabel {
+    cursor: default !important;
+    font-weight: bold !important;
+}
 
 .resursOrderInfoTitle {
     background: #211551 !important;
@@ -63,4 +67,7 @@
 }
 .r_annuity_disabled {
     background: #FFCCCC !important;
+}
+.resurs_order_meta_container {
+    display: none;
 }
