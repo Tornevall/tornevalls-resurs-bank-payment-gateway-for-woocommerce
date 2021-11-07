@@ -11,6 +11,7 @@ use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Service\OrderHandler;
+use ResursBank\Service\OrderStatus as OrderStatusHandler;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -514,11 +515,15 @@ class WooCommerce
      */
     public static function getFormattedPaymentData($return)
     {
-        $return['customer_billing'] = self::getAdminCustomerAddress(
-            $return['ecom']->customer->address
-        );
-        $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ?
-            self::getAdminCustomerAddress($return['ecom']->deliveryAddress) : [];
+        // This won't work if the payment is not at Resurs yet.
+        if (isset($return['ecom'])) {
+            $return['customer_billing'] = self::getAdminCustomerAddress(
+                $return['ecom']->customer->address
+            );
+
+            $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ?
+                self::getAdminCustomerAddress($return['ecom']->deliveryAddress) : [];
+        }
 
         return $return;
     }
@@ -743,7 +748,7 @@ class WooCommerce
 
         Data::setLogNotice(
             sprintf(
-                __('Callback (%s) Handling for %s Finished.', 'trbwc'),
+                __('Callback (%s) Handling for %s finished.', 'trbwc'),
                 $callbackType,
                 $pRequest
             )
@@ -821,16 +826,34 @@ class WooCommerce
 
     /**
      * Set order note, but prefixed by plugin name.
+     *
      * @param $order
+     * @param $orderNote
+     * @param int $is_customer_note
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function setOrderNote($order, $orderNote, $is_customer_note = 0)
     {
-        self::getProperOrder($order, 'order')->add_order_note(
-            self::getOrderNotePrefixed($orderNote),
-            $is_customer_note
-        );
+        $properOrder = self::getProperOrder($order, 'order');
+        if (method_exists($properOrder, 'get_id') && $properOrder->get_id()) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __(
+                        'setOrderNote for %s: %s'
+                    ),
+                    $properOrder->get_id(),
+                    $orderNote
+                )
+            );
+
+            self::getProperOrder($order, 'order')->add_order_note(
+                self::getOrderNotePrefixed($orderNote),
+                $is_customer_note
+            );
+        }
     }
 
     /**
@@ -841,7 +864,7 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getProperOrder($orderContainer, $returnAs)
+    public static function getProperOrder($orderContainer, $returnAs)
     {
         if (method_exists($orderContainer, 'get_id')) {
             $orderId = $orderContainer->get_id();
@@ -876,7 +899,7 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    private static function getOrderNotePrefixed($orderNote)
+    public static function getOrderNotePrefixed($orderNote)
     {
         return sprintf(
             '[%s] %s',
@@ -916,9 +939,36 @@ class WooCommerce
     private static function getUpdatedOrderByCallback($paymentId, $orderId, $order)
     {
         if ($orderId) {
-            self::setOrderStatusByCallback(Api::getResurs()->getOrderStatusByPayment($paymentId), $order);
             self::getCustomerRealAddress($order);
+            self::setOrderStatusByCallback(
+                Api::getResurs()->getOrderStatusByPayment($paymentId),
+                $order
+            );
         }
+    }
+
+    /**
+     * Apply actions to WooCommerce Action Queue.
+     *
+     * @param $queueName
+     * @param $value
+     * @since 0.0.1.0
+     */
+    public static function applyQueue($queueName, $value)
+    {
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                WordPress::getFilterName($queueName)
+            ),
+            $value,
+        ];
+
+        return WC()->queue()->add(
+            ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
+        );
+        //WC()->queue()->schedule_recurring(time()+5, 2, WordPress::getFilterName($queueName));
     }
 
     /**
@@ -967,21 +1017,31 @@ class WooCommerce
         $currentStatus = $order->get_status();
         $requestedStatus = self::getOrderStatuses($ecomOrderStatus);
 
-        if ($ecomOrderStatus & OrderStatus::AUTO_DEBITED) {
-            WooCommerce::setOrderNote(
+        if (strtolower($currentStatus) !== strtolower($requestedStatus)) {
+            if ($ecomOrderStatus & OrderStatus::AUTO_DEBITED) {
+                WooCommerce::setOrderNote(
+                    $order,
+                    __(
+                        'Resurs Bank order status update indicates direct debited payment method.',
+                        'trbwc'
+                    )
+                );
+            }
+
+            self::setOrderNote(
                 $order,
-                __(
-                    'Resurs Bank order status update indicates direct debited payment method.',
-                    'trbwc'
+                sprintf(
+                    __('Order status update to %s has been queued.', 'trbwc'),
+                    $requestedStatus
                 )
             );
-        }
-        if ($currentStatus !== $requestedStatus) {
-            $return = self::setOrderStatusUpdate(
+
+            $return = OrderStatusHandler::setOrderStatusWithNotice(
                 $order,
                 $requestedStatus,
                 sprintf(
-                    __('Resurs Bank updated order status to %s.', 'trbwc'),
+                    __('Resurs Bank queued order update: Change from %s to %s from queue.', 'trbwc'),
+                    $currentStatus,
                     $requestedStatus
                 )
             );
