@@ -4,7 +4,7 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Tornevall Networks Resurs Bank payment gateway for "
 "WooCommerce\n"
-"POT-Creation-Date: 2021-11-06 02:15+0100\n"
+"POT-Creation-Date: 2021-11-07 13:26+0100\n"
 "PO-Revision-Date: 2021-11-06 00:23+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
@@ -44,178 +44,178 @@ msgstr ""
 msgid "Resurs Bank AB"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:560
+#: src/Gateway/ResursDefault.php:559
 #, php-format
 msgid "Reusing preferred payment id \"%s\" for customer, age %d seconds old."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:570
+#: src/Gateway/ResursDefault.php:569
 #, php-format
 msgid "Preferred payment id set to \"%s\" for customer."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:783
+#: src/Gateway/ResursDefault.php:782
 #, php-format
 msgid "Base URL for signing: %s"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:790
+#: src/Gateway/ResursDefault.php:789
 #, php-format
 msgid "Signing parameters for %s: %s"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:890
+#: src/Gateway/ResursDefault.php:889
 msgid "Article description is missing."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:971 src/Helpers/WooCommerce.php:1183
+#: src/Gateway/ResursDefault.php:970 src/Helpers/WooCommerce.php:1186
 #, php-format
 msgid "%s: Could not create order from an empty cart."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:976
+#: src/Gateway/ResursDefault.php:975
 msgid "Cart is empty!"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1325
+#: src/Gateway/ResursDefault.php:1324
 #, php-format
 msgid "Order process initialized by customer with checkout %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1412
+#: src/Gateway/ResursDefault.php:1411
 msgid "Order reference updated (updatePaymentReference) with no errors."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1422
+#: src/Gateway/ResursDefault.php:1421
 msgid "Order reference not updated: Reference is already updated."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1437
+#: src/Gateway/ResursDefault.php:1436
 #, php-format
 msgid "updatePaymentReference failure (code %s): %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1487
+#: src/Gateway/ResursDefault.php:1486
 #, php-format
 msgid "Resurs Bank processing order (%s)."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1497
+#: src/Gateway/ResursDefault.php:1496
 #, php-format
 msgid "%s: Initialize Resurs Bank process, order %s (%s) via %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1515
+#: src/Gateway/ResursDefault.php:1514
 msgid "Chosen checkout type is currently unsupported"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1524
+#: src/Gateway/ResursDefault.php:1523
 #, php-format
 msgid "%s: Order %s returned \"%s\" to WooCommerce."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1533
+#: src/Gateway/ResursDefault.php:1532
 #, php-format
 msgid ""
 "$return is not an object as expected in function %s (Checkout request type "
 "is %s)."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1572
+#: src/Gateway/ResursDefault.php:1571
 #, php-format
 msgid "API data request: %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1574
+#: src/Gateway/ResursDefault.php:1573
 msgid ""
 "Customer returned from Resurs Bank. WooCommerce order validation in progress."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1575
+#: src/Gateway/ResursDefault.php:1574
 msgid "wc_order_id + preferred_id not present"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1585
+#: src/Gateway/ResursDefault.php:1584
 msgid ""
 "Session value rco_order_id has been reset after successful return to landing "
 "page."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1631
+#: src/Gateway/ResursDefault.php:1630
 #, php-format
 msgid "Finishing. Ready to redirect customer. Using URL %s"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1783
+#: src/Gateway/ResursDefault.php:1782
 #, php-format
 msgid "Customer returned from Resurs Bank to complete order %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1818
+#: src/Gateway/ResursDefault.php:1817
 msgid "Order is debited and completed."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1826
+#: src/Gateway/ResursDefault.php:1825
 msgid "Order is booked and ready to handle."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1834
+#: src/Gateway/ResursDefault.php:1833
 msgid "Order is frozen and waiting for manual inspection."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1842
+#: src/Gateway/ResursDefault.php:1841
 msgid ""
 "Resurs Bank requires external handling/signing on this order. Customer "
 "redirected."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1852
+#: src/Gateway/ResursDefault.php:1851
 #, php-format
 msgid "The booking failed with status %s. Customer notified in checkout."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1858
+#: src/Gateway/ResursDefault.php:1857
 msgid ""
 "The payment can not complete. Contact customer services for more information."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2002
+#: src/Gateway/ResursDefault.php:2001
 #, php-format
 msgid ""
 "Booking this signed payment has been running multiple times but failed with "
 "exception %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2012
+#: src/Gateway/ResursDefault.php:2011
 #, php-format
 msgid ""
 "Tried to book signed payment but skipped: This has happened before and an "
 "exception with code %d occurred that time."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2049
+#: src/Gateway/ResursDefault.php:2048
 msgid ""
 "Could not complete your order. Please contact support for more information."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2055
+#: src/Gateway/ResursDefault.php:2054
 msgid ""
 "Could not complete order due to signing problems. Did you cancel your order?"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2071
+#: src/Gateway/ResursDefault.php:2070
 #, php-format
 msgid ""
 "Customer returned via urlType \"%s\" - failed or cancelled payment (signing "
 "required: %s)."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2073 src/Module/FormFields.php:560
+#: src/Gateway/ResursDefault.php:2072 src/Module/FormFields.php:560
 #: src/Module/FormFields.php:572 src/Module/FormFields.php:584
 msgid "Yes"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2073
+#: src/Gateway/ResursDefault.php:2072
 msgid "No"
 msgstr ""
 
@@ -274,12 +274,12 @@ msgstr ""
 msgid "Invalid"
 msgstr ""
 
-#: src/Helpers/WooCommerce.php:1018
+#: src/Helpers/WooCommerce.php:1021
 #, php-format
 msgid "Resurs Bank updated order status to %s."
 msgstr ""
 
-#: src/Helpers/WooCommerce.php:1114
+#: src/Helpers/WooCommerce.php:1117
 msgid ""
 "Resurs Bank billing address mismatch with current address in order. Data has "
 "synchronized with Resurs Bank billing data."
@@ -1223,7 +1223,7 @@ msgstr ""
 msgid "Please contact customer service for more information."
 msgstr ""
 
-#: src/Service/OrderHandler.php:83
+#: src/Service/OrderHandler.php:82
 msgid "Shipping"
 msgstr ""
 
@@ -1247,11 +1247,11 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: templates/adminpage_details.phtml:15
+#: templates/adminpage_details.phtml:16
 msgid "Order information and metadata for Resurs Bank"
 msgstr ""
 
-#: templates/adminpage_details.phtml:29
+#: templates/adminpage_details.phtml:30
 msgid ""
 "Payment could not be found at Resurs Bank. The metadata in the plugin "
 "however has been marked as a payment failure at least once during the "
@@ -1260,28 +1260,32 @@ msgid ""
 "other reasons, like internal server errors at Resurs Bank."
 msgstr ""
 
-#: templates/adminpage_details.phtml:55
+#: templates/adminpage_details.phtml:56
 #, php-format
 msgid "Purchased with merchant username \"%s\" from environment \"%s\"."
 msgstr ""
 
 #: templates/adminpage_details.phtml:80
+msgid "Expand metadata view"
+msgstr ""
+
+#: templates/adminpage_details.phtml:100
 msgid ""
 "Data will only be displayed if the purchase has been made with another "
 "merchant account than the current in use."
 msgstr ""
 
-#: templates/adminpage_details.phtml:89
+#: templates/adminpage_details.phtml:109
 msgid ""
 "This data is shown to you since the purchase has been made with another "
 "merchant account than the current in use."
 msgstr ""
 
-#: templates/adminpage_details.phtml:110
+#: templates/adminpage_details.phtml:139
 msgid "Yes."
 msgstr ""
 
-#: templates/adminpage_details.phtml:110
+#: templates/adminpage_details.phtml:139
 msgid "No."
 msgstr ""
 
