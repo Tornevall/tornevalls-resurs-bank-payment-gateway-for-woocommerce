@@ -4,6 +4,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
+use ResursBank\Helpers\WooCommerce;
 use function is_array;
 
 /**
@@ -23,6 +24,57 @@ class Plugin
         add_action('rbwc_mock_create_iframe_exception', [$this, 'mockCreateIframeException']);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
         add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
+        add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
+    }
+
+    /**
+     * Queued status handler. Should not be called directly as it is based on WC_Queue.
+     *
+     * @param $order
+     * @param $status
+     * @param $notice
+     * @throws Exception
+     * @since 0.0.1.0
+     * @link https://github.com/woocommerce/woocommerce/wiki/WC_Queue---WooCommerce-Worker-Queue
+     */
+    public function updateOrderStatusByQueue($order = '', $status = '', $notice = '')
+    {
+        if (!empty($status)) {
+            $properOrder = WooCommerce::getProperOrder($order, 'order');
+
+            $currentStatus = $properOrder->get_status();
+            if ($currentStatus !== $status) {
+                $properOrder->update_status(
+                    $status,
+                    WooCommerce::getOrderNotePrefixed($notice)
+                );
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
+                        __(
+                            'Queued Status Handler: Updated status for %s to %s with notice: %s',
+                            'trbwc'
+                        ),
+                        $order,
+                        $status,
+                        $notice
+                    )
+                );
+            } else {
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
+                        __(
+                            'Queued Status Handler: Status for %s not updated to %s, because that ' .
+                            'status was already set.',
+                            'trbwc'
+                        ),
+                        $order,
+                        $status
+                    )
+                );
+            }
+        }
     }
 
     /**
