@@ -492,7 +492,10 @@ class Data
         if (!empty($wcCustomer)) {
             $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
             $return = !empty($woocommerceCustomerCountry) ?
-                $woocommerceCustomerCountry : get_option('woocommerce_default_country');
+                $woocommerceCustomerCountry : WordPress::applyFilters(
+                    'getDefaultCountry',
+                    get_option('woocommerce_default_country')
+                );
         }
 
         return $return;
