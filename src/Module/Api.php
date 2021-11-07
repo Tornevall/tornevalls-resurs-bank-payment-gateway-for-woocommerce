@@ -3,11 +3,11 @@
 namespace ResursBank\Module;
 
 use Exception;
+use ResursBank\Helpers\WordPress;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursException;
 use RuntimeException;
-use TorneLIB\Exception\ExceptionHandler;
 use function in_array;
 use function is_array;
 
@@ -137,6 +137,8 @@ class Api
             );
             $this->setWsdlCache();
             $this->setEcomConfiguration();
+            $this->setEcomTimeout();
+            $this->setEcomAutoDebitMethods();
         }
 
         return $this->ecom;
@@ -228,6 +230,35 @@ class Api
                 Data::getCheckoutType()
             )
         );
+    }
+
+    /**
+     * @return $this
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setEcomTimeout()
+    {
+        $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', 12);
+        $this->ecom->setFlag('CURL_TIMEOUT', $currentTimeout > 0 ? $currentTimeout : 12);
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     * @since 0.0.1.0
+     */
+    private function setEcomAutoDebitMethods()
+    {
+        $finalizationMethodTypes = (array)Data::getResursOption('order_instant_finalization_methods');
+
+        foreach ($finalizationMethodTypes as $methodType) {
+            if ($methodType !== 'default') {
+                $this->ecom->setAutoDebitableType($methodType);
+            }
+        }
+        return $this;
     }
 
     /**

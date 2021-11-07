@@ -4,6 +4,8 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
+use ResursBank\Helpers\WooCommerce;
+use function is_array;
 
 /**
  * Class Plugin Internal plugin handler.
@@ -19,15 +21,125 @@ class Plugin
         add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
         add_action('rbwc_mock_update_payment_reference_failure', [$this, 'mockUpdatePaymentFailure']);
+        add_action('rbwc_mock_create_iframe_exception', [$this, 'mockCreateIframeException']);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
+        add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
+        add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
     }
 
     /**
+     * Queued status handler. Should not be called directly as it is based on WC_Queue.
+     *
+     * @param $order
+     * @param $status
+     * @param $notice
+     * @throws Exception
+     * @since 0.0.1.0
+     * @link https://github.com/woocommerce/woocommerce/wiki/WC_Queue---WooCommerce-Worker-Queue
+     */
+    public function updateOrderStatusByQueue($order = '', $status = '', $notice = '')
+    {
+        if (!empty($status)) {
+            $properOrder = WooCommerce::getProperOrder($order, 'order');
+
+            $currentStatus = $properOrder->get_status();
+            if ($currentStatus !== $status) {
+                $properOrder->update_status(
+                    $status,
+                    WooCommerce::getOrderNotePrefixed($notice)
+                );
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
+                        __(
+                            'Queued Status Handler: Updated status for %s to %s with notice: %s',
+                            'trbwc'
+                        ),
+                        $order,
+                        $status,
+                        $notice
+                    )
+                );
+            } else {
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
+                        __(
+                            'Queued Status Handler: Status for %s not updated to %s, because that ' .
+                            'status was already set.',
+                            'trbwc'
+                        ),
+                        $order,
+                        $status
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * @param $return
+     * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
-    function mockUpdatePaymentFailure()
+    public function getAvailableAutoDebitMethods($return)
     {
-        throw new Exception('MockException: updatePaymentFailure.', 470);
+        $paymentMethodList = Api::getPaymentMethods();
+        if (is_array($paymentMethodList)) {
+            $return['default'] = __('Default (Choice made by plugin)', 'trbwc');
+            foreach ($paymentMethodList as $method) {
+                if ($method->type === 'PAYMENT_PROVIDER') {
+                    $return[$method->specificType] = $method->specificType;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function mockCreateIframeException()
+    {
+        $this->getMockException(__FUNCTION__);
+    }
+
+    /**
+     * @param $function
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function getMockException($function)
+    {
+        $exceptionCode = 470;
+        Data::canLog(
+            Data::LOG_INFO,
+            sprintf(
+                __('Mocked Exception in action. Throwing MockException for function %s, with error code %d.'),
+                $function,
+                $exceptionCode
+            )
+        );
+
+        throw new Exception(
+            sprintf(
+                'MockException: %s',
+                $function
+            ),
+            $exceptionCode
+        );
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function mockUpdatePaymentFailure()
+    {
+        $this->getMockException(__FUNCTION__);
     }
 
     /**

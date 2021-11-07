@@ -11,6 +11,7 @@ use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Service\OrderHandler;
+use ResursBank\Service\OrderStatus as OrderStatusHandler;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -514,11 +515,15 @@ class WooCommerce
      */
     public static function getFormattedPaymentData($return)
     {
-        $return['customer_billing'] = self::getAdminCustomerAddress(
-            $return['ecom']->customer->address
-        );
-        $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ?
-            self::getAdminCustomerAddress($return['ecom']->deliveryAddress) : [];
+        // This won't work if the payment is not at Resurs yet.
+        if (isset($return['ecom'])) {
+            $return['customer_billing'] = self::getAdminCustomerAddress(
+                $return['ecom']->customer->address
+            );
+
+            $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ?
+                self::getAdminCustomerAddress($return['ecom']->deliveryAddress) : [];
+        }
 
         return $return;
     }
@@ -564,25 +569,6 @@ class WooCommerce
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getValidCart($returnCart = false)
-    {
-        $return = false;
-
-        if (isset(WC()->cart)) {
-            $return = (WC()->cart->get_cart_contents_count() > 0);
-
-            if (!empty(WC()->cart) && $return && $returnCart) {
-                $return = WC()->cart->get_cart();
-            }
-        }
-
-        return $return;
-    }
-
-    /**
      * @param $return
      * @return mixed
      * @since 0.0.1.0
@@ -610,40 +596,6 @@ class WooCommerce
             }
             $return['ecom_short'] = $purgedEcom;
         }
-        return $return;
-    }
-
-    /**
-     * @param $key
-     * @return array|mixed|string
-     * @since 0.0.1.0
-     */
-    public static function getSessionValue($key)
-    {
-        $return = null;
-
-        if (self::getSession()) {
-            $return = WC()->session->get($key);
-        } elseif (isset($_SESSION[$key])) {
-            $return = $_SESSION[$key];
-        }
-
-        return $return;
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private static function getSession()
-    {
-        global $woocommerce;
-
-        $return = false;
-        if (isset($woocommerce->session) && !empty($woocommerce->session)) {
-            $return = true;
-        }
-
         return $return;
     }
 
@@ -700,35 +652,28 @@ class WooCommerce
     }
 
     /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private static function getSession()
+    {
+        global $woocommerce;
+
+        $return = false;
+        if (isset($woocommerce->session) && !empty($woocommerce->session)) {
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
      * @return string
      * @since 0.0.1.0
      */
     public static function getWcApiUrl()
     {
         return sprintf('%s', WC()->api_request_url('ResursDefault'));
-    }
-
-    /**
-     * @param $orderId
-     * @throws ResursException
-     */
-    private static function setSigningMarked($orderId, $byCallback)
-    {
-        if (Data::getOrderMeta('signingRedirectTime', $orderId) &&
-            Data::getOrderMeta('bookPaymentStatus', $orderId) &&
-            empty(Data::getOrderMeta('signingOk', $orderId))
-        ) {
-            Data::setOrderMeta($orderId, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
-            Data::setOrderMeta(
-                $orderId,
-                'signingConfirmed',
-                sprintf(
-                    'Callback:%s-%s',
-                    $byCallback,
-                    strftime('%Y-%m-%d %H:%M:%S', time())
-                )
-            );
-        }
     }
 
     /**
@@ -764,18 +709,7 @@ class WooCommerce
                 );
             }
 
-            if ($order === null) {
-                Data::setLogError(
-                    sprintf(
-                        __(
-                            'Callback with parameter %s received, but failed because $order could not ' .
-                            'instantiate and remained null.',
-                            'trbwc'
-                        ),
-                        $pRequest
-                    )
-                );
-            }
+            self::getHandledCallbackNullOrder($order, $pRequest);
 
             try {
                 Data::setOrderMeta(
@@ -813,7 +747,11 @@ class WooCommerce
         }
 
         Data::setLogNotice(
-            __('Callback Handling Finished.', 'trbwc')
+            sprintf(
+                __('Callback (%s) Handling for %s finished.', 'trbwc'),
+                $callbackType,
+                $pRequest
+            )
         );
 
         self::reply(
@@ -888,16 +826,34 @@ class WooCommerce
 
     /**
      * Set order note, but prefixed by plugin name.
+     *
      * @param $order
+     * @param $orderNote
+     * @param int $is_customer_note
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
      */
     public static function setOrderNote($order, $orderNote, $is_customer_note = 0)
     {
-        self::getProperOrder($order, 'order')->add_order_note(
-            self::getOrderNotePrefixed($orderNote),
-            $is_customer_note
-        );
+        $properOrder = self::getProperOrder($order, 'order');
+        if (method_exists($properOrder, 'get_id') && $properOrder->get_id()) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    __(
+                        'setOrderNote for %s: %s'
+                    ),
+                    $properOrder->get_id(),
+                    $orderNote
+                )
+            );
+
+            self::getProperOrder($order, 'order')->add_order_note(
+                self::getOrderNotePrefixed($orderNote),
+                $is_customer_note
+            );
+        }
     }
 
     /**
@@ -908,7 +864,7 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getProperOrder($orderContainer, $returnAs)
+    public static function getProperOrder($orderContainer, $returnAs)
     {
         if (method_exists($orderContainer, 'get_id')) {
             $orderId = $orderContainer->get_id();
@@ -943,13 +899,34 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    private static function getOrderNotePrefixed($orderNote)
+    public static function getOrderNotePrefixed($orderNote)
     {
         return sprintf(
             '[%s] %s',
             WordPress::applyFilters('getOrderNotePrefix', Data::getPrefix()),
             $orderNote
         );
+    }
+
+    /**
+     * @param $order
+     * @param $pRequest
+     * @since 0.0.1.0
+     */
+    private static function getHandledCallbackNullOrder($order, $pRequest)
+    {
+        if ($order === null) {
+            Data::setLogError(
+                sprintf(
+                    __(
+                        'Callback with parameter %s received, but failed because $order could not ' .
+                        'instantiate and remained null.',
+                        'trbwc'
+                    ),
+                    $pRequest
+                )
+            );
+        }
     }
 
     /**
@@ -962,125 +939,12 @@ class WooCommerce
     private static function getUpdatedOrderByCallback($paymentId, $orderId, $order)
     {
         if ($orderId) {
-            self::setOrderStatusByCallback(Api::getResurs()->getOrderStatusByPayment($paymentId), $order);
             self::getCustomerRealAddress($order);
-        }
-    }
-
-    /**
-     * @param $ecomOrderStatus
-     * @param WC_Order $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function setOrderStatusByCallback($ecomOrderStatus, $order)
-    {
-        switch (true) {
-            case $ecomOrderStatus & OrderStatus::PENDING:
-                self::setOrderStatusWithNotice($order, OrderStatus::PENDING);
-                break;
-            case $ecomOrderStatus & OrderStatus::PROCESSING:
-                self::setOrderStatusWithNotice($order, OrderStatus::PROCESSING);
-                break;
-            case $ecomOrderStatus & OrderStatus::COMPLETED:
-                self::setOrderStatusWithNotice($order, OrderStatus::COMPLETED);
-                break;
-            case $ecomOrderStatus & OrderStatus::ANNULLED:
-                self::setOrderStatusWithNotice($order, OrderStatus::ANNULLED);
-                break;
-            case $ecomOrderStatus & OrderStatus::CREDITED:
-                self::setOrderStatusWithNotice($order, OrderStatus::CREDITED);
-                break;
-            case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
-                self::setOrderStatusWithNotice($order, OrderStatus::AUTO_DEBITED);
-                break;
-            case $ecomOrderStatus & OrderStatus::MANUAL_INSPECTION:
-                self::setOrderStatusWithNotice($order, OrderStatus::MANUAL_INSPECTION);
-                break;
-            default:
-        }
-    }
-
-    /**
-     * @param WC_Order $order
-     * @param $ecomOrderStatus
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function setOrderStatusWithNotice($order, $ecomOrderStatus)
-    {
-        $currentStatus = $order->get_status();
-        $requestedStatus = self::getOrderStatuses($ecomOrderStatus);
-
-        if ($currentStatus !== $requestedStatus) {
-            $return = self::setOrderStatusUpdate(
-                $order,
-                self::getOrderStatuses($ecomOrderStatus),
-                sprintf(
-                    __('Resurs Bank updated order status to %s.', 'trbwc'),
-                    self::getOrderStatuses($ecomOrderStatus)
-                )
+            self::setOrderStatusByCallback(
+                Api::getResurs()->getOrderStatusByPayment($paymentId),
+                $order
             );
-        } else {
-            $orderStatusUpdateNotice = __(
-                sprintf(
-                    '%s notice: Request to set order to status "%s" but current status is already set.',
-                    __FUNCTION__,
-                    $requestedStatus
-                ),
-                'trbwc'
-            );
-            self::setOrderNote(
-                $order,
-                $orderStatusUpdateNotice
-            );
-            Data::setLogNotice($orderStatusUpdateNotice);
-            // Tell them that this went almost well, if they ask.
-            $return = true;
         }
-
-        return $return;
-    }
-
-    /**
-     * @param null $key
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    private static function getOrderStatuses($key = null)
-    {
-        $return = WordPress::applyFilters('getOrderStatuses', [
-            OrderStatus::PROCESSING => 'processing',
-            OrderStatus::CREDITED => 'refunded',
-            OrderStatus::COMPLETED => 'completed',
-            OrderStatus::PENDING => 'on-hold',
-            OrderStatus::ANNULLED => 'cancelled',
-            OrderStatus::ERROR => 'on-hold',
-            OrderStatus::MANUAL_INSPECTION => 'on-hold',
-        ]);
-        if (isset($key, $return[$key])) {
-            return $return[$key];
-        }
-        return $return;
-    }
-
-    /**
-     * Set order status with prefixed note.
-     *
-     * @param $order
-     * @param $newOrderStatus
-     * @param $orderNote
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
-    {
-        return self::getProperOrder($order, 'order')->update_status(
-            $newOrderStatus,
-            self::getOrderNotePrefixed($orderNote)
-        );
     }
 
     /**
@@ -1130,6 +994,152 @@ class WooCommerce
     }
 
     /**
+     * @param $ecomOrderStatus
+     * @param WC_Order $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function setOrderStatusByCallback($ecomOrderStatus, $order)
+    {
+        switch (true) {
+            case $ecomOrderStatus & OrderStatus::PENDING:
+                self::setOrderStatusWithNotice($order, OrderStatus::PENDING);
+                break;
+            case $ecomOrderStatus & OrderStatus::PROCESSING:
+                self::setOrderStatusWithNotice($order, OrderStatus::PROCESSING);
+                break;
+            case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
+                self::setOrderStatusWithNotice($order, OrderStatus::AUTO_DEBITED);
+                break;
+            case $ecomOrderStatus & OrderStatus::COMPLETED:
+                self::setOrderStatusWithNotice($order, OrderStatus::COMPLETED);
+                break;
+            case $ecomOrderStatus & OrderStatus::ANNULLED:
+                self::setOrderStatusWithNotice($order, OrderStatus::ANNULLED);
+                break;
+            case $ecomOrderStatus & OrderStatus::CREDITED:
+                self::setOrderStatusWithNotice($order, OrderStatus::CREDITED);
+                break;
+            case $ecomOrderStatus & OrderStatus::MANUAL_INSPECTION:
+                self::setOrderStatusWithNotice($order, OrderStatus::MANUAL_INSPECTION);
+                break;
+            default:
+        }
+    }
+
+    /**
+     * @param WC_Order $order
+     * @param $ecomOrderStatus
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function setOrderStatusWithNotice($order, $ecomOrderStatus)
+    {
+        $currentStatus = $order->get_status();
+        $requestedStatus = self::getOrderStatuses($ecomOrderStatus);
+
+        if (strtolower($currentStatus) !== strtolower($requestedStatus)) {
+            if ($ecomOrderStatus & OrderStatus::AUTO_DEBITED) {
+                WooCommerce::setOrderNote(
+                    $order,
+                    __(
+                        'Resurs Bank order status update indicates direct debited payment method.',
+                        'trbwc'
+                    )
+                );
+            }
+
+            self::setOrderNote(
+                $order,
+                sprintf(
+                    __('Order status update to %s has been queued.', 'trbwc'),
+                    $requestedStatus
+                )
+            );
+
+            $return = OrderStatusHandler::setOrderStatusWithNotice(
+                $order,
+                $requestedStatus,
+                sprintf(
+                    __('Resurs Bank queued order update: Change from %s to %s from queue.', 'trbwc'),
+                    $currentStatus,
+                    $requestedStatus
+                )
+            );
+        } else {
+            $orderStatusUpdateNotice = __(
+                sprintf(
+                    '%s notice: Request to set order to status "%s" but current status is already set.',
+                    __FUNCTION__,
+                    $requestedStatus
+                ),
+                'trbwc'
+            );
+            self::setOrderNote(
+                $order,
+                $orderStatusUpdateNotice
+            );
+            Data::setLogNotice($orderStatusUpdateNotice);
+            // Tell them that this went almost well, if they ask.
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param null $key
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getOrderStatuses($key = null)
+    {
+        $returnStatusString = 'on-hold';
+        $autoFinalizationString = Data::getResursOption('order_instant_finalization_status');
+
+        $return = WordPress::applyFilters('getOrderStatuses', [
+            OrderStatus::PROCESSING => 'processing',
+            OrderStatus::CREDITED => 'refunded',
+            OrderStatus::COMPLETED => 'completed',
+            OrderStatus::AUTO_DEBITED => $autoFinalizationString !== 'default' ? $autoFinalizationString : 'completed',
+            OrderStatus::PENDING => 'on-hold',
+            OrderStatus::ANNULLED => 'cancelled',
+            OrderStatus::ERROR => 'on-hold',
+            OrderStatus::MANUAL_INSPECTION => 'on-hold',
+        ]);
+        if (isset($key, $return[$key])) {
+            $returnStatusString = $return[$key];
+        }
+
+        return $returnStatusString;
+    }
+
+    /**
+     * @param $orderId
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    private static function setSigningMarked($orderId, $byCallback)
+    {
+        if (Data::getOrderMeta('signingRedirectTime', $orderId) &&
+            Data::getOrderMeta('bookPaymentStatus', $orderId) &&
+            empty(Data::getOrderMeta('signingOk', $orderId))
+        ) {
+            Data::setOrderMeta($orderId, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setOrderMeta(
+                $orderId,
+                'signingConfirmed',
+                sprintf(
+                    'Callback:%s-%s',
+                    $byCallback,
+                    strftime('%Y-%m-%d %H:%M:%S', time())
+                )
+            );
+        }
+    }
+
+    /**
      * @param array $out
      * @param int $code
      * @param string $httpString
@@ -1144,6 +1154,48 @@ class WooCommerce
         header($replyString, true, $code);
         echo json_encode($out);
         exit;
+    }
+
+    /**
+     * Apply actions to WooCommerce Action Queue.
+     *
+     * @param $queueName
+     * @param $value
+     * @since 0.0.1.0
+     */
+    public static function applyQueue($queueName, $value)
+    {
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                WordPress::getFilterName($queueName)
+            ),
+            $value,
+        ];
+
+        return WC()->queue()->add(
+            ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
+        );
+        //WC()->queue()->schedule_recurring(time()+5, 2, WordPress::getFilterName($queueName));
+    }
+
+    /**
+     * Set order status with prefixed note.
+     *
+     * @param $order
+     * @param $newOrderStatus
+     * @param $orderNote
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
+    {
+        return self::getProperOrder($order, 'order')->update_status(
+            $newOrderStatus,
+            self::getOrderNotePrefixed($orderNote)
+        );
     }
 
     /**
@@ -1172,7 +1224,9 @@ class WooCommerce
                     $orderHandler->setPreparedOrderLines();
                     self::setSessionValue('customerCartTotal', WC()->cart->total);
                     // Only update payment session if in RCO mode.
-                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO &&
+                        !empty(WooCommerce::getSessionValue('rco_order_id'))
+                    ) {
                         Api::getResurs()->updateCheckoutOrderLines(
                             WooCommerce::getSessionValue('rco_order_id'),
                             $orderHandler->getOrderLines()
@@ -1183,13 +1237,52 @@ class WooCommerce
         } catch (Exception $e) {
             Data::setLogError(
                 sprintf(
-                    __('%s: Could not create order from an empty cart.', 'trbwc'),
-                    __FUNCTION__
+                    __('Exception (%s) from %s: %s.', 'trbwc'),
+                    $e->getCode(),
+                    __FUNCTION__,
+                    $e->getMessage()
                 )
             );
         }
 
         self::setCustomerCheckoutLocation($isCheckout);
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function getValidCart($returnCart = false)
+    {
+        $return = false;
+
+        if (isset(WC()->cart)) {
+            $return = (WC()->cart->get_cart_contents_count() > 0);
+
+            if (!empty(WC()->cart) && $return && $returnCart) {
+                $return = WC()->cart->get_cart();
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @return array|mixed|string
+     * @since 0.0.1.0
+     */
+    public static function getSessionValue($key)
+    {
+        $return = null;
+
+        if (self::getSession()) {
+            $return = WC()->session->get($key);
+        } elseif (isset($_SESSION[$key])) {
+            $return = $_SESSION[$key];
+        }
+
+        return $return;
     }
 
     /**
