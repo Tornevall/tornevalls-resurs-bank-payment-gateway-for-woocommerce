@@ -180,10 +180,10 @@ class FormFields extends WC_Settings_API
                 ],
             ],
             'payment_methods' => [
-                'title' => __('Payment methods and settings', 'trbwc'),
+                'title' => __('Payment methods and order handling', 'trbwc'),
                 'payment_methods_settings' => [
                     'type' => 'title',
-                    'title' => __('Payment methods and settings', 'trbwc'),
+                    'title' => __('Payment methods and order handling', 'trbwc'),
                     'desc' => __(
                         'This section covers information for your current payment methods that is linked with your ' .
                         'API settings. You can not edit titles or descriptions at this page so if you need to ' .
@@ -444,7 +444,7 @@ class FormFields extends WC_Settings_API
                 ],
             ],
             'advanced' => [
-                'title' => __('Advanced Settings', 'trbwc'),
+                'title' => __('Advanced Merchant', 'trbwc'),
                 'complex_api_section' => [
                     'type' => 'title',
                     'title' => __('Advanced API', 'trbwc'),
@@ -530,10 +530,18 @@ class FormFields extends WC_Settings_API
                             'trbwc'
                         ),
                         'none' => __(
-                            'Not at all, please',
+                            'Do not cache WSDL',
                             'trbwc'
                         ),
                     ],
+                    'desc' => __(
+                        'This setting defines how SOAP requests are being made to Resurs Bank. It is ' .
+                        'usually recommended to keep requests cached (meaning wsdl and data required for a SOAP ' .
+                        'call to work, are stored locally on your server). During development it sometimes ' .
+                        'better to run tests uncached, however, it is not recommended in a production since ' .
+                        'this directly affects network performance (since each SOAP call will include an extra ' .
+                        'network request to the API first).'
+                    ),
                     'default' => 'default',
                 ],
                 'complex_api_section_end' => [
