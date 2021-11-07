@@ -1164,7 +1164,9 @@ class WooCommerce
                     $orderHandler->setPreparedOrderLines();
                     self::setSessionValue('customerCartTotal', WC()->cart->total);
                     // Only update payment session if in RCO mode.
-                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO &&
+                        !empty(WooCommerce::getSessionValue('rco_order_id'))
+                    ) {
                         Api::getResurs()->updateCheckoutOrderLines(
                             WooCommerce::getSessionValue('rco_order_id'),
                             $orderHandler->getOrderLines()
@@ -1175,8 +1177,10 @@ class WooCommerce
         } catch (Exception $e) {
             Data::setLogError(
                 sprintf(
-                    __('%s: Could not create order from an empty cart.', 'trbwc'),
-                    __FUNCTION__
+                    __('Exception (%s) from %s: %s.', 'trbwc'),
+                    $e->getCode(),
+                    __FUNCTION__,
+                    $e->getMessage()
                 )
             );
         }
