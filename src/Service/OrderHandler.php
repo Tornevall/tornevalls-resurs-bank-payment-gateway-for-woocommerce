@@ -79,7 +79,7 @@ class OrderHandler extends ResursDefault
                 WordPress::applyFilters('getShippingName', 'shipping'),
                 WordPress::applyFilters('getShippingDescription', __('Shipping', 'rbwc')),
                 $this->cart->get_shipping_total(),
-                (float)round(
+                round(
                     $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
                     wc_get_price_decimals()
                 ) * 100,
