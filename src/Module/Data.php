@@ -1716,8 +1716,8 @@ class Data
                 $wcErrorCollection[] = $arr['notice'];
             }
             $internalErrorMessage = implode("<br>\n", $wcErrorCollection);
-            Data::canLog(
-                Data::LOG_ERROR,
+            self::canLog(
+                self::LOG_ERROR,
                 $internalErrorMessage
             );
         }
