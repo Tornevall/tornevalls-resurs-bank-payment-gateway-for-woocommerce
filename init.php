@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 require_once(__DIR__ . '/vendor/autoload.php');
-if (!ResursBank\Helpers\WooCommerce::getActiveState()) {
+if (!ResursBank\Service\WooCommerce::getActiveState()) {
     return;
 }
 
@@ -27,12 +27,12 @@ define('RESURSBANK_SNAKECASE_FILTERS', true);
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
-add_action('plugins_loaded', 'ResursBank\Helpers\WordPress::initializePlugin');
+add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializePlugin');
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 
 // Making sure that we do not coexist with prior versions.
-add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Helpers\WordPress::getPriorVersionsDisabled');
+add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Service\WordPress::getPriorVersionsDisabled');
 
 load_plugin_textdomain(
     'trbwc',

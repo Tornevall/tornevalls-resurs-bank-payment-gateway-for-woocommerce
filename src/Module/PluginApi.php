@@ -6,9 +6,9 @@ use Exception;
 use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Helpers\WooCommerce;
-use ResursBank\Helpers\WordPress;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
 use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
@@ -127,35 +127,6 @@ class PluginApi
     }
 
     /**
-     * @since 0.0.1.0
-     */
-    public static function getCostOfPurchase()
-    {
-        $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
-        $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
-
-        $method = WooCommerce::getRequest('method');
-        $total = WooCommerce::getRequest('total');
-        if (Data::getCustomerCountry() !== 'DK') {
-            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation($method, $total, true, true);
-        } else {
-            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation(Api::getPaymentMethods(), $total, false, true);
-        }
-
-        echo Data::getGenericClass()
-            ->getTemplate(
-                'checkout_costofpurchase_default.phtml',
-                [
-                    'wooCommerceStyleSheet' => $wooCommerceStyleSheet,
-                    'resursStyleSheet' => $resursStyleSheet,
-                    'priceInfoHtml' => $priceInfoHtml,
-                ]
-            );
-
-        die;
-    }
-
-    /**
      * @param null $expire
      * @param null $noReply Boolean that returns the answer instead of replying live.
      * @return bool
@@ -235,6 +206,35 @@ class PluginApi
     private static function getParam($key)
     {
         return isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function getCostOfPurchase()
+    {
+        $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
+        $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
+
+        $method = WooCommerce::getRequest('method');
+        $total = WooCommerce::getRequest('total');
+        if (Data::getCustomerCountry() !== 'DK') {
+            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation($method, $total, true, true);
+        } else {
+            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation(Api::getPaymentMethods(), $total, false, true);
+        }
+
+        echo Data::getGenericClass()
+            ->getTemplate(
+                'checkout_costofpurchase_default.phtml',
+                [
+                    'wooCommerceStyleSheet' => $wooCommerceStyleSheet,
+                    'resursStyleSheet' => $resursStyleSheet,
+                    'priceInfoHtml' => $priceInfoHtml,
+                ]
+            );
+
+        die;
     }
 
     /**
@@ -435,10 +435,11 @@ class PluginApi
         Data::setLogNotice(
             sprintf(
                 __(
-                    'Credentials for Resurs was validated successfully. Response was %s.',
+                    'Resurs Bank credential validation for environment %s executed, response was %s.',
                     'trbwc'
                 ),
-                $validationResponse
+                self::getParam('e'),
+                is_bool($validationResponse) && (bool)$validationResponse ? 'true' : 'false'
             )
         );
 

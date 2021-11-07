@@ -1,6 +1,6 @@
 <?php
 
-namespace ResursBank\Helpers;
+namespace ResursBank\Service;
 
 use Exception;
 use Resursbank\Ecommerce\Types\OrderStatus;

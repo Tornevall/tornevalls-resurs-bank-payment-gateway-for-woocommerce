@@ -3,7 +3,7 @@
 namespace ResursBank\Service;
 
 use Exception;
-use ResursBank\Helpers\WooCommerce;
+use ResursBank\Service\WooCommerce;
 use WC_Queue_Interface;
 
 /**
