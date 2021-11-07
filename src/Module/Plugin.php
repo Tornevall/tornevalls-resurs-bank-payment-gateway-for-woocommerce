@@ -4,7 +4,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Helpers\WooCommerce;
+use ResursBank\Service\WooCommerce;
 use function is_array;
 
 /**

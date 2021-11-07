@@ -3,7 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
-use ResursBank\Helpers\WordPress;
+use ResursBank\Service\WordPress;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursException;

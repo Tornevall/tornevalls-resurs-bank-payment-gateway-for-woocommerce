@@ -4,8 +4,8 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Helpers\WooCommerce;
-use ResursBank\Helpers\WordPress;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
 use stdClass;

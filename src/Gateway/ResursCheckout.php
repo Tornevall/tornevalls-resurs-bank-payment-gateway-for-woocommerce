@@ -3,7 +3,7 @@
 namespace ResursBank\Gateway;
 
 use Exception;
-use ResursBank\Helpers\WooCommerce;
+use ResursBank\Service\WooCommerce;
 use ResursBank\Module\Data;
 
 /**
