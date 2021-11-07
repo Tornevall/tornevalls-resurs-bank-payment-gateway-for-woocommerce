@@ -510,19 +510,26 @@ class Data
     }
 
     /**
-     * @param $annuityPaymentMethod
-     * @param $monthlyPrice
-     * @return string
+     * @param $paymentMethodId
+     * @return array|stdClass
+     * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getReadMoreString($annuityPaymentMethod, $monthlyPrice)
+    public static function getPaymentMethodById($paymentMethodId)
     {
-        return sprintf(
-            '<span style="cursor:pointer !important; font-weight:bold;" onclick="getRbReadMoreClicker(\'%s\', %s)">%s</span>',
-            $annuityPaymentMethod['id'],
-            $monthlyPrice,
-            WordPress::applyFilters('partPaymentReadMoreString', __('Read more.', 'trbwc'))
-        );
+        $return = [];
+
+        $storedMethods = Api::getPaymentMethods();
+        if (is_array($storedMethods)) {
+            foreach ($storedMethods as $method) {
+                if (isset($method->id) && $method->id === $paymentMethodId) {
+                    $return = $method;
+                    break;
+                }
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -605,6 +612,22 @@ class Data
     private static function getWcPriceSpan($monthlyPrice, $wcPriceRequest = [])
     {
         return sprintf('<span id="r_annuity_price">%s</span>', wc_price($monthlyPrice, $wcPriceRequest));
+    }
+
+    /**
+     * @param $annuityPaymentMethod
+     * @param $monthlyPrice
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getReadMoreString($annuityPaymentMethod, $monthlyPrice)
+    {
+        return sprintf(
+            '<span style="cursor:pointer !important; font-weight:bold;" onclick="getRbReadMoreClicker(\'%s\', %s)">%s</span>',
+            $annuityPaymentMethod['id'],
+            $monthlyPrice,
+            WordPress::applyFilters('partPaymentReadMoreString', __('Read more.', 'trbwc'))
+        );
     }
 
     /**
@@ -1531,29 +1554,6 @@ class Data
     public static function hasOldGateway()
     {
         return defined('RB_WOO_VERSION') ? true : false;
-    }
-
-    /**
-     * @param $paymentMethodId
-     * @return array|stdClass
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getPaymentMethodById($paymentMethodId)
-    {
-        $return = [];
-
-        $storedMethods = Api::getPaymentMethods();
-        if (is_array($storedMethods)) {
-            foreach ($storedMethods as $method) {
-                if (isset($method->id) && $method->id === $paymentMethodId) {
-                    $return = $method;
-                    break;
-                }
-            }
-        }
-
-        return $return;
     }
 
     /**

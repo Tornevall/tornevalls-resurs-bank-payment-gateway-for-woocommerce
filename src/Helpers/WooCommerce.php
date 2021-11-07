@@ -948,27 +948,49 @@ class WooCommerce
     }
 
     /**
-     * Apply actions to WooCommerce Action Queue.
-     *
-     * @param $queueName
-     * @param $value
+     * @param $order
+     * @return bool
+     * @throws Exception
      * @since 0.0.1.0
      */
-    public static function applyQueue($queueName, $value)
+    private static function getCustomerRealAddress($order)
     {
-        $applyArray = [
-            sprintf(
-                '%s_%s',
-                'rbwc',
-                WordPress::getFilterName($queueName)
-            ),
-            $value,
-        ];
+        $return = false;
+        $resursPayment = Data::getOrderMeta('resurspayment', $order);
+        if (is_object($resursPayment) && isset($resursPayment->customer)) {
+            $billingAddress = $order->get_address('billing');
+            $orderId = $order->get_id();
+            if ($orderId > 0 && isset($resursPayment->customer->address)) {
+                foreach (self::$getAddressTranslation as $item => $value) {
+                    if (isset($billingAddress[$item], $resursPayment->customer->address->{$value}) &&
+                        $billingAddress[$item] !== $resursPayment->customer->address->{$value}
+                    ) {
+                        update_post_meta(
+                            $orderId,
+                            sprintf('_billing_%s', $item),
+                            $resursPayment->customer->address->{$value}
+                        );
+                        $return = true;
+                    }
+                }
+            }
+        }
 
-        return WC()->queue()->add(
-            ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
-        );
-        //WC()->queue()->schedule_recurring(time()+5, 2, WordPress::getFilterName($queueName));
+        if ($return) {
+            $synchNotice = __(
+                'Resurs Bank billing address mismatch with current address in order. ' .
+                'Data has synchronized with Resurs Bank billing data.',
+                'resurs-bank-payment-gateway-for-woocommerce'
+            );
+            Data::setOrderMeta($order, 'customerSynchronization', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setLogNotice($synchNotice);
+            WooCommerce::setOrderNote(
+                $order,
+                $synchNotice
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -1094,70 +1116,6 @@ class WooCommerce
     }
 
     /**
-     * Set order status with prefixed note.
-     *
-     * @param $order
-     * @param $newOrderStatus
-     * @param $orderNote
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
-    {
-        return self::getProperOrder($order, 'order')->update_status(
-            $newOrderStatus,
-            self::getOrderNotePrefixed($orderNote)
-        );
-    }
-
-    /**
-     * @param $order
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getCustomerRealAddress($order)
-    {
-        $return = false;
-        $resursPayment = Data::getOrderMeta('resurspayment', $order);
-        if (is_object($resursPayment) && isset($resursPayment->customer)) {
-            $billingAddress = $order->get_address('billing');
-            $orderId = $order->get_id();
-            if ($orderId > 0 && isset($resursPayment->customer->address)) {
-                foreach (self::$getAddressTranslation as $item => $value) {
-                    if (isset($billingAddress[$item], $resursPayment->customer->address->{$value}) &&
-                        $billingAddress[$item] !== $resursPayment->customer->address->{$value}
-                    ) {
-                        update_post_meta(
-                            $orderId,
-                            sprintf('_billing_%s', $item),
-                            $resursPayment->customer->address->{$value}
-                        );
-                        $return = true;
-                    }
-                }
-            }
-        }
-
-        if ($return) {
-            $synchNotice = __(
-                'Resurs Bank billing address mismatch with current address in order. ' .
-                'Data has synchronized with Resurs Bank billing data.',
-                'resurs-bank-payment-gateway-for-woocommerce'
-            );
-            Data::setOrderMeta($order, 'customerSynchronization', strftime('%Y-%m-%d %H:%M:%S', time()));
-            Data::setLogNotice($synchNotice);
-            WooCommerce::setOrderNote(
-                $order,
-                $synchNotice
-            );
-        }
-
-        return $return;
-    }
-
-    /**
      * @param $orderId
      * @throws ResursException
      * @since 0.0.1.0
@@ -1196,6 +1154,48 @@ class WooCommerce
         header($replyString, true, $code);
         echo json_encode($out);
         exit;
+    }
+
+    /**
+     * Apply actions to WooCommerce Action Queue.
+     *
+     * @param $queueName
+     * @param $value
+     * @since 0.0.1.0
+     */
+    public static function applyQueue($queueName, $value)
+    {
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                WordPress::getFilterName($queueName)
+            ),
+            $value,
+        ];
+
+        return WC()->queue()->add(
+            ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
+        );
+        //WC()->queue()->schedule_recurring(time()+5, 2, WordPress::getFilterName($queueName));
+    }
+
+    /**
+     * Set order status with prefixed note.
+     *
+     * @param $order
+     * @param $newOrderStatus
+     * @param $orderNote
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
+    {
+        return self::getProperOrder($order, 'order')->update_status(
+            $newOrderStatus,
+            self::getOrderNotePrefixed($orderNote)
+        );
     }
 
     /**
