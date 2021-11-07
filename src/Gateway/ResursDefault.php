@@ -259,7 +259,7 @@ class ResursDefault extends WC_Payment_Gateway
                 if (($deprecatedIcon = $this->getMethodIconDeprecated($typeCheck))) {
                     $return = $deprecatedIcon;
                 }
-                if (($icon = $this->getIconByFilter($typeCheck))) {
+                if (($icon = $this->getIconByFilter())) {
                     $return = $icon;
                     break;
                 }
@@ -286,11 +286,10 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param $type
      * @return mixed
      * @since 0.0.1.0
      */
-    private function getIconByFilter($type)
+    private function getIconByFilter()
     {
         return WordPress::applyFilters(
             'getPaymentMethodIcon',
@@ -425,7 +424,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getTermsByRco($pageId)
     {
-        if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+        if (Data::getCheckoutType() === self::TYPE_RCO) {
             $pageId = 0;
         }
         return $pageId;
