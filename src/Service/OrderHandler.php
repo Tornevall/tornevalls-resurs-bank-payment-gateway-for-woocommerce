@@ -17,16 +17,15 @@ use WC_Product;
 class OrderHandler extends ResursDefault
 {
     /**
-     * @var array
-     * @since 0.0.1.0
-     */
-    private $cart;
-
-    /**
      * @var Api
      * @since 0.0.1.0
      */
     protected $API;
+    /**
+     * @var array
+     * @since 0.0.1.0
+     */
+    private $cart;
 
     /**
      * @param $cart
@@ -150,6 +149,36 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function setOrderRows()
+    {
+        if (WooCommerce::getValidCart()) {
+            foreach (WooCommerce::getValidCart(true) as $item) {
+                /**
+                 * Data object is of type WC_Product_Simple actually.
+                 * @var WC_Product $productData
+                 */
+                $productData = $item['data'];
+
+                if ($productData !== null) {
+                    Data::setDeveloperLog(
+                        __FUNCTION__,
+                        sprintf(
+                            'Add orderline %s.',
+                            $productData->get_id()
+                        )
+                    );
+                    $this->setOrderRow('ORDER_LINE', $productData, $item);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return array
      * @throws Exception
      * @since 0.0.1.0
@@ -183,36 +212,6 @@ class OrderHandler extends ResursDefault
     public function setApi($api)
     {
         $this->API = $api;
-
-        return $this;
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setOrderRows()
-    {
-        if (WooCommerce::getValidCart()) {
-            foreach (WooCommerce::getValidCart(true) as $item) {
-                /**
-                 * Data object is of type WC_Product_Simple actually.
-                 * @var WC_Product $productData
-                 */
-                $productData = $item['data'];
-
-                if ($productData !== null) {
-                    Data::setDeveloperLog(
-                        __FUNCTION__,
-                        sprintf(
-                            'Add orderline %s.',
-                            $productData->get_id()
-                        )
-                    );
-                    $this->setOrderRow('ORDER_LINE', $productData, $item);
-                }
-            }
-        }
 
         return $this;
     }
