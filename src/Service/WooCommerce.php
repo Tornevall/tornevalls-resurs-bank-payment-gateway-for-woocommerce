@@ -163,6 +163,19 @@ class WooCommerce
                     }
                     unset($gateways[$gatewayName]);
                 }
+            } else {
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
+                        __(
+                            'Chosen customer country is "%s" and not matching the one currently set in ' .
+                            'WooCommerce (%s). It is not guaranteed that all payment methods is shown in this mode.',
+                            'trbwc'
+                        ),
+                        $customerCountry,
+                        get_option('woocommerce_default_country')
+                    )
+                );
             }
         }
 
