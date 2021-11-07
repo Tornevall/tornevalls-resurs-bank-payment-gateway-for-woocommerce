@@ -3,7 +3,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: trwbc\n"
 "POT-Creation-Date: 2021-11-07 20:03+0100\n"
-"PO-Revision-Date: 2021-11-07 20:14+0100\n"
+"PO-Revision-Date: 2021-11-07 20:23+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -49,7 +49,7 @@ msgstr "Resurs Bank AB"
 #: src/Gateway/ResursDefault.php:542
 #, php-format
 msgid "An error (%s, code %s) occurred during the iframe creation. Retrying with a new payment id."
-msgstr "Ett fel (%s, kod %s) inträffade när iframe skulle skapas. Försöker igen med ett nytt betalnings-ID."
+msgstr "Ett fel (%s, kod %s) inträffade när iframe skulle skapas. Försöker igen med ett nytt betalnings-id."
 
 #: src/Gateway/ResursDefault.php:735
 #, php-format
@@ -654,7 +654,7 @@ msgstr "Cachelagra inte WSDL"
 
 #: src/Module/FormFields.php:573
 msgid "This setting defines how SOAP requests are being made to Resurs Bank. It is usually recommended to keep requests cached (meaning wsdl and data required for a SOAP call to work, are stored locally on your server). During development it sometimes better to run tests uncached, however, it is not recommended in a production since this directly affects network performance (since each SOAP call will include an extra network request to the API first)."
-msgstr "Den här inställningen definierar hur SOAP-anrop görs till Resurs Bank. Vi rekommenderar vanligtvis att du håller anropen cachelagrade (vilket innebär att wsdl och data som krävs för att ett SOAP-anrop skall fungera lagras detta lokalt på servern). Under utveckling är det ibland bättre att köra tester ocachat, men det rekommenderas inte i en produktion eftersom detta direkt påverkar nätverksprestanda (eftersom varje SOAP-anrop kommer att utföra en extra nätverksbegäran till APIet först)."
+msgstr "Den här inställningen definierar hur SOAP-anrop görs till Resurs Bank. Vi rekommenderar vanligtvis att du håller anropen cachelagrade (vilket innebär att wsdl och data som krävs för att ett SOAP-anrop skall fungera lagras detta lokalt på servern). Under utveckling är det ibland bättre att köra tester ocachat, men det rekommenderas inte i en produktion eftersom detta direkt påverkar nätverksprestanda (eftersom varje SOAP-anrop kommer att utföra en extra nätverksbegäran mot API'et först)."
 
 #: src/Module/FormFields.php:587
 msgid "Developer Section"
@@ -807,7 +807,7 @@ msgstr "Misslyckas med att skapa iframe"
 
 #: src/Module/FormFields.php:945
 msgid "This setting enables a fictive error in the checkout where the iframe fails to render. This has happened during development, where the current payment id used by the plugin collided with an already existing order id at Resurs Bank."
-msgstr "Den här inställningen aktiverar ett fiktigt fel i kassan där iframe inte kan skapas. Detta har skett under utveckling, där det nuvarande betalnings id som användes av pluginet kolliderade med ett redan befintligt order-id på Resurs Bank."
+msgstr "Den här inställningen aktiverar ett fiktivt fel i kassan där iframe inte kan skapas. Detta har skett under utveckling, där det nuvarande betalnings id som användes av tillägget kolliderade med ett redan befintligt order-id på Resurs Bank."
 
 #: src/Module/FormFields.php:1012
 msgid "Private person"
@@ -862,7 +862,7 @@ msgstr "Standard (Val gjort av plugin)"
 #: src/Module/Plugin.php:121
 #, php-format
 msgid "Mocked Exception in action. Throwing MockException for function %s, with error code %d."
-msgstr "Fiktivt undantagfel körs. Kastar MockException för funktion %s, med felkod %d."
+msgstr "Fiktivt undantagsfel körs. Kastar MockException för funktion %s, med felkod %d."
 
 #: src/Module/Plugin.php:216
 #, php-format
