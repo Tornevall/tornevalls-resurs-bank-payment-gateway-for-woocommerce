@@ -1,4 +1,5 @@
-<span id="rbGetAddressFields">
+<?php if ($get_address_form || $get_address_form_always) { ?>
+    <span id="rbGetAddressFields">
     <div>
         <input type="radio"
                id="resursSsnCustomerTypeNatural"
@@ -27,9 +28,11 @@
     </div>
     <div style="display: none;" class="resursGetAddressError"></div>
     <div id="resursGetAddressSpinnify" style="display: none;"></div>
-    <?php if ($supported_country) { ?>
+    <?php
+    if ($supported_country && $get_address_form) { ?>
         <div>
             <button onclick="getResursAddress();return false;"><?php echo $customer_button_text; ?></button>
         </div>
     <?php } ?>
 </span>
+<?php } ?>

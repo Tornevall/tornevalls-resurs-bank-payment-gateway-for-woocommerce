@@ -248,12 +248,24 @@ class FormFields extends WC_Settings_API
                 'get_address_form' => [
                     'id' => 'get_address_form',
                     'type' => 'checkbox',
-                    'title' => __('Use getAddress forms in checkout', 'trbwc'),
+                    'title' => __('Use address information lookup service', 'trbwc'),
                     'desc' => __('Enabled', 'trbwc'),
                     'default' => 'yes',
                     'desc_tip' => __(
-                        'This enables address lookup forms in checkout, when available. ' .
+                        'This enables address lookup forms (getAddress) in checkout, when available. ' .
                         'Countries currently supported is SE (government id) and NO (phone number).',
+                        'trbwc'
+                    ),
+                ],
+                'get_address_form_always' => [
+                    'id' => 'get_address_form_always',
+                    'type' => 'checkbox',
+                    'title' => __('Always show government id field from address service', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'default' => 'no',
+                    'desc_tip' => __(
+                        'With this setting enabled, the getAddress form will always be shown, regardless of country ' .
+                        'compatibility.',
                         'trbwc'
                     ),
                 ],
@@ -992,20 +1004,8 @@ class FormFields extends WC_Settings_API
      */
     public static function getGetAddressForm($checkout, $returnHtml = false)
     {
-        // Run only on correct conditions.
-        $getAddressFormDefault = Data::getResursOption('get_address_form');
-        // Being compatible. Enforced mode.
-        if ((bool)WordPress::applyFiltersDeprecated('resurs_getaddress_enabled', null)) {
-            $getAddressFormDefault = true;
-        }
-        // If $getAddressFormDefault is false (not enabled) or ...
-        // If getAddressDisabled (filter) is returning other than false.
-        if (!$getAddressFormDefault || (bool)WordPress::applyFilters('getAddressDisabled', !$getAddressFormDefault)) {
-            return;
-        }
-        //$countryByConditions = Data::getCustomerCountry();
+        $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
         $customerTypeByConditions = Data::getCustomerType();
-
         $return = Data::getGenericClass()->getTemplate(
             'checkout_getaddress.phtml',
             [
@@ -1014,6 +1014,8 @@ class FormFields extends WC_Settings_API
                 'customer_type' => (null === $customerTypeByConditions) ? 'NATURAL' : $customerTypeByConditions,
                 'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
                 'supported_country' => Data::isGetAddressSupported(),
+                'get_address_form' => Data::canUseGetAddressForm(),
+                'get_address_form_always' => $getAddressFormAlways
             ]
         );
         if ($returnHtml) {

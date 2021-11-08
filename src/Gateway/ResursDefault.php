@@ -1260,22 +1260,34 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         if (count($requiredFields)) {
+            $getAddressVisible = Data::canUseGetAddressForm();
             foreach ($requiredFields as $fieldName) {
                 $fieldValue = null;
+                $displayField = $this->getDisplayableField($fieldName);
+                $streamLineFields = Data::getResursOption('streamline_payment_fields');
                 switch ($fieldName) {
                     case 'government_id':
                         $fieldValue = WooCommerce::getSessionValue('identification');
+                        if (!$getAddressVisible) {
+                            $displayField = true;
+                        } elseif (!$streamLineFields) {
+                            $displayField = false;
+                        }
+                        if ($this->paymentMethodInformation->type === 'PAYMENT_PROVIDER' && $displayField) {
+                            $displayField = false;
+                            // External payment methods does not require the govt. id.
+                            $streamLineFields = false;
+                        }
                         break;
                     default:
-                        break;
                 }
                 $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
-                    'displayMode' => $this->getDisplayableField($fieldName) ? '' : 'none',
+                    'displayMode' => $displayField ? '' : 'none',
                     'methodId' => isset(
                         $this->paymentMethodInformation->id
                     ) ? $this->paymentMethodInformation->id : '?',
                     'fieldSize' => WordPress::applyFilters('getPaymentFieldSize', 24, $fieldName),
-                    'streamLine' => Data::getResursOption('streamline_payment_fields'),
+                    'streamLine' => $streamLineFields,
                     'fieldLabel' => FormFields::getFieldString($fieldName),
                     'fieldName' => sprintf(
                         '%s_%s_%s',
