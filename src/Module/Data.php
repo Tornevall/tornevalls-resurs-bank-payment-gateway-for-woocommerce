@@ -18,6 +18,7 @@ use WC_Customer;
 use WC_Logger;
 use WC_Order;
 use function count;
+use function in_array;
 use function is_array;
 
 /**
@@ -1699,7 +1700,37 @@ class Data
      */
     public static function isGetAddressSupported()
     {
-        return in_array(self::getCustomerCountry(), ['NO', 'SE'], true);
+        $return = in_array(
+            self::getCustomerCountry(),
+            WordPress::applyFilters(
+                'getCompatibleGetAddressCountries',
+                ['NO', 'SE']
+            ),
+            true
+        );
+
+        return $return;
+    }
+
+    /**
+     * Complex settings for getAddress forms.
+     *
+     * @return bool|mixed
+     * @since 0.0.1.0
+     */
+    public static function canUseGetAddressForm()
+    {
+        $getAddressDisabled = (bool)WordPress::applyFilters('getAddressDisabled', false);
+        $getAddressFormDefault = (bool)WordPress::applyFiltersDeprecated(
+            'resurs_getaddress_enabled',
+            Data::getResursOption('get_address_form')
+        );
+        if ($getAddressDisabled) {
+            // Filter overrides the config settings.
+            $getAddressFormDefault = $getAddressDisabled;
+        }
+
+        return $getAddressFormDefault;
     }
 
     /**
