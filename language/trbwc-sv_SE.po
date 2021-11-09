@@ -3,7 +3,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: trwbc\n"
 "POT-Creation-Date: 2021-11-08 08:29+0100\n"
-"PO-Revision-Date: 2021-11-08 08:32+0100\n"
+"PO-Revision-Date: 2021-11-08 10:00+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -510,7 +510,7 @@ msgstr "Mall för delbetalning"
 
 #: src/Module/FormFields.php:313
 msgid "When you enable the part payment options for products, you can choose your own template to display. Templates are built on WordPress pages. If you want to show a custom page, you may choose which page you want to show here. Shortcodes that can be use: [currency], [monthlyPrice], [monthlyDuration], [methodId], [methodDescription]. If you use a custom text [monthlyPrice] will be delivered without the currency, so you have to add that part yourself."
-msgstr "När du aktiverar delbetalningsalternativen för produkter kan du välja vilken mall du vill visa. Mallar är byggda på WordPress-sidor. Om du vill visa en anpassad sida kan du välja vilken sida du vill visa här. Kortkoder som kan användas: [valuta], [monthlyPrice], [monthlyDuration], [methodId], [methodDescription]. Om du använder en anpassad text [månadspris] levereras utan valuta, så du måste lägga till den delen själv."
+msgstr "När du aktiverar delbetalningsalternativen för produkter kan du välja vilken mall du vill visa. Mallar är byggda på WordPress-sidor. Om du vill visa en anpassad sida kan du välja vilken sida du vill visa här. Kortkoder som kan användas: [currency], [monthlyPrice], [monthlyDuration], [methodId], [methodDescription]. Om du använder en anpassad text [monthlyPrice], levereras priset utan valuta, så du måste lägga till den delen själv."
 
 #: src/Module/FormFields.php:339
 msgid "Use default (Completed)"

@@ -803,6 +803,27 @@ class FormFields extends WC_Settings_API
                 'dev_section_end' => [
                     'type' => 'sectionend',
                 ],
+                'bleeding_edge_settings' => [
+                    'type' => 'title',
+                    'title' => 'Bleeding Edge',
+                ],
+                'bleeding_edge' => [
+                    'id' => 'bleeding_edge',
+                    'title' => __('Bleeding Edge Checkout Technology', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __('Enable', 'trbwc'),
+                    'desc_tip' => __(
+                        'Enable features that may be both groundbreaking and platform breaking (a joke). ' .
+                        'The features enabled here are not guaranteed to work in production environments and ' .
+                        'should only be enabled by a developer. Bleeding edge mode can only be used in ' .
+                        'test. Also please note, that features within this area, requires higher versions of PHP.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'bleeding_edge_settings_end' => [
+                    'type' => 'sectionend',
+                ],
                 'admin_tweaking_section' => [
                     'type' => 'title',
                     'title' => 'Administration Tweaking',
