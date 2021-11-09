@@ -46,7 +46,7 @@ if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
 use Exception;
 use ReflectionException;
 use RESURS_EXCEPTIONS;
-use Resursbank\Ecommerce\Helpers\Helper;
+use Resursbank\Ecommerce\Service\Translation;
 use Resursbank\Ecommerce\Types\AftershopAction;
 use Resursbank\Ecommerce\Types\Callback;
 use Resursbank\Ecommerce\Types\CheckoutType;
@@ -74,7 +74,7 @@ if (!defined('ECOMPHP_VERSION')) {
     define('ECOMPHP_VERSION', (new Generic())->getVersionByAny(__FILE__, 3, ResursBank::class));
 }
 if (!defined('ECOMPHP_MODIFY_DATE')) {
-    define('ECOMPHP_MODIFY_DATE', '20210909');
+    define('ECOMPHP_MODIFY_DATE', '20211028');
 }
 
 /**
@@ -102,7 +102,7 @@ class ResursBank
 
     ///// Debugging, helpers and development
     /**
-     * Current targeted environment - default is always test, as we don't like that mistakes are going production
+     * Current targeted environment - default is always test, as we dont like that mistakes are going production
      *
      * @var int
      */
@@ -1177,7 +1177,8 @@ class ResursBank
     /**
      * @return bool
      */
-    private function getValidatedCredentials() {
+    private function getValidatedCredentials()
+    {
         try {
             $this->getRegisteredEventCallback(Callback::BOOKED);
             $result = true;
@@ -3286,7 +3287,7 @@ class ResursBank
             $paymentMethodIdOrFactorObject = $methodObject;
         }
         $return = '';
-        $helper = (new Helper())->setLanguage($language);
+        $helper = (new Translation())->setLanguage($language);
         $methodList = $helper->getMethodsByPhrases();
         if (isset($paymentMethodIdOrFactorObject->id)) {
             $lCaseId = strtolower($paymentMethodIdOrFactorObject->id);
@@ -4047,9 +4048,93 @@ class ResursBank
     }
 
     /**
+     * @param $key
+     * @param string $customerType
+     * @return mixed
+     */
+    public function getSimplifiedRequiredFields($key, $customerType = 'NATURAL')
+    {
+        $fields = $this->getSimplifiedFieldArray($customerType);
+
+        return !empty($key) && isset($fields[$key]) ? $fields[$key] : $fields['undefined'];
+    }
+
+    /**
+     * @param $customerType
+     * @param null $paymentMethod
+     * @return array
+     */
+    private function getSimplifiedFieldArray($customerType)
+    {
+        $fields = [
+            'NATURAL' => [
+                'INVOICE' => [
+                    'government_id',
+                    'phone',
+                    'mobile',
+                    'email',
+                ],
+                'INVOICE_LEGAL' => [
+                    'government_id',
+                    'phone',
+                    'mobile',
+                    'email',
+                    'government_id_contact',
+                ],
+                'CARD' => [
+                    'government_id',
+                ],
+                'DEBIT_CARD' => [
+                    'government_id',
+                ],
+                'CREDIT_CARD' => [
+                    'government_id',
+                ],
+                'REVOLVING_CREDIT' => [
+                    'government_id',
+                    'mobile',
+                    'email',
+                ],
+                'PART_PAYMENT' => [
+                    'government_id',
+                    'phone',
+                    'mobile',
+                    'email',
+                ],
+                'undefined' => [
+                    'government_id',
+                    'phone',
+                    'mobile',
+                    'email',
+                ],
+            ],
+            'LEGAL' => [
+                'undefined' => [
+                    'applicant-government-id',
+                    'applicant-telephone-number',
+                    'applicant-mobile-number',
+                    'applicant-email-address',
+                    'applicant-full-name',
+                    'contact-government-id',
+                ],
+            ],
+        ];
+
+        switch ($customerType) {
+            case 'LEGAL';
+                $return = $fields['LEGAL'];
+                break;
+            default:
+                $return = $fields['NATURAL'];
+        }
+
+        return $return;
+    }
+
+    /**
      * If payment amount is within allowed limits of payment method
      *
-     * @param int $totalAmount
+     * @param flaot $totalAmount
      * @param int $minimumAmount
      * @param int $maxmimumAMount
      * @return bool
