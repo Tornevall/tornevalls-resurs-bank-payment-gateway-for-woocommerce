@@ -747,8 +747,15 @@ class WooCommerce
                     Data::setLogException($e);
                 }
             } else {
-                $code = 406; // Not acceptable
-                $responseString = 'Digest rejected';
+                $code = OrderStatusHandler::HTTP_STATUS_DIGEST_IS_WRONG; // Not acceptable
+                $responseString = 'Digest rejected.';
+                if (!$orderId) {
+                    $code = OrderStatusHandler::HTTP_STATUS_ORDER_IS_GONE;
+                    $responseString = 'Order is not ours.';
+                }
+                if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
+                    $code = OrderStatusHandler::HTTP_STATUS_ORDER_IS_NOT_OURS;
+                }
             }
             $replyArray['digestCode'] = $code;
         } elseif ($callbackType === 'TEST') {
