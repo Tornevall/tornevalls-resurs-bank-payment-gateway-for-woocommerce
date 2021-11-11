@@ -330,6 +330,20 @@ class FormFields extends WC_Settings_API
                     'type' => 'title',
                     'title' => 'Order Status Mapping',
                 ],
+                'accept_rejected_callbacks' => [
+                    'id' => 'accept_rejected_callbacks',
+                    'type' => 'checkbox',
+                    'title' => __('Accept rejected callbacks', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'default' => 'no',
+                    'desc_tip' => __(
+                        'When Resurs Bank has a callback delivery where the order does not exist in the system, the ' .
+                        'plugin will respond with HTTP 410 (Gone). However, if callbacks from Resurs Bank is ' .
+                        'looping eternally due to this problem, this option allows the plugin to pretend that the ' .
+                        'order has been properly updated. Such cases will be replied with HTTP 204 (No content).',
+                        'trbwc'
+                    ),
+                ],
                 'order_instant_finalization_status' => [
                     'id' => 'order_instant_finalization_status',
                     'title' => 'Automatically debited order status',

@@ -13,6 +13,31 @@ use WC_Queue_Interface;
 class OrderStatus
 {
     /**
+     * HTTP Response Code for "digest problems".
+     *
+     * @var int
+     * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+     * @since 0.0.1.0
+     */
+    const HTTP_STATUS_DIGEST_IS_WRONG = 406;        // Matching with HTTP Status "Not acceptable".
+
+    /**
+     * HTTP Response Code for "order not found".
+     * @var int
+     * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+     * @since 0.0.1.0
+     */
+    const HTTP_STATUS_ORDER_IS_GONE = 410;          // Marching with HTTP Status "Gone".
+
+    /**
+     * HTTP Response Code for "order not found".
+     * @var int
+     * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+     * @since 0.0.1.0
+     */
+    const HTTP_STATUS_ORDER_IS_NOT_OURS = 204;          // Marching with HTTP Status "No content".
+
+    /**
      * What we handle through static calls.
      * @var OrderStatus
      * @since 0.0.1.0
