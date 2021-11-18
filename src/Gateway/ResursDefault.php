@@ -26,6 +26,7 @@ use WC_Product;
 use WC_Tax;
 use function count;
 use function in_array;
+use function is_object;
 
 /**
  * Class ResursDefault
@@ -164,7 +165,7 @@ class ResursDefault extends WC_Payment_Gateway
     public function __construct($resursPaymentMethodObject = [])
     {
         global $woocommerce;
-        $this->cart = isset($woocommerce->cart) ? $woocommerce->cart : null;
+        $this->cart = $woocommerce->cart ?? null;
         $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
         $this->method_title = __('Resurs Bank', 'trbwc');
