@@ -32,6 +32,7 @@ use function in_array;
  * Default payment method class. Handles payments and orders dynamically, with focus on less loss
  * of data during API communication.
  * @package Resursbank\Gateway
+ * @since 0.0.1.0
  */
 class ResursDefault extends WC_Payment_Gateway
 {

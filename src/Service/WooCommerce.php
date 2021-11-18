@@ -755,6 +755,7 @@ class WooCommerce
                 }
                 if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
                     $code = OrderStatusHandler::HTTP_STATUS_ORDER_IS_NOT_OURS;
+                    $responseString = 'Order is not ours, but it is still accepted.';
                 }
             }
             $replyArray['digestCode'] = $code;

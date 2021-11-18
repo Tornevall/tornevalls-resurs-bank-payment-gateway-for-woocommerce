@@ -12,6 +12,7 @@ use WC_Settings_Page;
 /**
  * Class Settings
  * @package Resursbank\Gateway
+ * @since 0.0.1.0
  */
 class AdminPage extends WC_Settings_Page
 {
