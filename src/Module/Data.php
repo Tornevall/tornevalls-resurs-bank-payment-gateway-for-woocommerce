@@ -490,7 +490,7 @@ class Data
         $wcCustomer = $woocommerce->customer;
 
         $return = null;
-        if (!empty($wcCustomer)) {
+        if ($wcCustomer instanceof WC_Customer && method_exists($wcCustomer, 'get_billing_country')) {
             $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
             $return = !empty($woocommerceCustomerCountry) ?
                 $woocommerceCustomerCountry : WordPress::applyFilters(
