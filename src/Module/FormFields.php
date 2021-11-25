@@ -338,9 +338,10 @@ class FormFields extends WC_Settings_API
                     'default' => 'no',
                     'desc_tip' => __(
                         'When Resurs Bank has a callback delivery where the order does not exist in the system, the ' .
-                        'plugin will respond with HTTP 410 (Gone). However, if callbacks from Resurs Bank is ' .
-                        'looping eternally due to this problem, this option allows the plugin to pretend that the ' .
-                        'order has been properly updated. Such cases will be replied with HTTP 204 (No content).',
+                        'plugin will respond with another HTTP code. If callbacks from Resurs Bank is ' .
+                        'repeatedly sending too many messages of this kind due to any kind of errors ' .
+                        '(like loops, etc), this option allows the plugin to reply with a response that ' .
+                        'says that the callback was successful anyway.',
                         'trbwc'
                     ),
                 ],
@@ -827,10 +828,10 @@ class FormFields extends WC_Settings_API
                     'type' => 'checkbox',
                     'desc' => __('Enable', 'trbwc'),
                     'desc_tip' => __(
-                        'Enable features that may be both groundbreaking and platform breaking (a joke). ' .
-                        'The features enabled here are not guaranteed to work in production environments and ' .
-                        'should only be enabled by a developer. Bleeding edge mode can only be used in ' .
-                        'test. Also please note, that features within this area, requires higher versions of PHP.',
+                        'Enable features that is still under development. The features enabled here are not ' .
+                        'guaranteed to work in production environments and should only be enabled by a developer.' .
+                        'Bleeding edge mode can currently only be used in test. Also please note, that features' .
+                        'within this area, requires higher versions of PHP.',
                         'trbwc'
                     ),
                     'default' => 'no',
@@ -1067,7 +1068,7 @@ class FormFields extends WC_Settings_API
                 'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
                 'supported_country' => Data::isGetAddressSupported(),
                 'get_address_form' => Data::canUseGetAddressForm(),
-                'get_address_form_always' => $getAddressFormAlways
+                'get_address_form_always' => $getAddressFormAlways,
             ]
         );
         if ($returnHtml) {
