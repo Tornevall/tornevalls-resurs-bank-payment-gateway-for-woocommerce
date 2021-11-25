@@ -744,7 +744,7 @@ class WooCommerce
                 $replyArray['digestCode'] = $code;
                 $replyArray['errors'] = [
                     'code' => $code,
-                    'message' => $e->getMessage()
+                    'message' => $e->getMessage(),
                 ];
                 Data::setLogException(
                     $e
@@ -770,10 +770,13 @@ class WooCommerce
                     if (!$orderId) {
                         $code = OrderStatusHandler::HTTP_RESPONSE_GONE_NOT_OURS;
                         $responseString = 'Order is not ours.';
-                    }
-                    if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
-                        $code = OrderStatusHandler::HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED;
-                        $responseString = 'Order is not ours, but it is still accepted.';
+                        // Only allow other responses if the order does not exist in the system.
+                        // If there is a proper order, but with a miscalculated digest, callbacks should
+                        // still be rejected with the bad digest message.
+                        if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
+                            $code = OrderStatusHandler::HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED;
+                            $responseString = 'Order is not ours, but it is still accepted.';
+                        }
                     }
                 }
                 $replyArray['digestCode'] = $code;
