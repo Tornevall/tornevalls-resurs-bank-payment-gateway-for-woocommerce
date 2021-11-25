@@ -996,6 +996,23 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'mock_update_callback_exception' => [
+                    'id' => 'mock_update_callback_exception',
+                    'title' => __(
+                        'Fail on callback update.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'This setting enables a fictive callback problem.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'mocking_section_end' => [
                     'type' => 'sectionend',
                 ],

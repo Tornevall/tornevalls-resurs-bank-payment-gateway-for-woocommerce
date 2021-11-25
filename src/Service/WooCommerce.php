@@ -706,6 +706,10 @@ class WooCommerce
         $replyArray = [
             'aliveConfirm' => true,
             'actual' => $callbackType,
+            'errors' => [
+                'code' => 0,
+                'message' => '',
+            ],
         ];
 
         // If there is a payment, there must be a digest.
@@ -723,7 +727,9 @@ class WooCommerce
 
             self::getHandledCallbackNullOrder($order, $pRequest);
 
+            $callbackEarlyFailure = false;
             try {
+                self::applyMock('updateCallbackException');
                 Data::setOrderMeta(
                     $order,
                     sprintf('callback_%s_receive', $callbackType),
@@ -732,38 +738,54 @@ class WooCommerce
                     true
                 );
             } catch (Exception $e) {
+                $callbackEarlyFailure = true;
+                $replyArray['aliveConfirm'] = false;
+                $code = $e->getCode();
+                $replyArray['digestCode'] = $code;
+                $replyArray['errors'] = [
+                    'code' => $code,
+                    'message' => $e->getMessage()
+                ];
                 Data::setLogException(
                     $e
                 );
             }
 
-            if ($getConfirmedSalt && $orderId) {
-                try {
-                    self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
-                    self::setSigningMarked($orderId, $callbackType);
-                } catch (Exception $e) {
-                    $code = $e->getCode();
-                    $responseString = $e->getMessage();
-                    Data::setLogException($e);
+            if (!$callbackEarlyFailure) {
+                if ($getConfirmedSalt && $orderId) {
+                    try {
+                        self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
+                        self::setSigningMarked($orderId, $callbackType);
+                        $code = OrderStatusHandler::HTTP_RESPONSE_OK;
+                        $responseString = 'OK';
+                        $replyArray['digestCode'] = $code;
+                    } catch (Exception $e) {
+                        $code = $e->getCode();
+                        $responseString = $e->getMessage();
+                        Data::setLogException($e);
+                    }
+                } else {
+                    $code = OrderStatusHandler::HTTP_RESPONSE_DIGEST_IS_WRONG; // Not acceptable
+                    $responseString = 'Digest rejected.';
+                    if (!$orderId) {
+                        $code = OrderStatusHandler::HTTP_RESPONSE_GONE_NOT_OURS;
+                        $responseString = 'Order is not ours.';
+                    }
+                    if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
+                        $code = OrderStatusHandler::HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED;
+                        $responseString = 'Order is not ours, but it is still accepted.';
+                    }
                 }
-            } else {
-                $code = OrderStatusHandler::HTTP_STATUS_DIGEST_IS_WRONG; // Not acceptable
-                $responseString = 'Digest rejected.';
-                if (!$orderId) {
-                    $code = OrderStatusHandler::HTTP_STATUS_ORDER_IS_GONE;
-                    $responseString = 'Order is not ours.';
-                }
-                if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
-                    $code = OrderStatusHandler::HTTP_STATUS_ORDER_IS_NOT_OURS;
-                    $responseString = 'Order is not ours, but it is still accepted.';
-                }
+                $replyArray['digestCode'] = $code;
+            } elseif ($callbackType === 'TEST') {
+                $responseString = 'Test OK';
+                Data::setResursOption('resurs_callback_test_response', time());
+                $code = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
+
+                // There are not digest codes available in this state so we should throw the callback handler
+                // a success regardless.
+                $replyArray['digestCode'] = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
             }
-            $replyArray['digestCode'] = $code;
-        } elseif ($callbackType === 'TEST') {
-            Data::setResursOption('resurs_callback_test_response', time());
-            // There are not digest codes available in this state so we should throw the callback handler
-            // a success regardless.
-            $replyArray['digestCode'] = '200';
         }
 
         Data::setLogNotice(

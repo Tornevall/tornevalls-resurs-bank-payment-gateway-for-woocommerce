@@ -22,6 +22,7 @@ class Plugin
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
         add_action('rbwc_mock_update_payment_reference_failure', [$this, 'mockUpdatePaymentFailure']);
         add_action('rbwc_mock_create_iframe_exception', [$this, 'mockCreateIframeException']);
+        add_action('mock_update_callback_exception', [$this, 'mockUpdateCallbackException']);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
         add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
         add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
@@ -103,6 +104,15 @@ class Plugin
      * @since 0.0.1.0
      */
     public function mockCreateIframeException()
+    {
+        $this->getMockException(__FUNCTION__);
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function mockUpdateCallbackException()
     {
         $this->getMockException(__FUNCTION__);
     }
