@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: trwbc\n"
-"POT-Creation-Date: 2021-11-08 08:29+0100\n"
-"PO-Revision-Date: 2021-11-08 08:31+0100\n"
+"POT-Creation-Date: 2021-11-25 20:00+0100\n"
+"PO-Revision-Date: 2021-11-25 20:02+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Norwegian Bokmal\n"
 "MIME-Version: 1.0\n"
@@ -25,189 +25,189 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 
-#: src/Gateway/AdminPage.php:123
+#: src/Gateway/AdminPage.php:124
 msgid "Plugin and account settings"
 msgstr "Plugin- og kontoinnstillinger"
 
-#: src/Gateway/AdminPage.php:157
+#: src/Gateway/AdminPage.php:158
 #, php-format
 msgid "Extended configuration view for Resurs Bank: %s"
 msgstr "Utvidet konfigurasjonsvisning for Resurs Bank: %s"
 
-#: src/Gateway/ResursDefault.php:169
+#: src/Gateway/ResursDefault.php:170
 msgid "Resurs Bank"
 msgstr "Resurs Bank"
 
-#: src/Gateway/ResursDefault.php:170
+#: src/Gateway/ResursDefault.php:171
 msgid "Resurs Bank Payment Gateway with dynamic payment methods."
 msgstr "Resurs Bank payment Gateway med dynamiske betalingsmetoder."
 
-#: src/Gateway/ResursDefault.php:171
+#: src/Gateway/ResursDefault.php:172
 msgid "Resurs Bank AB"
-msgstr "Resurs Bank"
+msgstr "Resurs Bank AB"
 
-#: src/Gateway/ResursDefault.php:542
+#: src/Gateway/ResursDefault.php:543
 #, php-format
 msgid "An error (%s, code %s) occurred during the iframe creation. Retrying with a new payment id."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:735
+#: src/Gateway/ResursDefault.php:736
 #, php-format
 msgid "Base URL for signing: %s"
 msgstr "Standard URL for signering: %s"
 
-#: src/Gateway/ResursDefault.php:742
+#: src/Gateway/ResursDefault.php:743
 #, php-format
 msgid "Signing parameters for %s: %s"
 msgstr "Signeringsparametere for %s: %s"
 
-#: src/Gateway/ResursDefault.php:842
+#: src/Gateway/ResursDefault.php:843
 #, php-format
 msgid "%s: Could not create order from an empty cart."
 msgstr "%s: Kan ikke opprette ordre fra en tom handlekurv."
 
-#: src/Gateway/ResursDefault.php:847
+#: src/Gateway/ResursDefault.php:848
 msgid "Cart is empty!"
 msgstr "Vognen er tom!"
 
-#: src/Gateway/ResursDefault.php:967
+#: src/Gateway/ResursDefault.php:968
 #, php-format
 msgid "Reusing preferred payment id \"%s\" for customer, age %d seconds old."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:977
+#: src/Gateway/ResursDefault.php:978
 #, php-format
 msgid "Preferred payment id set to \"%s\" for customer."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1047
+#: src/Gateway/ResursDefault.php:1048
 msgid "Article description is missing."
 msgstr "Artikkelbeskrivelse mangler."
 
-#: src/Gateway/ResursDefault.php:1360
+#: src/Gateway/ResursDefault.php:1361
 #, php-format
 msgid "Order process initialized by customer with checkout %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1447
+#: src/Gateway/ResursDefault.php:1448
 msgid "Order reference updated (updatePaymentReference) with no errors."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1457
+#: src/Gateway/ResursDefault.php:1458
 msgid "Order reference not updated: Reference is already updated."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1472
+#: src/Gateway/ResursDefault.php:1473
 #, php-format
 msgid "updatePaymentReference failure (code %s): %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1522
+#: src/Gateway/ResursDefault.php:1523
 #, php-format
 msgid "Resurs Bank processing order (%s)."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1532
+#: src/Gateway/ResursDefault.php:1533
 #, php-format
 msgid "%s: Initialize Resurs Bank process, order %s (%s) via %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1550
+#: src/Gateway/ResursDefault.php:1551
 msgid "Chosen checkout type is currently unsupported"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1559
+#: src/Gateway/ResursDefault.php:1560
 #, php-format
 msgid "%s: Order %s returned \"%s\" to WooCommerce."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1568
+#: src/Gateway/ResursDefault.php:1569
 #, php-format
 msgid "$return is not an object as expected in function %s (Checkout request type is %s)."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1607
+#: src/Gateway/ResursDefault.php:1608
 #, php-format
 msgid "API data request: %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1609
+#: src/Gateway/ResursDefault.php:1610
 msgid "Customer returned from Resurs Bank. WooCommerce order validation in progress."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1610
+#: src/Gateway/ResursDefault.php:1611
 msgid "wc_order_id + preferred_id not present"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1620
+#: src/Gateway/ResursDefault.php:1621
 msgid "Session value rco_order_id has been reset after successful return to landing page."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1666
+#: src/Gateway/ResursDefault.php:1667
 #, php-format
 msgid "Finishing. Ready to redirect customer. Using URL %s"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1818
+#: src/Gateway/ResursDefault.php:1819
 #, php-format
 msgid "Customer returned from Resurs Bank to complete order %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1853
+#: src/Gateway/ResursDefault.php:1854
 msgid "Order is debited and completed."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1861
+#: src/Gateway/ResursDefault.php:1862
 msgid "Order is booked and ready to handle."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1869
+#: src/Gateway/ResursDefault.php:1870
 msgid "Order is frozen and waiting for manual inspection."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1877
+#: src/Gateway/ResursDefault.php:1878
 msgid "Resurs Bank requires external handling/signing on this order. Customer redirected."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1887
+#: src/Gateway/ResursDefault.php:1888
 #, php-format
 msgid "The booking failed with status %s. Customer notified in checkout."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:1893
+#: src/Gateway/ResursDefault.php:1894
 msgid "The payment can not complete. Contact customer services for more information."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2037
+#: src/Gateway/ResursDefault.php:2038
 #, php-format
 msgid "Booking this signed payment has been running multiple times but failed with exception %s."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2047
+#: src/Gateway/ResursDefault.php:2048
 #, php-format
 msgid "Tried to book signed payment but skipped: This has happened before and an exception with code %d occurred that time."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2084
+#: src/Gateway/ResursDefault.php:2085
 msgid "Could not complete your order. Please contact support for more information."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2090
+#: src/Gateway/ResursDefault.php:2091
 msgid "Could not complete order due to signing problems. Did you cancel your order?"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2106
+#: src/Gateway/ResursDefault.php:2107
 #, php-format
 msgid "Customer returned via urlType \"%s\" - failed or cancelled payment (signing required: %s)."
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2108 src/Module/FormFields.php:615
-#: src/Module/FormFields.php:627 src/Module/FormFields.php:638
-#: src/Module/FormFields.php:650
+#: src/Gateway/ResursDefault.php:2109 src/Module/FormFields.php:630
+#: src/Module/FormFields.php:642 src/Module/FormFields.php:653
+#: src/Module/FormFields.php:665
 msgid "Yes"
 msgstr ""
 
-#: src/Gateway/ResursDefault.php:2108
+#: src/Gateway/ResursDefault.php:2109
 msgid "No"
 msgstr ""
 
@@ -313,10 +313,10 @@ msgstr ""
 
 #: src/Module/FormFields.php:53 src/Module/FormFields.php:239
 #: src/Module/FormFields.php:252 src/Module/FormFields.php:264
-#: src/Module/FormFields.php:437 src/Module/FormFields.php:453
-#: src/Module/FormFields.php:469 src/Module/FormFields.php:515
-#: src/Module/FormFields.php:528 src/Module/FormFields.php:545
-#: src/Module/FormFields.php:556
+#: src/Module/FormFields.php:337 src/Module/FormFields.php:452
+#: src/Module/FormFields.php:468 src/Module/FormFields.php:484
+#: src/Module/FormFields.php:530 src/Module/FormFields.php:543
+#: src/Module/FormFields.php:560 src/Module/FormFields.php:571
 msgid "Enabled"
 msgstr ""
 
@@ -512,368 +512,400 @@ msgstr ""
 msgid "When you enable the part payment options for products, you can choose your own template to display. Templates are built on WordPress pages. If you want to show a custom page, you may choose which page you want to show here. Shortcodes that can be use: [currency], [monthlyPrice], [monthlyDuration], [methodId], [methodDescription]. If you use a custom text [monthlyPrice] will be delivered without the currency, so you have to add that part yourself."
 msgstr ""
 
-#: src/Module/FormFields.php:339
-msgid "Use default (Completed)"
+#: src/Module/FormFields.php:336
+msgid "Accept rejected callbacks"
 msgstr ""
 
 #: src/Module/FormFields.php:340
+msgid "When Resurs Bank has a callback delivery where the order does not exist in the system, the plugin will respond with another HTTP code. If callbacks from Resurs Bank is repeatedly sending too many messages of this kind due to any kind of errors (like loops, etc), this option allows the plugin to reply with a response that says that the callback was successful anyway."
+msgstr ""
+
+#: src/Module/FormFields.php:354
+msgid "Use default (Completed)"
+msgstr ""
+
+#: src/Module/FormFields.php:355
 msgid "Processing"
 msgstr ""
 
-#: src/Module/FormFields.php:341
+#: src/Module/FormFields.php:356
 msgid "Credited (refunded)"
 msgstr ""
 
-#: src/Module/FormFields.php:342
+#: src/Module/FormFields.php:357
 msgid "Completed"
 msgstr ""
 
-#: src/Module/FormFields.php:343
+#: src/Module/FormFields.php:358
 msgid "Pending (on-hold)"
 msgstr ""
 
-#: src/Module/FormFields.php:344
+#: src/Module/FormFields.php:359
 msgid "Annulled (cancelled)"
 msgstr ""
 
-#: src/Module/FormFields.php:368
+#: src/Module/FormFields.php:383
 msgid "Update payment methods and annuity factors"
 msgstr ""
 
-#: src/Module/FormFields.php:382
+#: src/Module/FormFields.php:397
 msgid "Update callbacks"
 msgstr ""
 
-#: src/Module/FormFields.php:390
+#: src/Module/FormFields.php:405
 msgid "Request test from Resurs Bank"
 msgstr ""
 
-#: src/Module/FormFields.php:399
+#: src/Module/FormFields.php:414
 msgid "Part payment settings"
 msgstr ""
 
-#: src/Module/FormFields.php:401
+#: src/Module/FormFields.php:416
 msgid "If you have part payment options in any of your payment methods, this is where you configure how the prices are shown in your product view and similar."
 msgstr ""
 
-#: src/Module/FormFields.php:412
+#: src/Module/FormFields.php:427
 msgid "Fraud control"
 msgstr ""
 
-#: src/Module/FormFields.php:415
+#: src/Module/FormFields.php:430
 msgid "How to handle fraud and debiting"
 msgstr ""
 
-#: src/Module/FormFields.php:418
+#: src/Module/FormFields.php:433
 #, php-format
 msgid "This section configures how fraud and finalizations should be handled in the integrated (simplified flow) and hosted checkout (not Resurs Checkout!). It is strongly recommended to keep the settings disabled and let callbacks handle the rest, unless you are a travel company that rely on non fraudulent behaviours. The settings below makes sure that orders that is frozen when the order has been handled are automatically annulled. If the orders in other hands are healthy and booked you can also set the process to automatically debit/finalize the order with the setup below. For more information, see <a href=\"%s\" target=\"_blank\">%s</a>."
 msgstr ""
 
-#: src/Module/FormFields.php:436
+#: src/Module/FormFields.php:451
 msgid "Wait for fraud control"
 msgstr ""
 
-#: src/Module/FormFields.php:439
+#: src/Module/FormFields.php:454
 msgid "The checkout process waits until the fraud control is finished at Resurs Bank and the order is handled synchronously. If this setting is disabled, Resurs Bank must be able to reach your system with callbacks to be able to deliver the result."
 msgstr ""
 
-#: src/Module/FormFields.php:452
+#: src/Module/FormFields.php:467
 msgid "Annul frozen orders"
 msgstr ""
 
-#: src/Module/FormFields.php:455
+#: src/Module/FormFields.php:470
 msgid "If Resurs Bank freezes a payment due to fraud, the order will automatically be annulled. By default, the best practice is to handle all annulments asynchronously with callbacks. Callback event name is ANNUL."
 msgstr ""
 
-#: src/Module/FormFields.php:468
+#: src/Module/FormFields.php:483
 msgid "Automatically debit if booked"
 msgstr ""
 
-#: src/Module/FormFields.php:471
+#: src/Module/FormFields.php:486
 msgid "Orders are automatically debited (finalized) if the fraud control passes. By default, the best practice is to handle all finalizations asynchronously with callbacks. Callback event name is FINALIZATION."
 msgstr ""
 
-#: src/Module/FormFields.php:486
+#: src/Module/FormFields.php:501
 msgid "Resurs Checkout customer interaction behaviour"
 msgstr ""
 
-#: src/Module/FormFields.php:494
+#: src/Module/FormFields.php:509
 msgid "Advanced Merchant"
 msgstr ""
 
-#: src/Module/FormFields.php:497
+#: src/Module/FormFields.php:512
 msgid "Advanced API"
 msgstr ""
 
-#: src/Module/FormFields.php:501
+#: src/Module/FormFields.php:516
 msgid "Resurs Checkout paymentId maximum age."
 msgstr ""
 
-#: src/Module/FormFields.php:504
+#: src/Module/FormFields.php:519
 msgid "Defined in seconds, how long a preferred payment id can live before it is renewed in a current session. This setting is necessary as we use the id to track cart updates which very much prevents malicious cart manipulation. It also allows customers to reload the checkout page and still use the same payment id. When a payment is successful, the preferred payment id will also be reset."
 msgstr ""
 
-#: src/Module/FormFields.php:514
+#: src/Module/FormFields.php:529
 msgid "Do not add VAT to discounts"
 msgstr ""
 
-#: src/Module/FormFields.php:517
+#: src/Module/FormFields.php:532
 msgid "When order rows are added to Resurs Bank API, the VAT is applied on the coupon amount excluding tax. To handle the discount without vat and instead use the full including tax amount as a discount, you can enable this feature."
 msgstr ""
 
-#: src/Module/FormFields.php:527
+#: src/Module/FormFields.php:542
 msgid "Prevent rounding errors"
 msgstr ""
 
-#: src/Module/FormFields.php:530
+#: src/Module/FormFields.php:545
 msgid "WooCommerce are able to show prices rounded with 0 decimals. It is however widely known and confirmed that payment gateways may have problems with tax calculation, when the decimals are fewer than two. With this setting enabled, the plugin will try to override the decimal setup as long as it is set to lower than 2. If you disable this feature, you also confirm that you are willingly using a, for the platform, unsupported feature. If you've not already done it, it is recommended to instead increase the number of decimals to 2 or higher."
 msgstr ""
 
-#: src/Module/FormFields.php:544
+#: src/Module/FormFields.php:559
 msgid "Can interact with old-plugin orders"
 msgstr ""
 
-#: src/Module/FormFields.php:547
+#: src/Module/FormFields.php:562
 msgid "Enabling this feature allows the plugin to enter orders created with the old plugin."
 msgstr ""
 
-#: src/Module/FormFields.php:555
+#: src/Module/FormFields.php:570
 msgid "Store API history in orders"
 msgstr ""
 
-#: src/Module/FormFields.php:558
+#: src/Module/FormFields.php:573
 msgid "If this setting is active, the first time you view a specific order API data will be stored for it. This means that it will be possible to go back to prior orders and view them even after you change the user credentials."
 msgstr ""
 
-#: src/Module/FormFields.php:568
+#: src/Module/FormFields.php:583
 msgid "WSDL requests are cached"
 msgstr ""
 
-#: src/Module/FormFields.php:572
+#: src/Module/FormFields.php:587
 msgid "Default: Only for production/live environment"
 msgstr ""
 
-#: src/Module/FormFields.php:576
+#: src/Module/FormFields.php:591
 msgid "Both for production/live and test/staging"
 msgstr ""
 
-#: src/Module/FormFields.php:580
+#: src/Module/FormFields.php:595
 msgid "Do not cache WSDL"
 msgstr ""
 
-#: src/Module/FormFields.php:585
+#: src/Module/FormFields.php:600
 msgid "This setting defines how SOAP requests are being made to Resurs Bank. It is usually recommended to keep requests cached (meaning wsdl and data required for a SOAP call to work, are stored locally on your server). During development it sometimes better to run tests uncached, however, it is not recommended in a production since this directly affects network performance (since each SOAP call will include an extra network request to the API first)."
 msgstr ""
 
-#: src/Module/FormFields.php:599
+#: src/Module/FormFields.php:614
 msgid "Developer Section"
 msgstr ""
 
-#: src/Module/FormFields.php:602
+#: src/Module/FormFields.php:617
 msgid "Logging"
 msgstr ""
 
-#: src/Module/FormFields.php:605
+#: src/Module/FormFields.php:620
 msgid "Default for this plugin is to log a fair amount of data for you. However, there is also also much debug data for developers available, that you normally not need. In this section you can choose the extras you want to see in your logs."
 msgstr ""
 
-#: src/Module/FormFields.php:614
+#: src/Module/FormFields.php:629
 msgid "Details at order events for merchants"
 msgstr ""
 
-#: src/Module/FormFields.php:617
+#: src/Module/FormFields.php:632
 msgid "Detailed order events are data that normally passes without any sound. Things like initial order creations and clicks could show up in your logs."
 msgstr ""
 
-#: src/Module/FormFields.php:626
+#: src/Module/FormFields.php:641
 msgid "Log INFO events"
 msgstr ""
 
-#: src/Module/FormFields.php:629
+#: src/Module/FormFields.php:644
 msgid "Log events that flows under severity INFO. Logs affected is for example mocking events."
 msgstr ""
 
-#: src/Module/FormFields.php:637
+#: src/Module/FormFields.php:652
 msgid "Developer based details at order events"
 msgstr ""
 
-#: src/Module/FormFields.php:640
+#: src/Module/FormFields.php:655
 msgid "Works like details for merchants, but this adds debugging information that may only be relevant for developers."
 msgstr ""
 
-#: src/Module/FormFields.php:649
+#: src/Module/FormFields.php:664
 msgid "Deep details"
 msgstr ""
 
-#: src/Module/FormFields.php:652
+#: src/Module/FormFields.php:667
 msgid "Things that only developers would have interest in. Logs may be junky with this option enabled."
 msgstr ""
 
-#: src/Module/FormFields.php:659
+#: src/Module/FormFields.php:674
 msgid "Activate Advanced Tweaking Mode (Developer)"
 msgstr ""
 
-#: src/Module/FormFields.php:661
+#: src/Module/FormFields.php:676
 msgid "Activate Advanced Tweaking Mode (you might need an extra reload after save)"
 msgstr ""
 
-#: src/Module/FormFields.php:665
+#: src/Module/FormFields.php:680
 msgid "The developer section is normally nothing you will need, unless you are a very advanced administrator/developer/merchant that likes to configure a little bit over the limits. If you know what you are doing, feel free to activate this section."
 msgstr ""
 
-#: src/Module/FormFields.php:678
+#: src/Module/FormFields.php:693
 msgid "Support"
 msgstr ""
 
-#: src/Module/FormFields.php:773
+#: src/Module/FormFields.php:788
 msgid "Developers Section"
 msgstr ""
 
-#: src/Module/FormFields.php:776
+#: src/Module/FormFields.php:791
 msgid "This section is for very advanced tweaking only. It is not enabled and visible by default for security reasons. Proceed at your own risk!"
 msgstr ""
 
-#: src/Module/FormFields.php:782
+#: src/Module/FormFields.php:797
 msgid "Developer Settings"
 msgstr ""
 
-#: src/Module/FormFields.php:789
+#: src/Module/FormFields.php:804
 msgid "Disable RB 2.x"
 msgstr ""
 
-#: src/Module/FormFields.php:792
+#: src/Module/FormFields.php:807
 msgid "Disable prior similar versions of the Resurs Bank plugin (v2.x-series) - You might need an extra reload after save"
 msgstr ""
 
-#: src/Module/FormFields.php:797
+#: src/Module/FormFields.php:812
 msgid "This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x with help from filters in that release."
 msgstr ""
 
-#: src/Module/FormFields.php:812
+#: src/Module/FormFields.php:827
+msgid "Bleeding Edge Checkout Technology"
+msgstr ""
+
+#: src/Module/FormFields.php:829 src/Service/WordPress.php:699
+#: templates/adminpage_annuity_selector.phtml:14
+msgid "Enable"
+msgstr ""
+
+#: src/Module/FormFields.php:831
+msgid ""
+"Enable features that is still under development. The features enabled here are not guaranteed to work in production environments and should only be enabled by a developer.Bleeding edge mode can currently only be used in test. Also please note, that features \n"
+"                        within this area, requires higher versions of PHP."
+msgstr ""
+
+#: src/Module/FormFields.php:848
 msgid "Trust is_admin before frontend nonces."
 msgstr ""
 
-#: src/Module/FormFields.php:815
+#: src/Module/FormFields.php:851
 msgid "Yes, do trust them please."
 msgstr ""
 
-#: src/Module/FormFields.php:819
+#: src/Module/FormFields.php:855
 msgid "For some places in the admin panel, we use nonces as an extra security layer when it comes to requests like updating callbacks, payment methods, etc. Sometimes nonces expires too quickly and breaks requests in wp_admin. Enable this feature to start trusting is_admin() during ajax request primarily and nonces secondarily. is_admin is normally a security layer that prevents unknonwn requests to be executed."
 msgstr ""
 
-#: src/Module/FormFields.php:837
+#: src/Module/FormFields.php:873
 msgid "Activate \"real people\"-mode in test, for getAddress."
 msgstr ""
 
-#: src/Module/FormFields.php:840 src/Module/FormFields.php:855
-#: src/Module/FormFields.php:935 src/Module/FormFields.php:953
+#: src/Module/FormFields.php:876 src/Module/FormFields.php:891
+#: src/Module/FormFields.php:971 src/Module/FormFields.php:989
+#: src/Module/FormFields.php:1008
 msgid "Enable."
 msgstr ""
 
-#: src/Module/FormFields.php:844
+#: src/Module/FormFields.php:880
 msgid "Required production credentials available: When activating this mode, getAddress will use real lookups for getAddress rather than the mocked data."
 msgstr ""
 
-#: src/Module/FormFields.php:852
+#: src/Module/FormFields.php:888
 msgid "Allow mocked behaviours"
 msgstr ""
 
-#: src/Module/FormFields.php:859
+#: src/Module/FormFields.php:895
 msgid "This setting enables mocked behaviours and data on fly, during tests."
 msgstr ""
 
-#: src/Module/FormFields.php:873
+#: src/Module/FormFields.php:909
 msgid "Prefix for order and status notes"
 msgstr ""
 
-#: src/Module/FormFields.php:876
+#: src/Module/FormFields.php:912
 msgid "When orders are updated with new statuses, or gets new notifications this is how we are prefixing the notes. Default (empty) is \"trbwc\"."
 msgstr ""
 
-#: src/Module/FormFields.php:912
+#: src/Module/FormFields.php:948
 msgid "Mocking & Testing"
 msgstr ""
 
-#: src/Module/FormFields.php:915
+#: src/Module/FormFields.php:951
 msgid "Mocking Section"
 msgstr ""
 
-#: src/Module/FormFields.php:918
+#: src/Module/FormFields.php:954
 msgid "Section of Mocking & Tests. Are you not developing this plugin? Then you probably do not need it either. The section is specifically placed hiddenly here, since the options here are used to recreate events under very specific circumstances. For example, you can mock errors from here, that you otherwise had to hardcode into the plugin. Options here are normally enabled until the feature has been trigged once. After first execution it will instantly become disabled automatically. The mocking section can only be enabled when your environment is set to test and you explicitly allowed mocking on your site."
 msgstr ""
 
-#: src/Module/FormFields.php:932
+#: src/Module/FormFields.php:968
 msgid "Fail on updatePaymentReference"
 msgstr ""
 
-#: src/Module/FormFields.php:939
+#: src/Module/FormFields.php:975
 msgid "This setting enables a fictive error on front-to-back calls during order creations where updatePaymentReference occurs."
 msgstr ""
 
-#: src/Module/FormFields.php:948
+#: src/Module/FormFields.php:984
 msgid "Fail on iframe creation"
 msgstr ""
 
-#: src/Module/FormFields.php:957
+#: src/Module/FormFields.php:993
 msgid "This setting enables a fictive error in the checkout where the iframe fails to render. This has happened during development, where the current payment id used by the plugin collided with an already existing order id at Resurs Bank."
 msgstr ""
 
+#: src/Module/FormFields.php:1003
+msgid "Fail on callback update."
+msgstr ""
+
 #: src/Module/FormFields.php:1012
+msgid "This setting enables a fictive callback problem."
+msgstr ""
+
+#: src/Module/FormFields.php:1065
 msgid "Private person"
 msgstr ""
 
-#: src/Module/FormFields.php:1013
+#: src/Module/FormFields.php:1066
 msgid "Company"
 msgstr ""
 
-#: src/Module/FormFields.php:1015
+#: src/Module/FormFields.php:1068
 msgid "Get address"
 msgstr ""
 
-#: src/Module/FormFields.php:1151
+#: src/Module/FormFields.php:1204
 msgid "Social security number"
 msgstr ""
 
-#: src/Module/FormFields.php:1152
+#: src/Module/FormFields.php:1205
 msgid "Phone number"
 msgstr ""
 
-#: src/Module/FormFields.php:1153
+#: src/Module/FormFields.php:1206
 msgid "Mobile number"
 msgstr ""
 
-#: src/Module/FormFields.php:1154
+#: src/Module/FormFields.php:1207
 msgid "E-mail address"
 msgstr ""
 
-#: src/Module/FormFields.php:1155
+#: src/Module/FormFields.php:1208
 msgid "Applicant government id"
 msgstr ""
 
-#: src/Module/FormFields.php:1156
+#: src/Module/FormFields.php:1209
 msgid "Card number"
 msgstr ""
 
-#: src/Module/Plugin.php:55
+#: src/Module/Plugin.php:56
 #, php-format
 msgid "Queued Status Handler: Updated status for %s to %s with notice: %s"
 msgstr ""
 
-#: src/Module/Plugin.php:68
+#: src/Module/Plugin.php:69
 #, php-format
 msgid "Queued Status Handler: Status for %s not updated to %s, because that status was already set."
 msgstr ""
 
-#: src/Module/Plugin.php:90
+#: src/Module/Plugin.php:91
 msgid "Default (Choice made by plugin)"
 msgstr ""
 
-#: src/Module/Plugin.php:121
+#: src/Module/Plugin.php:131
 #, php-format
 msgid "Mocked Exception in action. Throwing MockException for function %s, with error code %d."
 msgstr ""
 
-#: src/Module/Plugin.php:216
+#: src/Module/Plugin.php:226
 #, php-format
 msgid "The filter \"%s\" is currently put in an active state by an unknown third party plugin. This setting is deprecated and no longer fully supported. It is highly recommended to disable or remove the filter entirely and solve the problem that required this from start somehow else."
 msgstr ""
@@ -981,53 +1013,53 @@ msgstr ""
 msgid "Session value %s set to %s."
 msgstr ""
 
-#: src/Service/WooCommerce.php:763
+#: src/Service/WooCommerce.php:796
 #, php-format
 msgid "Callback (%s) Handling for %s finished."
 msgstr ""
 
-#: src/Service/WooCommerce.php:829
+#: src/Service/WooCommerce.php:862
 #, php-format
 msgid "Callback received from Resurs Bank: %s (Digest Status: %s, External ID: %s, Internal ID: %d)."
 msgstr ""
 
-#: src/Service/WooCommerce.php:833
+#: src/Service/WooCommerce.php:866
 msgid "Valid"
 msgstr ""
 
-#: src/Service/WooCommerce.php:833
+#: src/Service/WooCommerce.php:866
 msgid "Invalid"
 msgstr ""
 
-#: src/Service/WooCommerce.php:857
+#: src/Service/WooCommerce.php:890
 #, php-format
 msgid "setOrderNote for %s: %s"
 msgstr ""
 
-#: src/Service/WooCommerce.php:934
+#: src/Service/WooCommerce.php:967
 #, php-format
 msgid "Callback with parameter %s received, but failed because $order could not instantiate and remained null."
 msgstr ""
 
-#: src/Service/WooCommerce.php:993
+#: src/Service/WooCommerce.php:1026
 msgid "Resurs Bank billing address mismatch with current address in order. Data has synchronized with Resurs Bank billing data."
 msgstr ""
 
-#: src/Service/WooCommerce.php:1059
+#: src/Service/WooCommerce.php:1092
 msgid "Resurs Bank order status update indicates direct debited payment method."
 msgstr ""
 
-#: src/Service/WooCommerce.php:1068
+#: src/Service/WooCommerce.php:1101
 #, php-format
 msgid "Order status update to %s has been queued."
 msgstr ""
 
-#: src/Service/WooCommerce.php:1077
+#: src/Service/WooCommerce.php:1110
 #, php-format
 msgid "Resurs Bank queued order update: Change from %s to %s from queue."
 msgstr ""
 
-#: src/Service/WooCommerce.php:1252
+#: src/Service/WooCommerce.php:1285
 #, php-format
 msgid "Exception (%s) from %s: %s."
 msgstr ""
@@ -1092,10 +1124,6 @@ msgstr ""
 
 #: src/Service/WordPress.php:695
 msgid "Refresh has finished. Please check your new settings to confirm the update."
-msgstr ""
-
-#: src/Service/WordPress.php:699 templates/adminpage_annuity_selector.phtml:14
-msgid "Enable"
 msgstr ""
 
 #: src/Service/WordPress.php:700 templates/adminpage_annuity_selector.phtml:16
@@ -1202,35 +1230,35 @@ msgstr ""
 
 #: templates/adminpage_paymentmethods.phtml:22
 msgid "Method ID"
-msgstr ""
+msgstr "Metode-ID"
 
 #: templates/adminpage_paymentmethods.phtml:23
 msgid "Description"
-msgstr ""
+msgstr "Beskrivelse"
 
 #: templates/adminpage_paymentmethods.phtml:24
 msgid "Amount limits"
-msgstr ""
+msgstr "Beløpsgrenser"
 
 #: templates/adminpage_paymentmethods.phtml:25
 msgid "Method type"
-msgstr ""
+msgstr "Metodetype"
 
 #: templates/adminpage_paymentmethods.phtml:26
 msgid "Customer types"
-msgstr ""
+msgstr "Kundetyper"
 
 #: templates/adminpage_paymentmethods.phtml:27
 msgid "Part payment options"
-msgstr ""
+msgstr "Alternativer for delbetaling"
 
 #: templates/adminpage_paymentmethods.phtml:28
 msgid "Payment Fee"
-msgstr ""
+msgstr "Betalingsgebyr"
 
 #: templates/adminpage_shipping.phtml:5
 msgid "Shipping Address"
-msgstr ""
+msgstr "Leveringsadresse"
 
 #. Plugin Name of the plugin/theme
 msgid "Tornevall Networks Resurs Bank payment gateway for WooCommerce"
@@ -1242,7 +1270,7 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid "Connect Resurs Bank as WooCommerce payment gateway."
-msgstr ""
+msgstr "Koble Resurs Bank som WooCommerce betalingsgateway."
 
 #. Author of the plugin/theme
 msgid "Tomas Tornevall"
