@@ -22,6 +22,7 @@ class Plugin
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
         add_action('rbwc_mock_update_payment_reference_failure', [$this, 'mockUpdatePaymentFailure']);
         add_action('rbwc_mock_create_iframe_exception', [$this, 'mockCreateIframeException']);
+        add_action('rbwc_mock_empty_price_info_html', [$this, 'mockEmptyPriceInfoHtml']);
         add_action('mock_update_callback_exception', [$this, 'mockUpdateCallbackException']);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
         add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
@@ -76,6 +77,15 @@ class Plugin
                 );
             }
         }
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.0
+     */
+    public function mockEmptyPriceInfoHtml()
+    {
+        return '';
     }
 
     /**
