@@ -223,6 +223,17 @@ class PluginApi
         } else {
             $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation(Api::getPaymentMethods(), $total, false, true);
         }
+        $hasMock = WooCommerce::applyMock('emptyPriceInfoHtml');
+        if ($hasMock !== null) {
+            $priceInfoHtml = $hasMock;
+        }
+
+        if (empty($priceInfoHtml)) {
+            $priceInfoHtml = __(
+                'Price information request retrieved no content from Resurs Bank.',
+                'trbwc'
+            );
+        }
 
         echo Data::getGenericClass()
             ->getTemplate(
