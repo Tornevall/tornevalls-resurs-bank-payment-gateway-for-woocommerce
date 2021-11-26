@@ -448,7 +448,7 @@ class WooCommerce
     public static function applyMock($mock)
     {
         if (Data::canMock($mock)) {
-            WordPress::doAction(
+            return WordPress::applyFilters(
                 sprintf('mock%s', ucfirst($mock)),
                 null
             );
