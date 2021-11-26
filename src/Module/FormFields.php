@@ -1000,7 +1000,7 @@ class FormFields extends WC_Settings_API
                 'mock_update_callback_exception' => [
                     'id' => 'mock_update_callback_exception',
                     'title' => __(
-                        'Fail on callback update.',
+                        'Fail on callback update',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
@@ -1010,6 +1010,23 @@ class FormFields extends WC_Settings_API
                     ),
                     'desc_tip' => __(
                         'This setting enables a fictive callback problem.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_empty_price_info_html' => [
+                    'id' => 'mock_empty_price_info_html',
+                    'title' => __(
+                        'Fail retrieval of priceinfo',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
                         'trbwc'
                     ),
                     'default' => 'no',
