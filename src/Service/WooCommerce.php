@@ -287,7 +287,9 @@ class WooCommerce
                 $orderData['ecom_short'] = self::getMetaDataFromOrder($orderData['ecom_short'], $orderData['meta']);
             }
             if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
-                $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
+                if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                    $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
+                }
                 echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
             }
             // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
@@ -1245,10 +1247,20 @@ class WooCommerce
      */
     public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
     {
-        return self::getProperOrder($order, 'order')->update_status(
-            $newOrderStatus,
-            self::getOrderNotePrefixed($orderNote)
-        );
+        if (Data::getResursOption('queue_order_statuses_on_success')) {
+            $return = OrderStatusHandler::setOrderStatusWithNotice(
+                $order,
+                $newOrderStatus,
+                $orderNote
+            );
+        } else {
+            $return = self::getProperOrder($order, 'order')->update_status(
+                $newOrderStatus,
+                self::getOrderNotePrefixed($orderNote)
+            );
+        }
+
+        return $return;
     }
 
     /**

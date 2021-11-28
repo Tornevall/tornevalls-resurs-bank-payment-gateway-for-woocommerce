@@ -525,7 +525,21 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => '3600',
                 ],
+                'queue_order_statuses_on_success' => [
+                    'id' => 'queue_order_statuses_on_success',
+                    'title' => __('Queue order statuses on successpage', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'If you suspect that there may be race conditions between order status updates in the ' .
+                        'customer-success landing page, and the order statuses updated with callbacks you can ' .
+                        'enable this option to queue not only the callback updates but also the other updates.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'no',
+                ],
                 'discard_coupon_vat' => [
+                    'id' => 'discard_coupon_vat',
                     'title' => __('Do not add VAT to discounts', 'trbwc'),
                     'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
