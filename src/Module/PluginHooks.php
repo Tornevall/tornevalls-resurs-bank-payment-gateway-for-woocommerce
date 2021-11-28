@@ -96,7 +96,7 @@ class PluginHooks
      */
     public function getAvailableAutoDebitMethods($return)
     {
-        $paymentMethodList = Api::getPaymentMethods();
+        $paymentMethodList = ResursBankAPI::getPaymentMethods();
         if (is_array($paymentMethodList)) {
             $return['default'] = __('Default (Choice made by plugin)', 'trbwc');
             foreach ($paymentMethodList as $method) {

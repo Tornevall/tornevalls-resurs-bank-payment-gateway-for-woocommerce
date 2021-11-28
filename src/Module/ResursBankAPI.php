@@ -16,7 +16,7 @@ use function is_array;
  * @package ResursBank\Module
  * @since 0.0.1.0
  */
-class Api
+class ResursBankAPI
 {
     /**
      * @var ResursBank $resursBank

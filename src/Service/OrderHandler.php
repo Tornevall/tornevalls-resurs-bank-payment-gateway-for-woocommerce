@@ -4,7 +4,7 @@ namespace ResursBank\Service;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Module\Api;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
 use WC_Coupon;
 use WC_Product;
@@ -15,7 +15,7 @@ use WC_Product;
 class OrderHandler extends ResursDefault
 {
     /**
-     * @var Api
+     * @var ResursBankAPI
      * @since 0.0.1.0
      */
     protected $API;
@@ -191,7 +191,7 @@ class OrderHandler extends ResursDefault
      * for the already created link to only update changes that occurred during the order line rendering here as
      * the link may already contain customer data.
      *
-     * @return Api
+     * @return ResursBankAPI
      * @since 0.0.1.0
      */
     public function getApi()

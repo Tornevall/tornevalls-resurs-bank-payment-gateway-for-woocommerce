@@ -16,7 +16,7 @@ use WC_Checkout;
 use WC_Order;
 
 /**
- * Class PluginApi
+ * Backend API Handler.
  *
  * @package ResursBank\Module
  */
@@ -219,9 +219,9 @@ class PluginApi
         $method = WooCommerce::getRequest('method');
         $total = WooCommerce::getRequest('total');
         if (Data::getCustomerCountry() !== 'DK') {
-            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation($method, $total, true, true);
+            $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation($method, $total, true, true);
         } else {
-            $priceInfoHtml = Api::getResurs()->getCostOfPriceInformation(Api::getPaymentMethods(), $total, false, true);
+            $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation(ResursBankAPI::getPaymentMethods(), $total, false, true);
         }
         $hasMock = WooCommerce::applyMock('emptyPriceInfoHtml');
         if ($hasMock !== null) {
@@ -396,7 +396,7 @@ class PluginApi
 
         if ($isValid) {
             try {
-                $validationResponse = (new Api())->getConnection()->validateCredentials(
+                $validationResponse = (new ResursBankAPI())->getConnection()->validateCredentials(
                     (self::getParam('e') !== 'live') ? 1 : 0,
                     self::getParam('u'),
                     self::getParam('p')
@@ -438,8 +438,8 @@ class PluginApi
             Data::setResursOption($getPasswordFrom, self::getParam('p'));
 
             if ($isLiveChange) {
-                Api::getPaymentMethods(false);
-                Api::getAnnuityFactors(false);
+                ResursBankAPI::getPaymentMethods(false);
+                ResursBankAPI::getAnnuityFactors(false);
             }
         }
 
@@ -479,8 +479,8 @@ class PluginApi
         }
 
         // Re-fetch payment methods.
-        Api::getPaymentMethods(false);
-        Api::getAnnuityFactors(false);
+        ResursBankAPI::getPaymentMethods(false);
+        ResursBankAPI::getAnnuityFactors(false);
         if (self::canReply($reply)) {
             self::reply([
                 'reload' => true,
@@ -510,7 +510,7 @@ class PluginApi
             self::getValidatedNonce();
         }
         try {
-            Api::getResurs()->unregisterEventCallback(
+            ResursBankAPI::getResurs()->unregisterEventCallback(
                 Callback::FINALIZATION & Callback::ANNULMENT & Callback::AUTOMATIC_FRAUD_CONTROL,
                 true
             );
@@ -524,7 +524,7 @@ class PluginApi
             $callbackUrl = self::getCallbackUrl(self::getCallbackParams($ecomCallbackId));
             try {
                 Data::setLogNotice(sprintf('Callback Registration: %s.', $callbackUrl));
-                Api::getResurs()->setRegisterCallback(
+                ResursBankAPI::getResurs()->setRegisterCallback(
                     $ecomCallbackId,
                     $callbackUrl,
                     self::getCallbackDigestData()
@@ -533,7 +533,7 @@ class PluginApi
                 Data::setLogException($e);
             }
         }
-        Api::getCallbackList(false);
+        ResursBankAPI::getCallbackList(false);
 
         return ['reload' => true];
     }
@@ -571,7 +571,7 @@ class PluginApi
     private static function getCallbackParams($ecomCallbackId)
     {
         $params = [
-            'c' => Api::getResurs()->getCallbackTypeString($ecomCallbackId),
+            'c' => ResursBankAPI::getResurs()->getCallbackTypeString($ecomCallbackId),
             't' => time(),
         ];
         switch ($ecomCallbackId) {
@@ -676,7 +676,7 @@ class PluginApi
         self::reply(
             [
                 'price' => wc_price(
-                    Api::getResurs()->getAnnuityPriceByDuration(
+                    ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
                         WooCommerce::getRequest('price'),
                         Data::getResursOption('currentAnnuityFactor'),
                         (int)Data::getResursOption('currentAnnuityDuration')
@@ -706,7 +706,7 @@ class PluginApi
         $e = null;
 
         try {
-            $freshCallbackList = Api::getResurs()->getRegisteredEventCallback($callbackConstant);
+            $freshCallbackList = ResursBankAPI::getResurs()->getRegisteredEventCallback($callbackConstant);
             Data::clearCredentialNotice();
         } catch (Exception $e) {
             $hasErrors = true;
@@ -733,7 +733,7 @@ class PluginApi
                         $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
                         similar_text(
                             $expectedUrl,
-                            $freshCallbackList[Api::getResurs()->getCallbackTypeString($callback)],
+                            $freshCallbackList[ResursBankAPI::getResurs()->getCallbackTypeString($callback)],
                             $percentualValue
                         );
                         if ($percentualValue < 90) {
@@ -765,8 +765,8 @@ class PluginApi
         if (is_admin()) {
             try {
                 self::getNewCallbacks(false);
-                Api::getPaymentMethods(false);
-                Api::getAnnuityFactors(false);
+                ResursBankAPI::getPaymentMethods(false);
+                ResursBankAPI::getAnnuityFactors(false);
             } catch (\Exception $e) {
                 $return['errorstring'] = $e->getMessage();
                 $return['errorcode'] = $e->getCode();
@@ -791,8 +791,8 @@ class PluginApi
         $callback = WooCommerce::getRequest('callback');
         $message = '';
         if ((bool)Data::getResursOption('show_developer')) {
-            $successRemoval = Api::getResurs()->unregisterEventCallback(
-                Api::getResurs()->getCallbackTypeByString($callback)
+            $successRemoval = ResursBankAPI::getResurs()->unregisterEventCallback(
+                ResursBankAPI::getResurs()->getCallbackTypeByString($callback)
             );
         } else {
             $message = __('Advanced mode is disabled. You can not make this change.', 'trbwc');
@@ -861,7 +861,7 @@ class PluginApi
     {
         Data::setResursOption('resurs_callback_test_response', null);
         $return = WordPress::applyFiltersDeprecated('resurs_trigger_test_callback', null);
-        $return['api'] = (bool)Api::getResurs()->triggerCallback();
+        $return['api'] = (bool)ResursBankAPI::getResurs()->triggerCallback();
         $return['html'] = sprintf(
             '<div>%s</div><div id="resursWaitingForTest"></div>',
             sprintf(
@@ -916,7 +916,7 @@ class PluginApi
      */
     public static function getAddress()
     {
-        $apiRequest = Api::getResurs();
+        $apiRequest = ResursBankAPI::getResurs();
         $addressResponse = [];
         $identification = WooCommerce::getRequest('identification');
         $customerType = Data::getCustomerType();

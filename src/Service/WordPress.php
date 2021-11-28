@@ -3,7 +3,7 @@
 namespace ResursBank\Service;
 
 use Exception;
-use ResursBank\Module\Api;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\PluginHooks;
@@ -635,8 +635,8 @@ class WordPress
     {
         global $current_tab;
         $return['noncify'] = self::getNonce('admin');
-        $return['environment'] = Api::getEnvironment();
-        $return['wsdl'] = Api::getWsdlMode();
+        $return['environment'] = ResursBankAPI::getEnvironment();
+        $return['wsdl'] = ResursBankAPI::getWsdlMode();
         $return['translate_checkout_rco'] = __(
             'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
             'page. It is intended to give you a full scale payment solution with all payment methods collected ' .

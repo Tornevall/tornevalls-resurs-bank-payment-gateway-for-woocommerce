@@ -1108,8 +1108,8 @@ class FormFields extends WC_Settings_API
         $theDuration = (int)Data::getResursOption('currentAnnuityDuration');
 
         try {
-            $paymentMethods = Api::getPaymentMethods();
-            $annuityFactors = self::getAnnuityDropDown(Api::getAnnuityFactors(), $theFactor, $theDuration);
+            $paymentMethods = ResursBankAPI::getPaymentMethods();
+            $annuityFactors = self::getAnnuityDropDown(ResursBankAPI::getAnnuityFactors(), $theFactor, $theDuration);
         } catch (Exception $e) {
             $exception = $e;
         }
@@ -1194,7 +1194,7 @@ class FormFields extends WC_Settings_API
         $exception = null;
         $callbacks = [];
         try {
-            $callbacks = Api::getCallbackList();
+            $callbacks = ResursBankAPI::getCallbackList();
         } catch (Exception $e) {
             $exception = $e;
         }

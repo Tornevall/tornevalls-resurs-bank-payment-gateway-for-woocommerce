@@ -7,7 +7,7 @@ namespace ResursBank\Gateway;
 use Exception;
 use JsonException;
 use Resursbank\Ecommerce\Types\CheckoutType;
-use ResursBank\Module\Api;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Service\OrderHandler;
@@ -94,7 +94,7 @@ class ResursDefault extends WC_Payment_Gateway
     protected $order;
     /**
      * Main API. Use as primary communicator. Acts like a bridge between the real API.
-     * @var Api $API
+     * @var ResursBankAPI $API
      * @since 0.0.1.0
      */
     protected $API;
@@ -240,7 +240,7 @@ class ResursDefault extends WC_Payment_Gateway
             $this->apiData['paymentMethod'] = Data::getPaymentMethodBySession();
         }
         $this->apiDataId = sha1(uniqid('wc-api', true));
-        $this->API = new Api();
+        $this->API = new ResursBankAPI();
 
         return $this;
     }
@@ -820,7 +820,7 @@ class ResursDefault extends WC_Payment_Gateway
         // It is necessary to fetch payment id from session if exists, so we can keep it both in frontend
         // and the backend API. If not set, we'll let ecomPHP fetch a new.
         $sessionPaymentId = WooCommerce::getSessionValue('rco_order_id');
-        return !empty($sessionPaymentId) ? $sessionPaymentId : Api::getResurs()->getPreferredPaymentId();
+        return !empty($sessionPaymentId) ? $sessionPaymentId : ResursBankAPI::getResurs()->getPreferredPaymentId();
     }
 
     /**
@@ -1133,7 +1133,7 @@ class ResursDefault extends WC_Payment_Gateway
         // in each payment method that is requested here. If the payment method is not present,
         // this one will be skipped and the rest of the function will fail over to the parent value.
         if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
-            $minMax = Api::getResurs()->getMinMax(
+            $minMax = ResursBankAPI::getResurs()->getMinMax(
                 $this->get_order_total(),
                 $this->getRealMin($this->paymentMethodInformation->minLimit),
                 $this->getRealMax($this->paymentMethodInformation->maxLimit)
@@ -1435,7 +1435,7 @@ class ResursDefault extends WC_Payment_Gateway
                     WooCommerce::applyMock('updatePaymentReferenceFailure');
                     $newPaymentId = $this->getPaymentId();
                     if ($idBeforeChange !== $newPaymentId) {
-                        Api::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
+                        ResursBankAPI::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
                         Data::setOrderMeta(
                             $order,
                             'initialUpdatePaymentReference',

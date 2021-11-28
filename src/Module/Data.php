@@ -432,7 +432,7 @@ class Data
                 $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
         }
 
-        $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
+        $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
             $annuityPaymentMethod = (array)Data::getPaymentMethodById($annuityMethod);
 
@@ -523,7 +523,7 @@ class Data
     {
         $return = [];
 
-        $storedMethods = Api::getPaymentMethods();
+        $storedMethods = ResursBankAPI::getPaymentMethods();
         if (is_array($storedMethods)) {
             foreach ($storedMethods as $method) {
                 if (isset($method->id) && $method->id === $paymentMethodId) {
@@ -1422,11 +1422,11 @@ class Data
         try {
             if (!$return['ecomException']['code']) {
                 try {
-                    $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
+                    $return['ecom'] = ResursBankAPI::getPayment($return['resurs'], null, $return);
                     $return['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
                     if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
-                        $return['ecom'] = Api::getPayment($return['resurs_secondary'], null, $return);
+                        $return['ecom'] = ResursBankAPI::getPayment($return['resurs_secondary'], null, $return);
                     }
                     $return['ecom_had_reference_problems'] = true;
                 }

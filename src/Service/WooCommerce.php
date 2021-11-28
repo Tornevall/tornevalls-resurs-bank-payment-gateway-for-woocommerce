@@ -7,7 +7,7 @@ use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Module\Api;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Service\OrderStatus as OrderStatusHandler;
@@ -118,7 +118,7 @@ class WooCommerce
      */
     private static function getGatewaysFromPaymentMethods($gateways)
     {
-        $methodList = Api::getPaymentMethods();
+        $methodList = ResursBankAPI::getPaymentMethods();
         $currentCheckoutType = Data::getCheckoutType();
         if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
             $currentCheckoutType !== ResursDefault::TYPE_RCO
@@ -573,7 +573,7 @@ class WooCommerce
     public static function getGenericLocalization($return, $scriptName)
     {
         if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
-            $return[sprintf('%s_rco_suggest_id', Data::getPrefix())] = Api::getResurs()->getPreferredPaymentId();
+            $return[sprintf('%s_rco_suggest_id', Data::getPrefix())] = ResursBankAPI::getResurs()->getPreferredPaymentId();
             $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
         }
 
@@ -818,7 +818,7 @@ class WooCommerce
      */
     private static function getConfirmedSalt()
     {
-        return Api::getResurs()->getValidatedCallbackDigest(
+        return ResursBankAPI::getResurs()->getValidatedCallbackDigest(
             self::getRequest('p'),
             self::getCurrentSalt(),
             self::getRequest('d'),
@@ -991,7 +991,7 @@ class WooCommerce
         if ($orderId) {
             self::getCustomerRealAddress($order);
             self::setOrderStatusByCallback(
-                Api::getResurs()->getOrderStatusByPayment($paymentId),
+                ResursBankAPI::getResurs()->getOrderStatusByPayment($paymentId),
                 $order
             );
         }
@@ -1277,7 +1277,7 @@ class WooCommerce
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO &&
                         !empty(WooCommerce::getSessionValue('rco_order_id'))
                     ) {
-                        Api::getResurs()->updateCheckoutOrderLines(
+                        ResursBankAPI::getResurs()->updateCheckoutOrderLines(
                             WooCommerce::getSessionValue('rco_order_id'),
                             $orderHandler->getOrderLines()
                         );
