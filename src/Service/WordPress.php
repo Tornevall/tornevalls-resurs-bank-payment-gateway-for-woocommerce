@@ -6,7 +6,7 @@ use Exception;
 use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use ResursBank\Module\Plugin;
+use ResursBank\Module\PluginHooks;
 use TorneLIB\IO\Data\Strings;
 
 /**
@@ -28,7 +28,7 @@ class WordPress
         }
 
         // Initialize plugin functions.
-        new Plugin();
+        new PluginHooks();
         // Always initialize defaults once on plugin loaded (performance saver).
         Data::getDefaultsInit();
         self::setupAjaxActions();

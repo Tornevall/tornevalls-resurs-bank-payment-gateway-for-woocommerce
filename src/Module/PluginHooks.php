@@ -12,7 +12,7 @@ use function is_array;
  *
  * @package ResursBank\Module
  */
-class Plugin
+class PluginHooks
 {
     public function __construct()
     {
