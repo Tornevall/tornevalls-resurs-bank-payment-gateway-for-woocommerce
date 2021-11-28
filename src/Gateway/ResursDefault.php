@@ -1604,7 +1604,13 @@ class ResursDefault extends WC_Payment_Gateway
             $this->apiData['isReturningCustomer'] = false;
             if ($this->getApiValue('wc_order_id') && $this->getApiValue('preferred_id')) {
                 $this->apiData['isReturningCustomer'] = true;
+
+                if ($this->order instanceof WC_Order && Data::getCheckoutType() === self::TYPE_RCO) {
+                    $orderHandler = new OrderHandler();
+                    $orderHandler->getCustomerRealAddress($this->order);
+                }
             }
+
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
