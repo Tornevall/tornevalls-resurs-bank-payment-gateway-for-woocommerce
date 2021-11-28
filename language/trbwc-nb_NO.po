@@ -193,7 +193,7 @@ msgid "Could not complete your order. Please contact support for more informatio
 msgstr ""
 
 #: src/Gateway/ResursDefault.php:2091
-msgid "Could not complete order due to signing problems. Did you cancel your order?"
+msgid "Could not complete order due to signing problems."
 msgstr ""
 
 #: src/Gateway/ResursDefault.php:2107

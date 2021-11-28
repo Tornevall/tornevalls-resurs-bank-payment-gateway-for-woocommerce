@@ -11,6 +11,7 @@ use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderHandler;
+use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use ResursException;
@@ -1615,7 +1616,14 @@ class ResursDefault extends WC_Payment_Gateway
             );
             $this->wcOrderData = Data::getOrderInfo($this->order);
 
-            if ($this->isSuccess() && $this->setFinalSigning()) {
+            $finalSigningResponse = $this->setFinalSigning();
+            if ($this->isSuccess($finalSigningResponse)) {
+                if (isset($finalSigningResponse) &&
+                    is_array($finalSigningResponse) &&
+                    isset($finalSigningResponse['redirect'])
+                ) {
+                    $finalRedirectUrl = $finalSigningResponse['redirect'];
+                }
                 if (Data::getCheckoutType() === self::TYPE_RCO) {
                     Data::canLog(
                         Data::CAN_LOG_ORDER_EVENTS,
@@ -1759,9 +1767,9 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array|mixed|string
      * @since 0.0.1.0
      */
-    private function isSuccess()
+    private function isSuccess($finalSigningResponse)
     {
-        return $this->getApiValue('success');
+        return isset($finalSigningResponse['result']) && $finalSigningResponse['result'] === 'failed' ? false : $this->getApiValue('success');
     }
 
     /**
@@ -1786,9 +1794,8 @@ class ResursDefault extends WC_Payment_Gateway
                     $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
                         $bookSignedOrderReference
                     );
-                    $this->getResultByPaymentStatus();
+                    $return = $this->getResultByPaymentStatus();
                 }
-                $return = true;
             } else {
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
             }
@@ -1970,7 +1977,7 @@ class ResursDefault extends WC_Payment_Gateway
         } else {
             $currentOrderStatus = $this->order->get_status();
             if ($currentOrderStatus !== $woocommerceStatus) {
-                WooCommerce::setOrderStatusUpdate(
+                OrderStatus::setOrderStatusWithNotice(
                     $this->order,
                     $woocommerceStatus,
                     $statusNotification
@@ -2090,7 +2097,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         if ($signing) {
             $return = (string)__(
-                'Could not complete order due to signing problems. Did you cancel your order?',
+                'Could not complete order due to signing problems.',
                 'trbwc'
             );
         }
@@ -2106,7 +2113,10 @@ class ResursDefault extends WC_Payment_Gateway
     private function getCancelNotice($signing)
     {
         return sprintf(
-            __('Customer returned via urlType "%s" - failed or cancelled payment (signing required: %s).', 'trbwc'),
+            __(
+                'Customer returned via urlType "%s" - failed or cancelled payment (signing required: %s).',
+                'trbwc'
+            ),
             $this->getUrlType(),
             $signing ? __('Yes', 'trbwc') : __('No', 'trbwc')
         );

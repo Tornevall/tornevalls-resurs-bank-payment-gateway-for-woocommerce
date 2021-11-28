@@ -193,8 +193,8 @@ msgid "Could not complete your order. Please contact support for more informatio
 msgstr "Det gick inte att slutföra din beställning. Vänligen kontakta supporten för mer information."
 
 #: src/Gateway/ResursDefault.php:2091
-msgid "Could not complete order due to signing problems. Did you cancel your order?"
-msgstr "Det gick inte att slutföra ordern på grund av signeringsproblem. Har du avbrutit din köp?"
+msgid "Could not complete order due to signing problems."
+msgstr "Det gick inte att slutföra ordern på grund av signeringsproblem."
 
 #: src/Gateway/ResursDefault.php:2107
 #, php-format
