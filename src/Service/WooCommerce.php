@@ -756,6 +756,11 @@ class WooCommerce
                     try {
                         self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
                         self::setSigningMarked($orderId, $callbackType);
+                        WordPress::doAction(
+                            sprintf('callback_received_%s', $callbackType),
+                            $order,
+                            $order
+                        );
                         $code = OrderStatusHandler::HTTP_RESPONSE_OK;
                         $responseString = 'OK';
                         $replyArray['digestCode'] = $code;
