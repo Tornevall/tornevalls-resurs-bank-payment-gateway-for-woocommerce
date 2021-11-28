@@ -463,7 +463,8 @@ class ResursBankAPI
     public static function getCallbackList($fromStorage = true)
     {
         $return = self::$callbacks;
-        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('callbacks'), false))) {
+        $stored = json_decode(Data::getResursOption('callbacks'), false);
+        if ($fromStorage && is_array($stored)) {
             $return = $stored;
         }
 

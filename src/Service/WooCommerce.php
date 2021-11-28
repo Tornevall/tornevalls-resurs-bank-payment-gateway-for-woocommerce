@@ -558,8 +558,10 @@ class WooCommerce
     public static function getGenericLocalization($return, $scriptName)
     {
         if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
-            $return[sprintf('%s_rco_suggest_id',
-                Data::getPrefix())] = ResursBankAPI::getResurs()->getPreferredPaymentId();
+            $return[sprintf(
+                '%s_rco_suggest_id',
+                Data::getPrefix()
+            )] = ResursBankAPI::getResurs()->getPreferredPaymentId();
             $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
         }
 

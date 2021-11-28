@@ -25,6 +25,7 @@ use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
 use function count;
+use function function_exists;
 use function in_array;
 
 /**
