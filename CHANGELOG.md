@@ -1,7 +1,7 @@
 Current ChangeLog is based on what has reached the master branch. Also, github referenses are now added.
 
 # 0.0.1.0 / 1.0.0
-
+<ul>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-22'>RWC-22</a>] -         CRITICAL Uncaught Error: Maximum function nesting level of &#39;500&#39; reached
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-97'>RWC-97</a>] -         The blue box may not show properly when payments are not finished
@@ -27,6 +27,8 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-253'>RWC-253</a>] -         Annuity factors with custom currency data
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-258'>RWC-258</a>] -         ECom requesting payments four times in RCO mode
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-6'>RWC-6</a>] -         RBWC 1.0
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-3'>RWC-3</a>] -         composerize package PSR-4 formatted
 </li>
@@ -102,8 +104,6 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-82'>RWC-82</a>] -         Make sure payment gateways are country based
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-87'>RWC-87</a>] -         Order status handler actions/filter should have lower priority than default
-</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-98'>RWC-98</a>] -         Change behaviour output of discount handling as the first part has been handled wrong
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-99'>RWC-99</a>] -         Use native coupon description
@@ -155,8 +155,6 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-158'>RWC-158</a>] -         Track API history with metadata (?)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-159'>RWC-159</a>] -         Use filters to change min-max amount based on customizations
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-160'>RWC-160</a>] -         NOTICE ONLY: Part credit not supported by PSP methods
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-161'>RWC-161</a>] -         Deprecated functions from ECom 1.3.59 and inspections
 </li>
@@ -228,8 +226,6 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-221'>RWC-221</a>] -         #14: During getMetaData-requests, make it possible to fetch getPaymentinfo
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-222'>RWC-222</a>] -         Synchronize billing address in synchronous mode
-</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-224'>RWC-224</a>] -         Errors caused by woocommerce thrown to setRbwcGenericError gets double div&#39;s for .woocommerce-error
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-225'>RWC-225</a>] -         When activating other delivery address make sure to match the addressrow, to avoid weird addressing
@@ -280,7 +276,15 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-262'>RWC-262</a>] -         Move Helpers to Service
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-264'>RWC-264</a>] -         If callbacks are delayed, update order status upon &quot;enter order editor&quot;
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-265'>RWC-265</a>] -         Make callbacks handle problematic callbacks
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-267'>RWC-267</a>] -         Removal of callbacks are not warning of &quot;lost callbacks&quot; in backend-admin
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-274'>RWC-274</a>] -         Set up a better way for how we handled callback exceptions
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-275'>RWC-275</a>] -         Priceinfo errorfixing
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-4'>RWC-4</a>] -         Generate basic configuration view
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-33'>RWC-33</a>] -         woocommerce_resurs_bank_&#39; . $type . &#39;_checkout_icon (iconified method)
 </li>
@@ -294,3 +298,4 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-52'>RWC-52</a>] -         #16: resursbank_temporary_disable_checkout
 </li>
+</ul>
