@@ -14,6 +14,7 @@ use TorneLIB\Data\Password;
 use TorneLIB\IO\Data\Strings;
 use WC_Checkout;
 use WC_Order;
+use function count;
 
 /**
  * Backend API Handler.
@@ -451,7 +452,7 @@ class PluginApi
                     'trbwc'
                 ),
                 self::getParam('e'),
-                is_bool($validationResponse) && (bool)$validationResponse ? 'true' : 'false'
+                is_bool($validationResponse) && $validationResponse ? 'true' : 'false'
             )
         );
 
@@ -732,11 +733,15 @@ class PluginApi
                 } else {
                     foreach (self::$callbacks as $callback) {
                         $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
+                        if (!empty($expectedUrl)) {
+                            $counter ++;
+                        }
                         similar_text(
                             $expectedUrl,
                             $freshCallbackList[ResursBankAPI::getResurs()->getCallbackTypeString($callback)],
                             $percentualValue
                         );
+
                         if ($percentualValue < 90) {
                             $return['requireRefresh'] = true;
                         }
@@ -745,6 +750,11 @@ class PluginApi
                 }
             }
         }
+
+        if (count($freshCallbackList) !== 4) {
+            $return['requireRefresh'] = true;
+        }
+
         $return['errors'] = [
             'code' => isset($e) ? $e->getCode() : 0,
             'message' => isset($e) ? $e->getMessage() : null,
