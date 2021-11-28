@@ -59,11 +59,19 @@ class Data
      * @since 0.0.1.0
      */
     const LOG_WARNING = 'warning';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const CAN_LOG_JUNK = 'junk';
+
+    /**
+     * Can log all backend calls.
+     * var string
+     * @since 0.0.1.0
+     */
+    const CAN_LOG_BACKEND = 'backend';
 
     /**
      * @var string
