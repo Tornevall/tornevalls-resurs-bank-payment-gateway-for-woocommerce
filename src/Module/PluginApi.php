@@ -51,8 +51,17 @@ class PluginApi
      */
     public static function execApi()
     {
+        Data::canLog(
+            Data::CAN_LOG_BACKEND,
+            sprintf('Backend: %s (%s), params %s', __FUNCTION__, self::getAction(), print_r($_REQUEST, true))
+        );
+
         $returnedValue = WordPress::applyFilters(self::getAction(), null, $_REQUEST);
         if (!empty($returnedValue)) {
+            Data::canLog(
+                Data::CAN_LOG_BACKEND,
+                sprintf('Backend: %s (%s), params %s', __FUNCTION__, self::getAction(), print_r($returnedValue, true))
+            );
             self::reply($returnedValue);
         }
     }
@@ -734,7 +743,7 @@ class PluginApi
                     foreach (self::$callbacks as $callback) {
                         $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
                         if (!empty($expectedUrl)) {
-                            $counter ++;
+                            $counter++;
                         }
                         similar_text(
                             $expectedUrl,

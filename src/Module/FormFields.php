@@ -684,6 +684,17 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'can_log_backend' => [
+                    'id' => 'can_log_backend',
+                    'type' => 'checkbox',
+                    'title' => __('Backend requests', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Log backend events triggered by the ajaxify executor.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'show_developer' => [
                     'title' => __('Activate Advanced Tweaking Mode (Developer)', 'trbwc'),
                     'desc' => __(
