@@ -3,10 +3,10 @@
 namespace ResursBank\Service;
 
 use Exception;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\PluginHooks;
+use ResursBank\Module\ResursBankAPI;
 use TorneLIB\IO\Data\Strings;
 
 /**

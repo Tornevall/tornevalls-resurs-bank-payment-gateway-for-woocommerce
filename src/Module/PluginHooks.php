@@ -119,15 +119,6 @@ class PluginHooks
     }
 
     /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function mockUpdateCallbackException()
-    {
-        $this->getMockException(__FUNCTION__);
-    }
-
-    /**
      * @param $function
      * @throws Exception
      * @since 0.0.1.0
@@ -151,6 +142,15 @@ class PluginHooks
             ),
             $exceptionCode
         );
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function mockUpdateCallbackException()
+    {
+        $this->getMockException(__FUNCTION__);
     }
 
     /**

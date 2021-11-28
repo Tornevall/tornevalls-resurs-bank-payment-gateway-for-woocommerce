@@ -432,7 +432,11 @@ class Data
                 $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
         }
 
-        $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
+        $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
+            $wcDisplayPrice,
+            $annuityMethod,
+            $annuityDuration
+        );
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
             $annuityPaymentMethod = (array)Data::getPaymentMethodById($annuityMethod);
 

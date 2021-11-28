@@ -7,9 +7,9 @@ namespace ResursBank\Gateway;
 use Exception;
 use JsonException;
 use Resursbank\Ecommerce\Types\CheckoutType;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderHandler;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
@@ -538,7 +538,8 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
             } catch (Exception $e) {
                 Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS, sprintf(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
                         __(
                             'An error (%s, code %s) occurred during the iframe creation. Retrying with a new ' .
                             'payment id.',
@@ -1429,7 +1430,7 @@ class ResursDefault extends WC_Payment_Gateway
         $referenceType = Data::getResursOption('order_id_type');
 
         switch ($referenceType) {
-            case 'postid';
+            case 'postid':
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
                     WooCommerce::applyMock('updatePaymentReferenceFailure');

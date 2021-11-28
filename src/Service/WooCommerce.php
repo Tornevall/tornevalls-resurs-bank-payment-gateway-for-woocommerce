@@ -7,9 +7,9 @@ use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderStatus as OrderStatusHandler;
 use ResursException;
 use RuntimeException;
@@ -441,21 +441,6 @@ class WooCommerce
     }
 
     /**
-     * Create a mocked moment if test and allowed mocking is enabled.
-     * @param $mock
-     * @since 0.0.1.0
-     */
-    public static function applyMock($mock)
-    {
-        if (Data::canMock($mock)) {
-            return WordPress::applyFilters(
-                sprintf('mock%s', ucfirst($mock)),
-                null
-            );
-        }
-    }
-
-    /**
      * @param $methodName
      * @return bool
      * @since 0.0.1.0
@@ -573,7 +558,8 @@ class WooCommerce
     public static function getGenericLocalization($return, $scriptName)
     {
         if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
-            $return[sprintf('%s_rco_suggest_id', Data::getPrefix())] = ResursBankAPI::getResurs()->getPreferredPaymentId();
+            $return[sprintf('%s_rco_suggest_id',
+                Data::getPrefix())] = ResursBankAPI::getResurs()->getPreferredPaymentId();
             $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
         }
 
@@ -975,6 +961,21 @@ class WooCommerce
                     ),
                     $pRequest
                 )
+            );
+        }
+    }
+
+    /**
+     * Create a mocked moment if test and allowed mocking is enabled.
+     * @param $mock
+     * @since 0.0.1.0
+     */
+    public static function applyMock($mock)
+    {
+        if (Data::canMock($mock)) {
+            return WordPress::applyFilters(
+                sprintf('mock%s', ucfirst($mock)),
+                null
             );
         }
     }

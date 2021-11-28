@@ -221,7 +221,8 @@ class PluginApi
         if (Data::getCustomerCountry() !== 'DK') {
             $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation($method, $total, true, true);
         } else {
-            $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation(ResursBankAPI::getPaymentMethods(), $total, false, true);
+            $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation(ResursBankAPI::getPaymentMethods(),
+                $total, false, true);
         }
         $hasMock = WooCommerce::applyMock('emptyPriceInfoHtml');
         if ($hasMock !== null) {

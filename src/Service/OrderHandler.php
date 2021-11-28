@@ -4,8 +4,8 @@ namespace ResursBank\Service;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\Module\Data;
+use ResursBank\Module\ResursBankAPI;
 use WC_Coupon;
 use WC_Product;
 
