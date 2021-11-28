@@ -41,16 +41,6 @@ class WooCommerce
      * @since 0.0.1.0
      */
     private static $session;
-    /** @var array getAddress form fields translated into wooCommerce address data */
-    private static $getAddressTranslation = [
-        'first_name' => 'firstName',
-        'last_name' => 'lastName',
-        'address_1' => 'addressRow1',
-        'address_2' => 'addressRow2',
-        'city' => 'postalArea',
-        'postcode' => 'postalCode',
-        'country' => 'country',
-    ];
     /**
      * @var $basename
      * @since 0.0.1.0
@@ -994,58 +984,14 @@ class WooCommerce
     private static function getUpdatedOrderByCallback($paymentId, $orderId, $order)
     {
         if ($orderId) {
-            self::getCustomerRealAddress($order);
+            //self::getCustomerRealAddress($order);
+            $orderHandler = new OrderHandler();
+            $orderHandler->getCustomerRealAddress($order);
             self::setOrderStatusByCallback(
                 ResursBankAPI::getResurs()->getOrderStatusByPayment($paymentId),
                 $order
             );
         }
-    }
-
-    /**
-     * @param $order
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getCustomerRealAddress($order)
-    {
-        $return = false;
-        $resursPayment = Data::getOrderMeta('resurspayment', $order);
-        if (is_object($resursPayment) && isset($resursPayment->customer)) {
-            $billingAddress = $order->get_address('billing');
-            $orderId = $order->get_id();
-            if ($orderId > 0 && isset($resursPayment->customer->address)) {
-                foreach (self::$getAddressTranslation as $item => $value) {
-                    if (isset($billingAddress[$item], $resursPayment->customer->address->{$value}) &&
-                        $billingAddress[$item] !== $resursPayment->customer->address->{$value}
-                    ) {
-                        update_post_meta(
-                            $orderId,
-                            sprintf('_billing_%s', $item),
-                            $resursPayment->customer->address->{$value}
-                        );
-                        $return = true;
-                    }
-                }
-            }
-        }
-
-        if ($return) {
-            $synchNotice = __(
-                'Resurs Bank billing address mismatch with current address in order. ' .
-                'Data has synchronized with Resurs Bank billing data.',
-                'resurs-bank-payment-gateway-for-woocommerce'
-            );
-            Data::setOrderMeta($order, 'customerSynchronization', strftime('%Y-%m-%d %H:%M:%S', time()));
-            Data::setLogNotice($synchNotice);
-            WooCommerce::setOrderNote(
-                $order,
-                $synchNotice
-            );
-        }
-
-        return $return;
     }
 
     /**

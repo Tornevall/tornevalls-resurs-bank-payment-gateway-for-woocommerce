@@ -78,7 +78,7 @@ msgstr "Återanvänder föredraget betalningsid \"%s\" för kund, ålder %d seku
 #: src/Gateway/ResursDefault.php:978
 #, php-format
 msgid "Preferred payment id set to \"%s\" for customer."
-msgstr "Föredraget betalningsid s på \"%s\" för kunden."
+msgstr "Föredraget betalningsid inställt till \"%s\" för kunden."
 
 #: src/Gateway/ResursDefault.php:1048
 msgid "Article description is missing."
