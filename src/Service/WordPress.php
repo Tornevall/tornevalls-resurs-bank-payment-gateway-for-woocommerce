@@ -488,6 +488,8 @@ class WordPress
     }
 
     /**
+     * WordPress equivalent for apply_filters, but properly prefixed with plugin name tag.
+     *
      * @param $filterName
      * @param $value
      * @return mixed
