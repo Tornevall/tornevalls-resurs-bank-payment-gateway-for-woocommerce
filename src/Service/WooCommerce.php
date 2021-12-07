@@ -1178,7 +1178,6 @@ class WooCommerce
         return WC()->queue()->add(
             ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
         );
-        //WC()->queue()->schedule_recurring(time()+5, 2, WordPress::getFilterName($queueName));
     }
 
     /**

@@ -1775,7 +1775,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function isSuccess($finalSigningResponse)
     {
-        return isset($finalSigningResponse['result']) && $finalSigningResponse['result'] === 'failed' ? false : $this->getApiValue('success');
+        return isset($finalSigningResponse['result']) &&
+        $finalSigningResponse['result'] === 'failed' ? false : $this->getApiValue('success');
     }
 
     /**
