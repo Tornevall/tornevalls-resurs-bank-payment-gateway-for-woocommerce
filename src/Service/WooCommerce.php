@@ -303,7 +303,7 @@ class WooCommerce
                 'adminpage_woocommerce_version22',
                 [
                     'wooPlug22VersionInfo' => __(
-                        'This order has not been created by this plugin and the other plugin is currently unavailable.',
+                        'Order has not been created by this plugin and the original plugin is currently unavailable.',
                         'trbwc'
                     ),
                 ]

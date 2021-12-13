@@ -76,7 +76,10 @@ class ResursCheckout
      */
     public function isLegacyIframe($iframeContainer)
     {
-        return (isset($iframeContainer) && preg_match('/oc-shop.js/', $iframeContainer->script) ? true : false);
+        return (
+        (isset($iframeContainer, $iframeContainer->script) &&
+            preg_match('/oc-shop.js/', $iframeContainer->script))
+        );
     }
 
     /**
