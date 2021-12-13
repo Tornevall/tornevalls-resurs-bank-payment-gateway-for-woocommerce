@@ -552,23 +552,60 @@ class ResursDefault extends WC_Payment_Gateway
                     )
                 );
                 $paymentId = $this->getProperPaymentId(true);
-                $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+                try {
+                    $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+                    $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
+                } catch (Exception $e) {
+                    $this->rcoFrameData = new stdClass();
+                    $this->rcoFrameData->script = '';
+                    $this->rcoFrameData->exception = [
+                        'code' => $e->getCode(),
+                        'message' => $e->getMessage(),
+                    ];
+                }
             }
-            $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
 
             // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.
             WooCommerce::setSessionValue('rco_legacy', $this->rcoFrameData->legacy);
 
-            $urlList = (new Domain())->getUrlsFromHtml($this->rcoFrameData->script);
-            if (isset($this->rcoFrameData->script) && !empty($this->rcoFrameData->script) && count($urlList)) {
-                $this->rcoFrameData->originHostName = $this->API->getConnection()->getIframeOrigin($this->rcoFrameData->baseUrl);
+            $this->getProperRcoEnqueue();
+        }
+    }
+
+    /**
+     * Prepare for RCO depending on what happened. We need to make exceptions available in frontend from this point.
+     *
+     * @throws Exception
+     * @since 1.0.0
+     */
+    private function getProperRcoEnqueue()
+    {
+        $urlList = isset($this->rcoFrameData->script) ?
+            (new Domain())->getUrlsFromHtml($this->rcoFrameData->script) : [];
+        if (isset($this->rcoFrameData->script)) {
+            if (count($urlList) && !empty($this->rcoFrameData->script)) {
+                $this->rcoFrameData->originHostName = $this
+                    ->API
+                    ->getConnection()
+                    ->getIframeOrigin($this->rcoFrameData->baseUrl);
                 wp_enqueue_script(
                     'trbwc_rco',
                     array_pop($urlList),
                     ['jquery']
                 );
                 unset($this->rcoFrameData->customer);
+                wp_localize_script(
+                    'trbwc_rco',
+                    'trbwc_rco',
+                    (array)$this->rcoFrameData
+                );
+            } else {
+                wp_enqueue_script(
+                    'trbwc_rco',
+                    Data::getGatewayUrl() . '/js/trbwc_rco.js',
+                    ['jquery']
+                );
                 wp_localize_script(
                     'trbwc_rco',
                     'trbwc_rco',
