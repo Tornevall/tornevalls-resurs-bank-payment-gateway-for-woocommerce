@@ -97,6 +97,8 @@ class ResursBankAPI
             Data::setTimeoutStatus(self::getResurs(), $e);
             Data::setLogException($e);
             // Do not check the timeout handler here, only check if the soap request has timed out.
+            // On other errors, just pass the exception on, since there may something worse than just
+            // a timeout.
             if (!(bool)$failover && $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
                 self::getPaymentByRestNotice($e);
                 return self::getPayment($orderId, true);
