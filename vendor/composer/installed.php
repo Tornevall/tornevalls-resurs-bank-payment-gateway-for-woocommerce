@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../resursbank/ecomphp',
             'aliases' => array(),
-            'reference' => '65fdad11d3e21ab6dac1245c5d316d515c9f1091',
+            'reference' => 'f337637be2392f427b4d5ad807d292ef5705ec1a',
             'dev_requirement' => false,
         ),
         'resursbank/ecomphp-deprecated' => array(

@@ -7,6 +7,7 @@ use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
+use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use RuntimeException;
@@ -706,6 +707,7 @@ class PluginApi
         $callbackConstant = 0;
         $return['requireRefresh'] = false;
         $return['similarity'] = 0;
+        $errorMessage = '';
 
         foreach (self::$callbacks as $callback) {
             $callbackConstant += $callback;
@@ -716,18 +718,25 @@ class PluginApi
         $freshCallbackList = [];
         $e = null;
 
+        $resursApi = ResursBankAPI::getResurs();
         try {
-            $freshCallbackList = ResursBankAPI::getResurs()->getRegisteredEventCallback($callbackConstant);
+            $freshCallbackList = $resursApi->getRegisteredEventCallback($callbackConstant);
             Data::clearCredentialNotice();
         } catch (Exception $e) {
             $hasErrors = true;
+            Data::setTimeoutStatus($resursApi, $e);
 
+            $errorMessage = $e->getMessage();
             if ($e->getCode() === 401) {
                 Data::getCredentialNotice();
             } else {
+                if (Data::getTimeoutStatus() > 0) {
+                    $errorMessage .= ' ' . __('Connectivity may be a bit slower than normal.', 'trbwc');
+                }
+
                 Data::setResursOption(
                     'front_callbacks_credential_error',
-                    json_encode(['code' => $e->getCode(), 'message' => $e->getMessage(), 'function' => __FUNCTION__])
+                    json_encode(['code' => $e->getCode(), 'message' => $errorMessage, 'function' => __FUNCTION__])
                 );
             }
         }
@@ -760,13 +769,13 @@ class PluginApi
             }
         }
 
-        if (count($freshCallbackList) !== 4) {
+        if (!$hasErrors && count($freshCallbackList) !== 4) {
             $return['requireRefresh'] = true;
         }
 
         $return['errors'] = [
             'code' => isset($e) ? $e->getCode() : 0,
-            'message' => isset($e) ? $e->getMessage() : null,
+            'message' => isset($e) ? $errorMessage : null,
         ];
 
         self::reply($return);
@@ -787,7 +796,8 @@ class PluginApi
                 self::getNewCallbacks(false);
                 ResursBankAPI::getPaymentMethods(false);
                 ResursBankAPI::getAnnuityFactors(false);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
+                Data::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
                 $return['errorstring'] = $e->getMessage();
                 $return['errorcode'] = $e->getCode();
             }
@@ -968,6 +978,7 @@ class PluginApi
                         'trbwc'
                     ));
                 } catch (Exception $e) {
+                    Data::setTimeoutStatus($apiRequest);
                     // If we get an error here, it might be cause by credential errors.
                     // In that case lets fall back to the default lookup.
                     $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
@@ -985,6 +996,7 @@ class PluginApi
                         'trbwc'
                     ));
                 } catch (Exception $e) {
+                    Data::setTimeoutStatus($apiRequest);
                     self::getAddressLog(
                         $customerCountry,
                         $customerType,
