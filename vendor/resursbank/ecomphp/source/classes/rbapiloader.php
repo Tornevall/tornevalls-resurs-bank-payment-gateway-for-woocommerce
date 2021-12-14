@@ -58,6 +58,7 @@ use stdClass;
 use TorneLIB\Config\Flag;
 use TorneLIB\Data\Compress;
 use TorneLIB\Data\Password;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\Helpers\NetUtils;
 use TorneLIB\IO\Data\Strings;
@@ -74,7 +75,7 @@ if (!defined('ECOMPHP_VERSION')) {
     define('ECOMPHP_VERSION', (new Generic())->getVersionByAny(__FILE__, 3, ResursBank::class));
 }
 if (!defined('ECOMPHP_MODIFY_DATE')) {
-    define('ECOMPHP_MODIFY_DATE', '20211028');
+    define('ECOMPHP_MODIFY_DATE', '20211214');
 }
 
 /**
@@ -85,7 +86,7 @@ if (!defined('ECOMPHP_MODIFY_DATE')) {
 /**
  * Class ResursBank
  * @package Resursbank\RBEcomPHP
- * @version 1.3.61
+ * @version 1.3.66
  */
 class ResursBank
 {
@@ -113,6 +114,18 @@ class ResursBank
      * @var string
      */
     public $username;
+
+    /**
+     * @var bool
+     */
+    private $registerCallbacksFailover = false;
+
+    /**
+     * Timeout controller, marked as true if one or more API request indicates timeout.
+     * @var bool
+     * @since 1.3.66
+     */
+    private $timeoutException = false;
 
     ///// Environment and API
     /**
@@ -1863,7 +1876,6 @@ class ResursBank
      */
     public function getSaltKey($complexity = 1, $setMax = null)
     {
-
         $retp = null;
         $characterListArray = [
             'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -1904,7 +1916,7 @@ class ResursBank
         $numchars = [];
         for ($i = 0; $i < $max; $i++) {
             $charListId = rand(0, count($characterListArray) - 1);
-            // Set $numchars[ $charListId ] to a zero a value if not set before.
+            // Set $numchars[$charListId] to a zero a value if not set before.
             // This might render ugly notices about undefined offsets in some cases.
             if (!isset($numchars[$charListId])) {
                 $numchars[$charListId] = 0;
@@ -1956,6 +1968,24 @@ class ResursBank
         $this->registerCallbacksViaRest = $useRest;
         return $this;
     }
+
+    /**
+     * @return $this
+     */
+    public function setRegisterCallbackFailover()
+    {
+        $this->registerCallbacksFailover = true;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRegisterCallbackFailover()
+    {
+        return $this->registerCallbacksFailover;
+    }
+
 
     /**
      * Register a callback URL with Resurs Bank
@@ -2046,7 +2076,7 @@ class ResursBank
             );
         }
         ////// DIGEST CONFIGURATION FINISH
-        if ($this->registerCallbacksViaRest && $callbackType !== Callback::UPDATE) {
+        if ($this->registerCallbacksViaRest) {
             $registerBy = 'rest';
             $serviceUrl = sprintf('%s/callbacks', $this->getCheckoutUrl());
             $renderCallbackUrl = sprintf('%s/%s', $serviceUrl, $renderCallback['eventType']);
@@ -2086,6 +2116,21 @@ class ResursBank
             }
 
             return true;
+        }
+
+        if ($this->getRegisterCallbackFailover() && !$this->getRegisterCallbacksViaRest()) {
+            $this->registerCallbacksViaRest = true;
+            $return = $this->setRegisterCallback(
+                $callbackType,
+                $callbackUriTemplate,
+                $digestData,
+                $basicAuthUserName,
+                $basicAuthPassword
+            );
+            $this->registerCallbacksViaRest = false;
+            if ($return) {
+                return $return;
+            }
         }
 
         throw new ResursException(
@@ -2324,7 +2369,7 @@ class ResursBank
     /**
      * Simplifies removal of callbacks even when they does not exist at first.
      *
-     * @param int $callbackTypeData
+     * @param int $callbackType
      * @param bool $isMultiple Consider callback type bit range when true, where the value 255 is all callbacks at once.
      * @param bool $forceSoap
      * @return array|bool
@@ -2815,6 +2860,35 @@ class ResursBank
     }
 
     /**
+     * Timeout controller, marked as true if one or more API request indicates timeout.
+     * @return bool
+     * @since 1.3.66
+     */
+    public function hasTimeoutException()
+    {
+        return $this->timeoutException;
+    }
+
+    /**
+     * Timeout controller, marked as true if one or more API request indicates timeout.
+     * This method is supposed to not crash the entire system, but only mark timeout events.
+     *
+     * @param Exception $e
+     * @since 1.3.66
+     */
+    private function timeoutControl($e)
+    {
+        if ($e instanceof Exception) {
+            // Curl throws 28 and the wrapper for SoapClient throws code 1015 (from netcurl 6.1.5), on timeouts.
+            if ($e->getCode() === 28 ||
+                $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT
+            ) {
+                $this->timeoutException = true;
+            }
+        }
+    }
+
+    /**
      * Speak with webservices
      *
      * @param string $serviceName
@@ -2839,6 +2913,7 @@ class ResursBank
                 //$RequestService = call_user_func_array(array($Service, $serviceName), [$resursParameters]);
                 $RequestService = $Service->$serviceName($resursParameters);
             } catch (Exception $serviceRequestException) {
+                $this->timeoutControl($serviceRequestException);
                 // Try to fetch previous exception (This is what we actually want)
                 $previousException = $serviceRequestException->getPrevious();
                 $previousExceptionCode = null;
@@ -3493,6 +3568,7 @@ class ResursBank
                 DataType::JSON
             );
         } catch (Exception $e) {
+            $this->timeoutControl($e);
             $exceptionFromBody = $this->CURL->getBody();
 
             if (is_string($exceptionFromBody) && !empty($exceptionFromBody)) {
@@ -3722,6 +3798,8 @@ class ResursBank
                 $this->lastPaymentStored[$paymentId]->requestMethod = $this->getPaymentRequestMethod;
                 $return = $this->lastPaymentStored[$paymentId];
             } catch (ResursException $e) {
+                // Do run timeoutControl but don't stop at this moment, since we also run failovers.
+                $this->timeoutControl($e);
                 // 3 = The order does not exist, default REST error.
                 // If we for some reason get 404 errors here, the error should be rethrown as 3.
                 // If we for some unknown reason get 500+ errors, we can almost be sure that something else went wrong.
@@ -3745,6 +3823,7 @@ class ResursBank
                 $this->lastPaymentStored[$paymentId]->requestMethod = $this->getPaymentRequestMethod;
                 $return = $this->lastPaymentStored[$paymentId];
             } catch (Exception $e) {
+                $this->timeoutControl($e);
                 // 8 = REFERENCED_DATA_DONT_EXISTS
                 throw $e;
             }
@@ -3807,6 +3886,7 @@ class ResursBank
             // The look of this call makes it compatible to PHP 5.3 (without chaining)
             return $this->CURL->request($this->getCheckoutUrl() . '/checkout/payments/' . $paymentId)->getParsed();
         } catch (Exception $e) {
+            $this->timeoutControl($e);
             // Get internal exceptions before http responses
             $exceptionTestBody = @json_decode($this->CURL->getBody());
             if (isset($exceptionTestBody->errorCode) && isset($exceptionTestBody->description)) {
@@ -4257,6 +4337,9 @@ class ResursBank
                 if (isset($methodArray->id)) {
                     $methodId = $methodArray->id;
                     if (isset($methodArray->legalInfoLinks)) {
+                        if (is_object($methodArray->legalInfoLinks)) {
+                            $methodArray->legalInfoLinks = [$methodArray->legalInfoLinks];
+                        }
                         $linkCount = 0;
                         foreach ($methodArray->legalInfoLinks as $legalInfoLinkId => $legalInfoArray) {
                             if (isset($legalInfoArray->appendPriceLast) && ($legalInfoArray->appendPriceLast === true)
@@ -4443,7 +4526,8 @@ class ResursBank
             $orderData = $this->getOrderData();
             $return = isset($orderData['totalAmount']) ? $orderData['totalAmount'] : 0;
         } catch (Exception $e) {
-            // Just ignore this.
+            // Track timeouts and ignore errors.
+            $this->timeoutControl($e);
         }
 
         return (float)$return;
@@ -5559,6 +5643,7 @@ class ResursBank
                 }
             }
         } catch (Exception $e) {
+            $this->timeoutControl($e);
         }
         $this->preparePayload($payment_id_or_method, $payload);
         if ($this->paymentMethodIsPsp) {
@@ -5689,7 +5774,8 @@ class ResursBank
                             }
                         }
                     } catch (Exception $e) {
-                        // Ignore on internal errors.
+                        $this->timeoutControl($e);
+                        // Ignore on internal errors, but track timeouts.
                     }
 
                     return $parsedResponse->html;
@@ -5703,6 +5789,7 @@ class ResursBank
                     throw new ResursException(implode("\n", $error), $responseCode);
                 }
             } catch (Exception $e) {
+                // Do not run timeoutControl from here - this is done through handlePostErrors.
                 $this->handlePostErrors($e);
             }
 
@@ -5843,6 +5930,7 @@ class ResursBank
             }
         }
         if (method_exists($e, 'getMessage')) {
+            $this->timeoutControl($e);
             /** @noinspection PhpUndefinedMethodInspection */
             throw new ResursException($e->getMessage(), $e->getCode(), $e);
         }
@@ -6667,6 +6755,7 @@ class ResursBank
                 try {
                     $this->preparePayload();
                 } catch (Exception $e) {
+                    $this->timeoutControl($e);
                     /**
                      * @since 1.3.16
                      */
@@ -6926,12 +7015,7 @@ class ResursBank
     public function canDebit($paymentArrayOrPaymentId = [])
     {
         $status = (array)$this->getPaymentContent($paymentArrayOrPaymentId, 'status');
-        // IS_DEBITED - DEBITABLE
-        if (in_array('DEBITABLE', $status)) {
-            return true;
-        }
-
-        return false;
+        return in_array('DEBITABLE', $status) && !$this->isFrozen($paymentArrayOrPaymentId);
     }
 
     /**
@@ -7531,6 +7615,7 @@ class ResursBank
                 AftershopAction::FINALIZE
             );
         } catch (Exception $afterShopObjectException) {
+            $this->timeoutControl($afterShopObjectException);
             // No rows to finalize? Check if this was auto debited by internal rules, or throw back error.
             if ($afterShopObjectException->getCode() === RESURS_EXCEPTIONS::BOOKPAYMENT_NO_BOOKDATA &&
                 (
@@ -7575,6 +7660,9 @@ class ResursBank
                 return true;
             }
         } catch (Exception $finalizationException) {
+            // Avoid timeout control here, since the soapCall apparently can throw exceptions that matches
+            // curl timeouts (28).
+
             // Possible invoice error codes:
             // 28 = ECOMMERCEERROR_NOT_ALLOWED_INVOICE_ID
             // 29 ECOMMERCEERROR_ALREADY_EXISTS_INVOICE_ID
@@ -7879,6 +7967,7 @@ class ResursBank
         try {
             $checkPayment = $this->getPayment($paymentId);
         } catch (Exception $e) {
+            $this->timeoutControl($e);
             $customErrorMessage = $e->getMessage();
         }
         if (!isset($checkPayment->id) && !empty($customErrorMessage)) {
@@ -8571,6 +8660,7 @@ class ResursBank
             }
             $this->addMetaData($paymentId, 'CustomerId', $this->customerId);
         } catch (Exception $metaResponseException) {
+            $this->timeoutControl($metaResponseException);
         }
 
         return true;
@@ -8597,6 +8687,7 @@ class ResursBank
         try {
             $currentInvoiceTest = $this->getNextInvoiceNumber();
         } catch (Exception $e) {
+            $this->timeoutControl($e);
         }
         $paymentScanTypes = ['IS_DEBITED', 'IS_CREDITED', 'IS_ANNULLED'];
 

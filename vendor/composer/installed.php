@@ -11,12 +11,12 @@
     ),
     'versions' => array(
         'resursbank/ecomphp' => array(
-            'pretty_version' => '1.3.63',
-            'version' => '1.3.63.0',
+            'pretty_version' => '1.3.66',
+            'version' => '1.3.66.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../resursbank/ecomphp',
             'aliases' => array(),
-            'reference' => 'ecc6d278041b6e93cc272b79443e6fd2362b6361',
+            'reference' => '65fdad11d3e21ab6dac1245c5d316d515c9f1091',
             'dev_requirement' => false,
         ),
         'resursbank/ecomphp-deprecated' => array(
@@ -47,12 +47,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-errorhandler' => array(
-            'pretty_version' => '6.1.12',
-            'version' => '6.1.12.0',
+            'pretty_version' => '6.1.14',
+            'version' => '6.1.14.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-errorhandler',
             'aliases' => array(),
-            'reference' => '2f023b3b817f5c2043ab1de89cd7649a0c335796',
+            'reference' => '46e7fc13af412e318fadde0a465b3c39aff1797a',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-flags' => array(
@@ -74,12 +74,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-netcurl' => array(
-            'pretty_version' => '6.1.4',
-            'version' => '6.1.4.0',
+            'pretty_version' => '6.1.5',
+            'version' => '6.1.5.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-netcurl',
             'aliases' => array(),
-            'reference' => '174ef32a35ae38e21d6393b27eb682216b5bcec3',
+            'reference' => '14cc6e439b530de24ab92de303c186e3a83fc7fb',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-network' => array(
