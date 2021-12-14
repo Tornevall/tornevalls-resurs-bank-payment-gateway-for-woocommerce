@@ -8,6 +8,7 @@ use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
+use TorneLIB\Exception\Constants;
 use function in_array;
 use function is_array;
 
@@ -93,11 +94,13 @@ class ResursBankAPI
                 $return->environment = null;
             }
         } catch (Exception $e) {
-            if (!(bool)$failover && $e->getCode() === 2) {
+            Data::setTimeoutStatus(self::getResurs(), $e);
+            Data::setLogException($e);
+            // Do not check the timeout handler here, only check if the soap request has timed out.
+            if (!(bool)$failover && $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
                 self::getPaymentByRestNotice($e);
                 return self::getPayment($orderId, true);
             }
-            Data::setLogException($e);
             throw $e;
         }
         // Restore failovers.
@@ -128,6 +131,7 @@ class ResursBankAPI
      */
     public function getConnection()
     {
+        $timeoutStatus = Data::getTimeoutStatus();
         if (empty($this->ecom)) {
             $this->getResolvedCredentials();
             $this->ecom = new ResursBank(
@@ -139,6 +143,10 @@ class ResursBankAPI
             $this->setEcomConfiguration();
             $this->setEcomTimeout();
             $this->setEcomAutoDebitMethods();
+        }
+
+        if ($timeoutStatus > 0) {
+            $this->setEcomTimeout(4);
         }
 
         return $this->ecom;
@@ -233,14 +241,14 @@ class ResursBankAPI
     }
 
     /**
+     * @param int $forceTimeout
      * @return $this
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setEcomTimeout()
+    private function setEcomTimeout($forceTimeout = null)
     {
-        $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', 12);
-        $this->ecom->setFlag('CURL_TIMEOUT', $currentTimeout > 0 ? $currentTimeout : 12);
+        $this->ecom->setFlag('CURL_TIMEOUT', Data::getDefaultApiTimeout($forceTimeout));
 
         return $this;
     }
@@ -409,6 +417,7 @@ class ResursBankAPI
                     self::$annuityFactors = $annuityArray;
                 }
             } catch (Exception $e) {
+                Data::setTimeoutStatus(self::getResurs());
                 // Reset.
                 Data::setResursOption('annuityFactors', null);
                 throw $e;
@@ -442,6 +451,8 @@ class ResursBankAPI
             try {
                 self::$paymentMethods = self::getResurs()->getPaymentMethods([], true);
             } catch (Exception $e) {
+                Data::setTimeoutStatus(ResursBankAPI::getResurs());
+
                 // Reset.
                 Data::setResursOption('paymentMethods', null);
                 throw $e;
@@ -470,14 +481,15 @@ class ResursBankAPI
 
         if (!$fromStorage || empty($return)) {
             try {
-                self::$paymentMethods = self::getResurs()->getRegisteredEventCallback(255);
+                self::$callbacks = self::getResurs()->getRegisteredEventCallback(255);
             } catch (Exception $e) {
+                Data::setTimeoutStatus(self::getResurs(), $e);
                 // Reset.
                 Data::setResursOption('callbacks', null);
                 throw $e;
             }
-            $return = self::$paymentMethods;
-            Data::setResursOption('callbacks', json_encode(self::$paymentMethods));
+            $return = self::$callbacks;
+            Data::setResursOption('callbacks', json_encode(self::$callbacks));
         }
 
         return $return;
@@ -485,6 +497,7 @@ class ResursBankAPI
 
     /**
      * @return bool
+     * @throws Exception
      * @since 0.0.1.0
      */
     public function getCredentialsPresent()
@@ -493,8 +506,9 @@ class ResursBankAPI
         try {
             $this->getResolvedCredentials();
         } catch (Exception $e) {
-            $return = false;
+            Data::setTimeoutStatus(self::getResurs(), $e);
             Data::setLogException($e);
+            $return = false;
         }
         return $return;
     }

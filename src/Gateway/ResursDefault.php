@@ -539,6 +539,7 @@ class ResursDefault extends WC_Payment_Gateway
                 WooCommerce::applyMock('createIframeException');
                 $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
             } catch (Exception $e) {
+                Data::setTimeoutStatus($this->API->getConnection());
                 Data::canLog(
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf(
@@ -556,6 +557,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
                     $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
                 } catch (Exception $e) {
+                    Data::setTimeoutStatus($this->API->getConnection());
                     $this->rcoFrameData = new stdClass();
                     $this->rcoFrameData->script = '';
                     $this->rcoFrameData->exception = [
@@ -1500,6 +1502,7 @@ class ResursDefault extends WC_Payment_Gateway
                         );
                     }
                 } catch (Exception $e) {
+                    Data::setTimeoutStatus(ResursBankAPI::getResurs());
                     Data::setLogNotice(
                         sprintf(
                             'updatePaymentReference failed: %s (code %s).',
@@ -1844,6 +1847,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
             }
         } catch (Exception $booksignedException) {
+            Data::setTimeoutStatus($this->API->getConnection());
             $this->setFinalSigningExceptionNotes($booksignedException);
         }
 

@@ -4,12 +4,14 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
+use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Data\Aes;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\NetWrapper;
@@ -298,6 +300,58 @@ class Data
     }
 
     /**
+     * @return int
+     * @since 0.0.1.0
+     */
+    public static function getTimeoutStatus()
+    {
+        return (int)get_transient(
+            sprintf('%s_resurs_api_timeout', Data::getPrefix())
+        );
+    }
+
+    /**
+     * @param ResursBank $resursConnection
+     * @param Exception $exception
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setTimeoutStatus($resursConnection, $exception = null)
+    {
+        $return = false;
+        $timeoutByException = false;
+
+        if (!is_null($exception) && !$resursConnection->hasTimeoutException() && $exception instanceof Exception) {
+            if ($exception->getCode() === 28 || $exception->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+                $timeoutByException = true;
+            }
+        }
+
+        // If positive values are sent here, we store a timestamp for 60 seconds with a transient entry.
+        if ($resursConnection->hasTimeoutException() || $timeoutByException) {
+            $return = set_transient(
+                sprintf('%s_resurs_api_timeout', Data::getPrefix()),
+                time(),
+                60
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param null $forceTimeout
+     * @return int
+     * @since 0.0.1.0
+     */
+    public static function getDefaultApiTimeout($forceTimeout = null)
+    {
+        $useDefault = is_null($forceTimeout) ? 10 : (int)$forceTimeout;
+        $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', $useDefault);
+        return ($currentTimeout > 0 ? $currentTimeout : $useDefault);
+    }
+
+    /**
      * @since 0.0.1.0
      */
     public static function getAnnuityFactors()
@@ -305,11 +359,25 @@ class Data
         global $product;
 
         if (is_object($product) && !empty(self::getResursOption('currentAnnuityFactor'))) {
-            self::getAnnuityHtml(
-                wc_get_price_to_display($product),
-                self::getResursOption('currentAnnuityFactor'),
-                (int)self::getResursOption('currentAnnuityDuration')
-            );
+            try {
+                self::getAnnuityHtml(
+                    wc_get_price_to_display($product),
+                    self::getResursOption('currentAnnuityFactor'),
+                    (int)self::getResursOption('currentAnnuityDuration')
+                );
+            } catch (Exception $annuityException) {
+                $resursApi = ResursBankAPI::getResurs();
+                Data::setTimeoutStatus($resursApi, $annuityException);
+                if ($resursApi->hasTimeoutException()) {
+                    echo sprintf(
+                        '<div class="annuityTimeout">%s</div>',
+                        __(
+                            'Resurs Bank price information is currently unavailable right now, due to timed out ' .
+                            'connection. Please try again in a moment.'
+                        )
+                    );
+                }
+            }
         }
     }
 
@@ -1437,10 +1505,13 @@ class Data
                     $return['ecom'] = ResursBankAPI::getPayment($return['resurs'], null, $return);
                     $return['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
+                    Data::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
                     if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
                         $return['ecom'] = ResursBankAPI::getPayment($return['resurs_secondary'], null, $return);
                     }
                     $return['ecom_had_reference_problems'] = true;
+                    $return['ecomException']['code'] = $e->getCode();
+                    $return['ecomException']['message'] = $e->getMessage();
                 }
                 $return = WooCommerce::getFormattedPaymentData($return);
                 $return = WooCommerce::getPaymentInfoDetails($return);

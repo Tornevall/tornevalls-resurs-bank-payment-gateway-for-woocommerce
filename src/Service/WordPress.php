@@ -739,7 +739,8 @@ class WordPress
      */
     private static function getLocalizationDataGlobal($return)
     {
-        $defaultTimeout = 8000;
+        // Set timeout to one second more than the backend timeout.
+        $defaultTimeout = ((Data::getDefaultApiTimeout() + 1) * 1000);
         $setAjaxifyTimeout = WordPress::applyFilters('ajaxifyTimeout', $defaultTimeout);
         $return['noncify'] = self::getNonce('all');
         $return['ajaxify'] = admin_url('admin-ajax.php');
