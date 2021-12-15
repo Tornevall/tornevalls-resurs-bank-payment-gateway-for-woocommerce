@@ -538,6 +538,7 @@ class ResursDefault extends WC_Payment_Gateway
             try {
                 WooCommerce::applyMock('createIframeException');
                 $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+                $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             } catch (Exception $e) {
                 Data::setTimeoutStatus($this->API->getConnection());
                 Data::canLog(
@@ -565,7 +566,8 @@ class ResursDefault extends WC_Payment_Gateway
                         'message' => $e->getMessage(),
                     ];
                 }
-            }
+            } // End of exception.
+
             $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
 
             // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.

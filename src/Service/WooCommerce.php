@@ -314,8 +314,6 @@ class WooCommerce
     /**
      * @param $orderData
      * @throws ResursException
-     * @throws ExceptionHandler
-     * @throws Exception
      * @since 0.0.1.0
      */
     private static function setOrderMetaInformation($orderData)
