@@ -489,13 +489,21 @@ class PluginApi
         if ($validate) {
             self::getValidatedNonce();
         }
+        $e = null;
 
         // Re-fetch payment methods.
-        ResursBankAPI::getPaymentMethods(false);
-        ResursBankAPI::getAnnuityFactors(false);
+        try {
+            ResursBankAPI::getPaymentMethods(false);
+            ResursBankAPI::getAnnuityFactors(false);
+            $canReload = true;
+        } catch (Exception $e) {
+            $canReload = false;
+        }
         if (self::canReply($reply)) {
             self::reply([
-                'reload' => true,
+                'reload' => $canReload,
+                'error' => $e instanceof Exception ? $e->getMessage() : '',
+                'code' => $e instanceof Exception ? $e->getCode() : 0
             ]);
         }
     }
@@ -751,9 +759,6 @@ class PluginApi
                 } else {
                     foreach (self::$callbacks as $callback) {
                         $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
-                        if (!empty($expectedUrl)) {
-                            $counter++;
-                        }
                         similar_text(
                             $expectedUrl,
                             $freshCallbackList[ResursBankAPI::getResurs()->getCallbackTypeString($callback)],

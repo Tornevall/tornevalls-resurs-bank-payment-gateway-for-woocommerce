@@ -22,6 +22,9 @@ class PluginHooks
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
         add_action('rbwc_mock_update_payment_reference_failure', [$this, 'mockUpdatePaymentFailure']);
         add_action('rbwc_mock_create_iframe_exception', [$this, 'mockCreateIframeException']);
+        add_action('rbwc_mock_callback_update_exception', [$this, 'mockCallbackUpdateException']);
+        add_action('rbwc_mock_get_payment_methods_exception', [$this, 'mockGetPaymentMethodsException']);
+        add_action('rbwc_mock_annuity_factor_config_exception', [$this, 'mockAnnuityFactorConfigException']);
         add_action('rbwc_mock_empty_price_info_html', [$this, 'mockEmptyPriceInfoHtml']);
         add_action('mock_update_callback_exception', [$this, 'mockUpdateCallbackException']);
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
@@ -96,15 +99,32 @@ class PluginHooks
      */
     public function getAvailableAutoDebitMethods($return)
     {
-        $paymentMethodList = ResursBankAPI::getPaymentMethods();
-        if (is_array($paymentMethodList)) {
-            $return['default'] = __('Default (Choice made by plugin)', 'trbwc');
-            foreach ($paymentMethodList as $method) {
-                if ($method->type === 'PAYMENT_PROVIDER') {
-                    $return[$method->specificType] = $method->specificType;
+        WooCommerce::setSessionValue('rb_requesting_debit_methods', true);
+        // If we are saving or are somewhere else than in the payment methods section, we don't need
+        // to run this controller as it is only used for visuals.
+        if (!isset($_REQUEST['save']) &&
+            isset($_REQUEST['section']) &&
+            $_REQUEST['section'] === 'payment_methods'
+        ) {
+            try {
+                // Get payment methods locally for this request. We don't have to fetch
+                // this live each run for auto debitable methods.
+                $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
+            } catch (Exception $e) {
+                $return = [
+                    'default' => __('Payment Methods are currently unavailable!', 'trbwc')
+                ];
+            }
+            if (isset($paymentMethodList) && is_array($paymentMethodList)) {
+                $return['default'] = __('Default (Choice made by plugin)', 'trbwc');
+                foreach ($paymentMethodList as $method) {
+                    if ($method->type === 'PAYMENT_PROVIDER') {
+                        $return[$method->specificType] = $method->specificType;
+                    }
                 }
             }
         }
+        WooCommerce::setSessionValue('rb_requesting_debit_methods', false);
 
         return $return;
     }
@@ -114,6 +134,33 @@ class PluginHooks
      * @since 0.0.1.0
      */
     public function mockCreateIframeException()
+    {
+        $this->getMockException(__FUNCTION__);
+    }
+
+    /**
+     * @throws Exception
+     * @since 1.0.0
+     */
+    public function mockCallbackUpdateException()
+    {
+        $this->getMockException(__FUNCTION__);
+    }
+
+    /**
+     * @throws Exception
+     * @since 1.0.0
+     */
+    public function mockGetPaymentMethodsException()
+    {
+        $this->getMockException(__FUNCTION__);
+    }
+
+    /**
+     * @throws Exception
+     * @since 1.0.0
+     */
+    public function mockAnnuityFactorConfigException()
     {
         $this->getMockException(__FUNCTION__);
     }

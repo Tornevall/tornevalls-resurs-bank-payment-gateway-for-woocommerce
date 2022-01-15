@@ -158,13 +158,20 @@ function getDeprecatedCredentialsForm() {
  */
 function getResursPaymentMethods() {
     getResursSpin('#div_trbwc_admin_payment_methods_button');
-    getResursAjaxify('post', 'resursbank_get_payment_methods', {'n': true}, function () {
-        $rQuery('#div_trbwc_admin_payment_methods_button').html(
-            $rQuery('<div>', {
-                'style': 'font-weight: bold; color: #000099;'
-            }).html(getResursLocalization('reloading'))
-        );
-        document.location.reload();
+    getResursAjaxify('post', 'resursbank_get_payment_methods', {'n': true}, function (data) {
+        console.log(data['reload']);
+        if (data['reload'] === true) {
+            $rQuery('#div_trbwc_admin_payment_methods_button').html(
+                $rQuery('<div>', {
+                    'style': 'font-weight: bold; color: #000099;'
+                }).html(getResursLocalization('reloading'))
+            );
+            document.location.reload();
+        } else if (data['error'] !== '') {
+            getResursError(data['error'], '#div_trbwc_admin_payment_methods_button');
+        } else {
+            getResursError('Unable to update.', '#div_trbwc_admin_payment_methods_button');
+        }
     }, function (d) {
         getResursError(d, '#div_trbwc_admin_payment_methods_button');
     });
@@ -175,13 +182,19 @@ function getResursPaymentMethods() {
  */
 function getResursCallbacks() {
     getResursSpin('#div_trbwc_admin_callbacks_button');
-    getResursAjaxify('post', 'resursbank_get_new_callbacks', {'n': ''}, function () {
-        $rQuery('#div_trbwc_admin_callbacks_button').html(
-            $rQuery('<div>', {
-                'style': 'font-weight: bold; color: #000099;'
-            }).html(getResursLocalization('reloading'))
-        );
-        document.location.reload();
+    getResursAjaxify('post', 'resursbank_get_new_callbacks', {'n': ''}, function (data) {
+        if (data['reload'] === true) {
+            $rQuery('#div_trbwc_admin_callbacks_button').html(
+                $rQuery('<div>', {
+                    'style': 'font-weight: bold; color: #000099;'
+                }).html(getResursLocalization('reloading'))
+            );
+            document.location.reload();
+        } else if (data['error'] !== '') {
+            getResursError(data['error'], '#div_trbwc_admin_payment_methods_button');
+        } else {
+            getResursError('Unable to update.', '#div_trbwc_admin_callbacks_button');
+        }
     });
 }
 
