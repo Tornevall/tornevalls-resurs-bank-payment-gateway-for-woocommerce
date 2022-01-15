@@ -108,26 +108,31 @@ class WooCommerce
      */
     private static function getGatewaysFromPaymentMethods($gateways)
     {
-        $methodList = ResursBankAPI::getPaymentMethods();
-        $currentCheckoutType = Data::getCheckoutType();
-        if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
-            $currentCheckoutType !== ResursDefault::TYPE_RCO
-        ) {
-            // For simplified flow and hosted flow, we create individual class modules for all payment methods
-            // that has been received from the getPaymentMethods call.
-            foreach ($methodList as $methodClass) {
-                $gatewayClass = new ResursDefault($methodClass);
-                // Ask itself if it is enabled.
-                if ($gatewayClass->is_available()) {
-                    $gateways[] = $gatewayClass;
+        // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
+        try {
+            $methodList = ResursBankAPI::getPaymentMethods();
+            $currentCheckoutType = Data::getCheckoutType();
+            if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
+                $currentCheckoutType !== ResursDefault::TYPE_RCO
+            ) {
+                // For simplified flow and hosted flow, we create individual class modules for all payment methods
+                // that has been received from the getPaymentMethods call.
+                foreach ($methodList as $methodClass) {
+                    $gatewayClass = new ResursDefault($methodClass);
+                    // Ask itself if it is enabled.
+                    if ($gatewayClass->is_available()) {
+                        $gateways[] = $gatewayClass;
+                    }
                 }
+            } else {
+                // In RCO mode, we don't have to handle all separate payment methods as a gateway since
+                // the iframe keeps track of them, so in this case will create a smaller class gateway through the
+                // ResursCheckout module.
+                $gatewayClass = new ResursDefault(new ResursCheckout());
+                $gateways[] = $gatewayClass;
             }
-        } else {
-            // In RCO mode, we don't have to handle all separate payment methods as a gateway since
-            // the iframe keeps track of them, so in this case will create a smaller class gateway through the
-            // ResursCheckout module.
-            $gatewayClass = new ResursDefault(new ResursCheckout());
-            $gateways[] = $gatewayClass;
+        } catch (Exception $e) {
+            Data::setLogException($e);
         }
 
         return $gateways;

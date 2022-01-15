@@ -5,7 +5,7 @@ namespace ResursBank\Module;
 use Exception;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
-use ResursBank\Service\WordPress;
+use ResursBank\Service\WooCommerce;
 use ResursException;
 use RuntimeException;
 use TorneLIB\Exception\Constants;
@@ -141,11 +141,22 @@ class ResursBankAPI
                 $this->credentials['password'],
                 self::getEnvironment()
             );
-            $this->setWsdlCache();
-            $this->setEcomConfiguration();
-            $this->setEcomTimeout();
-            $this->setEcomAutoDebitMethods();
         }
+
+        if (!empty(Data::getResursOption('api_soap_url'))) {
+            $soapUrl = sprintf('%s/', preg_replace('/\/$/', '', Data::getResursOption('api_soap_url')));
+            if (!empty($soapUrl) && self::getEnvironment() === RESURS_ENVIRONMENTS::TEST) {
+                $this->ecom->setTestUrl(
+                    $soapUrl,
+                    Data::getCheckoutType()
+                );
+            }
+        }
+
+        $this->setWsdlCache();
+        $this->setEcomConfiguration();
+        $this->setEcomTimeout();
+        $this->setEcomAutoDebitMethods();
 
         if ($timeoutStatus > 0) {
             $this->setEcomTimeout(4);
@@ -396,7 +407,7 @@ class ResursBankAPI
     public static function getAnnuityFactors($fromStorage = true)
     {
         $return = self::$annuityFactors;
-        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('annuityFactors'), false))) {
+        if ($fromStorage && !empty($stored = json_decode(Data::getResursOption('annuityFactors'), false))) {
             $return = $stored;
         }
 
@@ -404,8 +415,13 @@ class ResursBankAPI
             try {
                 $annuityArray = [];
                 // fromStorage can be called externally.
-                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 $paymentMethods = is_array($fromStorage) ? $fromStorage : (array)self::getPaymentMethods();
+                if (Data::canMock('annuityFactorConfigException', false)) {
+                    // This mocking section will simulate a total failure of the fetching part.
+                    $stored = null;
+                    WooCommerce::applyMock('annuityFactorConfigException');
+                }
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (count($paymentMethods)) {
                     foreach ($paymentMethods as $paymentMethod) {
                         $annuityResponse = self::getResurs()->getAnnuityFactors($paymentMethod->id);
@@ -419,14 +435,21 @@ class ResursBankAPI
                     self::$annuityFactors = $annuityArray;
                 }
             } catch (Exception $e) {
-                Data::setTimeoutStatus(self::getResurs());
-                // Reset.
-                Data::setResursOption('annuityFactors', null);
-                throw $e;
+                if (is_object($stored)) {
+                    WooCommerce::setSessionValue('silentAnnuityException', $e);
+                    // If there are errors during this procedure, override the stored controller
+                    // and return data if there is a cached storage. This makes it possible for the
+                    // plugin to live without the access to Resurs Bank.
+                    self::$annuityFactors = $stored;
+                } else {
+                    Data::setTimeoutStatus(self::getResurs());
+                    throw $e;
+                }
             }
             $return = self::$annuityFactors;
             Data::setResursOption('annuityFactors', json_encode(self::$annuityFactors));
         }
+        WooCommerce::setSessionValue('silentAnnuityException', null);
 
         return $return;
     }
@@ -441,6 +464,21 @@ class ResursBankAPI
      */
     public static function getPaymentMethods($fromStorage = true)
     {
+        // Mocking feature that reveals that this payment methods request is effective all around
+        // the admin platform. When this mock is triggered, other pages (like the mock-admin) may
+        // fail. This feature turned out to fix an important bug. We also knows that requesting payment
+        // methods can also affect admin panel if Resurs Bank throws an exception if the method request
+        // is failing at this point (since we're cleaning up the storage).
+        if (isset($_REQUEST['section']) &&
+            $_REQUEST['section'] === 'payment_methods' &&
+            !WooCommerce::getSessionValue('rb_requesting_debit_methods') &&
+            Data::canMock('getEmptyPaymentMethodsException')
+        ) {
+            // But this feature is only set for visual testing.
+            // Note: As the wp-admin is running, we will first pass through "auto debitable methods".
+            Data::setResursOption('paymentMethods', null);
+        }
+
         $return = self::$paymentMethods;
         if ($fromStorage) {
             $stored = json_decode(Data::getResursOption('paymentMethods'));
@@ -451,14 +489,19 @@ class ResursBankAPI
 
         if (!$fromStorage || empty($return)) {
             try {
+                if (isset($_REQUEST['section']) && $_REQUEST['section'] === 'payment_methods') {
+                    // Also this part is used for the specific admin section.
+                    WooCommerce::applyMock('getPaymentMethodsException');
+                }
                 self::$paymentMethods = self::getResurs()->getPaymentMethods([], true);
             } catch (Exception $e) {
                 Data::setTimeoutStatus(ResursBankAPI::getResurs());
-
-                // Reset.
-                Data::setResursOption('paymentMethods', null);
+                WooCommerce::setSessionValue('silentGetPaymentMethodsException', $e);
+                // We do not want to reset on errors, right?
+                //Data::setResursOption('paymentMethods', null);
                 throw $e;
             }
+            WooCommerce::setSessionValue('silentGetPaymentMethodsException', null);
             $return = self::$paymentMethods;
             Data::setResursOption('paymentMethods', json_encode(self::$paymentMethods));
         }
@@ -483,12 +526,20 @@ class ResursBankAPI
 
         if (!$fromStorage || empty($return)) {
             try {
+                WooCommerce::applyMock('callbackUpdateException');
                 self::$callbacks = self::getResurs()->getRegisteredEventCallback(255);
             } catch (Exception $e) {
-                Data::setTimeoutStatus(self::getResurs(), $e);
-                // Reset.
-                Data::setResursOption('callbacks', null);
-                throw $e;
+                if (is_object($stored) || is_array($stored)) {
+                    // If there are errors during this procedure, override the stored controller
+                    // and return data if there is a cached storage. This makes it possible for the
+                    // plugin to live without the access to Resurs Bank.
+                    self::$callbacks = (array)$stored;
+                } else {
+                    Data::setTimeoutStatus(self::getResurs(), $e);
+                    // We do not want to reset on errors, right?
+                    //Data::setResursOption('callbacks', null);
+                    throw $e;
+                }
             }
             $return = self::$callbacks;
             Data::setResursOption('callbacks', json_encode(self::$callbacks));

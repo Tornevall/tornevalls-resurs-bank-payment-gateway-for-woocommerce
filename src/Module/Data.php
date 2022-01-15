@@ -758,10 +758,12 @@ class Data
     }
 
     /**
+     * @param string $specificMock
+     * @param bool $resetMock Ability to not reset mock mode for specific mock if it has to be checked first.
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canMock($specificMock)
+    public static function canMock($specificMock, $resetMock = true)
     {
         $return = false;
         if (self::isTest() && (bool)Data::getResursOption('allow_mocking', null, false)) {
@@ -771,8 +773,10 @@ class Data
                 null,
                 false
             )) {
-                // Disable mockoption after first execution.
-                Data::setResursOption($mockOptionName, false);
+                if ($resetMock) {
+                    // Disable mockoption after first execution.
+                    Data::setResursOption($mockOptionName, false);
+                }
                 return true;
             }
         }

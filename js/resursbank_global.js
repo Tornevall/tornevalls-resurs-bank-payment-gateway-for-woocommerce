@@ -100,6 +100,10 @@ function getResursError(data) {
                 useVisibleElement.html(getResursLocalization('nonce_error'));
                 return;
             }
+        } else {
+            // No visible element? Do a shoutout!
+            console.log('RBWC Ajax Backend Error: ', data);
+            alert(data);
         }
     } else {
         console.log('RBWC Ajax Backend Error: ', data);

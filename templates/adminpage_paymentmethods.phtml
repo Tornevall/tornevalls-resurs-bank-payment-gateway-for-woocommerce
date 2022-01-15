@@ -57,8 +57,18 @@
                     <td class="resursMethodBody <?php echo $annuityClass ?>"
                         id="r_annuity_field_<?php echo $methodObject->id; ?>"
                     ><?php
-                        if ($methodObject->type === 'REVOLVING_CREDIT') {
+                        if ($methodObject->type === 'REVOLVING_CREDIT' && isset($annuityFactors[$methodObject->id])) {
                             echo $annuityFactors[$methodObject->id];
+                        } else {
+                            if (!empty($annuityException) && $annuityException instanceof Exception) {
+                                printf(
+                                    __(
+                                        'Received error from annuity factors request: %s (%d)', 'trbwc'
+                                    ),
+                                    $annuityException->getMessage(),
+                                    $annuityException->getCode()
+                                );
+                            }
                         } ?></td>
                     <!--<td class="resursMethodBody">
                         <?php

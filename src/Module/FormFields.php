@@ -3,6 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use WC_Checkout;
 use WC_Settings_API;
@@ -943,6 +944,23 @@ class FormFields extends WC_Settings_API
                 'order_tweaking_section_end' => [
                     'type' => 'sectionend',
                 ],
+                'api_tweaking_section' => [
+                    'type' => 'title',
+                    'title' => 'Order Tweaking',
+                ],
+                'api_soap_url' => [
+                    'id' => 'api_soap_url',
+                    'title' => __('API SOAP Url', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Use another URL for the SOAP-API. Currently only for test environment!',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'api_tweaking_section_end' => [
+                    'type' => 'sectionend',
+                ],
             ],
         ];
 
@@ -1025,7 +1043,7 @@ class FormFields extends WC_Settings_API
                 'mock_update_callback_exception' => [
                     'id' => 'mock_update_callback_exception',
                     'title' => __(
-                        'Fail on callback update',
+                        'Fail on callback update in wp-admin',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
@@ -1043,6 +1061,77 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_empty_price_info_html',
                     'title' => __(
                         'Fail retrieval of priceinfo',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_annuity_factor_config_exception' => [
+                    'id' => 'mock_annuity_factor_config_exception',
+                    'title' => __(
+                        'Fail fetching annuityFactor values',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_get_payment_methods_exception' => [
+                    'id' => 'mock_get_payment_methods_exception',
+                    'title' => __(
+                        'wp-admin: getPaymentMethods in AJAX request',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'This setting enables a fictive getPaymentMethods problem when we update payment methods ' .
+                        'in admin manually.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_get_empty_payment_methods_exception' => [
+                    'id' => 'mock_get_empty_payment_methods_exception',
+                    'title' => __(
+                        'wp-admin: getPaymentMethods without stored data',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'This setting enables a fictive getPaymentMethods problem where we request for payment ' .
+                        'methods the first time. To test exceptions with the API update, this should be combined ' .
+                        'with the getPaymentMethods in AJAX-mock.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_callback_update_exception' => [
+                    'id' => 'mock_callback_update_exception',
+                    'title' => __(
+                        'Fail update callbacks from Resurs Bank',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
@@ -1128,16 +1217,25 @@ class FormFields extends WC_Settings_API
     public static function getFieldMethodList()
     {
         $exception = null;
+        $annuityException = null;
         $paymentMethods = [];
         $theFactor = Data::getResursOption('currentAnnuityFactor');
         $theDuration = (int)Data::getResursOption('currentAnnuityDuration');
+        $annuityFactors = [];
 
         try {
             $paymentMethods = ResursBankAPI::getPaymentMethods();
-            $annuityFactors = self::getAnnuityDropDown(ResursBankAPI::getAnnuityFactors(), $theFactor, $theDuration);
         } catch (Exception $e) {
             $exception = $e;
         }
+        $silentGetPaymentMethodsException = WooCommerce::getSessionValue('silentGetPaymentMethodsException');
+
+        try {
+            $annuityFactors = self::getAnnuityDropDown(ResursBankAPI::getAnnuityFactors(), $theFactor, $theDuration);
+        } catch (Exception $e) {
+            $annuityException = $e;
+        }
+        $silentAnnuityException = WooCommerce::getSessionValue('silentAnnuityException');
 
         if (is_array($paymentMethods)) {
             $annuityEnabled = Data::getResursOption('currentAnnuityFactor');
@@ -1148,7 +1246,10 @@ class FormFields extends WC_Settings_API
                     'paymentMethods' => $paymentMethods,
                     'annuityFactors' => $annuityFactors,
                     'exception' => $exception,
+                    'annuityException' => $annuityException,
                     'annuityEnabled' => $annuityEnabled,
+                    'silentGetPaymentMethodsException' => $silentGetPaymentMethodsException,
+                    'silentAnnuityException' => $silentAnnuityException,
                     'environment' => Data::getResursOption('environment'),
                 ]
             );
