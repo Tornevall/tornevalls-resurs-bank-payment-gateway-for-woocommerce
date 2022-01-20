@@ -159,7 +159,6 @@ function getDeprecatedCredentialsForm() {
 function getResursPaymentMethods() {
     getResursSpin('#div_trbwc_admin_payment_methods_button');
     getResursAjaxify('post', 'resursbank_get_payment_methods', {'n': true}, function (data) {
-        console.log(data['reload']);
         if (data['reload'] === true) {
             $rQuery('#div_trbwc_admin_payment_methods_button').html(
                 $rQuery('<div>', {
@@ -191,9 +190,13 @@ function getResursCallbacks() {
             );
             document.location.reload();
         } else if (data['error'] !== '') {
-            getResursError(data['error'], '#div_trbwc_admin_payment_methods_button');
+            getResursError(data['error'], '#div_trbwc_admin_callbacks_button');
         } else {
             getResursError('Unable to update.', '#div_trbwc_admin_callbacks_button');
+        }
+    }, function (data) {
+        if (typeof data.statusText !== 'undefined') {
+            getResursError(data.statusText, '#div_trbwc_admin_callbacks_button');
         }
     });
 }
@@ -377,8 +380,11 @@ function doResursRemoveCallback(cbid) {
                 } else {
                     getCallbackButtonRestored(data['callback']);
                     // There might be a denial here that needs to be alerted.
-                    if (data['message'] !== '') {
+                    if (typeof data['message'] === 'string' && data['message'] !== '') {
                         alert(data['message']);
+                    }
+                    if (typeof data === 'string' && data !== '') {
+                        alert(data);
                     }
                 }
             }
