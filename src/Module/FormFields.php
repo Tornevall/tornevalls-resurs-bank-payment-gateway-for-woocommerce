@@ -273,6 +273,7 @@ class FormFields extends WC_Settings_API
                 'rco_method_titling' => [
                     'id' => 'rco_method_titling',
                     'type' => 'select',
+                    'title' => __('How to display payment method titles', 'trbwc'),
                     'options' => [
                         'default' => __('Default title.', 'trbwc'),
                         'id' => __('Use the ID of the chosen payment method.', 'trbwc'),

@@ -3,6 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecommerce\Service\Merchant\MerchantApi;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
