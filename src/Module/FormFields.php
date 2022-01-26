@@ -846,6 +846,7 @@ class FormFields extends WC_Settings_API
             foreach ($basicArray as $itemSetting => $value) {
                 $newArraySetup[$itemSetting] = $value;
                 if ($itemSetting === 'password_production') {
+                    // Apply bleeding edge MerchantAPI setting just after the old account settings.
                     $newArraySetup += $bleedingEdgeEcommerceJWT;
                 }
             }
