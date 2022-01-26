@@ -12,9 +12,6 @@
  * Domain Path: /language
  */
 
-use ResursBank\Module\Data;
-use ResursBank\Module\ResursBankAPI;
-
 if (!defined('ABSPATH')) {
     exit;
 }
