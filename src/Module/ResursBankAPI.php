@@ -177,6 +177,10 @@ class ResursBankAPI
 
                         $tokenRequestData = $this->merchantConnection->getToken();
                         if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
+                            Data::setDeveloperLog(
+                                __FUNCTION__,
+                                __('Merchant API token renewed.', 'trbwc')
+                            );
                             $livingTransientToken = $tokenRequestData->getAccessToken();
                             set_transient(
                                 sprintf('%s_bearer', Data::getPrefix()),
@@ -186,11 +190,14 @@ class ResursBankAPI
                         }
                     } else {
                         $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
+                        Data::setDeveloperLog(
+                            __FUNCTION__,
+                            __('Merchant API token reused.', 'trbwc')
+                        );
                     }
                 }
-
             } catch (Exception $e) {
-
+                Data::setLogException($e);
             }
         }
 
