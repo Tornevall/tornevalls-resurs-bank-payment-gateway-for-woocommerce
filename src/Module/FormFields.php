@@ -3,8 +3,10 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecommerce\Service\Merchant\Model\Method;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use stdClass;
 use WC_Checkout;
 use WC_Settings_API;
 use function in_array;
@@ -796,6 +798,64 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * Bleeding edge settings block. Activates currently unstable features.
+     *
+     * @param $currentArray
+     * @param $section
+     * @since 0.0.1.0
+     */
+    public static function getBleedingEdgeSettings($currentArray, $section)
+    {
+        if (Data::isBleedingEdge()) {
+            $bleedingEdgeEcommerceJWT = [
+                'jwt_client_id' => [
+                    'id' => 'jwt_client_id',
+                    'title' => __('JWT Client ID', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'JWT Client ID.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'jwt_client_password' => [
+                    'id' => 'jwt_client_password',
+                    'title' => __('JWT Client Password', 'trbwc'),
+                    'type' => 'password',
+                    'desc' => __(
+                        'JWT Client Password.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'jwt_store_id' => [
+                    'id' => 'jwt_store_id',
+                    'title' => __('JWT Store ID', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Numeric store id or uuid-based.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+            ];
+
+            $basicArray = $currentArray['basic'];
+
+            $newArraySetup = [];
+            foreach ($basicArray as $itemSetting => $value) {
+                $newArraySetup[$itemSetting] = $value;
+                if ($itemSetting === 'password_production') {
+                    $newArraySetup += $bleedingEdgeEcommerceJWT;
+                }
+            }
+            $currentArray['basic'] = $newArraySetup;
+        }
+
+        return $currentArray;
+    }
+
+    /**
      * Filter based addon.
      * Do not use getResursOption in this request as this may cause infinite loops.
      *
@@ -975,8 +1035,6 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param $currentArray
-     * @param $section
      * @return mixed
      * @since 0.0.1.0
      */
@@ -1210,6 +1268,36 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * Fetch and compare a payment method with the simplified API list. Returns the index for which
+     * the expected payment method resides in the old format.
+     *
+     * @param Method $merchantApiMethod
+     * @param stdClass $paymentMethods
+     * @return int
+     * @since 0.0.1.0
+     */
+    private static function getMerchantMethodBySimplified($merchantApiMethod, $paymentMethods)
+    {
+        $return = -1;
+
+        foreach ($paymentMethods as $paymentMethodIndex => $paymentMethod) {
+            $resursType = preg_replace('/^RESURS_/', '', $merchantApiMethod->getType());
+            // Need to look up customerType too.
+            if ($paymentMethod->description === $merchantApiMethod->getDescription() &&
+                (
+                    $paymentMethod->specificType === $merchantApiMethod->getType() ||
+                    $paymentMethod->specificType === $resursType
+                )
+            ) {
+                $return = $paymentMethodIndex;
+                break;
+            }
+        }
+
+        return (int)$return;
+    }
+
+    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
@@ -1240,6 +1328,19 @@ class FormFields extends WC_Settings_API
 
         if (is_array($paymentMethods)) {
             $annuityEnabled = Data::getResursOption('currentAnnuityFactor');
+            $bleedingMethods = [];
+
+            if (Data::isBleedingEdgeApiReady()) {
+                $merch = ResursBankAPI::getMerchantConnection();
+                $bleedingMethods = $merch->getPaymentMethods(Data::getResursOption('jwt_store_id'))->getList();
+                /** @var Method $bleedingMethod */
+                foreach ($bleedingMethods as $bleedingMethod) {
+                    $paymentMethodIndex = self::getMerchantMethodBySimplified($bleedingMethod, $paymentMethods);
+                    if ($paymentMethodIndex > -1) {
+                        $paymentMethods[$paymentMethodIndex]->merchantMethod = $bleedingMethod;
+                    }
+                }
+            }
 
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_paymentmethods.phtml',
@@ -1252,6 +1353,7 @@ class FormFields extends WC_Settings_API
                     'silentGetPaymentMethodsException' => $silentGetPaymentMethodsException,
                     'silentAnnuityException' => $silentAnnuityException,
                     'environment' => Data::getResursOption('environment'),
+                    'isBleedingEdge' => Data::isBleedingEdge(),
                 ]
             );
         }

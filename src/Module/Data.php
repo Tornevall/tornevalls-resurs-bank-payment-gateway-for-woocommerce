@@ -1916,6 +1916,29 @@ class Data
     }
 
     /**
+     * Check whether bleeding edge technology is enabled.
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isBleedingEdge()
+    {
+        return (bool)Data::getResursOption('bleeding_edge');
+    }
+
+    /**
+     * Check if account for bleeding edge API has been set up.
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isBleedingEdgeApiReady()
+    {
+        return (Data::isBleedingEdge() &&
+            !empty(Data::getResursOption('jwt_store_id')) &&
+            !empty(Data::getResursOption('jwt_client_id')) &&
+            !empty(Data::getResursOption('jwt_client_password')));
+    }
+
+    /**
      * @param $paymentMethod
      * @return bool
      * @since 0.0.1.0
