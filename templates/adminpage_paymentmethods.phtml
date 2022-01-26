@@ -1,8 +1,11 @@
-<h3><?php _e(sprintf('Available payment methods (Environment %s)', $environment), 'trbwc'); ?></h3>
+<h3>
+    <?php
+    use Resursbank\Ecommerce\Service\Merchant\Model\Method;
+    _e(sprintf('Available payment methods (Environment %s)', $environment), 'trbwc'); ?></h3>
 
 <?php
-    // $silentAnnuityException
-    // $silentGetPaymentMethodsException
+// $silentAnnuityException
+// $silentGetPaymentMethodsException
 ?>
 <?php if ($exception === null) { ?>
     <div style="font-style: italic;margin-bottom: 5px;">
@@ -23,9 +26,9 @@
 
     <table width="100%" style="border: none;">
         <tr>
-            <td width="10%" class="resursMethodHead"><?php _e('Method ID', 'trbwc') ?></td>
+            <td width="20%" class="resursMethodHead"><?php _e('Method ID', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Description', 'trbwc') ?></td>
-            <td width="20%" class="resursMethodHead"><?php _e('Amount limits', 'trbwc') ?></td>
+            <td width="10%" class="resursMethodHead"><?php _e('Amount limits', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Method type', 'trbwc') ?></td>
             <td width="10%" class="resursMethodHead"><?php _e('Customer types', 'trbwc') ?></td>
             <td width="20%" class="resursMethodHead"><?php _e('Part payment options', 'trbwc') ?></td>
@@ -34,9 +37,20 @@
         <?php
         if (is_array($paymentMethods) && count($paymentMethods)) {
             foreach ($paymentMethods as $methodObject) {
+                $merchantMethod = isset($methodObject->merchantMethod) ? $methodObject->merchantMethod : null;
+                $merchantMethodId = $merchantMethod instanceof Method ? $merchantMethod->getId() : '';
                 ?>
                 <tr>
-                    <td class="resursMethodBody"><?php echo $methodObject->id ?></td>
+                    <td class="resursMethodBody">
+                        <?php
+                        echo $methodObject->id;
+                        if ($isBleedingEdge) {
+                            ?>
+                            <div style="font-size: 12px; font-style: italic;"><?php echo $merchantMethodId ?></div>
+                            <?php
+                        }
+                        ?>
+                    </td>
                     <td class="resursMethodBody"><?php echo $methodObject->description ?></td>
                     <td class="resursMethodBody">
                         <?php echo $methodObject->minLimit ?> - <?php echo $methodObject->maxLimit ?>

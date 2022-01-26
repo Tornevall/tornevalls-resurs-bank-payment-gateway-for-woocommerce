@@ -30,6 +30,7 @@ define('RESURSBANK_SNAKECASE_FILTERS', true);
 add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializePlugin');
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
+add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBleedingEdgeSettings', 10, 2);
 
 // Making sure that we do not coexist with prior versions.
 add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Service\WordPress::getPriorVersionsDisabled');

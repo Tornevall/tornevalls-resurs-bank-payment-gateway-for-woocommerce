@@ -4,6 +4,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use Resursbank\Ecommerce\Service\Merchant\MerchantApi;
+use Resursbank\Ecommerce\Service\Merchant\ResursToken;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
@@ -57,6 +58,20 @@ class ResursBankAPI
         'username' => '',
         'password' => '',
     ];
+
+    /**
+     * Static variable of Resurs Bank Merchant API (early bleeding edge state).
+     * @var MerchantApi
+     * @since 0.0.1.0
+     */
+    private static $merchantApi;
+
+    /**
+     * Resurs Bank Merchant API (early bleeding edge state).
+     * @var MerchantApi
+     * @since 0.0.1.0
+     */
+    private $merchantConnection;
 
     /**
      * @return bool|string
@@ -125,6 +140,61 @@ class ResursBankAPI
         }
 
         return self::$resursBank->getConnection();
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function getMerchantConnection()
+    {
+        if (empty(self::$merchantApi)) {
+            // Instantiation.
+            self::$merchantApi = new self();
+        }
+
+        return self::$merchantApi->getMerchantApi();
+    }
+
+    /**
+     * @return MerchantApi
+     * @throws Exception
+     */
+    public function getMerchantApi()
+    {
+        if (Data::isBleedingEdge() && Data::isBleedingEdgeApiReady()) {
+            try {
+                if (empty($this->merchantConnection)) {
+                    $livingTransientToken = (string)get_transient(
+                        sprintf('%s_bearer', Data::getPrefix())
+                    );
+
+                    if (empty($livingTransientToken)) {
+                        $this->merchantConnection = (new MerchantApi())
+                            ->setClientId(Data::getResursOption('jwt_client_id'))
+                            ->setClientSecret(Data::getResursOption('jwt_client_password'))
+                            ->setScope('mock-merchant-api')
+                            ->setGrantType('client_credentials');
+
+                        $tokenRequestData = $this->merchantConnection->getToken();
+                        if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
+                            $livingTransientToken = $tokenRequestData->getAccessToken();
+                            set_transient(
+                                sprintf('%s_bearer', Data::getPrefix()),
+                                $livingTransientToken,
+                                $tokenRequestData->getExpire()
+                            );
+                        }
+                    } else {
+                        $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
+                    }
+                }
+
+            } catch (Exception $e) {
+
+            }
+        }
+
+        return $this->merchantConnection;
     }
 
     /**
