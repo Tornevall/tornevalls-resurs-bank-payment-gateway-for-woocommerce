@@ -10,6 +10,8 @@ use WC_Coupon;
 use WC_Product;
 
 /**
+ * Class for which active order creations are handled.
+ *
  * @since 0.0.1.0
  */
 class OrderHandler extends ResursDefault

@@ -7,7 +7,6 @@ use WC_Queue_Interface;
 
 /**
  * Order status handler. Handles "complex" order statuses which is known to be affected by race conditions.
- * Class OrderStatus
  * @since 0.0.1.0
  */
 class OrderStatus

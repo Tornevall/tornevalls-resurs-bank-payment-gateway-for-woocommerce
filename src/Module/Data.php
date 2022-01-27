@@ -382,6 +382,30 @@ class Data
     }
 
     /**
+     * Carefully check and return order from Resurs Bank but only if it does exist. We do this by checking
+     * if the payment method allows us doing a getPayment and if true, then we will return a new WC_Order with
+     * Resurs Bank ecom metadata included.
+     *
+     * @param int|WC_Order $orderData
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getResursOrderIfExists($orderData)
+    {
+        $return = null;
+
+        $order = WooCommerce::getProperOrder($orderData, 'order');
+        if (self::isResursMethod($order->get_payment_method())) {
+            $resursOrder = Data::getOrderInfo($order);
+            if (!empty($resursOrder['ecom']) && isset($resursOrder['ecom']->id)) {
+                $return = $resursOrder;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @param string $key
      * @param null $namespace
      * @param bool $getDefaults

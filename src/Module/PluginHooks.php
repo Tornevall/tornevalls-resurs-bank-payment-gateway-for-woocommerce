@@ -30,6 +30,21 @@ class PluginHooks
         add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
         add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
         add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
+        add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
+    }
+
+    /**
+     * @param $orderId
+     * @param $oldSlug
+     * @param $newSlug
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function updateOrderStatusByWooCommerce($orderId, $oldSlug, $newSlug)
+    {
+        if (($order = Data::getResursOrderIfExists($orderId))) {
+            // This is where we handle order statuses changed from WooCommerce.
+        }
     }
 
     /**
@@ -112,7 +127,7 @@ class PluginHooks
                 $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
             } catch (Exception $e) {
                 $return = [
-                    'default' => __('Payment Methods are currently unavailable!', 'trbwc')
+                    'default' => __('Payment Methods are currently unavailable!', 'trbwc'),
                 ];
             }
             if (isset($paymentMethodList) && is_array($paymentMethodList)) {

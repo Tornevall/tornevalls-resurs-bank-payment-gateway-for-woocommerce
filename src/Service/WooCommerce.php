@@ -260,8 +260,6 @@ class WooCommerce
     /**
      * @param mixed $order
      * @throws ResursException
-     * @throws ExceptionHandler
-     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAdminAfterOrderDetails($order = null)
