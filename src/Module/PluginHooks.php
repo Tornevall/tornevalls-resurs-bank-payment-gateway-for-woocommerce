@@ -6,6 +6,7 @@ use Exception;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use TorneLIB\Utils\WordPress;
+use WC_Order;
 use function is_array;
 
 /**
@@ -43,15 +44,77 @@ class PluginHooks
      */
     public function updateOrderStatusByWooCommerce($orderId, $oldSlug, $newSlug)
     {
-        if (($order = Data::getResursOrderIfExists($orderId))) {
-            // Userdata that should follow with the afterShopFlow when changing order status on Resurs side,
-            // for backtracking actions.
-
-            $wpHelper = new WordPress();
-            $currentRunningUser = $wpHelper->getUserInfo(null);;
-            $currentRunningUsername = $wpHelper->getUserInfo('user_login');
+        $order = Data::getResursOrderIfExists($orderId);
+        if (!empty($order) && isset($order['ecom'])) {
+            // Precheck old status. There are some statuses that prevents editing.
+            $this->handleOrderStatusByOldSlug($oldSlug, $order);
 
             // This is where we handle order statuses changed from WooCommerce.
+            $this->handleOrderByNewSlug($newSlug, $order);
+        }
+    }
+
+    /**
+     * Handle old slugs first.
+     * Equivalent to RB v2.x method order_status_changed first parts.
+     *
+     * @param $oldSlug
+     * @param WC_Order $order
+     * @since 0.0.1.0
+     */
+    private function handleOrderStatusByOldSlug($oldSlug, $order)
+    {
+        $url = admin_url('post.php');
+        $url = add_query_arg('post', $order['order']->get_id(), $url);
+        $url = add_query_arg('action', 'edit', $url);
+
+        $ecomStatus = isset($order['ecom']->status) ? (array)$order['ecom']->status : [];
+
+        switch ($oldSlug) {
+            case 'cancelled':
+                if (in_array('IS_ANNULLED', $ecomStatus)) {
+                    wp_set_object_terms($order['order']->get_id(), $oldSlug, 'shop_order_status', false);
+                    wp_safe_redirect($url);
+                }
+                break;
+            case 'refunded':
+                if (in_array('IS_CREDITED', $ecomStatus)) {
+                    wp_set_object_terms($order['order']->get_id(), $oldSlug, 'shop_order_status', false);
+                    wp_safe_redirect($url);
+                }
+                break;
+            default:
+        }
+    }
+
+    /**
+     * @param $newSlug
+     * @param $order
+     * @throws Exception
+     */
+    private function handleOrderByNewSlug($newSlug, $order)
+    {
+        $wpHelper = new WordPress();
+        $resursConnection = (new ResursBankAPI())->getConnection();
+
+        // Userdata that should follow with the afterShopFlow when changing order status on Resurs side,
+        // for backtracking actions.
+        $resursConnection->setLoggedInUser($wpHelper->getUserInfo('user_login'));
+
+        switch ($newSlug) {
+            case 'completed':
+                if ($resursConnection->canDebit($order['ecom'])) {
+                    // Fix the v2.x complexity here.
+                }
+                break;
+            case 'cancelled':
+            case 'refunded':
+                if ($resursConnection->canCredit($payment_id) ||
+                    $resursConnection->canAnnul($payment_id)
+                ) {
+                    // Fix the v2.x complexity here.
+                }
+            default:
         }
     }
 
