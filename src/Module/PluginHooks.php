@@ -5,6 +5,7 @@ namespace ResursBank\Module;
 use Exception;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
+use TorneLIB\Utils\WordPress;
 use function is_array;
 
 /**
@@ -34,6 +35,34 @@ class PluginHooks
     }
 
     /**
+     * @param $key
+     * @return int|mixed|null
+     */
+    public function getUserInfo($key)
+    {
+        $return = null;
+
+        if (function_exists('get_current_user_id') && function_exists('get_user_meta')) {
+            $currentUserId = get_current_user_id();
+            if ($key === 'userid' || empty($key)) {
+                $return = $currentUserId;
+            } else {
+                $metaData = empty($key) ? get_user_meta($currentUserId) : get_user_meta($currentUserId, $key);
+                if ($currentUserId && is_array($metaData) && !count($metaData)) {
+                    $return = get_userdata($currentUserId)->get($key);
+                } else {
+                    $return = isset($metaData[$key]) ? $metaData[$key]:$metaData;
+                    if (is_array($return) && count($return) === 1) {
+                        $return = array_pop($return);
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * @param $orderId
      * @param $oldSlug
      * @param $newSlug
@@ -43,6 +72,13 @@ class PluginHooks
     public function updateOrderStatusByWooCommerce($orderId, $oldSlug, $newSlug)
     {
         if (($order = Data::getResursOrderIfExists($orderId))) {
+            // Userdata that should follow with the afterShopFlow when changing order status on Resurs side,
+            // for backtracking actions.
+
+            $wpHelper = new WordPress();
+            $currentRunningUser = $wpHelper->getUserInfo(null);;
+            $currentRunningUsername = $wpHelper->getUserInfo('user_login');
+
             // This is where we handle order statuses changed from WooCommerce.
         }
     }
