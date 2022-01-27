@@ -94,6 +94,8 @@ class PluginHooks
      */
     private function handleOrderByNewSlug($newSlug, $order)
     {
+        $afterShopResponseString = '';
+
         $wpHelper = new WordPress();
         $resursConnection = (new ResursBankAPI())->getConnection();
 
@@ -101,20 +103,53 @@ class PluginHooks
         // for backtracking actions.
         $resursConnection->setLoggedInUser($wpHelper->getUserInfo('user_login'));
 
+        $resursReference = Data::getResursReference($order);
         switch ($newSlug) {
             case 'completed':
+                // Make sure we also handle instant finalizations.
                 if ($resursConnection->canDebit($order['ecom'])) {
-                    // Fix the v2.x complexity here.
+                    try {
+                        $finalizeResponse = $resursConnection->finalizePayment($resursReference);
+                        $afterShopResponseString = $finalizeResponse ?
+                            __('Success.', 'trbwc') : __('Failed without exception.');
+                    } catch (Exception $e) {
+                        $afterShopResponseString = $e->getMessage();
+                    }
                 }
                 break;
             case 'cancelled':
             case 'refunded':
-                if ($resursConnection->canCredit($payment_id) ||
-                    $resursConnection->canAnnul($payment_id)
+                if ($resursConnection->canCredit($order['ecom']) ||
+                    $resursConnection->canAnnul($order['ecom'])
                 ) {
-                    // Fix the v2.x complexity here.
+                    // When an order is fully refunded or cancelled (as this slug represents), we should follow the
+                    // full cancellation method. As it seems, in v2.x cancellations and refunds are separated into
+                    // two different sections with identical code except for the slug name.
+                    try {
+                        $cancelResponse = $resursConnection->cancelPayment($resursReference);
+                        $afterShopResponseString = $cancelResponse ?
+                            __('Success.', 'trbwc') : __('Failed without exception.');
+                    } catch (Exception $e) {
+                        $afterShopResponseString = $e->getMessage();
+                    }
                 }
+                break;
             default:
+        }
+
+        if (!empty($afterShopResponseString)) {
+            WooCommerce::setOrderNote(
+                $order['order'],
+                __(
+                    sprintf(
+                        'WooCommerce signalled "%s"-request. Sent %s to Resurs Bank with result: %s.',
+                        $newSlug,
+                        $newSlug,
+                        $afterShopResponseString
+                    ),
+                    'trbwc'
+                )
+            );
         }
     }
 
