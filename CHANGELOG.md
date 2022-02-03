@@ -1,7 +1,10 @@
 Current ChangeLog is based on what has reached the master branch. Also, github referenses are now added.
 
 # 0.0.1.0 / 1.0.0
+
 <ul>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-6'>RWC-6</a>] -         Milestone for RBWC 1.0 reached
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-22'>RWC-22</a>] -         CRITICAL Uncaught Error: Maximum function nesting level of &#39;500&#39; reached
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-97'>RWC-97</a>] -         The blue box may not show properly when payments are not finished
@@ -27,8 +30,6 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-253'>RWC-253</a>] -         Annuity factors with custom currency data
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-258'>RWC-258</a>] -         ECom requesting payments four times in RCO mode
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-6'>RWC-6</a>] -         RBWC 1.0
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-3'>RWC-3</a>] -         composerize package PSR-4 formatted
 </li>
@@ -85,8 +86,6 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-70'>RWC-70</a>] -         Prepare simplified and methods
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-71'>RWC-71</a>] -         Handle annuity factors
-</li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-72'>RWC-72</a>] -         payment method editor - consider fee data in &quot;manual section&quot;
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-74'>RWC-74</a>] -         isEnabled (option) should override active status for gateways
 </li>
@@ -254,6 +253,8 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-245'>RWC-245</a>] -         Tweak for note prefix might not work properly
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-246'>RWC-246</a>] -         Log frontent-to-backend
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-247'>RWC-247</a>] -         mock mode (fake error in test by intentionally throw errors by config - - time limited enabled.. ex throw on updatePaymentReference
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-251'>RWC-251</a>] -         Orders with orderTotal of 0.
@@ -280,11 +281,21 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-267'>RWC-267</a>] -         Removal of callbacks are not warning of &quot;lost callbacks&quot; in backend-admin
 </li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-268'>RWC-268</a>] -         WooTweaker: Ignore digest validations (on technical disturbances)
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-272'>RWC-272</a>] -         Make sure saving credentials also updates callbacks properly
+</li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-274'>RWC-274</a>] -         Set up a better way for how we handled callback exceptions
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-275'>RWC-275</a>] -         Priceinfo errorfixing
 </li>
-<li>[<a href='https://tracker.tornevall.net/browse/RWC-4'>RWC-4</a>] -         Generate basic configuration view
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-281'>RWC-281</a>] -         RCO Checkout Error Handling
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-282'>RWC-282</a>] -         Handle timeouts
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-283'>RWC-283</a>] -         Cache annuity factors and payment methods so that they can work independently of Resurs health status
+</li>
+<li>[<a href='https://tracker.tornevall.net/browse/RWC-284'>RWC-284</a>] -         Unreachable API&#39;s handling (AKA Christmas Holidays API Exception patch)
 </li>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-33'>RWC-33</a>] -         woocommerce_resurs_bank_&#39; . $type . &#39;_checkout_icon (iconified method)
 </li>
