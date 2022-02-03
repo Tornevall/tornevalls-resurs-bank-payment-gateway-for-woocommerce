@@ -193,7 +193,10 @@ class PluginHooks
     }
 
     /**
-     * Equivalent to v2's getOrderRowsByRefundedDiscountItems - the discounts.
+     * Equivalent to v2's getOrderRowsByRefundedDiscountItems - the discounts. This is the most
+     * from v2 untouched codebase that will ever be found in this plugin again. It very much contains all
+     * we need to resolve discounts within an aftershop request. Dead variables and some other things
+     * are however, from that version, cleaned up.
      *
      * @param WC_Order $order
      * @param ResursBank $connection
