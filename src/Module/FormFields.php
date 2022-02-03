@@ -691,10 +691,10 @@ class FormFields extends WC_Settings_API
                 'can_log_backend' => [
                     'id' => 'can_log_backend',
                     'type' => 'checkbox',
-                    'title' => __('Backend requests', 'trbwc'),
+                    'title' => __('Log backend requests from ajaxify-js', 'trbwc'),
                     'desc' => __('Yes', 'trbwc'),
                     'desc_tip' => __(
-                        'Log backend events triggered by the ajaxify executor.',
+                        'Log backend events triggered by the the javascript method that handles all AJAX requests.',
                         'trbwc'
                     ),
                     'default' => 'no',
@@ -1154,7 +1154,7 @@ class FormFields extends WC_Settings_API
                 'mock_get_payment_methods_exception' => [
                     'id' => 'mock_get_payment_methods_exception',
                     'title' => __(
-                        'wp-admin: getPaymentMethods in AJAX request',
+                        'wp-admin: Generate an exception in AJAX-based getPaymentMethods-requests',
                         'trbwc'
                     ),
                     'type' => 'checkbox',
@@ -1172,7 +1172,7 @@ class FormFields extends WC_Settings_API
                 'mock_get_empty_payment_methods_exception' => [
                     'id' => 'mock_get_empty_payment_methods_exception',
                     'title' => __(
-                        'wp-admin: getPaymentMethods without stored data',
+                        'wp-admin: getPaymentMethods will run without pre-stored data',
                         'trbwc'
                     ),
                     'type' => 'checkbox',

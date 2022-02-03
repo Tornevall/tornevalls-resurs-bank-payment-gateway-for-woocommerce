@@ -379,7 +379,7 @@ class PluginHooks
             $order['order']->add_order_note(
                 sprintf(
                     __(
-                        'Refund/cancellation request for %d item(s) sent to API successfully.',
+                        'Refund/cancellation request for %d item(s) sent to Resurs Bank successfully.',
                         'resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     $itemCount
@@ -484,7 +484,7 @@ class PluginHooks
                             $fullAfterShopRequest
                         );
                         $afterShopResponseString = $finalizeResponse ?
-                            __('Success.', 'trbwc') : __('Failed without exception.');
+                            __('Success.', 'trbwc') : __('Failed without receiving any exception.', 'trbwc');
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
                     }
@@ -510,7 +510,7 @@ class PluginHooks
                             $fullAfterShopRequest
                         );
                         $afterShopResponseString = $cancelResponse ?
-                            __('Success.', 'trbwc') : __('Failed without exception.');
+                            __('Success.', 'trbwc') : __('Failed without receiving any exception.', 'trbwc');
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
                     }
