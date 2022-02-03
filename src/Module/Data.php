@@ -367,7 +367,7 @@ class Data
                 );
             } catch (Exception $annuityException) {
                 $resursApi = ResursBankAPI::getResurs();
-                Data::setTimeoutStatus($resursApi, $annuityException);
+                self::setTimeoutStatus($resursApi, $annuityException);
                 if ($resursApi->hasTimeoutException()) {
                     echo sprintf(
                         '<div class="annuityTimeout">%s</div>',
