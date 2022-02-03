@@ -1499,7 +1499,7 @@ class Data
         $return = '';
 
         $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
-        if (isset($orderDataArray['meta']) && is_array($orderDataArray)) {
+        if (is_array($orderDataArray) && isset($orderDataArray['meta']) && is_array($orderDataArray)) {
             foreach ($searchUsing as $searchKey) {
                 $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
                 if (isset($orderDataArray['meta'][$searchKey])) {

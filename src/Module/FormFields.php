@@ -1205,6 +1205,23 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'mock_refund_exception' => [
+                    'id' => 'mock_refund_exception',
+                    'title' => __(
+                        'Emulate refunding error from Resurs Bank (annul/credit)',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Emulating exceptions from SoapService in the annulPayment/creditPayment services.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'mocking_section_end' => [
                     'type' => 'sectionend',
                 ],

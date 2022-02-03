@@ -16,6 +16,7 @@ use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\ExceptionHandler;
 use WC_Order;
+use WC_Product;
 use WC_Session;
 use function in_array;
 use function is_string;
@@ -164,7 +165,8 @@ class WooCommerce
                 );
 
                 foreach ($gateways as $gatewayName => $gatewayClass) {
-                    if ($gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
+                    if ($gatewayClass instanceof ResursDefault &&
+                        $gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
                         (bool)preg_match('/card/i', $gatewayClass->getSpecificType())
                     ) {
                         continue;
@@ -600,6 +602,23 @@ class WooCommerce
     public static function setIsInCheckout()
     {
         self::setCustomerCheckoutLocation(true);
+    }
+
+    /**
+     * @param WC_Product $product
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getProperArticleNumber($product) {
+        $return = $product->get_id();
+        $productSkuValue = $product->get_sku();
+        if (!empty($productSkuValue) &&
+            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
+        ) {
+            $return = $productSkuValue;
+        }
+
+        return WordPress::applyFilters('getArticleNumber', $return, $product);
     }
 
     /**
