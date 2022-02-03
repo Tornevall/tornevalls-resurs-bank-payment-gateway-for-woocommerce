@@ -1,4 +1,4 @@
-Current ChangeLog is based on what has reached the master branch. Also, github referenses are now added.
+Current ChangeLog is based on what has reached the master branch. Also, github references are now added.
 
 # 0.0.1.0 / 1.0.0
 
