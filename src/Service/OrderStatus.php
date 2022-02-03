@@ -7,35 +7,55 @@ use WC_Queue_Interface;
 
 /**
  * Order status handler. Handles "complex" order statuses which is known to be affected by race conditions.
- * Class OrderStatus
  * @since 0.0.1.0
  */
 class OrderStatus
 {
     /**
      * HTTP Response Code for "digest problems".
-     *
+     * Matching with HTTP Status "Not acceptable".
      * @var int
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_STATUS_DIGEST_IS_WRONG = 406;        // Matching with HTTP Status "Not acceptable".
+    const HTTP_RESPONSE_DIGEST_IS_WRONG = 406;
 
     /**
      * HTTP Response Code for "order not found".
+     * Matching with HTTP Status "Gone".
      * @var int
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_STATUS_ORDER_IS_GONE = 410;          // Marching with HTTP Status "Gone".
+    const HTTP_RESPONSE_GONE_NOT_OURS = 410;
 
     /**
      * HTTP Response Code for "order not found".
+     * Callback treated when order was not found but accepted (option accept_rejected_callbacks enabled).
+     * Matching with HTTP Status "Accepted".
      * @var int
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_STATUS_ORDER_IS_NOT_OURS = 204;          // Marching with HTTP Status "No content".
+    const HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED = 202;
+
+    /**
+     * HTTP Response Code for a successfully handled callback.
+     * Callback treated fully OK.
+     * Matching with HTTP Status "No content" (default for success).
+     * @var int
+     * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+     * @since 0.0.1.0
+     */
+    const HTTP_RESPONSE_OK = 204;
+
+    /**
+     * HTTP Response Code for test callbacks.
+     * @var int
+     * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+     * @since 0.0.1.0
+     */
+    const HTTP_RESPONSE_TEST_OK = 200;
 
     /**
      * What we handle through static calls.

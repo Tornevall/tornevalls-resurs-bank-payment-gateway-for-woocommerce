@@ -3,10 +3,10 @@
 namespace ResursBank\Service;
 
 use Exception;
-use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use ResursBank\Module\Plugin;
+use ResursBank\Module\PluginHooks;
+use ResursBank\Module\ResursBankAPI;
 use TorneLIB\IO\Data\Strings;
 
 /**
@@ -28,7 +28,7 @@ class WordPress
         }
 
         // Initialize plugin functions.
-        new Plugin();
+        new PluginHooks();
         // Always initialize defaults once on plugin loaded (performance saver).
         Data::getDefaultsInit();
         self::setupAjaxActions();
@@ -488,6 +488,8 @@ class WordPress
     }
 
     /**
+     * WordPress equivalent for apply_filters, but properly prefixed with plugin name tag.
+     *
      * @param $filterName
      * @param $value
      * @return mixed
@@ -635,8 +637,8 @@ class WordPress
     {
         global $current_tab;
         $return['noncify'] = self::getNonce('admin');
-        $return['environment'] = Api::getEnvironment();
-        $return['wsdl'] = Api::getWsdlMode();
+        $return['environment'] = ResursBankAPI::getEnvironment();
+        $return['wsdl'] = ResursBankAPI::getWsdlMode();
         $return['translate_checkout_rco'] = __(
             'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
             'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
@@ -737,7 +739,8 @@ class WordPress
      */
     private static function getLocalizationDataGlobal($return)
     {
-        $defaultTimeout = 8000;
+        // Set timeout to one second more than the backend timeout.
+        $defaultTimeout = ((Data::getDefaultApiTimeout() + 1) * 1000);
         $setAjaxifyTimeout = WordPress::applyFilters('ajaxifyTimeout', $defaultTimeout);
         $return['noncify'] = self::getNonce('all');
         $return['ajaxify'] = admin_url('admin-ajax.php');
@@ -747,7 +750,7 @@ class WordPress
         $return['failed'] = __('Failed.', 'trbwc');
         $return['reloading'] = __('Please wait while reloading...', 'trbwc');
         $return['nonce_error'] = __(
-            'The page security (nonce) is reportedly expired or is wrong. This can also be caused by the ' .
+            'The page security (nonce) is reportedly expired or wrong. This can also be caused by the ' .
             'fact that you have already interacted with the page you are trying to update information on. ' .
             'You may want to reload your browser before proceeding.',
             'trbwc'

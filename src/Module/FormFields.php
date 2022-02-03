@@ -3,7 +3,10 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecommerce\Service\Merchant\Model\Method;
+use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use stdClass;
 use WC_Checkout;
 use WC_Settings_API;
 use function in_array;
@@ -272,6 +275,7 @@ class FormFields extends WC_Settings_API
                 'rco_method_titling' => [
                     'id' => 'rco_method_titling',
                     'type' => 'select',
+                    'title' => __('How to display payment method titles', 'trbwc'),
                     'options' => [
                         'default' => __('Default title.', 'trbwc'),
                         'id' => __('Use the ID of the chosen payment method.', 'trbwc'),
@@ -338,9 +342,10 @@ class FormFields extends WC_Settings_API
                     'default' => 'no',
                     'desc_tip' => __(
                         'When Resurs Bank has a callback delivery where the order does not exist in the system, the ' .
-                        'plugin will respond with HTTP 410 (Gone). However, if callbacks from Resurs Bank is ' .
-                        'looping eternally due to this problem, this option allows the plugin to pretend that the ' .
-                        'order has been properly updated. Such cases will be replied with HTTP 204 (No content).',
+                        'plugin will respond with another HTTP code. If callbacks from Resurs Bank is ' .
+                        'repeatedly sending too many messages of this kind due to any kind of errors ' .
+                        '(like loops, etc), this option allows the plugin to reply with a response that ' .
+                        'says that the callback was successful anyway.',
                         'trbwc'
                     ),
                 ],
@@ -524,7 +529,21 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => '3600',
                 ],
+                'queue_order_statuses_on_success' => [
+                    'id' => 'queue_order_statuses_on_success',
+                    'title' => __('Queue order statuses on successpage', 'trbwc'),
+                    'desc' => __('Enabled', 'trbwc'),
+                    'desc_tip' => __(
+                        'If you suspect that there may be race conditions between order status updates in the ' .
+                        'customer-success landing page, and the order statuses updated with callbacks you can ' .
+                        'enable this option to queue not only the callback updates but also the other updates.',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'default' => 'no',
+                ],
                 'discard_coupon_vat' => [
+                    'id' => 'discard_coupon_vat',
                     'title' => __('Do not add VAT to discounts', 'trbwc'),
                     'desc' => __('Enabled', 'trbwc'),
                     'desc_tip' => __(
@@ -669,6 +688,17 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'can_log_backend' => [
+                    'id' => 'can_log_backend',
+                    'type' => 'checkbox',
+                    'title' => __('Log backend requests from ajaxify-js', 'trbwc'),
+                    'desc' => __('Yes', 'trbwc'),
+                    'desc_tip' => __(
+                        'Log backend events triggered by the the javascript method that handles all AJAX requests.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'show_developer' => [
                     'title' => __('Activate Advanced Tweaking Mode (Developer)', 'trbwc'),
                     'desc' => __(
@@ -768,6 +798,65 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * Bleeding edge settings block. Activates currently unstable features.
+     *
+     * @param $currentArray
+     * @param $section
+     * @since 0.0.1.0
+     */
+    public static function getBleedingEdgeSettings($currentArray, $section)
+    {
+        if (Data::isBleedingEdge()) {
+            $bleedingEdgeEcommerceJWT = [
+                'jwt_client_id' => [
+                    'id' => 'jwt_client_id',
+                    'title' => __('JWT Client ID', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'JWT Client ID.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'jwt_client_password' => [
+                    'id' => 'jwt_client_password',
+                    'title' => __('JWT Client Password', 'trbwc'),
+                    'type' => 'password',
+                    'desc' => __(
+                        'JWT Client Password.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'jwt_store_id' => [
+                    'id' => 'jwt_store_id',
+                    'title' => __('JWT Store ID', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Numeric store id or uuid-based.',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+            ];
+
+            $basicArray = $currentArray['basic'];
+
+            $newArraySetup = [];
+            foreach ($basicArray as $itemSetting => $value) {
+                $newArraySetup[$itemSetting] = $value;
+                if ($itemSetting === 'password_production') {
+                    // Apply bleeding edge MerchantAPI setting just after the old account settings.
+                    $newArraySetup += $bleedingEdgeEcommerceJWT;
+                }
+            }
+            $currentArray['basic'] = $newArraySetup;
+        }
+
+        return $currentArray;
+    }
+
+    /**
      * Filter based addon.
      * Do not use getResursOption in this request as this may cause infinite loops.
      *
@@ -815,27 +904,6 @@ class FormFields extends WC_Settings_API
                     'default' => 'yes',
                 ],
                 'dev_section_end' => [
-                    'type' => 'sectionend',
-                ],
-                'bleeding_edge_settings' => [
-                    'type' => 'title',
-                    'title' => 'Bleeding Edge',
-                ],
-                'bleeding_edge' => [
-                    'id' => 'bleeding_edge',
-                    'title' => __('Bleeding Edge Checkout Technology', 'trbwc'),
-                    'type' => 'checkbox',
-                    'desc' => __('Enable', 'trbwc'),
-                    'desc_tip' => __(
-                        'Enable features that may be both groundbreaking and platform breaking (a joke). ' .
-                        'The features enabled here are not guaranteed to work in production environments and ' .
-                        'should only be enabled by a developer. Bleeding edge mode can only be used in ' .
-                        'test. Also please note, that features within this area, requires higher versions of PHP.',
-                        'trbwc'
-                    ),
-                    'default' => 'no',
-                ],
-                'bleeding_edge_settings_end' => [
                     'type' => 'sectionend',
                 ],
                 'admin_tweaking_section' => [
@@ -917,6 +985,44 @@ class FormFields extends WC_Settings_API
                 'order_tweaking_section_end' => [
                     'type' => 'sectionend',
                 ],
+                'api_tweaking_section' => [
+                    'type' => 'title',
+                    'title' => 'Order Tweaking',
+                ],
+                'api_soap_url' => [
+                    'id' => 'api_soap_url',
+                    'title' => __('API SOAP Url', 'trbwc'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Use another URL for the SOAP-API. Currently only for test environment!',
+                        'trbwc'
+                    ),
+                    'default' => '',
+                ],
+                'api_tweaking_section_end' => [
+                    'type' => 'sectionend',
+                ],
+                'bleeding_edge_settings' => [
+                    'type' => 'title',
+                    'title' => 'Bleeding Edge',
+                ],
+                'bleeding_edge' => [
+                    'id' => 'bleeding_edge',
+                    'title' => __('Bleeding Edge Checkout Technology', 'trbwc'),
+                    'type' => 'checkbox',
+                    'desc' => __('Enable', 'trbwc'),
+                    'desc_tip' => __(
+                        'Enable features that is still under development. The features enabled here are not ' .
+                        'guaranteed to work in production environments and should only be enabled by a developer.' .
+                        'Bleeding edge mode can currently only be used in test. Also please note, that features' .
+                        'within this area, requires higher versions of PHP.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'bleeding_edge_settings_end' => [
+                    'type' => 'sectionend',
+                ],
             ],
         ];
 
@@ -930,8 +1036,6 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param $currentArray
-     * @param $section
      * @return mixed
      * @since 0.0.1.0
      */
@@ -996,6 +1100,128 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'mock_update_callback_exception' => [
+                    'id' => 'mock_update_callback_exception',
+                    'title' => __(
+                        'Fail on callback update in wp-admin',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'This setting enables a fictive callback problem.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_empty_price_info_html' => [
+                    'id' => 'mock_empty_price_info_html',
+                    'title' => __(
+                        'Fail retrieval of priceinfo',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_annuity_factor_config_exception' => [
+                    'id' => 'mock_annuity_factor_config_exception',
+                    'title' => __(
+                        'Fail fetching annuityFactor values',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_get_payment_methods_exception' => [
+                    'id' => 'mock_get_payment_methods_exception',
+                    'title' => __(
+                        'wp-admin: Generate an exception in AJAX-based getPaymentMethods-requests',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'This setting enables a fictive getPaymentMethods problem when we update payment methods ' .
+                        'in admin manually.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_get_empty_payment_methods_exception' => [
+                    'id' => 'mock_get_empty_payment_methods_exception',
+                    'title' => __(
+                        'wp-admin: getPaymentMethods will run without pre-stored data',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'This setting enables a fictive getPaymentMethods problem where we request for payment ' .
+                        'methods the first time. To test exceptions with the API update, this should be combined ' .
+                        'with the getPaymentMethods in AJAX-mock.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_callback_update_exception' => [
+                    'id' => 'mock_callback_update_exception',
+                    'title' => __(
+                        'Fail update callbacks from Resurs Bank',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
+                'mock_refund_exception' => [
+                    'id' => 'mock_refund_exception',
+                    'title' => __(
+                        'Emulate refunding error from Resurs Bank (annul/credit)',
+                        'trbwc'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'trbwc'
+                    ),
+                    'desc_tip' => __(
+                        'Emulating exceptions from SoapService in the annulPayment/creditPayment services.',
+                        'trbwc'
+                    ),
+                    'default' => 'no',
+                ],
                 'mocking_section_end' => [
                     'type' => 'sectionend',
                 ],
@@ -1050,13 +1276,43 @@ class FormFields extends WC_Settings_API
                 'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
                 'supported_country' => Data::isGetAddressSupported(),
                 'get_address_form' => Data::canUseGetAddressForm(),
-                'get_address_form_always' => $getAddressFormAlways
+                'get_address_form_always' => $getAddressFormAlways,
             ]
         );
         if ($returnHtml) {
             return $return;
         }
         echo $return;
+    }
+
+    /**
+     * Fetch and compare a payment method with the simplified API list. Returns the index for which
+     * the expected payment method resides in the old format.
+     *
+     * @param Method $merchantApiMethod
+     * @param stdClass $paymentMethods
+     * @return int
+     * @since 0.0.1.0
+     */
+    private static function getMerchantMethodBySimplified($merchantApiMethod, $paymentMethods)
+    {
+        $return = -1;
+
+        foreach ($paymentMethods as $paymentMethodIndex => $paymentMethod) {
+            $resursType = preg_replace('/^RESURS_/', '', $merchantApiMethod->getType());
+            // Need to look up customerType too.
+            if ($paymentMethod->description === $merchantApiMethod->getDescription() &&
+                (
+                    $paymentMethod->specificType === $merchantApiMethod->getType() ||
+                    $paymentMethod->specificType === $resursType
+                )
+            ) {
+                $return = $paymentMethodIndex;
+                break;
+            }
+        }
+
+        return (int)$return;
     }
 
     /**
@@ -1068,19 +1324,41 @@ class FormFields extends WC_Settings_API
     public static function getFieldMethodList()
     {
         $exception = null;
+        $annuityException = null;
         $paymentMethods = [];
         $theFactor = Data::getResursOption('currentAnnuityFactor');
         $theDuration = (int)Data::getResursOption('currentAnnuityDuration');
+        $annuityFactors = [];
 
         try {
-            $paymentMethods = Api::getPaymentMethods();
-            $annuityFactors = self::getAnnuityDropDown(Api::getAnnuityFactors(), $theFactor, $theDuration);
+            $paymentMethods = ResursBankAPI::getPaymentMethods();
         } catch (Exception $e) {
             $exception = $e;
         }
+        $silentGetPaymentMethodsException = WooCommerce::getSessionValue('silentGetPaymentMethodsException');
+
+        try {
+            $annuityFactors = self::getAnnuityDropDown(ResursBankAPI::getAnnuityFactors(), $theFactor, $theDuration);
+        } catch (Exception $e) {
+            $annuityException = $e;
+        }
+        $silentAnnuityException = WooCommerce::getSessionValue('silentAnnuityException');
 
         if (is_array($paymentMethods)) {
             $annuityEnabled = Data::getResursOption('currentAnnuityFactor');
+            $bleedingMethods = [];
+
+            if (Data::isBleedingEdgeApiReady()) {
+                $merch = ResursBankAPI::getMerchantConnection();
+                $bleedingMethods = $merch->getPaymentMethods(Data::getResursOption('jwt_store_id'))->getList();
+                /** @var Method $bleedingMethod */
+                foreach ($bleedingMethods as $bleedingMethod) {
+                    $paymentMethodIndex = self::getMerchantMethodBySimplified($bleedingMethod, $paymentMethods);
+                    if ($paymentMethodIndex > -1) {
+                        $paymentMethods[$paymentMethodIndex]->merchantMethod = $bleedingMethod;
+                    }
+                }
+            }
 
             echo Data::getGenericClass()->getTemplate(
                 'adminpage_paymentmethods.phtml',
@@ -1088,8 +1366,12 @@ class FormFields extends WC_Settings_API
                     'paymentMethods' => $paymentMethods,
                     'annuityFactors' => $annuityFactors,
                     'exception' => $exception,
+                    'annuityException' => $annuityException,
                     'annuityEnabled' => $annuityEnabled,
+                    'silentGetPaymentMethodsException' => $silentGetPaymentMethodsException,
+                    'silentAnnuityException' => $silentAnnuityException,
                     'environment' => Data::getResursOption('environment'),
+                    'isBleedingEdge' => Data::isBleedingEdge(),
                 ]
             );
         }
@@ -1159,7 +1441,7 @@ class FormFields extends WC_Settings_API
         $exception = null;
         $callbacks = [];
         try {
-            $callbacks = Api::getCallbackList();
+            $callbacks = ResursBankAPI::getCallbackList();
         } catch (Exception $e) {
             $exception = $e;
         }

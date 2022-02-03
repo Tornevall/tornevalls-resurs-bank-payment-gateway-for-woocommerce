@@ -7,15 +7,16 @@ use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderStatus as OrderStatusHandler;
 use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\ExceptionHandler;
 use WC_Order;
+use WC_Product;
 use WC_Session;
 use function in_array;
 use function is_string;
@@ -41,16 +42,6 @@ class WooCommerce
      * @since 0.0.1.0
      */
     private static $session;
-    /** @var array getAddress form fields translated into wooCommerce address data */
-    private static $getAddressTranslation = [
-        'first_name' => 'firstName',
-        'last_name' => 'lastName',
-        'address_1' => 'addressRow1',
-        'address_2' => 'addressRow2',
-        'city' => 'postalArea',
-        'postcode' => 'postalCode',
-        'country' => 'country',
-    ];
     /**
      * @var $basename
      * @since 0.0.1.0
@@ -118,26 +109,31 @@ class WooCommerce
      */
     private static function getGatewaysFromPaymentMethods($gateways)
     {
-        $methodList = Api::getPaymentMethods();
-        $currentCheckoutType = Data::getCheckoutType();
-        if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
-            $currentCheckoutType !== ResursDefault::TYPE_RCO
-        ) {
-            // For simplified flow and hosted flow, we create individual class modules for all payment methods
-            // that has been received from the getPaymentMethods call.
-            foreach ($methodList as $methodClass) {
-                $gatewayClass = new ResursDefault($methodClass);
-                // Ask itself if it is enabled.
-                if ($gatewayClass->is_available()) {
-                    $gateways[] = $gatewayClass;
+        // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
+        try {
+            $methodList = ResursBankAPI::getPaymentMethods();
+            $currentCheckoutType = Data::getCheckoutType();
+            if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
+                $currentCheckoutType !== ResursDefault::TYPE_RCO
+            ) {
+                // For simplified flow and hosted flow, we create individual class modules for all payment methods
+                // that has been received from the getPaymentMethods call.
+                foreach ($methodList as $methodClass) {
+                    $gatewayClass = new ResursDefault($methodClass);
+                    // Ask itself if it is enabled.
+                    if ($gatewayClass->is_available()) {
+                        $gateways[] = $gatewayClass;
+                    }
                 }
+            } else {
+                // In RCO mode, we don't have to handle all separate payment methods as a gateway since
+                // the iframe keeps track of them, so in this case will create a smaller class gateway through the
+                // ResursCheckout module.
+                $gatewayClass = new ResursDefault(new ResursCheckout());
+                $gateways[] = $gatewayClass;
             }
-        } else {
-            // In RCO mode, we don't have to handle all separate payment methods as a gateway since
-            // the iframe keeps track of them, so in this case will create a smaller class gateway through the
-            // ResursCheckout module.
-            $gatewayClass = new ResursDefault(new ResursCheckout());
-            $gateways[] = $gatewayClass;
+        } catch (Exception $e) {
+            Data::setLogException($e);
         }
 
         return $gateways;
@@ -169,7 +165,8 @@ class WooCommerce
                 );
 
                 foreach ($gateways as $gatewayName => $gatewayClass) {
-                    if ($gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
+                    if ($gatewayClass instanceof ResursDefault &&
+                        $gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
                         (bool)preg_match('/card/i', $gatewayClass->getSpecificType())
                     ) {
                         continue;
@@ -265,8 +262,6 @@ class WooCommerce
     /**
      * @param mixed $order
      * @throws ResursException
-     * @throws ExceptionHandler
-     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAdminAfterOrderDetails($order = null)
@@ -287,7 +282,9 @@ class WooCommerce
                 $orderData['ecom_short'] = self::getMetaDataFromOrder($orderData['ecom_short'], $orderData['meta']);
             }
             if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
-                $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
+                if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                    $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
+                }
                 echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
             }
             // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
@@ -311,7 +308,7 @@ class WooCommerce
                 'adminpage_woocommerce_version22',
                 [
                     'wooPlug22VersionInfo' => __(
-                        'This order has not been created by this plugin and the other plugin is currently unavailable.',
+                        'Order has not been created by this plugin and the original plugin is currently unavailable.',
                         'trbwc'
                     ),
                 ]
@@ -322,8 +319,6 @@ class WooCommerce
     /**
      * @param $orderData
      * @throws ResursException
-     * @throws ExceptionHandler
-     * @throws Exception
      * @since 0.0.1.0
      */
     private static function setOrderMetaInformation($orderData)
@@ -438,21 +433,6 @@ class WooCommerce
         }
 
         return $return;
-    }
-
-    /**
-     * Create a mocked moment if test and allowed mocking is enabled.
-     * @param $mock
-     * @since 0.0.1.0
-     */
-    public static function applyMock($mock)
-    {
-        if (Data::canMock($mock)) {
-            WordPress::doAction(
-                sprintf('mock%s', ucfirst($mock)),
-                null
-            );
-        }
     }
 
     /**
@@ -573,7 +553,10 @@ class WooCommerce
     public static function getGenericLocalization($return, $scriptName)
     {
         if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
-            $return[sprintf('%s_rco_suggest_id', Data::getPrefix())] = Api::getResurs()->getPreferredPaymentId();
+            $return[sprintf(
+                '%s_rco_suggest_id',
+                Data::getPrefix()
+            )] = ResursBankAPI::getResurs()->getPreferredPaymentId();
             $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
         }
 
@@ -619,6 +602,23 @@ class WooCommerce
     public static function setIsInCheckout()
     {
         self::setCustomerCheckoutLocation(true);
+    }
+
+    /**
+     * @param WC_Product $product
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getProperArticleNumber($product) {
+        $return = $product->get_id();
+        $productSkuValue = $product->get_sku();
+        if (!empty($productSkuValue) &&
+            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
+        ) {
+            $return = $productSkuValue;
+        }
+
+        return WordPress::applyFilters('getArticleNumber', $return, $product);
     }
 
     /**
@@ -706,6 +706,10 @@ class WooCommerce
         $replyArray = [
             'aliveConfirm' => true,
             'actual' => $callbackType,
+            'errors' => [
+                'code' => 0,
+                'message' => '',
+            ],
         ];
 
         // If there is a payment, there must be a digest.
@@ -723,7 +727,9 @@ class WooCommerce
 
             self::getHandledCallbackNullOrder($order, $pRequest);
 
+            $callbackEarlyFailure = false;
             try {
+                self::applyMock('updateCallbackException');
                 Data::setOrderMeta(
                     $order,
                     sprintf('callback_%s_receive', $callbackType),
@@ -732,38 +738,62 @@ class WooCommerce
                     true
                 );
             } catch (Exception $e) {
+                $callbackEarlyFailure = true;
+                $replyArray['aliveConfirm'] = false;
+                $code = $e->getCode();
+                $replyArray['digestCode'] = $code;
+                $replyArray['errors'] = [
+                    'code' => $code,
+                    'message' => $e->getMessage(),
+                ];
                 Data::setLogException(
                     $e
                 );
             }
 
-            if ($getConfirmedSalt && $orderId) {
-                try {
-                    self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
-                    self::setSigningMarked($orderId, $callbackType);
-                } catch (Exception $e) {
-                    $code = $e->getCode();
-                    $responseString = $e->getMessage();
-                    Data::setLogException($e);
+            if (!$callbackEarlyFailure) {
+                if ($getConfirmedSalt && $orderId) {
+                    try {
+                        self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
+                        self::setSigningMarked($orderId, $callbackType);
+                        WordPress::doAction(
+                            sprintf('callback_received_%s', $callbackType),
+                            $order,
+                            $order
+                        );
+                        $code = OrderStatusHandler::HTTP_RESPONSE_OK;
+                        $responseString = 'OK';
+                        $replyArray['digestCode'] = $code;
+                    } catch (Exception $e) {
+                        $code = $e->getCode();
+                        $responseString = $e->getMessage();
+                        Data::setLogException($e);
+                    }
+                } else {
+                    $code = OrderStatusHandler::HTTP_RESPONSE_DIGEST_IS_WRONG; // Not acceptable
+                    $responseString = 'Digest rejected.';
+                    if (!$orderId) {
+                        $code = OrderStatusHandler::HTTP_RESPONSE_GONE_NOT_OURS;
+                        $responseString = 'Order is not ours.';
+                        // Only allow other responses if the order does not exist in the system.
+                        // If there is a proper order, but with a miscalculated digest, callbacks should
+                        // still be rejected with the bad digest message.
+                        if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
+                            $code = OrderStatusHandler::HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED;
+                            $responseString = 'Order is not ours, but it is still accepted.';
+                        }
+                    }
                 }
-            } else {
-                $code = OrderStatusHandler::HTTP_STATUS_DIGEST_IS_WRONG; // Not acceptable
-                $responseString = 'Digest rejected.';
-                if (!$orderId) {
-                    $code = OrderStatusHandler::HTTP_STATUS_ORDER_IS_GONE;
-                    $responseString = 'Order is not ours.';
-                }
-                if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
-                    $code = OrderStatusHandler::HTTP_STATUS_ORDER_IS_NOT_OURS;
-                    $responseString = 'Order is not ours, but it is still accepted.';
-                }
+                $replyArray['digestCode'] = $code;
+            } elseif ($callbackType === 'TEST') {
+                $responseString = 'Test OK';
+                Data::setResursOption('resurs_callback_test_response', time());
+                $code = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
+
+                // There are not digest codes available in this state so we should throw the callback handler
+                // a success regardless.
+                $replyArray['digestCode'] = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
             }
-            $replyArray['digestCode'] = $code;
-        } elseif ($callbackType === 'TEST') {
-            Data::setResursOption('resurs_callback_test_response', time());
-            // There are not digest codes available in this state so we should throw the callback handler
-            // a success regardless.
-            $replyArray['digestCode'] = '200';
         }
 
         Data::setLogNotice(
@@ -788,7 +818,7 @@ class WooCommerce
      */
     private static function getConfirmedSalt()
     {
-        return Api::getResurs()->getValidatedCallbackDigest(
+        return ResursBankAPI::getResurs()->getValidatedCallbackDigest(
             self::getRequest('p'),
             self::getCurrentSalt(),
             self::getRequest('d'),
@@ -950,6 +980,21 @@ class WooCommerce
     }
 
     /**
+     * Create a mocked moment if test and allowed mocking is enabled.
+     * @param $mock
+     * @since 0.0.1.0
+     */
+    public static function applyMock($mock)
+    {
+        if (Data::canMock($mock)) {
+            return WordPress::applyFilters(
+                sprintf('mock%s', ucfirst($mock)),
+                null
+            );
+        }
+    }
+
+    /**
      * @param $paymentId
      * @param $orderId
      * @param $order
@@ -959,58 +1004,14 @@ class WooCommerce
     private static function getUpdatedOrderByCallback($paymentId, $orderId, $order)
     {
         if ($orderId) {
-            self::getCustomerRealAddress($order);
+            //self::getCustomerRealAddress($order);
+            $orderHandler = new OrderHandler();
+            $orderHandler->getCustomerRealAddress($order);
             self::setOrderStatusByCallback(
-                Api::getResurs()->getOrderStatusByPayment($paymentId),
+                ResursBankAPI::getResurs()->getOrderStatusByPayment($paymentId),
                 $order
             );
         }
-    }
-
-    /**
-     * @param $order
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getCustomerRealAddress($order)
-    {
-        $return = false;
-        $resursPayment = Data::getOrderMeta('resurspayment', $order);
-        if (is_object($resursPayment) && isset($resursPayment->customer)) {
-            $billingAddress = $order->get_address('billing');
-            $orderId = $order->get_id();
-            if ($orderId > 0 && isset($resursPayment->customer->address)) {
-                foreach (self::$getAddressTranslation as $item => $value) {
-                    if (isset($billingAddress[$item], $resursPayment->customer->address->{$value}) &&
-                        $billingAddress[$item] !== $resursPayment->customer->address->{$value}
-                    ) {
-                        update_post_meta(
-                            $orderId,
-                            sprintf('_billing_%s', $item),
-                            $resursPayment->customer->address->{$value}
-                        );
-                        $return = true;
-                    }
-                }
-            }
-        }
-
-        if ($return) {
-            $synchNotice = __(
-                'Resurs Bank billing address mismatch with current address in order. ' .
-                'Data has synchronized with Resurs Bank billing data.',
-                'resurs-bank-payment-gateway-for-woocommerce'
-            );
-            Data::setOrderMeta($order, 'customerSynchronization', strftime('%Y-%m-%d %H:%M:%S', time()));
-            Data::setLogNotice($synchNotice);
-            WooCommerce::setOrderNote(
-                $order,
-                $synchNotice
-            );
-        }
-
-        return $return;
     }
 
     /**
@@ -1197,7 +1198,6 @@ class WooCommerce
         return WC()->queue()->add(
             ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
         );
-        //WC()->queue()->schedule_recurring(time()+5, 2, WordPress::getFilterName($queueName));
     }
 
     /**
@@ -1212,10 +1212,20 @@ class WooCommerce
      */
     public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
     {
-        return self::getProperOrder($order, 'order')->update_status(
-            $newOrderStatus,
-            self::getOrderNotePrefixed($orderNote)
-        );
+        if (Data::getResursOption('queue_order_statuses_on_success')) {
+            $return = OrderStatusHandler::setOrderStatusWithNotice(
+                $order,
+                $newOrderStatus,
+                $orderNote
+            );
+        } else {
+            $return = self::getProperOrder($order, 'order')->update_status(
+                $newOrderStatus,
+                self::getOrderNotePrefixed($orderNote)
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -1247,7 +1257,7 @@ class WooCommerce
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO &&
                         !empty(WooCommerce::getSessionValue('rco_order_id'))
                     ) {
-                        Api::getResurs()->updateCheckoutOrderLines(
+                        ResursBankAPI::getResurs()->updateCheckoutOrderLines(
                             WooCommerce::getSessionValue('rco_order_id'),
                             $orderHandler->getOrderLines()
                         );

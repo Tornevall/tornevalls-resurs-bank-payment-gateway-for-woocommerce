@@ -9,7 +9,6 @@ jQuery(document).ready(function ($) {
         }
     }
 });
-
 /**
  *
  * @param rcoLegacyElement
@@ -30,6 +29,7 @@ function getRbwcLegacyInit(rcoLegacyElement) {
         $rQuery('body').trigger('rbwc_purchase_reject', {type: 'deny'});
     });
     rcoLegacy.setCustomerChangedEventCallback(function (customer) {
+
         resursBankRcoDataContainer.rco_customer = customer;
         resursBankRcoDataContainer.rco_payment = customer.paymentMethod;
         $rQuery('body').trigger('rbwc_customer_synchronize', {

@@ -1,5 +1,5 @@
 /*!
- * ResursCheckoutJS v0.10
+ * ResursCheckoutJS v0.11
  *  Generic Resurs Bank iFrame-driver for Resurs Checkout, for catching events in the Resurs Checkout iFrame.
  *  Used for the older version of RCO-Interceptor, maintenance only!
  *  Docs and info-urls resides in the non-minified version.
@@ -32,6 +32,8 @@
 
 if (typeof ResursCheckout !== "function" && typeof ResursCheckout === "undefined") {
     function ResursCheckout() {
+        var isLoaded = false;
+        var hasV2 = false;
         var currentResursEventNamePrefix = "checkout";
         var resursCheckoutElement = "";     // defined element for where Resurs Checkout iframe is (or should be) located
         var resursCheckoutFrame = "";
@@ -164,7 +166,15 @@ if (typeof ResursCheckout !== "function" && typeof ResursCheckout === "undefined
                     postMessage(postMessageData);
                 }
             },
+            getLoadedFrame: function () {
+                return isLoaded;
+            },
             init: function () {
+                if (typeof $ResursCheckout !== 'undefined' && typeof jQuery !== 'undefined') {
+                    hasV2 = true;
+                    console.log("Discovered Resurs Bank Facelift (v2).");
+                }
+
                 window.addEventListener('message', function (event) {
                     var origin = event.origin || event.originalEvent.origin;
                     /* Validate origin and do nothing if resursCheckoutDomain is missing */
@@ -186,6 +196,7 @@ if (typeof ResursCheckout !== "function" && typeof ResursCheckout === "undefined
                                     eventType: currentResursEventNamePrefix + ":set-purchase-button-interceptor",
                                     checkOrderBeforeBooking: true
                                 });
+                                isLoaded = true;
                                 if (typeof resursCheckoutIframeReady === "function") {
                                     resursCheckoutIframeReady(resursCheckoutFrame);
                                 }

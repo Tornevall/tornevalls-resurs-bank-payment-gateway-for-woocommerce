@@ -4,26 +4,44 @@ namespace ResursBank\Service;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
-use ResursBank\Module\Api;
 use ResursBank\Module\Data;
+use ResursBank\Module\ResursBankAPI;
 use WC_Coupon;
 use WC_Product;
 
 /**
+ * Class for which active order creations are handled.
+ *
  * @since 0.0.1.0
  */
 class OrderHandler extends ResursDefault
 {
     /**
-     * @var Api
+     * @var ResursBankAPI
      * @since 0.0.1.0
      */
     protected $API;
+
     /**
      * @var array
      * @since 0.0.1.0
      */
     private $cart;
+
+    /**
+     * getAddress form fields translated into wooCommerce address data.
+     * @var array
+     * @since 0.0.1.0
+     */
+    private static $getAddressTranslation = [
+        'first_name' => 'firstName',
+        'last_name' => 'lastName',
+        'address_1' => 'addressRow1',
+        'address_2' => 'addressRow2',
+        'city' => 'postalArea',
+        'postcode' => 'postalCode',
+        'country' => 'country',
+    ];
 
     /**
      * @param $cart
@@ -48,6 +66,52 @@ class OrderHandler extends ResursDefault
             ->setFee();
 
         return $this;
+    }
+
+    /**
+     * @param $order
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getCustomerRealAddress($order)
+    {
+        $return = false;
+        $resursPayment = Data::getOrderMeta('resurspayment', $order);
+        if (is_object($resursPayment) && isset($resursPayment->customer)) {
+            $billingAddress = $order->get_address('billing');
+            $orderId = $order->get_id();
+            if ($orderId > 0 && isset($resursPayment->customer->address)) {
+                foreach (self::$getAddressTranslation as $item => $value) {
+                    if (isset($billingAddress[$item], $resursPayment->customer->address->{$value}) &&
+                        $billingAddress[$item] !== $resursPayment->customer->address->{$value}
+                    ) {
+                        update_post_meta(
+                            $orderId,
+                            sprintf('_billing_%s', $item),
+                            $resursPayment->customer->address->{$value}
+                        );
+                        $return = true;
+                    }
+                }
+            }
+        }
+
+        if ($return) {
+            $synchNotice = __(
+                'Resurs Bank billing address mismatch with current address in order. ' .
+                'Data has synchronized with Resurs Bank billing data.',
+                'resurs-bank-payment-gateway-for-woocommerce'
+            );
+            Data::setOrderMeta($order, 'customerSynchronization', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setLogNotice($synchNotice);
+            WooCommerce::setOrderNote(
+                $order,
+                $synchNotice
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -111,6 +175,8 @@ class OrderHandler extends ResursDefault
                     $couponDescription = $coupon->get_code();
                 }
 
+                // TODO: Store this information as metadata instead so each order gets handled
+                // TODO: properly in aftershop mode.
                 $discardCouponVat = (bool)Data::getResursOption('discard_coupon_vat');
                 $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
                 $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
@@ -191,7 +257,7 @@ class OrderHandler extends ResursDefault
      * for the already created link to only update changes that occurred during the order line rendering here as
      * the link may already contain customer data.
      *
-     * @return Api
+     * @return ResursBankAPI
      * @since 0.0.1.0
      */
     public function getApi()

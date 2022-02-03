@@ -7,10 +7,11 @@ namespace ResursBank\Gateway;
 use Exception;
 use JsonException;
 use Resursbank\Ecommerce\Types\CheckoutType;
-use ResursBank\Module\Api;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderHandler;
+use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use ResursException;
@@ -25,6 +26,7 @@ use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
 use function count;
+use function function_exists;
 use function in_array;
 use function is_object;
 
@@ -95,7 +97,7 @@ class ResursDefault extends WC_Payment_Gateway
     protected $order;
     /**
      * Main API. Use as primary communicator. Acts like a bridge between the real API.
-     * @var Api $API
+     * @var ResursBankAPI $API
      * @since 0.0.1.0
      */
     protected $API;
@@ -241,7 +243,7 @@ class ResursDefault extends WC_Payment_Gateway
             $this->apiData['paymentMethod'] = Data::getPaymentMethodBySession();
         }
         $this->apiDataId = sha1(uniqid('wc-api', true));
-        $this->API = new Api();
+        $this->API = new ResursBankAPI();
 
         return $this;
     }
@@ -537,9 +539,12 @@ class ResursDefault extends WC_Payment_Gateway
             try {
                 WooCommerce::applyMock('createIframeException');
                 $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+                $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             } catch (Exception $e) {
+                Data::setTimeoutStatus($this->API->getConnection());
                 Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS, sprintf(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
                         __(
                             'An error (%s, code %s) occurred during the iframe creation. Retrying with a new ' .
                             'payment id.',
@@ -550,23 +555,62 @@ class ResursDefault extends WC_Payment_Gateway
                     )
                 );
                 $paymentId = $this->getProperPaymentId(true);
-                $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
-            }
-            $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
+                try {
+                    $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
+                    $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
+                } catch (Exception $e) {
+                    Data::setTimeoutStatus($this->API->getConnection());
+                    $this->rcoFrameData = new stdClass();
+                    $this->rcoFrameData->script = '';
+                    $this->rcoFrameData->exception = [
+                        'code' => $e->getCode(),
+                        'message' => $e->getMessage(),
+                    ];
+                }
+            } // End of exception.
+
             $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
 
             // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.
             WooCommerce::setSessionValue('rco_legacy', $this->rcoFrameData->legacy);
 
-            $urlList = (new Domain())->getUrlsFromHtml($this->rcoFrameData->script);
-            if (isset($this->rcoFrameData->script) && !empty($this->rcoFrameData->script) && count($urlList)) {
-                $this->rcoFrameData->originHostName = $this->API->getConnection()->getIframeOrigin($this->rcoFrameData->baseUrl);
+            $this->getProperRcoEnqueue();
+        }
+    }
+
+    /**
+     * Prepare for RCO depending on what happened. We need to make exceptions available in frontend from this point.
+     *
+     * @throws Exception
+     * @since 1.0.0
+     */
+    private function getProperRcoEnqueue()
+    {
+        $urlList = isset($this->rcoFrameData->script) ?
+            (new Domain())->getUrlsFromHtml($this->rcoFrameData->script) : [];
+        if (isset($this->rcoFrameData->script)) {
+            if (count($urlList) && !empty($this->rcoFrameData->script)) {
+                $this->rcoFrameData->originHostName = $this
+                    ->API
+                    ->getConnection()
+                    ->getIframeOrigin($this->rcoFrameData->baseUrl);
                 wp_enqueue_script(
                     'trbwc_rco',
                     array_pop($urlList),
                     ['jquery']
                 );
                 unset($this->rcoFrameData->customer);
+                wp_localize_script(
+                    'trbwc_rco',
+                    'trbwc_rco',
+                    (array)$this->rcoFrameData
+                );
+            } else {
+                wp_enqueue_script(
+                    'trbwc_rco',
+                    Data::getGatewayUrl() . '/js/trbwc_rco.js',
+                    ['jquery']
+                );
                 wp_localize_script(
                     'trbwc_rco',
                     'trbwc_rco',
@@ -821,7 +865,7 @@ class ResursDefault extends WC_Payment_Gateway
         // It is necessary to fetch payment id from session if exists, so we can keep it both in frontend
         // and the backend API. If not set, we'll let ecomPHP fetch a new.
         $sessionPaymentId = WooCommerce::getSessionValue('rco_order_id');
-        return !empty($sessionPaymentId) ? $sessionPaymentId : Api::getResurs()->getPreferredPaymentId();
+        return !empty($sessionPaymentId) ? $sessionPaymentId : ResursBankAPI::getResurs()->getPreferredPaymentId();
     }
 
     /**
@@ -1079,15 +1123,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getProperArticleNumber($product)
     {
-        $return = $product->get_id();
-        $productSkuValue = $product->get_sku();
-        if (!empty($productSkuValue) &&
-            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
-        ) {
-            $return = $productSkuValue;
-        }
-
-        return WordPress::applyFilters('getArticleNumber', $return, $product);
+        return WooCommerce::getProperArticleNumber($product);
     }
 
     /**
@@ -1134,7 +1170,7 @@ class ResursDefault extends WC_Payment_Gateway
         // in each payment method that is requested here. If the payment method is not present,
         // this one will be skipped and the rest of the function will fail over to the parent value.
         if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
-            $minMax = Api::getResurs()->getMinMax(
+            $minMax = ResursBankAPI::getResurs()->getMinMax(
                 $this->get_order_total(),
                 $this->getRealMin($this->paymentMethodInformation->minLimit),
                 $this->getRealMax($this->paymentMethodInformation->maxLimit)
@@ -1430,13 +1466,13 @@ class ResursDefault extends WC_Payment_Gateway
         $referenceType = Data::getResursOption('order_id_type');
 
         switch ($referenceType) {
-            case 'postid';
+            case 'postid':
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
                     WooCommerce::applyMock('updatePaymentReferenceFailure');
                     $newPaymentId = $this->getPaymentId();
                     if ($idBeforeChange !== $newPaymentId) {
-                        Api::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
+                        ResursBankAPI::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
                         Data::setOrderMeta(
                             $order,
                             'initialUpdatePaymentReference',
@@ -1461,6 +1497,7 @@ class ResursDefault extends WC_Payment_Gateway
                         );
                     }
                 } catch (Exception $e) {
+                    Data::setTimeoutStatus(ResursBankAPI::getResurs());
                     Data::setLogNotice(
                         sprintf(
                             'updatePaymentReference failed: %s (code %s).',
@@ -1602,7 +1639,13 @@ class ResursDefault extends WC_Payment_Gateway
             $this->apiData['isReturningCustomer'] = false;
             if ($this->getApiValue('wc_order_id') && $this->getApiValue('preferred_id')) {
                 $this->apiData['isReturningCustomer'] = true;
+
+                if ($this->order instanceof WC_Order && Data::getCheckoutType() === self::TYPE_RCO) {
+                    $orderHandler = new OrderHandler();
+                    $orderHandler->getCustomerRealAddress($this->order);
+                }
             }
+
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
@@ -1614,7 +1657,14 @@ class ResursDefault extends WC_Payment_Gateway
             );
             $this->wcOrderData = Data::getOrderInfo($this->order);
 
-            if ($this->isSuccess() && $this->setFinalSigning()) {
+            $finalSigningResponse = $this->setFinalSigning();
+            if ($this->isSuccess($finalSigningResponse)) {
+                if (isset($finalSigningResponse) &&
+                    is_array($finalSigningResponse) &&
+                    isset($finalSigningResponse['redirect'])
+                ) {
+                    $finalRedirectUrl = $finalSigningResponse['redirect'];
+                }
                 if (Data::getCheckoutType() === self::TYPE_RCO) {
                     Data::canLog(
                         Data::CAN_LOG_ORDER_EVENTS,
@@ -1758,9 +1808,10 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array|mixed|string
      * @since 0.0.1.0
      */
-    private function isSuccess()
+    private function isSuccess($finalSigningResponse)
     {
-        return $this->getApiValue('success');
+        return isset($finalSigningResponse['result']) &&
+        $finalSigningResponse['result'] === 'failed' ? false : $this->getApiValue('success');
     }
 
     /**
@@ -1785,13 +1836,13 @@ class ResursDefault extends WC_Payment_Gateway
                     $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
                         $bookSignedOrderReference
                     );
-                    $this->getResultByPaymentStatus();
+                    $return = $this->getResultByPaymentStatus();
                 }
-                $return = true;
             } else {
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
             }
         } catch (Exception $booksignedException) {
+            Data::setTimeoutStatus($this->API->getConnection());
             $this->setFinalSigningExceptionNotes($booksignedException);
         }
 
@@ -1969,7 +2020,7 @@ class ResursDefault extends WC_Payment_Gateway
         } else {
             $currentOrderStatus = $this->order->get_status();
             if ($currentOrderStatus !== $woocommerceStatus) {
-                WooCommerce::setOrderStatusUpdate(
+                OrderStatus::setOrderStatusWithNotice(
                     $this->order,
                     $woocommerceStatus,
                     $statusNotification
@@ -2089,7 +2140,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         if ($signing) {
             $return = (string)__(
-                'Could not complete order due to signing problems. Did you cancel your order?',
+                'Could not complete order due to signing problems.',
                 'trbwc'
             );
         }
@@ -2105,7 +2156,10 @@ class ResursDefault extends WC_Payment_Gateway
     private function getCancelNotice($signing)
     {
         return sprintf(
-            __('Customer returned via urlType "%s" - failed or cancelled payment (signing required: %s).', 'trbwc'),
+            __(
+                'Customer returned via urlType "%s" - failed or cancelled payment (signing required: %s).',
+                'trbwc'
+            ),
             $this->getUrlType(),
             $signing ? __('Yes', 'trbwc') : __('No', 'trbwc')
         );

@@ -4,12 +4,14 @@ namespace ResursBank\Module;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
+use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Data\Aes;
+use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\NetWrapper;
@@ -59,11 +61,19 @@ class Data
      * @since 0.0.1.0
      */
     const LOG_WARNING = 'warning';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const CAN_LOG_JUNK = 'junk';
+
+    /**
+     * Can log all backend calls.
+     * var string
+     * @since 0.0.1.0
+     */
+    const CAN_LOG_BACKEND = 'backend';
 
     /**
      * @var string
@@ -290,6 +300,58 @@ class Data
     }
 
     /**
+     * @return int
+     * @since 0.0.1.0
+     */
+    public static function getTimeoutStatus()
+    {
+        return (int)get_transient(
+            sprintf('%s_resurs_api_timeout', Data::getPrefix())
+        );
+    }
+
+    /**
+     * @param ResursBank $resursConnection
+     * @param Exception $exception
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setTimeoutStatus($resursConnection, $exception = null)
+    {
+        $return = false;
+        $timeoutByException = false;
+
+        if (!is_null($exception) && !$resursConnection->hasTimeoutException() && $exception instanceof Exception) {
+            if ($exception->getCode() === 28 || $exception->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+                $timeoutByException = true;
+            }
+        }
+
+        // If positive values are sent here, we store a timestamp for 60 seconds with a transient entry.
+        if ($resursConnection->hasTimeoutException() || $timeoutByException) {
+            $return = set_transient(
+                sprintf('%s_resurs_api_timeout', Data::getPrefix()),
+                time(),
+                60
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param null $forceTimeout
+     * @return int
+     * @since 0.0.1.0
+     */
+    public static function getDefaultApiTimeout($forceTimeout = null)
+    {
+        $useDefault = is_null($forceTimeout) ? 10 : (int)$forceTimeout;
+        $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', $useDefault);
+        return ($currentTimeout > 0 ? $currentTimeout : $useDefault);
+    }
+
+    /**
      * @since 0.0.1.0
      */
     public static function getAnnuityFactors()
@@ -297,12 +359,50 @@ class Data
         global $product;
 
         if (is_object($product) && !empty(self::getResursOption('currentAnnuityFactor'))) {
-            self::getAnnuityHtml(
-                wc_get_price_to_display($product),
-                self::getResursOption('currentAnnuityFactor'),
-                (int)self::getResursOption('currentAnnuityDuration')
-            );
+            try {
+                self::getAnnuityHtml(
+                    wc_get_price_to_display($product),
+                    self::getResursOption('currentAnnuityFactor'),
+                    (int)self::getResursOption('currentAnnuityDuration')
+                );
+            } catch (Exception $annuityException) {
+                $resursApi = ResursBankAPI::getResurs();
+                self::setTimeoutStatus($resursApi, $annuityException);
+                if ($resursApi->hasTimeoutException()) {
+                    echo sprintf(
+                        '<div class="annuityTimeout">%s</div>',
+                        __(
+                            'Resurs Bank price information is currently unavailable right now, due to timed out ' .
+                            'connection. Please try again in a moment.'
+                        )
+                    );
+                }
+            }
         }
+    }
+
+    /**
+     * Carefully check and return order from Resurs Bank but only if it does exist. We do this by checking
+     * if the payment method allows us doing a getPayment and if true, then we will return a new WC_Order with
+     * Resurs Bank ecom metadata included.
+     *
+     * @param int|WC_Order $orderData
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getResursOrderIfExists($orderData)
+    {
+        $return = null;
+
+        $order = WooCommerce::getProperOrder($orderData, 'order');
+        if (self::isResursMethod($order->get_payment_method())) {
+            $resursOrder = Data::getOrderInfo($order);
+            if (!empty($resursOrder['ecom']) && isset($resursOrder['ecom']->id)) {
+                $return = $resursOrder;
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -432,7 +532,11 @@ class Data
                 $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
         }
 
-        $monthlyPrice = Api::getResurs()->getAnnuityPriceByDuration($wcDisplayPrice, $annuityMethod, $annuityDuration);
+        $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
+            $wcDisplayPrice,
+            $annuityMethod,
+            $annuityDuration
+        );
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
             $annuityPaymentMethod = (array)Data::getPaymentMethodById($annuityMethod);
 
@@ -490,7 +594,7 @@ class Data
         $wcCustomer = $woocommerce->customer;
 
         $return = null;
-        if (!empty($wcCustomer)) {
+        if ($wcCustomer instanceof WC_Customer && method_exists($wcCustomer, 'get_billing_country')) {
             $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
             $return = !empty($woocommerceCustomerCountry) ?
                 $woocommerceCustomerCountry : WordPress::applyFilters(
@@ -523,7 +627,7 @@ class Data
     {
         $return = [];
 
-        $storedMethods = Api::getPaymentMethods();
+        $storedMethods = ResursBankAPI::getPaymentMethods();
         if (is_array($storedMethods)) {
             foreach ($storedMethods as $method) {
                 if (isset($method->id) && $method->id === $paymentMethodId) {
@@ -678,10 +782,12 @@ class Data
     }
 
     /**
+     * @param string $specificMock
+     * @param bool $resetMock Ability to not reset mock mode for specific mock if it has to be checked first.
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canMock($specificMock)
+    public static function canMock($specificMock, $resetMock = true)
     {
         $return = false;
         if (self::isTest() && (bool)Data::getResursOption('allow_mocking', null, false)) {
@@ -691,8 +797,10 @@ class Data
                 null,
                 false
             )) {
-                // Disable mockoption after first execution.
-                Data::setResursOption($mockOptionName, false);
+                if ($resetMock) {
+                    // Disable mockoption after first execution.
+                    Data::setResursOption($mockOptionName, false);
+                }
                 return true;
             }
         }
@@ -1391,7 +1499,7 @@ class Data
         $return = '';
 
         $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
-        if (isset($orderDataArray['meta']) && is_array($orderDataArray)) {
+        if (is_array($orderDataArray) && isset($orderDataArray['meta']) && is_array($orderDataArray)) {
             foreach ($searchUsing as $searchKey) {
                 $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
                 if (isset($orderDataArray['meta'][$searchKey])) {
@@ -1422,13 +1530,16 @@ class Data
         try {
             if (!$return['ecomException']['code']) {
                 try {
-                    $return['ecom'] = Api::getPayment($return['resurs'], null, $return);
+                    $return['ecom'] = ResursBankAPI::getPayment($return['resurs'], null, $return);
                     $return['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
+                    Data::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
                     if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
-                        $return['ecom'] = Api::getPayment($return['resurs_secondary'], null, $return);
+                        $return['ecom'] = ResursBankAPI::getPayment($return['resurs_secondary'], null, $return);
                     }
                     $return['ecom_had_reference_problems'] = true;
+                    $return['ecomException']['code'] = $e->getCode();
+                    $return['ecomException']['message'] = $e->getMessage();
                 }
                 $return = WooCommerce::getFormattedPaymentData($return);
                 $return = WooCommerce::getPaymentInfoDetails($return);
@@ -1826,6 +1937,29 @@ class Data
                 ]
             )
         );
+    }
+
+    /**
+     * Check whether bleeding edge technology is enabled.
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isBleedingEdge()
+    {
+        return (bool)Data::getResursOption('bleeding_edge');
+    }
+
+    /**
+     * Check if account for bleeding edge API has been set up.
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isBleedingEdgeApiReady()
+    {
+        return (Data::isBleedingEdge() &&
+            !empty(Data::getResursOption('jwt_store_id')) &&
+            !empty(Data::getResursOption('jwt_client_id')) &&
+            !empty(Data::getResursOption('jwt_client_password')));
     }
 
     /**

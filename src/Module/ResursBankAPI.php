@@ -3,11 +3,14 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecommerce\Service\Merchant\MerchantApi;
+use Resursbank\Ecommerce\Service\Merchant\ResursToken;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
-use ResursBank\Service\WordPress;
+use ResursBank\Service\WooCommerce;
 use ResursException;
 use RuntimeException;
+use TorneLIB\Exception\Constants;
 use function in_array;
 use function is_array;
 
@@ -16,7 +19,7 @@ use function is_array;
  * @package ResursBank\Module
  * @since 0.0.1.0
  */
-class Api
+class ResursBankAPI
 {
     /**
      * @var ResursBank $resursBank
@@ -57,6 +60,20 @@ class Api
     ];
 
     /**
+     * Static variable of Resurs Bank Merchant API (early bleeding edge state).
+     * @var MerchantApi
+     * @since 0.0.1.0
+     */
+    private static $merchantApi;
+
+    /**
+     * Resurs Bank Merchant API (early bleeding edge state).
+     * @var MerchantApi
+     * @since 0.0.1.0
+     */
+    private $merchantConnection;
+
+    /**
      * @return bool|string
      * @since 0.0.1.0
      */
@@ -93,11 +110,15 @@ class Api
                 $return->environment = null;
             }
         } catch (Exception $e) {
-            if (!(bool)$failover && $e->getCode() === 2) {
+            Data::setTimeoutStatus(self::getResurs(), $e);
+            Data::setLogException($e);
+            // Do not check the timeout handler here, only check if the soap request has timed out.
+            // On other errors, just pass the exception on, since there may something worse than just
+            // a timeout.
+            if (!(bool)$failover && $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
                 self::getPaymentByRestNotice($e);
                 return self::getPayment($orderId, true);
             }
-            Data::setLogException($e);
             throw $e;
         }
         // Restore failovers.
@@ -122,12 +143,75 @@ class Api
     }
 
     /**
+     * @since 0.0.1.0
+     */
+    public static function getMerchantConnection()
+    {
+        if (empty(self::$merchantApi)) {
+            // Instantiation.
+            self::$merchantApi = new self();
+        }
+
+        return self::$merchantApi->getMerchantApi();
+    }
+
+    /**
+     * @return MerchantApi
+     * @throws Exception
+     */
+    public function getMerchantApi()
+    {
+        if (Data::isBleedingEdge() && Data::isBleedingEdgeApiReady()) {
+            try {
+                if (empty($this->merchantConnection)) {
+                    $livingTransientToken = (string)get_transient(
+                        sprintf('%s_bearer', Data::getPrefix())
+                    );
+
+                    if (empty($livingTransientToken)) {
+                        $this->merchantConnection = (new MerchantApi())
+                            ->setClientId(Data::getResursOption('jwt_client_id'))
+                            ->setClientSecret(Data::getResursOption('jwt_client_password'))
+                            ->setScope('mock-merchant-api')
+                            ->setGrantType('client_credentials');
+
+                        $tokenRequestData = $this->merchantConnection->getToken();
+                        if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
+                            Data::setDeveloperLog(
+                                __FUNCTION__,
+                                __('Merchant API token renewed.', 'trbwc')
+                            );
+                            $livingTransientToken = $tokenRequestData->getAccessToken();
+                            set_transient(
+                                sprintf('%s_bearer', Data::getPrefix()),
+                                $livingTransientToken,
+                                $tokenRequestData->getExpire()
+                            );
+                        }
+                    } else {
+                        $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
+                        Data::setDeveloperLog(
+                            __FUNCTION__,
+                            __('Merchant API token reused.', 'trbwc')
+                        );
+                    }
+                }
+            } catch (Exception $e) {
+                Data::setLogException($e);
+            }
+        }
+
+        return $this->merchantConnection;
+    }
+
+    /**
      * @return ResursBank
      * @throws Exception
      * @since 0.0.1.0
      */
     public function getConnection()
     {
+        $timeoutStatus = Data::getTimeoutStatus();
         if (empty($this->ecom)) {
             $this->getResolvedCredentials();
             $this->ecom = new ResursBank(
@@ -135,10 +219,25 @@ class Api
                 $this->credentials['password'],
                 self::getEnvironment()
             );
-            $this->setWsdlCache();
-            $this->setEcomConfiguration();
-            $this->setEcomTimeout();
-            $this->setEcomAutoDebitMethods();
+        }
+
+        if (!empty(Data::getResursOption('api_soap_url'))) {
+            $soapUrl = sprintf('%s/', preg_replace('/\/$/', '', Data::getResursOption('api_soap_url')));
+            if (!empty($soapUrl) && self::getEnvironment() === RESURS_ENVIRONMENTS::TEST) {
+                $this->ecom->setTestUrl(
+                    $soapUrl,
+                    Data::getCheckoutType()
+                );
+            }
+        }
+
+        $this->setWsdlCache();
+        $this->setEcomConfiguration();
+        $this->setEcomTimeout();
+        $this->setEcomAutoDebitMethods();
+
+        if ($timeoutStatus > 0) {
+            $this->setEcomTimeout(4);
         }
 
         return $this->ecom;
@@ -233,14 +332,14 @@ class Api
     }
 
     /**
+     * @param int $forceTimeout
      * @return $this
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setEcomTimeout()
+    private function setEcomTimeout($forceTimeout = null)
     {
-        $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', 12);
-        $this->ecom->setFlag('CURL_TIMEOUT', $currentTimeout > 0 ? $currentTimeout : 12);
+        $this->ecom->setFlag('CURL_TIMEOUT', Data::getDefaultApiTimeout($forceTimeout));
 
         return $this;
     }
@@ -386,7 +485,7 @@ class Api
     public static function getAnnuityFactors($fromStorage = true)
     {
         $return = self::$annuityFactors;
-        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('annuityFactors'), false))) {
+        if ($fromStorage && !empty($stored = json_decode(Data::getResursOption('annuityFactors'), false))) {
             $return = $stored;
         }
 
@@ -394,8 +493,13 @@ class Api
             try {
                 $annuityArray = [];
                 // fromStorage can be called externally.
-                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 $paymentMethods = is_array($fromStorage) ? $fromStorage : (array)self::getPaymentMethods();
+                if (Data::canMock('annuityFactorConfigException', false)) {
+                    // This mocking section will simulate a total failure of the fetching part.
+                    $stored = null;
+                    WooCommerce::applyMock('annuityFactorConfigException');
+                }
+                /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (count($paymentMethods)) {
                     foreach ($paymentMethods as $paymentMethod) {
                         $annuityResponse = self::getResurs()->getAnnuityFactors($paymentMethod->id);
@@ -409,13 +513,21 @@ class Api
                     self::$annuityFactors = $annuityArray;
                 }
             } catch (Exception $e) {
-                // Reset.
-                Data::setResursOption('annuityFactors', null);
-                throw $e;
+                if (is_object($stored)) {
+                    WooCommerce::setSessionValue('silentAnnuityException', $e);
+                    // If there are errors during this procedure, override the stored controller
+                    // and return data if there is a cached storage. This makes it possible for the
+                    // plugin to live without the access to Resurs Bank.
+                    self::$annuityFactors = $stored;
+                } else {
+                    Data::setTimeoutStatus(self::getResurs());
+                    throw $e;
+                }
             }
             $return = self::$annuityFactors;
             Data::setResursOption('annuityFactors', json_encode(self::$annuityFactors));
         }
+        WooCommerce::setSessionValue('silentAnnuityException', null);
 
         return $return;
     }
@@ -430,6 +542,21 @@ class Api
      */
     public static function getPaymentMethods($fromStorage = true)
     {
+        // Mocking feature that reveals that this payment methods request is effective all around
+        // the admin platform. When this mock is triggered, other pages (like the mock-admin) may
+        // fail. This feature turned out to fix an important bug. We also knows that requesting payment
+        // methods can also affect admin panel if Resurs Bank throws an exception if the method request
+        // is failing at this point (since we're cleaning up the storage).
+        if (isset($_REQUEST['section']) &&
+            $_REQUEST['section'] === 'payment_methods' &&
+            !WooCommerce::getSessionValue('rb_requesting_debit_methods') &&
+            Data::canMock('getEmptyPaymentMethodsException')
+        ) {
+            // But this feature is only set for visual testing.
+            // Note: As the wp-admin is running, we will first pass through "auto debitable methods".
+            Data::setResursOption('paymentMethods', null);
+        }
+
         $return = self::$paymentMethods;
         if ($fromStorage) {
             $stored = json_decode(Data::getResursOption('paymentMethods'));
@@ -440,12 +567,19 @@ class Api
 
         if (!$fromStorage || empty($return)) {
             try {
+                if (isset($_REQUEST['section']) && $_REQUEST['section'] === 'payment_methods') {
+                    // Also this part is used for the specific admin section.
+                    WooCommerce::applyMock('getPaymentMethodsException');
+                }
                 self::$paymentMethods = self::getResurs()->getPaymentMethods([], true);
             } catch (Exception $e) {
-                // Reset.
-                Data::setResursOption('paymentMethods', null);
+                Data::setTimeoutStatus(ResursBankAPI::getResurs());
+                WooCommerce::setSessionValue('silentGetPaymentMethodsException', $e);
+                // We do not want to reset on errors, right?
+                //Data::setResursOption('paymentMethods', null);
                 throw $e;
             }
+            WooCommerce::setSessionValue('silentGetPaymentMethodsException', null);
             $return = self::$paymentMethods;
             Data::setResursOption('paymentMethods', json_encode(self::$paymentMethods));
         }
@@ -463,20 +597,30 @@ class Api
     public static function getCallbackList($fromStorage = true)
     {
         $return = self::$callbacks;
-        if ($fromStorage && is_array($stored = json_decode(Data::getResursOption('callbacks'), false))) {
+        $stored = json_decode(Data::getResursOption('callbacks'), false);
+        if ($fromStorage && is_array($stored)) {
             $return = $stored;
         }
 
         if (!$fromStorage || empty($return)) {
             try {
-                self::$paymentMethods = self::getResurs()->getRegisteredEventCallback(255);
+                WooCommerce::applyMock('callbackUpdateException');
+                self::$callbacks = self::getResurs()->getRegisteredEventCallback(255);
             } catch (Exception $e) {
-                // Reset.
-                Data::setResursOption('callbacks', null);
-                throw $e;
+                if (is_object($stored) || is_array($stored)) {
+                    // If there are errors during this procedure, override the stored controller
+                    // and return data if there is a cached storage. This makes it possible for the
+                    // plugin to live without the access to Resurs Bank.
+                    self::$callbacks = (array)$stored;
+                } else {
+                    Data::setTimeoutStatus(self::getResurs(), $e);
+                    // We do not want to reset on errors, right?
+                    //Data::setResursOption('callbacks', null);
+                    throw $e;
+                }
             }
-            $return = self::$paymentMethods;
-            Data::setResursOption('callbacks', json_encode(self::$paymentMethods));
+            $return = self::$callbacks;
+            Data::setResursOption('callbacks', json_encode(self::$callbacks));
         }
 
         return $return;
@@ -484,6 +628,7 @@ class Api
 
     /**
      * @return bool
+     * @throws Exception
      * @since 0.0.1.0
      */
     public function getCredentialsPresent()
@@ -492,8 +637,9 @@ class Api
         try {
             $this->getResolvedCredentials();
         } catch (Exception $e) {
-            $return = false;
+            Data::setTimeoutStatus(self::getResurs(), $e);
             Data::setLogException($e);
+            $return = false;
         }
         return $return;
     }

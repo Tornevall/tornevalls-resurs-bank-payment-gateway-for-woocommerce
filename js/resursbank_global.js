@@ -55,7 +55,7 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
             type: requestMethod,
             url: getResursLocalization('ajaxify'),
             data: requestData,
-            timeout: parseInt(getResursLocalization('ajaxifyTimeout'))
+            timeout: parseInt(getResursLocalization('ajaxifyTimeout')) + 1
         }
     ).done(
         function (data, textStatus, jqXhr) {
@@ -75,7 +75,6 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
     ).fail(
         function (data, textStatus, jqXhr) {
             if (typeof failMethod === 'function') {
-                console.dir(data);
                 failMethod(data, typeof data.statusText !== 'undefined' ? data.statusText : textStatus, jqXhr);
                 return;
             } else {
@@ -91,23 +90,44 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
  * @since 0.0.1.0
  */
 function getResursError(data) {
-    var useVisibleElement;
     if (typeof arguments[1] !== 'undefined') {
-        if ($rQuery(arguments[1]).length > 0) {
-            useVisibleElement = $rQuery(arguments[1]);
-            useVisibleElement.html(data['error']);
-            if (typeof data['error'] !== 'undefined' && data['error'] === 'nonce_validation') {
-                useVisibleElement.html(getResursLocalization('nonce_error'));
-                return;
-            }
+        var isWarningElement = $rQuery(arguments[1]);
+        if (isWarningElement.length > 0) {
+            return rbwcShowErrorElement(data, isWarningElement);
+        } else {
+            return rbwcShowErrorElement(data, null);
         }
     } else {
+        return rbwcShowErrorElement('RBWC Ajax Backend Error: ' + data, null);
+    }
+}
+
+/**
+ * errorElement must be of type jquery-extracted.
+ * @param data
+ * @param errorElement
+ */
+function rbwcShowErrorElement(data, errorElement) {
+    if (typeof data === 'string') {
         console.log('RBWC Ajax Backend Error: ', data);
     }
-
-    if (typeof data['error'] !== 'undefined' && data['error'] === 'nonce_validation') {
-        alert(getResursLocalization('nonce_error'));
+    if (null !== errorElement) {
+        if (typeof data['error'] !== 'undefined') {
+            errorElement.html(data['error']);
+        } else if (typeof data === 'string') {
+            errorElement.html(data);
+        }
+    } else if (typeof data === 'string') {
+        // Only show errors on strings.
+        alert(data);
     }
+    if (typeof data['error'] !== 'undefined' && data['error'] === 'nonce_validation') {
+        if (null !== errorElement) {
+            errorElement.html(getResursLocalization('nonce_error'));
+        }
+    }
+    trbwcLog('ErrorLog By Element:');
+    console.dir(data);
 }
 
 /**
