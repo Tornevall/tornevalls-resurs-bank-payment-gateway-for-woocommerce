@@ -1122,15 +1122,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getProperArticleNumber($product)
     {
-        $return = $product->get_id();
-        $productSkuValue = $product->get_sku();
-        if (!empty($productSkuValue) &&
-            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
-        ) {
-            $return = $productSkuValue;
-        }
-
-        return WordPress::applyFilters('getArticleNumber', $return, $product);
+        return WooCommerce::getProperArticleNumber($product);
     }
 
     /**

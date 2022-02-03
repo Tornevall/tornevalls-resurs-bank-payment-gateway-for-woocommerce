@@ -175,6 +175,8 @@ class OrderHandler extends ResursDefault
                     $couponDescription = $coupon->get_code();
                 }
 
+                // TODO: Store this information as metadata instead so each order gets handled
+                // TODO: properly in aftershop mode.
                 $discardCouponVat = (bool)Data::getResursOption('discard_coupon_vat');
                 $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
                 $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
