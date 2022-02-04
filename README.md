@@ -1,4 +1,4 @@
-# Tornevall Networks Resurs Bank Payment Gateway for WooCommerce
+# Tornevalls Resurs Bank Payment Gateway for WooCommerce
 
 This is a third party plugin written to work as a payment gateway for WooCommerce and WordPress.
 
