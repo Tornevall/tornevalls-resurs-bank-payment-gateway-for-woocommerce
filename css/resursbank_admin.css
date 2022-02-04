@@ -6,6 +6,7 @@
     color: #FFFFFF !important;
     padding: 5px !important;
 }
+
 .resursOrderInfoLabel {
     cursor: default !important;
     font-weight: bold !important;
@@ -62,12 +63,15 @@
 .r_annuity {
     font-size: 12px !important;
 }
+
 .r_annuity_enabled {
     background: #CCFFCC !important;
 }
+
 .r_annuity_disabled {
     background: #FFCCCC !important;
 }
+
 .resurs_order_meta_container {
     display: none;
 }
