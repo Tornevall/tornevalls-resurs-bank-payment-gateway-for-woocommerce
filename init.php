@@ -1,5 +1,6 @@
 <?php
 /**
+ * @noinspection PhpCSValidationInspection
  * Plugin Name: Tornevalls Resurs Bank payment gateway for WooCommerce
  * Plugin URI: https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
@@ -10,7 +11,6 @@
  * Author URI:
  * Text Domain: trbwc
  * Domain Path: /language
- * @noinspection PhpCSValidationInspection
  */
 declare(strict_types=1);
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
