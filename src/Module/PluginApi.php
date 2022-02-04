@@ -1,7 +1,6 @@
 <?php
 
 /** @noinspection CompactCanBeUsedInspection */
-
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
 namespace ResursBank\Module;

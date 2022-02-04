@@ -1,7 +1,6 @@
 <?php
 
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
-
 /** @noinspection PhpUsageOfSilenceOperatorInspection */
 
 namespace ResursBank\Module;
@@ -88,11 +87,13 @@ class PluginHooks
                 )
             );
 
-            // Precheck old status. There are some statuses that prevents editing.
-            $this->handleOrderStatusByOldSlug($oldSlug, $order['order']);
+            // Pre check old status. There are some statuses that prevents editing.
+            // Send the full order object here, not just WC_Order.
+            $this->handleOrderStatusByOldSlug($oldSlug, $order);
 
             // This is where we handle order statuses changed from WooCommerce.
-            $this->handleOrderByNewSlug($newSlug, $order['order']);
+            // Send the full order object here, not just WC_Order.
+            $this->handleOrderByNewSlug($newSlug, $order);
         }
     }
 
@@ -101,7 +102,7 @@ class PluginHooks
      * Equivalent to RB v2.x method order_status_changed first parts.
      *
      * @param $oldSlug
-     * @param WC_Order $order
+     * @param $order
      * @since 0.0.1.0
      */
     private function handleOrderStatusByOldSlug($oldSlug, $order)

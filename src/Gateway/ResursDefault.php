@@ -1328,7 +1328,7 @@ class ResursDefault extends WC_Payment_Gateway
         $fieldHtml = null;
         // If not here, no fields are required.
         /** @noinspection PhpUndefinedFieldInspection */
-        $requiredFields = (array)FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
+        $requiredFields = FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
 
         if (Data::getCheckoutType() === self::TYPE_RCO) {
             return;
