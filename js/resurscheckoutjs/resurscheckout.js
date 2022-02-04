@@ -37,7 +37,7 @@ if (typeof ResursCheckout !== "function" && typeof ResursCheckout === "undefined
         var currentResursEventNamePrefix = "checkout";
         var resursCheckoutElement = "";     // defined element for where Resurs Checkout iframe is (or should be) located
         var resursCheckoutFrame = "";
-        var resursCheckoutVersion = "0.10";
+        var resursCheckoutVersion = "0.11";
         var resursCheckoutData = {"paymentMethod": "", "customerData": {}};
         var resursCheckoutDebug = false;
         var resursCheckoutBookingCallback = null;
@@ -169,8 +169,11 @@ if (typeof ResursCheckout !== "function" && typeof ResursCheckout === "undefined
             getLoadedFrame: function () {
                 return isLoaded;
             },
+            isFaceliftAvailable: function () {
+                return hasV2;
+            },
             init: function () {
-                if (typeof $ResursCheckout !== 'undefined' && typeof jQuery !== 'undefined') {
+                if (typeof $ResursCheckout !== 'undefined') {
                     hasV2 = true;
                     console.log("Discovered Resurs Bank Facelift (v2).");
                 }

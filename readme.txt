@@ -12,14 +12,15 @@ Resurs Bank Payment Gateway for WooCommerce.
 
 == Description ==
 
-= Self preservation notice: First time running should be a dedicated test environment =
+= Self preservation notice: First time running *should* be a dedicated test environment =
 
 If you are entirely new to this plugin, I'd suggest you to run it in a dedicated test environment that is
-supposedly equals to a production environment when you install the plugin AFTER testing. Primary newly detected
-errors should be discovered in TEST rather than production. If something fails in production it also means that
-YOU are the one that potentially looses traffic to your site.
+supposedly *equal* to a production environment - where you install the plugin live *AFTER* testing.
+Primary new problems should be discovered in TEST rather than production since the costs are way lower,
+where no real people are depending on failed orders or payments. If something fails in production it also means
+that you are the one that potentially looses traffic while your site is down.
 
-This responsibility is yours and this handling is for your safety only!
+This responsibility is yours and this way of handling things is required for *your* safety!
 
 = Description and requirements =
 

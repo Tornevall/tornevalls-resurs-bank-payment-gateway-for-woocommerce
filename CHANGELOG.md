@@ -1,6 +1,8 @@
-Current ChangeLog is based on what has reached the master branch. Also, github referenses are now added.
+Current ChangeLog is based on what has reached the master branch. Also, github references are now added.
 
 # 0.0.1.0 / 1.0.0
+
+**153 issues was added in this version.**
 
 <ul>
 <li>[<a href='https://tracker.tornevall.net/browse/RWC-6'>RWC-6</a>] -         Milestone for RBWC 1.0 reached

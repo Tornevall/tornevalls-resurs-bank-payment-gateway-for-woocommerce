@@ -1,6 +1,7 @@
 <?php
 /**
- * Plugin Name: Tornevall Networks Resurs Bank payment gateway for WooCommerce
+ * @noinspection PhpCSValidationInspection
+ * Plugin Name: Tornevalls Resurs Bank payment gateway for WooCommerce
  * Plugin URI: https://wordpress.org/plugins/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
  * WC Tested up to: 5.7.1
@@ -11,19 +12,20 @@
  * Text Domain: trbwc
  * Domain Path: /language
  */
+declare(strict_types=1);
+define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
+define('RESURSBANK_PREFIX', 'trbwc');
+define('RESURSBANK_SNAKECASE_FILTERS', true);
+
+require_once(__DIR__ . '/vendor/autoload.php');
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-require_once(__DIR__ . '/vendor/autoload.php');
 if (!ResursBank\Service\WooCommerce::getActiveState()) {
     return;
 }
-
-define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
-define('RESURSBANK_PREFIX', 'trbwc');
-define('RESURSBANK_SNAKECASE_FILTERS', true);
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
