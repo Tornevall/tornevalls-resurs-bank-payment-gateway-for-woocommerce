@@ -1,13 +1,17 @@
 <?php
 
+/** @noinspection LongInheritanceChainInspection */
+
 namespace ResursBank\Service;
 
 use Exception;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
+use WC_Cart;
 use WC_Coupon;
 use WC_Product;
+use function is_object;
 
 /**
  * Class for which active order creations are handled.
@@ -16,18 +20,6 @@ use WC_Product;
  */
 class OrderHandler extends ResursDefault
 {
-    /**
-     * @var ResursBankAPI
-     * @since 0.0.1.0
-     */
-    protected $API;
-
-    /**
-     * @var array
-     * @since 0.0.1.0
-     */
-    private $cart;
-
     /**
      * getAddress form fields translated into wooCommerce address data.
      * @var array
@@ -57,7 +49,7 @@ class OrderHandler extends ResursDefault
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function setPreparedOrderLines()
+    public function setPreparedOrderLines(): self
     {
         $this
             ->setOrderRows()
@@ -74,7 +66,7 @@ class OrderHandler extends ResursDefault
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function getCustomerRealAddress($order)
+    public function getCustomerRealAddress($order): bool
     {
         $return = false;
         $resursPayment = Data::getOrderMeta('resurspayment', $order);
@@ -119,7 +111,7 @@ class OrderHandler extends ResursDefault
      * @since 0.0.1.0
      * @todo Complete this.
      */
-    private function setFee()
+    private function setFee(): self
     {
         return $this;
     }
@@ -129,7 +121,7 @@ class OrderHandler extends ResursDefault
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setShipping()
+    private function setShipping(): self
     {
         // Add when not free.
         if ($this->cart->get_shipping_total() > 0) {
@@ -160,7 +152,7 @@ class OrderHandler extends ResursDefault
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setCoupon()
+    private function setCoupon(): self
     {
         if (wc_coupons_enabled()) {
             $coupons = $this->cart->get_coupons();
@@ -216,10 +208,12 @@ class OrderHandler extends ResursDefault
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setOrderRows()
+    private function setOrderRows(): OrderHandler
     {
         if (WooCommerce::getValidCart()) {
-            foreach (WooCommerce::getValidCart(true) as $item) {
+            /** @var WC_Cart $cartList */
+            $cartList = WooCommerce::getValidCart(true);
+            foreach ($cartList as $item) {
                 /**
                  * Data object is of type WC_Product_Simple actually.
                  * @var WC_Product $productData
@@ -230,7 +224,7 @@ class OrderHandler extends ResursDefault
                     Data::setDeveloperLog(
                         __FUNCTION__,
                         sprintf(
-                            'Add orderline %s.',
+                            'Add order line %s.',
                             $productData->get_id()
                         )
                     );
@@ -247,7 +241,7 @@ class OrderHandler extends ResursDefault
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function getOrderLines()
+    public function getOrderLines(): array
     {
         return $this->API->getConnection()->getOrderLines();
     }
@@ -260,20 +254,20 @@ class OrderHandler extends ResursDefault
      * @return ResursBankAPI
      * @since 0.0.1.0
      */
-    public function getApi()
+    public function getApi(): ResursBankAPI
     {
         return $this->API;
     }
 
     /**
      * Sets up a Resurs API Link that is already in use instead of recreating the API link. This is an important
-     * step for ResursDefault to be able to pass orderline handling to this section.
+     * step for ResursDefault to be able to pass order line handling to this section.
      *
      * @param $api
      * @return $this
      * @since 0.0.1.0
      */
-    public function setApi($api)
+    public function setApi($api): self
     {
         $this->API = $api;
 

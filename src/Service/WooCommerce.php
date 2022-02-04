@@ -1,5 +1,9 @@
 <?php
 
+/** @noinspection PhpUndefinedFieldInspection */
+
+/** @noinspection ParameterDefaultValueIsNotNullInspection */
+
 namespace ResursBank\Service;
 
 use Exception;
@@ -14,11 +18,14 @@ use ResursBank\Service\OrderStatus as OrderStatusHandler;
 use ResursException;
 use RuntimeException;
 use stdClass;
-use TorneLIB\Exception\ExceptionHandler;
+use WC_Cart;
 use WC_Order;
 use WC_Product;
-use WC_Session;
+use function count;
+use function func_get_args;
 use function in_array;
+use function is_array;
+use function is_object;
 use function is_string;
 
 /**
@@ -38,11 +45,6 @@ class WooCommerce
      */
     public static $inCheckoutKey = 'customerWasInCheckout';
     /**
-     * @var WC_Session
-     * @since 0.0.1.0
-     */
-    private static $session;
-    /**
      * @var $basename
      * @since 0.0.1.0
      */
@@ -60,7 +62,7 @@ class WooCommerce
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getActiveState()
+    public static function getActiveState(): bool
     {
         return in_array(
             'woocommerce/woocommerce.php',
@@ -113,8 +115,8 @@ class WooCommerce
         try {
             $methodList = ResursBankAPI::getPaymentMethods();
             $currentCheckoutType = Data::getCheckoutType();
-            if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) ||
-                $currentCheckoutType !== ResursDefault::TYPE_RCO
+            if ($currentCheckoutType !== ResursDefault::TYPE_RCO ||
+                (bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
             ) {
                 // For simplified flow and hosted flow, we create individual class modules for all payment methods
                 // that has been received from the getPaymentMethods call.
@@ -167,7 +169,7 @@ class WooCommerce
                 foreach ($gateways as $gatewayName => $gatewayClass) {
                     if ($gatewayClass instanceof ResursDefault &&
                         $gatewayClass->getType() === 'PAYMENT_PROVIDER' &&
-                        (bool)preg_match('/card/i', $gatewayClass->getSpecificType())
+                        stripos($gatewayClass->getSpecificType(), 'card') !== false
                     ) {
                         continue;
                     }
@@ -209,7 +211,7 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    public static function getBaseName()
+    public static function getBaseName(): string
     {
         if (empty(self::$basename)) {
             self::$basename = trim(plugin_basename(Data::getGatewayPath()));
@@ -254,13 +256,14 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    public static function getRequiredVersion()
+    public static function getRequiredVersion(): string
     {
         return self::$requiredVersion;
     }
 
     /**
      * @param mixed $order
+     * @throws Exception
      * @throws ResursException
      * @since 0.0.1.0
      */
@@ -318,6 +321,7 @@ class WooCommerce
 
     /**
      * @param $orderData
+     * @throws Exception
      * @throws ResursException
      * @since 0.0.1.0
      */
@@ -373,10 +377,8 @@ class WooCommerce
         foreach ($metaArray as $metaKey => $metaValue) {
             if (preg_match(sprintf('/^%s/', $metaPrefix), $metaKey)) {
                 $metaKey = (string)preg_replace(sprintf('/^%s_/', $metaPrefix), '', $metaKey);
-                if (is_array($metaValue)) {
-                    if (count($metaValue) === 1) {
-                        $metaValue = array_pop($metaValue);
-                    }
+                if (is_array($metaValue) && count($metaValue) === 1) {
+                    $metaValue = array_pop($metaValue);
                 }
                 if (is_string($metaValue) || is_array($metaValue)) {
                     $ecomMetaArray[$metaKey] = $metaValue;
@@ -427,7 +429,7 @@ class WooCommerce
                     'id (%s). You can check the UpdatePaymentReference values for errors.',
                     'trbwc'
                 ),
-                isset($orderData['resurs_secondary']) ? $orderData['resurs_secondary'] : '[missing reference]',
+                $orderData['resurs_secondary'] ?? '[missing reference]',
                 $orderData['resurs']
             );
         }
@@ -440,7 +442,7 @@ class WooCommerce
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getIsOldMethod($methodName)
+    public static function getIsOldMethod($methodName): bool
     {
         $return = false;
         if (strncmp($methodName, 'resurs_bank_', 12) === 0) {
@@ -525,7 +527,7 @@ class WooCommerce
      * @return array
      * @since 0.0.1.0
      */
-    private static function getAdminCustomerAddress($ecomCustomer)
+    private static function getAdminCustomerAddress($ecomCustomer): array
     {
         $return = [
             'fullName' => !empty($ecomCustomer->fullName) ? $ecomCustomer->fullName : $ecomCustomer->firstName,
@@ -609,7 +611,8 @@ class WooCommerce
      * @return mixed
      * @since 0.0.1.0
      */
-    public static function getProperArticleNumber($product) {
+    public static function getProperArticleNumber($product)
+    {
         $return = $product->get_id();
         $productSkuValue = $product->get_sku();
         if (!empty($productSkuValue) &&
@@ -667,7 +670,7 @@ class WooCommerce
      * @return bool
      * @since 0.0.1.0
      */
-    private static function getSession()
+    private static function getSession(): bool
     {
         global $woocommerce;
 
@@ -683,7 +686,7 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    public static function getWcApiUrl()
+    public static function getWcApiUrl(): string
     {
         return sprintf('%s', WC()->api_request_url('ResursDefault'));
     }
@@ -753,6 +756,7 @@ class WooCommerce
 
             if (!$callbackEarlyFailure) {
                 if ($getConfirmedSalt && $orderId) {
+                    /** @noinspection BadExceptionsProcessingInspection */
                     try {
                         self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
                         self::setSigningMarked($orderId, $callbackType);
@@ -816,7 +820,7 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getConfirmedSalt()
+    private static function getConfirmedSalt(): bool
     {
         return ResursBankAPI::getResurs()->getValidatedCallbackDigest(
             self::getRequest('p'),
@@ -834,9 +838,9 @@ class WooCommerce
      */
     public static function getRequest($key, $post_data = null)
     {
-        $return = isset($_REQUEST[$key]) ? $_REQUEST[$key] : null;
+        $return = $_REQUEST[$key] ?? null;
 
-        if (null === $return && (bool)$post_data && isset($_REQUEST['post_data'])) {
+        if ($return === null && (bool)$post_data && isset($_REQUEST['post_data'])) {
             parse_str($_REQUEST['post_data'], $newPostData);
             if (is_array($newPostData) && isset($newPostData[$key])) {
                 $return = $newPostData[$key];
@@ -850,7 +854,7 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    private static function getCurrentSalt()
+    private static function getCurrentSalt(): string
     {
         return (string)Data::getResursOption('salt');
     }
@@ -860,7 +864,7 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    private static function getCallbackLogNotice($getConfirmedSalt)
+    private static function getCallbackLogNotice($getConfirmedSalt): string
     {
         return sprintf(
             __(
@@ -880,12 +884,15 @@ class WooCommerce
      * @param $order
      * @param $orderNote
      * @param int $is_customer_note
+     * @return bool
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection ParameterDefaultValueIsNotNullInspection
      */
-    public static function setOrderNote($order, $orderNote, $is_customer_note = 0)
+    public static function setOrderNote($order, $orderNote, $is_customer_note = 0): bool
     {
+        $return = false;
+
         $properOrder = self::getProperOrder($order, 'order');
         if (method_exists($properOrder, 'get_id') && $properOrder->get_id()) {
             Data::canLog(
@@ -899,11 +906,13 @@ class WooCommerce
                 )
             );
 
-            self::getProperOrder($order, 'order')->add_order_note(
+            $return = self::getProperOrder($order, 'order')->add_order_note(
                 self::getOrderNotePrefixed($orderNote),
                 $is_customer_note
             );
         }
+
+        return (bool)$return;
     }
 
     /**
@@ -921,25 +930,18 @@ class WooCommerce
             $order = $orderContainer;
         } elseif ((int)$orderContainer > 0) {
             $order = new WC_Order($orderContainer);
+            $orderId = $orderContainer;
         } elseif (is_object($orderContainer) && isset($orderContainer->id)) {
             $orderId = $orderContainer->id;
             $order = new WC_Order($orderId);
         } else {
-            throw new Exception(
+            throw new RuntimeException(
                 sprintf('Order id not found when looked up in %s.', __FUNCTION__),
                 400
             );
         }
 
-        switch ($returnAs) {
-            case 'order':
-                $return = $order;
-                break;
-            default:
-                $return = $orderId;
-        }
-
-        return $return;
+        return $returnAs === 'order' ? $order : $orderId;
     }
 
     /**
@@ -949,7 +951,7 @@ class WooCommerce
      * @return string
      * @since 0.0.1.0
      */
-    public static function getOrderNotePrefixed($orderNote)
+    public static function getOrderNotePrefixed($orderNote): string
     {
         return sprintf(
             '[%s] %s',
@@ -982,6 +984,7 @@ class WooCommerce
     /**
      * Create a mocked moment if test and allowed mocking is enabled.
      * @param $mock
+     * @return mixed|void
      * @since 0.0.1.0
      */
     public static function applyMock($mock)
@@ -1062,7 +1065,7 @@ class WooCommerce
 
         if (strtolower($currentStatus) !== strtolower($requestedStatus)) {
             if ($ecomOrderStatus & OrderStatus::AUTO_DEBITED) {
-                WooCommerce::setOrderNote(
+                self::setOrderNote(
                     $order,
                     __(
                         'Resurs Bank order status update indicates direct debited payment method.',
@@ -1097,13 +1100,11 @@ class WooCommerce
                 ),
                 'trbwc'
             );
-            self::setOrderNote(
+            $return = self::setOrderNote(
                 $order,
                 $orderStatusUpdateNotice
             );
             Data::setLogNotice($orderStatusUpdateNotice);
-            // Tell them that this went almost well, if they ask.
-            $return = true;
         }
 
         return $return;
@@ -1113,6 +1114,7 @@ class WooCommerce
      * @param null $key
      * @return mixed
      * @since 0.0.1.0
+     * @noinspection PhpDeprecationInspection
      */
     private static function getOrderStatuses($key = null)
     {
@@ -1138,6 +1140,7 @@ class WooCommerce
 
     /**
      * @param $orderId
+     * @throws Exception
      * @throws ResursException
      * @since 0.0.1.0
      */
@@ -1169,7 +1172,7 @@ class WooCommerce
      */
     private static function reply($out, $code = 202, $httpString = 'Accepted')
     {
-        $sProtocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
+        $sProtocol = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
         $replyString = sprintf('%s %d %s', $sProtocol, $code, $httpString);
         header('Content-type: application/json');
         header($replyString, true, $code);
@@ -1184,7 +1187,7 @@ class WooCommerce
      * @param $value
      * @since 0.0.1.0
      */
-    public static function applyQueue($queueName, $value)
+    public static function applyQueue($queueName, $value): string
     {
         $applyArray = [
             sprintf(
@@ -1210,7 +1213,7 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote)
+    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote): bool
     {
         if (Data::getResursOption('queue_order_statuses_on_success')) {
             $return = OrderStatusHandler::setOrderStatusWithNotice(
@@ -1246,19 +1249,19 @@ class WooCommerce
         $isCheckout = is_checkout();
 
         try {
-            if (WooCommerce::getValidCart()) {
+            if (self::getValidCart()) {
                 $currentTotal = WC()->cart->total;
-                if ($currentTotal !== WooCommerce::getSessionValue('customerCartTotal')) {
+                if ($currentTotal !== self::getSessionValue('customerCartTotal')) {
                     $orderHandler = new OrderHandler();
                     $orderHandler->setCart(WC()->cart);
                     $orderHandler->setPreparedOrderLines();
                     self::setSessionValue('customerCartTotal', WC()->cart->total);
                     // Only update payment session if in RCO mode.
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO &&
-                        !empty(WooCommerce::getSessionValue('rco_order_id'))
+                        !empty(self::getSessionValue('rco_order_id'))
                     ) {
                         ResursBankAPI::getResurs()->updateCheckoutOrderLines(
-                            WooCommerce::getSessionValue('rco_order_id'),
+                            self::getSessionValue('rco_order_id'),
                             $orderHandler->getOrderLines()
                         );
                     }
@@ -1279,7 +1282,8 @@ class WooCommerce
     }
 
     /**
-     * @return bool
+     * @param bool $returnCart
+     * @return array|bool|WC_Cart
      * @since 0.0.1.0
      */
     public static function getValidCart($returnCart = false)
@@ -1289,7 +1293,7 @@ class WooCommerce
         if (isset(WC()->cart)) {
             $return = (WC()->cart->get_cart_contents_count() > 0);
 
-            if (!empty(WC()->cart) && $return && $returnCart) {
+            if ($returnCart && $return && !empty(WC()->cart)) {
                 $return = WC()->cart->get_cart();
             }
         }
@@ -1325,18 +1329,18 @@ class WooCommerce
      */
     public static function getReviewFragments($fragments)
     {
-        $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
-        $fragments['rbwc_cart_total'] = (float)(WooCommerce::getValidCart() ? WC()->cart->total : 0.00);
+        $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(true);
+        $fragments['rbwc_cart_total'] = (float)(self::getValidCart() ? WC()->cart->total : 0.00);
         self::setCustomerCheckoutLocation(true);
 
         return $fragments;
     }
 
     /**
-     * @param $arrayRequest
      * @since 0.0.1.0
+     * @noinspection PhpUnusedParameterInspection
      */
-    public static function getOrderReviewSettings($arrayRequest)
+    public static function getOrderReviewSettings()
     {
         // Rounding panic prevention.
         if (isset($_POST['payment_method']) && Data::isResursMethod($_POST['payment_method'])) {

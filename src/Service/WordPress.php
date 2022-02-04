@@ -7,7 +7,14 @@ use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
+use RuntimeException;
 use TorneLIB\IO\Data\Strings;
+use WP_Post;
+use function count;
+use function defined;
+use function func_get_args;
+use function in_array;
+use function is_array;
 
 /**
  * Class WordPress WordPress related actions.
@@ -125,7 +132,7 @@ class WordPress
      */
     private static function setupActions()
     {
-        $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+        $action = $_REQUEST['action'] ?? '';
         add_action('admin_notices', '\ResursBank\Service\WordPress::getAdminNotices');
         add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
@@ -215,7 +222,7 @@ class WordPress
      * @return array
      * @since 0.0.1.0
      */
-    public static function getPartPaymentPage()
+    public static function getPartPaymentPage(): array
     {
         $pagelist = get_pages();
         $widgetPages = [
@@ -243,6 +250,7 @@ class WordPress
 
         if (isset($_SESSION[Data::getPrefix()]['exception'])) {
             $class = 'notice notice-error is-dismissible';
+            /** @noinspection PhpUnusedLocalVariableInspection */
             foreach ($_SESSION[Data::getPrefix()]['exception'] as $index => $item) {
                 printf(
                     '<div class="%1$s"><p>[%3$s] %2$s</p></div>',
@@ -295,13 +303,13 @@ class WordPress
         $frontCredentialCheck = Data::getResursOption('front_callbacks_credential_error');
         try {
             if (!empty($frontCredentialCheck)) {
-                $credentialMessage = json_decode($frontCredentialCheck);
-                // Generate an exeception the ugly way.
+                $credentialMessage = json_decode($frontCredentialCheck, false);
+                // Generate an exception the ugly way.
                 if (isset($credentialMessage->message)) {
-                    throw new Exception(
+                    throw new RuntimeException(
                         sprintf(
                             'Resurs Bank %s (%s): %s',
-                            isset($credentialMessage->function) ? $credentialMessage->function : __FUNCTION__,
+                            $credentialMessage->function ?? __FUNCTION__,
                             $credentialMessage->code,
                             $credentialMessage->message
                         ),
@@ -350,7 +358,7 @@ class WordPress
      * @return string
      * @since 0.0.1.0
      */
-    public static function getFilterName($filterName)
+    public static function getFilterName($filterName): string
     {
         $return = $filterName;
         if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
@@ -367,7 +375,7 @@ class WordPress
      * @return array
      * @since 0.0.1.0
      */
-    public static function getFilterArgs($args)
+    public static function getFilterArgs($args):array
     {
         if (is_array($args) && count($args) > 2) {
             array_shift($args);
@@ -422,7 +430,7 @@ class WordPress
             $return = false;
         } elseif ($return) {
             // Find more places that could be necessary to enable the plugin.
-            $return = WordPress::applyFilters('getPriorVersionsDisabled', $return);
+            $return = self::applyFilters('getPriorVersionsDisabled', $return);
         }
 
         return $return;
@@ -464,7 +472,7 @@ class WordPress
      * @return array
      * @since 0.0.1.0
      */
-    private static function getPriorVersionDisabledAppearances()
+    private static function getPriorVersionDisabledAppearances():array
     {
         return [
             'in' => [
@@ -484,7 +492,7 @@ class WordPress
      */
     private static function getRequest($request)
     {
-        return isset($_REQUEST[$request]) ? $_REQUEST[$request] : '';
+        return $_REQUEST[$request] ?? '';
     }
 
     /**
@@ -593,7 +601,8 @@ class WordPress
      */
     public static function getLocalizedScripts($scriptName, $isAdmin = null, $extraLocalizationData = null)
     {
-        if (($localizationData = self::getLocalizationData($scriptName, (bool)$isAdmin))) {
+        $localizationData = self::getLocalizationData($scriptName, (bool)$isAdmin);
+        if ($localizationData) {
             if (is_array($extraLocalizationData) && count($extraLocalizationData)) {
                 $localizationData = array_merge($localizationData, $extraLocalizationData);
             }
@@ -611,7 +620,7 @@ class WordPress
      * @return array
      * @since 0.0.1.0
      */
-    private static function getLocalizationData($scriptName, $isAdmin)
+    private static function getLocalizationData($scriptName, $isAdmin): array
     {
         $return = [];
 
@@ -713,7 +722,7 @@ class WordPress
      * @since 0.0.1.0
      * @noinspection ParameterDefaultValueIsNotNullInspection
      */
-    private static function getNonce($tag, $strictify = true)
+    private static function getNonce($tag, $strictify = true): string
     {
         return (string)wp_create_nonce(self::getNonceTag($tag, $strictify));
     }
@@ -725,7 +734,7 @@ class WordPress
      * @since 0.0.1.0
      * @noinspection ParameterDefaultValueIsNotNullInspection
      */
-    public static function getNonceTag($tag, $strictify = true)
+    public static function getNonceTag($tag, $strictify = true): string
     {
         return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
     }
@@ -741,7 +750,7 @@ class WordPress
     {
         // Set timeout to one second more than the backend timeout.
         $defaultTimeout = ((Data::getDefaultApiTimeout() + 1) * 1000);
-        $setAjaxifyTimeout = WordPress::applyFilters('ajaxifyTimeout', $defaultTimeout);
+        $setAjaxifyTimeout = self::applyFilters('ajaxifyTimeout', $defaultTimeout);
         $return['noncify'] = self::getNonce('all');
         $return['ajaxify'] = admin_url('admin-ajax.php');
         $return['ajaxifyTimeout'] = (int)$setAjaxifyTimeout ? $setAjaxifyTimeout : $defaultTimeout;

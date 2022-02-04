@@ -1,4 +1,7 @@
 <?php
+/** @noinspection EfferentObjectCouplingInspection */
+/** @noinspection SpellCheckingInspection */
+/** @noinspection ParameterDefaultValueIsNotNullInspection */
 
 namespace ResursBank\Module;
 
@@ -20,8 +23,11 @@ use WC_Customer;
 use WC_Logger;
 use WC_Order;
 use function count;
+use function defined;
 use function in_array;
 use function is_array;
+use function is_object;
+use function is_string;
 
 /**
  * Class Data Core data class for plugin. This is where we store dynamic content without dependencies those days.
@@ -245,7 +251,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    public static function getGatewayPath($subDirectory = null)
+    public static function getGatewayPath($subDirectory = null): string
     {
         $subPathTest = preg_replace('/\//', '', $subDirectory);
         $gatewayPath = preg_replace('/\/+$/', '', RESURSBANK_GATEWAY_PATH);
@@ -262,7 +268,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    private static function getImageUrl($imageFileName = null)
+    private static function getImageUrl($imageFileName = null): string
     {
         $return = sprintf(
             '%s/images',
@@ -280,7 +286,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    public static function getGatewayUrl()
+    public static function getGatewayUrl(): string
     {
         return preg_replace('/\/+$/', '', plugin_dir_url(self::getPluginInitFile()));
     }
@@ -291,7 +297,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    private static function getPluginInitFile()
+    private static function getPluginInitFile(): string
     {
         return sprintf(
             '%s/init.php',
@@ -303,10 +309,10 @@ class Data
      * @return int
      * @since 0.0.1.0
      */
-    public static function getTimeoutStatus()
+    public static function getTimeoutStatus(): int
     {
         return (int)get_transient(
-            sprintf('%s_resurs_api_timeout', Data::getPrefix())
+            sprintf('%s_resurs_api_timeout', self::getPrefix())
         );
     }
 
@@ -316,21 +322,22 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function setTimeoutStatus($resursConnection, $exception = null)
+    public static function setTimeoutStatus($resursConnection, $exception = null): bool
     {
         $return = false;
         $timeoutByException = false;
 
-        if (!is_null($exception) && !$resursConnection->hasTimeoutException() && $exception instanceof Exception) {
-            if ($exception->getCode() === 28 || $exception->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+        if ($exception instanceof Exception && !$resursConnection->hasTimeoutException()) {
+            $exceptionCode = $exception->getCode();
+            if ($exceptionCode === 28 || $exceptionCode === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
                 $timeoutByException = true;
             }
         }
 
         // If positive values are sent here, we store a timestamp for 60 seconds with a transient entry.
-        if ($resursConnection->hasTimeoutException() || $timeoutByException) {
+        if ($timeoutByException || $resursConnection->hasTimeoutException()) {
             $return = set_transient(
-                sprintf('%s_resurs_api_timeout', Data::getPrefix()),
+                sprintf('%s_resurs_api_timeout', self::getPrefix()),
                 time(),
                 60
             );
@@ -344,14 +351,15 @@ class Data
      * @return int
      * @since 0.0.1.0
      */
-    public static function getDefaultApiTimeout($forceTimeout = null)
+    public static function getDefaultApiTimeout($forceTimeout = null): int
     {
-        $useDefault = is_null($forceTimeout) ? 10 : (int)$forceTimeout;
+        $useDefault = $forceTimeout === null ? 10 : (int)$forceTimeout;
         $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', $useDefault);
         return ($currentTimeout > 0 ? $currentTimeout : $useDefault);
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAnnuityFactors()
@@ -387,16 +395,16 @@ class Data
      * Resurs Bank ecom metadata included.
      *
      * @param int|WC_Order $orderData
-     * @throws Exception
+     * @return array|null
+     * @throws ResursException
      * @since 0.0.1.0
      */
     public static function getResursOrderIfExists($orderData)
     {
         $return = null;
-
         $order = WooCommerce::getProperOrder($orderData, 'order');
         if (self::isResursMethod($order->get_payment_method())) {
-            $resursOrder = Data::getOrderInfo($order);
+            $resursOrder = self::getOrderInfo($order);
             if (!empty($resursOrder['ecom']) && isset($resursOrder['ecom']->id)) {
                 $return = $resursOrder;
             }
@@ -430,8 +438,11 @@ class Data
         }
 
         // What the old plugin never did to save space.
-        if (($testBoolean = self::getTruth($return)) !== null) {
-            $return = (bool)$testBoolean;
+        $testBoolean = self::getTruth($return);
+
+        /** @noinspection NullCoalescingOperatorCanBeUsedInspection */
+        if ($testBoolean !== null) {
+            $return = $testBoolean;
         } else {
             $return = (string)$return;
         }
@@ -495,7 +506,7 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getPrefix($extra = null)
+    public static function getPrefix($extra = null): string
     {
         if (empty($extra)) {
             return RESURSBANK_PREFIX;
@@ -511,7 +522,7 @@ class Data
      */
     private static function getDefault($key)
     {
-        return isset(self::$formFieldDefaults[$key]['default']) ? self::$formFieldDefaults[$key]['default'] : '';
+        return self::$formFieldDefaults[$key]['default'] ?? '';
     }
 
     /**
@@ -525,6 +536,10 @@ class Data
     {
         $customerCountry = self::getCustomerCountry();
         switch ($customerCountry) {
+            case 'US':
+                // Resides here as an example.
+                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
+                break;
             case 'FI':
                 $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
                 break;
@@ -538,7 +553,7 @@ class Data
             $annuityDuration
         );
         if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
-            $annuityPaymentMethod = (array)Data::getPaymentMethodById($annuityMethod);
+            $annuityPaymentMethod = (array)self::getPaymentMethodById($annuityMethod);
 
             // Customized string.
             $partPayString = self::getPartPayStringByTags(
@@ -612,7 +627,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getTestMode()
+    public static function getTestMode(): bool
     {
         return in_array(self::getResursOption('environment'), ['test', 'staging']);
     }
@@ -658,11 +673,8 @@ class Data
         $replaceTags = [];
         $replaceWith = [];
         foreach ($tags as $tagKey => $tagValue) {
-            switch ($tagKey) {
-                case 'payFrom':
-                    $tagValue = self::getWcPriceSpan($data['monthlyPrice'], ['currency' => ' ']);
-                    break;
-                default:
+            if ($tagKey === 'payFrom') {
+                $tagValue = self::getWcPriceSpan($data['monthlyPrice'], ['currency' => ' ']);
             }
             $replaceTags[] = sprintf('/\[%s\]/i', $tagKey);
             $replaceWith[] = $tagValue;
@@ -677,8 +689,8 @@ class Data
 
         if (!empty($data['paymentMethod'])) {
             foreach ($data['paymentMethod'] as $methodKey => $methodValue) {
-                if (in_array($methodKey, $methodTags) && is_string($methodValue)) {
-                    $replaceTags[] = sprintf('/\[method%s\]/i', ucFirst($methodKey));
+                if (is_string($methodValue) && in_array($methodKey, $methodTags, true)) {
+                    $replaceTags[] = sprintf('/\[method%s\]/i', ucfirst($methodKey));
                     $replaceWith[] = $methodValue;
                 }
             }
@@ -697,7 +709,7 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    private static function getCompatibleTags($replaceTags, $data)
+    private static function getCompatibleTags($replaceTags, $data): array
     {
         $v2 = [
             'payFromAnnuity' => wc_price($data['monthlyPrice']),
@@ -714,10 +726,11 @@ class Data
 
     /**
      * @param $monthlyPrice
+     * @param array $wcPriceRequest
      * @return string
      * @since 0.0.1.0
      */
-    private static function getWcPriceSpan($monthlyPrice, $wcPriceRequest = [])
+    private static function getWcPriceSpan($monthlyPrice, $wcPriceRequest = []): string
     {
         return sprintf('<span id="r_annuity_price">%s</span>', wc_price($monthlyPrice, $wcPriceRequest));
     }
@@ -727,11 +740,16 @@ class Data
      * @param $monthlyPrice
      * @return string
      * @since 0.0.1.0
+     * @noinspection LongLine
+     * @noinspection BadExpressionStatementJS
+     * Expression is location in the js parts by the way.
      */
-    public static function getReadMoreString($annuityPaymentMethod, $monthlyPrice)
+    public static function getReadMoreString($annuityPaymentMethod, $monthlyPrice): string
     {
         return sprintf(
-            '<span style="cursor:pointer !important; font-weight:bold;" onclick="getRbReadMoreClicker(\'%s\', %s)">%s</span>',
+            '<span style="cursor:pointer !important; font-weight:bold;" onclick="getRbReadMoreClicker(\'%s\', \'%s\')">
+            %s
+            </span>',
             $annuityPaymentMethod['id'],
             $monthlyPrice,
             WordPress::applyFilters('partPaymentReadMoreString', __('Read more.', 'trbwc'))
@@ -742,7 +760,7 @@ class Data
      * @return Generic
      * @since 0.0.1.0
      */
-    public static function getGenericClass()
+    public static function getGenericClass(): Generic
     {
         if (self::$genericClass !== Generic::class) {
             self::$genericClass = new Generic();
@@ -757,7 +775,7 @@ class Data
      *
      * @since 0.0.1.0
      */
-    public static function getDefaultsInit()
+    public static function getDefaultsInit(): array
     {
         if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
             self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
@@ -771,9 +789,13 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    private static function getDefaultsFromSections($array)
+    private static function getDefaultsFromSections($array): array
     {
         $return = [];
+        /**
+         * We want the content, not the section value.
+         * @noinspection PhpUnusedLocalVariableInspection
+         */
         foreach ($array as $section => $content) {
             $return += $content;
         }
@@ -787,19 +809,19 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canMock($specificMock, $resetMock = true)
+    public static function canMock($specificMock, $resetMock = true): bool
     {
         $return = false;
-        if (self::isTest() && (bool)Data::getResursOption('allow_mocking', null, false)) {
+        if (self::isTest() && (bool)self::getResursOption('allow_mocking', null, false)) {
             $mockOptionName = Strings::returnSnakeCase(sprintf('mock%s', ucfirst($specificMock)));
-            if (Data::getResursOption(
+            if (self::getResursOption(
                 $mockOptionName,
                 null,
                 false
             )) {
                 if ($resetMock) {
                     // Disable mockoption after first execution.
-                    Data::setResursOption($mockOptionName, false);
+                    self::setResursOption($mockOptionName, false);
                 }
                 return true;
             }
@@ -812,7 +834,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function isTest()
+    public static function isTest(): bool
     {
         return (self::getResursOption('environment', null, false) === 'test');
     }
@@ -823,7 +845,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function setResursOption($key, $value)
+    public static function setResursOption($key, $value): bool
     {
         return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
     }
@@ -832,7 +854,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function hasDefaults()
+    public static function hasDefaults(): bool
     {
         return is_array(self::$formFieldDefaults) && count(self::$formFieldDefaults);
     }
@@ -841,7 +863,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    public static function getGatewayBackend()
+    public static function getGatewayBackend(): string
     {
         return sprintf(
             '%s?action=resurs_bank_backend',
@@ -854,7 +876,7 @@ class Data
      * @return array
      * @version 0.0.1.0
      */
-    public static function getPluginScripts($isAdmin = null)
+    public static function getPluginScripts($isAdmin = null): array
     {
         if ($isAdmin) {
             $return = self::$jsLoadersAdmin;
@@ -873,7 +895,7 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getPluginStyles($isAdmin = null)
+    public static function getPluginStyles($isAdmin = null): array
     {
         if ($isAdmin) {
             $return = self::$stylesAdmin;
@@ -890,12 +912,12 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getJsDependencies($scriptName, $isAdmin)
+    public static function getJsDependencies($scriptName, $isAdmin): array
     {
         if ($isAdmin) {
-            $return = isset(self::$jsDependenciesAdmin[$scriptName]) ? self::$jsDependenciesAdmin[$scriptName] : [];
+            $return = self::$jsDependenciesAdmin[$scriptName] ?? [];
         } else {
-            $return = isset(self::$jsDependencies[$scriptName]) ? self::$jsDependencies[$scriptName] : [];
+            $return = self::$jsDependencies[$scriptName] ?? [];
         }
 
         return $return;
@@ -905,7 +927,7 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getPaymentMethodBySession()
+    public static function getPaymentMethodBySession(): string
     {
         return WooCommerce::getSessionValue('paymentMethod');
     }
@@ -915,9 +937,9 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getCheckoutType()
+    public static function getCheckoutType(): string
     {
-        $currentCheckoutType = Data::getResursOption('checkout_type');
+        $currentCheckoutType = self::getResursOption('checkout_type');
         // Warning: Filter makes this plugin feel very bad.
         if ($currentCheckoutType === ResursDefault::TYPE_RCO &&
             (bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
@@ -946,7 +968,7 @@ class Data
      * @throws ExceptionHandler
      * @since 0.0.1.0
      */
-    public static function getValidatedVersion()
+    public static function getValidatedVersion(): bool
     {
         $return = false;
         if (version_compare(self::getCurrentVersion(), self::getVersionByComposer(), '==')) {
@@ -961,7 +983,7 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getCurrentVersion()
+    public static function getCurrentVersion(): string
     {
         return self::getPluginDataContent('version');
     }
@@ -973,7 +995,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    private static function getPluginDataContent($key)
+    private static function getPluginDataContent($key): string
     {
         $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
         return $pluginContent[$key];
@@ -986,7 +1008,7 @@ class Data
      * @throws ExceptionHandler
      * @version 0.0.1.0
      */
-    public static function getVersionByComposer()
+    public static function getVersionByComposer(): string
     {
         return (new Generic())->getVersionByComposer(
             self::getGatewayPath() . '/composer.json'
@@ -998,7 +1020,7 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getPluginTitle($getBaseName = null)
+    public static function getPluginTitle($getBaseName = null): string
     {
         return !$getBaseName ? self::getPluginDataContent('Plugin Name') : WooCommerce::getBaseName();
     }
@@ -1008,7 +1030,7 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getFormFields($getBasic = null)
+    public static function getFormFields($getBasic = null): array
     {
         return FormFields::getFormFields($getBasic);
     }
@@ -1060,7 +1082,7 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    private static function getWrapperList($netWrapper)
+    private static function getWrapperList($netWrapper): array
     {
         $wrapperList = [];
         foreach ($netWrapper->getWrappers() as $wrapperClass => $wrapperInstance) {
@@ -1096,18 +1118,18 @@ class Data
             ),
         ];
 
-        return isset($array[$key]) ? $array[$key] : '';
+        return $array[$key] ?? '';
     }
 
     /**
      * @return bool
      * @since 0.0.1.0
      */
-    public static function isProductionAvailable()
+    public static function isProductionAvailable(): bool
     {
         return (
-            !empty(Data::getResursOption('login_production')) &&
-            !empty(Data::getResursOption('password_production'))
+            !empty(self::getResursOption('login_production')) &&
+            !empty(self::getResursOption('password_production'))
         );
     }
 
@@ -1116,24 +1138,24 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function setEncryptData($data)
+    public static function setEncryptData($data): string
     {
+        $dataEncryptionState = null;
         try {
             $crypt = self::getCrypt();
             $return = $crypt->aesEncrypt($data);
-            $dataEncryptionState = null;
         } catch (Exception $e) {
-            $return = (new Strings())->base64urlEncode($data);
             $dataEncryptionState = $e;
+            $return = (new Strings())->base64urlEncode($data);
         }
 
-        if (!empty($e)) {
-            Data::setLogNotice(
+        if ($dataEncryptionState instanceof Exception) {
+            self::setLogNotice(
                 sprintf(
                     __('%s failed encryption (%d): %s. Failover to base64.', 'trbwc'),
                     __FUNCTION__,
-                    $e->getCode(),
-                    $e->getMessage()
+                    $dataEncryptionState->getCode(),
+                    $dataEncryptionState->getMessage()
                 )
             );
         }
@@ -1146,7 +1168,7 @@ class Data
      * @throws ExceptionHandler
      * @since 0.0.1.0
      */
-    public static function getCrypt()
+    public static function getCrypt(): Aes
     {
         if (empty(self::$encrypt)) {
             $aesKey = self::getResursOption('key');
@@ -1194,7 +1216,7 @@ class Data
 
         $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
 
-        $from = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'Console';
+        $from = $_SERVER['REMOTE_ADDR'] ?? 'Console';
         $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
 
         switch ($severity) {
@@ -1223,17 +1245,19 @@ class Data
      * @param bool $base64
      * @return mixed
      * @since 0.0.1.0
+     * @noinspection BadExceptionsProcessingInspection
      */
     public static function getDecryptData($data, $base64 = false)
     {
         try {
-            if (!$base64) {
+            if ($base64) {
+                $return = (new Strings())->base64urlDecode($data);
+            } else {
                 $crypt = self::getCrypt();
                 $return = $crypt->aesDecrypt($data);
-            } else {
-                $return = (new Strings())->base64urlDecode($data);
             }
         } catch (Exception $e) {
+            self::setLogException($e);
             $return = (new Strings())->base64urlDecode($data);
         }
 
@@ -1247,7 +1271,7 @@ class Data
      */
     public static function isEnabled()
     {
-        return Data::getResursOption('enabled', null, false);
+        return self::getResursOption('enabled', null, false);
     }
 
     /**
@@ -1256,7 +1280,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function setDeveloperLog($fromFunction, $message)
+    public static function setDeveloperLog($fromFunction, $message): bool
     {
         return self::canLog(
             self::CAN_LOG_ORDER_DEVELOPER,
@@ -1277,7 +1301,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canLog($eventType, $logData)
+    public static function canLog($eventType, $logData): bool
     {
         $return = false;
 
@@ -1349,7 +1373,7 @@ class Data
      * @throws ResursException
      * @since 0.0.1.0
      */
-    public static function getOrderInfo($order, $orderIsResursReference = null)
+    public static function getOrderInfo($order, $orderIsResursReference = null): array
     {
         $return = [];
         $orderId = null;
@@ -1360,7 +1384,8 @@ class Data
             $order = new WC_Order($orderId);
         } elseif (is_string($order)) {
             // Landing here it might be a Resurs or EComPHP reference.
-            if (($foundOrderId = self::getOrderByEcomRef($order))) {
+            $foundOrderId = self::getOrderByEcomRef($order);
+            if ($foundOrderId) {
                 $order = self::getOrderInfo($foundOrderId);
                 $orderId = $order['order']->get_id();
             }
@@ -1391,7 +1416,7 @@ class Data
         $return = 0;
 
         foreach (self::$searchArray as $key) {
-            $getPostId = (int)self::getRefVarFromMeta($key, $orderReference);
+            $getPostId = self::getRefVarFromMeta($key, $orderReference);
             if ($getPostId) {
                 $return = $getPostId;
                 break;
@@ -1411,7 +1436,7 @@ class Data
      * @return int
      * @since 0.0.1.0
      */
-    private static function getRefVarFromMeta($key, $reference)
+    private static function getRefVarFromMeta($key, $reference): int
     {
         $getPostId = self::getRefVarFromDatabase($key, $reference);
         if (!$getPostId) {
@@ -1428,7 +1453,7 @@ class Data
             $return = (int)$getPostId;
         }
 
-        return isset($return) ? $return : 0;
+        return $return ?? 0;
     }
 
     /**
@@ -1459,9 +1484,9 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getPrefetchedPayment($key)
+    public static function getPrefetchedPayment($key): array
     {
-        return isset(self::$payments[$key]) ? self::$payments[$key] : [];
+        return self::$payments[$key] ?? [];
     }
 
     /**
@@ -1491,15 +1516,16 @@ class Data
 
     /**
      * @param $orderDataArray
-     * @param string $searchFor
+     * @param string|array $searchFor
      * @return string
      */
-    public static function getResursReference($orderDataArray, $searchFor = '')
+    public static function getResursReference($orderDataArray, $searchFor = null): string
     {
         $return = '';
 
+        /** @noinspection CallableParameterUseCaseInTypeContextInspection */
         $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
-        if (is_array($orderDataArray) && isset($orderDataArray['meta']) && is_array($orderDataArray)) {
+        if (is_array($orderDataArray) && isset($orderDataArray['meta'])) {
             foreach ($searchUsing as $searchKey) {
                 $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
                 if (isset($orderDataArray['meta'][$searchKey])) {
@@ -1533,7 +1559,7 @@ class Data
                     $return['ecom'] = ResursBankAPI::getPayment($return['resurs'], null, $return);
                     $return['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
-                    Data::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
+                    self::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
                     if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
                         $return['ecom'] = ResursBankAPI::getPayment($return['resurs_secondary'], null, $return);
                     }
@@ -1624,7 +1650,7 @@ class Data
     private static function getLocalizedOrderData($orderData = null)
     {
         $localizeArray = [
-            'resursOrder' => isset($orderData['resurs']) ? $orderData['resurs'] : '',
+            'resursOrder' => $orderData['resurs'] ?? '',
             'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
         ];
 
@@ -1666,7 +1692,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function hasOldGateway()
+    public static function hasOldGateway(): bool
     {
         return defined('RB_WOO_VERSION') ? true : false;
     }
@@ -1679,7 +1705,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canHandleOrder($thisMethod)
+    public static function canHandleOrder($thisMethod): bool
     {
         $return = false;
 
@@ -1692,7 +1718,7 @@ class Data
         $isResursDeprecated = false;
         foreach ($allowMethod as $methodKey) {
             if ((bool)preg_match(sprintf('/^%s/', $methodKey), $thisMethod)) {
-                if ((bool)preg_match('/^resurs_bank_/', $methodKey)) {
+                if (strncmp($methodKey, 'resurs_bank_', 12) === 0) {
                     $isResursDeprecated = true;
                     break;
                 }
@@ -1701,7 +1727,7 @@ class Data
             }
         }
 
-        if ($isResursDeprecated && Data::getResursOption('deprecated_interference')) {
+        if ($isResursDeprecated && self::getResursOption('deprecated_interference')) {
             $return = true;
         }
 
@@ -1773,7 +1799,7 @@ class Data
      * @return array
      * @since 0.0.1.0
      */
-    public static function getGeneralSettings($settings = null)
+    public static function getGeneralSettings($settings = null): array
     {
         foreach ((array)$settings as $setting) {
             if (isset($setting['id']) && $setting['id'] === 'woocommerce_price_num_decimals') {
@@ -1809,7 +1835,7 @@ class Data
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function isGetAddressSupported()
+    public static function isGetAddressSupported(): bool
     {
         $return = in_array(
             self::getCustomerCountry(),
@@ -1834,7 +1860,7 @@ class Data
         $getAddressDisabled = (bool)WordPress::applyFilters('getAddressDisabled', false);
         $getAddressFormDefault = (bool)WordPress::applyFiltersDeprecated(
             'resurs_getaddress_enabled',
-            Data::getResursOption('get_address_form')
+            self::getResursOption('get_address_form')
         );
         if ($getAddressDisabled) {
             // Filter overrides the config settings.
@@ -1848,7 +1874,7 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getErrorNotices()
+    public static function getErrorNotices(): string
     {
         $wcNotices = wc_get_notices();
         $internalErrorMessage = '';
@@ -1904,7 +1930,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function clearCredentialNotice()
+    public static function clearCredentialNotice(): bool
     {
         return self::delResursOption('front_callbacks_credential_error');
     }
@@ -1914,7 +1940,7 @@ class Data
      * @param $key
      * @return bool
      */
-    public static function delResursOption($key)
+    public static function delResursOption($key): bool
     {
         return delete_option(sprintf('%s_%s', self::getPrefix('admin'), $key));
     }
@@ -1923,9 +1949,9 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getCredentialNotice()
+    public static function getCredentialNotice(): bool
     {
-        return Data::setResursOption(
+        return self::setResursOption(
             'front_callbacks_credential_error',
             json_encode(
                 [
@@ -1944,9 +1970,9 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function isBleedingEdge()
+    public static function isBleedingEdge(): bool
     {
-        return (bool)Data::getResursOption('bleeding_edge');
+        return (bool)self::getResursOption('bleeding_edge');
     }
 
     /**
@@ -1954,12 +1980,12 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function isBleedingEdgeApiReady()
+    public static function isBleedingEdgeApiReady(): bool
     {
-        return (Data::isBleedingEdge() &&
-            !empty(Data::getResursOption('jwt_store_id')) &&
-            !empty(Data::getResursOption('jwt_client_id')) &&
-            !empty(Data::getResursOption('jwt_client_password')));
+        return (self::isBleedingEdge() &&
+            !empty(self::getResursOption('jwt_store_id')) &&
+            !empty(self::getResursOption('jwt_client_id')) &&
+            !empty(self::getResursOption('jwt_client_password')));
     }
 
     /**
@@ -1967,7 +1993,7 @@ class Data
      * @return bool
      * @since 0.0.1.0
      */
-    public static function isResursMethod($paymentMethod)
+    public static function isResursMethod($paymentMethod): bool
     {
         return (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
     }

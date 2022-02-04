@@ -1,5 +1,9 @@
 <?php
 
+/** @noinspection ParameterDefaultValueIsNotNullInspection */
+
+/** @noinspection PhpUsageOfSilenceOperatorInspection */
+
 namespace ResursBank\Module;
 
 use Exception;
@@ -8,11 +12,14 @@ use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use RuntimeException;
 use TorneLIB\Utils\WordPress as wpHelper;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Order_Refund;
 use WC_Product;
+use function count;
+use function in_array;
 use function is_array;
 
 /**
@@ -67,13 +74,25 @@ class PluginHooks
      */
     public function updateOrderStatusByWooCommerce($orderId, $oldSlug, $newSlug)
     {
+        /** @var array $order */
         $order = Data::getResursOrderIfExists($orderId);
         if (!empty($order) && isset($order['ecom'])) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    '%s: orderId=%s, oldSlug=%s, newSlug=%s',
+                    __FUNCTION__,
+                    $orderId,
+                    $oldSlug,
+                    $newSlug
+                )
+            );
+
             // Precheck old status. There are some statuses that prevents editing.
-            $this->handleOrderStatusByOldSlug($oldSlug, $order);
+            $this->handleOrderStatusByOldSlug($oldSlug, $order['order']);
 
             // This is where we handle order statuses changed from WooCommerce.
-            $this->handleOrderByNewSlug($newSlug, $order);
+            $this->handleOrderByNewSlug($newSlug, $order['order']);
         }
     }
 
@@ -95,13 +114,13 @@ class PluginHooks
 
         switch ($oldSlug) {
             case 'cancelled':
-                if (in_array('IS_ANNULLED', $ecomStatus)) {
+                if (in_array('IS_ANNULLED', $ecomStatus, true)) {
                     wp_set_object_terms($order['order']->get_id(), $oldSlug, 'shop_order_status', false);
                     wp_safe_redirect($url);
                 }
                 break;
             case 'refunded':
-                if (in_array('IS_CREDITED', $ecomStatus)) {
+                if (in_array('IS_CREDITED', $ecomStatus, true)) {
                     wp_set_object_terms($order['order']->get_id(), $oldSlug, 'shop_order_status', false);
                     wp_safe_redirect($url);
                 }
@@ -118,7 +137,7 @@ class PluginHooks
      * @return bool
      * @since 0.0.1.0
      */
-    private function isFullAfterShopRequest($paymentId, $connection)
+    private function isFullAfterShopRequest($paymentId, $connection): bool
     {
         return (
             !$connection->canCredit($paymentId) &&
@@ -135,8 +154,9 @@ class PluginHooks
      * @param ResursBank $connection
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection LongLine
      */
-    private function hasCustomAfterShopOrderLines($order, $connection)
+    private function hasCustomAfterShopOrderLines($order, $connection): bool
     {
         $return = false;
 
@@ -166,7 +186,7 @@ class PluginHooks
      * @return float
      * @since 0.0.1.0
      */
-    private function getPositiveValueFromNegative($valueString)
+    private function getPositiveValueFromNegative($valueString): float
     {
         return (float)preg_replace('/^-/', '', $valueString);
     }
@@ -204,7 +224,7 @@ class PluginHooks
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function hasCustomAfterShopDiscount($order, $connection)
+    private function hasCustomAfterShopDiscount($order, $connection): bool
     {
         $return = false;
 
@@ -263,12 +283,14 @@ class PluginHooks
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function hasCustomAfterShopShipping($order)
+    private function hasCustomAfterShopShipping($order): bool
     {
         $shippingTotal = 0;
 
         if ($order instanceof WC_Order || $order instanceof WC_Order_Refund) {
             $shippingTotal = $order->get_shipping_total();
+            // Depending of the instance.
+            /** @noinspection NotOptimalIfConditionsInspection */
             if ($order instanceof WC_Order_Refund) {
                 $refundOrderInfo = new WC_Order($order->get_id());
                 $shippingRefunded = (float)$refundOrderInfo->get_total_shipping_refunded();
@@ -295,7 +317,7 @@ class PluginHooks
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function refundResursOrder($orderId, $refundId)
+    public function refundResursOrder($orderId, $refundId): bool
     {
         $return = false;
         $order = Data::getResursOrderIfExists($orderId);
@@ -351,7 +373,7 @@ class PluginHooks
         $refundObject,
         $order,
         $itemCount
-    ) {
+    ): bool {
         $return = false;
         $totalDiscount = (float)$order['order']->get_total_discount();
         if ($totalDiscount) {
@@ -470,12 +492,11 @@ class PluginHooks
             case 'completed':
                 // Make sure we also handle instant finalizations.
                 if ($resursConnection->canDebit($order['ecom'])) {
+                    $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
+                    if (!$fullAfterShopRequest) {
+                        $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
+                    }
                     try {
-                        $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
-                        if (!$fullAfterShopRequest) {
-                            $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
-                        }
-
                         // Add feature here, for which we look for and add discounts and shipping if necessary.
                         $finalizeResponse = $resursConnection->finalizePayment(
                             $resursReference,
@@ -589,7 +610,7 @@ class PluginHooks
      * @return string
      * @since 0.0.1.0
      */
-    public function mockEmptyPriceInfoHtml()
+    public function mockEmptyPriceInfoHtml(): string
     {
         return '';
     }
@@ -599,6 +620,7 @@ class PluginHooks
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection BadExceptionsProcessingInspection
      */
     public function getAvailableAutoDebitMethods($return)
     {
@@ -614,6 +636,7 @@ class PluginHooks
                 // this live each run for auto debitable methods.
                 $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
             } catch (Exception $e) {
+                Data::setLogException($e);
                 $return = [
                     'default' => __('Payment Methods are currently unavailable!', 'trbwc'),
                 ];
@@ -694,7 +717,7 @@ class PluginHooks
             )
         );
 
-        throw new Exception(
+        throw new RuntimeException(
             sprintf(
                 'MockException: %s',
                 $function
@@ -739,7 +762,7 @@ class PluginHooks
      * @return string
      * @since 0.0.1.0
      */
-    public function getPartPaymentWidgetPage($return)
+    public function getPartPaymentWidgetPage($return): string
     {
         $partPaymentWidgetId = Data::getResursOption('part_payment_template');
         if ($partPaymentWidgetId) {
@@ -766,7 +789,8 @@ class PluginHooks
             }
             $byItem = sprintf('method_%s.png', $itemName);
 
-            if (($imageByMethodContent = Data::getImage($byItem))) {
+            $imageByMethodContent = Data::getImage($byItem);
+            if ($imageByMethodContent) {
                 $url = $imageByMethodContent;
                 break;
             }
