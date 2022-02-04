@@ -44,6 +44,7 @@ class WooCommerce
      * @since 0.0.1.0
      */
     public static $inCheckoutKey = 'customerWasInCheckout';
+
     /**
      * @var $basename
      * @since 0.0.1.0

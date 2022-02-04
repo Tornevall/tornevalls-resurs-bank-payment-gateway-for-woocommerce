@@ -42,26 +42,31 @@ class Data
      * @since 0.0.1.0
      */
     const LOG_INFO = 'info';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_DEBUG = 'debug';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_NOTICE = 'notice';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_CRITICAL = 'critical';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const LOG_ERROR = 'error';
+
     /**
      * @var string
      * @since 0.0.1.0
@@ -115,6 +120,7 @@ class Data
         'paymentId',
         'paymentIdLast',
     ];
+
     /**
      * @var WC_Logger $Log
      * @since 0.0.1.0

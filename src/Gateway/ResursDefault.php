@@ -51,31 +51,37 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      */
     const STATUS_FINALIZED = 'completed';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_BOOKED = 'processing';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_FROZEN = 'on-hold';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_SIGNING = 'on-hold';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_DENIED = 'failed';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_FAILED = 'failed';
+
     /**
      * @var string
      * @since 0.0.1.0
@@ -87,58 +93,69 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      */
     const TYPE_HOSTED = 'hosted';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const TYPE_SIMPLIFIED = 'simplified';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const TYPE_RCO = 'rco';
+
     /**
      * @var WC_Order $order
      * @since 0.0.1.0
      */
     protected $order;
+
     /**
      * Main API. Use as primary communicator. Acts like a bridge between the real API.
      * @var ResursBankAPI $API
      * @since 0.0.1.0
      */
     protected $API;
+
     /**
      * @var array $applicantPostData Applicant request.
      * @since 0.0.1.0
      */
     private $applicantPostData = [];
+
     /**
      * @var stdClass $paymentResponse
      * @since 0.0.1.0
      */
     private $paymentResponse;
+
     /**
      * @var array
      * @since 0.0.1.0
      */
     private $wcOrderData;
+
     /**
      * Data that will be sent between Resurs Bank and ourselves.
      * @var array $apiData
      * @since 0.0.1.0
      */
     private $apiData = [];
+
     /**
      * @var string $apiDataId
      * @since 0.0.1.0
      */
     private $apiDataId = '';
+
     /**
      * @var WC_Cart $cart
      * @since 0.0.1.0
      */
     protected $cart;
+
     /**
      * @var array $paymentMethodInformation
      * @since 0.0.1.0
