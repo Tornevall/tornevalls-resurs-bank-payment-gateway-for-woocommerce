@@ -498,8 +498,7 @@ class ResursBankAPI
             $annuityArray = [];
 
             try {
-                // fromStorage can be called externally.
-                $paymentMethods = $fromStorage ? $stored : (array)self::getPaymentMethods();
+                $paymentMethods = (array)self::getPaymentMethods($fromStorage);
                 if (Data::canMock('annuityFactorConfigException', false)) {
                     // This mocking section will simulate a total failure of the fetching part.
                     $stored = null;
