@@ -430,7 +430,7 @@ class WooCommerce
                     'id (%s). You can check the UpdatePaymentReference values for errors.',
                     'trbwc'
                 ),
-                $orderData['resurs_secondary'] ?? '[missing reference]',
+                $orderData['resurs_secondary'] ?? __('[missing reference]', 'trbwc'),
                 $orderData['resurs']
             );
         }

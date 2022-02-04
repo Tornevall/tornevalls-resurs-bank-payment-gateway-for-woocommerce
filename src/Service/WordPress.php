@@ -375,7 +375,7 @@ class WordPress
      * @return array
      * @since 0.0.1.0
      */
-    public static function getFilterArgs($args):array
+    public static function getFilterArgs($args): array
     {
         if (is_array($args) && count($args) > 2) {
             array_shift($args);
@@ -472,7 +472,7 @@ class WordPress
      * @return array
      * @since 0.0.1.0
      */
-    private static function getPriorVersionDisabledAppearances():array
+    private static function getPriorVersionDisabledAppearances(): array
     {
         return [
             'in' => [
