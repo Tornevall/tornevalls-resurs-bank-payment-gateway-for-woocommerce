@@ -43,7 +43,7 @@ class FormFields extends WC_Settings_API
      * @noinspection ParameterDefaultValueIsNotNullInspection
      * @since 0.0.1.0
      */
-    public static function getFormFields($section = 'basic', $id = null)
+    public static function getFormFields($section = 'basic', $id = null): array
     {
         if (empty($section)) {
             $section = 'basic';
@@ -735,7 +735,7 @@ class FormFields extends WC_Settings_API
             $return = isset($formFields[$section]) ? self::getTransformedIdArray($formFields[$section], $id) : [];
         }
 
-        return $return;
+        return (array)$return;
     }
 
     /**
@@ -743,10 +743,10 @@ class FormFields extends WC_Settings_API
      *
      * @param $array
      * @param $add
-     * @return string
+     * @return array
      * @since 0.0.1.0
      */
-    public static function getTransformedIdArray($array, $add): string
+    public static function getTransformedIdArray($array, $add): array
     {
         $return = $array;
 

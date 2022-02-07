@@ -1248,14 +1248,14 @@ class ResursDefault extends WC_Payment_Gateway
      * Customize minimum allowed amount for a payment method. Can never be lower than the lowest minimum from method.
      *
      * @param int $minLimit
-     * @return int
+     * @return float
      * @link https://github.com/Tornevall/wpwc-resurs/issues/42
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
      */
-    private function getRealMin($minLimit): int
+    private function getRealMin($minLimit): float
     {
-        $requestedMinLimit = (int)WordPress::applyFilters(
+        $requestedMinLimit = WordPress::applyFilters(
             'methodMinLimit',
             $minLimit,
             $this->paymentMethodInformation
@@ -1265,21 +1265,21 @@ class ResursDefault extends WC_Payment_Gateway
             $requestedMinLimit = $this->paymentMethodInformation->minLimit;
         }
 
-        return $requestedMinLimit;
+        return (float)$requestedMinLimit;
     }
 
     /**
      * Customize maximum allowed amount for a payment method. Can never be higher than the highest maximum from method.
      *
      * @param int $maxLimit
-     * @return int
+     * @return float
      * @link https://github.com/Tornevall/wpwc-resurs/issues/42
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
      */
-    private function getRealMax($maxLimit): int
+    private function getRealMax($maxLimit): float
     {
-        $requestedMaxLimit = (int)WordPress::applyFilters(
+        $requestedMaxLimit = WordPress::applyFilters(
             'methodMaxLimit',
             $maxLimit,
             $this->paymentMethodInformation
@@ -1289,7 +1289,7 @@ class ResursDefault extends WC_Payment_Gateway
             $requestedMaxLimit = $this->paymentMethodInformation->maxLimit;
         }
 
-        return $requestedMaxLimit;
+        return (float)$requestedMaxLimit;
     }
 
     /**
