@@ -2,10 +2,9 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 
 # 0.0.1.0 + 1.0.0
 
-** Epic
 * [RWC-6](https://tracker.tornevall.net/browse/RWC-6) - RBWC 1.0
 
-** Bug
+**Bug**
 * [RWC-22](https://tracker.tornevall.net/browse/RWC-22) - CRITICAL Uncaught Error: Maximum function nesting level of '500' reached
 * [RWC-97](https://tracker.tornevall.net/browse/RWC-97) - The blue box may not show properly when payments are not finished
 * [RWC-171](https://tracker.tornevall.net/browse/RWC-171) - adminpage_details.phtml bugs out due to RCO.
@@ -20,7 +19,7 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 * [RWC-253](https://tracker.tornevall.net/browse/RWC-253) - Annuity factors with custom currency data
 * [RWC-258](https://tracker.tornevall.net/browse/RWC-258) - ECom requesting payments four times in RCO mode
 
-** Task
+**Task**
 * [RWC-3](https://tracker.tornevall.net/browse/RWC-3) - composerize package PSR-4 formatted
 * [RWC-7](https://tracker.tornevall.net/browse/RWC-7) - Basic administration Interface
 * [RWC-12](https://tracker.tornevall.net/browse/RWC-12) - Generate README that explains architecture and other instructions.
@@ -156,7 +155,7 @@ Current ChangeLog is based on what has reached the master branch. Also, github r
 * [RWC-284](https://tracker.tornevall.net/browse/RWC-284) - Unreachable API's handling (AKA Christmas Holidays API Exception patch)
 * [RWC-295](https://tracker.tornevall.net/browse/RWC-295) - Handle old plugin orders (but with ability to disable feature)
 
-** Sub-task
+**Sub-task**
 * [RWC-33](https://tracker.tornevall.net/browse/RWC-33) - woocommerce_resurs_bank_' . $type . '_checkout_icon (iconified method)
 * [RWC-38](https://tracker.tornevall.net/browse/RWC-38) - resurs_trigger_test_callback
 * [RWC-40](https://tracker.tornevall.net/browse/RWC-40) - resursbank_set_storeid
