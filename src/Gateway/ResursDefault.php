@@ -6,8 +6,6 @@
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
-declare(strict_types=1);
-
 namespace ResursBank\Gateway;
 
 use Exception;
