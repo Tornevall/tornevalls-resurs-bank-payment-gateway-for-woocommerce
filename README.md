@@ -58,8 +58,10 @@ The original codebase was initialized july 2020.
 ## REQUIREMENTS AND SECURITY CONSIDERATIONS
 
 * WooCommerce: v3.5.0 or higher (old features are ditched) and the actual support is set much higher.
-* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly recommended
-  to go for the latest version as soon as possible if you're not already there.
+* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly
+  recommended to go for the latest version as soon as possible if you're not already there.
+  See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more
+  information.
 * HTTPS *must* be enabled in both directions. This is a callback security measure.
 * XML and SoapClient must be available.
 * Curl is *recommended* but not necessary.
