@@ -7,6 +7,13 @@
     padding: 5px !important;
 }
 
+.resursOrderInfoOldPluginNote {
+    display: block;
+    font-weight: bold;
+    background: #ffd7cd !important;
+    color: #990000 !important;
+}
+
 .resursOrderInfoLabel {
     cursor: default !important;
     font-weight: bold !important;

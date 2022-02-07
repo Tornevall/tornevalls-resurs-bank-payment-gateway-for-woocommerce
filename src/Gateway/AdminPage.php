@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpCSValidationInspection */
+
 namespace ResursBank\Gateway;
 
 use Exception;
@@ -69,7 +71,7 @@ class AdminPage extends WC_Settings_Page
     /**
      * @since 0.0.1.0
      */
-    public static function getId()
+    public static function getId(): string
     {
         return Data::getPrefix('admin');
     }
@@ -86,7 +88,7 @@ class AdminPage extends WC_Settings_Page
 
     /**
      * @param string $current_section
-     * @return array
+     * @return array|mixed|void
      */
     public function get_settings($current_section = '')
     {
@@ -109,7 +111,7 @@ class AdminPage extends WC_Settings_Page
      * @return array
      * @since 0.0.1.0
      */
-    private function getSectionNames($fromFunction = null)
+    private function getSectionNames($fromFunction = null): array
     {
         $return = [];
         $formFields = Data::getFormFields('all');
@@ -120,10 +122,9 @@ class AdminPage extends WC_Settings_Page
 
         foreach ($formFields as $sectionKey => $sectionArray) {
             if ($sectionKey === 'basic') {
-                $return[''] = isset($sectionArray['title']) ?
-                    $sectionArray['title'] : __('Plugin and account settings', 'trbwc');
+                $return[''] = $sectionArray['title'] ?? __('Plugin and account settings', 'trbwc');
             } else {
-                $return[$sectionKey] = isset($sectionArray['title']) ? $sectionArray['title'] : $sectionKey;
+                $return[$sectionKey] = $sectionArray['title'] ?? $sectionKey;
             }
         }
 

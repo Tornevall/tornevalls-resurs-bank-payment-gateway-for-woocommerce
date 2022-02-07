@@ -11,8 +11,10 @@ use ResursBank\Service\WooCommerce;
 use ResursException;
 use RuntimeException;
 use TorneLIB\Exception\Constants;
+use function count;
 use function in_array;
 use function is_array;
+use function is_object;
 
 /**
  * Class Api EComPHP Translator. Also a guide for what could be made better in the real API.
@@ -85,24 +87,25 @@ class ResursBankAPI
     /**
      * Get payment properly by testing two API's before giving up.
      * @param $orderId
-     * @param null $failover
+     * @param null $failOver
      * @param null $orderInfo
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getPayment($orderId, $failover = null, $orderInfo = null)
+    public static function getPayment($orderId, $failOver = null, $orderInfo = null)
     {
-        if ((bool)$failover) {
+        if ((bool)$failOver) {
             self::getResurs()->setFlag('GET_PAYMENT_BY_REST');
         }
         try {
-            if (($credentialMeta = self::getMatchingCredentials($orderInfo)) !== null) {
+            $credentialMeta = self::getMatchingCredentials($orderInfo);
+            if ($credentialMeta !== null) {
                 $resurs = self::getEcomBySecondaryCredentials($credentialMeta, $orderId);
                 $return = $resurs->getPayment($orderId);
                 $return->isCurrentCredentials = false;
-                $return->username = isset($credentialMeta->l) ? $credentialMeta->l : '';
-                $return->environment = isset($credentialMeta->e) ? $credentialMeta->e : 1;
+                $return->username = $credentialMeta->l ?? '';
+                $return->environment = $credentialMeta->e ?? 1;
             } else {
                 $return = self::getResurs()->getPayment($orderId);
                 $return->isCurrentCredentials = true;
@@ -115,13 +118,13 @@ class ResursBankAPI
             // Do not check the timeout handler here, only check if the soap request has timed out.
             // On other errors, just pass the exception on, since there may something worse than just
             // a timeout.
-            if (!(bool)$failover && $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+            if (!(bool)$failOver && $e->getCode() === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
                 self::getPaymentByRestNotice($e);
                 return self::getPayment($orderId, true);
             }
             throw $e;
         }
-        // Restore failovers.
+        // Restore.
         self::getResurs()->deleteFlag('GET_PAYMENT_BY_REST');
 
         return $return;
@@ -132,7 +135,7 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getResurs()
+    public static function getResurs(): ResursBank
     {
         if (empty(self::$resursBank)) {
             // Instantiation.
@@ -143,9 +146,11 @@ class ResursBankAPI
     }
 
     /**
+     * @return MerchantApi
+     * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getMerchantConnection()
+    public static function getMerchantConnection(): MerchantApi
     {
         if (empty(self::$merchantApi)) {
             // Instantiation.
@@ -159,7 +164,7 @@ class ResursBankAPI
      * @return MerchantApi
      * @throws Exception
      */
-    public function getMerchantApi()
+    public function getMerchantApi(): MerchantApi
     {
         if (Data::isBleedingEdge() && Data::isBleedingEdgeApiReady()) {
             try {
@@ -209,7 +214,7 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function getConnection()
+    public function getConnection(): ResursBank
     {
         $timeoutStatus = Data::getTimeoutStatus();
         if (empty($this->ecom)) {
@@ -247,18 +252,16 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function getResolvedCredentials()
+    private function getResolvedCredentials(): bool
     {
         $environment = Data::getResursOption('environment');
 
-        switch ($environment) {
-            case 'live':
-                $getUserFrom = 'login_production';
-                $getPasswordFrom = 'password_production';
-                break;
-            default:
-                $getUserFrom = 'login';
-                $getPasswordFrom = 'password';
+        if ($environment === 'live') {
+            $getUserFrom = 'login_production';
+            $getPasswordFrom = 'password_production';
+        } else {
+            $getUserFrom = 'login';
+            $getPasswordFrom = 'password';
         }
 
         $this->credentials['username'] = Data::getResursOption($getUserFrom);
@@ -275,7 +278,7 @@ class ResursBankAPI
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getEnvironment()
+    public static function getEnvironment(): bool
     {
         return in_array(
             Data::getResursOption('environment'),
@@ -292,7 +295,7 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setWsdlCache()
+    private function setWsdlCache(): string
     {
         $wsdlMode = Data::getResursOption('api_wsdl');
 
@@ -337,7 +340,7 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setEcomTimeout($forceTimeout = null)
+    private function setEcomTimeout($forceTimeout = null): self
     {
         $this->ecom->setFlag('CURL_TIMEOUT', Data::getDefaultApiTimeout($forceTimeout));
 
@@ -348,7 +351,7 @@ class ResursBankAPI
      * @return $this
      * @since 0.0.1.0
      */
-    private function setEcomAutoDebitMethods()
+    private function setEcomAutoDebitMethods(): self
     {
         $finalizationMethodTypes = (array)Data::getResursOption('order_instant_finalization_methods');
 
@@ -395,6 +398,7 @@ class ResursBankAPI
      * @return false|string
      * @throws ResursException
      * @since 0.0.1.0
+     * @noinspection SpellCheckingInspection
      */
     private static function getApiMeta($orderData)
     {
@@ -417,7 +421,7 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getEcomBySecondaryCredentials($credentialMeta, $orderId)
+    private static function getEcomBySecondaryCredentials($credentialMeta, $orderId): ResursBank
     {
         Data::setLogNotice(
             sprintf(
@@ -432,8 +436,8 @@ class ResursBankAPI
             )
         );
         return self::getTemporaryEcom(
-            isset($credentialMeta->l) ? $credentialMeta->l : '',
-            isset($credentialMeta->p) ? $credentialMeta->p : '',
+            $credentialMeta->l ?? '',
+            $credentialMeta->p ?? '',
             in_array($credentialMeta->e, ['test', 'staging']) ? 1 : 0
         );
     }
@@ -446,7 +450,7 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getTemporaryEcom($username, $password, $environment)
+    private static function getTemporaryEcom($username, $password, $environment): ResursBank
     {
         // Creating a simple connection.
         return new ResursBank(
@@ -485,15 +489,16 @@ class ResursBankAPI
     public static function getAnnuityFactors($fromStorage = true)
     {
         $return = self::$annuityFactors;
-        if ($fromStorage && !empty($stored = json_decode(Data::getResursOption('annuityFactors'), false))) {
+        $stored = json_decode(Data::getResursOption('annuityFactors'), false);
+        if ($fromStorage && !empty($stored)) {
             $return = $stored;
         }
 
         if (!$fromStorage || empty($return)) {
+            $annuityArray = [];
+
             try {
-                $annuityArray = [];
-                // fromStorage can be called externally.
-                $paymentMethods = is_array($fromStorage) ? $fromStorage : (array)self::getPaymentMethods();
+                $paymentMethods = (array)self::getPaymentMethods($fromStorage);
                 if (Data::canMock('annuityFactorConfigException', false)) {
                     // This mocking section will simulate a total failure of the fetching part.
                     $stored = null;
@@ -559,6 +564,7 @@ class ResursBankAPI
 
         $return = self::$paymentMethods;
         if ($fromStorage) {
+            /** @noinspection JsonEncodingApiUsageInspection */
             $stored = json_decode(Data::getResursOption('paymentMethods'));
             if (is_array($stored)) {
                 $return = $stored;
@@ -573,7 +579,7 @@ class ResursBankAPI
                 }
                 self::$paymentMethods = self::getResurs()->getPaymentMethods([], true);
             } catch (Exception $e) {
-                Data::setTimeoutStatus(ResursBankAPI::getResurs());
+                Data::setTimeoutStatus(self::getResurs());
                 WooCommerce::setSessionValue('silentGetPaymentMethodsException', $e);
                 // We do not want to reset on errors, right?
                 //Data::setResursOption('paymentMethods', null);
@@ -631,7 +637,7 @@ class ResursBankAPI
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function getCredentialsPresent()
+    public function getCredentialsPresent(): bool
     {
         $return = true;
         try {

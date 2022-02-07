@@ -86,13 +86,12 @@ class OrderStatus
      * @param $order
      * @param $status
      * @param $notice
-     * @return WC_Queue_Interface
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderStatusWithNotice($order, $status, $notice)
+    public static function setOrderStatusWithNotice($order, $status, $notice): string
     {
-        self::getStaticQueue()->setOrderStatus(
+        return (self::getStaticQueue())->setOrderStatus(
             $order,
             $status,
             $notice
@@ -105,12 +104,13 @@ class OrderStatus
      * @param $order
      * @param $status
      * @param $notice
+     * @return string
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function setOrderStatus($order, $status, $notice)
+    public function setOrderStatus($order, $status, $notice): string
     {
-        WooCommerce::applyQueue(
+        return WooCommerce::applyQueue(
             'updateOrderStatusByQueue',
             [
                 WooCommerce::getProperOrder($order, 'id'),
@@ -125,7 +125,7 @@ class OrderStatus
      * @return OrderStatus
      * @since 0.0.1.0
      */
-    private static function getStaticQueue()
+    private static function getStaticQueue(): OrderStatus
     {
         if (empty(self::$staticQueue)) {
             self::$staticQueue = new OrderStatus();
@@ -139,7 +139,7 @@ class OrderStatus
      * @return WC_Queue_Interface
      * @since 0.0.1.0
      */
-    public function getQueue()
+    public function getQueue(): WC_Queue_Interface
     {
         return $this->queue;
     }

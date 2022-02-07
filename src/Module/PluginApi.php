@@ -1,5 +1,8 @@
 <?php
 
+/** @noinspection CompactCanBeUsedInspection */
+/** @noinspection ParameterDefaultValueIsNotNullInspection */
+
 namespace ResursBank\Module;
 
 use Exception;
@@ -7,15 +10,18 @@ use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
-use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use ResursException;
 use RuntimeException;
 use TorneLIB\Data\Password;
+use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Strings;
 use WC_Checkout;
 use WC_Order;
 use function count;
+use function is_array;
+use function is_bool;
 
 /**
  * Backend API Handler.
@@ -29,11 +35,6 @@ class PluginApi
      * @since 0.0.1.0
      */
     private static $resursCheckout;
-    /**
-     * @var ResursDefault
-     * @since 0.0.1.0
-     */
-    private static $resursDefault;
 
     /**
      * List of callbacks required for this plugin to handle payments properly.
@@ -71,7 +72,7 @@ class PluginApi
      * @return string
      * @since 0.0.1.0
      */
-    private static function getAction()
+    private static function getAction(): string
     {
         $action = isset($_REQUEST['action']) ? (string)$_REQUEST['action'] : '';
 
@@ -143,7 +144,7 @@ class PluginApi
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getValidatedNonce($expire = null, $noReply = null)
+    public static function getValidatedNonce($expire = null, $noReply = null): bool
     {
         $return = false;
         $expired = false;
@@ -195,7 +196,7 @@ class PluginApi
      * @return bool
      * @since 0.0.1.0
      */
-    public static function expireNonce($nonceTag)
+    public static function expireNonce($nonceTag): bool
     {
         $optionTag = 'resurs_nonce_' . $nonceTag;
         $return = false;
@@ -216,10 +217,13 @@ class PluginApi
      */
     private static function getParam($key)
     {
-        return isset($_REQUEST[$key]) ? $_REQUEST[$key] : '';
+        return $_REQUEST[$key] ?? '';
     }
 
     /**
+     * @throws Exception
+     * @throws ResursException
+     * @throws ExceptionHandler
      * @since 0.0.1.0
      */
     public static function getCostOfPurchase()
@@ -232,8 +236,12 @@ class PluginApi
         if (Data::getCustomerCountry() !== 'DK') {
             $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation($method, $total, true, true);
         } else {
-            $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation(ResursBankAPI::getPaymentMethods(),
-                $total, false, true);
+            $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation(
+                ResursBankAPI::getPaymentMethods(),
+                $total,
+                false,
+                true
+            );
         }
         $hasMock = WooCommerce::applyMock('emptyPriceInfoHtml');
         if ($hasMock !== null) {
@@ -261,11 +269,14 @@ class PluginApi
     }
 
     /**
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection PhpUndefinedFieldInspection
      */
-    public static function checkoutCreateOrder()
+    public static function checkoutCreateOrder(): array
     {
+        $return = [];
         WooCommerce::setSessionValue('rco_customer_session_request', $_REQUEST['rco_customer']);
 
         $finalCartTotal = WC()->cart->total;
@@ -294,7 +305,6 @@ class PluginApi
 
     /**
      * What will be created on success.
-     * @return WC_Checkout
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -359,7 +369,7 @@ class PluginApi
     /**
      * @throws Exception
      */
-    private static function getCreatedOrder()
+    private static function getCreatedOrder(): array
     {
         $return = [
             'success' => false,
@@ -404,7 +414,7 @@ class PluginApi
          *
          * @var bool $isLiveChange
          */
-        $isLiveChange = Data::getResursOption('environment') === self::getParam('e') ? false : true;
+        $isLiveChange = Data::getResursOption('environment') !== self::getParam('e');
 
         if ($isValid) {
             try {
@@ -437,15 +447,14 @@ class PluginApi
                 Data::setResursOption('environment', self::getParam('e'));
             }
 
-            switch (self::getParam('e')) {
-                case 'live':
-                    $getUserFrom = 'login_production';
-                    $getPasswordFrom = 'password_production';
-                    break;
-                default:
-                    $getUserFrom = 'login';
-                    $getPasswordFrom = 'password';
+            if (self::getParam('e') === 'live') {
+                $getUserFrom = 'login_production';
+                $getPasswordFrom = 'password_production';
+            } else {
+                $getUserFrom = 'login';
+                $getPasswordFrom = 'password';
             }
+
             Data::setResursOption($getUserFrom, self::getParam('u'));
             Data::setResursOption($getPasswordFrom, self::getParam('p'));
 
@@ -483,6 +492,7 @@ class PluginApi
      * @param bool $validate
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection BadExceptionsProcessingInspection
      */
     public static function getPaymentMethods($reply = true, $validate = true)
     {
@@ -497,13 +507,14 @@ class PluginApi
             ResursBankAPI::getAnnuityFactors(false);
             $canReload = true;
         } catch (Exception $e) {
+            Data::setLogException($e);
             $canReload = false;
         }
         if (self::canReply($reply)) {
             self::reply([
                 'reload' => $canReload,
                 'error' => $e instanceof Exception ? $e->getMessage() : '',
-                'code' => $e instanceof Exception ? $e->getCode() : 0
+                'code' => $e instanceof Exception ? $e->getCode() : 0,
             ]);
         }
     }
@@ -513,9 +524,9 @@ class PluginApi
      * @return bool
      * @since 0.0.1.0
      */
-    private static function canReply($reply)
+    private static function canReply($reply): bool
     {
-        return is_null($reply) || (bool)$reply === true;
+        return $reply === null || (bool)$reply === true;
     }
 
     /**
@@ -524,7 +535,7 @@ class PluginApi
      * @since 0.0.1.0
      * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
-    public static function getNewCallbacks($validate = true)
+    public static function getNewCallbacks($validate = true): array
     {
         if ($validate) {
             self::getValidatedNonce();
@@ -564,7 +575,7 @@ class PluginApi
      * @since 0.0.1.0
      * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
-    private static function getCallbackUrl($callbackParams)
+    private static function getCallbackUrl($callbackParams): string
     {
         $return = WooCommerce::getWcApiUrl();
         if (is_array($callbackParams)) {
@@ -588,27 +599,26 @@ class PluginApi
      * @since 0.0.1.0
      * @link https://docs.tornevall.net/display/TORNEVALL/Callback+URLs+explained
      */
-    private static function getCallbackParams($ecomCallbackId)
+    private static function getCallbackParams($ecomCallbackId): array
     {
         $params = [
             'c' => ResursBankAPI::getResurs()->getCallbackTypeString($ecomCallbackId),
             't' => time(),
         ];
-        switch ($ecomCallbackId) {
-            case Callback::TEST:
-                $params += [
-                    'ignore1' => '{param1}',
-                    'ignore2' => '{param2}',
-                    'ignore3' => '{param3}',
-                    'ignore4' => '{param4}',
-                    'ignore5' => '{param5}',
-                ];
-                unset($params['t']);
-                break;
-            default:
-                // UNFREEZE, ANNULMENT, FINALIZATION, UPDATE, BOOKED
-                $params['p'] = '{paymentId}';
-                $params['d'] = '{digest}';
+
+        if ($ecomCallbackId === Callback::TEST) {
+            $params += [
+                'ignore1' => '{param1}',
+                'ignore2' => '{param2}',
+                'ignore3' => '{param3}',
+                'ignore4' => '{param4}',
+                'ignore5' => '{param5}',
+            ];
+            unset($params['t']);
+        } else {
+            // UNFREEZE, ANNULMENT, FINALIZATION, UPDATE, BOOKED
+            $params['p'] = '{paymentId}';
+            $params['d'] = '{digest}';
         }
 
         return $params;
@@ -619,13 +629,11 @@ class PluginApi
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getCallbackDigestData()
+    private static function getCallbackDigestData(): array
     {
-        $return = [
+        return [
             'digestSalt' => self::getTheSalt(),
         ];
-
-        return $return;
     }
 
     /**
@@ -633,7 +641,7 @@ class PluginApi
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getTheSalt()
+    private static function getTheSalt(): string
     {
         $currentSaltData = (int)Data::getResursOption('saltdate');
         $saltDateControl = time() - $currentSaltData;
@@ -708,6 +716,9 @@ class PluginApi
     }
 
     /**
+     * Backend request to check if callbacks is matching our expecations or if they need to get updated.
+     *
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getCallbackMatches()
@@ -787,6 +798,7 @@ class PluginApi
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getInternalResynch()
@@ -877,7 +889,6 @@ class PluginApi
                     Data::clearCredentialNotice();
                 } catch (Exception $e) {
                     if (is_admin() && $e->getCode() === 401) {
-                        // @todo RWC-234 github #32
                         Data::getCredentialNotice();
                     }
                 }
@@ -892,7 +903,7 @@ class PluginApi
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getTriggerTest()
+    public static function getTriggerTest(): bool
     {
         Data::setResursOption('resurs_callback_test_response', null);
         $return = WordPress::applyFiltersDeprecated('resurs_trigger_test_callback', null);
@@ -912,7 +923,7 @@ class PluginApi
      * @return array
      * @since 0.0.1.0
      */
-    public static function getTriggerResponse()
+    public static function getTriggerResponse(): array
     {
         $runTime = 0;
         $success = false;
@@ -945,7 +956,6 @@ class PluginApi
     }
 
     /**
-     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -983,6 +993,7 @@ class PluginApi
                         'trbwc'
                     ));
                 } catch (Exception $e) {
+                    Data::setLogException($e);
                     Data::setTimeoutStatus($apiRequest);
                     // If we get an error here, it might be cause by credential errors.
                     // In that case lets fall back to the default lookup.
@@ -1073,16 +1084,15 @@ class PluginApi
             if (!empty($wooSessionData)) {
                 $addressResponse[$addressTransform] = $wooSessionData;
             }
-            if (!preg_match('/:/', $addressTransform)) {
-                $return[$addressField] = isset($addressResponse[$addressTransform]) ?
-                    $addressResponse[$addressTransform] : '';
-            } else {
+            if (preg_match('/:/', $addressTransform)) {
                 $splitInfo = explode(':', $addressTransform);
                 foreach ($splitInfo as $splitKey) {
                     $compileInfo[] = '%s';
-                    $compileKeys[] = isset($addressResponse[$splitKey]) ? $addressResponse[$splitKey] : '';
+                    $compileKeys[] = $addressResponse[$splitKey] ?? '';
                 }
                 $return[$addressField] = vsprintf(implode(' ', $compileInfo), $compileKeys);
+            } else {
+                $return[$addressField] = $addressResponse[$addressTransform] ?? '';
             }
         }
 
@@ -1093,7 +1103,7 @@ class PluginApi
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function purchaseReject()
+    public static function purchaseReject(): array
     {
         $return = [
             'error' => false,
@@ -1111,7 +1121,7 @@ class PluginApi
         ];
 
         // Fallback to the standard reject reason if nothing is found.
-        $transRejectMessage = isset($transReject[$rejectType]) ? $transReject[$rejectType] : $rejectType;
+        $transRejectMessage = $transReject[$rejectType] ?? $rejectType;
 
         if ($wooOrderId) {
             $currentOrder = new WC_Order($wooOrderId);

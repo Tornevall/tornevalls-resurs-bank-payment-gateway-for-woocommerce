@@ -74,7 +74,7 @@ class ResursCheckout
      * @return bool
      * @since 0.0.1.0
      */
-    public function isLegacyIframe($iframeContainer)
+    public function isLegacyIframe($iframeContainer): bool
     {
         return (
         (isset($iframeContainer, $iframeContainer->script) &&
@@ -88,8 +88,11 @@ class ResursCheckout
      * @return array
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection LongLine
+     * @noinspection ParameterDefaultValueIsNotNullInspection
+     * @noinspection PhpCSValidationInspection
      */
-    public function getCustomerFieldsByApiVersion($getType = 'billingAddress')
+    public function getCustomerFieldsByApiVersion($getType = 'billingAddress'): array
     {
         $rcoCustomerData = (array)WooCommerce::getSessionValue('rco_customer_session_request');
 
@@ -97,8 +100,7 @@ class ResursCheckout
         if (WooCommerce::getSessionValue('rco_legacy')) {
             WooCommerce::setSessionValue('paymentMethod', $rcoCustomerData['paymentMethod']);
             $getType = $this->getCustomerFieldsTypeByLegacy($getType);
-            $customerAddressBlock = isset($rcoCustomerData['customerData'][$getType]) ?
-                $rcoCustomerData['customerData'][$getType] : [];
+            $customerAddressBlock = $rcoCustomerData['customerData'][$getType] ?? [];
             $return = [
                 'first_name' => !empty($customerAddressBlock['firstname']) ? $customerAddressBlock['firstname'] : '',
                 'last_name' => !empty($customerAddressBlock['surname']) ? $customerAddressBlock['surname'] : '',
@@ -111,9 +113,9 @@ class ResursCheckout
                 'phone' => !empty($customerAddressBlock['telephone']) ? $customerAddressBlock['telephone'] : '',
             ];
         } else {
-            $customerAddressBlock = isset($rcoCustomerData[$getType]) ? $rcoCustomerData[$getType] : [];
+            $customerAddressBlock = $rcoCustomerData[$getType] ?? [];
             // This should absolutely not be empty!
-            $rcoPaymentData = isset($_REQUEST['rco_payment']) ? $_REQUEST['rco_payment'] : [];
+            $rcoPaymentData = $_REQUEST['rco_payment'] ?? [];
             WooCommerce::setSessionValue('paymentMethod', $rcoPaymentData['id']);
 
             // Observe that RCOv2 does not have any country code available, so it has to be
@@ -138,16 +140,8 @@ class ResursCheckout
      * @return string
      * @since 0.0.1.0
      */
-    private function getCustomerFieldsTypeByLegacy($getType)
+    private function getCustomerFieldsTypeByLegacy($getType): string
     {
-        switch ($getType) {
-            case 'deliveryAddress':
-                $getType = 'delivery';
-                break;
-            default:
-                $getType = 'address';
-        }
-
-        return $getType;
+        return $getType === 'deliveryAddress' ? 'delivery': 'address';
     }
 }

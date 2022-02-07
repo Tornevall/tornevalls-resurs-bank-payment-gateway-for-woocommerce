@@ -1,5 +1,8 @@
 <?php
 
+/** @noinspection ParameterDefaultValueIsNotNullInspection */
+/** @noinspection CompactCanBeUsedInspection */
+
 namespace ResursBank\Module;
 
 use Exception;
@@ -9,6 +12,7 @@ use ResursBank\Service\WordPress;
 use stdClass;
 use WC_Checkout;
 use WC_Settings_API;
+use function count;
 use function in_array;
 use function is_array;
 
@@ -39,7 +43,7 @@ class FormFields extends WC_Settings_API
      * @noinspection ParameterDefaultValueIsNotNullInspection
      * @since 0.0.1.0
      */
-    public static function getFormFields($section = 'basic', $id = null)
+    public static function getFormFields($section = 'basic', $id = null): array
     {
         if (empty($section)) {
             $section = 'basic';
@@ -73,7 +77,7 @@ class FormFields extends WC_Settings_API
                             'trbwc'
                         ),
                         'simplified' => __(
-                            'Integrated Checkout (simplified shopflow)',
+                            'Integrated Checkout (simplified shopFlow)',
                             'trbwc'
                         ),
                         'hosted' => __(
@@ -177,7 +181,7 @@ class FormFields extends WC_Settings_API
                     ],
                     'desc' => __(
                         'Defines which country this plugin operates from. Credentials given by Resurs Bank are ' .
-                        'limited to a specifc country. Default: Store address country.',
+                        'limited to a specific country. Default: Store address country.',
                         'trbwc'
                     ),
                 ],
@@ -581,7 +585,7 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                     'type' => 'checkbox',
-                    'default' => 'no',
+                    'default' => 'yes',
                 ],
                 'store_api_history' => [
                     'id' => 'store_api_history',
@@ -731,7 +735,7 @@ class FormFields extends WC_Settings_API
             $return = isset($formFields[$section]) ? self::getTransformedIdArray($formFields[$section], $id) : [];
         }
 
-        return $return;
+        return (array)$return;
     }
 
     /**
@@ -739,10 +743,10 @@ class FormFields extends WC_Settings_API
      *
      * @param $array
      * @param $add
-     * @return string
+     * @return array
      * @since 0.0.1.0
      */
-    public static function getTransformedIdArray($array, $add)
+    public static function getTransformedIdArray($array, $add): array
     {
         $return = $array;
 
@@ -801,10 +805,9 @@ class FormFields extends WC_Settings_API
      * Bleeding edge settings block. Activates currently unstable features.
      *
      * @param $currentArray
-     * @param $section
      * @since 0.0.1.0
      */
-    public static function getBleedingEdgeSettings($currentArray, $section)
+    public static function getBleedingEdgeSettings($currentArray)
     {
         if (Data::isBleedingEdge()) {
             $bleedingEdgeEcommerceJWT = [
@@ -865,7 +868,7 @@ class FormFields extends WC_Settings_API
      * @return array
      * @since 0.0.1.0
      */
-    public static function getDeveloperTweaks($currentArray, $section)
+    public static function getDeveloperTweaks($currentArray, $section): array
     {
         $return = $currentArray;
 
@@ -1129,7 +1132,8 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                     'desc_tip' => __(
-                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'Ensure that the priceinfo box still shows data when no data has ' .
+                        'been retrieved from priceinfo.',
                         'trbwc'
                     ),
                     'default' => 'no',
@@ -1146,7 +1150,8 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                     'desc_tip' => __(
-                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'Ensure that the priceinfo box still shows data when no data has been ' .
+                        'retrieved from priceinfo.',
                         'trbwc'
                     ),
                     'default' => 'no',
@@ -1200,7 +1205,8 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                     'desc_tip' => __(
-                        'Ensure that the priceinfo box still shows data when no data has been retrieved from priceinfo.',
+                        'Ensure that the priceinfo box still shows data when no data has been ' .
+                        'retrieved from priceinfo.',
                         'trbwc'
                     ),
                     'default' => 'no',
@@ -1235,7 +1241,7 @@ class FormFields extends WC_Settings_API
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getShowDeveloper()
+    public static function getShowDeveloper(): bool
     {
         if (!isset(self::$showDeveloper)) {
             self::$showDeveloper = Data::getResursOption('show_developer', null, false);
@@ -1257,13 +1263,13 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param WC_Checkout $checkout
-     * @param bool $returnHtml
-     * @return false|string|void
+     * @param WC_Checkout $wcCheckout
+     * @param bool $returnAsHtml
+     * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getGetAddressForm($checkout, $returnHtml = false)
+    public static function getGetAddressForm($wcCheckout, $returnAsHtml = false)
     {
         $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
         $customerTypeByConditions = Data::getCustomerType();
@@ -1272,17 +1278,29 @@ class FormFields extends WC_Settings_API
             [
                 'customer_private' => __('Private person', 'trbwc'),
                 'customer_company' => __('Company', 'trbwc'),
-                'customer_type' => (null === $customerTypeByConditions) ? 'NATURAL' : $customerTypeByConditions,
+                'customer_type' => $customerTypeByConditions ?? 'NATURAL',
                 'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
                 'supported_country' => Data::isGetAddressSupported(),
                 'get_address_form' => Data::canUseGetAddressForm(),
                 'get_address_form_always' => $getAddressFormAlways,
             ]
         );
-        if ($returnHtml) {
+
+        // Note: As this feature is just generating the form via woocommerce_before_checkout_billing_form,
+        // it is not necessary to use this one.
+        /*woocommerce_form_field('rbGetAddressFields', [
+            'type' => 'text',
+            'class' => ['ssn form-row-wide resurs_ssn_field'],
+            'label' => 'govIdLabel',
+            'placeholder' => 'billing',
+        ], $wcCheckout->get_value('rbGetAddressFields'));*/
+
+        if ((bool)$returnAsHtml) {
             return $return;
+        } else {
+            echo $return;
         }
-        echo $return;
+        return $wcCheckout instanceof WC_Checkout ? $wcCheckout : '';
     }
 
     /**
@@ -1294,7 +1312,7 @@ class FormFields extends WC_Settings_API
      * @return int
      * @since 0.0.1.0
      */
-    private static function getMerchantMethodBySimplified($merchantApiMethod, $paymentMethods)
+    private static function getMerchantMethodBySimplified($merchantApiMethod, $paymentMethods): int
     {
         $return = -1;
 
@@ -1325,7 +1343,7 @@ class FormFields extends WC_Settings_API
     {
         $exception = null;
         $annuityException = null;
-        $paymentMethods = [];
+        $paymentMethods = new stdClass();
         $theFactor = Data::getResursOption('currentAnnuityFactor');
         $theDuration = (int)Data::getResursOption('currentAnnuityDuration');
         $annuityFactors = [];
@@ -1346,7 +1364,6 @@ class FormFields extends WC_Settings_API
 
         if (is_array($paymentMethods)) {
             $annuityEnabled = Data::getResursOption('currentAnnuityFactor');
-            $bleedingMethods = [];
 
             if (Data::isBleedingEdgeApiReady()) {
                 $merch = ResursBankAPI::getMerchantConnection();
@@ -1379,11 +1396,13 @@ class FormFields extends WC_Settings_API
 
     /**
      * @param $annuityFactors
-     * @return string
+     * @param $theFactor
+     * @param $theDuration
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getAnnuityDropDown($annuityFactors, $theFactor, $theDuration)
+    private static function getAnnuityDropDown($annuityFactors, $theFactor, $theDuration): array
     {
         $return = [];
 
@@ -1405,7 +1424,7 @@ class FormFields extends WC_Settings_API
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getRenderedFactors($id, $factorArray, $theFactor, $theDuration)
+    private static function getRenderedFactors($id, $factorArray, $theFactor, $theDuration): string
     {
         $options = null;
         foreach ($factorArray as $item) {
@@ -1422,7 +1441,7 @@ class FormFields extends WC_Settings_API
         }
 
         $isFactorEnabled = Data::getResursOption('currentAnnuityFactor');
-        $enabled = ($isFactorEnabled === $id) ? true : false;
+        $enabled = $isFactorEnabled === $id;
         return Data::getGenericClass()->getTemplate('adminpage_annuity_selector.phtml', [
             'id' => $id,
             'options' => $options,
@@ -1488,7 +1507,7 @@ class FormFields extends WC_Settings_API
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canDisplayField($key)
+    public static function canDisplayField($key): bool
     {
         return in_array($key, [
             'government_id',
@@ -1502,7 +1521,7 @@ class FormFields extends WC_Settings_API
      * @return array
      * @since 0.0.1.0
      */
-    public static function getSpecificTypeFields($key = null)
+    public static function getSpecificTypeFields($key = null): array
     {
         $return = [
             'INVOICE' => [

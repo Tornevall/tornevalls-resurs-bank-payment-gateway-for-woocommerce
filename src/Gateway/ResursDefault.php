@@ -1,6 +1,12 @@
 <?php
 
+// We do use camel cases in this file.
+
+/** @noinspection PhpCSValidationInspection */
+/** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
+
+declare(strict_types=1);
 
 namespace ResursBank\Gateway;
 
@@ -28,6 +34,8 @@ use WC_Tax;
 use function count;
 use function function_exists;
 use function in_array;
+use function is_array;
+use function is_object;
 
 /**
  * Class ResursDefault
@@ -43,31 +51,37 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      */
     const STATUS_FINALIZED = 'completed';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_BOOKED = 'processing';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_FROZEN = 'on-hold';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_SIGNING = 'on-hold';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_DENIED = 'failed';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const STATUS_FAILED = 'failed';
+
     /**
      * @var string
      * @since 0.0.1.0
@@ -79,58 +93,69 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      */
     const TYPE_HOSTED = 'hosted';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const TYPE_SIMPLIFIED = 'simplified';
+
     /**
      * @var string
      * @since 0.0.1.0
      */
     const TYPE_RCO = 'rco';
+
     /**
      * @var WC_Order $order
      * @since 0.0.1.0
      */
     protected $order;
+
     /**
      * Main API. Use as primary communicator. Acts like a bridge between the real API.
      * @var ResursBankAPI $API
      * @since 0.0.1.0
      */
     protected $API;
+
     /**
      * @var array $applicantPostData Applicant request.
      * @since 0.0.1.0
      */
     private $applicantPostData = [];
+
     /**
      * @var stdClass $paymentResponse
      * @since 0.0.1.0
      */
     private $paymentResponse;
+
     /**
      * @var array
      * @since 0.0.1.0
      */
     private $wcOrderData;
+
     /**
      * Data that will be sent between Resurs Bank and ourselves.
      * @var array $apiData
      * @since 0.0.1.0
      */
     private $apiData = [];
+
     /**
      * @var string $apiDataId
      * @since 0.0.1.0
      */
     private $apiDataId = '';
+
     /**
      * @var WC_Cart $cart
      * @since 0.0.1.0
      */
-    private $cart;
+    protected $cart;
+
     /**
      * @var array $paymentMethodInformation
      * @since 0.0.1.0
@@ -166,7 +191,7 @@ class ResursDefault extends WC_Payment_Gateway
     public function __construct($resursPaymentMethodObject = [])
     {
         global $woocommerce;
-        $this->cart = isset($woocommerce->cart) ? $woocommerce->cart : null;
+        $this->cart = $woocommerce->cart ?? null;
         $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
         $this->method_title = __('Resurs Bank', 'trbwc');
@@ -188,6 +213,7 @@ class ResursDefault extends WC_Payment_Gateway
      * Initializer. It is not until we have payment method information we can start using this class for real.
      * @param $paymentMethodInformation
      * @since 0.0.1.0
+     * @noinspection PhpUndefinedFieldInspection
      */
     private function setPaymentMethodInformation($paymentMethodInformation)
     {
@@ -235,7 +261,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return $this
      * @since 0.0.1.0
      */
-    private function setPaymentApiData()
+    private function setPaymentApiData(): self
     {
         $this->apiData['checkoutType'] = Data::getCheckoutType();
         if (!empty(Data::getPaymentMethodBySession())) {
@@ -277,7 +303,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getMethodIconDeprecated($typeCheck)
+    private function getMethodIconDeprecated($typeCheck): string
     {
         return !isset($this->paymentMethodInformation->{$typeCheck}) ? WordPress::applyFiltersDeprecated(
             sprintf(
@@ -291,6 +317,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @return mixed
      * @since 0.0.1.0
+     * @noinspection PhpUndefinedFieldInspection
      */
     private function getIconByFilter()
     {
@@ -309,7 +336,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array
      * @since 0.0.1.0
      */
-    private function getApplicantPostData()
+    private function getApplicantPostData(): array
     {
         $realMethodId = $this->getRealMethodId();
         $return = [];
@@ -347,7 +374,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return bool
      * @since 0.0.1.0
      */
-    private function isPaymentReady()
+    private function isPaymentReady(): bool
     {
         return (isset($_REQUEST['payment_method'], $_REQUEST['wc-ajax']) && $_REQUEST['wc-ajax'] === 'checkout');
     }
@@ -399,7 +426,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getMethodInformation($key)
     {
-        return isset($this->paymentMethodInformation->{$key}) ? $this->paymentMethodInformation->{$key} : null;
+        return $this->paymentMethodInformation->{$key} ?? null;
     }
 
     /**
@@ -415,7 +442,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return WC_Order
      * @since 0.0.1.0
      */
-    public function getOrder()
+    public function getOrder(): WC_Order
     {
         return $this->order;
     }
@@ -438,8 +465,9 @@ class ResursDefault extends WC_Payment_Gateway
      *
      * @return string
      * @since 0.0.1.0
+     * @noinspection SpellCheckingInspection
      */
-    public function get_title()
+    public function get_title(): string
     {
         global $theorder;
 
@@ -452,6 +480,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $return = $internalPaymentTitle;
                 }
             } catch (Exception $e) {
+                Data::setLogException($e);
             }
         }
 
@@ -485,7 +514,19 @@ class ResursDefault extends WC_Payment_Gateway
             $internalTitle = Data::getOrderMeta('paymentMethod', $order);
             if (!empty($internalTitle)) {
                 try {
-                    $paymentMethodDetails = json_decode(Data::getResursOption('paymentMethods'), JSON_THROW_ON_ERROR);
+                    // This that we want to use in higher PHP-versions but can not utilize until WooCommerce
+                    // leaves the world of 7.0.
+                    if (PHP_VERSION_ID >= 70300) {
+                        /** @noinspection PhpStrictTypeCheckingInspection */
+                        $paymentMethodDetails = json_decode(
+                            Data::getResursOption('paymentMethods'),
+                            JSON_THROW_ON_ERROR
+                        );
+                    } else {
+                        // We want this as is.
+                        /** @noinspection JsonEncodingApiUsageInspection */
+                        $paymentMethodDetails = json_decode(Data::getResursOption('paymentMethods'));
+                    }
                     if (is_array($paymentMethodDetails)) {
                         foreach ($paymentMethodDetails as $method) {
                             if (isset($method['id']) && $method['id'] === $internalTitle) {
@@ -494,6 +535,7 @@ class ResursDefault extends WC_Payment_Gateway
                         }
                     }
                 } catch (Exception $e) {
+                    Data::setLogException($e);
                 }
             }
         }
@@ -518,10 +560,8 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Standard Resurs Checkout. Not interceptor ready.
-     * @return mixed
      * @throws Exception
      * @since 0.0.1.0
-     * @noinspection PhpUnusedPrivateMethodInspection
      */
     private function processRco()
     {
@@ -568,6 +608,8 @@ class ResursDefault extends WC_Payment_Gateway
                 }
             } // End of exception.
 
+            // Special method that is use when RCO is active.
+            /** @noinspection PhpUndefinedMethodInspection */
             $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
 
             // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.
@@ -588,7 +630,7 @@ class ResursDefault extends WC_Payment_Gateway
         $urlList = isset($this->rcoFrameData->script) ?
             (new Domain())->getUrlsFromHtml($this->rcoFrameData->script) : [];
         if (isset($this->rcoFrameData->script)) {
-            if (count($urlList) && !empty($this->rcoFrameData->script)) {
+            if (!empty($this->rcoFrameData->script) && count($urlList)) {
                 $this->rcoFrameData->originHostName = $this
                     ->API
                     ->getConnection()
@@ -625,7 +667,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setOrderData()
+    private function setOrderData(): self
     {
         Data::setDeveloperLog(__FUNCTION__, 'Start.');
 
@@ -651,7 +693,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setCustomer()
+    private function setCustomer(): self
     {
         $governmentId = $this->getCustomerData('government_id');
         Data::setDeveloperLog(__FUNCTION__, sprintf('setCountryByCountryCode:%s', $this->getCustomerData('country')));
@@ -707,9 +749,9 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getCustomerData($key, $returnType = null)
+    private function getCustomerData($key, $returnType = null): string
     {
-        $return = isset($this->applicantPostData[$key]) ? $this->applicantPostData[$key] : '';
+        $return = $this->applicantPostData[$key] ?? '';
 
         if ($key === 'mobile' && isset($return['phone']) && !$return) {
             $return = $return['phone'];
@@ -718,7 +760,7 @@ class ResursDefault extends WC_Payment_Gateway
             $return = $return['phone'];
         }
 
-        // If it's not in the postdata, it could possibly be found in the order maintained from the order.
+        // If it's not in the post data, it could possibly be found in the order maintained from the order.
         $billingAddress = $this->order->get_address();
         $deliveryAddress = $this->order->get_address('shipping');
 
@@ -744,7 +786,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setSigning()
+    private function setSigning(): self
     {
         $this->API->getConnection()->setSigning(
             $this->getSigningUrl(['success' => true, 'urlType' => 'success']),
@@ -768,7 +810,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getSigningUrl($params = null)
+    private function getSigningUrl($params = null): string
     {
         $wcApi = WooCommerce::getWcApiUrl();
         $signingBaseUrl = add_query_arg('apiDataId', $this->apiDataId, $wcApi);
@@ -799,7 +841,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getApiData($addArray = null, $encode = null)
+    private function getApiData($addArray = null, $encode = null): string
     {
         $return = json_encode(array_merge((array)$addArray, $this->apiData));
 
@@ -834,8 +876,9 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection SpellCheckingInspection
      */
-    private function getPaymentId()
+    private function getPaymentId(): string
     {
         switch (Data::getResursOption('order_id_type')) {
             case 'postid':
@@ -845,6 +888,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $return = $this->getPaymentIdBySession();
                 break;
             default:
+                $return = '';
                 break;
         }
 
@@ -858,23 +902,26 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array|mixed|string|null
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection SpellCheckingInspection
      */
     public function getPaymentIdBySession()
     {
         // It is necessary to fetch payment id from session if exists, so we can keep it both in frontend
-        // and the backend API. If not set, we'll let ecomPHP fetch a new.
+        // and the backend API. If not set, we'll let "ecom" fetch a new.
         $sessionPaymentId = WooCommerce::getSessionValue('rco_order_id');
         return !empty($sessionPaymentId) ? $sessionPaymentId : ResursBankAPI::getResurs()->getPreferredPaymentId();
     }
 
     /**
+     * @return ResursDefault
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setOrderLines()
+    private function setOrderLines(): ResursDefault
     {
         if (WooCommerce::getValidCart()) {
             // This is the first point we store the cart total for the current session.
+            /** @noinspection PhpUndefinedFieldInspection */
             WooCommerce::setSessionValue('customerCartTotal', WC()->cart->total);
             $orderHandler = new OrderHandler();
             $orderHandler->setCart($this->cart);
@@ -897,10 +944,12 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @return ResursDefault
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection SpellCheckingInspection
      */
-    private function setStoreId()
+    private function setStoreId(): ResursDefault
     {
         /** @noinspection PhpDeprecationInspection */
         $deprecatedStoreId = WordPress::applyFiltersDeprecated('set_storeid', null);
@@ -918,7 +967,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setCustomerId()
+    private function setCustomerId(): self
     {
         $customerId = $this->getCustomerId();
         if ($customerId) {
@@ -931,7 +980,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return int
      * @since 0.0.1.0
      */
-    private function getCustomerId()
+    private function getCustomerId(): int
     {
         $return = 0;
         if (function_exists('wp_get_current_user')) {
@@ -969,10 +1018,11 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Get payment method from ecom data.
+     *
      * @return string
      * @since 0.0.1.0
      */
-    private function getPaymentMethod()
+    private function getPaymentMethod(): string
     {
         /** @noinspection PhpUndefinedFieldInspection */
         return (string)isset($this->paymentMethodInformation->id) ? $this->paymentMethodInformation->id : '';
@@ -1035,6 +1085,8 @@ class ResursDefault extends WC_Payment_Gateway
      * @param bool $returnAgeValue
      * @return bool|int
      * @since 0.0.1.0
+     * @noinspection ParameterDefaultValueIsNotNullInspection
+     * @noinspection SpellCheckingInspection
      */
     private function getRcoPaymentIdTooOld($returnAgeValue = false)
     {
@@ -1057,7 +1109,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function setOrderRow($rowType, $productData, $item)
+    public function setOrderRow($rowType, $productData, $item): ResursDefault
     {
         $this->API->getConnection()->addOrderLine(
             $this->getFromProduct('artNo', $productData),
@@ -1151,7 +1203,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
      */
-    public function is_available()
+    public function is_available(): bool
     {
         global $woocommerce;
 
@@ -1159,7 +1211,7 @@ class ResursDefault extends WC_Payment_Gateway
         $return = parent::is_available();
 
         // @link https://wordpress.org/support/topic/php-notice-trying-to-get-property-total-of-non-object-2/
-        if (!method_exists($this, 'get_order_total') || !isset($woocommerce->cart)) {
+        if (!isset($woocommerce->cart) || !method_exists($this, 'get_order_total')) {
             return Data::isEnabled();
         }
 
@@ -1180,7 +1232,7 @@ class ResursDefault extends WC_Payment_Gateway
 
             // We decide at this level if the payment method should be available,
             // based on current chosen country. Beware of the admin parts.
-            if (!is_admin() && !empty($customerType) && $return) {
+            if ($return && !empty($customerType) && !is_admin()) {
                 $return = in_array(
                     $customerType,
                     (array)$this->paymentMethodInformation->customerType,
@@ -1196,13 +1248,14 @@ class ResursDefault extends WC_Payment_Gateway
      * Customize minimum allowed amount for a payment method. Can never be lower than the lowest minimum from method.
      *
      * @param int $minLimit
-     * @return int
+     * @return float
      * @link https://github.com/Tornevall/wpwc-resurs/issues/42
      * @since 0.0.1.0
+     * @noinspection PhpUndefinedFieldInspection
      */
-    private function getRealMin($minLimit)
+    private function getRealMin($minLimit): float
     {
-        $requestedMinLimit = (int)WordPress::applyFilters(
+        $requestedMinLimit = WordPress::applyFilters(
             'methodMinLimit',
             $minLimit,
             $this->paymentMethodInformation
@@ -1212,20 +1265,21 @@ class ResursDefault extends WC_Payment_Gateway
             $requestedMinLimit = $this->paymentMethodInformation->minLimit;
         }
 
-        return $requestedMinLimit;
+        return (float)$requestedMinLimit;
     }
 
     /**
      * Customize maximum allowed amount for a payment method. Can never be higher than the highest maximum from method.
      *
      * @param int $maxLimit
-     * @return int
+     * @return float
      * @link https://github.com/Tornevall/wpwc-resurs/issues/42
      * @since 0.0.1.0
+     * @noinspection PhpUndefinedFieldInspection
      */
-    private function getRealMax($maxLimit)
+    private function getRealMax($maxLimit): float
     {
-        $requestedMaxLimit = (int)WordPress::applyFilters(
+        $requestedMaxLimit = WordPress::applyFilters(
             'methodMaxLimit',
             $maxLimit,
             $this->paymentMethodInformation
@@ -1235,7 +1289,7 @@ class ResursDefault extends WC_Payment_Gateway
             $requestedMaxLimit = $this->paymentMethodInformation->maxLimit;
         }
 
-        return $requestedMaxLimit;
+        return (float)$requestedMaxLimit;
     }
 
     /**
@@ -1245,7 +1299,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    public function getOrderButtonHtml($classButtonHtml)
+    public function getOrderButtonHtml($classButtonHtml): string
     {
         $return = '';
 
@@ -1284,13 +1338,14 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection PhpUndefinedFieldInspection
      */
     public function payment_fields()
     {
         $fieldHtml = null;
         // If not here, no fields are required.
         /** @noinspection PhpUndefinedFieldInspection */
-        $requiredFields = (array)FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
+        $requiredFields = FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
 
         if (Data::getCheckoutType() === self::TYPE_RCO) {
             return;
@@ -1303,6 +1358,8 @@ class ResursDefault extends WC_Payment_Gateway
                 $displayField = $this->getDisplayableField($fieldName);
                 $streamLineFields = Data::getResursOption('streamline_payment_fields');
                 switch ($fieldName) {
+                    case 'reserved-for-future-use':
+                        break;
                     case 'government_id':
                         $fieldValue = WooCommerce::getSessionValue('identification');
                         if (!$getAddressVisible) {
@@ -1318,11 +1375,10 @@ class ResursDefault extends WC_Payment_Gateway
                         break;
                     default:
                 }
+                /** @noinspection SpellCheckingInspection */
                 $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
                     'displayMode' => $displayField ? '' : 'none',
-                    'methodId' => isset(
-                        $this->paymentMethodInformation->id
-                    ) ? $this->paymentMethodInformation->id : '?',
+                    'methodId' => $this->paymentMethodInformation->id ?? '?',
                     'fieldSize' => WordPress::applyFilters('getPaymentFieldSize', 24, $fieldName),
                     'streamLine' => $streamLineFields,
                     'fieldLabel' => FormFields::getFieldString($fieldName),
@@ -1336,9 +1392,10 @@ class ResursDefault extends WC_Payment_Gateway
                 ]);
             }
 
+            /** @noinspection SpellCheckingInspection */
             $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
                 'method' => $this->paymentMethodInformation,
-                'total' => isset($this->cart->total) ? $this->cart->total : 0,
+                'total' => $this->cart->total ?? 0,
             ]);
 
             echo $fieldHtml;
@@ -1350,7 +1407,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return bool
      * @since 0.0.1.0
      */
-    private function getDisplayableField($fieldName)
+    private function getDisplayableField($fieldName): bool
     {
         return !(Data::getResursOption('streamline_payment_fields') ||
             !FormFields::canDisplayField($fieldName));
@@ -1417,19 +1474,19 @@ class ResursDefault extends WC_Payment_Gateway
         if (empty($metaCheckoutType)) {
             $this->setOrderCheckoutMeta($order_id);
             $paymentMethodBySession = Data::getPaymentMethodBySession();
-            if ($metaCheckoutType === ResursDefault::TYPE_RCO && !empty($paymentMethodBySession)) {
+            if ($metaCheckoutType === self::TYPE_RCO && !empty($paymentMethodBySession)) {
                 $order->set_payment_method(Data::getPaymentMethodBySession());
             }
         }
 
         $this->preProcessOrder($order);
-        if (Data::getCheckoutType() !== ResursDefault::TYPE_RCO) {
+        if (Data::getCheckoutType() !== self::TYPE_RCO) {
             $return = $this->processResursOrder($order);
-        } elseif (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+        } elseif (Data::getCheckoutType() === self::TYPE_RCO) {
             // Rules applicable on RCO only.
             $return['result'] = 'success';
             $return['total'] = (float)$this->cart->total;
-            $return['redirect'] = WC_Payment_Gateway::get_return_url($order);
+            $return['redirect'] = $this->get_return_url($order);
         }
 
         return $return;
@@ -1459,12 +1516,15 @@ class ResursDefault extends WC_Payment_Gateway
      * @param $order
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection SpellCheckingInspection
      */
     private function setProperPaymentReference($order)
     {
         $referenceType = Data::getResursOption('order_id_type');
 
         switch ($referenceType) {
+            case 'reserved-for-future-use':
+                break;
             case 'postid':
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
@@ -1548,7 +1608,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array
      * @throws Exception
      */
-    private function processResursOrder($order)
+    private function processResursOrder($order): array
     {
         // Available options: simplified, hosted, rco. Methods should exists for each of them.
         $checkoutRequestType = sprintf('process%s', ucfirst(Data::getCheckoutType()));
@@ -1616,6 +1676,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection IssetConstructsCanBeMergedInspection
      */
     public function getApiRequest()
     {
@@ -1658,32 +1719,39 @@ class ResursDefault extends WC_Payment_Gateway
 
             $finalSigningResponse = $this->setFinalSigning();
             if ($this->isSuccess($finalSigningResponse)) {
+                // Inspections reacted on this if conditions and suggested merging the isset. That, we won't do.
                 if (isset($finalSigningResponse) &&
                     is_array($finalSigningResponse) &&
                     isset($finalSigningResponse['redirect'])
                 ) {
                     $finalRedirectUrl = $finalSigningResponse['redirect'];
                 }
-                if (Data::getCheckoutType() === self::TYPE_RCO) {
-                    Data::canLog(
-                        Data::CAN_LOG_ORDER_EVENTS,
-                        __(
-                            'Session value rco_order_id has been reset after successful return to landing page.',
-                            'trbwc'
-                        )
-                    );
-                }
                 WooCommerce::setSessionValue('rco_order_id', null);
                 WooCommerce::setSessionValue('customerCartTotal', null);
-                if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
-                    // When someone returns with a successful call.
-                    if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData)) {
+
+                switch ($this->getCheckoutType()) {
+                    case self::TYPE_SIMPLIFIED:
+                        // When someone returns with a successful call.
+                        if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData)) {
+                            $finalRedirectUrl = $this->get_return_url($this->order);
+                        }
+                        break;
+                    case self::TYPE_HOSTED:
+                    case self::TYPE_RCO:
+                        // Logging for specific flow.
+                        if ($this->getCheckoutType() === self::TYPE_RCO) {
+                            Data::canLog(
+                                Data::CAN_LOG_ORDER_EVENTS,
+                                __(
+                                    'Session value rco_order_id has been reset after successful ' .
+                                    'return to landing page.',
+                                    'trbwc'
+                                )
+                            );
+                        }
                         $finalRedirectUrl = $this->get_return_url($this->order);
-                    }
-                } elseif ($this->getCheckoutType() === self::TYPE_HOSTED ||
-                    $this->getCheckoutType() === self::TYPE_RCO
-                ) {
-                    $finalRedirectUrl = $this->get_return_url($this->order);
+                        break;
+                    default:
                 }
             } else {
                 // Landing here is complex, but this part of the method is based on failures.
@@ -1725,25 +1793,25 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * If API request is based on RCO, we can not entirely trust the landing page API content.
-     * In that case we have to remerge some data from the session instead as the "signing success url"
+     * In that case we have to re merge some data from the session instead as the "signing success url"
      * is empty when the iframe is rendered.
      *
      * @return $this
      * @throws JsonException
      * @since 0.0.1.0
      */
-    private function getApiByRco()
+    private function getApiByRco(): self
     {
         $baseHandler = new Strings();
         $apiRequestContent = json_decode($baseHandler->base64urlDecode($_REQUEST['apiData']), true);
 
-        if ($apiRequestContent['checkoutType'] === ResursDefault::TYPE_RCO) {
+        if ($apiRequestContent['checkoutType'] === self::TYPE_RCO) {
             $requestSession = [
                 'preferred_id' => 'rco_order_id',
                 'wc_order_id' => 'order_awaiting_payment',
             ];
             $apiRequestContent = $this->getSessionApiData($apiRequestContent, $requestSession);
-            // Reencode the data again.
+            // Re-encode the data again.
             $_REQUEST['apiData'] = $baseHandler->base64urlEncode(json_encode($apiRequestContent, JSON_THROW_ON_ERROR));
         }
         return $this;
@@ -1759,7 +1827,9 @@ class ResursDefault extends WC_Payment_Gateway
     {
         foreach ($requestArray as $itemKey => $fromItemKey) {
             $sessionValue = WooCommerce::getSessionValue($fromItemKey);
-            if ((!empty($sessionValue) && !isset($apiRequestContent[$itemKey])) || empty($apiRequestContent[$itemKey])) {
+            if ((!empty($sessionValue) && !isset($apiRequestContent[$itemKey])) ||
+                empty($apiRequestContent[$itemKey])
+            ) {
                 $apiRequestContent[$itemKey] = $sessionValue;
             }
         }
@@ -1771,7 +1841,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return $this
      * @since 0.0.1.0
      */
-    private function setApiData($apiArray)
+    private function setApiData($apiArray): self
     {
         $this->apiData = array_merge($this->apiData, $apiArray);
         return $this;
@@ -1781,11 +1851,11 @@ class ResursDefault extends WC_Payment_Gateway
      * @return WC_Order
      * @since 0.0.1.0
      */
-    private function getCurrentOrder()
+    private function getCurrentOrder(): WC_Order
     {
         $return = new WC_Order($this->getApiValue('wc_order_id'));
         $awaitingOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
-        if (!$return->get_id() && $awaitingOrderId) {
+        if ($awaitingOrderId && !$return->get_id()) {
             $return = new WC_Order($awaitingOrderId);
         }
 
@@ -1840,9 +1910,10 @@ class ResursDefault extends WC_Payment_Gateway
             } else {
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
             }
-        } catch (Exception $booksignedException) {
+        } catch (Exception $bookSignedException) {
+            Data::setLogException($bookSignedException);
             Data::setTimeoutStatus($this->API->getConnection());
-            $this->setFinalSigningExceptionNotes($booksignedException);
+            $this->setFinalSigningExceptionNotes($bookSignedException);
         }
 
         return $return;
@@ -1854,7 +1925,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getCheckoutType()
+    private function getCheckoutType(): string
     {
         return (string)$this->getApiValue('checkoutType');
     }
@@ -1957,7 +2028,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getBookPaymentStatus()
+    private function getBookPaymentStatus(): string
     {
         return $this->getPaymentResponse('bookPaymentStatus');
     }
@@ -1969,7 +2040,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getPaymentResponse($key)
     {
-        return isset($this->paymentResponse->$key) ? $this->paymentResponse->$key : '';
+        return $this->paymentResponse->$key ?? '';
     }
 
     /**
@@ -2050,7 +2121,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array
      * @since 0.0.1.0
      */
-    private function getResult($status, $redirect = null)
+    private function getResult($status, $redirect = null): array
     {
         if (empty($redirect)) {
             $redirect = $status === 'failed' ?
@@ -2130,7 +2201,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getCustomerAfterSigningNotices($signing)
+    private function getCustomerAfterSigningNotices($signing): string
     {
         $return = __(
             'Could not complete your order. Please contact support for more information.',
@@ -2152,7 +2223,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return string
      * @since 0.0.1.0
      */
-    private function getCancelNotice($signing)
+    private function getCancelNotice($signing): string
     {
         return sprintf(
             __(
@@ -2279,7 +2350,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      * @noinspection PhpUnusedPrivateMethodInspection
      */
-    private function setCardData()
+    private function setCardData(): self
     {
         $this->API->getConnection()->setCardData(
             $this->getCustomerData('card_number')
