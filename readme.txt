@@ -2,7 +2,7 @@
 Contributors: RB-Tornevall, Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, resurs checkout, checkout, RCO, hosted, simplified, hostedflow, simplified flow, hosted flow
 Requires at least: 5.5
-Tested up to: 5.8.1
+Tested up to: 5.9
 Requires PHP: 7.0
 Stable tag: 0.0.1.0
 License: GPLv2 or later
