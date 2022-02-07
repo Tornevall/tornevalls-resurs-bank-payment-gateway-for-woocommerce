@@ -46,6 +46,14 @@ if (isset($ecom)) {
         } else {
             ?>
             <span>
+                <?php
+                if ($v2) {?>
+                    <span class="resursOrderInfoContainer resursOrderInfoOldPluginNote">
+                        <?php echo strtoupper(__('Not created with this plugin!', 'trbwc')); ?>
+                    </span>
+                <?php
+                }
+                ?>
         <?php
         if (isset($ecom->isCurrentCredentials) && !$ecom->isCurrentCredentials) {
             $isDifferentAccount = true;

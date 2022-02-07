@@ -270,30 +270,32 @@ class WooCommerce
      */
     public static function getAdminAfterOrderDetails($order = null)
     {
-        self::getAdminAfterOldCheck($order);
-
-        if (!empty($order) &&
-            Data::canHandleOrder($order->get_payment_method())
-        ) {
-            $orderData = Data::getOrderInfo($order);
-            self::setOrderMetaInformation($orderData);
-            $orderData['ecom_meta'] = [];
-            if (!isset($orderData['ecom'])) {
-                $orderData['ecom'] = [];
-                $orderData['ecom_short'] = [];
-            }
-            if (isset($orderData['meta']) && is_array($orderData['meta'])) {
-                $orderData['ecom_short'] = self::getMetaDataFromOrder($orderData['ecom_short'], $orderData['meta']);
-            }
-            if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
-                if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-                    $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
+        if ($order instanceof WC_Order) {
+            $paymentMethod = $order->get_payment_method();
+            if (Data::canHandleOrder($paymentMethod)) {
+                $orderData = Data::getOrderInfo($order);
+                self::setOrderMetaInformation($orderData);
+                $orderData['ecom_meta'] = [];
+                if (!isset($orderData['ecom'])) {
+                    $orderData['ecom'] = [];
+                    $orderData['ecom_short'] = [];
                 }
-                echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+                if (isset($orderData['meta']) && is_array($orderData['meta'])) {
+                    $orderData['ecom_short'] = self::getMetaDataFromOrder($orderData['ecom_short'], $orderData['meta']);
+                }
+                $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
+                if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
+                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                        $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
+                    }
+                    echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+                }
+                // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
+                // if someone wants to create their own view.
+                WordPress::doAction('showOrderDetails', $orderData);
+            } else {
+                self::getAdminAfterOldCheck($order);
             }
-            // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
-            // if someone wants to create their own view.
-            WordPress::doAction('showOrderDetails', $orderData);
         }
     }
 
@@ -1330,13 +1332,13 @@ class WooCommerce
      * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
      *
      * @param $fragments
-     * @return mixed
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getReviewFragments($fragments)
+    public static function getReviewFragments($fragments): array
     {
-        $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(true);
+        $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
         $fragments['rbwc_cart_total'] = (float)(self::getValidCart() ? WC()->cart->total : 0.00);
         self::setCustomerCheckoutLocation(true);
 

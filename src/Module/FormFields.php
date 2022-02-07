@@ -585,7 +585,7 @@ class FormFields extends WC_Settings_API
                         'trbwc'
                     ),
                     'type' => 'checkbox',
-                    'default' => 'no',
+                    'default' => 'yes',
                 ],
                 'store_api_history' => [
                     'id' => 'store_api_history',
@@ -1263,13 +1263,13 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param WC_Checkout $checkout
-     * @param bool $returnHtml
-     * @return false|string|void
+     * @param WC_Checkout $wcCheckout
+     * @param bool $returnAsHtml
+     * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getGetAddressForm($returnHtml = false)
+    public static function getGetAddressForm($wcCheckout, $returnAsHtml = false)
     {
         $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
         $customerTypeByConditions = Data::getCustomerType();
@@ -1285,10 +1285,22 @@ class FormFields extends WC_Settings_API
                 'get_address_form_always' => $getAddressFormAlways,
             ]
         );
-        if ($returnHtml) {
+
+        // Note: As this feature is just generating the form via woocommerce_before_checkout_billing_form,
+        // it is not necessary to use this one.
+        /*woocommerce_form_field('rbGetAddressFields', [
+            'type' => 'text',
+            'class' => ['ssn form-row-wide resurs_ssn_field'],
+            'label' => 'govIdLabel',
+            'placeholder' => 'billing',
+        ], $wcCheckout->get_value('rbGetAddressFields'));*/
+
+        if ((bool)$returnAsHtml) {
             return $return;
+        } else {
+            echo $return;
         }
-        echo $return;
+        return $wcCheckout instanceof WC_Checkout ? $wcCheckout : '';
     }
 
     /**

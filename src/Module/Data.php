@@ -1726,7 +1726,7 @@ class Data
         $isResursDeprecated = false;
         foreach ($allowMethod as $methodKey) {
             if ((bool)preg_match(sprintf('/^%s/', $methodKey), $thisMethod)) {
-                if (strncmp($methodKey, 'resurs_bank_', 12) === 0) {
+                if (self::isDeprecatedPluginOrder($thisMethod)) {
                     $isResursDeprecated = true;
                     break;
                 }
@@ -1740,6 +1740,16 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @param $thisMethod
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isDeprecatedPluginOrder($thisMethod): bool
+    {
+        return strncmp($thisMethod, 'resurs_bank_', 12) === 0;
     }
 
     /**
@@ -2003,6 +2013,12 @@ class Data
      */
     public static function isResursMethod($paymentMethod): bool
     {
-        return (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
+        $return = (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
+
+        if (!$return && Data::canHandleOrder($paymentMethod)) {
+            $return = true;
+        }
+
+        return $return;
     }
 }
