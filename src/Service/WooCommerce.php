@@ -907,7 +907,7 @@ class WooCommerce
                 )
             );
 
-            $return = self::getProperOrder($order, 'order')->add_order_note(
+            $return = $properOrder->add_order_note(
                 self::getOrderNotePrefixed($orderNote),
                 $is_customer_note
             );
@@ -1053,6 +1053,10 @@ class WooCommerce
     }
 
     /**
+     * Set order status together with a notice.
+     * The returned values in the method usually was set to return a boolean for success, but should no longer
+     * be depending on this. Other functions using this feature should not be required to validate success.
+     *
      * @param WC_Order $order
      * @param $ecomOrderStatus
      * @return mixed
@@ -1083,6 +1087,7 @@ class WooCommerce
                 )
             );
 
+            // Don't get fooled by the same name. This function is set elsewhere.
             $return = OrderStatusHandler::setOrderStatusWithNotice(
                 $order,
                 $requestedStatus,
@@ -1106,6 +1111,34 @@ class WooCommerce
                 $orderStatusUpdateNotice
             );
             Data::setLogNotice($orderStatusUpdateNotice);
+        }
+
+        return $return;
+    }
+
+    /**
+     * Set order status with prefixed note.
+     *
+     * @param $order
+     * @param $newOrderStatus
+     * @param $orderNote
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote): bool
+    {
+        if (Data::getResursOption('queue_order_statuses_on_success')) {
+            $return = OrderStatusHandler::setOrderStatusWithNotice(
+                $order,
+                $newOrderStatus,
+                $orderNote
+            );
+        } else {
+            $return = self::getProperOrder($order, 'order')->update_status(
+                $newOrderStatus,
+                self::getOrderNotePrefixed($orderNote)
+            );
         }
 
         return $return;
@@ -1202,34 +1235,6 @@ class WooCommerce
         return WC()->queue()->add(
             ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
         );
-    }
-
-    /**
-     * Set order status with prefixed note.
-     *
-     * @param $order
-     * @param $newOrderStatus
-     * @param $orderNote
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote): bool
-    {
-        if (Data::getResursOption('queue_order_statuses_on_success')) {
-            $return = OrderStatusHandler::setOrderStatusWithNotice(
-                $order,
-                $newOrderStatus,
-                $orderNote
-            );
-        } else {
-            $return = self::getProperOrder($order, 'order')->update_status(
-                $newOrderStatus,
-                self::getOrderNotePrefixed($orderNote)
-            );
-        }
-
-        return $return;
     }
 
     /**

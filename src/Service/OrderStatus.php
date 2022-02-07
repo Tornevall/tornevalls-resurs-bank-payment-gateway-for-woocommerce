@@ -89,9 +89,9 @@ class OrderStatus
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderStatusWithNotice($order, $status, $notice)
+    public static function setOrderStatusWithNotice($order, $status, $notice): string
     {
-        return self::getStaticQueue()->setOrderStatus(
+        return (self::getStaticQueue())->setOrderStatus(
             $order,
             $status,
             $notice
@@ -104,10 +104,11 @@ class OrderStatus
      * @param $order
      * @param $status
      * @param $notice
+     * @return string
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function setOrderStatus($order, $status, $notice)
+    public function setOrderStatus($order, $status, $notice): string
     {
         return WooCommerce::applyQueue(
             'updateOrderStatusByQueue',
