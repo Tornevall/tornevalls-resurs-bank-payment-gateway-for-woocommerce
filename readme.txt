@@ -13,10 +13,13 @@ Tornevalls Resurs Bank Payment Gateway for WooCommerce.
 == Description ==
 
 Payment gateway for Resurs Bank AB with support for the most recent shop flows.
-SoapClient is required for AfterShop related actions like debiting, crediting, annulments, etc.
+
+**SoapClient is required** for all actions related to "after shop", debiting, refunding, annulments, and so on.
+Also, your site has to be fully reachable with SSL/HTTPS. **For full list of requirements, look below.**
 
 There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you tend
-to use **this** plugin as it is an upgrade from the Resurs supported release.
+to use **this** plugin as it is an upgrade from the Resurs supported release as the settings and filters may be
+different.
 
 [![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
@@ -83,15 +86,11 @@ not the same thing.
 
 == Frequently Asked Questions ==
 
-= What does 0.0.1.0 mean? =
-
-It is a release candidate. As soon as it reaches 1.0.0 it is considered stable. Minor fixes and bugs
-may be applied before that point.
-
 = Can I upgrade from version 2.2.x =
 
-"Version 2.2.x" is currently the official Resurs Bank release and currently not the same as this release. However,
-the intentions with this plugin is to be as seamless as possible.
+**"Version 2.2.x"** is currently the **official Resurs Bank release** and currently not the same as this release.
+However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the
+prior release can be handled by this one.
 
 = Is this release a refactored version of Resurs Bank's? =
 
