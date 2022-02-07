@@ -930,12 +930,14 @@ class Data
     }
 
     /**
+     * Get current payment method from session.
+     *
      * @return string
      * @since 0.0.1.0
      */
     public static function getPaymentMethodBySession(): string
     {
-        return WooCommerce::getSessionValue('paymentMethod');
+        return (string)WooCommerce::getSessionValue('paymentMethod');
     }
 
     /**

@@ -1297,7 +1297,8 @@ class WooCommerce
         $return = false;
 
         if (isset(WC()->cart)) {
-            $return = (WC()->cart->get_cart_contents_count() > 0);
+            $cartContentCount = WC()->cart->get_cart_contents_count();
+            $return = $cartContentCount > 0;
 
             if ($returnCart && $return && !empty(WC()->cart)) {
                 $return = WC()->cart->get_cart();
@@ -1309,7 +1310,7 @@ class WooCommerce
 
     /**
      * @param $key
-     * @return array|mixed|string
+     * @return array|string|mixed
      * @since 0.0.1.0
      */
     public static function getSessionValue($key)
