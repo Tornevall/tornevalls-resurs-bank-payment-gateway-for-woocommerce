@@ -63,7 +63,9 @@ Help translate the plugin by joining [Crowdin](https://crwd.in/trwbc)!
 
 If you'd like to contribute to this project, you can either sign up
 to [github](https://github.com/Tornevall/wpwc-resurs/issues) and create an issue or use the
-old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this on.
+old [Bitbucket Project](https://tracker.tornevall.net/projects/RWC) to do this on. The full project status can
+be found [at this dashboard](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200) since that's
+where the project started.
 
 == Installation ==
 

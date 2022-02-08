@@ -168,20 +168,19 @@ function setRbwcGenericError(errorMessage) {
  * @since 0.0.1.0
  */
 function resursPlaceOrderControl() {
-    if (typeof resursTemporaryCartTotal !== 'undefined' && getResursLocalization('checkoutType') === 'rco') {
+    if (getResursLocalization('checkoutType') === 'rco') {
         if ($rQuery('#place_order').length > 0) {
             resursHasPlaceOrder = true;
-            if ($rQuery('#place_order').is(':visible') && resursTemporaryCartTotal === 0) {
-                trbwcLog('Button for placing order is visible and cart control indicates a price of 0.');
-                $rQuery('#resursbank_rco_container').hide();
-                $rQuery('.woocommerce-billing-fields').show();
-                $rQuery('.woocommerce-shipping-fields').show();
-            }
-            return;
-        }
-        if ($rQuery('#place_order').length === 0 && resursTemporaryCartTotal > 0) {
-            trbwcLog('Cart control indicates change to ' + resursTemporaryCartTotal + '.');
+        } else {
             resursHasPlaceOrder = false;
+        }
+        if (resursTemporaryCartTotal === 0) {
+            trbwcLog('Button for placing order is visible and cart control indicates a price of 0.');
+            $rQuery('#resursbank_rco_container').hide();
+            $rQuery('.woocommerce-billing-fields').show();
+            $rQuery('.woocommerce-shipping-fields').show();
+        } else if (resursTemporaryCartTotal > 0) {
+            trbwcLog('Cart control indicates change to ' + resursTemporaryCartTotal + '.');
             $rQuery('.woocommerce-billing-fields').hide();
             $rQuery('.woocommerce-shipping-fields').hide();
             $rQuery('#resursbank_rco_container').show();

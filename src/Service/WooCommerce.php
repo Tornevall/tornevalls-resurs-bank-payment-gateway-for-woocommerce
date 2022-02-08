@@ -1259,19 +1259,24 @@ class WooCommerce
         try {
             if (self::getValidCart()) {
                 $currentTotal = WC()->cart->total;
-                if ($currentTotal !== self::getSessionValue('customerCartTotal')) {
+                self::setSessionValue('customerCartTotal', WC()->cart->total);
+                if ((float)$currentTotal) {
                     $orderHandler = new OrderHandler();
                     $orderHandler->setCart(WC()->cart);
                     $orderHandler->setPreparedOrderLines();
-                    self::setSessionValue('customerCartTotal', WC()->cart->total);
                     // Only update payment session if in RCO mode.
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO &&
-                        !empty(self::getSessionValue('rco_order_id'))
+                        !empty(self::getSessionValue('rco_order_id')) &&
+                        (float)$currentTotal > 0.00
                     ) {
-                        ResursBankAPI::getResurs()->updateCheckoutOrderLines(
-                            self::getSessionValue('rco_order_id'),
-                            $orderHandler->getOrderLines()
-                        );
+                        try {
+                            ResursBankAPI::getResurs()->updateCheckoutOrderLines(
+                                self::getSessionValue('rco_order_id'),
+                                $orderHandler->getOrderLines()
+                            );
+                        } catch (Exception $e) {
+                            Data::setLogException($e);
+                        }
                     }
                 }
             }
