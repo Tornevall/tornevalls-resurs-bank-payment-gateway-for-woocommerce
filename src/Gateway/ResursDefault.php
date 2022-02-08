@@ -1303,6 +1303,8 @@ class ResursDefault extends WC_Payment_Gateway
 
         if (Data::getCheckoutType() !== self::TYPE_RCO) {
             $return = $classButtonHtml;
+        } elseif (WooCommerce::getValidCart() && (float)WC()->cart->total === 0.00) {
+            $return = $classButtonHtml;
         }
 
         return $return;
