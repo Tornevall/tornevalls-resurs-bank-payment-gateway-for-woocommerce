@@ -4,7 +4,7 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 5.5
 Tested up to: 5.9
 Requires PHP: 7.0
-Stable tag: 0.0.1.0
+Stable tag: 0.0.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,11 @@ not the same thing.
 
 == Frequently Asked Questions ==
 
+= Where can I get more information about this plugin =
+
+You may visit https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway for more information regarding the
+plugin. For questions about API and Resurs Bank please visit https://test.resurs.com/docs/.
+
 = Can I upgrade from version 2.2.x =
 
 **"Version 2.2.x"** is currently the **official Resurs Bank release** and currently not the same as this release.
@@ -99,8 +104,29 @@ prior release can be handled by this one.
 No. It's a rewrite. From scratch. The intentions may be to replace the other version in the future and this is
 currently considered a side project, *even if it has been developed by an employee* at Resurs Bank.
 
+= Plugin is causing 40X errors on my site =
+
+There are several reasons for the 40X errors, but if they are thrown from an EComPHP API message there are few things to take in consideration:
+
+* 401 = Unauthorized.
+  **Cause**: Bad credentials
+  **Solution**: Contact Resurs Bank support for support questions regarding API credentials.
+* 403 = Forbidden.
+  **Cause**: This may be more common during test.
+  **Solution:** Resolution: Contact Resurs Bank for support.
+
+### There's an order created but there is no order information connected to Resurs Bank ###
+
+This is a common question about customer actions and how the order has been created/signed. Most of the details is usually placed in the order notes for the order, but if you need more information you could also consider contacting Resurs Bank support.
+
+= How does the respective payment flows work with Resurs Bank in this plugin? =
+
+Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works, not only here, but mostly
+anywhere can be seen at https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described
 
 == Screenshots ==
+
+https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway
 
 
 == Changelog ==

@@ -79,3 +79,25 @@ connect their own features to whatever they need to do.
 
 Most of the configuring are made through the admin panel, which includes tweaking when advanced mode is enabled. Take a
 look at the documentation for more information.
+
+## Frequently Asked Questions
+
+### Where can I get more information about this plugin ###
+
+You may visit https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway for more information regarding the
+plugin. For questions about API and Resurs Bank please visit https://test.resurs.com/docs/.
+
+### Plugin is causing 40X errors on my site ###
+
+There are several reasons for the 40X errors, but if they are thrown from an EComPHP API message there are few things to take in consideration:
+
+* 401 = Unauthorized.
+  **Cause**: Bad credentials
+  **Solution**: Contact Resurs Bank support for support questions regarding API credentials.
+* 403 = Forbidden.
+  **Cause**: This may be more common during test.
+  **Solution:** Resolution: Contact Resurs Bank for support.
+
+### There's an order created but there is no order information connected to Resurs Bank ###
+
+This is a common question about customer actions and how the order has been created/signed. Most of the details is usually placed in the order notes for the order, but if you need more information you could also consider contacting Resurs Bank support.
