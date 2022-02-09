@@ -122,7 +122,10 @@ class AdminPage extends WC_Settings_Page
 
         foreach ($formFields as $sectionKey => $sectionArray) {
             if ($sectionKey === 'basic') {
-                $return[''] = $sectionArray['title'] ?? __('Plugin and account settings', 'trbwc');
+                $return[''] = $sectionArray['title'] ?? __(
+                        'Plugin and account settings',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    );
             } else {
                 $return[$sectionKey] = $sectionArray['title'] ?? $sectionKey;
             }
@@ -157,7 +160,7 @@ class AdminPage extends WC_Settings_Page
                 'adminPageTop' => sprintf(
                     __(
                         'Extended configuration view for Resurs Bank: %s',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     $sectionNames[$current_section]
                 ),

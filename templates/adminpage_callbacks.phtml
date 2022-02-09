@@ -1,18 +1,27 @@
 <h3>
     <?php use ResursBank\Module\Data;
 
-    _e('Available callbacks', 'trbwc');
+    _e('Available callbacks', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
     ?>
 </h3>
 <?php if ($exception === null) { ?>
     <table width="100%" style="border: none;">
         <tr>
-            <td width="20%" class="resursMethodHead"><?php _e('Callback', 'trbwc') ?></td>
-            <td width="80%" class="resursMethodHead"><?php _e('Callback URL', 'trbwc') ?></td>
+            <td width="20%" class="resursMethodHead"><?php _e(
+                    'Callback',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+            <td width="80%" class="resursMethodHead"><?php _e(
+                    'Callback URL',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
             <?php
             if ((bool)Data::getResursOption('show_developer')) {
                 ?>
-                <td width="80%" class="resursMethodHead"><?php _e('Remove', 'trbwc') ?></td>
+                <td width="80%" class="resursMethodHead"><?php _e(
+                        'Remove',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ) ?></td>
                 <?php
             }
             ?>
@@ -35,7 +44,8 @@
                     if ((bool)Data::getResursOption('show_developer')) {
                         ?>
                         <td class="resursMethodBody" id="remove_cb_btn_<?php echo $callbackType; ?>">
-                            <button type="button" onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X</button>
+                            <button type="button" onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X
+                            </button>
                         </td>
                         <?php
                     } ?>

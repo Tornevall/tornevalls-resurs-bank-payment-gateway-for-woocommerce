@@ -53,36 +53,42 @@ class FormFields extends WC_Settings_API
         /** @noinspection HtmlUnknownTarget */
         $formFields = [
             'basic' => [
-                'title' => __('Basic Resurs Bank API Settings', 'trbwc'),
+                'title' => __(
+                    'Basic Resurs Bank API Settings',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 'enabled' => [
                     'id' => 'enabled',
-                    'title' => __('Enable plugin checkout functions', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __(
+                        'Enable plugin checkout functions',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
-                    'label' => __('Enable Resurs Bank', 'trbwc'),
+                    'label' => __('Enable Resurs Bank', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'This enables core functions of Resurs Bank, like the payment gateway, etc. ' .
                         'When disabled, after shop functions (i.e. debiting, annulling, etc) will still work.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'yes',
                 ],
                 'checkout_type' => [
                     'id' => 'checkout_type',
-                    'title' => __('Checkout Type', 'trbwc'),
+                    'title' => __('Checkout Type', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'select',
                     'options' => [
                         'rco' => __(
                             'Resurs Checkout (embedded checkout by iframe)',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         'simplified' => __(
                             'Integrated Checkout (simplified shopFlow)',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         'hosted' => __(
                             'Hosted Checkout',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                     ],
                     'custom_attributes' => [
@@ -92,21 +98,21 @@ class FormFields extends WC_Settings_API
                     'default' => 'rco',
                     'desc' => __(
                         'Chosen checkout type.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'environment' => [
                     'id' => 'environment',
-                    'title' => __('Environment', 'trbwc'),
+                    'title' => __('Environment', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'select',
                     'options' => [
                         'test' => __(
                             'Test',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         'live' => __(
                             'Production',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                     ],
                     'custom_attributes' => [
@@ -115,32 +121,32 @@ class FormFields extends WC_Settings_API
                     'default' => 'test',
                     'desc' => __(
                         'Defines if you are are live or just in test/staging. Default: test.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'login' => [
                     'id' => 'login',
-                    'title' => __('Username', 'trbwc'),
+                    'title' => __('Username', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'desc' => __(
                         'Web services username, received from Resurs Bank.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
                 'login_production' => [
                     'id' => 'login_production',
-                    'title' => __('Username (Production).', 'trbwc'),
+                    'title' => __('Username (Production).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'desc' => __(
                         'Web services username, received from Resurs Bank.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
                 'password' => [
                     'id' => 'password',
-                    'title' => __('Resurs Bank API password', 'trbwc'),
+                    'title' => __('Resurs Bank API password', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'password',
                     'default' => '',
                     'desc' => __(
@@ -148,7 +154,7 @@ class FormFields extends WC_Settings_API
                         'environment as the chosen one and you decide to validate them before saving, payment ' .
                         'methods and necessary data will update the same time. Otherwise, only credentials will be ' .
                         'saved.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'custom_attributes' => [
                         'onload' => 'resursAppendCredentialCheck()',
@@ -156,7 +162,7 @@ class FormFields extends WC_Settings_API
                 ],
                 'password_production' => [
                     'id' => 'password_production',
-                    'title' => __('Resurs Bank API Password (Production).', 'trbwc'),
+                    'title' => __('Resurs Bank API Password (Production).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'password',
                     'default' => '',
                     'desc' => __(
@@ -164,7 +170,7 @@ class FormFields extends WC_Settings_API
                         'make sure you use the validation button. If you choose to not validate your credentials ' .
                         'here, and instead just save, you have to update the methods manually in the payment ' .
                         'methods section.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'custom_attributes' => [
                         'onload' => 'resursAppendCredentialCheck()',
@@ -172,7 +178,7 @@ class FormFields extends WC_Settings_API
                 ],
                 'country' => [
                     'id' => 'country',
-                    'title' => __('Chosen merchant country', 'trbwc'),
+                    'title' => __('Chosen merchant country', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'default' => get_option('woocommerce_default_country'),
                     'css' => 'width: 100px',
@@ -182,36 +188,36 @@ class FormFields extends WC_Settings_API
                     'desc' => __(
                         'Defines which country this plugin operates from. Credentials given by Resurs Bank are ' .
                         'limited to a specific country. Default: Store address country.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
             ],
             'payment_methods' => [
-                'title' => __('Payment methods and order handling', 'trbwc'),
+                'title' => __('Payment methods and order handling', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 'payment_methods_settings' => [
                     'type' => 'title',
-                    'title' => __('Payment methods, products and checkout', 'trbwc'),
+                    'title' => __('Payment methods, products and checkout', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => __(
                         'This section covers information for your current payment methods that is linked with your ' .
                         'API settings. You can not edit titles or descriptions at this page so if you need to ' .
                         'change such data you have to contact Resurs Bank support.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'order_id_type' => [
                     'id' => 'order_id_type',
                     'type' => 'select',
-                    'title' => __('Order id numbering', 'trbwc'),
+                    'title' => __('Order id numbering', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => __(
                         'Decide which kind of order id/reference that should be used when customers are ' .
                         'placing orders. If you let the plugin set the reference, the reference will be based on ' .
                         'a timestamp with an ending random number to make them unique (i.e. YYYYMMDDHHMMSS-UNIQUE).',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'ecom',
                     'options' => [
-                        'ecom' => __('Let plugin set the reference', 'trbwc'),
-                        'postid' => __('Use WooCommerce internal post id as reference', 'trbwc'),
+                        'ecom' => __('Let plugin set the reference', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'postid' => __('Use WooCommerce internal post id as reference', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     ],
                     'custom_attributes' => [
                         'size' => 2,
@@ -219,14 +225,14 @@ class FormFields extends WC_Settings_API
                 ],
                 'payment_method_icons' => [
                     'id' => 'payment_method_icons',
-                    'title' => __('Checkout method logotypes', 'trbwc'),
+                    'title' => __('Checkout method logotypes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'select',
                     'default' => 'none',
                     'options' => [
-                        'none' => __('Prefer to not display logotypes', 'trbwc'),
-                        'woocommerce_icon' => __('Display logotypes as WooCommerce default', 'trbwc'),
-                        'only_specifics' => __('Display icons only if they are of customized', 'trbwc'),
-                        'specifics_and_resurs' => __('Display Resurs branded and customized icons', 'trbwc'),
+                        'none' => __('Prefer to not display logotypes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'woocommerce_icon' => __('Display logotypes as WooCommerce default', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'only_specifics' => __('Display icons only if they are of customized', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'specifics_and_resurs' => __('Display Resurs branded and customized icons', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     ],
                     'custom_attributes' => [
                         'size' => 4,
@@ -236,54 +242,54 @@ class FormFields extends WC_Settings_API
                         'your best option here. Observe that this option is entirely dependent on your theme and ' .
                         'no layout are rendered through this as we use the default icon setup in WooCommerce to ' .
                         'show the icons.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'streamline_payment_fields' => [
                     'id' => 'streamline_payment_fields',
                     'type' => 'checkbox',
-                    'title' => __('Applicant fields are always visible', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Applicant fields are always visible', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'default' => 'no',
                     'desc_tip' => __(
                         'The applicant fields that Resurs Bank is using to handle payments is normally, inherited ' .
                         'from WooCommerce standard billing fields in the checkout. You can however enable them ' .
                         'here, if you want your customers to see them anyway.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'get_address_form' => [
                     'id' => 'get_address_form',
                     'type' => 'checkbox',
-                    'title' => __('Use address information lookup service', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Use address information lookup service', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'default' => 'yes',
                     'desc_tip' => __(
                         'This enables address lookup forms (getAddress) in checkout, when available. ' .
                         'Countries currently supported is SE (government id) and NO (phone number).',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'get_address_form_always' => [
                     'id' => 'get_address_form_always',
                     'type' => 'checkbox',
-                    'title' => __('Always show government id field from address service', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Always show government id field from address service', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'default' => 'no',
                     'desc_tip' => __(
                         'With this setting enabled, the getAddress form will always be shown, regardless of country ' .
                         'compatibility.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'rco_method_titling' => [
                     'id' => 'rco_method_titling',
                     'type' => 'select',
-                    'title' => __('How to display payment method titles', 'trbwc'),
+                    'title' => __('How to display payment method titles', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'options' => [
-                        'default' => __('Default title.', 'trbwc'),
-                        'id' => __('Use the ID of the chosen payment method.', 'trbwc'),
-                        'description' => __('Use the description of the chosen payment method.', 'trbwc'),
+                        'default' => __('Default title.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'id' => __('Use the ID of the chosen payment method.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'description' => __('Use the description of the chosen payment method.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     ],
                     'default' => 'default',
                     'custom_attributes' => [
@@ -293,7 +299,7 @@ class FormFields extends WC_Settings_API
                         'When payment methods are mentioned in order data and Resurs Checkout payments, you can ' .
                         'choose how it should be displayed. Selecting anything but the default value will display ' .
                         'the ID or description of a chosen payment method instead of "Resurs Bank AB".',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'rco_iframe_position' => [
@@ -302,12 +308,12 @@ class FormFields extends WC_Settings_API
                     'desc' => __(
                         'Defines where in the checkout the iframe should be placed. Preferred position is after ' .
                         'the checkout form and also default. This setting is also configurable with filters.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'select',
                     'options' => [
-                        'after_checkout_form' => __('After checkout form (Default).', 'trbwc'),
-                        'checkout_before_order_review' => __('Before order review.', 'trbwc'),
+                        'after_checkout_form' => __('After checkout form (Default).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'checkout_before_order_review' => __('Before order review.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     ], // The options are based on available filters in WooCommerce.
                     'default' => 'after_checkout_form',
                     'custom_attributes' => [
@@ -324,7 +330,7 @@ class FormFields extends WC_Settings_API
                         '[currency], [monthlyPrice], [monthlyDuration], [methodId], [methodDescription]. If you use ' .
                         'a custom text [monthlyPrice] will be delivered without the currency, so you have to add ' .
                         'that part yourself.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'select',
                     'options' => WordPress::applyFilters('getPartPaymentPage', []),
@@ -341,8 +347,8 @@ class FormFields extends WC_Settings_API
                 'accept_rejected_callbacks' => [
                     'id' => 'accept_rejected_callbacks',
                     'type' => 'checkbox',
-                    'title' => __('Accept rejected callbacks', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Accept rejected callbacks', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'default' => 'no',
                     'desc_tip' => __(
                         'When Resurs Bank has a callback delivery where the order does not exist in the system, the ' .
@@ -350,7 +356,7 @@ class FormFields extends WC_Settings_API
                         'repeatedly sending too many messages of this kind due to any kind of errors ' .
                         '(like loops, etc), this option allows the plugin to reply with a response that ' .
                         'says that the callback was successful anyway.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'order_instant_finalization_status' => [
@@ -388,7 +394,7 @@ class FormFields extends WC_Settings_API
                 'payment_methods_button' => [
                     'type' => 'button',
                     'action' => 'button',
-                    'title' => __('Update payment methods and annuity factors', 'trbwc'),
+                    'title' => __('Update payment methods and annuity factors', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'custom_attributes' => [
                         'onclick' => 'getResursPaymentMethods()',
                     ],
@@ -402,7 +408,7 @@ class FormFields extends WC_Settings_API
                 'callbacks_button' => [
                     'type' => 'button',
                     'action' => 'button',
-                    'title' => __('Update callbacks', 'trbwc'),
+                    'title' => __('Update callbacks', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'custom_attributes' => [
                         'onclick' => 'getResursCallbacks()',
                     ],
@@ -410,7 +416,7 @@ class FormFields extends WC_Settings_API
                 'trigger_callback_button' => [
                     'type' => 'button',
                     'action' => 'button',
-                    'title' => __('Request test from Resurs Bank', 'trbwc'),
+                    'title' => __('Request test from Resurs Bank', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'custom_attributes' => [
                         'onclick' => 'getResursCallbackTest()',
                     ],
@@ -419,11 +425,11 @@ class FormFields extends WC_Settings_API
                     'type' => 'sectionend',
                 ],
                 'payment_method_annuity' => [
-                    'title' => __('Part payment settings', 'trbwc'),
+                    'title' => __('Part payment settings', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => __(
                         'If you have part payment options in any of your payment methods, this is where ' .
                         'you configure how the prices are shown in your product view and similar.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'title',
                 ],
@@ -432,10 +438,10 @@ class FormFields extends WC_Settings_API
                 ],
             ],
             'fraud_control' => [
-                'title' => __('Fraud control', 'trbwc'),
+                'title' => __('Fraud control', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 'fraud_finalization_section' => [
                     'type' => 'title',
-                    'title' => __('How to handle fraud and debiting', 'trbwc'),
+                    'title' => __('How to handle fraud and debiting', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => sprintf(
                         __(
                             'This section configures how fraud and finalizations should be handled in the ' .
@@ -447,7 +453,7 @@ class FormFields extends WC_Settings_API
                             'you can also set the process to automatically debit/finalize the order with the setup ' .
                             'below. ' .
                             'For more information, see <a href="%s" target="_blank">%s</a>.',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         'https://test.resurs.com/docs/display/ecom/paymentData',
                         'https://test.resurs.com/docs/display/ecom/paymentData'
@@ -456,13 +462,13 @@ class FormFields extends WC_Settings_API
                 'waitForFraudControl' => [
                     'id' => 'waitForFraudControl',
                     'type' => 'checkbox',
-                    'title' => __('Wait for fraud control', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Wait for fraud control', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'The checkout process waits until the fraud control is finished at Resurs Bank ' .
                         'and the order is handled synchronously. If this setting is disabled, Resurs Bank must be ' .
                         'able to reach your system with callbacks to be able to deliver the result.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                     'custom_attributes' => [
@@ -472,13 +478,13 @@ class FormFields extends WC_Settings_API
                 'annulIfFrozen' => [
                     'id' => 'annulIfFrozen',
                     'type' => 'checkbox',
-                    'title' => __('Annul frozen orders', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Annul frozen orders', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'If Resurs Bank freezes a payment due to fraud, the order will automatically be annulled. ' .
                         'By default, the best practice is to handle all annulments asynchronously with callbacks. ' .
                         'Callback event name is ANNUL.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                     'custom_attributes' => [
@@ -488,13 +494,13 @@ class FormFields extends WC_Settings_API
                 'finalizeIfBooked' => [
                     'id' => 'finalizeIfBooked',
                     'type' => 'checkbox',
-                    'title' => __('Automatically debit if booked', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Automatically debit if booked', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Orders are automatically debited (finalized) if the fraud control passes. ' .
                         'By default, the best practice is to handle all finalizations asynchronously with callbacks. ' .
                         'Callback event name is FINALIZATION.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                     'custom_attributes' => [
@@ -506,7 +512,7 @@ class FormFields extends WC_Settings_API
                 ],
                 'rco_customer_behaviour' => [
                     'type' => 'title',
-                    'title' => __('Resurs Checkout customer interaction behaviour', 'trbwc'),
+                    'title' => __('Resurs Checkout customer interaction behaviour', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 ],
                 'rco_customer_behaviour_end' => [
                     'id' => 'rco_customer_behaviour_end',
@@ -514,14 +520,14 @@ class FormFields extends WC_Settings_API
                 ],
             ],
             'advanced' => [
-                'title' => __('Advanced Merchant', 'trbwc'),
+                'title' => __('Advanced Merchant', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 'complex_api_section' => [
                     'type' => 'title',
-                    'title' => __('Advanced API', 'trbwc'),
+                    'title' => __('Advanced API', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 ],
                 'rco_paymentid_age' => [
                     'id' => 'rco_paymentid_age',
-                    'title' => __('Resurs Checkout paymentId maximum age.', 'trbwc'),
+                    'title' => __('Resurs Checkout paymentId maximum age.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'desc' => __(
                         'Defined in seconds, how long a preferred payment id can live before it is renewed in a ' .
@@ -529,93 +535,93 @@ class FormFields extends WC_Settings_API
                         'which very much prevents malicious cart manipulation. It also allows customers to reload ' .
                         'the checkout page and still use the same payment id. When a payment is successful, the ' .
                         'preferred payment id will also be reset.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '3600',
                 ],
                 'queue_order_statuses_on_success' => [
                     'id' => 'queue_order_statuses_on_success',
-                    'title' => __('Queue order statuses on successpage', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Queue order statuses on successpage', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'If you suspect that there may be race conditions between order status updates in the ' .
                         'customer-success landing page, and the order statuses updated with callbacks you can ' .
                         'enable this option to queue not only the callback updates but also the other updates.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'default' => 'no',
                 ],
                 'discard_coupon_vat' => [
                     'id' => 'discard_coupon_vat',
-                    'title' => __('Do not add VAT to discounts', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Do not add VAT to discounts', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'When order rows are added to Resurs Bank API, the VAT is applied on the coupon amount ' .
                         'excluding tax. To handle the discount without vat and instead use the full including tax ' .
                         'amount as a discount, you can enable this feature.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'default' => 'no',
                 ],
                 'prevent_rounding_panic' => [
                     'id' => 'prevent_rounding_panic',
-                    'title' => __('Prevent rounding errors', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Prevent rounding errors', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'WooCommerce are able to show prices rounded with 0 decimals. It is however widely known ' .
                         'and confirmed that payment gateways may have problems with tax calculation, when the ' .
                         'decimals are fewer than two. With this setting enabled, the plugin will try to override the ' .
-                        'decimal setup as long as it is set to lower than 2. If you disable this feature, you also ' .
+                        'decimal setup as long as it is set to lower than 2. If you use this feature, you also ' .
                         'confirm that you are willingly using a, for the platform, unsupported feature. If you\'ve ' .
                         'not already done it, it is recommended to instead increase the number of decimals to 2 or ' .
                         'higher.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'default' => 'yes',
                 ],
                 'deprecated_interference' => [
                     'id' => 'deprecated_interference',
-                    'title' => __('Can interact with old-plugin orders', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Can interact with old-plugin orders', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Enabling this feature allows the plugin to enter orders created with the old plugin.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'default' => 'yes',
                 ],
                 'store_api_history' => [
                     'id' => 'store_api_history',
-                    'title' => __('Store API history in orders', 'trbwc'),
-                    'desc' => __('Enabled', 'trbwc'),
+                    'title' => __('Store API history in orders', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'If this setting is active, the first time you view a specific order API data will be stored ' .
                         'for it. This means that it will be possible to go back to prior orders and view them even ' .
                         'after you change the user credentials.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'default' => 'yes',
                 ],
                 'api_wsdl' => [
                     'id' => 'api_wsdl',
-                    'title' => __('WSDL requests are cached', 'trbwc'),
+                    'title' => __('WSDL requests are cached', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'select',
                     'options' => [
                         'default' => __(
                             'Default: Only for production/live environment',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         'both' => __(
                             'Both for production/live and test/staging',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         'none' => __(
                             'Do not cache WSDL',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                     ],
                     'desc' => __(
@@ -633,87 +639,87 @@ class FormFields extends WC_Settings_API
                 ],
                 'complex_developer_section' => [
                     'type' => 'title',
-                    'title' => __('Developer Section', 'trbwc'),
+                    'title' => __('Developer Section', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 ],
                 'logging' => [
-                    'title' => __('Logging', 'trbwc'),
+                    'title' => __('Logging', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'title',
                     'desc' => __(
                         'Default for this plugin is to log a fair amount of data for you. However, there is also ' .
                         'also much debug data for developers available, that you normally not need. In this section ' .
                         'you can choose the extras you want to see in your logs.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
                 'can_log_order_events' => [
                     'id' => 'can_log_order_events',
                     'type' => 'checkbox',
-                    'title' => __('Details at order events for merchants', 'trbwc'),
-                    'desc' => __('Yes', 'trbwc'),
+                    'title' => __('Details at order events for merchants', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Detailed order events are data that normally passes without any sound. ' .
                         'Things like initial order creations and clicks could show up in your logs.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
                 'can_log_info' => [
                     'id' => 'can_log_info',
                     'type' => 'checkbox',
-                    'title' => __('Log INFO events', 'trbwc'),
-                    'desc' => __('Yes', 'trbwc'),
+                    'title' => __('Log INFO events', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Log events that flows under severity INFO. Logs affected is for example mocking events.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
                 'can_log_order_developer' => [
                     'id' => 'can_log_order_developer',
                     'type' => 'checkbox',
-                    'title' => __('Developer based details at order events', 'trbwc'),
-                    'desc' => __('Yes', 'trbwc'),
+                    'title' => __('Developer based details at order events', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Works like details for merchants, but this adds debugging information that may only be ' .
                         'relevant for developers.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
                 'can_log_junk' => [
                     'id' => 'can_log_junk',
                     'type' => 'checkbox',
-                    'title' => __('Deep details', 'trbwc'),
-                    'desc' => __('Yes', 'trbwc'),
+                    'title' => __('Deep details', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Things that only developers would have interest in. Logs may be junky with this ' .
                         'option enabled.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
                 'can_log_backend' => [
                     'id' => 'can_log_backend',
                     'type' => 'checkbox',
-                    'title' => __('Log backend requests from ajaxify-js', 'trbwc'),
-                    'desc' => __('Yes', 'trbwc'),
+                    'title' => __('Log backend requests from ajaxify-js', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Log backend events triggered by the the javascript method that handles all AJAX requests.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
                 'show_developer' => [
-                    'title' => __('Activate Advanced Tweaking Mode (Developer)', 'trbwc'),
+                    'title' => __('Activate Advanced Tweaking Mode (Developer)', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => __(
                         'Activate Advanced Tweaking Mode (you might need an extra reload after save)',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'The developer section is normally nothing you will need, unless you are a very advanced ' .
                         'administrator/developer/merchant that likes to configure a little bit over the limits. ' .
                         'If you know what you are doing, feel free to activate this section.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'default' => 'no',
@@ -723,7 +729,7 @@ class FormFields extends WC_Settings_API
                 ],
             ],
             'information' => [
-                'title' => __('Support', 'trbwc'),
+                'title' => __('Support', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
             ],
         ];
 
@@ -813,31 +819,31 @@ class FormFields extends WC_Settings_API
             $bleedingEdgeEcommerceJWT = [
                 'jwt_client_id' => [
                     'id' => 'jwt_client_id',
-                    'title' => __('JWT Client ID', 'trbwc'),
+                    'title' => __('JWT Client ID', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'desc' => __(
                         'JWT Client ID.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
                 'jwt_client_password' => [
                     'id' => 'jwt_client_password',
-                    'title' => __('JWT Client Password', 'trbwc'),
+                    'title' => __('JWT Client Password', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'password',
                     'desc' => __(
                         'JWT Client Password.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
                 'jwt_store_id' => [
                     'id' => 'jwt_store_id',
-                    'title' => __('JWT Store ID', 'trbwc'),
+                    'title' => __('JWT Store ID', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'desc' => __(
                         'Numeric store id or uuid-based.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
@@ -876,33 +882,33 @@ class FormFields extends WC_Settings_API
             'developer' => [
                 'dev_section' => [
                     'type' => 'title',
-                    'title' => __('Developers Section', 'trbwc'),
+                    'title' => __('Developers Section', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => sprintf(
                         __(
                             'This section is for very advanced tweaking only. It is not enabled and visible by ' .
                             'default for security reasons. Proceed at your own risk!',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         )
                     ),
                 ],
-                'title' => __('Developer Settings', 'trbwc'),
+                'title' => __('Developer Settings', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 'plugin_section' => [
                     'type' => 'title',
                     'title' => 'Plugin Settings',
                 ],
                 'priorVersionsDisabled' => [
                     'id' => 'priorVersionsDisabled',
-                    'title' => __('Disable RB 2.x', 'trbwc'),
+                    'title' => __('Disable RB 2.x', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Disable prior similar versions of the Resurs Bank plugin (v2.x-series) - ' .
                         'You might need an extra reload after save',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
                         'with help from filters in that release.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'yes',
                 ],
@@ -915,11 +921,11 @@ class FormFields extends WC_Settings_API
                 ],
                 'nonce_trust_admin_session' => [
                     'id' => 'nonce_trust_admin_session',
-                    'title' => __('Trust is_admin before frontend nonces.', 'trbwc'),
+                    'title' => __('Trust is_admin before frontend nonces.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Yes, do trust them please.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'For some places in the admin panel, we use nonces as an extra security layer when it comes ' .
@@ -927,7 +933,7 @@ class FormFields extends WC_Settings_API
                         'quickly and breaks requests in wp_admin. Enable this feature to start trusting is_admin() ' .
                         'during ajax request primarily and nonces secondarily. is_admin is normally a security layer ' .
                         'that prevents unknonwn requests to be executed.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -940,30 +946,30 @@ class FormFields extends WC_Settings_API
                 ],
                 'simulate_real_getaddress' => [
                     'id' => 'simulate_real_getaddress',
-                    'title' => __('Activate "real people"-mode in test, for getAddress.', 'trbwc'),
+                    'title' => __('Activate "real people"-mode in test, for getAddress.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'Required production credentials available: When activating this mode, getAddress will use ' .
                         'real lookups for getAddress rather than the mocked data.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
                 'allow_mocking' => [
                     'id' => 'allow_mocking',
-                    'title' => __('Allow mocked behaviours', 'trbwc'),
+                    'title' => __('Allow mocked behaviours', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'This setting enables mocked behaviours and data on fly, during tests.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -976,12 +982,12 @@ class FormFields extends WC_Settings_API
                 ],
                 'order_note_prefix' => [
                     'id' => 'order_note_prefix',
-                    'title' => __('Prefix for order and status notes', 'trbwc'),
+                    'title' => __('Prefix for order and status notes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'desc' => __(
                         'When orders are updated with new statuses, or gets new notifications this is how we are ' .
                         'prefixing the notes. Default (empty) is "trbwc".',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
@@ -994,11 +1000,11 @@ class FormFields extends WC_Settings_API
                 ],
                 'api_soap_url' => [
                     'id' => 'api_soap_url',
-                    'title' => __('API SOAP Url', 'trbwc'),
+                    'title' => __('API SOAP Url', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'text',
                     'desc' => __(
                         'Use another URL for the SOAP-API. Currently only for test environment!',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
@@ -1011,15 +1017,15 @@ class FormFields extends WC_Settings_API
                 ],
                 'bleeding_edge' => [
                     'id' => 'bleeding_edge',
-                    'title' => __('Bleeding Edge Checkout Technology', 'trbwc'),
+                    'title' => __('Bleeding Edge Checkout Technology', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
-                    'desc' => __('Enable', 'trbwc'),
+                    'desc' => __('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Enable features that is still under development. The features enabled here are not ' .
                         'guaranteed to work in production environments and should only be enabled by a developer.' .
                         'Bleeding edge mode can currently only be used in test. Also please note, that features' .
                         'within this area, requires higher versions of PHP.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1051,10 +1057,10 @@ class FormFields extends WC_Settings_API
 
         if (self::$allowMocking && Data::getResursOption('environment', null, false) === 'test') {
             $return['mocking'] = [
-                'title' => __('Mocking & Testing', 'trbwc'),
+                'title' => __('Mocking & Testing', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 'mocking_section' => [
                     'type' => 'title',
-                    'title' => __('Mocking Section', 'trbwc'),
+                    'title' => __('Mocking Section', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => sprintf(
                         __(
                             'Section of Mocking & Tests. Are you not developing this plugin? Then you probably do ' .
@@ -1065,22 +1071,22 @@ class FormFields extends WC_Settings_API
                             'execution it will instantly become disabled automatically. The mocking section can only ' .
                             'be enabled when your environment is set to test and you explicitly allowed mocking on ' .
                             'your site.',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         )
                     ),
                 ],
                 'mock_update_payment_reference_failure' => [
                     'id' => 'mock_update_payment_reference_failure',
-                    'title' => __('Fail on updatePaymentReference', 'trbwc'),
+                    'title' => __('Fail on updatePaymentReference', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'This setting enables a fictive error on front-to-back calls during order creations where ' .
                         'updatePaymentReference occurs.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1088,18 +1094,18 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_create_iframe_exception',
                     'title' => __(
                         'Fail on iframe creation',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'This setting enables a fictive error in the checkout where the iframe fails to render. This ' .
                         'has happened during development, where the current payment id used by the plugin ' .
                         'collided with an already existing order id at Resurs Bank.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1107,16 +1113,16 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_update_callback_exception',
                     'title' => __(
                         'Fail on callback update in wp-admin',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'This setting enables a fictive callback problem.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1124,17 +1130,17 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_empty_price_info_html',
                     'title' => __(
                         'Fail retrieval of priceinfo',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'Ensure that the priceinfo box still shows data when no data has ' .
                         'been retrieved from priceinfo.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1142,17 +1148,17 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_annuity_factor_config_exception',
                     'title' => __(
                         'Fail fetching annuityFactor values',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'Ensure that the priceinfo box still shows data when no data has been ' .
                         'retrieved from priceinfo.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1160,17 +1166,17 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_get_payment_methods_exception',
                     'title' => __(
                         'wp-admin: Generate an exception in AJAX-based getPaymentMethods-requests',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'This setting enables a fictive getPaymentMethods problem when we update payment methods ' .
                         'in admin manually.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1178,18 +1184,18 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_get_empty_payment_methods_exception',
                     'title' => __(
                         'wp-admin: getPaymentMethods will run without pre-stored data',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'This setting enables a fictive getPaymentMethods problem where we request for payment ' .
                         'methods the first time. To test exceptions with the API update, this should be combined ' .
                         'with the getPaymentMethods in AJAX-mock.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1197,17 +1203,17 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_callback_update_exception',
                     'title' => __(
                         'Fail update callbacks from Resurs Bank',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'Ensure that the priceinfo box still shows data when no data has been ' .
                         'retrieved from priceinfo.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1215,16 +1221,16 @@ class FormFields extends WC_Settings_API
                     'id' => 'mock_refund_exception',
                     'title' => __(
                         'Emulate refunding error from Resurs Bank (annul/credit)',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
                     'desc' => __(
                         'Enable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
                         'Emulating exceptions from SoapService in the annulPayment/creditPayment services.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
                 ],
@@ -1276,10 +1282,10 @@ class FormFields extends WC_Settings_API
         $return = Data::getGenericClass()->getTemplate(
             'checkout_getaddress.phtml',
             [
-                'customer_private' => __('Private person', 'trbwc'),
-                'customer_company' => __('Company', 'trbwc'),
+                'customer_private' => __('Private person', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                'customer_company' => __('Company', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 'customer_type' => $customerTypeByConditions ?? 'NATURAL',
-                'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'trbwc')),
+                'customer_button_text' => WordPress::applyFilters('getAddressButtonText', __('Get address', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')),
                 'supported_country' => Data::isGetAddressSupported(),
                 'get_address_form' => Data::canUseGetAddressForm(),
                 'get_address_form_always' => $getAddressFormAlways,
@@ -1484,12 +1490,12 @@ class FormFields extends WC_Settings_API
     public static function getFieldString($key = null)
     {
         $fields = [
-            'government_id' => __('Social security number', 'trbwc'),
-            'phone' => __('Phone number', 'trbwc'),
-            'mobile' => __('Mobile number', 'trbwc'),
-            'email' => __('E-mail address', 'trbwc'),
-            'government_id_contact' => __('Applicant government id', 'trbwc'),
-            'card_number' => __('Card number', 'trbwc'),
+            'government_id' => __('Social security number', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'phone' => __('Phone number', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'mobile' => __('Mobile number', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'email' => __('E-mail address', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'government_id_contact' => __('Applicant government id', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'card_number' => __('Card number', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
         ];
 
         // If no key are sent here, it is probably a localization request.

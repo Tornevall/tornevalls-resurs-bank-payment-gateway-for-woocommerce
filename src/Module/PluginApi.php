@@ -251,7 +251,7 @@ class PluginApi
         if (empty($priceInfoHtml)) {
             $priceInfoHtml = __(
                 'Price information request retrieved no content from Resurs Bank.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
         }
 
@@ -289,7 +289,7 @@ class PluginApi
                 'While you were in the checkout, the cart has been updated somewhere else. If you have more tabs ' .
                 'open in your browser, make sure you only use one of them during the payment. You may want to ' .
                 'reload this page to make it right.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
             $return = [
                 'success' => false,
@@ -430,7 +430,7 @@ class PluginApi
                     sprintf(
                         __(
                             'An error occured during credential checking: %s (%d).',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $e->getMessage(),
                         $e->getCode()
@@ -468,7 +468,7 @@ class PluginApi
             sprintf(
                 __(
                     'Resurs Bank credential validation for environment %s executed, response was %s.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 self::getParam('e'),
                 is_bool($validationResponse) && $validationResponse ? 'true' : 'false'
@@ -750,7 +750,7 @@ class PluginApi
                 Data::getCredentialNotice();
             } else {
                 if (Data::getTimeoutStatus() > 0) {
-                    $errorMessage .= ' ' . __('Connectivity may be a bit slower than normal.', 'trbwc');
+                    $errorMessage .= ' ' . __('Connectivity may be a bit slower than normal.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
                 }
 
                 Data::setResursOption(
@@ -842,7 +842,7 @@ class PluginApi
                 ResursBankAPI::getResurs()->getCallbackTypeByString($callback)
             );
         } else {
-            $message = __('Advanced mode is disabled. You can not make this change.', 'trbwc');
+            $message = __('Advanced mode is disabled. You can not make this change.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         }
 
         self::reply(
@@ -911,7 +911,7 @@ class PluginApi
         $return['html'] = sprintf(
             '<div>%s</div><div id="resursWaitingForTest"></div>',
             sprintf(
-                __('Activated test trigger. Response "%s" received.', 'trbwc'),
+                __('Activated test trigger. Response "%s" received.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $return['api'] ? 'success' : 'fail'
             )
         );
@@ -933,7 +933,7 @@ class PluginApi
         if ((int)Data::getResursOption('resurs_callback_test_response') > 0) {
             $lastResponse = sprintf(
                 '%s %s',
-                __('Received', 'trbwc'),
+                __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 strftime('%Y-%m-%d %H:%M:%S', Data::getResursOption('resurs_callback_test_response'))
             );
             $success = true;
@@ -990,7 +990,7 @@ class PluginApi
                     $addressResponse = (array)$apiRequest->getAddressByPhone($identification, $customerType);
                     self::getAddressLog($customerCountry, $customerType, $identification, __(
                         'By phone request.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ));
                 } catch (Exception $e) {
                     Data::setLogException($e);
@@ -1000,7 +1000,7 @@ class PluginApi
                     $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
                     self::getAddressLog($customerCountry, $customerType, $identification, __(
                         'By phone request failed, executed failover by government id.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ));
                 }
                 break;
@@ -1009,7 +1009,7 @@ class PluginApi
                     $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
                     self::getAddressLog($customerCountry, $customerType, $identification, __(
                         'By government id/company id (See customer type).',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ));
                 } catch (Exception $e) {
                     Data::setTimeoutStatus($apiRequest);
@@ -1020,7 +1020,7 @@ class PluginApi
                         sprintf(
                             __(
                                 'By government id/company id (See customer type), but failed: (%d) %s.',
-                                'trbwc'
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                             ),
                             $e->getCode(),
                             $e->getMessage()
@@ -1056,7 +1056,7 @@ class PluginApi
         Data::canLog(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
-                __('getAddress request (country %s, type %s) for %s: %s', 'trbwc'),
+                __('getAddress request (country %s, type %s) for %s: %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $customerCountry,
                 $customerType,
                 $identification,
@@ -1116,8 +1116,8 @@ class PluginApi
         $wooOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
 
         $transReject = [
-            'fail' => __('Failed', 'trbwc'),
-            'deny' => __('Denied', 'trbwc'),
+            'fail' => __('Failed', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'deny' => __('Denied', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
         ];
 
         // Fallback to the standard reject reason if nothing is found.
@@ -1126,7 +1126,7 @@ class PluginApi
         if ($wooOrderId) {
             $currentOrder = new WC_Order($wooOrderId);
             $failNote = sprintf(
-                __('Order was rejected with status "%s".', 'trbwc'),
+                __('Order was rejected with status "%s".', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $transRejectMessage
             );
             $updateStatus = WooCommerce::setOrderStatusUpdate(
@@ -1156,7 +1156,7 @@ class PluginApi
             $failNote .= ' ' .
                 WordPress::applyFilters(
                     'purchaseRejectCustomerMessage',
-                    __('Please contact customer service for more information.', 'trbwc')
+                    __('Please contact customer service for more information.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                 );
 
             Data::setOrderMeta($currentOrder, 'rco_reject_message', $failNote);

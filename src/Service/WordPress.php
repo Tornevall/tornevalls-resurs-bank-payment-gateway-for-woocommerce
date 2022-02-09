@@ -266,7 +266,7 @@ class WordPress
             __(
                 'The current plugin "%s" requires at least version %s - for the moment, you are running ' .
                 'on version %s. You should consider upgrading as soon as possible.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
             Data::getPluginTitle(true),
             WooCommerce::getRequiredVersion(),
@@ -398,7 +398,7 @@ class WordPress
                     __(
                         'It seems that you still have another plugin enabled (%s %s) in this platform that works ' .
                         'as Resurs Bank Payment Gateway. If this is intended, you can ignore this message.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     defined('RB_WOO_CLIENTNAME') ? RB_WOO_CLIENTNAME : 'Resurs Bank for WooCommerce',
                     defined('RB_WOO_VERSION') ? RB_WOO_VERSION : 'v2.x'
@@ -652,63 +652,63 @@ class WordPress
             'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
             'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
             'at the endpoint of Resurs Bank.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['translate_checkout_simplified'] = __(
             'The integrated checkout (also known as the "simplified shop flow") is a direct integration with ' .
             'WooCommerce which uses intended APIs to interact with your customers while finishing the orders.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['translate_checkout_hosted'] = __(
             '"Resurs Hosted Checkout" works similarly as the integrated simplified checkout, but on the ' .
             'checkout itself the customer are redirected to a hosted website to fulfill their payments. ' .
             'It can be quite easily compared with a Paypal solution.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['resurs_test_credentials'] = __(
             'Validate and save credentials',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['credential_failure_notice'] = __(
             'The credential check failed. If you save the current data we can not guarantee ' .
             'that your store will properly work.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['credential_success_notice'] = __(
             'The credential check was successful. You may now save the rest of your data.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['requireFraudControl'] = __(
             'This setting requires you to enable the fraud control.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['waiting_for_callback'] = __(
             'Waiting for test callback to arrive.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['trigger_test_fail'] = __(
             'Callback trigger is currently not working.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['callback_test_timeout'] = __(
             'Callback trigger timeout. Aborted.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['remove_callback_confirm'] = __(
             'Are you sure you want to remove callback',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['update_callbacks_required'] = __(
             'Callback URLs for Resurs Bank may be outdated. Do you want to refresh the current data?',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['update_callbacks_refresh'] = __(
             'Refresh has finished. Please check your new settings to confirm the update.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['current_tab'] = $current_tab;
-        $return['enable'] = __('Enable', 'trbwc');
-        $return['disable'] = __('Disable', 'trbwc');
+        $return['enable'] = __('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $return['disable'] = __('Disable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
 
         return self::applyFilters('localizationsAdmin', $return);
     }
@@ -755,14 +755,17 @@ class WordPress
         $return['ajaxify'] = admin_url('admin-ajax.php');
         $return['ajaxifyTimeout'] = (int)$setAjaxifyTimeout ? $setAjaxifyTimeout : $defaultTimeout;
         $return['spin'] = Data::getImage('spin.gif');
-        $return['success'] = __('Successful.', 'trbwc');
-        $return['failed'] = __('Failed.', 'trbwc');
-        $return['reloading'] = __('Please wait while reloading...', 'trbwc');
+        $return['success'] = __('Successful.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $return['failed'] = __('Failed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $return['reloading'] = __(
+            'Please wait while reloading...',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
         $return['nonce_error'] = __(
             'The page security (nonce) is reportedly expired or wrong. This can also be caused by the ' .
             'fact that you have already interacted with the page you are trying to update information on. ' .
             'You may want to reload your browser before proceeding.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['checkout_fields'] = FormFields::getFieldString();
         $return['getAddressFieldController'] = self::applyFilters('getAddressFieldController', []);
@@ -822,15 +825,15 @@ class WordPress
             $return['deprecated_login'] = !empty(Data::getResursOptionDeprecated('login')) ? true : false;
             $return['resurs_deprecated_credentials'] = __(
                 'Import credentials from Resurs v2.x',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
             $return['credential_import_success'] = __(
                 'Import successful.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
             $return['credential_import_failed'] = __(
                 'Import failed.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
         }
         return $return;

@@ -13,7 +13,10 @@ if (isset($ecom)) {
         <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle"
                onclick="resursToggleMetaData()">
             <?php
-            _e('Order information and metadata for Resurs Bank', 'trbwc')
+            _e(
+                'Order information and metadata for Resurs Bank',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            )
             ?>
         </label>
         <?php
@@ -32,7 +35,7 @@ if (isset($ecom)) {
                 'purchase. The customer in question may have been declined and then did not proceed. ' .
                 'The purchase could also have failed by other reasons, like internal server errors ' .
                 'at Resurs Bank.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
             $exceptionString = '';
         }
@@ -47,26 +50,30 @@ if (isset($ecom)) {
             ?>
             <span>
                 <?php
-                if ($v2) {?>
+                if ($v2) { ?>
                     <span class="resursOrderInfoContainer resursOrderInfoOldPluginNote">
-                        <?php echo strtoupper(__('Not created with this plugin!', 'trbwc')); ?>
+                        <?php
+                        echo strtoupper(
+                            __(
+                                'Not created with this plugin!',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            )
+                        ); ?>
                     </span>
+                    <?php
+                } ?>
                 <?php
-                }
-                ?>
-        <?php
-        if (isset($ecom->isCurrentCredentials) && !$ecom->isCurrentCredentials) {
-            $isDifferentAccount = true;
-            ?>
-            <span style="display:block;" class="resursOrderInfoDifferentCredentials">
+                if (isset($ecom->isCurrentCredentials) && !$ecom->isCurrentCredentials) {
+                    $isDifferentAccount = true; ?>
+                    <span style="display:block;" class="resursOrderInfoDifferentCredentials">
 <?php
 printf(__(
     'Purchased with merchant username "%s" from environment "%s".',
-    'trbwc'
+    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
 ), $ecom->username, $ecom->environment); ?>
             </span>
-            <?php
-        } ?>
+                    <?php
+                } ?>
     </span>
             <?php
         } ?>
@@ -79,21 +86,23 @@ printf(__(
             foreach ($ecom_short as $key => $value) {
                 if ($setExpander) {
                     $hasExpander = true;
-                    $setExpander = false;
-                    ?>
+                    $setExpander = false; ?>
                     <button type="button"
                             class="button"
                             id="resurs_meta_expand_button"
                             onclick="resursToggleMetaData()"
-                    ><?php echo __('Expand metadata view', 'trbwc'); ?>
+                    ><?php
+                        echo __(
+                            'Expand metadata view',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ); ?>
                     </button>
                     <span class="resurs_order_meta_container">
                     <?php
                 }
                 if (!empty($addExpanderAfter) && $key === $addExpanderAfter) {
                     $setExpander = true;
-                }
-                ?>
+                } ?>
                 <span style="display: block;" class="resursOrderInfoContainer">
                     <label for="resurs_order_<?php echo sha1($key) ?>" class="resursOrderInfoLabel">
                         <?php echo ucfirst($key) ?>
@@ -107,7 +116,7 @@ printf(__(
                             $value = __(
                                 'Data will only be displayed if the purchase has been made with another merchant ' .
                                 'account than the current in use.',
-                                'trbwc'
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                             );
                         } else {
                             $jsonPayment = json_decode($value, true);
@@ -116,7 +125,7 @@ printf(__(
                                     __(
                                         'This data is shown to you since the purchase has been made with another ' .
                                         'merchant account than the current in use.',
-                                        'trbwc'
+                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                                     ) .
                                     '<br><br>';
                                 foreach ($jsonPayment as $methodKey => $methodValue) {
@@ -134,7 +143,8 @@ printf(__(
                     }
                     if (is_numeric($value)) {
                         echo strtolower(
-                            sprintf('<span id="rbwc_value_%s">%s</span>',
+                            sprintf(
+                                '<span id="rbwc_value_%s">%s</span>',
                                 preg_replace(
                                     '/^a-z0-9$/i',
                                     '',
@@ -144,15 +154,17 @@ printf(__(
                             )
                         );
                     } elseif (is_bool($value)) {
-                        echo $value ? __('Yes.', 'trbwc') : __('No.', 'trbwc');
+                        echo $value ? __('Yes.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __(
+                            'No.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        );
                     } elseif ($key === 'status') {
                         echo implode(', ', (array)$value);
                     } elseif (is_array($value)) {
                         echo implode('<br>', $value);
                     } else {
                         echo $value;
-                    }
-                    ?>
+                    } ?>
                 </span>
                 <?php
             }
@@ -160,7 +172,8 @@ printf(__(
             if ($hasExpander) {
                 ?>
                 </span>
-            <?php }
+                <?php
+            }
         } ?>
 
     </p>

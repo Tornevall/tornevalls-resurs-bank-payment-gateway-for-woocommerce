@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
+
 /** @noinspection PhpUsageOfSilenceOperatorInspection */
 
 namespace ResursBank\Module;
@@ -414,7 +415,7 @@ class PluginHooks
                 sprintf(
                     __(
                         'Resurs Bank refunding error: %s (%s).',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     $e->getMessage(),
                     $e->getCode()
@@ -506,7 +507,13 @@ class PluginHooks
                             $fullAfterShopRequest
                         );
                         $afterShopResponseString = $finalizeResponse ?
-                            __('Success.', 'trbwc') : __('Failed without receiving any exception.', 'trbwc');
+                            __(
+                                'Success.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ) : __(
+                                'Failed without receiving any exception.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            );
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
                     }
@@ -532,7 +539,13 @@ class PluginHooks
                             $fullAfterShopRequest
                         );
                         $afterShopResponseString = $cancelResponse ?
-                            __('Success.', 'trbwc') : __('Failed without receiving any exception.', 'trbwc');
+                            __(
+                                'Success.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ) : __(
+                                'Failed without receiving any exception.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            );
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
                     }
@@ -551,7 +564,7 @@ class PluginHooks
                         $newSlug,
                         $afterShopResponseString
                     ),
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 )
             );
         }
@@ -583,7 +596,7 @@ class PluginHooks
                     sprintf(
                         __(
                             'Queued Status Handler: Updated status for %s to %s with notice: %s',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $order,
                         $status,
@@ -597,7 +610,7 @@ class PluginHooks
                         __(
                             'Queued Status Handler: Status for %s not updated to %s, because that ' .
                             'status was already set.',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $order,
                         $status
@@ -639,11 +652,17 @@ class PluginHooks
             } catch (Exception $e) {
                 Data::setLogException($e);
                 $return = [
-                    'default' => __('Payment Methods are currently unavailable!', 'trbwc'),
+                    'default' => __(
+                        'Payment Methods are currently unavailable!',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                 ];
             }
             if (isset($paymentMethodList) && is_array($paymentMethodList)) {
-                $return['default'] = __('Default (Choice made by plugin)', 'trbwc');
+                $return['default'] = __(
+                    'Default (Choice made by plugin)',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
                 foreach ($paymentMethodList as $method) {
                     if ($method->type === 'PAYMENT_PROVIDER') {
                         $return[$method->specificType] = $method->specificType;
@@ -821,7 +840,7 @@ class PluginHooks
                         'setting is deprecated and no longer fully supported. It is highly recommended to disable ' .
                         'or remove the filter entirely and solve the problem that required this from start somehow ' .
                         'else.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'resursbank_temporary_disable_checkout'
                 )

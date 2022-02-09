@@ -184,7 +184,10 @@ class ResursBankAPI
                         if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
                             Data::setDeveloperLog(
                                 __FUNCTION__,
-                                __('Merchant API token renewed.', 'trbwc')
+                                __(
+                                    'Merchant API token renewed.',
+                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                )
                             );
                             $livingTransientToken = $tokenRequestData->getAccessToken();
                             set_transient(
@@ -197,7 +200,10 @@ class ResursBankAPI
                         $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
                         Data::setDeveloperLog(
                             __FUNCTION__,
-                            __('Merchant API token reused.', 'trbwc')
+                            __(
+                                'Merchant API token reused.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            )
                         );
                     }
                 }
@@ -427,7 +433,7 @@ class ResursBankAPI
             sprintf(
                 __(
                     'Ecom request %s for %s with different credentials (%s, in environment %s).',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 __FUNCTION__,
                 $orderId,
@@ -470,7 +476,7 @@ class ResursBankAPI
             sprintf(
                 __(
                     'Got exception %d in %s, will retry with REST.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $e->getCode(),
                 __FUNCTION__
