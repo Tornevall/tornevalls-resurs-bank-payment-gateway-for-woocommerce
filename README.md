@@ -57,18 +57,21 @@ The original codebase was initialized july 2020.
 
 ## REQUIREMENTS AND SECURITY CONSIDERATIONS
 
-* WooCommerce: v3.5.0 or higher (old features are ditched) and the actual support is set much higher.
+* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug
+  2021, both WooCommerce and WordPress is about to jump into 7.4 and higher.
+  Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions
+  of PHP. This plugin is written for 7.0 and higher - and the policy is following WooCommerce *lowest* requirement.
+* **Required**: WooCommerce: v3.5.0 or higher!
+* **Required**: [SoapClient](https://php.net/manual/en/class.soapclient.php) with xml drivers and extensions.
+* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is
+  required from Resurs Bank.
+* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP streams on this one
+  as you may loose important features if you run explicitly with streams.
+* PHP streams? Yes, you still need them since SoapClient is actually using it.
 * WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly
   recommended to go for the latest version as soon as possible if you're not already there.
   See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more
   information.
-* HTTPS *must* be enabled in both directions. This is a callback security measure.
-* XML and SoapClient must be available.
-* Curl is *recommended* but not necessary.
-* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug
-  2021, both WooCommerce and WordPress is about to jump into 7.4 and higher.
-  Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions
-  of PHP.
 
 ### NEWS AND UPDATES
 
