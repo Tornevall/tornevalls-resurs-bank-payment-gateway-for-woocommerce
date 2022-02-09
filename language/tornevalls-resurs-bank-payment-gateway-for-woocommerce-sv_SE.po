@@ -1004,7 +1004,7 @@ msgstr "Avancerat läge är inaktiverat. Du kan inte göra den här ändringen."
 #: src/Module/PluginApi.php:914
 #, php-format
 msgid "Activated test trigger. Response \"%s\" received."
-msgstr "Aktiverad testutlösare. Svar \"%s\" mottaget."
+msgstr "Aktiverade testutlösare. Svar \"%s\" mottaget."
 
 #: src/Module/PluginApi.php:936
 msgid "Received"
