@@ -13,7 +13,7 @@ if (isset($ecom)) {
         <label for="resurs_order_details" style="font-weight: bold;cursor: pointer" class="resursOrderInfoTitle"
                onclick="resursToggleMetaData()">
             <?php
-            _e('Order information and metadata for Resurs Bank', 'trbwc')
+            _e('Order information and metadata for Resurs Bank', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
             ?>
         </label>
         <?php
@@ -32,7 +32,7 @@ if (isset($ecom)) {
                 'purchase. The customer in question may have been declined and then did not proceed. ' .
                 'The purchase could also have failed by other reasons, like internal server errors ' .
                 'at Resurs Bank.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
             $exceptionString = '';
         }
@@ -49,7 +49,7 @@ if (isset($ecom)) {
                 <?php
                 if ($v2) {?>
                     <span class="resursOrderInfoContainer resursOrderInfoOldPluginNote">
-                        <?php echo strtoupper(__('Not created with this plugin!', 'trbwc')); ?>
+                        <?php echo strtoupper(__('Not created with this plugin!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')); ?>
                     </span>
                 <?php
                 }
@@ -62,7 +62,7 @@ if (isset($ecom)) {
 <?php
 printf(__(
     'Purchased with merchant username "%s" from environment "%s".',
-    'trbwc'
+    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
 ), $ecom->username, $ecom->environment); ?>
             </span>
             <?php
@@ -85,7 +85,7 @@ printf(__(
                             class="button"
                             id="resurs_meta_expand_button"
                             onclick="resursToggleMetaData()"
-                    ><?php echo __('Expand metadata view', 'trbwc'); ?>
+                    ><?php echo __('Expand metadata view', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?>
                     </button>
                     <span class="resurs_order_meta_container">
                     <?php
@@ -107,7 +107,7 @@ printf(__(
                             $value = __(
                                 'Data will only be displayed if the purchase has been made with another merchant ' .
                                 'account than the current in use.',
-                                'trbwc'
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                             );
                         } else {
                             $jsonPayment = json_decode($value, true);
@@ -116,7 +116,7 @@ printf(__(
                                     __(
                                         'This data is shown to you since the purchase has been made with another ' .
                                         'merchant account than the current in use.',
-                                        'trbwc'
+                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                                     ) .
                                     '<br><br>';
                                 foreach ($jsonPayment as $methodKey => $methodValue) {
@@ -144,7 +144,7 @@ printf(__(
                             )
                         );
                     } elseif (is_bool($value)) {
-                        echo $value ? __('Yes.', 'trbwc') : __('No.', 'trbwc');
+                        echo $value ? __('Yes.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __('No.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
                     } elseif ($key === 'status') {
                         echo implode(', ', (array)$value);
                     } elseif (is_array($value)) {

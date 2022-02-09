@@ -9,7 +9,7 @@
  * Version: 0.0.1.0
  * Author: Tomas Tornevall
  * Author URI:
- * Text Domain: trbwc
+ * Text Domain: tornevalls-resurs-bank-payment-gateway-for-woocommerce
  * Domain Path: /language
  */
 
@@ -38,7 +38,7 @@ add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBlee
 add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Service\WordPress::getPriorVersionsDisabled');
 
 load_plugin_textdomain(
-    'trbwc',
+    'tornevalls-resurs-bank-payment-gateway-for-woocommerce',
     false,
     dirname(plugin_basename(__FILE__)) . '/language'
 );

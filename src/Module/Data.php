@@ -566,7 +566,7 @@ class Data
                 WordPress::applyFilters(
                     'partPaymentString',
                     sprintf(
-                        __('Part pay from %s per month. | %s', 'trbwc'),
+                        __('Part pay from %s per month. | %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                         self::getWcPriceSpan($monthlyPrice),
                         self::getReadMoreString($annuityPaymentMethod, $monthlyPrice)
                     )
@@ -758,7 +758,7 @@ class Data
             </span>',
             $annuityPaymentMethod['id'],
             $monthlyPrice,
-            WordPress::applyFilters('partPaymentReadMoreString', __('Read more.', 'trbwc'))
+            WordPress::applyFilters('partPaymentReadMoreString', __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'))
         );
     }
 
@@ -1054,20 +1054,20 @@ class Data
         $netWrapper = new NetWrapper();
 
         $renderData = [
-            __('Plugin version', 'trbwc') => self::getCurrentVersion(),
-            __('WooCommerce', 'trbwc') => sprintf(
+            __('Plugin version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getCurrentVersion(),
+            __('WooCommerce', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => sprintf(
                 __(
                     '%s, at least %s are required.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 WooCommerce::getWooCommerceVersion(),
                 WooCommerce::getRequiredVersion()
             ),
-            __('Composer version', 'trbwc') => self::getVersionByComposer(),
-            __('PHP Version', 'trbwc') => PHP_VERSION,
-            __('Webservice Library', 'trbwc') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
-            __('Communication Library', 'trbwc') => 'netcurl-' . $netWrapper->getVersion(),
-            __('Communication Drivers', 'trbwc') => implode('<br>', self::getWrapperList($netWrapper)),
+            __('Composer version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getVersionByComposer(),
+            __('PHP Version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => PHP_VERSION,
+            __('Webservice Library', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
+            __('Communication Library', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => 'netcurl-' . $netWrapper->getVersion(),
+            __('Communication Drivers', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => implode('<br>', self::getWrapperList($netWrapper)),
         ];
 
         $renderData += WordPress::applyFilters('renderInformationData', $renderData);
@@ -1115,14 +1115,14 @@ class Data
                 'drivers. Wrappers that must be available for this plugin to fully work, is either the ' .
                 'CurlWrapper or SimpleStreamWrapper -and- the SoapClientWrapper. Resurs Bank offers ' .
                 'multiple services over both Soap/XML and REST so they have to be present.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
             'support_string' => __(
                 'If you ever need support with this plugin, you should primarily check this ' .
                 'page before sending support requests. When you send the requests, make sure you do ' .
                 'include the information below in your message. Doing this, it will be easier ' .
                 'in the end to help you out.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
         ];
 
@@ -1160,7 +1160,7 @@ class Data
         if ($dataEncryptionState instanceof Exception) {
             self::setLogNotice(
                 sprintf(
-                    __('%s failed encryption (%d): %s. Failover to base64.', 'trbwc'),
+                    __('%s failed encryption (%d): %s. Failover to base64.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     __FUNCTION__,
                     $dataEncryptionState->getCode(),
                     $dataEncryptionState->getMessage()
@@ -1295,7 +1295,7 @@ class Data
             sprintf(
                 __(
                     'DevLog Method "%s" message: %s.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $fromFunction,
                 $message
@@ -1604,7 +1604,7 @@ class Data
         $return['errorString'] = __(
             'An error occurred during the payment information retrieval from Resurs Bank so we can ' .
             'not show the current order status for the moment.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['ecomException'] = [
             'message' => null,
@@ -1628,7 +1628,7 @@ class Data
             sprintf(
                 __(
                     '%s internal generic exception %s: %s --- File %s, line %s.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 self::getPrefix(),
                 $exception->getCode(),
@@ -1801,7 +1801,7 @@ class Data
                 sprintf(
                     __(
                         'Unable to update order meta in %s - object $order is of wrong type or not an integer.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     __FUNCTION__
                 ),
@@ -1824,7 +1824,7 @@ class Data
                 $currentPriceDecimals = wc_get_price_decimals();
                 if ($currentPriceDecimals < 2 && self::getResursOption('prevent_rounding_panic')) {
                     $settings[] = [
-                        'title' => __('Number of decimals headsup message', 'trbwc'),
+                        'title' => __('Number of decimals headsup message', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                         'type' => 'decimal_warning',
                         'desc' => 'Description',
                     ];
@@ -1976,7 +1976,7 @@ class Data
                     'code' => 401,
                     'message' => __(
                         'Received an error message from Resurs Bank that indicates that you credentials are incorrect.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ]
             )

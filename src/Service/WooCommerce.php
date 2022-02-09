@@ -160,7 +160,7 @@ class WooCommerce
                         __(
                             'The country (%s) this customer is using are not matching the one currently set in ' .
                             'WooCommerce (%s). It is not guaranteed that all payment methods is shown in this mode.',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $customerCountry,
                         get_option('woocommerce_default_country')
@@ -315,7 +315,7 @@ class WooCommerce
                 [
                     'wooPlug22VersionInfo' => __(
                         'Order has not been created by this plugin and the original plugin is currently unavailable.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ]
             );
@@ -343,7 +343,7 @@ class WooCommerce
                 Data::setLogInternal(
                     Data::LOG_NOTICE,
                     sprintf(
-                        __('EComPHP data present. Saving metadata for order %s.', 'trbwc'),
+                        __('EComPHP data present. Saving metadata for order %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                         $orderData['order']->get_id()
                     )
                 );
@@ -430,9 +430,9 @@ class WooCommerce
                     'This payment is marked with reference problems. This means that there might have been ' .
                     'problems when the payment was executed and tried to update the payment reference (%s) to a new ' .
                     'id (%s). You can check the UpdatePaymentReference values for errors.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                $orderData['resurs_secondary'] ?? __('[missing reference]', 'trbwc'),
+                $orderData['resurs_secondary'] ?? __('[missing reference]', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $orderData['resurs']
             );
         }
@@ -638,7 +638,7 @@ class WooCommerce
         Data::canLog(
             Data::CAN_LOG_JUNK,
             sprintf(
-                __('Session value %s set to %s.', 'trbwc'),
+                __('Session value %s set to %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 self::$inCheckoutKey,
                 $customerIsInCheckout ? 'true' : 'false'
             )
@@ -805,7 +805,7 @@ class WooCommerce
 
         Data::setLogNotice(
             sprintf(
-                __('Callback (%s) Handling for %s finished.', 'trbwc'),
+                __('Callback (%s) Handling for %s finished.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $callbackType,
                 $pRequest
             )
@@ -872,10 +872,10 @@ class WooCommerce
         return sprintf(
             __(
                 'Callback received from Resurs Bank: %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
             self::getRequest('c'),
-            $getConfirmedSalt ? __('Valid', 'trbwc') : __('Invalid', 'trbwc'),
+            $getConfirmedSalt ? __('Valid', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __('Invalid', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
             self::getRequest('p'),
             Data::getOrderByEcomRef(self::getRequest('p'))
         );
@@ -976,7 +976,7 @@ class WooCommerce
                     __(
                         'Callback with parameter %s received, but failed because $order could not ' .
                         'instantiate and remained null.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     $pRequest
                 )
@@ -1076,7 +1076,7 @@ class WooCommerce
                     $order,
                     __(
                         'Resurs Bank order status update indicates direct debited payment method.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     )
                 );
             }
@@ -1084,7 +1084,7 @@ class WooCommerce
             self::setOrderNote(
                 $order,
                 sprintf(
-                    __('Order status update to %s has been queued.', 'trbwc'),
+                    __('Order status update to %s has been queued.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $requestedStatus
                 )
             );
@@ -1094,7 +1094,7 @@ class WooCommerce
                 $order,
                 $requestedStatus,
                 sprintf(
-                    __('Resurs Bank queued order update: Change from %s to %s from queue.', 'trbwc'),
+                    __('Resurs Bank queued order update: Change from %s to %s from queue.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $currentStatus,
                     $requestedStatus
                 )
@@ -1106,7 +1106,7 @@ class WooCommerce
                     __FUNCTION__,
                     $requestedStatus
                 ),
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
             $return = self::setOrderNote(
                 $order,
@@ -1283,7 +1283,7 @@ class WooCommerce
         } catch (Exception $e) {
             Data::setLogError(
                 sprintf(
-                    __('Exception (%s) from %s: %s.', 'trbwc'),
+                    __('Exception (%s) from %s: %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $e->getCode(),
                     __FUNCTION__,
                     $e->getMessage()

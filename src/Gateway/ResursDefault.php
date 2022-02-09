@@ -192,9 +192,9 @@ class ResursDefault extends WC_Payment_Gateway
         $this->cart = $woocommerce->cart ?? null;
         $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
-        $this->method_title = __('Resurs Bank', 'trbwc');
-        $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'trbwc');
-        $this->title = __('Resurs Bank AB', 'trbwc');
+        $this->method_title = __('Resurs Bank', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $this->title = __('Resurs Bank AB', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $this->setPaymentMethodInformation($resursPaymentMethodObject);
         $this->has_fields = (
             Data::getCheckoutType() === self::TYPE_SIMPLIFIED ||
@@ -585,7 +585,7 @@ class ResursDefault extends WC_Payment_Gateway
                         __(
                             'An error (%s, code %s) occurred during the iframe creation. Retrying with a new ' .
                             'payment id.',
-                            'trbwc'
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $e->getMessage(),
                         $e->getCode()
@@ -817,14 +817,14 @@ class ResursDefault extends WC_Payment_Gateway
         Data::setDeveloperLog(
             __FUNCTION__,
             sprintf(
-                __('Base URL for signing: %s', 'trbwc'),
+                __('Base URL for signing: %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $signingBaseUrl
             )
         );
         Data::setDeveloperLog(
             __FUNCTION__,
             sprintf(
-                __('Signing parameters for %s: %s', 'trbwc'),
+                __('Signing parameters for %s: %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $signingBaseUrl,
                 print_r($this->getApiData((array)$params), true)
             )
@@ -929,12 +929,12 @@ class ResursDefault extends WC_Payment_Gateway
         } else {
             Data::setLogError(
                 sprintf(
-                    __('%s: Could not create order from an empty cart.', 'trbwc'),
+                    __('%s: Could not create order from an empty cart.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     __FUNCTION__
                 )
             );
             throw new RuntimeException(
-                __('Cart is empty!', 'trbwc')
+                __('Cart is empty!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
             );
         }
 
@@ -1057,7 +1057,7 @@ class ResursDefault extends WC_Payment_Gateway
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
-                    __('Reusing preferred payment id "%s" for customer, age %d seconds old.', 'trbwc'),
+                    __('Reusing preferred payment id "%s" for customer, age %d seconds old.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $lastRcoOrderId,
                     $this->getRcoPaymentIdTooOld(true)
                 )
@@ -1067,7 +1067,7 @@ class ResursDefault extends WC_Payment_Gateway
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
-                    __('Preferred payment id set to "%s" for customer.', 'trbwc'),
+                    __('Preferred payment id set to "%s" for customer.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $paymentId
                 )
             );
@@ -1140,7 +1140,7 @@ class ResursDefault extends WC_Payment_Gateway
             case 'title':
                 $return = !empty($useTitle = $productObject->get_title()) ? $useTitle : __(
                     'Article description is missing.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 );
                 break;
             case 'unitAmountWithoutVat':
@@ -1541,7 +1541,7 @@ class ResursDefault extends WC_Payment_Gateway
                         WooCommerce::setOrderNote(
                             $order,
                             sprintf(
-                                __('Order reference updated (updatePaymentReference) with no errors.', 'trbwc')
+                                __('Order reference updated (updatePaymentReference) with no errors.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                             )
                         );
                         // If order id is updated properly, our session based order id should also be updated in case
@@ -1551,7 +1551,7 @@ class ResursDefault extends WC_Payment_Gateway
                         WooCommerce::setOrderNote(
                             $order,
                             sprintf(
-                                __('Order reference not updated: Reference is already updated.', 'trbwc')
+                                __('Order reference not updated: Reference is already updated.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                             )
                         );
                     }
@@ -1567,7 +1567,7 @@ class ResursDefault extends WC_Payment_Gateway
                     WooCommerce::setOrderNote(
                         $order,
                         sprintf(
-                            __('updatePaymentReference failure (code %s): %s.', 'trbwc'),
+                            __('updatePaymentReference failure (code %s): %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                             $e->getCode(),
                             $e->getMessage()
                         )
@@ -1617,7 +1617,7 @@ class ResursDefault extends WC_Payment_Gateway
             WooCommerce::setOrderNote(
                 $this->order,
                 sprintf(
-                    __('Resurs Bank processing order (%s).', 'trbwc'),
+                    __('Resurs Bank processing order (%s).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $checkoutRequestType
                 )
             );
@@ -1627,7 +1627,7 @@ class ResursDefault extends WC_Payment_Gateway
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
-                    __('%s: Initialize Resurs Bank process, order %s (%s) via %s.', 'trbwc'),
+                    __('%s: Initialize Resurs Bank process, order %s (%s) via %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     __FUNCTION__,
                     $this->order->get_id(),
                     $this->getPaymentId(),
@@ -1654,7 +1654,7 @@ class ResursDefault extends WC_Payment_Gateway
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
-                    __('%s: Order %s returned "%s" to WooCommerce.', 'trbwc'),
+                    __('%s: Order %s returned "%s" to WooCommerce.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     __FUNCTION__,
                     $order->get_id(),
                     $return['result']
@@ -1663,7 +1663,7 @@ class ResursDefault extends WC_Payment_Gateway
         } else {
             Data::setLogError(
                 sprintf(
-                    __('$return is not an object as expected in function %s (Checkout request type is %s).', 'trbwc'),
+                    __('$return is not an object as expected in function %s (Checkout request type is %s).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     __FUNCTION__,
                     $checkoutRequestType
                 )
@@ -1709,10 +1709,10 @@ class ResursDefault extends WC_Payment_Gateway
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
-                    __('API data request: %s.', 'trbwc'),
+                    __('API data request: %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $this->apiData['isReturningCustomer'] ?
-                        __('Customer returned from Resurs Bank. WooCommerce order validation in progress.', 'trbwc') :
-                        __('wc_order_id + preferred_id not present', 'trbwc')
+                        __('Customer returned from Resurs Bank. WooCommerce order validation in progress.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') :
+                        __('wc_order_id + preferred_id not present', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                 )
             );
             $this->wcOrderData = Data::getOrderInfo($this->order);
@@ -1745,7 +1745,7 @@ class ResursDefault extends WC_Payment_Gateway
                                 __(
                                     'Session value rco_order_id has been reset after successful ' .
                                     'return to landing page.',
-                                    'trbwc'
+                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                                 )
                             );
                         }
@@ -1782,7 +1782,7 @@ class ResursDefault extends WC_Payment_Gateway
         Data::canLog(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
-                __('Finishing. Ready to redirect customer. Using URL %s', 'trbwc'),
+                __('Finishing. Ready to redirect customer. Using URL %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 $finalRedirectUrl
             )
         );
@@ -1938,7 +1938,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function setFinalSigningNotes($bookSignedOrderReference)
     {
         $customerSignedMessage = sprintf(
-            __('Customer returned from Resurs Bank to complete order %s.', 'trbwc'),
+            __('Customer returned from Resurs Bank to complete order %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
             $bookSignedOrderReference
         );
         Data::canLog(
@@ -1973,7 +1973,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->setSigningMarked();
                 $this->updateOrderStatus(
                     self::STATUS_FINALIZED,
-                    __('Order is debited and completed.', 'trbwc')
+                    __('Order is debited and completed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                 );
                 $return = $this->getResult('success');
                 break;
@@ -1981,7 +1981,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->setSigningMarked();
                 $this->updateOrderStatus(
                     self::STATUS_BOOKED,
-                    __('Order is booked and ready to handle.', 'trbwc')
+                    __('Order is booked and ready to handle.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                 );
                 $return = $this->getResult('success');
                 break;
@@ -1989,7 +1989,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->setSigningMarked();
                 $this->updateOrderStatus(
                     self::STATUS_FROZEN,
-                    __('Order is frozen and waiting for manual inspection.', 'trbwc')
+                    __('Order is frozen and waiting for manual inspection.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                 );
                 $return = $this->getResult('success');
                 break;
@@ -1997,7 +1997,7 @@ class ResursDefault extends WC_Payment_Gateway
                 Data::setOrderMeta($this->order, 'signingRedirectTime', strftime('%Y-%m-%d %H:%M:%S', time()));
                 $this->updateOrderStatus(
                     self::STATUS_SIGNING,
-                    __('Resurs Bank requires external handling/signing on this order. Customer redirected.', 'trbwc')
+                    __('Resurs Bank requires external handling/signing on this order. Customer redirected.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
                 );
                 $return = $this->getResult('success', $this->getBookSigningUrl());
                 break;
@@ -2007,14 +2007,14 @@ class ResursDefault extends WC_Payment_Gateway
                 WooCommerce::setOrderNote(
                     $this->order,
                     sprintf(
-                        __('The booking failed with status %s. Customer notified in checkout.', 'trbwc'),
+                        __('The booking failed with status %s. Customer notified in checkout.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                         $this->getBookPaymentStatus()
                     )
                 );
                 wc_add_notice(
                     __(
                         'The payment can not complete. Contact customer services for more information.',
-                        'trbwc'
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'error'
                 );
@@ -2102,7 +2102,7 @@ class ResursDefault extends WC_Payment_Gateway
                         __FUNCTION__,
                         $woocommerceStatus
                     ),
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 );
                 WooCommerce::setOrderNote(
                     $this->order,
@@ -2159,7 +2159,7 @@ class ResursDefault extends WC_Payment_Gateway
                 __(
                     'Booking this signed payment has been running multiple times but failed ' .
                     'with exception %s.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $lastExceptionCode
             )
@@ -2169,7 +2169,7 @@ class ResursDefault extends WC_Payment_Gateway
                 __(
                     'Tried to book signed payment but skipped: This has happened before and an ' .
                     'exception with code %d occurred that time.',
-                    'trbwc'
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $lastExceptionCode
             )
@@ -2205,13 +2205,13 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $return = __(
             'Could not complete your order. Please contact support for more information.',
-            'trbwc'
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
 
         if ($signing) {
             $return = (string)__(
                 'Could not complete order due to signing problems.',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
         }
 
@@ -2228,10 +2228,10 @@ class ResursDefault extends WC_Payment_Gateway
         return sprintf(
             __(
                 'Customer returned via urlType "%s" - failed or cancelled payment (signing required: %s).',
-                'trbwc'
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
             $this->getUrlType(),
-            $signing ? __('Yes', 'trbwc') : __('No', 'trbwc')
+            $signing ? __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __('No', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );
     }
 
