@@ -55,7 +55,7 @@ class OrderStatus
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_RESPONSE_TEST_OK = 200;
+    const HTTP_RESPONSE_TEST_OK = 202;
 
     /**
      * What we handle through static calls.
