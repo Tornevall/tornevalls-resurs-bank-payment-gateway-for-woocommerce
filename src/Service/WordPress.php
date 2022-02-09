@@ -757,7 +757,10 @@ class WordPress
         $return['spin'] = Data::getImage('spin.gif');
         $return['success'] = __('Successful.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['failed'] = __('Failed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
-        $return['reloading'] = __('Please wait while reloading...', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $return['reloading'] = __(
+            'Please wait while reloading...',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
         $return['nonce_error'] = __(
             'The page security (nonce) is reportedly expired or wrong. This can also be caused by the ' .
             'fact that you have already interacted with the page you are trying to update information on. ' .

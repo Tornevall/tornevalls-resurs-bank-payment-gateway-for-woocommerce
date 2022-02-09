@@ -343,7 +343,10 @@ class WooCommerce
                 Data::setLogInternal(
                     Data::LOG_NOTICE,
                     sprintf(
-                        __('EComPHP data present. Saving metadata for order %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        __(
+                            'EComPHP data present. Saving metadata for order %s.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
                         $orderData['order']->get_id()
                     )
                 );
@@ -432,7 +435,10 @@ class WooCommerce
                     'id (%s). You can check the UpdatePaymentReference values for errors.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                $orderData['resurs_secondary'] ?? __('[missing reference]', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                $orderData['resurs_secondary'] ?? __(
+                    '[missing reference]',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 $orderData['resurs']
             );
         }
@@ -638,7 +644,10 @@ class WooCommerce
         Data::canLog(
             Data::CAN_LOG_JUNK,
             sprintf(
-                __('Session value %s set to %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                __(
+                    'Session value %s set to %s.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 self::$inCheckoutKey,
                 $customerIsInCheckout ? 'true' : 'false'
             )
@@ -805,7 +814,10 @@ class WooCommerce
 
         Data::setLogNotice(
             sprintf(
-                __('Callback (%s) Handling for %s finished.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                __(
+                    'Callback (%s) Handling for %s finished.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 $callbackType,
                 $pRequest
             )
@@ -875,7 +887,13 @@ class WooCommerce
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
             self::getRequest('c'),
-            $getConfirmedSalt ? __('Valid', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __('Invalid', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            $getConfirmedSalt ? __(
+                'Valid',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) : __(
+                'Invalid',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
             self::getRequest('p'),
             Data::getOrderByEcomRef(self::getRequest('p'))
         );
@@ -1084,7 +1102,10 @@ class WooCommerce
             self::setOrderNote(
                 $order,
                 sprintf(
-                    __('Order status update to %s has been queued.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    __(
+                        'Order status update to %s has been queued.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                     $requestedStatus
                 )
             );
@@ -1094,7 +1115,10 @@ class WooCommerce
                 $order,
                 $requestedStatus,
                 sprintf(
-                    __('Resurs Bank queued order update: Change from %s to %s from queue.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    __(
+                        'Resurs Bank queued order update: Change from %s to %s from queue.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                     $currentStatus,
                     $requestedStatus
                 )

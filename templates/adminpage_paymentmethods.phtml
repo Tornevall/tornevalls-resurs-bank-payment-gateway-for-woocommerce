@@ -1,7 +1,12 @@
 <h3>
     <?php
+
     use Resursbank\Ecommerce\Service\Merchant\Model\Method;
-    _e(sprintf('Available payment methods (Environment %s)', $environment), 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h3>
+
+    _e(sprintf(
+        'Available payment methods (Environment %s)', $environment),
+        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+    ); ?></h3>
 
 <?php
 // $silentAnnuityException
@@ -26,13 +31,36 @@
 
     <table width="100%" style="border: none;">
         <tr>
-            <td width="20%" class="resursMethodHead"><?php _e('Method ID', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></td>
-            <td width="20%" class="resursMethodHead"><?php _e('Description', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></td>
-            <td width="10%" class="resursMethodHead"><?php _e('Amount limits', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></td>
-            <td width="20%" class="resursMethodHead"><?php _e('Method type', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></td>
-            <td width="10%" class="resursMethodHead"><?php _e('Customer types', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></td>
-            <td width="20%" class="resursMethodHead"><?php _e('Part payment options', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></td>
-            <!--<td width="20%" class="resursMethodHead"><?php _e('Payment Fee', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></td>-->
+            <td width="20%" class="resursMethodHead"><?php _e(
+                    'Method ID',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+            <td width="20%" class="resursMethodHead"><?php _e(
+                    'Description',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+            <td width="10%" class="resursMethodHead"><?php _e(
+                    'Amount limits',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+            <td width="20%" class="resursMethodHead"><?php _e(
+                    'Method type',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+            <td width="10%" class="resursMethodHead"><?php _e(
+                    'Customer types',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+            <td width="20%" class="resursMethodHead"><?php _e(
+                    'Part payment options',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+            <!--<td width="20%" class="resursMethodHead">
+            <?php _e(
+                'Payment Fee',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) ?>
+            </td>-->
         </tr>
         <?php
         if (is_array($paymentMethods) && count($paymentMethods)) {
@@ -81,7 +109,8 @@
                             if (!empty($annuityException) && $annuityException instanceof Exception) {
                                 printf(
                                     __(
-                                        'Received error from annuity factors request: %s (%d)', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                        'Received error from annuity factors request: %s (%d)',
+                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                                     ),
                                     $annuityException->getMessage(),
                                     $annuityException->getCode()

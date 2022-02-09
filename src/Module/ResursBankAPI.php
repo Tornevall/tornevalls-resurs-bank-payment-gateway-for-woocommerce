@@ -184,7 +184,10 @@ class ResursBankAPI
                         if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
                             Data::setDeveloperLog(
                                 __FUNCTION__,
-                                __('Merchant API token renewed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                                __(
+                                    'Merchant API token renewed.',
+                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                )
                             );
                             $livingTransientToken = $tokenRequestData->getAccessToken();
                             set_transient(
@@ -197,7 +200,10 @@ class ResursBankAPI
                         $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
                         Data::setDeveloperLog(
                             __FUNCTION__,
-                            __('Merchant API token reused.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                            __(
+                                'Merchant API token reused.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            )
                         );
                     }
                 }

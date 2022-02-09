@@ -566,7 +566,10 @@ class Data
                 WordPress::applyFilters(
                     'partPaymentString',
                     sprintf(
-                        __('Part pay from %s per month. | %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        __(
+                            'Part pay from %s per month. | %s',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
                         self::getWcPriceSpan($monthlyPrice),
                         self::getReadMoreString($annuityPaymentMethod, $monthlyPrice)
                     )
@@ -758,7 +761,8 @@ class Data
             </span>',
             $annuityPaymentMethod['id'],
             $monthlyPrice,
-            WordPress::applyFilters('partPaymentReadMoreString', __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'))
+            WordPress::applyFilters('partPaymentReadMoreString',
+                __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'))
         );
     }
 
@@ -1063,11 +1067,15 @@ class Data
                 WooCommerce::getWooCommerceVersion(),
                 WooCommerce::getRequiredVersion()
             ),
-            __('Composer version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getVersionByComposer(),
+            __('Composer version',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getVersionByComposer(),
             __('PHP Version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => PHP_VERSION,
-            __('Webservice Library', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
-            __('Communication Library', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => 'netcurl-' . $netWrapper->getVersion(),
-            __('Communication Drivers', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => implode('<br>', self::getWrapperList($netWrapper)),
+            __('Webservice Library',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
+            __('Communication Library',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => 'netcurl-' . $netWrapper->getVersion(),
+            __('Communication Drivers', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => implode('<br>',
+                self::getWrapperList($netWrapper)),
         ];
 
         $renderData += WordPress::applyFilters('renderInformationData', $renderData);
@@ -1160,7 +1168,8 @@ class Data
         if ($dataEncryptionState instanceof Exception) {
             self::setLogNotice(
                 sprintf(
-                    __('%s failed encryption (%d): %s. Failover to base64.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    __('%s failed encryption (%d): %s. Failover to base64.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     __FUNCTION__,
                     $dataEncryptionState->getCode(),
                     $dataEncryptionState->getMessage()
@@ -1824,7 +1833,8 @@ class Data
                 $currentPriceDecimals = wc_get_price_decimals();
                 if ($currentPriceDecimals < 2 && self::getResursOption('prevent_rounding_panic')) {
                     $settings[] = [
-                        'title' => __('Number of decimals headsup message', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'title' => __('Number of decimals headsup message',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                         'type' => 'decimal_warning',
                         'desc' => 'Description',
                     ];

@@ -53,10 +53,16 @@ class FormFields extends WC_Settings_API
         /** @noinspection HtmlUnknownTarget */
         $formFields = [
             'basic' => [
-                'title' => __('Basic Resurs Bank API Settings', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                'title' => __(
+                    'Basic Resurs Bank API Settings',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 'enabled' => [
                     'id' => 'enabled',
-                    'title' => __('Enable plugin checkout functions', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'title' => __(
+                        'Enable plugin checkout functions',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                     'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'type' => 'checkbox',
                     'label' => __('Enable Resurs Bank', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),

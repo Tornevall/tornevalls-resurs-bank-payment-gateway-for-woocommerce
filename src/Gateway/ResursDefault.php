@@ -192,7 +192,10 @@ class ResursDefault extends WC_Payment_Gateway
         $this->cart = $woocommerce->cart ?? null;
         $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
-        $this->method_title = __('Resurs Bank', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $this->method_title = __(
+            'Resurs Bank',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
         $this->method_description = __('Resurs Bank Payment Gateway with dynamic payment methods.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $this->title = __('Resurs Bank AB', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $this->setPaymentMethodInformation($resursPaymentMethodObject);

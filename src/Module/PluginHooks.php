@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
+
 /** @noinspection PhpUsageOfSilenceOperatorInspection */
 
 namespace ResursBank\Module;
@@ -506,7 +507,13 @@ class PluginHooks
                             $fullAfterShopRequest
                         );
                         $afterShopResponseString = $finalizeResponse ?
-                            __('Success.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __('Failed without receiving any exception.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+                            __(
+                                'Success.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ) : __(
+                                'Failed without receiving any exception.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            );
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
                     }
@@ -532,7 +539,13 @@ class PluginHooks
                             $fullAfterShopRequest
                         );
                         $afterShopResponseString = $cancelResponse ?
-                            __('Success.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __('Failed without receiving any exception.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+                            __(
+                                'Success.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ) : __(
+                                'Failed without receiving any exception.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            );
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
                     }
@@ -639,11 +652,17 @@ class PluginHooks
             } catch (Exception $e) {
                 Data::setLogException($e);
                 $return = [
-                    'default' => __('Payment Methods are currently unavailable!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'default' => __(
+                        'Payment Methods are currently unavailable!',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                 ];
             }
             if (isset($paymentMethodList) && is_array($paymentMethodList)) {
-                $return['default'] = __('Default (Choice made by plugin)', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+                $return['default'] = __(
+                    'Default (Choice made by plugin)',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
                 foreach ($paymentMethodList as $method) {
                     if ($method->type === 'PAYMENT_PROVIDER') {
                         $return[$method->specificType] = $method->specificType;
