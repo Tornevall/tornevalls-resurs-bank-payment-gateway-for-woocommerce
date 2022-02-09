@@ -899,11 +899,11 @@ class PluginApi
     /**
      * Trigger TEST callback at Resurs Bank.
      *
-     * @return bool
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getTriggerTest(): bool
+    public static function getTriggerTest(): array
     {
         Data::setResursOption('resurs_callback_test_response', null);
         $return = WordPress::applyFiltersDeprecated('resurs_trigger_test_callback', null);
