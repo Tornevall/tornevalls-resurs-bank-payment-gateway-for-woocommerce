@@ -558,8 +558,7 @@ class ResursBankAPI
         // fail. This feature turned out to fix an important bug. We also knows that requesting payment
         // methods can also affect admin panel if Resurs Bank throws an exception if the method request
         // is failing at this point (since we're cleaning up the storage).
-        if (isset($_REQUEST['section']) &&
-            $_REQUEST['section'] === 'payment_methods' &&
+        if (Data::getRequest('section') === 'payment_methods' &&
             !WooCommerce::getSessionValue('rb_requesting_debit_methods') &&
             Data::canMock('getEmptyPaymentMethodsException')
         ) {
@@ -579,7 +578,7 @@ class ResursBankAPI
 
         if (!$fromStorage || empty($return)) {
             try {
-                if (isset($_REQUEST['section']) && $_REQUEST['section'] === 'payment_methods') {
+                if (Data::getRequest('section') === 'payment_methods') {
                     // Also this part is used for the specific admin section.
                     WooCommerce::applyMock('getPaymentMethodsException');
                 }

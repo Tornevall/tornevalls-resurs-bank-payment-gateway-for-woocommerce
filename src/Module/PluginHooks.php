@@ -642,8 +642,7 @@ class PluginHooks
         // If we are saving or are somewhere else than in the payment methods section, we don't need
         // to run this controller as it is only used for visuals.
         if (!isset($_REQUEST['save']) &&
-            isset($_REQUEST['section']) &&
-            $_REQUEST['section'] === 'payment_methods'
+            Data::getRequest('section') === 'payment_methods'
         ) {
             try {
                 // Get payment methods locally for this request. We don't have to fetch

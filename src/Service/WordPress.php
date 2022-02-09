@@ -132,7 +132,7 @@ class WordPress
      */
     private static function setupActions()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = Data::getRequest('action');
         add_action('admin_notices', '\ResursBank\Service\WordPress::getAdminNotices');
         add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
@@ -424,9 +424,9 @@ class WordPress
         if ($isAjax) {
             // Allow life in ajax calls.
             $return = false;
-        } elseif ($return && self::getRequest('post')) {
+        } elseif ($return && Data::getRequest('post')) {
             $return = false;
-        } elseif ($return && self::getRequest('wc-api') === 'WC_Resurs_Bank') {
+        } elseif ($return && Data::getRequest('wc-api') === 'WC_Resurs_Bank') {
             $return = false;
         } elseif ($return) {
             // Find more places that could be necessary to enable the plugin.
@@ -445,10 +445,10 @@ class WordPress
     {
         $return = Data::getResursOption('priorVersionsDisabled');
         $appearance = self::getPriorVersionDisabledAppearances();
-        $section = self::getRequest('section');
-        $page = self::getRequest('page');
-        $tab = self::getRequest('tab');
-        $action = self::getRequest('action');
+        $section = Data::getRequest('section');
+        $page = Data::getRequest('page');
+        $tab = Data::getRequest('tab');
+        $action = Data::getRequest('action');
         $isInPageSection = in_array($page, $appearance['in'], true) ||
             in_array($section, $appearance['in'], true) ||
             in_array($action, $appearance['in'], true) ||
@@ -483,16 +483,6 @@ class WordPress
                 sprintf('%s_admin', Data::getPrefix()),
             ],
         ];
-    }
-
-    /**
-     * @param $request
-     * @return mixed|string
-     * @since 0.0.1.0
-     */
-    private static function getRequest($request)
-    {
-        return $_REQUEST[$request] ?? '';
     }
 
     /**

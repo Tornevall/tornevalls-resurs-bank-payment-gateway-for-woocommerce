@@ -16,6 +16,7 @@ use stdClass;
 use TorneLIB\Data\Aes;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\IO\Data\Arrays;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
@@ -1935,7 +1936,7 @@ class Data
      */
     private static function setCustomerTypeToSession()
     {
-        $customerTypeByGetAddress = WooCommerce::getRequest('resursSsnCustomerType', true);
+        $customerTypeByGetAddress = Data::getRequest('resursSsnCustomerType', true);
 
         if (!empty($customerTypeByGetAddress)) {
             WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
@@ -1949,9 +1950,80 @@ class Data
     private static function getCustomerTypeFromSession()
     {
         $return = WooCommerce::getSessionValue('resursSsnCustomerType');
-        $customerTypeByCompanyName = WooCommerce::getRequest('billing_company', true);
+        $customerTypeByCompanyName = self::getRequest('billing_company', true);
 
         return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+    }
+
+    /**
+     * @param $key
+     * @param bool|array $post_data
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getRequest($key, $post_data = null)
+    {
+        if (is_array($post_data)) {
+            $requestArray = $post_data;
+        } else {
+            $requestArray = $_REQUEST;
+        }
+        $request = self::getSanitizedRequest($requestArray);
+        $return = $request[$key] ?? null;
+
+        if ($return === null && (bool)$post_data && isset($_REQUEST['post_data'])) {
+            parse_str($_REQUEST['post_data'], $newPostData);
+            if (is_array($newPostData)) {
+                $newPostData = self::getSanitizedArray($newPostData);
+                $return = $newPostData[$key];
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * $_REQUEST-sanitizer.
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getSanitizedRequest($requestArray)
+    {
+        $returnRequest = [];
+        if (is_array($requestArray)) {
+            $returnRequest = self::getSanitizedArray($requestArray);
+        }
+        return $returnRequest;
+    }
+
+    /**
+     * Recursive string sanitizer.
+     *
+     * @param $array
+     * @since 0.0.1.0
+     */
+    public static function getSanitizedArray($array) {
+        $arrays = new Arrays();
+        $returnArray = [];
+        if ($arrays->isAssoc($array)) {
+            foreach ($array as $arrayKey => $arrayValue) {
+                if (is_array($arrayValue)) {
+                    $returnArray[$arrayKey] = self::getSanitizedArray($arrayValue);
+                } elseif (is_string($arrayValue)) {
+                    $returnArray[$arrayKey] = sanitize_text_field($arrayValue);
+                }
+            }
+        } elseif ($array) {
+            foreach ($array as $item) {
+                if (is_array($item)) {
+                    $returnArray[] = self::getSanitizedArray($arrayValue);
+                } elseif (is_string($item)) {
+                    $returnArray[] = sanitize_text_field($item);
+                }
+            }
+        }
+
+        return $returnArray;
     }
 
     /**

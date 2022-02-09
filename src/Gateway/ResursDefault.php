@@ -343,7 +343,10 @@ class ResursDefault extends WC_Payment_Gateway
         $return = [];
         // Skip the scraping if this is not a payment.
         if ($this->isPaymentReady()) {
-            foreach ($_REQUEST as $requestKey => $requestValue) {
+            $saneRequest = Data::getSanitizedRequest($_REQUEST);
+            foreach ($saneRequest as $requestKey => $requestValue) {
+                // Note: When we pass through here, via the OrderHandler, this matching is not really
+                // necessary.
                 if (preg_match(sprintf('/%s$/', $realMethodId), $requestKey)) {
                     $applicantDataKey = (string)preg_replace(
                         sprintf(
@@ -372,6 +375,8 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Validate if payment is ready.
+     *
      * @return bool
      * @since 0.0.1.0
      */
@@ -752,6 +757,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getCustomerData($key, $returnType = null): string
     {
+        // applicantPostData has been sanitized before reaching this point.
         $return = $this->applicantPostData[$key] ?? '';
 
         if ($key === 'mobile' && isset($return['phone']) && !$return) {
@@ -1332,8 +1338,8 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $_REQUEST['tab'] = Data::getPrefix('admin');
         $url = admin_url('admin.php');
-        $url = add_query_arg('page', $_REQUEST['page'], $url);
-        $url = add_query_arg('tab', $_REQUEST['tab'], $url);
+        $url = add_query_arg('page', Data::getRequest('page'), $url);
+        $url = add_query_arg('tab', Data::getRequest('tab'), $url);
         wp_safe_redirect($url);
         die('Deprecated space');
     }
@@ -1693,7 +1699,7 @@ class ResursDefault extends WC_Payment_Gateway
         if (isset($_REQUEST['apiData'])) {
             $this->getApiByRco();
             $this->setApiData(json_decode(
-                (new Strings())->base64urlDecode($_REQUEST['apiData']),
+                (new Strings())->base64urlDecode(Data::getRequest('apiData')),
                 true
             ));
 
@@ -1806,7 +1812,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function getApiByRco(): self
     {
         $baseHandler = new Strings();
-        $apiRequestContent = json_decode($baseHandler->base64urlDecode($_REQUEST['apiData']), true);
+        $apiRequestContent = json_decode($baseHandler->base64urlDecode(Data::getRequest('apiData')), true);
 
         if ($apiRequestContent['checkoutType'] === self::TYPE_RCO) {
             $requestSession = [

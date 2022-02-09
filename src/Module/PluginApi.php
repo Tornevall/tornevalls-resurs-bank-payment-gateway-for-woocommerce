@@ -74,9 +74,7 @@ class PluginApi
      */
     private static function getAction(): string
     {
-        $action = isset($_REQUEST['action']) ? (string)$_REQUEST['action'] : '';
-
-        return (new Strings())->getCamelCase(self::getTrimmedActionString($action));
+        return (new Strings())->getCamelCase(self::getTrimmedActionString(Data::getRequest('action')));
     }
 
     /**
@@ -217,7 +215,7 @@ class PluginApi
      */
     private static function getParam($key)
     {
-        return $_REQUEST[$key] ?? '';
+        return Data::getRequest($key);
     }
 
     /**
@@ -231,8 +229,8 @@ class PluginApi
         $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
         $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
 
-        $method = WooCommerce::getRequest('method');
-        $total = WooCommerce::getRequest('total');
+        $method = Data::getRequest('method');
+        $total = Data::getRequest('total');
         if (Data::getCustomerCountry() !== 'DK') {
             $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation($method, $total, true, true);
         } else {
@@ -277,7 +275,7 @@ class PluginApi
     public static function checkoutCreateOrder(): array
     {
         $return = [];
-        WooCommerce::setSessionValue('rco_customer_session_request', $_REQUEST['rco_customer']);
+        WooCommerce::setSessionValue('rco_customer_session_request', Data::getRequest('rco_customer'));
 
         $finalCartTotal = WC()->cart->total;
         $lastSeenCartTotal = WooCommerce::getSessionValue('customerCartTotal');
@@ -361,8 +359,8 @@ class PluginApi
     {
         foreach ($checkoutCustomer as $item => $value) {
             $itemVar = sprintf('%s_%s', $type, $item);
-            $_REQUEST[$itemVar] = $value;
-            $_POST[$itemVar] = $value;
+            $_REQUEST[$itemVar] = sanitize_text_field($value);
+            $_POST[$itemVar] = sanitize_text_field($value);
         }
     }
 
@@ -663,17 +661,17 @@ class PluginApi
     {
         //self::getValidatedNonce();
 
-        $mode = WooCommerce::getRequest('mode');
+        $mode = Data::getRequest('mode');
 
         switch ($mode) {
             case 'e':
                 Data::setResursOption(
                     'currentAnnuityFactor',
-                    WooCommerce::getRequest('id')
+                    Data::getRequest('id')
                 );
                 Data::setResursOption(
                     'currentAnnuityDuration',
-                    (int)WooCommerce::getRequest('duration')
+                    (int)Data::getRequest('duration')
                 );
                 break;
             case 'd':
@@ -686,9 +684,9 @@ class PluginApi
         // Confirm Request.
         self::reply(
             [
-                'id' => WooCommerce::getRequest('id'),
+                'id' => Data::getRequest('id'),
                 'duration' => Data::getResursOption('currentAnnuityDuration'),
-                'mode' => WooCommerce::getRequest('mode'),
+                'mode' => Data::getRequest('mode'),
             ]
         );
     }
@@ -705,7 +703,7 @@ class PluginApi
             [
                 'price' => wc_price(
                     ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
-                        WooCommerce::getRequest('price'),
+                        Data::getRequest('price'),
                         Data::getResursOption('currentAnnuityFactor'),
                         (int)Data::getResursOption('currentAnnuityDuration')
                     ),
@@ -732,7 +730,7 @@ class PluginApi
             $callbackConstant += $callback;
         }
 
-        $current_tab = WooCommerce::getRequest('t');
+        $current_tab = Data::getRequest('t');
         $hasErrors = false;
         $freshCallbackList = [];
         $e = null;
@@ -835,7 +833,7 @@ class PluginApi
     public static function callbackUnregister()
     {
         $successRemoval = false;
-        $callback = WooCommerce::getRequest('callback');
+        $callback = Data::getRequest('callback');
         $message = '';
         if ((bool)Data::getResursOption('show_developer')) {
             $successRemoval = ResursBankAPI::getResurs()->unregisterEventCallback(
@@ -963,7 +961,7 @@ class PluginApi
     {
         $apiRequest = ResursBankAPI::getResurs();
         $addressResponse = [];
-        $identification = WooCommerce::getRequest('identification');
+        $identification = Data::getRequest('identification');
         $customerType = Data::getCustomerType();
         $customerCountry = Data::getCustomerCountry();
 
@@ -981,7 +979,7 @@ class PluginApi
             'identificationResponse' => [],
         ];
 
-        WooCommerce::setSessionValue('identification', WooCommerce::getRequest('identification'));
+        WooCommerce::setSessionValue('identification', Data::getRequest('identification'));
 
         switch ($customerCountry) {
             case 'NO':
@@ -1080,7 +1078,7 @@ class PluginApi
         $addressFields = WordPress::applyFilters('getAddressFieldController', []);
         foreach ($addressFields as $addressField => $addressTransform) {
             // Check if the session is currently holding something that we want to put up in some fields.
-            $wooSessionData = trim(WooCommerce::getRequest($addressTransform));
+            $wooSessionData = trim(Data::getRequest($addressTransform));
             if (!empty($wooSessionData)) {
                 $addressResponse[$addressTransform] = $wooSessionData;
             }
@@ -1110,7 +1108,7 @@ class PluginApi
             'rejectUpdate' => false,
             'message' => '',
         ];
-        $rejectType = WooCommerce::getRequest('type');
+        $rejectType = Data::getRequest('type');
 
         // Presumably this is available for us to handle the order with.
         $wooOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
