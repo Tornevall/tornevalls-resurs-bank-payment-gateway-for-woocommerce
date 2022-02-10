@@ -385,11 +385,13 @@ class Data
                 $resursApi = ResursBankAPI::getResurs();
                 self::setTimeoutStatus($resursApi, $annuityException);
                 if ($resursApi->hasTimeoutException()) {
-                    echo sprintf(
-                        '<div class="annuityTimeout">%s</div>',
-                        __(
-                            'Resurs Bank price information is currently unavailable right now, due to timed out ' .
-                            'connection. Please try again in a moment.'
+                    echo Data::getEscapedHtml(
+                        sprintf(
+                            '<div class="annuityTimeout">%s</div>',
+                            __(
+                                'Resurs Bank price information is currently unavailable right now, due to timed out ' .
+                                'connection. Please try again in a moment.'
+                            )
                         )
                     );
                 }
@@ -588,17 +590,19 @@ class Data
             );
 
             // Fetch the rest from the template.
-            $annuityTemplate = self::getGenericClass()->getTemplate(
-                'product_annuity.phtml',
-                [
-                    'currency' => get_woocommerce_currency_symbol(),
-                    'monthlyPrice' => $monthlyPrice,
-                    'monthlyDuration' => $annuityDuration,
-                    'partPayString' => $partPayString,
-                    'paymentMethod' => $annuityPaymentMethod,
-                    'isTest' => self::getTestMode(),
-                    'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
-                ]
+            $annuityTemplate = Data::getEscapedHtml(
+                self::getGenericClass()->getTemplate(
+                    'product_annuity.phtml',
+                    [
+                        'currency' => get_woocommerce_currency_symbol(),
+                        'monthlyPrice' => $monthlyPrice,
+                        'monthlyDuration' => $annuityDuration,
+                        'partPayString' => $partPayString,
+                        'paymentMethod' => $annuityPaymentMethod,
+                        'isTest' => self::getTestMode(),
+                        'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
+                    ]
+                )
             );
 
             echo $annuityTemplate;
@@ -647,6 +651,7 @@ class Data
                     'name' => [],
                     'class' => [],
                     'style' => [],
+                    'width' => [],
                 ],
                 'tr' => [
                     'id' => [],
@@ -694,9 +699,12 @@ class Data
                 ],
                 'option' => [],
                 'button' => [
+                    'id' => [],
+                    'name' => [],
                     'class' => [],
                     'style' => [],
                     'onclick' => [],
+                    'type' => [],
                 ],
                 'iframe' => [
                     'src' => [],
@@ -710,7 +718,12 @@ class Data
                     'size' => [],
                     'onkeyup' => [],
                     'value' => [],
+                    'class' => [],
+                    'readonly' => [],
                 ],
+                'h1' => [],
+                'h2' => [],
+                'h3' => [],
             ]
         );
     }

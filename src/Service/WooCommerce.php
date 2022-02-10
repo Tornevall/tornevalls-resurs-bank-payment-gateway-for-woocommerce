@@ -288,7 +288,9 @@ class WooCommerce
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
                         $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
                     }
-                    echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+                    echo Data::getEscapedHtml(
+                        Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
+                    );
                 }
                 // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
                 // if someone wants to create their own view.
@@ -310,14 +312,16 @@ class WooCommerce
             !Data::hasOldGateway() &&
             !Data::getResursOption('deprecated_interference')
         ) {
-            echo Data::getGenericClass()->getTemplate(
-                'adminpage_woocommerce_version22',
-                [
-                    'wooPlug22VersionInfo' => __(
-                        'Order has not been created by this plugin and the original plugin is currently unavailable.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                ]
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate(
+                    'adminpage_woocommerce_version22',
+                    [
+                        'wooPlug22VersionInfo' => __(
+                            'Order has not been created by this plugin and the original plugin is currently unavailable.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
+                    ]
+                )
             );
         }
     }
@@ -490,7 +494,9 @@ class WooCommerce
             Data::canHandleOrder($order->get_payment_method())
         ) {
             $orderData = Data::getOrderInfo($order);
-            echo Data::getGenericClass()->getTemplate('adminpage_billing.phtml', $orderData);
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate('adminpage_billing.phtml', $orderData)
+            );
         }
     }
 
@@ -507,7 +513,9 @@ class WooCommerce
             Data::canHandleOrder($order->get_payment_method())
         ) {
             $orderData = Data::getOrderInfo($order);
-            echo Data::getGenericClass()->getTemplate('adminpage_shipping.phtml', $orderData);
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate('adminpage_shipping.phtml', $orderData)
+            );
         }
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection CompactCanBeUsedInspection */
+
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
 namespace ResursBank\Module;
@@ -240,13 +241,15 @@ class PluginApi
             );
         }
 
-        echo Data::getGenericClass()
-            ->getTemplate(
-                'checkout_costofpurchase_default.phtml',
-                [
-                    'priceInfoHtml' => $priceInfoHtml,
-                ]
-            );
+        echo Data::getEscapedHtml(
+            Data::getGenericClass()
+                ->getTemplate(
+                    'checkout_costofpurchase_default.phtml',
+                    [
+                        'priceInfoHtml' => $priceInfoHtml,
+                    ]
+                )
+        );
 
         die;
     }
@@ -733,7 +736,10 @@ class PluginApi
                 Data::getCredentialNotice();
             } else {
                 if (Data::getTimeoutStatus() > 0) {
-                    $errorMessage .= ' ' . __('Connectivity may be a bit slower than normal.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+                    $errorMessage .= ' ' . __(
+                            'Connectivity may be a bit slower than normal.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        );
                 }
 
                 Data::setResursOption(
@@ -825,7 +831,10 @@ class PluginApi
                 ResursBankAPI::getResurs()->getCallbackTypeByString($callback)
             );
         } else {
-            $message = __('Advanced mode is disabled. You can not make this change.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+            $message = __(
+                'Advanced mode is disabled. You can not make this change.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
         }
 
         self::reply(
@@ -894,7 +903,10 @@ class PluginApi
         $return['html'] = sprintf(
             '<div>%s</div><div id="resursWaitingForTest"></div>',
             sprintf(
-                __('Activated test trigger. Response "%s" received.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                __(
+                    'Activated test trigger. Response "%s" received.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 $return['api'] ? 'success' : 'fail'
             )
         );
@@ -1039,7 +1051,10 @@ class PluginApi
         Data::canLog(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
-                __('getAddress request (country %s, type %s) for %s: %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                __(
+                    'getAddress request (country %s, type %s) for %s: %s',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 $customerCountry,
                 $customerType,
                 $identification,
@@ -1139,7 +1154,10 @@ class PluginApi
             $failNote .= ' ' .
                 WordPress::applyFilters(
                     'purchaseRejectCustomerMessage',
-                    __('Please contact customer service for more information.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                    __(
+                        'Please contact customer service for more information.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    )
                 );
 
             Data::setOrderMeta($currentOrder, 'rco_reject_message', $failNote);

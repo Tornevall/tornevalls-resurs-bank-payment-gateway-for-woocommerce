@@ -2321,10 +2321,12 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getRcoIframe()
     {
-        echo WordPress::applyFilters(
-            'getRcoContainerHtml',
-            sprintf(
-                '<div id="resursbank_rco_container"></div>'
+        echo Data::getEscapedHtml(
+            WordPress::applyFilters(
+                'getRcoContainerHtml',
+                sprintf(
+                    '<div id="resursbank_rco_container"></div>'
+                )
             )
         );
     }

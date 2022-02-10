@@ -283,11 +283,13 @@ class WordPress
             }
         } catch (Exception $e) {
             Data::setLogException($e);
-            echo Data::getGenericClass()->getTemplate(
-                'adminpage_woocommerce_requirement',
-                [
-                    'requiredVersionNotice' => $requiredVersionNotice,
-                ]
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate(
+                    'adminpage_woocommerce_requirement',
+                    [
+                        'requiredVersionNotice' => $requiredVersionNotice,
+                    ]
+                )
             );
         }
 
@@ -395,19 +397,21 @@ class WordPress
      */
     private static function getOldSelfAwareness()
     {
-        echo Data::getGenericClass()->getTemplate(
-            'adminpage_woocommerce_version22',
-            [
-                'wooPlug22VersionInfo' => sprintf(
-                    __(
-                        'It seems that you still have another plugin enabled (%s %s) in this platform that works ' .
-                        'as Resurs Bank Payment Gateway. If this is intended, you can ignore this message.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        echo Data::getEscapedHtml(
+            Data::getGenericClass()->getTemplate(
+                'adminpage_woocommerce_version22',
+                [
+                    'wooPlug22VersionInfo' => sprintf(
+                        __(
+                            'It seems that you still have another plugin enabled (%s %s) in this platform that works ' .
+                            'as Resurs Bank Payment Gateway. If this is intended, you can ignore this message.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
+                        defined('RB_WOO_CLIENTNAME') ? RB_WOO_CLIENTNAME : 'Resurs Bank for WooCommerce',
+                        defined('RB_WOO_VERSION') ? RB_WOO_VERSION : 'v2.x'
                     ),
-                    defined('RB_WOO_CLIENTNAME') ? RB_WOO_CLIENTNAME : 'Resurs Bank for WooCommerce',
-                    defined('RB_WOO_VERSION') ? RB_WOO_VERSION : 'v2.x'
-                ),
-            ]
+                ]
+            )
         );
     }
 
