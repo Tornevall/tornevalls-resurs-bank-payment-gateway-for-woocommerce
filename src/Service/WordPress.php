@@ -47,7 +47,7 @@ class WordPress
     }
 
     /**
-     * Preparing for ajax actions.
+     * AJAX action validation. Without this check, AJAX calls to the plugin handler is not allowed.
      *
      * @since 0.0.1.0
      */
