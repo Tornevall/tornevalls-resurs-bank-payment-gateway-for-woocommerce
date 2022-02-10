@@ -34,6 +34,10 @@ function getResursAdminFields() {
     rbwcAdminNetworkLookup();
 }
 
+/**
+ * is_admin network lookups for Resurs Bank whitelisting help.
+ * @since 0.0.1.1
+ */
 function rbwcAdminNetworkLookup() {
     if ($rQuery('#rbwcNetworkLookup').length > 0) {
         getResursSpin('#rbwcNetworkLookup');
