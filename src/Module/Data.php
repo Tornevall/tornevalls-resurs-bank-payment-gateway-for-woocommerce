@@ -606,6 +606,25 @@ class Data
     }
 
     /**
+     * Case fixed sanitizer, cloned from WordPress own functions, for which we sanitize keys based on
+     * element id's. Resurs Bank is very much built on case-sensitive values for why we want to sanitize
+     * on both lower- and uppercase.
+     * @param $key
+     * @return mixed|void
+     * @since 0.0.1.1
+     */
+    public static function sanitize_key_element($key)
+    {
+        $sanitized_key = '';
+
+        if (is_scalar($key)) {
+            $sanitized_key = preg_replace('/[^a-z0-9_\-]/i', '', $key);
+        }
+
+        return apply_filters('sanitize_key', $sanitized_key, $key);
+    }
+
+    /**
      * Centralized escaper for internal templates.
      *
      * @param $content

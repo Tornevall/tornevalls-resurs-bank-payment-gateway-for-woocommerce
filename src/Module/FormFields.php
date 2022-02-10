@@ -1448,6 +1448,7 @@ class FormFields extends WC_Settings_API
 
         $isFactorEnabled = Data::getResursOption('currentAnnuityFactor');
         $enabled = $isFactorEnabled === $id;
+
         return Data::getGenericClass()->getTemplate('adminpage_annuity_selector.phtml', [
             'id' => $id,
             'options' => $options,
