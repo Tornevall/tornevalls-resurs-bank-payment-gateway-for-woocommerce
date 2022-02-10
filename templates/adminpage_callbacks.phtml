@@ -4,7 +4,7 @@
     _e('Available callbacks', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
     ?>
 </h3>
-<?php if ($exception === null) { ?>
+<?php if (!($exception instanceof Exception)) { ?>
     <table width="100%" style="border: none;">
         <tr>
             <td width="20%" class="resursMethodHead"><?php _e(
@@ -21,7 +21,8 @@
                 <td width="80%" class="resursMethodHead"><?php _e(
                         'Remove',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ) ?></td>
+                    ) ?>
+                </td>
                 <?php
             }
             ?>
@@ -30,21 +31,18 @@
         if (isset($callbacks) && is_array($callbacks)) {
             foreach ($callbacks as $callbackType => $callbackUrl) {
                 ?>
-                <tr id="callback_row_<?php echo $callbackType ?>">
-                    <td class="resursMethodBody"><?php echo $callbackType ?></td>
+                <tr id="callback_row_<?php echo sanitize_text_field($callbackType) ?>">
+                    <td class="resursMethodBody"><?php echo sanitize_text_field($callbackType) ?></td>
                     <td class="resursMethodBody">
                         <input class="trbwc_cb_input"
-                               value="<?php echo $callbackUrl ?>"
-                               readonly="readonly"
-                            <?php
-                            /*if (!(bool)Data::getResursOption('show_developer')) {
-                                echo 'readonly';
-                            }*/ ?>></td>
+                               value="<?php echo esc_url($callbackUrl) ?>"
+                               readonly="readonly"></td>
                     <?php
                     if ((bool)Data::getResursOption('show_developer')) {
                         ?>
-                        <td class="resursMethodBody" id="remove_cb_btn_<?php echo $callbackType; ?>">
-                            <button type="button" onclick="doResursRemoveCallback('<?php echo $callbackType; ?>')">X
+                        <td class="resursMethodBody" id="remove_cb_btn_<?php echo sanitize_text_field($callbackType); ?>">
+                            <button type="button"
+                                    onclick="doResursRemoveCallback('<?php echo sanitize_text_field($callbackType); ?>')">X
                             </button>
                         </td>
                         <?php
@@ -57,6 +55,6 @@
     </table>
 <?php } else { ?>
     <div style="border: 1px solid darkred; padding: 5px; background: #EA9090FF; margin-bottom: 5px;">
-        <?php echo $exception->getMessage() ?> (Code <?php echo $exception->getCode() ?>)
+        <?php echo esc_html($exception->getMessage()) ?> (Code <?php echo esc_html($exception->getCode()) ?>)
     </div>
 <?php } ?>

@@ -1,12 +1,12 @@
-<div style="display:<?php echo !$streamLine ? $displayMode : ''; ?>">
-    <label for="<?php echo $fieldName ?>" style="width:100%;display:block;">
-        <?php echo $fieldLabel ?>
+<div style="display:<?php echo !$streamLine ? sanitize_key($displayMode) : ''; ?>">
+    <label for="<?php echo sanitize_text_field($fieldName) ?>" style="width:100%;display:block;">
+        <?php echo sanitize_text_field($fieldLabel) ?>
     </label>
     <input type="text"
-           id="<?php echo $fieldName ?>"
-           size="<?php echo $fieldSize ?>"
-           class="field_<?php echo $fieldName ?>"
-           name="<?php echo $fieldName ?>"
+           id="<?php echo sanitize_text_field($fieldName) ?>"
+           size="<?php echo (int)$fieldSize ?>"
+           class="field_<?php echo sanitize_text_field($fieldName) ?>"
+           name="<?php echo sanitize_text_field($fieldName) ?>"
            onkeyup="setBillingInherit(this)"
-           value="<?php echo $fieldValue ?>">
+           value="<?php echo sanitize_text_field($fieldValue) ?>">
 </div>

@@ -2,17 +2,19 @@
     <b><?php _e('Number of decimals - Beware!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></b><br>
     <br>
     <?php
-    printf(
-        __(
-            'The plugin "%s" does not support rounding with lower than two decimals due to tax calculation problems. ' .
-            'When a purchase is made you will notice that the rounding with two decimals will still be visible for ' .
-            'all payment methods that has been registered with this plugin. ' .
-            'If you really want to change this, you are required to actively disable the rounding prevention ' .
-            'protection in the advanced section. By doing this you also confirm that you are willingly using an ' .
-            'unsupported feature. To remove this notification you can also raise the decimals to 2 or higher.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        ),
-        $pluginTitle
-    )
+    echo esc_html(
+        sprintf(
+            __(
+                'The plugin "%s" does not support rounding with lower than two decimals due to tax calculation problems. ' .
+                'When a purchase is made you will notice that the rounding with two decimals will still be visible for ' .
+                'all payment methods that has been registered with this plugin. ' .
+                'If you really want to change this, you are required to actively disable the rounding prevention ' .
+                'protection in the advanced section. By doing this you also confirm that you are willingly using an ' .
+                'unsupported feature. To remove this notification you can also raise the decimals to 2 or higher.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
+            $pluginTitle
+        )
+    );
     ?>
 </div>

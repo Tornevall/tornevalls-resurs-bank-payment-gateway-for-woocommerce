@@ -1,11 +1,12 @@
 <?php
+
 if (isset($customer_shipping) && count($customer_shipping)) {
     ?>
     <h3 class="resursOrderInfoTitle resursOrderInfoContainer">
         <?php _e('Shipping Address', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?>
     </h3>
     <div class="address resursOrderInfoContainer">
-        <?php echo nl2br(implode("\n", $customer_shipping)); ?>
+        <?php echo nl2br(esc_html(implode("\n", $customer_shipping))); ?>
     </div>
     <?php
 }

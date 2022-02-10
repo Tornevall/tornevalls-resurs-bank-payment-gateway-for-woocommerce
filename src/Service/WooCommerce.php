@@ -154,18 +154,22 @@ class WooCommerce
             $customerCountry = Data::getCustomerCountry();
 
             if ($customerCountry !== get_option('woocommerce_default_country')) {
-                Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS,
-                    sprintf(
-                        __(
-                            'The country (%s) this customer is using are not matching the one currently set in ' .
-                            'WooCommerce (%s). It is not guaranteed that all payment methods is shown in this mode.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                        $customerCountry,
-                        get_option('woocommerce_default_country')
-                    )
-                );
+                if (WooCommerce::getValidCart()) {
+                    // This log should only apply when there is a customer going somewhere.
+                    Data::canLog(
+                        Data::CAN_LOG_ORDER_EVENTS,
+                        sprintf(
+                            __(
+                                'The country (%s) this customer is using are not matching the one currently set in ' .
+                                'WooCommerce (%s). It is not guaranteed that all payment methods is shown in ' .
+                                'this mode.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ),
+                            $customerCountry,
+                            get_option('woocommerce_default_country')
+                        )
+                    );
+                }
 
                 foreach ($gateways as $gatewayName => $gatewayClass) {
                     if ($gatewayClass instanceof ResursDefault &&
@@ -270,6 +274,9 @@ class WooCommerce
      */
     public static function getAdminAfterOrderDetails($order = null)
     {
+        // Considering this place as a safe place to apply display in styles.
+        Data::getAdminSafeCss();
+
         if ($order instanceof WC_Order) {
             $paymentMethod = $order->get_payment_method();
             if (Data::canHandleOrder($paymentMethod)) {
@@ -288,7 +295,11 @@ class WooCommerce
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
                         $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
                     }
-                    echo Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+                    $rawAdminDetails = Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+                    $escapedAdminDetails = Data::getEscapedHtml(
+                        $rawAdminDetails
+                    );
+                    echo $escapedAdminDetails;
                 }
                 // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
                 // if someone wants to create their own view.
@@ -310,14 +321,16 @@ class WooCommerce
             !Data::hasOldGateway() &&
             !Data::getResursOption('deprecated_interference')
         ) {
-            echo Data::getGenericClass()->getTemplate(
-                'adminpage_woocommerce_version22',
-                [
-                    'wooPlug22VersionInfo' => __(
-                        'Order has not been created by this plugin and the original plugin is currently unavailable.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                ]
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate(
+                    'adminpage_woocommerce_version22',
+                    [
+                        'wooPlug22VersionInfo' => __(
+                            'Order has not been created by this plugin and the original plugin is currently unavailable.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
+                    ]
+                )
             );
         }
     }
@@ -485,12 +498,15 @@ class WooCommerce
      */
     public static function getAdminAfterBilling($order = null)
     {
+        Data::getAdminSafeCss();
         if (!empty($order) &&
             WordPress::applyFilters('canDisplayOrderInfoAfterBilling', true) &&
             Data::canHandleOrder($order->get_payment_method())
         ) {
             $orderData = Data::getOrderInfo($order);
-            echo Data::getGenericClass()->getTemplate('adminpage_billing.phtml', $orderData);
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate('adminpage_billing.phtml', $orderData)
+            );
         }
     }
 
@@ -502,12 +518,15 @@ class WooCommerce
      */
     public static function getAdminAfterShipping($order = null)
     {
+        Data::getAdminSafeCss();
         if (!empty($order) &&
             WordPress::applyFilters('canDisplayOrderInfoAfterShipping', true) &&
             Data::canHandleOrder($order->get_payment_method())
         ) {
             $orderData = Data::getOrderInfo($order);
-            echo Data::getGenericClass()->getTemplate('adminpage_shipping.phtml', $orderData);
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate('adminpage_shipping.phtml', $orderData)
+            );
         }
     }
 
@@ -656,8 +675,8 @@ class WooCommerce
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param string|array|stdClass $value
      * @since 0.0.1.0
      */
     public static function setSessionValue($key, $value)
@@ -717,7 +736,7 @@ class WooCommerce
 
         // This should be both logged as entries and in order.
         Data::setLogNotice($logNotice);
-        $callbackType = self::getRequest('c');
+        $callbackType = Data::getRequest('c');
         $replyArray = [
             'aliveConfirm' => true,
             'actual' => $callbackType,
@@ -728,9 +747,9 @@ class WooCommerce
         ];
 
         // If there is a payment, there must be a digest.
-        $pRequest = self::getRequest('p');
+        $pRequest = Data::getRequest('p');
         if (!empty($pRequest)) {
-            $orderId = Data::getOrderByEcomRef(self::getRequest('p'));
+            $orderId = Data::getOrderByEcomRef(Data::getRequest('p'));
 
             if ($orderId) {
                 $order = new WC_Order($orderId);
@@ -770,7 +789,7 @@ class WooCommerce
                 if ($getConfirmedSalt && $orderId) {
                     /** @noinspection BadExceptionsProcessingInspection */
                     try {
-                        self::getUpdatedOrderByCallback(self::getRequest('p'), $orderId, $order);
+                        self::getUpdatedOrderByCallback(Data::getRequest('p'), $orderId, $order);
                         self::setSigningMarked($orderId, $callbackType);
                         WordPress::doAction(
                             sprintf('callback_received_%s', $callbackType),
@@ -840,31 +859,11 @@ class WooCommerce
     private static function getConfirmedSalt(): bool
     {
         return ResursBankAPI::getResurs()->getValidatedCallbackDigest(
-            self::getRequest('p'),
+            Data::getRequest('p'),
             self::getCurrentSalt(),
-            self::getRequest('d'),
-            self::getRequest('r')
+            Data::getRequest('d'),
+            Data::getRequest('r')
         );
-    }
-
-    /**
-     * @param $key
-     * @param bool $post_data
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getRequest($key, $post_data = null)
-    {
-        $return = $_REQUEST[$key] ?? null;
-
-        if ($return === null && (bool)$post_data && isset($_REQUEST['post_data'])) {
-            parse_str($_REQUEST['post_data'], $newPostData);
-            if (is_array($newPostData) && isset($newPostData[$key])) {
-                $return = $newPostData[$key];
-            }
-        }
-
-        return $return;
     }
 
     /**
@@ -888,7 +887,7 @@ class WooCommerce
                 'Callback received from Resurs Bank: %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
-            self::getRequest('c'),
+            Data::getRequest('c'),
             $getConfirmedSalt ? __(
                 'Valid',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -896,8 +895,8 @@ class WooCommerce
                 'Invalid',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
-            self::getRequest('p'),
-            Data::getOrderByEcomRef(self::getRequest('p'))
+            Data::getRequest('p'),
+            Data::getOrderByEcomRef(Data::getRequest('p'))
         );
     }
 
@@ -1343,17 +1342,18 @@ class WooCommerce
 
     /**
      * @param $key
-     * @return array|string|mixed
+     * @return mixed
      * @since 0.0.1.0
      */
     public static function getSessionValue($key)
     {
         $return = null;
+        $session = Data::getSanitizedArray($_SESSION);
 
         if (self::getSession()) {
             $return = WC()->session->get($key);
         } elseif (isset($_SESSION[$key])) {
-            $return = $_SESSION[$key];
+            $return = $session[$key] ?? '';
         }
 
         return $return;
@@ -1383,7 +1383,8 @@ class WooCommerce
     public static function getOrderReviewSettings()
     {
         // Rounding panic prevention.
-        if (isset($_POST['payment_method']) && Data::isResursMethod($_POST['payment_method'])) {
+
+        if (Data::isResursMethod(Data::getRequest('payment_method', $_POST))) {
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
         }
         self::setCustomerCheckoutLocation(true);

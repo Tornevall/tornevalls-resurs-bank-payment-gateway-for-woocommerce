@@ -1,18 +1,22 @@
-<div id="r_annuity_p_<?php echo $id ?>">
-    <select class="r_annuity" id="r_annuity_select_<?php echo $id ?>"
-            onclick="setResursAnnuityClick(this, '<?php echo $id ?>', 'set')"
-    >
-        <?php echo $options ?>
-    </select>
-    <div id="r_activity_<?php echo $id ?>"></div>
-</div>
-<button id="r_annuity_button_<?php echo $id ?>" type="button"
-        onclick="setResursAnnuityClick(this, '<?php echo $id ?>', 'click')"
->
 <?php
+// Sanitized 220210 - keys in elements must NOT be lowercased, so sanitize_key is not an option!
+use ResursBank\Module\Data;
+?>
+<div id="r_annuity_p_<?php echo sanitize_text_field($id) ?>">
+    <select class="r_annuity"
+            id="r_annuity_select_<?php echo sanitize_text_field($id) ?>"
+            onclick="setResursAnnuityClick(this, '<?php echo sanitize_text_field($id) ?>', 'set')">
+        <?php echo Data::getEscapedHtml($options) ?>
+    </select>
+    <div id="r_activity_<?php echo sanitize_text_field($id) ?>"></div>
+</div>
+<button id="r_annuity_button_<?php echo sanitize_text_field($id) ?>" type="button"
+        onclick="setResursAnnuityClick(this, '<?php echo sanitize_text_field($id) ?>', 'click')"
+>
+    <?php
     if (!$enabled) {
         _e('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
     } else {
         _e('Disable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
     }
-    ?></button><span id="r_activity_<?php echo $id ?>"></span>
+    ?></button><span id="r_activity_<?php echo sanitize_text_field($id) ?>"></span>

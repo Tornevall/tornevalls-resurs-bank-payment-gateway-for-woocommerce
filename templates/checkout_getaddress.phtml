@@ -9,14 +9,14 @@
                <?php
                echo $customer_type === 'NATURAL' ? 'checked=checked' : ''
                ?>
-        > <?php echo $customer_private; ?>
+        > <?php echo esc_html($customer_private); ?>
         <input type="radio"
                id="resursSsnCustomerTypeLegal"
                onclick="setResursGetAddressCustomerType(this)"
                name="resursSsnCustomerType"
                value="LEGAL"
                <?php echo $customer_type === 'LEGAL' ? 'checked=checked' : '' ?>
-        > <?php echo $customer_company; ?>
+        > <?php echo esc_html($customer_company); ?>
     </div>
     <div class="woocommerce-input-wrapper">
         <input
@@ -31,7 +31,7 @@
     <?php
     if ($supported_country && $get_address_form) { ?>
         <div>
-            <button onclick="getResursAddress();return false;"><?php echo $customer_button_text; ?></button>
+            <button onclick="getResursAddress();return false;"><?php echo esc_html($customer_button_text); ?></button>
         </div>
     <?php } ?>
 </span>

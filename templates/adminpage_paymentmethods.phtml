@@ -1,10 +1,11 @@
 <h3>
     <?php
-
+    // Sanitizing on key levels.
     use Resursbank\Ecommerce\Service\Merchant\Model\Method;
+    use ResursBank\Module\Data;
 
     _e(sprintf(
-        'Available payment methods (Environment %s)', $environment),
+        'Available payment methods (Environment %s)', sanitize_text_field($environment)),
         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
     ); ?></h3>
 
@@ -12,7 +13,7 @@
 // $silentAnnuityException
 // $silentGetPaymentMethodsException
 ?>
-<?php if ($exception === null) { ?>
+<?php if (!($exception instanceof Exception)) { ?>
     <div style="font-style: italic;margin-bottom: 5px;">
         <?php
         _e(
@@ -55,44 +56,38 @@
                     'Part payment options',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
-            <!--<td width="20%" class="resursMethodHead">
-            <?php _e(
-                'Payment Fee',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            ) ?>
-            </td>-->
         </tr>
         <?php
         if (is_array($paymentMethods) && count($paymentMethods)) {
             foreach ($paymentMethods as $methodObject) {
-                $merchantMethod = isset($methodObject->merchantMethod) ? $methodObject->merchantMethod : null;
-                $merchantMethodId = $merchantMethod instanceof Method ? $merchantMethod->getId() : '';
+                $merchantMethod = esc_html(isset($methodObject->merchantMethod) ? $methodObject->merchantMethod : null);
+                $merchantMethodId = esc_html($merchantMethod instanceof Method ? $merchantMethod->getId() : '');
                 ?>
                 <tr>
                     <td class="resursMethodBody">
                         <?php
-                        echo $methodObject->id;
-                        if ($isBleedingEdge) {
+                        echo esc_html($methodObject->id);
+                        if ((bool)$isBleedingEdge) {
                             ?>
-                            <div style="font-size: 12px; font-style: italic;"><?php echo $merchantMethodId ?></div>
+                            <div style="font-size: 12px; font-style: italic;"><?php echo esc_html($merchantMethodId) ?></div>
                             <?php
                         }
                         ?>
                     </td>
-                    <td class="resursMethodBody"><?php echo $methodObject->description ?></td>
+                    <td class="resursMethodBody"><?php echo esc_html($methodObject->description) ?></td>
                     <td class="resursMethodBody">
-                        <?php echo $methodObject->minLimit ?> - <?php echo $methodObject->maxLimit ?>
+                        <?php echo (float)$methodObject->minLimit ?> - <?php echo (float)$methodObject->maxLimit ?>
                     </td>
                     <td class="resursMethodBody">
-                        <?php echo $methodObject->type ?>
+                        <?php echo esc_html($methodObject->type) ?>
                         <?php
                         if ($methodObject->type !== $methodObject->specificType) {
-                            printf('(<i>%s</i>)', $methodObject->specificType);
+                            printf('(<i>%s</i>)', esc_html($methodObject->specificType));
                         } ?>
                         <br>
                     </td>
                     <td class="resursMethodBody">
-                        <?php echo implode(', ', (array)$methodObject->customerType); ?>
+                        <?php echo esc_html(implode(', ', (array)$methodObject->customerType)); ?>
                     </td>
                     <?php
                     $annuityClass = ($annuityEnabled === $methodObject->id) ? 'r_annuity_enabled' : 'r_annuity_disabled';
@@ -100,11 +95,14 @@
                         $annuityClass = 'r_annuity_idle';
                     }
                     ?>
-                    <td class="resursMethodBody <?php echo $annuityClass ?>"
-                        id="r_annuity_field_<?php echo $methodObject->id; ?>"
+                    <td class="resursMethodBody <?php
+                    // Note to self: No sanitization needed.
+                        echo $annuityClass
+                    ?>"
+                        id="r_annuity_field_<?php echo sanitize_text_field($methodObject->id); ?>"
                     ><?php
                         if ($methodObject->type === 'REVOLVING_CREDIT' && isset($annuityFactors[$methodObject->id])) {
-                            echo $annuityFactors[$methodObject->id];
+                            echo Data::getEscapedHtml($annuityFactors[$methodObject->id]);
                         } else {
                             if (!empty($annuityException) && $annuityException instanceof Exception) {
                                 printf(
@@ -112,17 +110,11 @@
                                         'Received error from annuity factors request: %s (%d)',
                                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                                     ),
-                                    $annuityException->getMessage(),
-                                    $annuityException->getCode()
+                                    esc_html($annuityException->getMessage()),
+                                    esc_html($annuityException->getCode())
                                 );
                             }
                         } ?></td>
-                    <!--<td class="resursMethodBody">
-                        <?php
-                    /*                        // Adaptive section for editing fee in future.
-                                            //echo isset($methodObject->fee) ? $methodObject->fee : 0
-                                            */ ?>
-                    </td>-->
                 </tr>
                 <?php
             }
@@ -130,6 +122,6 @@
     </table>
 <?php } else { ?>
     <div style="border: 1px solid darkred; padding: 5px; background: #EA9090FF; margin-bottom: 5px;">
-        <?php echo $exception->getMessage() ?> (Code <?php echo $exception->getCode() ?>)
+        <?php echo esc_html($exception->getMessage()) ?> (Code <?php echo esc_html($exception->getCode()) ?>)
     </div>
 <?php } ?>

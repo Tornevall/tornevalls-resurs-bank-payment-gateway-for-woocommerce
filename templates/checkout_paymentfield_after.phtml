@@ -1,9 +1,10 @@
 <div class="resursReadMoreSpace">
     <?php if ($method->specificType !== 'CARD' && $method->type !== 'PAYMENT_PROVIDER') { ?>
-        <button type="button" class="btn btn-info active resursReadMoreButton"
-                onclick="getRbReadMoreClicker('<?php echo $method->id ?>', <?php echo (float)$total ?>)"
-        >
+        <div
+                type="button"
+                class="btn btn-info active resursReadMoreButton"
+                onclick="getRbReadMoreClicker('<?php echo esc_html($method->id) ?>', <?php echo (float)$total ?>)">
             <?php _e('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?>
-        </button>
+        </div>
     <?php } ?>
 </div>

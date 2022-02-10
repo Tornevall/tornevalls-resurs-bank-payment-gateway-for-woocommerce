@@ -92,8 +92,6 @@ class WordPress
     {
         // Generic calls.
         add_filter('plugin_action_links', 'ResursBank\Service\WooCommerce::getPluginAdminUrl', 10, 2);
-        // Other calls.
-        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
         // Localization.
@@ -102,6 +100,12 @@ class WordPress
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Service\WooCommerce::getSettingsPages');
         add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
         add_filter('rbwc_get_part_payment_page', 'ResursBank\Service\WordPress::getPartPaymentPage');
+
+        //$currentSlug = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH));
+        /*$currentSlug = Data::getRequest('action');
+        if ($currentSlug === 'resurs-bank-priceinfo' || $currentSlug === 'resursbank_get_cost_of_purchase') {
+            add_filter('the_content', 'ResursBank\Module\PluginApi::getDefaultPriceInfoTemplate');
+        }*/
 
         if (Data::isEnabled()) {
             add_filter('woocommerce_payment_gateways', 'ResursBank\Service\WooCommerce::getGateways');
@@ -132,7 +136,7 @@ class WordPress
      */
     private static function setupActions()
     {
-        $action = $_REQUEST['action'] ?? '';
+        $action = Data::getRequest('action');
         add_action('admin_notices', '\ResursBank\Service\WordPress::getAdminNotices');
         add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
@@ -279,11 +283,13 @@ class WordPress
             }
         } catch (Exception $e) {
             Data::setLogException($e);
-            echo Data::getGenericClass()->getTemplate(
-                'adminpage_woocommerce_requirement',
-                [
-                    'requiredVersionNotice' => $requiredVersionNotice,
-                ]
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate(
+                    'adminpage_woocommerce_requirement',
+                    [
+                        'requiredVersionNotice' => $requiredVersionNotice,
+                    ]
+                )
             );
         }
 
@@ -391,19 +397,21 @@ class WordPress
      */
     private static function getOldSelfAwareness()
     {
-        echo Data::getGenericClass()->getTemplate(
-            'adminpage_woocommerce_version22',
-            [
-                'wooPlug22VersionInfo' => sprintf(
-                    __(
-                        'It seems that you still have another plugin enabled (%s %s) in this platform that works ' .
-                        'as Resurs Bank Payment Gateway. If this is intended, you can ignore this message.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        echo Data::getEscapedHtml(
+            Data::getGenericClass()->getTemplate(
+                'adminpage_woocommerce_version22',
+                [
+                    'wooPlug22VersionInfo' => sprintf(
+                        __(
+                            'It seems that you still have another plugin enabled (%s %s) in this platform that works ' .
+                            'as Resurs Bank Payment Gateway. If this is intended, you can ignore this message.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
+                        defined('RB_WOO_CLIENTNAME') ? RB_WOO_CLIENTNAME : 'Resurs Bank for WooCommerce',
+                        defined('RB_WOO_VERSION') ? RB_WOO_VERSION : 'v2.x'
                     ),
-                    defined('RB_WOO_CLIENTNAME') ? RB_WOO_CLIENTNAME : 'Resurs Bank for WooCommerce',
-                    defined('RB_WOO_VERSION') ? RB_WOO_VERSION : 'v2.x'
-                ),
-            ]
+                ]
+            )
         );
     }
 
@@ -424,9 +432,9 @@ class WordPress
         if ($isAjax) {
             // Allow life in ajax calls.
             $return = false;
-        } elseif ($return && self::getRequest('post')) {
+        } elseif ($return && Data::getRequest('post')) {
             $return = false;
-        } elseif ($return && self::getRequest('wc-api') === 'WC_Resurs_Bank') {
+        } elseif ($return && Data::getRequest('wc-api') === 'WC_Resurs_Bank') {
             $return = false;
         } elseif ($return) {
             // Find more places that could be necessary to enable the plugin.
@@ -445,10 +453,10 @@ class WordPress
     {
         $return = Data::getResursOption('priorVersionsDisabled');
         $appearance = self::getPriorVersionDisabledAppearances();
-        $section = self::getRequest('section');
-        $page = self::getRequest('page');
-        $tab = self::getRequest('tab');
-        $action = self::getRequest('action');
+        $section = Data::getRequest('section');
+        $page = Data::getRequest('page');
+        $tab = Data::getRequest('tab');
+        $action = Data::getRequest('action');
         $isInPageSection = in_array($page, $appearance['in'], true) ||
             in_array($section, $appearance['in'], true) ||
             in_array($action, $appearance['in'], true) ||
@@ -483,16 +491,6 @@ class WordPress
                 sprintf('%s_admin', Data::getPrefix()),
             ],
         ];
-    }
-
-    /**
-     * @param $request
-     * @return mixed|string
-     * @since 0.0.1.0
-     */
-    private static function getRequest($request)
-    {
-        return $_REQUEST[$request] ?? '';
     }
 
     /**
@@ -548,6 +546,20 @@ class WordPress
         foreach (Data::getPluginScripts($isAdmin) as $scriptName => $scriptFile) {
             $realScriptName = sprintf('%s_%s', Data::getPrefix(), $scriptName);
             self::setEnqueue($realScriptName, $scriptFile, $isAdmin);
+        }
+
+        if (Data::getRequest('action') === 'resursbank_get_cost_of_purchase') {
+            $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
+            $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
+
+            wp_enqueue_style(
+                'woocommerce_default_style',
+                $wooCommerceStyleSheet
+            );
+            wp_enqueue_style(
+                'resurs_annuity_style',
+                $resursStyleSheet
+            );
         }
     }
 

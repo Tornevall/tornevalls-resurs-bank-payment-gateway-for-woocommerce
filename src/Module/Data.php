@@ -16,6 +16,7 @@ use stdClass;
 use TorneLIB\Data\Aes;
 use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
+use TorneLIB\IO\Data\Arrays;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
@@ -372,7 +373,8 @@ class Data
     {
         global $product;
 
-        if (is_object($product) && !empty(self::getResursOption('currentAnnuityFactor'))) {
+        $currentFactor = self::getResursOption('currentAnnuityFactor');
+        if (is_object($product) && !empty($currentFactor)) {
             try {
                 self::getAnnuityHtml(
                     wc_get_price_to_display($product),
@@ -383,11 +385,13 @@ class Data
                 $resursApi = ResursBankAPI::getResurs();
                 self::setTimeoutStatus($resursApi, $annuityException);
                 if ($resursApi->hasTimeoutException()) {
-                    echo sprintf(
-                        '<div class="annuityTimeout">%s</div>',
-                        __(
-                            'Resurs Bank price information is currently unavailable right now, due to timed out ' .
-                            'connection. Please try again in a moment.'
+                    echo Data::getEscapedHtml(
+                        sprintf(
+                            '<div class="annuityTimeout">%s</div>',
+                            __(
+                                'Resurs Bank price information is currently unavailable right now, due to timed out ' .
+                                'connection. Please try again in a moment.'
+                            )
                         )
                     );
                 }
@@ -544,13 +548,13 @@ class Data
         switch ($customerCountry) {
             case 'US':
                 // Resides here as an example.
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
+                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
                 break;
             case 'FI':
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
+                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
                 break;
             default:
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
+                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
         }
 
         $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
@@ -576,9 +580,9 @@ class Data
                 ),
                 [
                     'currency' => get_woocommerce_currency_symbol(),
-                    'monthlyPrice' => $monthlyPrice,
-                    'monthlyDuration' => $annuityDuration,
-                    'paymentLimit' => $minimumPaymentLimit,
+                    'monthlyPrice' => (float)$monthlyPrice,
+                    'monthlyDuration' => (int)$annuityDuration,
+                    'paymentLimit' => (int)$minimumPaymentLimit,
                     'paymentMethod' => $annuityPaymentMethod,
                     'isTest' => self::getTestMode(),
                     'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
@@ -586,21 +590,229 @@ class Data
             );
 
             // Fetch the rest from the template.
-            $annuityTemplate = self::getGenericClass()->getTemplate(
-                'product_annuity.phtml',
-                [
-                    'currency' => get_woocommerce_currency_symbol(),
-                    'monthlyPrice' => $monthlyPrice,
-                    'monthlyDuration' => $annuityDuration,
-                    'partPayString' => $partPayString,
-                    'paymentMethod' => $annuityPaymentMethod,
-                    'isTest' => self::getTestMode(),
-                    'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
-                ]
+            $annuityTemplate = Data::getEscapedHtml(
+                self::getGenericClass()->getTemplate(
+                    'product_annuity.phtml',
+                    [
+                        'currency' => get_woocommerce_currency_symbol(),
+                        'monthlyPrice' => $monthlyPrice,
+                        'monthlyDuration' => $annuityDuration,
+                        'partPayString' => $partPayString,
+                        'paymentMethod' => $annuityPaymentMethod,
+                        'isTest' => self::getTestMode(),
+                        'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
+                    ]
+                )
             );
 
             echo $annuityTemplate;
         }
+    }
+
+    /**
+     * Case fixed sanitizer, cloned from WordPress own functions, for which we sanitize keys based on
+     * element id's. Resurs Bank is very much built on case-sensitive values for why we want to sanitize
+     * on both lower- and uppercase.
+     * @param $key
+     * @return mixed|void
+     * @since 0.0.1.1
+     */
+    public static function sanitize_key_element($key)
+    {
+        $sanitized_key = '';
+
+        if (is_scalar($key)) {
+            $sanitized_key = preg_replace('/[^a-z0-9_\-]/i', '', $key);
+        }
+
+        return apply_filters('sanitize_key', $sanitized_key, $key);
+    }
+
+    /**
+     * Centralized escaper for internal templates.
+     *
+     * @param $content
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getEscapedHtml($content)
+    {
+        return wp_kses(
+            $content,
+            self::getSafeTags()
+        );
+    }
+
+    /**
+     * Get safe escape tags for html. Observe that we pass some of the elements through a purger, as
+     * some of the script based "on"-elements are limited to admin.
+     *
+     * @return array
+     * @since 0.0.1.1
+     */
+    private static function getSafeTags()
+    {
+        // Many of the html tags is depending on clickable elements, but we're limiting them here
+        // to only apply in the most important elements.
+        $return = [
+            'a' => [
+                'href' => [],
+                'target' => [],
+            ],
+            'br' => [],
+            'table' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'width' => [],
+            ],
+            'tr' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+            ],
+            'th' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'scope' => [],
+            ],
+            'td' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+            ],
+            'label' => [
+                'for' => [],
+                'style' => [],
+                'class' => [],
+                'onclick' => [],
+            ],
+            'div' => [
+                'style' => [],
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'label' => [],
+                'onclick' => [],
+            ],
+            'p' => [
+                'style' => [],
+                'class' => [],
+                'label' => [],
+            ],
+            'span' => [
+                'id' => [],
+                'name' => [],
+                'label' => [],
+                'class' => [],
+                'style' => [],
+                'onclick' => [],
+            ],
+            'select' => [
+                'option' => [],
+                'class' => [],
+                'id' => [],
+                'onclick' => [],
+            ],
+            'option' => [],
+            'button' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'onclick' => [],
+                'type' => [],
+            ],
+            'iframe' => [
+                'src' => [],
+                'class' => [],
+                'style' => [],
+            ],
+            'input' => [
+                'id' => [],
+                'name' => [],
+                'type' => [],
+                'size' => [],
+                'onkeyup' => [],
+                'value' => [],
+                'class' => [],
+                'readonly' => [],
+            ],
+            'h1' => [],
+            'h2' => [],
+            'h3' => [
+                'style' => [],
+                'class' => [],
+            ],
+        ];
+
+        return self::purgeSafeAdminTags($return);
+    }
+
+    /**
+     * Purge some html sanitizer elements before returning them to wp_kses.
+     * @since 0.0.1.1
+     */
+    private static function purgeSafeAdminTags($return)
+    {
+        if (!is_admin()) {
+            $unsetPublicClicks = [
+                'select',
+                'h1',
+                'h2',
+                'h3',
+            ];
+
+            foreach ($unsetPublicClicks as $element) {
+                if (isset($return[$element]['onclick'])) {
+                    unset($return[$element]['onclick']);
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @since 0.0.1.1
+     */
+    public static function getAdminSafeCss()
+    {
+        if (is_admin()) {
+            add_filter('safe_style_css', function ($styles) {
+                $styles[] = 'display';
+                $styles[] = 'border';
+                return $styles;
+            });
+        }
+    }
+
+    /**
+     * Escaping html where we only new a few elements.
+     *
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getTinyEscapedHtml($content)
+    {
+        return wp_kses(
+            $content,
+            [
+                'div' => [
+                    'class' => [],
+                    'style' => [],
+                ],
+                'span' => [
+                    'class' => [],
+                    'style' => [],
+                ],
+            ]
+        );
     }
 
     /**
@@ -759,10 +971,14 @@ class Data
             '<span style="cursor:pointer !important; font-weight:bold;" onclick="getRbReadMoreClicker(\'%s\', \'%s\')">
             %s
             </span>',
-            $annuityPaymentMethod['id'],
-            $monthlyPrice,
-            WordPress::applyFilters('partPaymentReadMoreString',
-                __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'))
+            isset($annuityPaymentMethod['id']) ? sanitize_text_field($annuityPaymentMethod['id']) : 'not-set',
+            (float)$monthlyPrice,
+            esc_html(
+                WordPress::applyFilters(
+                    'partPaymentReadMoreString',
+                    __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                )
+            )
         );
     }
 
@@ -1058,33 +1274,43 @@ class Data
         $netWrapper = new NetWrapper();
 
         $renderData = [
-            __('Plugin version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getCurrentVersion(),
+            __(
+                'Plugin version',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => esc_html(self::getCurrentVersion()),
             __('WooCommerce', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => sprintf(
                 __(
                     '%s, at least %s are required.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                WooCommerce::getWooCommerceVersion(),
-                WooCommerce::getRequiredVersion()
+                esc_html(WooCommerce::getWooCommerceVersion()),
+                esc_html(WooCommerce::getRequiredVersion())
             ),
-            __('Composer version',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getVersionByComposer(),
+            __(
+                'Composer version',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => esc_html(self::getVersionByComposer()),
             __('PHP Version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => PHP_VERSION,
-            __('Webservice Library',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
-            __('Communication Library',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => 'netcurl-' . $netWrapper->getVersion(),
-            __('Communication Drivers', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => implode('<br>',
-                self::getWrapperList($netWrapper)),
+            __(
+                'Webservice Library',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
+            __(
+                'Communication Library',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => esc_html('netcurl-' . $netWrapper->getVersion()),
+            __(
+                'Communication Drivers',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => Data::getEscapedHtml(implode('<br>', self::getWrapperList($netWrapper))),
         ];
 
-        $renderData += WordPress::applyFilters('renderInformationData', $renderData);
         $content .= self::getGenericClass()->getTemplate(
             'plugin_information',
             [
                 'required_drivers' => self::getSpecialString('required_drivers'),
                 'support_string' => self::getSpecialString('support_string'),
-                'render' => $renderData,
+                'render' => Data::getSanitizedArray(WordPress::applyFilters('renderInformationData', $renderData)),
             ]
         );
 
@@ -1102,7 +1328,7 @@ class Data
     {
         $wrapperList = [];
         foreach ($netWrapper->getWrappers() as $wrapperClass => $wrapperInstance) {
-            $wrapperList[] = preg_replace('/(.*)\\\\(.*?)$/', '$2', $wrapperClass);
+            $wrapperList[] = esc_html(preg_replace('/(.*)\\\\(.*?)$/', '$2', $wrapperClass));
         }
 
         return $wrapperList;
@@ -1935,7 +2161,7 @@ class Data
      */
     private static function setCustomerTypeToSession()
     {
-        $customerTypeByGetAddress = WooCommerce::getRequest('resursSsnCustomerType', true);
+        $customerTypeByGetAddress = Data::getRequest('resursSsnCustomerType', true);
 
         if (!empty($customerTypeByGetAddress)) {
             WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
@@ -1949,9 +2175,81 @@ class Data
     private static function getCustomerTypeFromSession()
     {
         $return = WooCommerce::getSessionValue('resursSsnCustomerType');
-        $customerTypeByCompanyName = WooCommerce::getRequest('billing_company', true);
+        $customerTypeByCompanyName = self::getRequest('billing_company', true);
 
         return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+    }
+
+    /**
+     * @param $key
+     * @param bool|array $post_data
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getRequest($key, $post_data = null)
+    {
+        if (is_array($post_data)) {
+            $requestArray = $post_data;
+        } else {
+            $requestArray = $_REQUEST;
+        }
+        $request = self::getSanitizedRequest($requestArray);
+        $return = $request[$key] ?? null;
+
+        if ($return === null && (bool)$post_data && isset($_REQUEST['post_data'])) {
+            parse_str($_REQUEST['post_data'], $newPostData);
+            if (is_array($newPostData)) {
+                $newPostData = self::getSanitizedArray($newPostData);
+                $return = $newPostData[$key];
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * $_REQUEST-sanitizer.
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getSanitizedRequest($requestArray)
+    {
+        $returnRequest = [];
+        if (is_array($requestArray)) {
+            $returnRequest = self::getSanitizedArray($requestArray);
+        }
+        return $returnRequest;
+    }
+
+    /**
+     * Recursive string sanitizer.
+     *
+     * @param $array
+     * @since 0.0.1.0
+     */
+    public static function getSanitizedArray($array)
+    {
+        $arrays = new Arrays();
+        $returnArray = [];
+        if ($arrays->isAssoc($array)) {
+            foreach ($array as $arrayKey => $arrayValue) {
+                if (is_array($arrayValue)) {
+                    $returnArray[$arrayKey] = self::getSanitizedArray($arrayValue);
+                } elseif (is_string($arrayValue)) {
+                    $returnArray[$arrayKey] = sanitize_text_field($arrayValue);
+                }
+            }
+        } elseif ($array) {
+            foreach ($array as $item) {
+                if (is_array($item)) {
+                    $returnArray[] = self::getSanitizedArray($arrayValue);
+                } elseif (is_string($item)) {
+                    $returnArray[] = sanitize_text_field($item);
+                }
+            }
+        }
+
+        return $returnArray;
     }
 
     /**

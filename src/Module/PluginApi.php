@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection CompactCanBeUsedInspection */
+
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
 namespace ResursBank\Module;
@@ -74,9 +75,7 @@ class PluginApi
      */
     private static function getAction(): string
     {
-        $action = isset($_REQUEST['action']) ? (string)$_REQUEST['action'] : '';
-
-        return (new Strings())->getCamelCase(self::getTrimmedActionString($action));
+        return (new Strings())->getCamelCase(self::getTrimmedActionString(Data::getRequest('action')));
     }
 
     /**
@@ -165,7 +164,7 @@ class PluginApi
         }
 
         foreach ($nonceArray as $nonceType) {
-            if (wp_verify_nonce(self::getParam('n'), WordPress::getNonceTag($nonceType))) {
+            if (wp_verify_nonce(Data::getRequest('n'), WordPress::getNonceTag($nonceType))) {
                 $return = true;
                 break;
             }
@@ -201,23 +200,13 @@ class PluginApi
         $optionTag = 'resurs_nonce_' . $nonceTag;
         $return = false;
         $lastNonce = get_option($optionTag);
-        if (self::getParam('n') === $lastNonce) {
+        if (Data::getRequest('n') === $lastNonce) {
             $return = true;
         } else {
             // Only update if different.
-            update_option($optionTag, self::getParam('n'));
+            update_option($optionTag, Data::getRequest('n'));
         }
         return $return;
-    }
-
-    /**
-     * @param $key
-     * @return mixed|string
-     * @since 0.0.1.0
-     */
-    private static function getParam($key)
-    {
-        return $_REQUEST[$key] ?? '';
     }
 
     /**
@@ -228,11 +217,8 @@ class PluginApi
      */
     public static function getCostOfPurchase()
     {
-        $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
-        $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
-
-        $method = WooCommerce::getRequest('method');
-        $total = WooCommerce::getRequest('total');
+        $method = Data::getRequest('method');
+        $total = Data::getRequest('total');
         if (Data::getCustomerCountry() !== 'DK') {
             $priceInfoHtml = ResursBankAPI::getResurs()->getCostOfPriceInformation($method, $total, true, true);
         } else {
@@ -255,15 +241,15 @@ class PluginApi
             );
         }
 
-        echo Data::getGenericClass()
-            ->getTemplate(
-                'checkout_costofpurchase_default.phtml',
-                [
-                    'wooCommerceStyleSheet' => $wooCommerceStyleSheet,
-                    'resursStyleSheet' => $resursStyleSheet,
-                    'priceInfoHtml' => $priceInfoHtml,
-                ]
-            );
+        echo Data::getEscapedHtml(
+            Data::getGenericClass()
+                ->getTemplate(
+                    'checkout_costofpurchase_default.phtml',
+                    [
+                        'priceInfoHtml' => $priceInfoHtml,
+                    ]
+                )
+        );
 
         die;
     }
@@ -277,7 +263,7 @@ class PluginApi
     public static function checkoutCreateOrder(): array
     {
         $return = [];
-        WooCommerce::setSessionValue('rco_customer_session_request', $_REQUEST['rco_customer']);
+        WooCommerce::setSessionValue('rco_customer_session_request', Data::getRequest('rco_customer'));
 
         $finalCartTotal = WC()->cart->total;
         $lastSeenCartTotal = WooCommerce::getSessionValue('customerCartTotal');
@@ -361,8 +347,8 @@ class PluginApi
     {
         foreach ($checkoutCustomer as $item => $value) {
             $itemVar = sprintf('%s_%s', $type, $item);
-            $_REQUEST[$itemVar] = $value;
-            $_POST[$itemVar] = $value;
+            $_REQUEST[$itemVar] = sanitize_text_field($value);
+            $_POST[$itemVar] = sanitize_text_field($value);
         }
     }
 
@@ -414,14 +400,14 @@ class PluginApi
          *
          * @var bool $isLiveChange
          */
-        $isLiveChange = Data::getResursOption('environment') !== self::getParam('e');
+        $isLiveChange = Data::getResursOption('environment') !== Data::getRequest('e');
 
         if ($isValid) {
             try {
                 $validationResponse = (new ResursBankAPI())->getConnection()->validateCredentials(
-                    (self::getParam('e') !== 'live') ? 1 : 0,
-                    self::getParam('u'),
-                    self::getParam('p')
+                    (Data::getRequest('e') !== 'live') ? 1 : 0,
+                    Data::getRequest('u'),
+                    Data::getRequest('p')
                 );
                 Data::delResursOption('front_credential_error');
             } catch (RuntimeException $e) {
@@ -444,10 +430,10 @@ class PluginApi
             // Since credentials was verified, we can set the environment first to ensure credentials are stored
             // on the proper options.
             if (!$isLiveChange) {
-                Data::setResursOption('environment', self::getParam('e'));
+                Data::setResursOption('environment', Data::getRequest('e'));
             }
 
-            if (self::getParam('e') === 'live') {
+            if (Data::getRequest('e') === 'live') {
                 $getUserFrom = 'login_production';
                 $getPasswordFrom = 'password_production';
             } else {
@@ -455,8 +441,8 @@ class PluginApi
                 $getPasswordFrom = 'password';
             }
 
-            Data::setResursOption($getUserFrom, self::getParam('u'));
-            Data::setResursOption($getPasswordFrom, self::getParam('p'));
+            Data::setResursOption($getUserFrom, Data::getRequest('u'));
+            Data::setResursOption($getPasswordFrom, Data::getRequest('p'));
 
             if ($isLiveChange) {
                 ResursBankAPI::getPaymentMethods(false);
@@ -470,7 +456,7 @@ class PluginApi
                     'Resurs Bank credential validation for environment %s executed, response was %s.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                self::getParam('e'),
+                Data::getRequest('e'),
                 is_bool($validationResponse) && $validationResponse ? 'true' : 'false'
             )
         );
@@ -663,17 +649,17 @@ class PluginApi
     {
         //self::getValidatedNonce();
 
-        $mode = WooCommerce::getRequest('mode');
+        $mode = Data::getRequest('mode');
 
         switch ($mode) {
             case 'e':
                 Data::setResursOption(
                     'currentAnnuityFactor',
-                    WooCommerce::getRequest('id')
+                    Data::getRequest('id')
                 );
                 Data::setResursOption(
                     'currentAnnuityDuration',
-                    (int)WooCommerce::getRequest('duration')
+                    (int)Data::getRequest('duration')
                 );
                 break;
             case 'd':
@@ -686,9 +672,9 @@ class PluginApi
         // Confirm Request.
         self::reply(
             [
-                'id' => WooCommerce::getRequest('id'),
+                'id' => Data::getRequest('id'),
                 'duration' => Data::getResursOption('currentAnnuityDuration'),
-                'mode' => WooCommerce::getRequest('mode'),
+                'mode' => Data::getRequest('mode'),
             ]
         );
     }
@@ -705,7 +691,7 @@ class PluginApi
             [
                 'price' => wc_price(
                     ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
-                        WooCommerce::getRequest('price'),
+                        Data::getRequest('price'),
                         Data::getResursOption('currentAnnuityFactor'),
                         (int)Data::getResursOption('currentAnnuityDuration')
                     ),
@@ -732,7 +718,7 @@ class PluginApi
             $callbackConstant += $callback;
         }
 
-        $current_tab = WooCommerce::getRequest('t');
+        $current_tab = Data::getRequest('t');
         $hasErrors = false;
         $freshCallbackList = [];
         $e = null;
@@ -750,7 +736,10 @@ class PluginApi
                 Data::getCredentialNotice();
             } else {
                 if (Data::getTimeoutStatus() > 0) {
-                    $errorMessage .= ' ' . __('Connectivity may be a bit slower than normal.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+                    $errorMessage .= ' ' . __(
+                            'Connectivity may be a bit slower than normal.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        );
                 }
 
                 Data::setResursOption(
@@ -835,14 +824,17 @@ class PluginApi
     public static function callbackUnregister()
     {
         $successRemoval = false;
-        $callback = WooCommerce::getRequest('callback');
+        $callback = Data::getRequest('callback');
         $message = '';
         if ((bool)Data::getResursOption('show_developer')) {
             $successRemoval = ResursBankAPI::getResurs()->unregisterEventCallback(
                 ResursBankAPI::getResurs()->getCallbackTypeByString($callback)
             );
         } else {
-            $message = __('Advanced mode is disabled. You can not make this change.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+            $message = __(
+                'Advanced mode is disabled. You can not make this change.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
         }
 
         self::reply(
@@ -911,7 +903,10 @@ class PluginApi
         $return['html'] = sprintf(
             '<div>%s</div><div id="resursWaitingForTest"></div>',
             sprintf(
-                __('Activated test trigger. Response "%s" received.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                __(
+                    'Activated test trigger. Response "%s" received.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 $return['api'] ? 'success' : 'fail'
             )
         );
@@ -963,7 +958,7 @@ class PluginApi
     {
         $apiRequest = ResursBankAPI::getResurs();
         $addressResponse = [];
-        $identification = WooCommerce::getRequest('identification');
+        $identification = Data::getRequest('identification');
         $customerType = Data::getCustomerType();
         $customerCountry = Data::getCustomerCountry();
 
@@ -981,7 +976,7 @@ class PluginApi
             'identificationResponse' => [],
         ];
 
-        WooCommerce::setSessionValue('identification', WooCommerce::getRequest('identification'));
+        WooCommerce::setSessionValue('identification', Data::getRequest('identification'));
 
         switch ($customerCountry) {
             case 'NO':
@@ -1056,7 +1051,10 @@ class PluginApi
         Data::canLog(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
-                __('getAddress request (country %s, type %s) for %s: %s', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                __(
+                    'getAddress request (country %s, type %s) for %s: %s',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
                 $customerCountry,
                 $customerType,
                 $identification,
@@ -1080,7 +1078,7 @@ class PluginApi
         $addressFields = WordPress::applyFilters('getAddressFieldController', []);
         foreach ($addressFields as $addressField => $addressTransform) {
             // Check if the session is currently holding something that we want to put up in some fields.
-            $wooSessionData = trim(WooCommerce::getRequest($addressTransform));
+            $wooSessionData = trim(Data::getRequest($addressTransform));
             if (!empty($wooSessionData)) {
                 $addressResponse[$addressTransform] = $wooSessionData;
             }
@@ -1110,7 +1108,7 @@ class PluginApi
             'rejectUpdate' => false,
             'message' => '',
         ];
-        $rejectType = WooCommerce::getRequest('type');
+        $rejectType = Data::getRequest('type');
 
         // Presumably this is available for us to handle the order with.
         $wooOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
@@ -1156,7 +1154,10 @@ class PluginApi
             $failNote .= ' ' .
                 WordPress::applyFilters(
                     'purchaseRejectCustomerMessage',
-                    __('Please contact customer service for more information.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                    __(
+                        'Please contact customer service for more information.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    )
                 );
 
             Data::setOrderMeta($currentOrder, 'rco_reject_message', $failNote);

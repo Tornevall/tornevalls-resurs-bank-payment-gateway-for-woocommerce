@@ -115,22 +115,32 @@ class ResursCheckout
         } else {
             $customerAddressBlock = $rcoCustomerData[$getType] ?? [];
             // This should absolutely not be empty!
-            $rcoPaymentData = $_REQUEST['rco_payment'] ?? [];
+            $rcoPaymentData = Data::getRequest('rco_payment') ?? [];
             WooCommerce::setSessionValue('paymentMethod', $rcoPaymentData['id']);
+            WooCommerce::applyMock('customerAddressBlockException');
 
-            // Observe that RCOv2 does not have any country code available, so it has to be
-            // fetched elsewhere.
-            $return = [
-                'first_name' => !empty($customerAddressBlock['firstName']) ? $customerAddressBlock['firstName'] : '',
-                'last_name' => !empty($customerAddressBlock['lastName']) ? $customerAddressBlock['lastName'] : '',
-                'address_1' => !empty($customerAddressBlock['addressRow1']) ? $customerAddressBlock['addressRow1'] : '',
-                'address_2' => !empty($customerAddressBlock['addressExtra']) ? $customerAddressBlock['addressExtra'] : '',
-                'city' => !empty($customerAddressBlock['city']) ? $customerAddressBlock['city'] : '',
-                'postcode' => !empty($customerAddressBlock['postalCode']) ? $customerAddressBlock['postalCode'] : '',
-                'country' => Data::getCustomerCountry(),
-                'email' => !empty($rcoCustomerData['email']) ? $rcoCustomerData['email'] : '',
-                'phone' => !empty($rcoCustomerData['phone']) ? $rcoCustomerData['phone'] : '',
-            ];
+            if (is_array($customerAddressBlock) && count($customerAddressBlock) > 2) {
+                // Observe that RCOv2 does not have any country code available, so it has to be
+                // fetched elsewhere.
+                $return = [
+                    'first_name' => !empty($customerAddressBlock['firstName']) ? $customerAddressBlock['firstName'] : '',
+                    'last_name' => !empty($customerAddressBlock['lastName']) ? $customerAddressBlock['lastName'] : '',
+                    'address_1' => !empty($customerAddressBlock['addressRow1']) ? $customerAddressBlock['addressRow1'] : '',
+                    'address_2' => !empty($customerAddressBlock['addressExtra']) ? $customerAddressBlock['addressExtra'] : '',
+                    'city' => !empty($customerAddressBlock['city']) ? $customerAddressBlock['city'] : '',
+                    'postcode' => !empty($customerAddressBlock['postalCode']) ? $customerAddressBlock['postalCode'] : '',
+                    'country' => Data::getCustomerCountry(),
+                    'email' => !empty($rcoCustomerData['email']) ? $rcoCustomerData['email'] : '',
+                    'phone' => !empty($rcoCustomerData['phone']) ? $rcoCustomerData['phone'] : '',
+                ];
+            } else {
+                throw new Exception(
+                    __(
+                        'Address block from Resurs Checkout is empty!',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    )
+                );
+            }
         }
         return $return;
     }
@@ -142,6 +152,6 @@ class ResursCheckout
      */
     private function getCustomerFieldsTypeByLegacy($getType): string
     {
-        return $getType === 'deliveryAddress' ? 'delivery': 'address';
+        return $getType === 'deliveryAddress' ? 'delivery' : 'address';
     }
 }

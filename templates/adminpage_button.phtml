@@ -1,10 +1,13 @@
-<button type="<?php echo $action; ?>"
+<button type="<?php echo sanitize_key($action); ?>"
     <?php if (isset($id) && !empty($id)) { ?>
-        id="button_<?php echo $id; ?>"
-        name="button_<?php echo $id; ?>"
+        id="button_<?php echo sanitize_text_field($id); ?>"
+        name="button_<?php echo sanitize_text_field($id); ?>"
     <?php } ?>
-    <?php echo $custom_attributes ?>>
-    <?php echo $title ?>
+    <?php
+    // Protecting local onclick.
+    echo wp_kses($custom_attributes, ['onclick' => []])
+    ?>>
+    <?php echo esc_html($title) ?>
 </button>
 <!-- Freely added spinner. -->
-<div id="div_<?php echo $id; ?>"></div>
+<div id="div_<?php echo sanitize_text_field($id); ?>"></div>
