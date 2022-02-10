@@ -1,18 +1,20 @@
-<div id="r_annuity_p_<?php echo $id ?>">
-    <select class="r_annuity" id="r_annuity_select_<?php echo $id ?>"
-            onclick="setResursAnnuityClick(this, '<?php echo $id ?>', 'set')"
-    >
-        <?php echo $options ?>
+<!-- Simplest sanitation applied, only element id's in effect. Options expecting no extra html. -->
+<div id="r_annuity_p_<?php echo sanitize_key($id) ?>">
+    <select
+            class="r_annuity"
+            id="r_annuity_select_<?php echo sanitize_key($id) ?>"
+            onclick="setResursAnnuityClick(this, '<?php echo sanitize_key($id) ?>', 'set')">
+        <?php echo wp_kses($options, ['option' => []]) ?>
     </select>
-    <div id="r_activity_<?php echo $id ?>"></div>
+    <div id="r_activity_<?php echo sanitize_key($id) ?>"></div>
 </div>
-<button id="r_annuity_button_<?php echo $id ?>" type="button"
-        onclick="setResursAnnuityClick(this, '<?php echo $id ?>', 'click')"
+<button id="r_annuity_button_<?php echo sanitize_key($id) ?>" type="button"
+        onclick="setResursAnnuityClick(this, '<?php echo sanitize_key($id) ?>', 'click')"
 >
-<?php
+    <?php
     if (!$enabled) {
         _e('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
     } else {
         _e('Disable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
     }
-    ?></button><span id="r_activity_<?php echo $id ?>"></span>
+    ?></button><span id="r_activity_<?php echo sanitize_key($id) ?>"></span>

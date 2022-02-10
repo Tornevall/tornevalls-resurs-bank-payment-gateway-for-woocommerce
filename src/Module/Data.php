@@ -605,6 +605,102 @@ class Data
     }
 
     /**
+     * Centralized escaper for internal templates.
+     *
+     * @param $content
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getEscapedHtml($content)
+    {
+        return wp_kses(
+            $content,
+            [
+                'a' => [
+                    'href' => [],
+                    'target' => [],
+                ],
+                'br' => [],
+                'p' => [],
+                'div' => [
+                    'id' => [],
+                    'name' => [],
+                    'class' => [],
+                    'style' => [],
+                    'onclick' => [],
+                ],
+                'table' => [
+                    'id' => [],
+                    'name' => [],
+                    'class' => [],
+                    'style' => [],
+                ],
+                'tr' => [
+                    'id' => [],
+                    'name' => [],
+                    'class' => [],
+                    'style' => [],
+                ],
+                'th' => [
+                    'id' => [],
+                    'name' => [],
+                    'class' => [],
+                    'style' => [],
+                    'scope' => [],
+                ],
+                'td' => [
+                    'id' => [],
+                    'name' => [],
+                    'class' => [],
+                    'style' => [],
+                ],
+                'span' => [
+                    'id' => [],
+                    'name' => [],
+                    'class' => [],
+                    'style' => [],
+                    'onclick' => [],
+                ],
+                'select' => [
+                    'option' => [],
+                    'class' => [],
+                    'id' => [],
+                    'onclick' => [],
+                ],
+                'option' => [],
+                'button' => [
+                    'class' => [],
+                    'style' => [],
+                    'onclick' => [],
+                ],
+            ]
+        );
+    }
+
+    /**
+     * Escaping html where we only new a few elements.
+     *
+     * @return string
+     * @since 0.0.1.0
+     */
+    public static function getTinyEscapedHtml($content)
+    {
+        return wp_kses(
+            $content,
+            [
+                'div' => [
+                    'class' => [],
+                    'style' => [],
+                ],
+                'span' => [
+                    'class' => [],
+                    'style' => [],
+                ],
+            ]
+        );
+    }
+
+    /**
      * @return false|mixed|void
      * @throws Exception
      * @since 0.0.1.0
@@ -1068,15 +1164,23 @@ class Data
                 WooCommerce::getWooCommerceVersion(),
                 WooCommerce::getRequiredVersion()
             ),
-            __('Composer version',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getVersionByComposer(),
+            __(
+                'Composer version',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => self::getVersionByComposer(),
             __('PHP Version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => PHP_VERSION,
-            __('Webservice Library',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
-            __('Communication Library',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => 'netcurl-' . $netWrapper->getVersion(),
-            __('Communication Drivers', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => implode('<br>',
-                self::getWrapperList($netWrapper)),
+            __(
+                'Webservice Library',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
+            __(
+                'Communication Library',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => 'netcurl-' . $netWrapper->getVersion(),
+            __(
+                'Communication Drivers',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => implode('<br>', self::getWrapperList($netWrapper)),
         ];
 
         $renderData += WordPress::applyFilters('renderInformationData', $renderData);
@@ -2002,7 +2106,8 @@ class Data
      * @param $array
      * @since 0.0.1.0
      */
-    public static function getSanitizedArray($array) {
+    public static function getSanitizedArray($array)
+    {
         $arrays = new Arrays();
         $returnArray = [];
         if ($arrays->isAssoc($array)) {

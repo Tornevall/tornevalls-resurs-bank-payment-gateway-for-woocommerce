@@ -55,20 +55,6 @@ class AdminPage extends WC_Settings_Page
     }
 
     /**
-     * @param $content
-     * @param $current_section
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getAdminDynamicContent($content, $current_section)
-    {
-        if ($current_section === 'information') {
-            $content .= WordPress::applyFilters('getPluginInformation', null);
-        }
-        return $content;
-    }
-
-    /**
      * @since 0.0.1.0
      */
     public static function getId(): string
@@ -141,33 +127,14 @@ class AdminPage extends WC_Settings_Page
     public function output()
     {
         global $current_section;
-        $sectionNames = $this->getSectionNames();
-
         $settings = $this->get_settings($current_section);
-        // This generates data for the form fields.
-        ob_start();
+
+        echo '<table class="form-table">';
         WC_Admin_Settings::output_fields($settings);
-        $outputHtml = ob_get_clean();
-
-        if (!isset($sectionNames[$current_section])) {
-            return;
+        if ($current_section === 'information') {
+            echo WordPress::applyFilters('getPluginInformation', null);
         }
-
-        // This displays the entire configuration.
-        echo Data::getGenericClass()->getTemplate(
-            'adminpage_main',
-            [
-                'adminPageTop' => sprintf(
-                    __(
-                        'Extended configuration view for Resurs Bank: %s',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    $sectionNames[$current_section]
-                ),
-                'adminPageSectionHtml' => $outputHtml,
-                'adminDynamicContent' => WordPress::applyFilters('adminDynamicContent', '', $current_section),
-            ]
-        );
+        echo '</table>';
     }
 
     /**

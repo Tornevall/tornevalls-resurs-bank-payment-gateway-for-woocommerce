@@ -163,7 +163,7 @@ class PluginApi
         }
 
         foreach ($nonceArray as $nonceType) {
-            if (wp_verify_nonce(self::getParam('n'), WordPress::getNonceTag($nonceType))) {
+            if (wp_verify_nonce(Data::getRequest('n'), WordPress::getNonceTag($nonceType))) {
                 $return = true;
                 break;
             }
@@ -199,23 +199,13 @@ class PluginApi
         $optionTag = 'resurs_nonce_' . $nonceTag;
         $return = false;
         $lastNonce = get_option($optionTag);
-        if (self::getParam('n') === $lastNonce) {
+        if (Data::getRequest('n') === $lastNonce) {
             $return = true;
         } else {
             // Only update if different.
-            update_option($optionTag, self::getParam('n'));
+            update_option($optionTag, Data::getRequest('n'));
         }
         return $return;
-    }
-
-    /**
-     * @param $key
-     * @return mixed|string
-     * @since 0.0.1.0
-     */
-    private static function getParam($key)
-    {
-        return Data::getRequest($key);
     }
 
     /**
@@ -412,14 +402,14 @@ class PluginApi
          *
          * @var bool $isLiveChange
          */
-        $isLiveChange = Data::getResursOption('environment') !== self::getParam('e');
+        $isLiveChange = Data::getResursOption('environment') !== Data::getRequest('e');
 
         if ($isValid) {
             try {
                 $validationResponse = (new ResursBankAPI())->getConnection()->validateCredentials(
-                    (self::getParam('e') !== 'live') ? 1 : 0,
-                    self::getParam('u'),
-                    self::getParam('p')
+                    (Data::getRequest('e') !== 'live') ? 1 : 0,
+                    Data::getRequest('u'),
+                    Data::getRequest('p')
                 );
                 Data::delResursOption('front_credential_error');
             } catch (RuntimeException $e) {
@@ -442,10 +432,10 @@ class PluginApi
             // Since credentials was verified, we can set the environment first to ensure credentials are stored
             // on the proper options.
             if (!$isLiveChange) {
-                Data::setResursOption('environment', self::getParam('e'));
+                Data::setResursOption('environment', Data::getRequest('e'));
             }
 
-            if (self::getParam('e') === 'live') {
+            if (Data::getRequest('e') === 'live') {
                 $getUserFrom = 'login_production';
                 $getPasswordFrom = 'password_production';
             } else {
@@ -453,8 +443,8 @@ class PluginApi
                 $getPasswordFrom = 'password';
             }
 
-            Data::setResursOption($getUserFrom, self::getParam('u'));
-            Data::setResursOption($getPasswordFrom, self::getParam('p'));
+            Data::setResursOption($getUserFrom, Data::getRequest('u'));
+            Data::setResursOption($getPasswordFrom, Data::getRequest('p'));
 
             if ($isLiveChange) {
                 ResursBankAPI::getPaymentMethods(false);
@@ -468,7 +458,7 @@ class PluginApi
                     'Resurs Bank credential validation for environment %s executed, response was %s.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                self::getParam('e'),
+                Data::getRequest('e'),
                 is_bool($validationResponse) && $validationResponse ? 'true' : 'false'
             )
         );

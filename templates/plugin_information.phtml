@@ -1,0 +1,26 @@
+<div style="border: 1px solid #000099; padding-left: 5px; width: 800px;">
+    <div style="font-style: italic; margin-bottom: 5px; padding: 5px;">
+        <?php use ResursBank\Module\Data;
+
+        echo esc_html($support_string)
+        ?>
+    </div>
+    <table class="form-table">
+        <?php foreach ($render as $renderKey => $renderValue) { ?>
+            <tr style="border-top: 1px solid gray;">
+                <th scope="row"
+                    class="titledesc" style="border-right: 1px solid gray;"
+                    valign="top">
+                    <?php echo Data::getEscapedHtml($renderKey) ?>
+                </th>
+                <td class="forminp forminp-checkbox"
+                    valign="top">
+                    <?php echo Data::getEscapedHtml($renderValue) ?>
+                </td>
+            </tr>
+        <?php } ?>
+    </table>
+    <div style="font-style: italic; margin-bottom: 5px; padding: 5px; border-top: 1px solid gray;">
+        <?php echo Data::getEscapedHtml($required_drivers) ?>
+    </div>
+</div>

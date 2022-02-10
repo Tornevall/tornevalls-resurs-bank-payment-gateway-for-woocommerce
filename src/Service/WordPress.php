@@ -92,8 +92,6 @@ class WordPress
     {
         // Generic calls.
         add_filter('plugin_action_links', 'ResursBank\Service\WooCommerce::getPluginAdminUrl', 10, 2);
-        // Other calls.
-        add_filter('rbwc_admin_dynamic_content', 'ResursBank\Gateway\AdminPage::getAdminDynamicContent', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
         // Localization.

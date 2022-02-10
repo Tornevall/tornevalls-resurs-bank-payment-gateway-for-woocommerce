@@ -1,11 +1,15 @@
 <?php
+// Template
 if (isset($customer_billing) && count($customer_billing)) {
     ?>
     <h3 class="resursOrderInfoTitle resursOrderInfoContainer">
         <?php _e('Billing Address', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?>
     </h3>
     <div class="address resursOrderInfoContainer">
-        <?php echo nl2br(implode("\n", $customer_billing)); ?>
+        <?php
+        // Sanitizing customer data.
+        echo nl2br(esc_html(implode("\n", $customer_billing)));
+        ?>
     </div>
     <?php
 }
