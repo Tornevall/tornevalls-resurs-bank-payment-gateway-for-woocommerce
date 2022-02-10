@@ -18,6 +18,8 @@ use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Strings;
+use TorneLIB\Module\Network\Domain;
+use TorneLIB\Module\Network\NetWrapper;
 use WC_Checkout;
 use WC_Order;
 use function count;
@@ -677,6 +679,73 @@ class PluginApi
                 'mode' => Data::getRequest('mode'),
             ]
         );
+    }
+
+    /**
+     * Network lookup handler, for whitelisting help at Resurs Bank.
+     * @throws ExceptionHandler
+     * @since 0.0.1.1
+     */
+    public static function getNetworkLookup()
+    {
+        if (is_admin()) {
+            // Using curl_multi via netwrapper if exists, otherwise there's a failover to at multi-request stream.
+            $httpWrapper = new NetWrapper();
+            $addressRequestUrls = [
+                'https://ipv4.netcurl.org',
+                'https://ipv6.netcurl.org',
+            ];
+
+            $networkRequest = $httpWrapper->request(
+                $addressRequestUrls
+            );
+
+            $addressRequestList = [];
+            foreach ($addressRequestUrls as $addressRequestUrl) {
+                $addressRequestResponse = $networkRequest->getParsed($addressRequestUrl);
+                $protoNum = self::getProtocolByHostName($addressRequestUrl);
+                if ($protoNum) {
+                    if (isset($addressRequestResponse->ip) &&
+                        filter_var($addressRequestResponse->ip, FILTER_VALIDATE_IP)
+                    ) {
+                        $addressRequestList[$protoNum] = $addressRequestResponse->ip;
+                    } else {
+                        $addressRequestList[$protoNum] = 'N/A';
+                    }
+                }
+            }
+        } else {
+            $addressRequestList['4'] = '!is_admin()';
+            $addressRequestList['6'] = '!is_admin()';
+        }
+
+        self::reply(
+            [
+                'addressRequest' => $addressRequestList,
+            ]
+        );
+        die;
+    }
+
+    /**
+     * @param $addressRequestUrl
+     * @return int
+     * @throws ExceptionHandler
+     */
+    private static function getProtocolByHostName($addressRequestUrl): int
+    {
+        $return = 0;
+        $domain = new Domain();
+        $hostNameExtracted = $domain->getUrlDomain($addressRequestUrl);
+        if (is_array($hostNameExtracted) && count($hostNameExtracted) === 3) {
+            /** @var array $hostData */
+            $hostData = explode('.', $hostNameExtracted[0]);
+            if (is_array($hostData) && count($hostData) === 3 && preg_match('/^ipv\d/', $hostData[0])) {
+                $return = (int)preg_replace('/[^0-9$]/i', '', $hostData[0]);
+            }
+        }
+
+        return $return;
     }
 
     /**

@@ -1280,7 +1280,10 @@ class Data
                 'Plugin version',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ) => esc_html(self::getCurrentVersion()),
-            __('WooCommerce', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => sprintf(
+            __(
+                'WooCommerce',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => sprintf(
                 __(
                     '%s, at least %s are required.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -1292,7 +1295,10 @@ class Data
                 'Composer version',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ) => esc_html(self::getVersionByComposer()),
-            __('PHP Version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => PHP_VERSION,
+            __(
+                'PHP Version',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => PHP_VERSION,
             __(
                 'Webservice Library',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -1304,16 +1310,22 @@ class Data
             __(
                 'Communication Drivers',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            ) => Data::getEscapedHtml(implode('<br>', self::getWrapperList($netWrapper))),
+            ) => nl2br(Data::getEscapedHtml(implode("\n", self::getWrapperList($netWrapper)))),
+            __(
+                'Network Lookup',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => '<div id="rbwcNetworkLookup">&nbsp;</div>',
         ];
 
-        $content .= self::getGenericClass()->getTemplate(
-            'plugin_information',
-            [
-                'required_drivers' => self::getSpecialString('required_drivers'),
-                'support_string' => self::getSpecialString('support_string'),
-                'render' => Data::getSanitizedArray(WordPress::applyFilters('renderInformationData', $renderData)),
-            ]
+        $content .= Data::getEscapedHtml(
+            self::getGenericClass()->getTemplate(
+                'plugin_information',
+                [
+                    'required_drivers' => self::getSpecialString('required_drivers'),
+                    'support_string' => self::getSpecialString('support_string'),
+                    'render' => Data::getSanitizedArray(WordPress::applyFilters('renderInformationData', $renderData)),
+                ]
+            )
         );
 
         return $content;
@@ -2238,7 +2250,7 @@ class Data
                 if (is_array($arrayValue)) {
                     $returnArray[$arrayKey] = self::getSanitizedArray($arrayValue);
                 } elseif (is_string($arrayValue)) {
-                    $returnArray[$arrayKey] = sanitize_text_field($arrayValue);
+                    $returnArray[$arrayKey] = Data::getEscapedHtml($arrayValue);
                 }
             }
         } elseif ($array) {
@@ -2246,7 +2258,7 @@ class Data
                 if (is_array($item)) {
                     $returnArray[] = self::getSanitizedArray($arrayValue);
                 } elseif (is_string($item)) {
-                    $returnArray[] = sanitize_text_field($item);
+                    $returnArray[] = Data::getEscapedHtml($item);
                 }
             }
         }
