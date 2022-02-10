@@ -693,6 +693,11 @@ class Data
                     'style' => [],
                     'onclick' => [],
                 ],
+                'iframe' => [
+                    'src' => [],
+                    'class' => [],
+                    'style' => [],
+                ],
             ]
         );
     }

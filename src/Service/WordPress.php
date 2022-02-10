@@ -101,6 +101,12 @@ class WordPress
         add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
         add_filter('rbwc_get_part_payment_page', 'ResursBank\Service\WordPress::getPartPaymentPage');
 
+        //$currentSlug = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH));
+        /*$currentSlug = Data::getRequest('action');
+        if ($currentSlug === 'resurs-bank-priceinfo' || $currentSlug === 'resursbank_get_cost_of_purchase') {
+            add_filter('the_content', 'ResursBank\Module\PluginApi::getDefaultPriceInfoTemplate');
+        }*/
+
         if (Data::isEnabled()) {
             add_filter('woocommerce_payment_gateways', 'ResursBank\Service\WooCommerce::getGateways');
             add_filter(
@@ -536,6 +542,20 @@ class WordPress
         foreach (Data::getPluginScripts($isAdmin) as $scriptName => $scriptFile) {
             $realScriptName = sprintf('%s_%s', Data::getPrefix(), $scriptName);
             self::setEnqueue($realScriptName, $scriptFile, $isAdmin);
+        }
+
+        if (Data::getRequest('action') === 'resursbank_get_cost_of_purchase') {
+            $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
+            $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
+
+            wp_enqueue_style(
+                'woocommerce_default_style',
+                $wooCommerceStyleSheet
+            );
+            wp_enqueue_style(
+                'resurs_annuity_style',
+                $resursStyleSheet
+            );
         }
     }
 

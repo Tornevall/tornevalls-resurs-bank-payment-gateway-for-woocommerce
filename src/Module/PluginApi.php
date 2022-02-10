@@ -216,9 +216,6 @@ class PluginApi
      */
     public static function getCostOfPurchase()
     {
-        $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
-        $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
-
         $method = Data::getRequest('method');
         $total = Data::getRequest('total');
         if (Data::getCustomerCountry() !== 'DK') {
@@ -247,8 +244,6 @@ class PluginApi
             ->getTemplate(
                 'checkout_costofpurchase_default.phtml',
                 [
-                    'wooCommerceStyleSheet' => $wooCommerceStyleSheet,
-                    'resursStyleSheet' => $resursStyleSheet,
                     'priceInfoHtml' => $priceInfoHtml,
                 ]
             );

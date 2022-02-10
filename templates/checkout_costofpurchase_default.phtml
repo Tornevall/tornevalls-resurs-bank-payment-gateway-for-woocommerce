@@ -1,9 +1,9 @@
 <html>
 <head>
-    <link rel="stylesheet" media="all" type="text/css" href="<?php echo $wooCommerceStyleSheet ?>">
-    <link rel="stylesheet" media="all" type="text/css" href="<?php echo $resursStyleSheet ?>">
+    <?php use ResursBank\Module\Data;
+    wp_head(); ?>
 </head>
 <body>
-<?php echo $priceInfoHtml ?>
+<?php echo Data::getEscapedHtml($priceInfoHtml) ?>
 </body>
 </html>
