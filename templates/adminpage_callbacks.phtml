@@ -31,8 +31,8 @@
         if (isset($callbacks) && is_array($callbacks)) {
             foreach ($callbacks as $callbackType => $callbackUrl) {
                 ?>
-                <tr id="callback_row_<?php echo sanitize_key($callbackType) ?>">
-                    <td class="resursMethodBody"><?php echo sanitize_key($callbackType) ?></td>
+                <tr id="callback_row_<?php echo sanitize_text_field($callbackType) ?>">
+                    <td class="resursMethodBody"><?php echo sanitize_text_field($callbackType) ?></td>
                     <td class="resursMethodBody">
                         <input class="trbwc_cb_input"
                                value="<?php echo esc_url($callbackUrl) ?>"
@@ -40,9 +40,9 @@
                     <?php
                     if ((bool)Data::getResursOption('show_developer')) {
                         ?>
-                        <td class="resursMethodBody" id="remove_cb_btn_<?php echo sanitize_key($callbackType); ?>">
+                        <td class="resursMethodBody" id="remove_cb_btn_<?php echo sanitize_text_field($callbackType); ?>">
                             <button type="button"
-                                    onclick="doResursRemoveCallback('<?php echo sanitize_key($callbackType); ?>')">X
+                                    onclick="doResursRemoveCallback('<?php echo sanitize_text_field($callbackType); ?>')">X
                             </button>
                         </td>
                         <?php

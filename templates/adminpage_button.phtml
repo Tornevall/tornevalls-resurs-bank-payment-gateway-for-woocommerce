@@ -1,7 +1,7 @@
 <button type="<?php echo sanitize_key($action); ?>"
     <?php if (isset($id) && !empty($id)) { ?>
-        id="button_<?php echo sanitize_key($id); ?>"
-        name="button_<?php echo sanitize_key($id); ?>"
+        id="button_<?php echo sanitize_text_field($id); ?>"
+        name="button_<?php echo sanitize_text_field($id); ?>"
     <?php } ?>
     <?php
     // Protecting local onclick.
@@ -10,4 +10,4 @@
     <?php echo esc_html($title) ?>
 </button>
 <!-- Freely added spinner. -->
-<div id="div_<?php echo sanitize_key($id); ?>"></div>
+<div id="div_<?php echo sanitize_text_field($id); ?>"></div>

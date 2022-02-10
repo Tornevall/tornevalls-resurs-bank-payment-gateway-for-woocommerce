@@ -373,7 +373,8 @@ class Data
     {
         global $product;
 
-        if (is_object($product) && !empty(self::getResursOption('currentAnnuityFactor'))) {
+        $currentFactor = self::getResursOption('currentAnnuityFactor');
+        if (is_object($product) && !empty($currentFactor)) {
             try {
                 self::getAnnuityHtml(
                     wc_get_price_to_display($product),
@@ -545,13 +546,13 @@ class Data
         switch ($customerCountry) {
             case 'US':
                 // Resides here as an example.
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
+                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
                 break;
             case 'FI':
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
+                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
                 break;
             default:
-                $minimumPaymentLimit = WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
+                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
         }
 
         $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
@@ -577,9 +578,9 @@ class Data
                 ),
                 [
                     'currency' => get_woocommerce_currency_symbol(),
-                    'monthlyPrice' => $monthlyPrice,
-                    'monthlyDuration' => $annuityDuration,
-                    'paymentLimit' => $minimumPaymentLimit,
+                    'monthlyPrice' => (float)$monthlyPrice,
+                    'monthlyDuration' => (int)$annuityDuration,
+                    'paymentLimit' => (int)$minimumPaymentLimit,
                     'paymentMethod' => $annuityPaymentMethod,
                     'isTest' => self::getTestMode(),
                     'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
@@ -856,10 +857,14 @@ class Data
             '<span style="cursor:pointer !important; font-weight:bold;" onclick="getRbReadMoreClicker(\'%s\', \'%s\')">
             %s
             </span>',
-            $annuityPaymentMethod['id'],
-            $monthlyPrice,
-            WordPress::applyFilters('partPaymentReadMoreString',
-                __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'))
+            isset($annuityPaymentMethod['id']) ? sanitize_text_field($annuityPaymentMethod['id']) : 'not-set',
+            (float)$monthlyPrice,
+            esc_html(
+                WordPress::applyFilters(
+                    'partPaymentReadMoreString',
+                    __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                )
+            )
         );
     }
 
@@ -1155,19 +1160,22 @@ class Data
         $netWrapper = new NetWrapper();
 
         $renderData = [
-            __('Plugin version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => self::getCurrentVersion(),
+            __(
+                'Plugin version',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => esc_html(self::getCurrentVersion()),
             __('WooCommerce', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => sprintf(
                 __(
                     '%s, at least %s are required.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                WooCommerce::getWooCommerceVersion(),
-                WooCommerce::getRequiredVersion()
+                esc_html(WooCommerce::getWooCommerceVersion()),
+                esc_html(WooCommerce::getRequiredVersion())
             ),
             __(
                 'Composer version',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            ) => self::getVersionByComposer(),
+            ) => esc_html(self::getVersionByComposer()),
             __('PHP Version', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') => PHP_VERSION,
             __(
                 'Webservice Library',
@@ -1176,20 +1184,19 @@ class Data
             __(
                 'Communication Library',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            ) => 'netcurl-' . $netWrapper->getVersion(),
+            ) => esc_html('netcurl-' . $netWrapper->getVersion()),
             __(
                 'Communication Drivers',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            ) => implode('<br>', self::getWrapperList($netWrapper)),
+            ) => Data::getEscapedHtml(implode('<br>', self::getWrapperList($netWrapper))),
         ];
 
-        $renderData += WordPress::applyFilters('renderInformationData', $renderData);
         $content .= self::getGenericClass()->getTemplate(
             'plugin_information',
             [
                 'required_drivers' => self::getSpecialString('required_drivers'),
                 'support_string' => self::getSpecialString('support_string'),
-                'render' => $renderData,
+                'render' => Data::getSanitizedArray(WordPress::applyFilters('renderInformationData', $renderData)),
             ]
         );
 
@@ -1207,7 +1214,7 @@ class Data
     {
         $wrapperList = [];
         foreach ($netWrapper->getWrappers() as $wrapperClass => $wrapperInstance) {
-            $wrapperList[] = preg_replace('/(.*)\\\\(.*?)$/', '$2', $wrapperClass);
+            $wrapperList[] = esc_html(preg_replace('/(.*)\\\\(.*?)$/', '$2', $wrapperClass));
         }
 
         return $wrapperList;

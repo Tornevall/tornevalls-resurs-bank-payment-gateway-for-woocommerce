@@ -5,7 +5,7 @@
     use ResursBank\Module\Data;
 
     _e(sprintf(
-        'Available payment methods (Environment %s)', sanitize_key($environment)),
+        'Available payment methods (Environment %s)', sanitize_text_field($environment)),
         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
     ); ?></h3>
 
@@ -105,7 +105,7 @@
                     // Note to self: No sanitization needed.
                         echo $annuityClass
                     ?>"
-                        id="r_annuity_field_<?php echo sanitize_key($methodObject->id); ?>"
+                        id="r_annuity_field_<?php echo sanitize_text_field($methodObject->id); ?>"
                     ><?php
                         if ($methodObject->type === 'REVOLVING_CREDIT' && isset($annuityFactors[$methodObject->id])) {
                             echo Data::getEscapedHtml($annuityFactors[$methodObject->id]);

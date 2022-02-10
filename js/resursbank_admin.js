@@ -590,7 +590,11 @@ function getResursFraudFlags(clickObject) {
  * @since 0.0.1.0
  */
 function isResursAnnuityDisabled(currentAnnuityField) {
-    return currentAnnuityField.attr('class').indexOf('r_annuity_disabled') > -1 ? true : false;
+    var returnBooleanValue = false;
+    if (currentAnnuityField.length > 0) {
+        returnBooleanValue = currentAnnuityField.attr('class').indexOf('r_annuity_disabled') > -1 ? true : false;
+    }
+    return returnBooleanValue;
 }
 
 /**

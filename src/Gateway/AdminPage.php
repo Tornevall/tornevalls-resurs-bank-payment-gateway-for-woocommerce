@@ -132,7 +132,7 @@ class AdminPage extends WC_Settings_Page
         echo '<table class="form-table">';
         WC_Admin_Settings::output_fields($settings);
         if ($current_section === 'information') {
-            echo WordPress::applyFilters('getPluginInformation', null);
+            echo Data::getEscapedHtml(WordPress::applyFilters('getPluginInformation', null));
         }
         echo '</table>';
     }

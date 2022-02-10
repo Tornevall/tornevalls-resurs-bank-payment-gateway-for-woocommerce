@@ -3,10 +3,10 @@
         <?php echo $fieldLabel ?>
     </label>
     <input type="text"
-           id="<?php echo sanitize_key($fieldName) ?>"
+           id="<?php echo sanitize_text_field($fieldName) ?>"
            size="<?php echo (int)$fieldSize ?>"
-           class="field_<?php echo sanitize_key($fieldName) ?>"
-           name="<?php echo sanitize_key($fieldName) ?>"
+           class="field_<?php echo sanitize_text_field($fieldName) ?>"
+           name="<?php echo sanitize_text_field($fieldName) ?>"
            onkeyup="setBillingInherit(this)"
-           value="<?php echo sanitize_key($fieldValue) ?>">
+           value="<?php echo sanitize_text_field($fieldValue) ?>">
 </div>
