@@ -1,6 +1,6 @@
-<div style="display:<?php echo !$streamLine ? $displayMode : ''; ?>">
-    <label for="<?php echo $fieldName ?>" style="width:100%;display:block;">
-        <?php echo $fieldLabel ?>
+<div style="display:<?php echo !$streamLine ? sanitize_key($displayMode) : ''; ?>">
+    <label for="<?php echo sanitize_text_field($fieldName) ?>" style="width:100%;display:block;">
+        <?php echo sanitize_text_field($fieldLabel) ?>
     </label>
     <input type="text"
            id="<?php echo sanitize_text_field($fieldName) ?>"

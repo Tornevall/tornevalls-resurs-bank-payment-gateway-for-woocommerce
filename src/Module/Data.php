@@ -642,13 +642,6 @@ class Data
                 ],
                 'br' => [],
                 'p' => [],
-                'div' => [
-                    'id' => [],
-                    'name' => [],
-                    'class' => [],
-                    'style' => [],
-                    'onclick' => [],
-                ],
                 'table' => [
                     'id' => [],
                     'name' => [],
@@ -674,9 +667,21 @@ class Data
                     'class' => [],
                     'style' => [],
                 ],
+                'label' => [
+                    'for' => [],
+                ],
+                'div' => [
+                    'style' => [],
+                    'id' => [],
+                    'name' => [],
+                    'class' => [],
+                    'label' => [],
+                    'onclick' => [],
+                ],
                 'span' => [
                     'id' => [],
                     'name' => [],
+                    'label' => [],
                     'class' => [],
                     'style' => [],
                     'onclick' => [],
@@ -697,6 +702,14 @@ class Data
                     'src' => [],
                     'class' => [],
                     'style' => [],
+                ],
+                'input' => [
+                    'id' => [],
+                    'name' => [],
+                    'type' => [],
+                    'size' => [],
+                    'onkeyup' => [],
+                    'value' => [],
                 ],
             ]
         );
