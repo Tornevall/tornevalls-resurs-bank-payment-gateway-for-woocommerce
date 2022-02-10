@@ -154,18 +154,22 @@ class WooCommerce
             $customerCountry = Data::getCustomerCountry();
 
             if ($customerCountry !== get_option('woocommerce_default_country')) {
-                Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS,
-                    sprintf(
-                        __(
-                            'The country (%s) this customer is using are not matching the one currently set in ' .
-                            'WooCommerce (%s). It is not guaranteed that all payment methods is shown in this mode.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                        $customerCountry,
-                        get_option('woocommerce_default_country')
-                    )
-                );
+                if (WooCommerce::getValidCart()) {
+                    // This log should only apply when there is a customer going somewhere.
+                    Data::canLog(
+                        Data::CAN_LOG_ORDER_EVENTS,
+                        sprintf(
+                            __(
+                                'The country (%s) this customer is using are not matching the one currently set in ' .
+                                'WooCommerce (%s). It is not guaranteed that all payment methods is shown in ' .
+                                'this mode.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ),
+                            $customerCountry,
+                            get_option('woocommerce_default_country')
+                        )
+                    );
+                }
 
                 foreach ($gateways as $gatewayName => $gatewayClass) {
                     if ($gatewayClass instanceof ResursDefault &&
@@ -270,6 +274,9 @@ class WooCommerce
      */
     public static function getAdminAfterOrderDetails($order = null)
     {
+        // Considering this place as a safe place to apply display in styles.
+        Data::getAdminSafeCss();
+
         if ($order instanceof WC_Order) {
             $paymentMethod = $order->get_payment_method();
             if (Data::canHandleOrder($paymentMethod)) {
@@ -288,9 +295,11 @@ class WooCommerce
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
                         $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
                     }
-                    echo Data::getEscapedHtml(
-                        Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
+                    $rawAdminDetails = Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
+                    $escapedAdminDetails = Data::getEscapedHtml(
+                        $rawAdminDetails
                     );
+                    echo $escapedAdminDetails;
                 }
                 // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
                 // if someone wants to create their own view.
@@ -489,6 +498,7 @@ class WooCommerce
      */
     public static function getAdminAfterBilling($order = null)
     {
+        Data::getAdminSafeCss();
         if (!empty($order) &&
             WordPress::applyFilters('canDisplayOrderInfoAfterBilling', true) &&
             Data::canHandleOrder($order->get_payment_method())
@@ -508,6 +518,7 @@ class WooCommerce
      */
     public static function getAdminAfterShipping($order = null)
     {
+        Data::getAdminSafeCss();
         if (!empty($order) &&
             WordPress::applyFilters('canDisplayOrderInfoAfterShipping', true) &&
             Data::canHandleOrder($order->get_payment_method())

@@ -639,93 +639,157 @@ class Data
     {
         return wp_kses(
             $content,
-            [
-                'a' => [
-                    'href' => [],
-                    'target' => [],
-                ],
-                'br' => [],
-                'p' => [],
-                'table' => [
-                    'id' => [],
-                    'name' => [],
-                    'class' => [],
-                    'style' => [],
-                    'width' => [],
-                ],
-                'tr' => [
-                    'id' => [],
-                    'name' => [],
-                    'class' => [],
-                    'style' => [],
-                ],
-                'th' => [
-                    'id' => [],
-                    'name' => [],
-                    'class' => [],
-                    'style' => [],
-                    'scope' => [],
-                ],
-                'td' => [
-                    'id' => [],
-                    'name' => [],
-                    'class' => [],
-                    'style' => [],
-                ],
-                'label' => [
-                    'for' => [],
-                ],
-                'div' => [
-                    'style' => [],
-                    'id' => [],
-                    'name' => [],
-                    'class' => [],
-                    'label' => [],
-                    'onclick' => [],
-                ],
-                'span' => [
-                    'id' => [],
-                    'name' => [],
-                    'label' => [],
-                    'class' => [],
-                    'style' => [],
-                    'onclick' => [],
-                ],
-                'select' => [
-                    'option' => [],
-                    'class' => [],
-                    'id' => [],
-                    'onclick' => [],
-                ],
-                'option' => [],
-                'button' => [
-                    'id' => [],
-                    'name' => [],
-                    'class' => [],
-                    'style' => [],
-                    'onclick' => [],
-                    'type' => [],
-                ],
-                'iframe' => [
-                    'src' => [],
-                    'class' => [],
-                    'style' => [],
-                ],
-                'input' => [
-                    'id' => [],
-                    'name' => [],
-                    'type' => [],
-                    'size' => [],
-                    'onkeyup' => [],
-                    'value' => [],
-                    'class' => [],
-                    'readonly' => [],
-                ],
-                'h1' => [],
-                'h2' => [],
-                'h3' => [],
-            ]
+            self::getSafeTags()
         );
+    }
+
+    /**
+     * Get safe escape tags for html. Observe that we pass some of the elements through a purger, as
+     * some of the script based "on"-elements are limited to admin.
+     *
+     * @return array
+     * @since 0.0.1.1
+     */
+    private static function getSafeTags()
+    {
+        // Many of the html tags is depending on clickable elements, but we're limiting them here
+        // to only apply in the most important elements.
+        $return = [
+            'a' => [
+                'href' => [],
+                'target' => [],
+            ],
+            'br' => [],
+            'table' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'width' => [],
+            ],
+            'tr' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+            ],
+            'th' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'scope' => [],
+            ],
+            'td' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+            ],
+            'label' => [
+                'for' => [],
+                'style' => [],
+                'class' => [],
+                'onclick' => [],
+            ],
+            'div' => [
+                'style' => [],
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'label' => [],
+                'onclick' => [],
+            ],
+            'p' => [
+                'style' => [],
+                'class' => [],
+                'label' => [],
+            ],
+            'span' => [
+                'id' => [],
+                'name' => [],
+                'label' => [],
+                'class' => [],
+                'style' => [],
+                'onclick' => [],
+            ],
+            'select' => [
+                'option' => [],
+                'class' => [],
+                'id' => [],
+                'onclick' => [],
+            ],
+            'option' => [],
+            'button' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'onclick' => [],
+                'type' => [],
+            ],
+            'iframe' => [
+                'src' => [],
+                'class' => [],
+                'style' => [],
+            ],
+            'input' => [
+                'id' => [],
+                'name' => [],
+                'type' => [],
+                'size' => [],
+                'onkeyup' => [],
+                'value' => [],
+                'class' => [],
+                'readonly' => [],
+            ],
+            'h1' => [],
+            'h2' => [],
+            'h3' => [
+                'style' => [],
+                'class' => [],
+            ],
+        ];
+
+        return self::purgeSafeAdminTags($return);
+    }
+
+    /**
+     * Purge some html sanitizer elements before returning them to wp_kses.
+     * @since 0.0.1.1
+     */
+    private static function purgeSafeAdminTags($return)
+    {
+        if (!is_admin()) {
+            $unsetPublicClicks = [
+                'select',
+                'h1',
+                'h2',
+                'h3',
+            ];
+
+            foreach ($unsetPublicClicks as $element) {
+                if (isset($return[$element]['onclick'])) {
+                    unset($return[$element]['onclick']);
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @since 0.0.1.1
+     */
+    public static function getAdminSafeCss()
+    {
+        if (is_admin()) {
+            add_filter('safe_style_css', function ($styles) {
+                $styles[] = 'display';
+                $styles[] = 'border';
+                return $styles;
+            });
+        }
     }
 
     /**

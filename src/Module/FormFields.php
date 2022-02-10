@@ -1470,11 +1470,7 @@ class FormFields extends WC_Settings_API
     public static function getFieldMethodList()
     {
         // Considering this place as a safe place to apply display in styles.
-        add_filter('safe_style_css', function ($styles) {
-            $styles[] = 'display';
-            $styles[] = 'border';
-            return $styles;
-        });
+        Data::getAdminSafeCss();
 
         $exception = null;
         $annuityException = null;
