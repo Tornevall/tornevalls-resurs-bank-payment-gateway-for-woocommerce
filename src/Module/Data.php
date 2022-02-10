@@ -1307,13 +1307,15 @@ class Data
             ) => Data::getEscapedHtml(implode('<br>', self::getWrapperList($netWrapper))),
         ];
 
-        $content .= self::getGenericClass()->getTemplate(
-            'plugin_information',
-            [
-                'required_drivers' => self::getSpecialString('required_drivers'),
-                'support_string' => self::getSpecialString('support_string'),
-                'render' => Data::getSanitizedArray(WordPress::applyFilters('renderInformationData', $renderData)),
-            ]
+        $content .= Data::getEscapedHtml(
+            self::getGenericClass()->getTemplate(
+                'plugin_information',
+                [
+                    'required_drivers' => self::getSpecialString('required_drivers'),
+                    'support_string' => self::getSpecialString('support_string'),
+                    'render' => Data::getSanitizedArray(WordPress::applyFilters('renderInformationData', $renderData)),
+                ]
+            )
         );
 
         return $content;
