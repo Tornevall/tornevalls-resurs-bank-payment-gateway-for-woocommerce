@@ -731,6 +731,7 @@ class PluginApi
      * @param $addressRequestUrl
      * @return int
      * @throws ExceptionHandler
+     * @since 0.0.1.1
      */
     private static function getProtocolByHostName($addressRequestUrl): int
     {
