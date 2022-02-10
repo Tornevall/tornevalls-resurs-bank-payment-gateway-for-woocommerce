@@ -633,7 +633,7 @@ class Data
      *
      * @param $content
      * @return string
-     * @since 0.0.1.0
+     * @since 0.0.1.1
      */
     public static function getEscapedHtml($content)
     {
@@ -779,6 +779,8 @@ class Data
     }
 
     /**
+     * Allowing specific styles if admin is active.
+     *
      * @since 0.0.1.1
      */
     public static function getAdminSafeCss()
@@ -796,7 +798,7 @@ class Data
      * Escaping html where we only new a few elements.
      *
      * @return string
-     * @since 0.0.1.0
+     * @since 0.0.1.1
      */
     public static function getTinyEscapedHtml($content)
     {
@@ -2184,7 +2186,7 @@ class Data
      * @param $key
      * @param bool|array $post_data
      * @return mixed
-     * @since 0.0.1.0
+     * @since 0.0.1.1
      */
     public static function getRequest($key, $post_data = null)
     {
@@ -2210,7 +2212,7 @@ class Data
     /**
      * $_REQUEST-sanitizer.
      * @return array
-     * @since 0.0.1.0
+     * @since 0.0.1.1
      */
     public static function getSanitizedRequest($requestArray)
     {
@@ -2225,7 +2227,7 @@ class Data
      * Recursive string sanitizer.
      *
      * @param $array
-     * @since 0.0.1.0
+     * @since 0.0.1.1
      */
     public static function getSanitizedArray($array)
     {
