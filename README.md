@@ -20,7 +20,7 @@ old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this o
 
 ## DOCUMENTS AND LINKS
 
-* [Help us translate the plugin](https://crwd.in/trwbc)
+* [Contribute with translations](https://crwd.in/trwbc)
 * [The current work-repository as of v0.0](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
 * [Github Synchronized repository](https://github.com/Tornevall/wpwc-resurs) will probably be the new official
   repository as bitbucket server will shut down in a few years from now.
