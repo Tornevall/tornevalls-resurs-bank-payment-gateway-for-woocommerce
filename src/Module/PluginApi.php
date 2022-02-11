@@ -112,7 +112,7 @@ class PluginApi
         }
 
         header('Content-type: application/json; charset=utf-8', true, 200);
-        echo json_encode($out);
+        echo json_encode(Data::getSanitizedArray($out));
         if ($dieInstantly) {
             die();
         }
