@@ -31,6 +31,33 @@ function getResursAdminFields() {
     getResursEnvironmentFields();
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
+    rbwcAdminNetworkLookup();
+}
+
+/**
+ * is_admin network lookups for Resurs Bank whitelisting help.
+ * @since 0.0.1.1
+ */
+function rbwcAdminNetworkLookup() {
+    if ($rQuery('#rbwcNetworkLookup').length > 0) {
+        getResursSpin('#rbwcNetworkLookup');
+        getResursAjaxify(
+            'get',
+            'resursbank_get_network_lookup',
+            {},
+            function(data) {
+                if (typeof data.addressRequest !== 'undefined') {
+                    var displayAddressTypes = '';
+                    for (var addressType in data.addressRequest) {
+                        if (parseInt(addressType) > 0) {
+                            displayAddressTypes += '<b>IPv' + addressType + '</b>: ' + data.addressRequest[addressType] + '<br>';
+                        }
+                    }
+                    $rQuery('#rbwcNetworkLookup').html(displayAddressTypes);
+                }
+            }
+        );
+    }
 }
 
 /**

@@ -72,6 +72,7 @@ class WordPress
             'set_new_annuity',
             'get_new_annuity_calculation',
             'get_cost_of_purchase',
+            'get_network_lookup',
         ];
 
         foreach ($actionList as $action) {
