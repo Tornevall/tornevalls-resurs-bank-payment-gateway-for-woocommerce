@@ -743,7 +743,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'can_log_order_events',
                     'type' => 'checkbox',
                     'title' => __(
-                        'Details at order events for merchants',
+                        'Log merchant details (CAN_LOG_ORDER_EVENTS)',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
@@ -757,7 +757,10 @@ class FormFields extends WC_Settings_API
                 'can_log_info' => [
                     'id' => 'can_log_info',
                     'type' => 'checkbox',
-                    'title' => __('Log INFO events', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'title' => __(
+                        'Log informative (CAN_LOG_INFO)',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                     'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Log events that flows under severity INFO. Logs affected is for example mocking events.',
@@ -769,7 +772,7 @@ class FormFields extends WC_Settings_API
                     'id' => 'can_log_order_developer',
                     'type' => 'checkbox',
                     'title' => __(
-                        'Developer based details at order events',
+                        'Log developer order events (CAN_LOG_ORDER_DEVELOPER)',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
@@ -796,12 +799,13 @@ class FormFields extends WC_Settings_API
                     'id' => 'can_log_backend',
                     'type' => 'checkbox',
                     'title' => __(
-                        'Log backend requests from ajaxify-js',
+                        'Log backend requests (CAN_LOG_BACKEND)',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
-                        'Log backend events triggered by the the javascript method that handles all AJAX requests.',
+                        'Log backend events triggered by the the javascript method that handles all AJAX ' .
+                        'requests (ajaxify-js).',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',
