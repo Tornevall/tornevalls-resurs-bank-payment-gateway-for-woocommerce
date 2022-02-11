@@ -612,10 +612,10 @@ class Data
      * element id's. Resurs Bank is very much built on case-sensitive values for why we want to sanitize
      * on both lower- and uppercase.
      * @param $key
-     * @return mixed|void
+     * @return mixed
      * @since 0.0.1.1
      */
-    public static function sanitize_key_element($key)
+    public static function getSanitizedKeyElement($key)
     {
         $sanitized_key = '';
 
@@ -2245,17 +2245,17 @@ class Data
         if ($arrays->isAssoc($array)) {
             foreach ($array as $arrayKey => $arrayValue) {
                 if (is_array($arrayValue)) {
-                    $returnArray[$arrayKey] = self::getSanitizedArray($arrayValue);
-                } elseif (is_string($arrayValue)) {
-                    $returnArray[$arrayKey] = Data::getEscapedHtml($arrayValue);
+                    $returnArray[self::getSanitizedKeyElement($arrayKey)] = self::getSanitizedArray($arrayValue);
+                } elseif (!is_object($arrayValue)) {
+                    $returnArray[self::getSanitizedKeyElement($arrayKey)] = esc_html($arrayValue);
                 }
             }
         } elseif ($array) {
             foreach ($array as $item) {
                 if (is_array($item)) {
-                    $returnArray[] = self::getSanitizedArray($arrayValue);
+                    $returnArray[] = self::getSanitizedArray($item);
                 } elseif (is_string($item)) {
-                    $returnArray[] = Data::getEscapedHtml($item);
+                    $returnArray[] = esc_html($item);
                 }
             }
         }

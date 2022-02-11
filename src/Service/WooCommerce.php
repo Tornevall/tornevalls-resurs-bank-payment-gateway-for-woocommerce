@@ -1236,7 +1236,7 @@ class WooCommerce
         $replyString = sprintf('%s %d %s', $sProtocol, $code, $httpString);
         header('Content-type: application/json');
         header($replyString, true, $code);
-        echo json_encode($out);
+        echo json_encode(Data::getSanitizedArray($out));
         exit;
     }
 
