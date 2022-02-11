@@ -497,6 +497,17 @@ class WordPress
      */
     public static function applyFilters($filterName, $value)
     {
+        Data::setDeveloperLog(
+            __FUNCTION__,
+            sprintf(
+                __(
+                    'Apply filter %s',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                $filterName
+            )
+        );
+
         $applyArray = [
             sprintf(
                 '%s_%s',

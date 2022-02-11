@@ -1460,28 +1460,27 @@ class Data
         }
 
         $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
-
         $from = $_SERVER['REMOTE_ADDR'] ?? 'Console';
         $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
 
         switch ($severity) {
             case 'info':
-                self::$Log->info($message);
+                self::$Log->info(esc_html($message));
                 break;
             case 'debug':
-                self::$Log->debug($message);
+                self::$Log->debug(esc_html($message));
                 break;
             case 'critical':
-                self::$Log->critical($message);
+                self::$Log->critical(esc_html($message));
                 break;
             case 'error':
-                self::$Log->error($message);
+                self::$Log->error(esc_html($message));
                 break;
             case 'warning':
-                self::$Log->warning($message);
+                self::$Log->warning(esc_html($message));
                 break;
             default:
-                self::$Log->notice($message);
+                self::$Log->notice(esc_html($message));
         }
     }
 
