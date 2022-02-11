@@ -855,7 +855,7 @@ class PluginHooks
     public function getRcoLoaderScripts($scriptList)
     {
         if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-            $scriptList['resursbank_rco_legacy'] = 'resurscheckoutjs/resurscheckout.js';
+            $scriptList['resursbank_rco_legacy'] = 'vendor/resurscheckoutjs/resurscheckout.js';
         }
 
         return $scriptList;
