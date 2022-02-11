@@ -6,7 +6,7 @@
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
  * WC Tested up to: 6.1.1
  * Requires PHP: 7.0
- * Version: 0.0.1.0
+ * Version: 0.0.1.1
  * Author: Tomas Tornevall
  * Author URI:
  * Text Domain: tornevalls-resurs-bank-payment-gateway-for-woocommerce

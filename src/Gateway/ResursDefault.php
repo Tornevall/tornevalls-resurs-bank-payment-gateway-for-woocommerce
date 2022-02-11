@@ -1427,8 +1427,7 @@ class ResursDefault extends WC_Payment_Gateway
                 return $styles;
             });
 
-            $escapedHtml = Data::getEscapedHtml($fieldHtml);
-            echo $escapedHtml;
+            echo Data::getEscapedHtml($fieldHtml);
         }
     }
 

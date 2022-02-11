@@ -157,7 +157,7 @@ printf(__(
                         strtolower(
                             sprintf(
                                 '<span id="rbwc_value_%s">%s</span>',
-                                sanitize_text_field($key),
+                                esc_attr($key),
                                 esc_html($value)
                             )
                         );

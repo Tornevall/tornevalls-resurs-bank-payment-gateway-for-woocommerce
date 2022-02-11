@@ -1,13 +1,13 @@
-<button type="<?php echo sanitize_key($action); ?>"
+<button type="<?php echo esc_attr($action); ?>"
     <?php if (isset($id) && !empty($id)) { ?>
-        id="button_<?php echo sanitize_text_field($id); ?>"
-        name="button_<?php echo sanitize_text_field($id); ?>"
+        id="button_<?php echo esc_attr($id); ?>"
+        name="button_<?php echo esc_attr($id); ?>"
     <?php } ?>
     <?php
     // Protecting local onclick.
     echo wp_kses($custom_attributes, ['onclick' => []])
     ?>>
-    <?php echo esc_html($title) ?>
+    <?php echo esc_attr($title) ?>
 </button>
 <!-- Freely added spinner. -->
-<div id="div_<?php echo sanitize_text_field($id); ?>"></div>
+<div id="div_<?php echo esc_attr($id); ?>"></div>

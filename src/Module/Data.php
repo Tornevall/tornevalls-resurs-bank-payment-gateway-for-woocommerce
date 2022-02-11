@@ -589,8 +589,8 @@ class Data
                 ]
             );
 
-            // Fetch the rest from the template.
-            $annuityTemplate = Data::getEscapedHtml(
+            // Fetch the rest from the template and display.
+            echo Data::getEscapedHtml(
                 self::getGenericClass()->getTemplate(
                     'product_annuity.phtml',
                     [
@@ -604,8 +604,6 @@ class Data
                     ]
                 )
             );
-
-            echo $annuityTemplate;
         }
     }
 

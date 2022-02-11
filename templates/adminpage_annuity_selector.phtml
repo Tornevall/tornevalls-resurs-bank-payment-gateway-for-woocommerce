@@ -2,16 +2,16 @@
 // Sanitized 220210 - keys in elements must NOT be lowercased, so sanitize_key is not an option!
 use ResursBank\Module\Data;
 ?>
-<div id="r_annuity_p_<?php echo sanitize_text_field($id) ?>">
+<div id="r_annuity_p_<?php echo esc_attr($id) ?>">
     <select class="r_annuity"
-            id="r_annuity_select_<?php echo sanitize_text_field($id) ?>"
-            onclick="setResursAnnuityClick(this, '<?php echo sanitize_text_field($id) ?>', 'set')">
+            id="r_annuity_select_<?php echo esc_attr($id) ?>"
+            onclick="setResursAnnuityClick(this, '<?php echo esc_attr($id) ?>', 'set')">
         <?php echo Data::getEscapedHtml($options) ?>
     </select>
-    <div id="r_activity_<?php echo sanitize_text_field($id) ?>"></div>
+    <div id="r_activity_<?php echo esc_attr($id) ?>"></div>
 </div>
-<button id="r_annuity_button_<?php echo sanitize_text_field($id) ?>" type="button"
-        onclick="setResursAnnuityClick(this, '<?php echo sanitize_text_field($id) ?>', 'click')"
+<button id="r_annuity_button_<?php echo esc_attr($id) ?>" type="button"
+        onclick="setResursAnnuityClick(this, '<?php echo esc_attr($id) ?>', 'click')"
 >
     <?php
     if (!$enabled) {
@@ -19,4 +19,4 @@ use ResursBank\Module\Data;
     } else {
         _e('Disable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
     }
-    ?></button><span id="r_activity_<?php echo sanitize_text_field($id) ?>"></span>
+    ?></button><span id="r_activity_<?php echo esc_attr($id) ?>"></span>
