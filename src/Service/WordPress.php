@@ -497,11 +497,11 @@ class WordPress
      */
     public static function applyFilters($filterName, $value)
     {
-        Data::setDeveloperLog(
-            __FUNCTION__,
+        Data::canLog(
+            Data::CAN_LOG_JUNK,
             sprintf(
                 __(
-                    'Apply filter %s',
+                    'Apply filter: %s',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $filterName
