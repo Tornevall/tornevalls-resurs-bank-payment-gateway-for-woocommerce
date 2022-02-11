@@ -783,10 +783,10 @@ class FormFields extends WC_Settings_API
                 'can_log_junk' => [
                     'id' => 'can_log_junk',
                     'type' => 'checkbox',
-                    'title' => __('Deep details', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'title' => __('Deep details (CAN_LOG_JUNK)', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
-                        'Things that only developers would have interest in. Logs may be junky with this ' .
+                        'Things that only developers would have interest in. Logs may be noisy with this ' .
                         'option enabled.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
