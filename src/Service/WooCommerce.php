@@ -293,13 +293,12 @@ class WooCommerce
                 $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
                 if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
                     if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-                        $orderData['ecom_short']['ecom_had_reference_problems'] = self::getEcomHadProblemsInfo($orderData);
+                        $orderData['ecom_short']['ecom_had_reference_problems'] =
+                            self::getEcomHadProblemsInfo($orderData);
                     }
-                    $rawAdminDetails = Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData);
-                    $escapedAdminDetails = Data::getEscapedHtml(
-                        $rawAdminDetails
+                    echo Data::getEscapedHtml(
+                        Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
                     );
-                    echo $escapedAdminDetails;
                 }
                 // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
                 // if someone wants to create their own view.

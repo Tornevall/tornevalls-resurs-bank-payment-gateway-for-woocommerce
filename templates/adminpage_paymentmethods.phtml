@@ -1,11 +1,14 @@
 <h3>
     <?php
-    // Sanitizing on key levels.
+
     use Resursbank\Ecommerce\Service\Merchant\Model\Method;
     use ResursBank\Module\Data;
 
-    _e(sprintf(
-        'Available payment methods (Environment %s)', sanitize_text_field($environment)),
+    _e(
+        sprintf(
+            'Available payment methods (Environment %s)',
+            esc_html($environment)
+        ),
         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
     ); ?></h3>
 
@@ -61,8 +64,7 @@
         if (is_array($paymentMethods) && count($paymentMethods)) {
             foreach ($paymentMethods as $methodObject) {
                 $merchantMethod = esc_html(isset($methodObject->merchantMethod) ? $methodObject->merchantMethod : null);
-                $merchantMethodId = esc_html($merchantMethod instanceof Method ? $merchantMethod->getId() : '');
-                ?>
+                $merchantMethodId = esc_html($merchantMethod instanceof Method ? $merchantMethod->getId() : ''); ?>
                 <tr>
                     <td class="resursMethodBody">
                         <?php
@@ -71,8 +73,7 @@
                             ?>
                             <div style="font-size: 12px; font-style: italic;"><?php echo esc_html($merchantMethodId) ?></div>
                             <?php
-                        }
-                        ?>
+                        } ?>
                     </td>
                     <td class="resursMethodBody"><?php echo esc_html($methodObject->description) ?></td>
                     <td class="resursMethodBody">
@@ -93,13 +94,11 @@
                     $annuityClass = ($annuityEnabled === $methodObject->id) ? 'r_annuity_enabled' : 'r_annuity_disabled';
                     if ($methodObject->type !== 'REVOLVING_CREDIT') {
                         $annuityClass = 'r_annuity_idle';
-                    }
-                    ?>
+                    } ?>
                     <td class="resursMethodBody <?php
-                    // Note to self: No sanitization needed.
-                        echo $annuityClass
+                    echo esc_attr($annuityClass)
                     ?>"
-                        id="r_annuity_field_<?php echo sanitize_text_field($methodObject->id); ?>"
+                        id="r_annuity_field_<?php echo esc_attr($methodObject->id); ?>"
                     ><?php
                         if ($methodObject->type === 'REVOLVING_CREDIT' && isset($annuityFactors[$methodObject->id])) {
                             echo Data::getEscapedHtml($annuityFactors[$methodObject->id]);

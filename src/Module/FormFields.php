@@ -1426,7 +1426,7 @@ class FormFields extends WC_Settings_API
         if ((bool)$returnAsHtml) {
             return $return;
         } else {
-            echo $return;
+            echo Data::getEscapedHtml($return);
         }
         return $wcCheckout instanceof WC_Checkout ? $wcCheckout : '';
     }
@@ -1522,8 +1522,7 @@ class FormFields extends WC_Settings_API
                     'isBleedingEdge' => Data::isBleedingEdge(),
                 ]
             );
-            $escapedTemplate = Data::getEscapedHtml($paymentMethodTemplate);
-            echo $escapedTemplate;
+            echo Data::getEscapedHtml($paymentMethodTemplate);
         }
     }
 
