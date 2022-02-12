@@ -63,6 +63,9 @@ function getRcoBillingSetup() {
  */
 function rbwcSetCivicNumber(o) {
     $rQuery('#resursSsnIdentification').val(o.value);
+    if ($rQuery('#rbGetResursAddressButton').length > 0) {
+        getResursAddress();
+    }
 }
 
 /**

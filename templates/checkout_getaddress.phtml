@@ -68,7 +68,7 @@ if ($get_address_form || $get_address_form_always) { ?>
     <?php
     if ($supported_country && $get_address_form) { ?>
         <div>
-            <button onclick="getResursAddress();return false;"><?php echo esc_html($customer_button_text); ?></button>
+            <button id="rbGetResursAddressButton" onclick="getResursAddress();return false;"><?php echo esc_html($customer_button_text); ?></button>
         </div>
     <?php } ?>
 </span>
