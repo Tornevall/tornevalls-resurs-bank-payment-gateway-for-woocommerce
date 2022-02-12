@@ -141,6 +141,8 @@ anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.torne
 
 == Changelog ==
 
+Active/open issues can be found [here](https://tracker.tornevall.net/projects/RWC/issues/) [and here](https://github.com/Tornevall/wpwc-resurs/issues). You can also [inspect the project status here](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200)!
+
 *0.0.1.0 is the first release candidate of what's planned to become 1.0.0.*
 Github references should be included for all releases.
 
