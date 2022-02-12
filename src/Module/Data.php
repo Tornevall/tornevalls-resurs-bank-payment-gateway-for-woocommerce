@@ -2210,8 +2210,9 @@ class Data
         if ($return === null && (bool)$post_data && isset($_REQUEST['post_data'])) {
             parse_str($_REQUEST['post_data'], $newPostData);
             if (is_array($newPostData)) {
-                $newPostData = self::getSanitizedArray($newPostData);
-                $return = $newPostData[$key];
+                // Early sanitizing should not apply here as we are strict typing some of the values.
+                // Applying the values wrong could cause strange values.
+                $return = $newPostData[$key] ?? '';
             }
         }
 

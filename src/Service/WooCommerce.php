@@ -738,6 +738,7 @@ class WooCommerce
         $callbackType = Data::getRequest('c');
         $replyArray = [
             'aliveConfirm' => true,
+            'i' => '',
             'actual' => $callbackType,
             'errors' => [
                 'code' => 0,
@@ -750,6 +751,7 @@ class WooCommerce
         if (!empty($pRequest)) {
             $orderId = Data::getOrderByEcomRef(Data::getRequest('p'));
 
+            $replyArray['i'] = $orderId;
             if ($orderId) {
                 $order = new WC_Order($orderId);
                 self::setOrderNote(
@@ -763,18 +765,24 @@ class WooCommerce
             $callbackEarlyFailure = false;
             try {
                 self::applyMock('updateCallbackException');
-                Data::setOrderMeta(
-                    $order,
-                    sprintf('callback_%s_receive', $callbackType),
-                    strftime('%Y-%m-%d %H:%M:%S', time()),
-                    true,
-                    true
-                );
+                if ($order instanceof WC_Order) {
+                    Data::setOrderMeta(
+                        $order,
+                        sprintf('callback_%s_receive', $callbackType),
+                        strftime('%Y-%m-%d %H:%M:%S', time()),
+                        true,
+                        true
+                    );
+                } else {
+                    throw new Exception(
+                        'Failed to instantiate $order during callback handling. Callback not updated.',
+                        500
+                    );
+                }
             } catch (Exception $e) {
                 $callbackEarlyFailure = true;
                 $replyArray['aliveConfirm'] = false;
                 $code = $e->getCode();
-                $replyArray['digestCode'] = $code;
                 $replyArray['errors'] = [
                     'code' => $code,
                     'message' => $e->getMessage(),
@@ -798,7 +806,6 @@ class WooCommerce
                         );
                         $code = OrderStatusHandler::HTTP_RESPONSE_OK;
                         $responseString = 'OK';
-                        $replyArray['digestCode'] = $code;
                     } catch (Exception $e) {
                         $code = $e->getCode();
                         $responseString = $e->getMessage();
@@ -812,7 +819,7 @@ class WooCommerce
                     // Are we switching between production and test on the same site? This might be the cause.
                     if (!$orderId) {
                         $code = OrderStatusHandler::HTTP_RESPONSE_GONE_NOT_OURS;
-                        $responseString = 'Order is not ours.';
+                        $responseString = 'Order is not ours or can not be found.';
                         // Only allow other responses if the order does not exist in the system.
                         // If there is a proper order, but with a miscalculated digest, callbacks should
                         // still be rejected with the bad digest message.
@@ -835,8 +842,11 @@ class WooCommerce
                         )
                     );
                     // If order id existed, we'll keep using the digestive error.
+                    $replyArray['errors'] = [
+                        'code' => $code,
+                        'message' => $responseString,
+                    ];
                 }
-                $replyArray['digestCode'] = $code;
             }
         }
 
@@ -1254,7 +1264,8 @@ class WooCommerce
         $replyString = sprintf('%s %d %s', $sProtocol, $code, $httpString);
         header('Content-type: application/json');
         header($replyString, true, $code);
-        echo json_encode(Data::getSanitizedArray($out));
+        // Can not sanitize output as the browser is strictly typed to specific content.
+        echo json_encode($out);
         exit;
     }
 
