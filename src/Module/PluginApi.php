@@ -506,7 +506,7 @@ class PluginApi
             ResursBankAPI::getAnnuityFactors(false);
             $canReload = true;
         } catch (Exception $e) {
-            Data::setLogException($e);
+            Data::setLogException($e, __FUNCTION__);
             $canReload = false;
         }
         if (self::canReply($reply)) {
@@ -560,7 +560,7 @@ class PluginApi
                     self::getCallbackDigestData()
                 );
             } catch (Exception $e) {
-                Data::setLogException($e);
+                Data::setLogException($e, __FUNCTION__);
             }
         }
         ResursBankAPI::getCallbackList(false);
@@ -1076,7 +1076,7 @@ class PluginApi
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ));
                 } catch (Exception $e) {
-                    Data::setLogException($e);
+                    Data::setLogException($e, __FUNCTION__);
                     Data::setTimeoutStatus($apiRequest);
                     // If we get an error here, it might be cause by credential errors.
                     // In that case lets fall back to the default lookup.

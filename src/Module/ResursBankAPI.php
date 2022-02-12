@@ -114,7 +114,7 @@ class ResursBankAPI
             }
         } catch (Exception $e) {
             Data::setTimeoutStatus(self::getResurs(), $e);
-            Data::setLogException($e);
+            Data::setLogException($e, __FUNCTION__);
             // Do not check the timeout handler here, only check if the soap request has timed out.
             // On other errors, just pass the exception on, since there may something worse than just
             // a timeout.
@@ -208,7 +208,7 @@ class ResursBankAPI
                     }
                 }
             } catch (Exception $e) {
-                Data::setLogException($e);
+                Data::setLogException($e, __FUNCTION__);
             }
         }
 
@@ -649,7 +649,7 @@ class ResursBankAPI
             $this->getResolvedCredentials();
         } catch (Exception $e) {
             Data::setTimeoutStatus(self::getResurs(), $e);
-            Data::setLogException($e);
+            Data::setLogException($e, __FUNCTION__);
             $return = false;
         }
         return $return;

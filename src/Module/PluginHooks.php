@@ -410,7 +410,7 @@ class PluginHooks
                 )
             );
         } catch (Exception $e) {
-            Data::setLogException($e);
+            Data::setLogException($e, __FUNCTION__);
             $order['order']->add_order_note(
                 sprintf(
                     __(
@@ -649,7 +649,7 @@ class PluginHooks
                 // this live each run for auto debitable methods.
                 $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
             } catch (Exception $e) {
-                Data::setLogException($e);
+                Data::setLogException($e, __FUNCTION__);
                 $return = [
                     'default' => __(
                         'Payment Methods are currently unavailable!',

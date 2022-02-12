@@ -1511,7 +1511,7 @@ class Data
                 $return = $crypt->aesDecrypt($data);
             }
         } catch (Exception $e) {
-            self::setLogException($e);
+            self::setLogException($e, __FUNCTION__);
             $return = (new Strings())->base64urlDecode($data);
         }
 
@@ -1829,7 +1829,7 @@ class Data
                 self::CAN_LOG_ORDER_EVENTS,
                 sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
             );
-            self::setLogException($e);
+            self::setLogException($e, __FUNCTION__);
             $return['ecomException'] = [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
