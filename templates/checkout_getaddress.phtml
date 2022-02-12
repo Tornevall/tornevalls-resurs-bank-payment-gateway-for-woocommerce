@@ -1,4 +1,6 @@
-<?php if ($get_address_form || $get_address_form_always) { ?>
+<?php use ResursBank\Module\Data;
+
+if ($get_address_form || $get_address_form_always) { ?>
     <span id="rbGetAddressFields">
     <div>
         <input type="radio"
@@ -25,6 +27,41 @@
                 id="resursSsnIdentification"
                 onkeyup="setBillingInherit(this)"
                 name="resursSsnIdentification">
+
+        <?php
+        if (Data::isExtendedTest()) {
+            $customerCountry = strtoupper(Data::getCustomerCountry());
+            if (isset($liveTestData[$customerCountry]['payments']['civicNumber']) &&
+                is_array($liveTestData[$customerCountry]['payments']['civicNumber']) &&
+                count($liveTestData[$customerCountry]['payments']['civicNumber'])
+            ) {
+                $civicNumberList = $liveTestData[$customerCountry]['payments']['civicNumber'];
+                $civicNumberOptions = [];
+                if (is_array($civicNumberList) && count($civicNumberList)) {
+                    foreach ($civicNumberList as $civicType => $civicNumber) {
+                        $civicNumberOptions[] = sprintf(
+                            '<option value="%s">%s (%s)</option>',
+                            $civicNumber,
+                            $civicType,
+                            $civicNumber
+                        );
+                    }
+                }
+            }
+            ?>
+            <div class="woocommerce-input-wrapper" id="rbwc_extended_test_mode_helper">
+                <select id="rbwc_civic_number_selector"
+                        size="<?php echo count($civicNumberOptions) ?>"
+                        onchange="rbwcSetCivicNumber(this)">
+                    <?php
+                    echo Data::getEscapedHtml(implode('', $civicNumberOptions));
+                    ?>
+                </select>
+            </div>
+            <?php
+        }
+        ?>
+
     </div>
     <div style="display: none;" class="resursGetAddressError"></div>
     <div id="resursGetAddressSpinnify" style="display: none;"></div>

@@ -275,7 +275,7 @@ class WooCommerce
     public static function getAdminAfterOrderDetails($order = null)
     {
         // Considering this place as a safe place to apply display in styles.
-        Data::getAdminSafeCss();
+        Data::getSafeStyle();
 
         if ($order instanceof WC_Order) {
             $paymentMethod = $order->get_payment_method();
@@ -497,7 +497,7 @@ class WooCommerce
      */
     public static function getAdminAfterBilling($order = null)
     {
-        Data::getAdminSafeCss();
+        Data::getSafeStyle();
         if (!empty($order) &&
             WordPress::applyFilters('canDisplayOrderInfoAfterBilling', true) &&
             Data::canHandleOrder($order->get_payment_method())
@@ -517,7 +517,7 @@ class WooCommerce
      */
     public static function getAdminAfterShipping($order = null)
     {
-        Data::getAdminSafeCss();
+        Data::getSafeStyle();
         if (!empty($order) &&
             WordPress::applyFilters('canDisplayOrderInfoAfterShipping', true) &&
             Data::canHandleOrder($order->get_payment_method())

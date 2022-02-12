@@ -56,6 +56,16 @@ function getRcoBillingSetup() {
 }
 
 /**
+ * Set civic number in getAddress box depending on what you wish for.
+ *
+ * @param o
+ * @since 0.0.1.2
+ */
+function rbwcSetCivicNumber(o) {
+    $rQuery('#resursSsnIdentification').val(o.value);
+}
+
+/**
  * Activates RCO based functions.
  * @since 0.0.1.0
  */
