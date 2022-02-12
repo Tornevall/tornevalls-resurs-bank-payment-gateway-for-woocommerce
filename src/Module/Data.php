@@ -1475,22 +1475,22 @@ class Data
 
         switch ($severity) {
             case 'info':
-                self::$Log->info(esc_html($message));
+                self::$Log->info($message);
                 break;
             case 'debug':
-                self::$Log->debug(esc_html($message));
+                self::$Log->debug($message);
                 break;
             case 'critical':
-                self::$Log->critical(esc_html($message));
+                self::$Log->critical($message);
                 break;
             case 'error':
-                self::$Log->error(esc_html($message));
+                self::$Log->error($message);
                 break;
             case 'warning':
-                self::$Log->warning(esc_html($message));
+                self::$Log->warning($message);
                 break;
             default:
-                self::$Log->notice(esc_html($message));
+                self::$Log->notice($message);
         }
     }
 
@@ -1861,28 +1861,49 @@ class Data
     }
 
     /**
+     * @param string $fromFunction
      * @param Exception $exception
      * @since 0.0.1.0
      */
-    public static function setLogException($exception)
+    public static function setLogException($exception, $fromFunction = '')
     {
         if (!isset($_SESSION[self::getPrefix()])) {
             $_SESSION[self::getPrefix()]['exception'] = [];
         }
         $_SESSION[self::getPrefix()]['exception'][] = $exception;
-        self::setLogError(
-            sprintf(
-                __(
-                    '%s internal generic exception %s: %s --- File %s, line %s.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ),
-                self::getPrefix(),
-                $exception->getCode(),
-                $exception->getMessage(),
-                $exception->getFile(),
-                $exception->getLine()
-            )
-        );
+
+        if (!empty($fromFunction)) {
+            $logMessage = __(
+                '%s internal generic exception %s from function %s: %s --- File %s, line %s.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
+            self::setLogError(
+                sprintf(
+                    $logMessage,
+                    self::getPrefix(),
+                    $exception->getCode(),
+                    $fromFunction,
+                    $exception->getMessage(),
+                    $exception->getFile(),
+                    $exception->getLine()
+                )
+            );
+        } else {
+            $logMessage = __(
+                '%s internal generic exception %s: %s --- File %s, line %s.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
+            self::setLogError(
+                sprintf(
+                    $logMessage,
+                    self::getPrefix(),
+                    $exception->getCode(),
+                    $exception->getMessage(),
+                    $exception->getFile(),
+                    $exception->getLine()
+                )
+            );
+        }
     }
 
     /**
@@ -2324,6 +2345,47 @@ class Data
             !empty(self::getResursOption('jwt_store_id')) &&
             !empty(self::getResursOption('jwt_client_id')) &&
             !empty(self::getResursOption('jwt_client_password')));
+    }
+
+    /**
+     * Selective string obfuscator for internal debugging.
+     * Only call for this method when debugging since data will be rewritten.
+     *
+     * @param $obfuscateThis
+     * @return array
+     * @since 0.0.1.1
+     */
+    public static function getObfuscatedData($obfuscateThis)
+    {
+        if (!Data::getResursOption('must_obfuscate_personal_data')) {
+            return $obfuscateThis;
+        }
+        $stringHandler = new Strings();
+        if (isset($obfuscateThis['rco_customer'])) {
+            $rcoCustomer = $obfuscateThis['rco_customer'];
+            $lookFor = ['billingAddress', 'deliveryAddress'];
+            foreach ($lookFor as $key) {
+                if (isset($rcoCustomer[$key])) {
+                    foreach ($rcoCustomer[$key] as $item => $value) {
+                        $obfuscateThis['rco_customer'][$key][$item] = $stringHandler->getObfuscatedStringFull(
+                            $value,
+                            2,
+                            0
+                        );
+                    }
+                }
+            }
+        }
+
+        foreach ($obfuscateThis as $item => $value) {
+            if (is_string($value) &&
+                ((bool)preg_match('/^billing_/i', $item) || (bool)preg_match('/^shipping_/i', $item))
+            ) {
+                $obfuscateThis[$item] = $stringHandler->getObfuscatedStringFull($value, 2, 0);
+            }
+        }
+
+        return $obfuscateThis;
     }
 
     /**

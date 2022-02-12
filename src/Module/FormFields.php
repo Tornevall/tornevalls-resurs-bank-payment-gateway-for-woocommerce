@@ -739,6 +739,23 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
+                'must_obfuscate_personal_data' => [
+                    'id' => 'must_obfuscate_personal_data',
+                    'type' => 'checkbox',
+                    'title' => __(
+                        'Obfuscate personal data in logs',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc_tip' => __(
+                        'To protect customers, customer data will be obfuscated in logs during debugging. If ' .
+                        'you really must change this to see debugged customers, this setting should be ' .
+                        'disabled. However, as this is an alternative to be GDPR compliant in debug logs you ' .
+                        'should probably consider avoiding this.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => 'yes',
+                ],
                 'can_log_order_events' => [
                     'id' => 'can_log_order_events',
                     'type' => 'checkbox',
@@ -786,7 +803,8 @@ class FormFields extends WC_Settings_API
                 'can_log_junk' => [
                     'id' => 'can_log_junk',
                     'type' => 'checkbox',
-                    'title' => __('Deep details (CAN_LOG_JUNK)', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'title' => __('Deep details (CAN_LOG_JUNK)',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'Things that only developers would have interest in. Logs may be noisy with this ' .
