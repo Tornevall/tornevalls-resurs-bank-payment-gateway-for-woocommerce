@@ -195,6 +195,25 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
+                'extended_test_mode' => [
+                    'id' => 'enabled',
+                    'title' => __(
+                        'Extended test mode',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'type' => 'checkbox',
+                    'label' => __(
+                        'Extended help when test is enabled',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc_tip' => __(
+                        'Helper functions that makes it easier to tests without reaching out for documentation. ' .
+                        'For the integrated (simplified) shop flow.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => 'yes',
+                ]
             ],
             'payment_methods' => [
                 'title' => __(
@@ -1420,6 +1439,17 @@ class FormFields extends WC_Settings_API
     {
         $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
         $customerTypeByConditions = Data::getCustomerType();
+
+        if (Data::isExtendedTest() && file_exists(Data::getGatewayPath() . '/testdata.json')) {
+            try {
+                $testDataFile = Data::getGatewayPath() . '/testdata.json';
+                $liveTestData = json_decode(@file_get_contents($testDataFile), true, 512);
+            } catch (Exception $e) {
+                Data::setLogException($e, __FUNCTION__);
+            }
+        }
+
+
         $return = Data::getGenericClass()->getTemplate(
             'checkout_getaddress.phtml',
             [
@@ -1433,8 +1463,11 @@ class FormFields extends WC_Settings_API
                 'supported_country' => Data::isGetAddressSupported(),
                 'get_address_form' => Data::canUseGetAddressForm(),
                 'get_address_form_always' => $getAddressFormAlways,
+                'liveTestData' => $liveTestData
             ]
         );
+
+        Data::getSafeStyle();
 
         // Note: As this feature is just generating the form via woocommerce_before_checkout_billing_form,
         // it is not necessary to use this one.
@@ -1492,7 +1525,7 @@ class FormFields extends WC_Settings_API
     public static function getFieldMethodList()
     {
         // Considering this place as a safe place to apply display in styles.
-        Data::getAdminSafeCss();
+        Data::getSafeStyle();
 
         $exception = null;
         $annuityException = null;

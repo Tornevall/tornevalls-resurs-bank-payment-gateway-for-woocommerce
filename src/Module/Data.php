@@ -271,6 +271,15 @@ class Data
     }
 
     /**
+     * @return bool
+     * @since 0.0.1.2
+     */
+    public static function isExtendedTest(): bool
+    {
+        return (self::isTest() && self::getResursOption('extended_test_mode'));
+    }
+
+    /**
      * @param string $imageFileName
      * @return string
      * @version 0.0.1.0
@@ -717,7 +726,9 @@ class Data
                 'id' => [],
                 'onclick' => [],
             ],
-            'option' => [],
+            'option' => [
+                'value' => [],
+            ],
             'button' => [
                 'id' => [],
                 'name' => [],
@@ -781,15 +792,13 @@ class Data
      *
      * @since 0.0.1.1
      */
-    public static function getAdminSafeCss()
+    public static function getSafeStyle()
     {
-        if (is_admin()) {
-            add_filter('safe_style_css', function ($styles) {
-                $styles[] = 'display';
-                $styles[] = 'border';
-                return $styles;
-            });
-        }
+        add_filter('safe_style_css', function ($styles) {
+            $styles[] = 'display';
+            $styles[] = 'border';
+            return $styles;
+        });
     }
 
     /**

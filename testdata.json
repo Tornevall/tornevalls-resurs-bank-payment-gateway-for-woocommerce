@@ -1,0 +1,16 @@
+{
+    "SE": {
+        "payments": {
+            "civicNumber": {
+                "Booked": "198305147715",
+                "Denied": "195012026430",
+                "Never Unfreeze": "198209123705",
+                "Unfreeze After 5s": "198001010001",
+                "Annul After 5s": "197801069241",
+                "Unfreeze After 10m": "198101010000",
+                "Annul After 10m": "198909194451",
+                "Second Deny": "198909194451"
+            }
+        }
+    }
+}
