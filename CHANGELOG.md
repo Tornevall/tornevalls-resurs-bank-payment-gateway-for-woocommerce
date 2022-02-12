@@ -3,6 +3,16 @@
 _0.0.1.0 is the first release candidate of what's planned to become 1.0.0._
 Github references should be included for all releases.
 
+# 0.0.1.1
+
+* [RWC-299](https://tracker.tornevall.net/browse/RWC-299) - Discount handling and buttons on zero orders (adjust)
+* [RWC-306](https://tracker.tornevall.net/browse/RWC-306) - Callbacks not properly fetched due to how we handle parameters
+* [RWC-300](https://tracker.tornevall.net/browse/RWC-300) - rejected callbacks response handling update.
+* [RWC-303](https://tracker.tornevall.net/browse/RWC-303) - Sanitize, Escape, and Validate
+* [RWC-304](https://tracker.tornevall.net/browse/RWC-304) - Match text domain with permalink
+* [RWC-305](https://tracker.tornevall.net/browse/RWC-305) - enqueue commands for js/css
+* [RWC-309](https://tracker.tornevall.net/browse/RWC-309) - Ip control section for woo
+
 # 0.0.1.0 + 1.0.0
 
 **Milestone/Epic -- Release Candidate 1**
@@ -159,7 +169,7 @@ Github references should be included for all releases.
   credendial updates
 * [RWC-210](https://tracker.tornevall.net/browse/RWC-210) - price variations?
 * [RWC-214](https://tracker.tornevall.net/browse/RWC-214) - [#13](https://github.com/Tornevall/wpwc-resurs/issues/13),
-  #8: Refuse to set a status that is already set.
+  [#8](https://github.com/Tornevall/wpwc-resurs/issues/8): Refuse to set a status that is already set.
 * [RWC-215](https://tracker.tornevall.net/browse/RWC-215) - [#9](https://github.com/Tornevall/wpwc-resurs/issues/9):
   Necessary callbacks, remove the rest (if not already removed).
 * [RWC-216](https://tracker.tornevall.net/browse/RWC-216) - updatePaymentReference and exceptions +logging when it
