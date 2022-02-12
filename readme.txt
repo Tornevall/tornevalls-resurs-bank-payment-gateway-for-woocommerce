@@ -150,6 +150,11 @@ Active/open issues can be found [here](https://tracker.tornevall.net/projects/RW
 *0.0.1.0 is the first release candidate of what's planned to become 1.0.0.*
 Github references should be included for all releases.
 
+= 0.0.1.2 =
+
+* [RWC-298](https://tracker.tornevall.net/browse/RWC-298) - Extended test mode.
+* Content information, readme's, assets and other updates.
+
 = 0.0.1.1 + 1.0.0 =
 
 * [RWC-299](https://tracker.tornevall.net/browse/RWC-299) - Discount handling and buttons on zero orders (adjust)
