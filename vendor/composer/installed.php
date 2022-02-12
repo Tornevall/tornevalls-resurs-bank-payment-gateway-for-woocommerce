@@ -65,12 +65,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-io' => array(
-            'pretty_version' => '6.1.5',
-            'version' => '6.1.5.0',
+            'pretty_version' => '6.1.6',
+            'version' => '6.1.6.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-io',
             'aliases' => array(),
-            'reference' => 'e07dbc32ee3161d53fa457bd1fc2f580b5b6d4ef',
+            'reference' => '76da195b3c67cfe505a158482dfc7e6bafb757e8',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-netcurl' => array(
