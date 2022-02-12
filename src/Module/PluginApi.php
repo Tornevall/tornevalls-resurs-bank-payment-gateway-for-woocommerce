@@ -70,7 +70,12 @@ class PluginApi
         if (!empty($returnedValue)) {
             Data::canLog(
                 Data::CAN_LOG_BACKEND,
-                sprintf('Backend: %s (%s), params %s', __FUNCTION__, self::getAction(), print_r($returnedValue, true))
+                sprintf(
+                    'Backend: %s (%s), params %s',
+                    __FUNCTION__,
+                    self::getAction(),
+                    print_r($returnedValue, true)
+                )
             );
             self::reply($returnedValue);
         }
@@ -812,7 +817,8 @@ class PluginApi
                 Data::getCredentialNotice();
             } else {
                 if (Data::getTimeoutStatus() > 0) {
-                    $errorMessage .= ' ' . __(
+                    $errorMessage .= ' ' .
+                        __(
                             'Connectivity may be a bit slower than normal.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         );
@@ -826,7 +832,8 @@ class PluginApi
         }
 
         if ($current_tab === sprintf('%s_admin', Data::getPrefix()) &&
-            (time() - (int)Data::getResursOption('lastCallbackCheck')) > 60) {
+            (time() - (int)Data::getResursOption('lastCallbackCheck')) > 60
+        ) {
             $storedCallbacks = Data::getResursOption('callbacks');
 
             if (!$hasErrors) {
