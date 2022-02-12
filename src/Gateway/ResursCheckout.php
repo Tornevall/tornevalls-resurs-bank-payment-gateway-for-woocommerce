@@ -5,6 +5,8 @@ namespace ResursBank\Gateway;
 use Exception;
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
+use function count;
+use function is_array;
 
 /**
  * Class ResursCheckout RCO iframe based class, that acts like it was a real payment method.
