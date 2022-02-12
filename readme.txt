@@ -14,28 +14,23 @@ Tornevalls Resurs Bank Payment Gateway for WooCommerce.
 
 Payment gateway for Resurs Bank AB with support for the most recent shop flows.
 
-**SoapClient is required** for all actions related to "after shop", debiting, refunding, annulments, and so on.
-Also, your site has to be fully reachable with SSL/HTTPS. **For full list of requirements, look below.**
+**SoapClient is required** for all actions related to "after shop", debiting, refunding, annulments, and so on. Also, your site has to be fully reachable with SSL/HTTPS. **For full list of requirements, look below.**
 
-There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you tend
-to use **this** plugin as it is an upgrade from the Resurs supported release as the settings and filters may be
-different.
+There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you tend to use **this** plugin as it is an upgrade from the Resurs supported release as the settings and filters may be different.
 
-[![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
+
 
 See below for information about requirements.
 
-= Self preservation notice: First time running **should** be a dedicated test environment =
+= WARNING =
 
-The responsibility that this product works properly with your system is yours. For **your** safety you should
-therefore **TEST the plugin** in a dedicated test environment **before using it** in a production.
+**First time running should be a dedicated test environment!**
 
-So: if you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test
-environment that is supposedly **equal** to a production environment. Never run any tests in production!
+The main responsibility that this product works properly with your system is yours. For **your** safety you should therefore **TEST the plugin** in a dedicated test environment **before using it** in a production.
 
-Primary new problems should be discovered in TEST rather than production since the costs are way lower,
-where no real people are depending on failed orders or payments. If something fails in production it also means
-that you are the one that potentially looses traffic while your site is down.
+If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is supposedly **equal** to a production environment. Never run any tests in production!
+
+Primary new problems should be discovered in TEST rather than production since the costs are way lower, where no real people are depending on failed orders or payments. If something fails in production it also means that you are the one that potentially looses traffic while your site is down.
 
 
 = System Requirements and packages =
@@ -59,15 +54,13 @@ that you are the one that potentially looses traffic while your site is down.
 Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details. Documentation
 for this specific release is currently located at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
 
+
 = Contribute =
 
-Help translate the plugin by joining [Crowdin](https://crwd.in/trwbc)!
+Help with translation of the plugin by joining [Crowdin](https://crwd.in/trwbc)!
 
-If you'd like to contribute to this project, you can either sign up
-to [github](https://github.com/Tornevall/wpwc-resurs/issues) and create an issue or use the
-old [Bitbucket Project](https://tracker.tornevall.net/projects/RWC) to do this on. The full project status can
-be found [at this dashboard](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200) since that's
-where the project started.
+If you'd like to contribute to this project, you can either sign up to [github](https://github.com/Tornevall/wpwc-resurs/issues) and create an issue or use the old [Bitbucket Project](https://tracker.tornevall.net/projects/RWC) to do this on. The full project status can be found [at this dashboard](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200) since that's where the project started.
+
 
 == Installation ==
 
@@ -88,6 +81,7 @@ However, this plugin release should not be considered an official upgrade from "
 are no old versions available yet - except from them *official release* from Resurs Bank. For the moment, this is
 not the same thing.
 
+
 == Frequently Asked Questions ==
 
 = Where can I get more information about this plugin =
@@ -100,6 +94,16 @@ plugin. For questions about API and Resurs Bank please visit [test.resurs.com/do
 **"Version 2.2.x"** is currently the **official Resurs Bank release** and currently not the same as this release.
 However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the
 prior release can be handled by this one.
+
+= What is considered "breaking changes"? =
+
+Breaking changes are collected [here](https://docs.tornevall.net/x/UwJzBQ).
+
+Examples of what could "break" in the form of "no longer supported":
+
+* The prior payment method editor where title and description for each payment method could be edited. This is not really plugin side decided, but based on rules set by Resurs Bank. First of all, titles and descriptions are handled by Resurs Bank to simplify changes that is related to whatever could happen to a payment method. The same goes for the sorting of payment methods in the checkout. Some payment methods is regulated by laws and should be displayed in a certain order. This is no longer up to the plugin to decide and sorting is based on in which order Resurs Bank is returning them in the API.
+* Many features are lifted straight out from the prior version - but not all of them are. There are settings in this new version that is no longer working, especially features that is filter bound. [Actions, filters, triggers](https://docs.tornevall.net/x/HoC4Aw) lists everything new available for you.
+* Settings is almost similar to the old plugin, but with new identifiers. It is partially intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has also been removed as they did no longer fill any purpose, not even in the old release.
 
 = Is this release a refactored version of Resurs Bank's? =
 
@@ -131,6 +135,8 @@ Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Check
 anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
 
 == Screenshots ==
+
+[![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
 
 == Changelog ==
