@@ -3,7 +3,7 @@
 _0.0.1.0 is the first release candidate of what's planned to become 1.0.0._
 Github references should be included for all releases.
 
-# 0.0.1.1
+# 0.0.1.1 + 1.0.0
 
 * [RWC-299](https://tracker.tornevall.net/browse/RWC-299) - Discount handling and buttons on zero orders (adjust)
 * [RWC-306](https://tracker.tornevall.net/browse/RWC-306) - Callbacks not properly fetched due to how we handle parameters
@@ -11,7 +11,7 @@ Github references should be included for all releases.
 * [RWC-303](https://tracker.tornevall.net/browse/RWC-303) - Sanitize, Escape, and Validate
 * [RWC-304](https://tracker.tornevall.net/browse/RWC-304) - Match text domain with permalink
 * [RWC-305](https://tracker.tornevall.net/browse/RWC-305) - enqueue commands for js/css
-* [RWC-309](https://tracker.tornevall.net/browse/RWC-309) - Ip control section for woo
+* [RWC-309](https://tracker.tornevall.net/browse/RWC-309) - Ip control section in support section
 
 # 0.0.1.0 + 1.0.0
 
