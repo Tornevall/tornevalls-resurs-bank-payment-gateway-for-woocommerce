@@ -70,7 +70,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-io',
             'aliases' => array(),
-            'reference' => '76da195b3c67cfe505a158482dfc7e6bafb757e8',
+            'reference' => 'c3bc7019d54135ed413246a0a3f3b9249c7f3d92',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-netcurl' => array(

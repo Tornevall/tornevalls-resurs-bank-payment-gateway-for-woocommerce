@@ -189,12 +189,15 @@ class Strings
      * @return string
      * @since 6.1.6
      */
-    function getObfuscatedStringFull($string)
+    function getObfuscatedStringFull($string, $startAt = 1, $endAt = 1)
     {
         $stringLength = strlen($string);
-        return $stringLength > 2 ?
-            substr($string, 0, 1) . str_repeat('*', $stringLength - 2) . substr($string, $stringLength - 1,
-                1) : $string;
+        return $stringLength > $startAt - 1 ?
+            substr($string, 0, $startAt) . str_repeat('*', $stringLength - 2) . substr(
+                $string,
+                $stringLength - $endAt,
+                $stringLength - $endAt
+            ) : $string;
     }
 
     /**
