@@ -743,14 +743,14 @@ class FormFields extends WC_Settings_API
                     'id' => 'must_obfuscate_logged_personal_data',
                     'type' => 'checkbox',
                     'title' => __(
-                        'Obfuscate personal data in logs',
+                        'Protect personal data in logs',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc_tip' => __(
                         'To protect customers, customer data will be obfuscated in logs during debugging. If ' .
-                        'you really must change this to see debugged customers, this setting should be ' .
-                        'disabled. However, as this is an alternative to be GDPR compliant in debug logs you ' .
+                        'you really must change this to see debugged customers, this setting is the one to ' .
+                        'disable. However, as this is an alternative to be GDPR compliant in debug logs you ' .
                         'should probably consider avoiding this.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),

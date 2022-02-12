@@ -147,6 +147,7 @@ Github references should be included for all releases.
 * [RWC-304](https://tracker.tornevall.net/browse/RWC-304) - Match text domain with permalink
 * [RWC-305](https://tracker.tornevall.net/browse/RWC-305) - enqueue commands for js/css
 * [RWC-309](https://tracker.tornevall.net/browse/RWC-309) - Ip control section in support section
+* [RWC-310](https://tracker.tornevall.net/browse/RWC-310) - Logging customer events masked
 
 = 0.0.1.0 + 1.0.0 =
 
