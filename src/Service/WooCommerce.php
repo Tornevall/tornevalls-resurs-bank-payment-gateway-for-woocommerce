@@ -136,7 +136,7 @@ class WooCommerce
                 $gateways[] = $gatewayClass;
             }
         } catch (Exception $e) {
-            Data::setLogException($e);
+            Data::setLogException($e, __FUNCTION__);
         }
 
         return $gateways;
@@ -787,9 +787,7 @@ class WooCommerce
                     'code' => $code,
                     'message' => $e->getMessage(),
                 ];
-                Data::setLogException(
-                    $e
-                );
+                Data::setLogException($e, __FUNCTION__);
             }
 
             if (!$callbackEarlyFailure) {
@@ -809,7 +807,7 @@ class WooCommerce
                     } catch (Exception $e) {
                         $code = $e->getCode();
                         $responseString = $e->getMessage();
-                        Data::setLogException($e);
+                        Data::setLogException($e, __FUNCTION__);
                     }
                 } else {
                     // Reaching here means something went wrong.

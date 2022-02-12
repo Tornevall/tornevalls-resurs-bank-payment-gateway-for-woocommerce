@@ -491,7 +491,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $return = $internalPaymentTitle;
                 }
             } catch (Exception $e) {
-                Data::setLogException($e);
+                Data::setLogException($e, __FUNCTION__);
             }
         }
 
@@ -546,7 +546,7 @@ class ResursDefault extends WC_Payment_Gateway
                         }
                     }
                 } catch (Exception $e) {
-                    Data::setLogException($e);
+                    Data::setLogException($e, __FUNCTION__);
                 }
             }
         }
@@ -1967,7 +1967,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
             }
         } catch (Exception $bookSignedException) {
-            Data::setLogException($bookSignedException);
+            Data::setLogException($bookSignedException, __FUNCTION__);
             Data::setTimeoutStatus($this->API->getConnection());
             $this->setFinalSigningExceptionNotes($bookSignedException);
         }
@@ -2251,7 +2251,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setFinalSigningExceptionNotes($bookSignedException)
     {
-        Data::setLogException($bookSignedException);
+        Data::setLogException($bookSignedException, __FUNCTION__);
         Data::setOrderMeta(
             $this->order,
             'bookSignedPaymentExceptionCode',

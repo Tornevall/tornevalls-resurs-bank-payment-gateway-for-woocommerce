@@ -277,7 +277,7 @@ class WordPress
                 WooCommerce::testRequiredVersion(false);
             }
         } catch (Exception $e) {
-            Data::setLogException($e);
+            Data::setLogException($e, __FUNCTION__);
             echo Data::getEscapedHtml(
                 Data::getGenericClass()->getTemplate(
                     'adminpage_woocommerce_requirement',
