@@ -196,9 +196,9 @@ class FormFields extends WC_Settings_API
                     ),
                 ],
                 'extended_test_mode' => [
-                    'id' => 'enabled',
+                    'id' => 'extended_test_mode',
                     'title' => __(
-                        'Extended test mode',
+                        'Enable extended test mode',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
@@ -208,12 +208,11 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc_tip' => __(
-                        'Helper functions that makes it easier to tests without reaching out for documentation. ' .
-                        'For the integrated (simplified) shop flow.',
+                        'Activates helping functions that makes life easier when testing.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'yes',
-                ]
+                ],
             ],
             'payment_methods' => [
                 'title' => __(
@@ -1463,7 +1462,7 @@ class FormFields extends WC_Settings_API
                 'supported_country' => Data::isGetAddressSupported(),
                 'get_address_form' => Data::canUseGetAddressForm(),
                 'get_address_form_always' => $getAddressFormAlways,
-                'liveTestData' => $liveTestData
+                'liveTestData' => $liveTestData,
             ]
         );
 

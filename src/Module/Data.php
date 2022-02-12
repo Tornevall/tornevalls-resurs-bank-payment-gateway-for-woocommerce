@@ -1273,6 +1273,41 @@ class Data
     }
 
     /**
+     * @param $links
+     * @param $file
+     * @return array
+     * @since 0.0.1.2
+     */
+    public static function getPluginRowMeta($links, $file): array
+    {
+        $row_meta = [];
+
+        if (false !== strpos($file, WooCommerce::getBaseName())) {
+            $urls = [
+                __(
+                    'Plugin Documentation',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) => 'https://docs.tornevall.net/x/CoC4Aw',
+                __(
+                    'Github',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) => 'https://github.com/Tornevall/wpwc-resurs',
+            ];
+
+            foreach ($urls as $urlInfo => $url) {
+                $row_meta[$urlInfo] = sprintf(
+                    '<a href="%s" title="%s" target="_blank">%s</a>',
+                    esc_url($url),
+                    esc_attr($urlInfo),
+                    esc_html($urlInfo)
+                );
+            }
+        }
+
+        return array_merge($links, $row_meta);
+    }
+
+    /**
      * @param $content
      * @return mixed
      * @throws Exception
@@ -1298,10 +1333,6 @@ class Data
                 esc_html(WooCommerce::getWooCommerceVersion()),
                 esc_html(WooCommerce::getRequiredVersion())
             ),
-            __(
-                'Composer version',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            ) => esc_html(self::getVersionByComposer()),
             __(
                 'PHP Version',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -1330,7 +1361,7 @@ class Data
                 [
                     'required_drivers' => self::getSpecialString('required_drivers'),
                     'support_string' => self::getSpecialString('support_string'),
-                    'render' => Data::getSanitizedArray(WordPress::applyFilters('renderInformationData', $renderData)),
+                    'render' => WordPress::applyFilters('renderInformationData', $renderData),
                 ]
             )
         );

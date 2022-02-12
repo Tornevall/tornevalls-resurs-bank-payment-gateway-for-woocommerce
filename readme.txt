@@ -4,13 +4,16 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 5.5
 Tested up to: 5.9
 Requires PHP: 7.0
-Stable tag: 0.0.1.1
+Stable tag: 0.0.1.2
+Plugin URI: https://github.com/Tornevall/wpwc-resurs
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Tornevalls Resurs Bank Payment Gateway for WooCommerce.
 
 == Description ==
+
+[![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
 Payment gateway for Resurs Bank AB with support for the most recent shop flows.
 
@@ -136,8 +139,9 @@ anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.torne
 
 == Screenshots ==
 
-[![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
-
+1. Basic Settings Configuration.
+2. Payment Methods View.
+3. Order View.
 
 == Changelog ==
 
