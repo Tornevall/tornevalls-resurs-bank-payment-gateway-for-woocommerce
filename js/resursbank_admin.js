@@ -209,7 +209,7 @@ function getResursPaymentMethods() {
 function getResursCallbacks() {
     getResursSpin('#div_trbwc_admin_callbacks_button');
     getResursAjaxify('post', 'resursbank_get_new_callbacks', {'n': ''}, function (data) {
-        if (data['reload'] === true) {
+        if (data['reload'] === true || data['reload'] === '1') {
             $rQuery('#div_trbwc_admin_callbacks_button').html(
                 $rQuery('<div>', {
                     'style': 'font-weight: bold; color: #000099;'

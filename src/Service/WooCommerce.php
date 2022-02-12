@@ -785,6 +785,7 @@ class WooCommerce
             }
 
             if (!$callbackEarlyFailure) {
+                // Digest vs saltkey checking. Reaching this place means both digest and order is proper.
                 if ($getConfirmedSalt && $orderId) {
                     /** @noinspection BadExceptionsProcessingInspection */
                     try {
@@ -804,8 +805,11 @@ class WooCommerce
                         Data::setLogException($e);
                     }
                 } else {
+                    // Reaching here means something went wrong.
                     $code = OrderStatusHandler::HTTP_RESPONSE_DIGEST_IS_WRONG; // Not acceptable
                     $responseString = 'Digest rejected.';
+                    // If order id is missing, we know that the callback is plausibly sent for another store.
+                    // Are we switching between production and test on the same site? This might be the cause.
                     if (!$orderId) {
                         $code = OrderStatusHandler::HTTP_RESPONSE_GONE_NOT_OURS;
                         $responseString = 'Order is not ours.';
@@ -813,10 +817,24 @@ class WooCommerce
                         // If there is a proper order, but with a miscalculated digest, callbacks should
                         // still be rejected with the bad digest message.
                         if ((bool)Data::getResursOption('accept_rejected_callbacks')) {
+                            // So if we accept rejects, we will tell Resurs callbacks that callback was ok
+                            // anyway. Which makes them stop sending further.
                             $code = OrderStatusHandler::HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED;
                             $responseString = 'Order is not ours, but it is still accepted.';
                         }
                     }
+                    Data::canLog(
+                        Data::CAN_LOG_ORDER_EVENTS,
+                        sprintf(
+                            __(
+                                'Callback received for order "%s" but something went wrong: %s',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ),
+                            $orderId,
+                            $responseString
+                        )
+                    );
+                    // If order id existed, we'll keep using the digestive error.
                 }
                 $replyArray['digestCode'] = $code;
             }

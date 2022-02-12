@@ -112,7 +112,8 @@ class PluginApi
         }
 
         header('Content-type: application/json; charset=utf-8', true, 200);
-        echo json_encode(Data::getSanitizedArray($out));
+        // Can not sanitize output as the browser is strictly typed to specific content.
+        echo json_encode($out);
         if ($dieInstantly) {
             die();
         }
@@ -829,11 +830,16 @@ class PluginApi
                 } else {
                     foreach (self::$callbacks as $callback) {
                         $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
-                        similar_text(
-                            $expectedUrl,
-                            $freshCallbackList[ResursBankAPI::getResurs()->getCallbackTypeString($callback)],
-                            $percentualValue
-                        );
+                        $callbackString = ResursBankAPI::getResurs()->getCallbackTypeString($callback);
+                        if (isset($callbackString)) {
+                            similar_text(
+                                $expectedUrl,
+                                $freshCallbackList[$callbackString],
+                                $percentualValue
+                            );
+                        } else {
+                            $percentualValue = 0;
+                        }
 
                         if ($percentualValue < 90) {
                             $return['requireRefresh'] = true;
