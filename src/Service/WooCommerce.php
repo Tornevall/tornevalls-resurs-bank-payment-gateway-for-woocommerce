@@ -1310,7 +1310,8 @@ class WooCommerce
         $isCheckout = is_checkout();
 
         try {
-            if (self::getValidCart()) {
+            // No need to update cart if not in checkout (and in admin).
+            if ($isCheckout && !is_admin() && self::getValidCart()) {
                 $currentTotal = WC()->cart->total;
                 self::setSessionValue('customerCartTotal', WC()->cart->total);
                 if ((float)$currentTotal) {
@@ -1328,7 +1329,15 @@ class WooCommerce
                                 $orderHandler->getOrderLines()
                             );
                         } catch (Exception $e) {
-                            Data::setLogException($e);
+                            Data::setLogError(
+                                sprintf(
+                                    __('Exception (%s) from %s: %s.',
+                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                                    $e->getCode(),
+                                    __FUNCTION__,
+                                    $e->getMessage()
+                                )
+                            );
                         }
                     }
                 }

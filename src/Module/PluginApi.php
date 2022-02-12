@@ -58,7 +58,12 @@ class PluginApi
     {
         Data::canLog(
             Data::CAN_LOG_BACKEND,
-            sprintf('Backend: %s (%s), params %s', __FUNCTION__, self::getAction(), print_r($_REQUEST, true))
+            sprintf(
+                'Backend: %s (%s), params %s',
+                __FUNCTION__,
+                self::getAction(),
+                print_r(Data::getObfuscatedData($_REQUEST), true)
+            )
         );
 
         $returnedValue = WordPress::applyFilters(self::getAction(), null, $_REQUEST);
