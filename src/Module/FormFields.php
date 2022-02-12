@@ -739,8 +739,8 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
-                'must_obfuscate_personal_data' => [
-                    'id' => 'must_obfuscate_personal_data',
+                'must_obfuscate_logged_personal_data' => [
+                    'id' => 'must_obfuscate_logged_personal_data',
                     'type' => 'checkbox',
                     'title' => __(
                         'Obfuscate personal data in logs',

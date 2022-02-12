@@ -2357,7 +2357,7 @@ class Data
      */
     public static function getObfuscatedData($obfuscateThis)
     {
-        if (!Data::getResursOption('must_obfuscate_personal_data')) {
+        if (!Data::getResursOption('must_obfuscate_logged_personal_data')) {
             return $obfuscateThis;
         }
         $stringHandler = new Strings();
