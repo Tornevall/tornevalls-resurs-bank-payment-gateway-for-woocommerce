@@ -2,6 +2,9 @@
 
 This is a third party plugin written to work as a payment gateway for WooCommerce and WordPress.
 
+[![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
+
+
 # IMPORTANT -- First time running should be on a dedicated test environment
 
 If you are entirely new to this plugin, I'd suggest you to run it in a dedicated test environment that is supposedly *
@@ -158,3 +161,10 @@ anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.torne
 The payment flow itself for each
 API [is described here](https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described).
 
+
+# Screenshots from the plugin
+
+[![Primary Basic Settings Configuration page.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-1.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-1.png)
+[![Part of the Payment Methods View.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-2.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-2.png)
+[![Part of the Order View.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-3.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-3.png)
+[![Resurs Checkout Variant 1.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-4.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-4.png)
