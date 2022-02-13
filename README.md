@@ -4,7 +4,6 @@ This is a third party plugin written to work as a payment gateway for WooCommerc
 
 [![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
-
 # IMPORTANT -- First time running should be on a dedicated test environment
 
 If you are entirely new to this plugin, I'd suggest you to run it in a dedicated test environment that is supposedly *
@@ -140,12 +139,12 @@ to take in consideration:
 
 ### What is a EComPHP API Message?
 
-From time to time, you will notices that errors and exceptions shows up on your screen. Normally, when doing API calls,
-this is done by [Resurs Bank Ecommerce API for PHP](https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349).
-Such messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self
-explained. For more information about this kind of messages can be answered by Resurs Bank
-support. [You can see some of them here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases)
-.
+From time to time, errors and exceptions shows up on your screen. Normally, when doing API calls, the messages comes
+from [Resurs Bank Ecommerce API](https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349). Many of the
+messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained.
+If you are unsure, contact the support preferrably with information about your system attached (which in the plugin's
+admin interface can be found under "Support and help" or "Support och hjälp" in swedish). A screenshot of that layout
+are attached to this plugin-repository (screenshot 8). [You can also see some of the error messages produced by the library itself here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases).
 
 ## I see an order but find no information connected to Resurs Bank =
 
@@ -161,7 +160,6 @@ anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.torne
 The payment flow itself for each
 API [is described here](https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described).
 
-
 # Screenshots from the plugin
 
 [![Primary Basic Settings Configuration page.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-1.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-1.png)
@@ -171,3 +169,4 @@ API [is described here](https://docs.tornevall.net/display/TORNEVALL/Checkout+wo
 [![Fraud Configuration Section.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-5.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-5.png)
 [![Enabling Developer Mode.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-6.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-6.png)
 [![Customer Tweaking Section, with mock features.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-7.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-7.png)
+[![Support and help screen.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-8.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-8.png)

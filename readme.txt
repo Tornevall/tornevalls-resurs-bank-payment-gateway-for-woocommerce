@@ -117,15 +117,15 @@ There are several reasons for the 40X errors, but if they are thrown from an ECo
 
 = What is a EComPHP API Message? =
 
-From time to time, you will notices that errors and exceptions shows up on your screen. Normally, when doing API calls, this is done by [Resurs Bank Ecommerce API for PHP](https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349). Such messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained. For more information about this kind of messages can be answered by Resurs Bank support. [You can see some of them here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases).
+From time to time, errors and exceptions shows up on your screen. Normally, when doing API calls, the messages comes from [Resurs Bank Ecommerce API](https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349). Many of the messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained. If you are unsure, contact the support preferrably with information about your system attached (which in the plugin's admin interface can be found under "Support and help" or "Support och hjälp" in swedish). A screenshot of that layout are attached to this plugin-repository (screenshot 8). [You can also see some of the error messages produced by the library itself here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases).
 
 = I see an order but find no information connected to Resurs Bank =
 
-This is a common question about customer actions and how the order has been created/signed. Most of the details is usually placed in the order notes for the order, but if you need more information you could also consider contacting Resurs Bank support.
+A common question about customer events is "what happened?" and "why" - very often about the order creation process and signing routines. Most of the details is usually placed in the order notes for the order so merchants can track down issues themselves, but if you need more information about events on Resurs Bank side you could also consider contacting the support.
 
 = How does the respective payment flows work with Resurs Bank in this plugin? =
 
-Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works, not only here, but mostly anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
+Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works for this plugin can be read at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
 
 The payment flow itself for each API [is described here](https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described).
 
@@ -137,7 +137,8 @@ The payment flow itself for each API [is described here](https://docs.tornevall.
 4. Resurs Checkout Variant 1.
 5. Fraud Configuration Section.
 6. Enabling Developer Mode.
-5. Customer Tweaking Section, with mock features.
+7. Customer Tweaking Section, with mock features.
+8. Support and help screen.
 
 == Changelog ==
 
