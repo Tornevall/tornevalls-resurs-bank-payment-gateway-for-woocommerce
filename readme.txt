@@ -86,11 +86,11 @@ You may visit [docs.tornevall.net](https://docs.tornevall.net/x/CoC4Aw) for more
 
 Breaking changes are collected [here](https://docs.tornevall.net/x/UwJzBQ).
 
-Examples of what could "break" in the form of "no longer supported":
+Examples of what could "break" is normally in the form of "no longer supported":
 
-* The prior payment method editor where title and description for each payment method could be edited. This is not really plugin side decided, but based on rules set by Resurs Bank. First of all, titles and descriptions are handled by Resurs Bank to simplify changes that is related to whatever could happen to a payment method. The same goes for the sorting of payment methods in the checkout. Some payment methods is regulated by laws and should be displayed in a certain order. This is no longer up to the plugin to decide and sorting is based on in which order Resurs Bank is returning them in the API.
-* Many features are lifted straight out from the prior version - but not all of them are. There are settings in this new version that is no longer working, especially features that is filter bound. [Actions, filters, triggers](https://docs.tornevall.net/x/HoC4Aw) lists everything new available for you.
-* Settings is almost similar to the old plugin, but with new identifiers. It is partially intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has also been removed as they did no longer fill any purpose, not even in the old release.
+* The prior payment method editor where title and description for each payment method could be edited. This is not really plugin side decided, but based on rules set by Resurs Bank. First of all, titles and descriptions are handled by Resurs Bank to simplify changes that is related to whatever could happen to a payment method. The same goes for the sorting of payment methods in the checkout. Some payment methods is regulated by laws and should be displayed in a certain order. This is no longer up to the plugin to decide and sorting is based on in which order Resurs Bank is returning them in the API. If you want anything changed, related to the payment method, you have to contact Resurs Bank support.
+* Many features are lifted straight out from the prior version - but not all of them are. There are settings in this new version that is no longer working, especially features that is filter bound. For filters, you can take a look at [Actions, filters, triggers](https://docs.tornevall.net/x/HoC4Aw) in the documentation. Further information about settings will come.
+* Speaking of settings. Settings is almost similar to the old plugin, but with new identifiers. It is partially intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has also been removed as they did no longer fill any purpose, not even in the old release.
 
 = Is this release a refactored version of Resurs Bank's? =
 
