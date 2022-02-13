@@ -80,7 +80,7 @@ You may visit [docs.tornevall.net](https://docs.tornevall.net/x/CoC4Aw) for more
 
 = Can I upgrade from version 2.2.x =
 
-**"Version 2.2.x"** is currently the **official Resurs Bank release** and currently not the same as this release. However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the prior release can be handled by this one.
+**"Version 2.2.x"** is currently the **official Resurs Bank release** and not the same as this release that is a practically a third party reboot. However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the prior release can be handled by this one.
 
 = What is considered "breaking changes"? =
 
@@ -107,8 +107,7 @@ There are several reasons for the 40X errors, but if they are thrown from an ECo
   **Cause**: This may be more common during test.
   **Solution:** Resolution: Contact Resurs Bank for support.
 
-
-### There's an order created but there is no order information connected to Resurs Bank ###
+= I seen an order but find no information connected to Resurs Bank =
 
 This is a common question about customer actions and how the order has been created/signed. Most of the details is usually placed in the order notes for the order, but if you need more information you could also consider contacting Resurs Bank support.
 
