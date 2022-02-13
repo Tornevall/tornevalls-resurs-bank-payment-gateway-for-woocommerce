@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - Tornevalls Resurs Bank payment gateway for WooCommerce - Stable Readme (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-02-13 01:47+0100\n"
+"PO-Revision-Date: 2022-02-13 11:43+0100\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -16,31 +16,63 @@ msgstr ""
 
 #. Short description.
 msgid "Tornevalls Resurs Bank Payment Gateway for WooCommerce."
-msgstr "Tornevalls Resurs Bank betalningslösning för WooCommerce"
+msgstr "Tornevalls Resurs Bank betalningslösning för WooCommerce."
 
 #. Plugin name.
 msgid "Tornevalls Resurs Bank payment gateway for WooCommerce"
 msgstr "Tornevalls Resurs Bank betalningslösning för WooCommerce"
 
 #. Found in faq paragraph.
-msgid "Examples of what could \"break\" in the form of \"no longer supported\":"
-msgstr "Exempel på vad som kan \"gå sönder\" i form av \"stöds ej längre\":"
+msgid "From time to time, you will notices that errors and exceptions shows up on your screen. Normally, when doing API calls, this is done by <a href=\"https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349\">Resurs Bank Ecommerce API for PHP</a>. Such messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained. Resurs Bank also have furter information about some error messages. <a href=\"https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases\">You can see some of them here</a>."
+msgstr "Då och då kommer du att märka att fel och undantag visas på skärmen. Normalt sett, när du API-anrop utförs, görs detta av <a href=\"https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349\">Resurs Bank Ecommerce API för PHP</a>. Sådana meddelanden kan spåras av Resurs Bank support, om något är oklart men många gånger är felmeddelande självförklarande. Resurs Bank har mer information om dessa felmeddelanden. <a href=\"https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases\">Du kan se några av dem här</a>."
+
+#. Found in faq paragraph.
+msgid "No. This plugin is a complete reboot. The future intentions might be to replace the other version in the future and <strong>this</strong> release is currently considered a side project, <em>even if it has been developed by an employee</em> at Resurs Bank."
+msgstr "Nej. Detta plugin är en fullständig \"reboot\". De framtida avsikterna kan vara att ersätta den andra versionen i framtiden och <strong>denna</strong> utgåva betraktas för närvarande som ett sidoprojekt, <em>även om det har utvecklats av en anställd</em> på Resurs Bank."
+
+#. Found in faq list item.
+msgid "Many ideas are lifted straight out from the prior version - but not all of them. Remember, this is a third party reboot of an old release. There are settings in this version that is no longer working, especially features that is bound to filters and actions. For actions and filters, you can take a look at the <a href=\"https://docs.tornevall.net/x/HoC4Aw\">documentation</a>. Further information about settings will come."
+msgstr "Många idéer lyfts direkt från den tidigare versionen - men inte alla. Kom ihåg att detta är en omstart från en tredje part av en äldre version. Det finns inställningar i den här versionen som inte längre fungerar, särskilt funktioner som är bundna till filter och åtgärder. För actions och filter kan du ta en titt på <a href=\"https://docs.tornevall.net/x/HoC4Aw\">dokumentationen</a>. Mer information om inställningar kommer."
+
+#. Found in faq header.
+msgid "I see an order but find no information connected to Resurs Bank"
+msgstr "Jag ser en order men hittar ingen information kopplad till Resurs Bank"
+
+#. Found in faq header.
+msgid "What is a EComPHP API Message?"
+msgstr "Vad är ett EComPHP API-meddelande?"
+
+#. Found in description header.
+msgid "System prerequisites"
+msgstr "Systemförutsättningar"
+
+#. Screenshot description.
+msgid "Part of the Order View."
+msgstr "En del av ordervyn."
+
+#. Screenshot description.
+msgid "Part of the Payment Methods View."
+msgstr "En del av vyn Betalningsmetoder."
+
+#. Screenshot description.
+msgid "Primary Basic Settings Configuration page."
+msgstr "Konfigurationssida för primära grundläggande inställningar."
+
+#. Found in faq paragraph.
+msgid "Examples of what could \"break\" is normally in the form of \"no longer supported\":"
+msgstr "Exempel på vad som kan \"brytas\" är normalt sett i form av \"stöds ej längre\":"
 
 #. Found in faq paragraph.
 msgid "Breaking changes are collected <a href=\"https://docs.tornevall.net/x/UwJzBQ\">here</a>."
 msgstr "Brytande förändringar samlas in <a href=\"https://docs.tornevall.net/x/UwJzBQ\">här</a>."
 
 #. Found in faq list item.
-msgid "Settings is almost similar to the old plugin, but with new identifiers. It is partially intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has also been removed as they did no longer fill any purpose, not even in the old release."
-msgstr "Inställningarna liknar nästan det gamla tillägget, men med nya identifierare. Det är delvis avsiktligt gjort, så vi kolliderar inte med gamla inställningar. Vissa av dem är inte heller särskilt effektiva, så några av dem har också tagits bort eftersom de inte längre fyllde något syfte, inte ens i den gamla utgåvan."
+msgid "Speaking of settings. Settings is almost similar to the old plugin, but with new identifiers. It is partially intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has also been removed as they did no longer fill any purpose."
+msgstr "På tal om inställningar. Inställningarna liknar nästan det gamla tillägget, men med nya identifierare. Det är delvis avsiktligt gjort, så att vi inte kolliderar med gamla inställningar. Vissa av dem är inte heller särskilt effektiva, så några av dem har också tagits bort eftersom de inte längre feller något syfte."
 
 #. Found in faq list item.
-msgid "Many features are lifted straight out from the prior version - but not all of them are. There are settings in this new version that is no longer working, especially features that is filter bound. <a href=\"https://docs.tornevall.net/x/HoC4Aw\">Actions, filters, triggers</a> lists everything new available for you."
-msgstr "Många egenskaper har lyfts direkt ut från den tidigare versionen - dock inte alla. Det finns inställningar i den här versionen som inte längre fungerar, särskilt funktioner som är filterbundna. <a href=\"https://docs.tornevall.net/x/HoC4Aw\">Actions, filters, triggers</a> listar allt nytt som är tillgängligt."
-
-#. Found in faq list item.
-msgid "The prior payment method editor where title and description for each payment method could be edited. This is not really plugin side decided, but based on rules set by Resurs Bank. First of all, titles and descriptions are handled by Resurs Bank to simplify changes that is related to whatever could happen to a payment method. The same goes for the sorting of payment methods in the checkout. Some payment methods is regulated by laws and should be displayed in a certain order. This is no longer up to the plugin to decide and sorting is based on in which order Resurs Bank is returning them in the API."
-msgstr "Den tidigare betalmetodsredigeraren där titel och beskrivning för respektive betalningsmetod kunde redigeras. Detta är egentligen inte upp till tillägget att bestämma, utan snarare regler satta av Resurs Bank. Till att börja med så hanteras titlar och beskrivningat av Resurs Bank för att förenkla när förändringar som kan ske med en betalmetod, sker. Samma gäller för sortering av betalmetoder i kassan. Vissa betalmetoder är regelstyrda av lagar och bör visas i en specifik ordning. Det är inte längre upp till tillägget att besluta vilken sorteringsordningen är, utan Resurs Bank som retunerar dom i sitt API."
+msgid "The prior payment method editor where title and description for each payment method could be edited. This is not really plugin side decided, but based on rules set by Resurs Bank. First of all, titles and descriptions are handled by Resurs Bank to simplify changes that is related to whatever could happen to a payment method. The same goes for the sorting of payment methods in the checkout. Some payment methods is regulated by laws and should be displayed in a certain order. This is no longer up to the plugin to decide and sorting is based on in which order Resurs Bank is returning them in the API. If you want anything changed, related to the payment method, you have to contact Resurs Bank support."
+msgstr "Redigeraren för för betalningsmetoder där titel och beskrivning för varje betalningsmetod kan ändras. Detta är egentligen inte upp till tillägget att beslutas, utan baseras på regler som fastställts av Resurs Bank. Först och främst hanteras titlar och beskrivningar av Resurs Bank för att förenkla förändringar som är relaterade till vad som än kan hända med en betalningsmetod. Detsamma gäller sortering av betalningsmetoder i kassan. Vissa betalningsmetoder regleras av lagar och bör visas i en viss ordning. Det är inte längre upp till tillägget att bestämma, och sortering baseras på i vilken ordning Resurs Bank returnerar dem i API:et. Om du vill att något ska ändras, relaterat till betalningsmetoden, måste du kontakta Resurs Bank support."
 
 #. Found in faq header.
 msgid "What is considered \"breaking changes\"?"
@@ -54,78 +86,34 @@ msgstr "<strong>Första gången du startar upp, bör vara i en dedikerad testmil
 msgid "WARNING"
 msgstr "VARNING"
 
-#. Screenshot description.
-msgid "Order View."
-msgstr "Ordervy."
-
-#. Screenshot description.
-msgid "Payment Methods View."
-msgstr "Vyn för betalningsmetoder."
-
-#. Screenshot description.
-msgid "Basic Settings Configuration."
-msgstr "Standardinställningar."
+#. Found in faq paragraph.
+msgid "Full description about how \"simplifiedShopFlow\", \"hosted flow\" and \"Resurs Checkout\" works, not only here, but mostly anywhere can be seen at <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
+msgstr "Fullständig beskrivning av hur \"simplifiedShopFlow\", \"hosted flow\" och \"Resurs Checkout\" fungerar, inte bara här, utan mestadels var som helst kan ses på <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
 
 #. Found in faq paragraph.
-msgid ""
-"Full description about how \"simplifiedShopFlow\", \"hosted flow\" and \"Resurs Checkout\" works, not only here, but mostly\n"
-"anywhere can be seen at <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
-msgstr ""
-"Fullständig beskrivning av hur \"simplifiedShopFlow\", \"hosted flow\" och \"Resurs Checkout\" fungerar, inte bara här, utan mestadels\n"
-"var som helst, kan ses på <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
+msgid "This is a common question about customer actions and how the order has been created/signed. Most of the details is usually placed in the order notes for the order, but if you need more information you could also consider contacting Resurs Bank support."
+msgstr "Detta är en vanlig fråga om kundhändelser och hur ordern har skapats/signerats. De flesta uppgifterna placeras vanligtvis i orderanteckningarna för beställningen, men om du behöver mer information kan du också överväga att kontakta Resurs Banks support."
 
 #. Found in faq paragraph.
-msgid ""
-"This is a common question about customer actions and how the order has been created/signed. Most of the details is\n"
-"usually placed in the order notes for the order, but if you need more information you could also consider contacting\n"
-"Resurs Bank support."
-msgstr ""
-"Detta är en vanlig fråga om kundåtgärder och hur ordern har skapats/signerats. De flesta detaljerna är\n"
-"vanligtvis placerade i orderanteckningarna för beställningen, men om du behöver mer information kan du också överväga att kontakta\n"
-"Resurs Bank support."
+msgid "There are several reasons for the 40X errors, but if they are thrown from an EComPHP API message, there are few things to take in consideration:"
+msgstr "Det finns flera orsaker till 40X-felen, men om de kastas från ett EComPHP API-meddelande finns det ett antal saker att ta hänsyn till:"
 
 #. Found in faq paragraph.
-msgid ""
-"There are several reasons for the 40X errors, but if they are thrown from an EComPHP API message there are few things\n"
-"to take in consideration:"
-msgstr ""
-"Det finns flera orsaker till 40X-felen, men om de kastas från ett EComPHP API-meddelande finns det några saker\n"
-"att ta hänsyn till:"
+msgid "<strong>\"Version 2.2.x\"</strong> is currently the <strong>official Resurs Bank release</strong> and not the same as this release that is a practically a third party reboot. However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the prior release can be handled by this one."
+msgstr "<strong>\"Version 2.2.x\"</strong> är för närvarande den <strong>officiella Resurs Bank-utgåvan</strong> och inte samma som den här utgåvan, som praktiskt taget är en omstart gjord av tredje part. Avsikterna med detta plugin är dock att användas så sömlöst som möjligt. Till exempel kan betalningar som placeras med den tidigare versionen även hanteras av den här."
 
 #. Found in faq paragraph.
-msgid ""
-"No. It's a rewrite. From scratch. The intentions may be to replace the other version in the future and this is\n"
-"currently considered a side project, <em>even if it has been developed by an employee</em> at Resurs Bank."
-msgstr ""
-"Nej. Det är en omskrivning helt från början. De framtida avsikterna skulle kunna vara att ersätta den andra versionen i framtiden och detta är\n"
-"för närvarande att betraktas som ett sidoprojekt, <em>även om det har utvecklats av en anställd</em> på Resurs Bank."
-
-#. Found in faq paragraph.
-msgid ""
-"<strong>\"Version 2.2.x\"</strong> is currently the <strong>official Resurs Bank release</strong> and currently not the same as this release.\n"
-"However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the\n"
-"prior release can be handled by this one."
-msgstr ""
-"<strong>\"Version 2.2.x\"</strong> är för närvarande den <strong>officiella Resurs Bank-utgåvan</strong> och för närvarande inte densamma som denna utgåva.\n"
-"Avsikterna med detta plugin är dock att kunna köras så sömlöst som möjligt. Betalningar som placerats hos\n"
-"den tidigare versionen kan exempelvis hanteras av den här."
-
-#. Found in faq paragraph.
-msgid ""
-"You may visit <a href=\"https://docs.tornevall.net/x/CoC4Aw\">docs.tornevall.net</a> for more information regarding the\n"
-"plugin. For questions about API and Resurs Bank please visit <a href=\"https://test.resurs.com/docs/\">test.resurs.com/docs</a>."
-msgstr ""
-"Du kan besöka <a href=\"https://docs.tornevall.net/x/CoC4Aw\">docs.tornevall.net</a> för mer information om\n"
-"tillägget. För frågor om API och Resurs Bank, besök <a href=\"https://test.resurs.com/docs/\">test.resurs.com/docs</a>."
+msgid "You may visit <a href=\"https://docs.tornevall.net/x/CoC4Aw\">docs.tornevall.net</a> for more information regarding the plugin. For questions about API and Resurs Bank please visit <a href=\"https://test.resurs.com/docs/\">test.resurs.com/docs</a>."
+msgstr "Du kan besöka <a href=\"https://docs.tornevall.net/x/CoC4Aw\">docs.tornevall.net</a> för mer information om plugin. För frågor om API och Resurs Bank, besök <a href=\"https://test.resurs.com/docs/\">test.resurs.com/docs</a>."
 
 #. Found in faq list item.
 msgid ""
 "403 = Forbidden.\n"
-"<strong>Cause</strong>: This may be more common during test.\n"
+"<strong>Cause</strong>: This is a bit be more common during testing.\n"
 "<strong>Solution:</strong> Resolution: Contact Resurs Bank for support."
 msgstr ""
 "403 = Förbjudet.\n"
-"<strong>Orsak</strong>: Detta kan ske oftare under tester.\n"
+"<strong>Orsak</strong>: Detta är lite vanligare under testning.\n"
 "<strong>Lösning:</strong> Lösning: Kontakta Resurs Bank för support."
 
 #. Found in faq list item.
@@ -140,79 +128,59 @@ msgstr ""
 
 #. Found in faq header.
 msgid "How does the respective payment flows work with Resurs Bank in this plugin?"
-msgstr "Hur fungerar respektive betalningsflöden med Resurs Bank i detta plugin?"
-
-#. Found in faq header.
-msgid "There's an order created but there is no order information connected to Resurs Bank"
-msgstr "Det skapas en order men det finns ingen orderinformation kopplad till Resurs Bank"
+msgstr "Hur fungerar respektive betalningsflöde med Resurs Bank i detta tillägg?"
 
 #. Found in faq header.
 msgid "Plugin is causing 40X errors on my site"
-msgstr "Plugin orsakar 40X-fel på min webbplats"
+msgstr "Tillägget orsakar 40X-fel på min webbplats"
 
 #. Found in faq header.
 msgid "Is this release a refactored version of Resurs Bank's?"
 msgstr "Är denna version en refaktorerad version av Resurs Banks?"
 
 #. Found in faq header.
-msgid "Can I upgrade from version 2.2.x"
-msgstr "Kan jag uppgradera från version 2.2.x"
+msgid "Can I upgrade from version 2.2.x?"
+msgstr "Kan jag uppgradera från version 2.2.x?"
 
 #. Found in faq header.
-msgid "Where can I get more information about this plugin"
-msgstr "Var kan jag få mer information om det här pluginet"
+msgid "Where can I get more information about this plugin?"
+msgstr "Var kan jag få mer information om det här tillägget?"
 
 #. Found in installation paragraph.
-msgid ""
-"However, this plugin release should not be considered an official upgrade from \"an older version\" as there currently\n"
-"are no old versions available yet - except from them <em>official release</em> from Resurs Bank. For the moment, this is\n"
-"not the same thing."
-msgstr ""
-"Den här plugin-versionen bör dock inte betraktas som en officiell uppgradering från \"en äldre version\" eftersom det för närvarande\n"
-"inte finns några äldre versioner tillgängliga ännu - förutom från den <em>officiella releasen</em> från Resurs Bank. För tillfället är detta\n"
-"Inte samma sak."
+msgid "However, this plugin release should not be considered an official upgrade from \"an older version\" as there currently are no old versions available yet - except from the <em>official release</em> from Resurs Bank. For the moment, this is not the same thing."
+msgstr "Denna plugin-utgåva bör dock inte betraktas som en officiell uppgradering från \"en äldre version\" eftersom det för närvarande inte finns några tidigare versioner tillgängliga ännu - förutom från den <em>officiella utgåvan</em> från Resurs Bank. För tillfället är detta inte samma sak."
 
 #. Found in installation paragraph.
-msgid ""
-"When you install this plugin and eventually did use an older version, you will also get the opportunity to import\n"
-"the old credentials. For full documentation, take a look at <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
-msgstr ""
-"När du installerar det här plugin-programmet och eventuellt använde en äldre version tidigare, så får du också möjlighet att importera\n"
-"de gamla autentiseringsuppgifterna. För fullständig dokumentation, ta en titt på <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
+msgid "When you install this plugin and eventually did use an older version, you will also get the opportunity to import the old credentials. For full documentation, take a look at <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
+msgstr "När du installerar det här tillägget och så eventuellt har använt en äldre version, så får du också möjlighet att importera de gamla autentiseringsuppgifterna. För fullständig dokumentation, ta en titt på <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
 
 #. Found in installation paragraph.
-msgid ""
-"Are you using this plugin as an upgrade from an older version? Feel free to do that; upgrading is meant to be seamless\n"
-"and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look\n"
-"through, if they are still matching your own. This may be important especially if you have a custom setup."
-msgstr ""
-"Använder du det här pluginet som en uppgradering från en äldre version? Det går bra; uppgradering är avsedd att vara sömlös\n"
-"och bör inte leda till \"brytande förändringar\". Det kan finnas konfigurationsinställningar att ta hänsyn till för att titta\n"
-"om de fortfarande matchar din egen. Detta kan vara viktigt, särskilt om du har en anpassad installation."
+msgid "Are you using this plugin as an upgrade from an older version? Feel free to do that; upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own. This may be important especially if you have a custom setup."
+msgstr "Använder du det här tillägget som en uppgradering från en äldre version? Gör gärna det; uppgradering är avsedd att vara sömlös och bör inte leda till att något bryts. Det kan finnas konfigurationsinställningar att ta hänsyn till att titta igenom, om de fortfarande matchar dina. Detta kan vara viktigt, särskilt om du har anpassat installationen."
 
 #. Found in installation paragraph.
 msgid "Preferred Method is to install and activate the plugin through the WordPress plugin installer."
-msgstr "Föredragen metod är att installera och aktivera plugin via WordPress plugin installatör."
+msgstr "Föredragen metod är att installera och aktivera tillägget via WordPress plugin-hanterare."
 
 #. Found in installation list item.
 msgid "Configure the plugin via admin control panel"
-msgstr "Konfigurera plugin via admin kontrollpanelen"
+msgstr "Konfigurera tillägget via kontrollpanelen"
 
 #. Found in installation list item.
 msgid "Activate the plugin through the \"Plugins\" menu in WordPress"
-msgstr "Aktivera plugin-menyn via menyn \"Plugins\" i WordPress"
+msgstr "Aktivera tillägget via menyn \"Plugins\" i WordPress"
 
 #. Found in installation list item.
 msgid "Upload the plugin archive to the \"/wp-content/plugins/\" directory"
-msgstr "Ladda upp pluginarkivet till katalogen \"/wp-content/plugins/\""
+msgstr "Ladda upp tilläggspaketet till katalogen \"/wp-content/plugins/\""
 
 #. Found in description paragraph.
 msgid "If you'd like to contribute to this project, you can either sign up to <a href=\"https://github.com/Tornevall/wpwc-resurs/issues\">github</a> and create an issue or use the old <a href=\"https://tracker.tornevall.net/projects/RWC\">Bitbucket Project</a> to do this on. The full project status can be found <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">at this dashboard</a> since that's where the project started."
-msgstr "Om du vill bidra till det här projektet kan du antingen registrera dig för <a href=\"https://github.com/Tornevall/wpwc-resurs/issues\">github</a> och skapa ett ärende eller använda det gamla <a href=\"https://tracker.tornevall.net/projects/RWC\">Bitbucket-projektet</a> för att göra detta på. Den fullständiga projektstatusen finns <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">på den här instrumentpanelen</a> eftersom det var där projektet startade."
+msgstr "Om du vill bidra till det här projektet kan du antingen registrera dig på <a href=\"https://github.com/Tornevall/wpwc-resurs/issues\">github</a> och skapa ett ärende, eller använda det gamla <a href=\"https://tracker.tornevall.net/projects/RWC\">Bitbucket-projektet</a> för att göra detta. Den fullständiga projektstatusen finns <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">på den här instrumentpanelen</a> eftersom det var där projektet startade."
 
 #. Found in description paragraph.
 msgid "Help with translation of the plugin by joining <a href=\"https://crwd.in/trwbc\">Crowdin</a>!"
-msgstr "Hjälp med översättning av plugin genom att gå med i <a href=\"https://crwd.in/trwbc\">Crowdin</a>!"
+msgstr "Hjälp till med översättning av tillägget genom att gå med i <a href=\"https://crwd.in/trwbc\">Crowdin</a>!"
 
 #. Found in description paragraph.
 msgid ""
@@ -224,15 +192,15 @@ msgstr ""
 
 #. Found in description paragraph.
 msgid "Primary new problems should be discovered in TEST rather than production since the costs are way lower, where no real people are depending on failed orders or payments. If something fails in production it also means that you are the one that potentially looses traffic while your site is down."
-msgstr "Primära nya problem bör upptäckas i TEST snarare än produktion eftersom kostnaderna är mycket lägre, där inga riktiga människor är beroende av misslyckade köp eller betalningar. Om något misslyckas i produktionen betyder det också att du är den som potentiellt förlorar trafiken medan din webbplats är nere."
+msgstr "Primära nya problem bör upptäckas i TEST snarare än produktion eftersom kostnaderna är mycket lägre, där inga riktiga människor är beroende av misslyckade köp eller betalningar. Om något misslyckas i produktionen betyder det också att du är den som potentiellt tappar trafik medan din webbplats är nere."
 
 #. Found in description paragraph.
 msgid "If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is supposedly <strong>equal</strong> to a production environment. Never run any tests in production!"
-msgstr "Om du är helt ny med detta plugin eller WordPress totalt sett, föreslår jag att du kör det i en dedikerad testmiljö som förmodligen är <strong>produktionslik</strong>. Kör aldrig några tester i produktion!"
+msgstr "Om du är helt ny på detta tillägg eller WordPress överlag, föreslår jag att du kör det i en dedikerad testmiljö som antas är <strong>likadan</strong> som en produktionsmiljö. Kör aldrig några tester i produktionen!"
 
 #. Found in description paragraph.
 msgid "The main responsibility that this product works properly with your system is yours. For <strong>your</strong> safety you should therefore <strong>TEST the plugin</strong> in a dedicated test environment <strong>before using it</strong> in a production."
-msgstr "Huvudansvaret för att denna produkt fungerar korrekt med ditt system är ditt. För <strong>din</strong> säkerhet bör du därför <strong>TESTA tillägget i</strong> en dedikerad testmiljö <strong>innan du använder den</strong> i en produktion."
+msgstr "Huvudansvaret för att denna produkt fungerar korrekt ihop med ditt system är ditt. För <strong>din</strong> säkerhet bör du därför <strong>TESTA tillägget i</strong> en dedikerad testmiljö <strong>innan du använder den</strong> i en produktion."
 
 #. Found in description paragraph.
 msgid "See below for information about requirements."
@@ -243,84 +211,64 @@ msgid "<a href=\"https://crowdin.com/project/trwbc\"></a>"
 msgstr "<a href=\"https://crowdin.com/project/trwbc\"></a>"
 
 #. Found in description paragraph.
-msgid "There is a publicly available release out supported by Resurs Bank (v2.2). There <strong>may be breaking changes</strong> if you tend to use <strong>this</strong> plugin as it is an upgrade from the Resurs supported release as the settings and filters may be different."
-msgstr "Det finns en publikt tillgänglig release ute, som Resurs Bank stödjer (v2.2). Det <strong>kan finnas brytande ändringar</strong> om du planerar att använda <strong>det här</strong> tillägget eftersom det är en uppgradering från resursversionen som stöds eftersom inställningarna och filtren kan vara olika."
+msgid "There is a publicly available release out supported by Resurs Bank (v2.2). There <strong>may be breaking changes</strong> if you plan to use <strong>this</strong> plugin as it was an upgrade from the Resurs Bank supported release, since the settings and filters have been replaced."
+msgstr "Det finns en publikt tillgänglig version som har släppts av Resurs Bank (v2.2). Det <strong>kan finnas brytande ändringar</strong> om du planerar att använda <strong>det här</strong> tillägget som om det vore en uppgradering från Resurs Bank-stödda utgåvan, eftersom inställningarna och filtren har bytts ut."
 
 #. Found in description paragraph.
 msgid "<strong>SoapClient is required</strong> for all actions related to \"after shop\", debiting, refunding, annulments, and so on. Also, your site has to be fully reachable with SSL/HTTPS. <strong>For full list of requirements, look below.</strong>"
-msgstr "<strong>SoapClient krävs</strong> för alla åtgärder relaterade till \"after shop\", debitering, återbetalning, annulleringar och så vidare. Din webbplats måste också vara fullt nåbar med SSL / HTTPS. <strong>För fullständig lista över krav, se nedan.</strong>"
+msgstr "<strong>SoapClient krävs</strong> för alla händelser relaterade till \"after shop\", debitering, återbetalning, annulleringar och så vidare. Din webbplats måste också vara fullt nåbar med SSL / HTTPS. <strong>För fullständig lista över krav, se nedan.</strong>"
 
 #. Found in description paragraph.
 msgid "Payment gateway for Resurs Bank AB with support for the most recent shop flows."
-msgstr "Betalningsport för Resurs Bank AB med stöd för de senaste butiksflödena."
+msgstr "Betalningsgateway för Resurs Bank AB med stöd för de senaste köpflödena."
 
 #. Found in description list item.
-msgid ""
-"WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly\n"
-"recommended to go for the latest version as soon as possible if you're not already there.\n"
-"See <a href=\"https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/\">here</a> for more\n"
-"information."
-msgstr ""
-"WordPress: Helst minst v5.5. Den har supporterats, och kommer förmodligen fortsätta stödja, äldre utgåvor men det är mycket\n"
-"rekommenderas att gå till den senaste versionen så snart som möjligt om du inte redan är där.\n"
-"Se <a href=\"https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/\">här</a> för mer\n"
-"information."
+msgid "WordPress: Preferably at least v5.5. It is highly recommended to go for the latest version as soon as possible if you're not already there. See <a href=\"https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/\">here</a> for more information."
+msgstr "WordPress: Helst minst v5.5. Det rekommenderas starkt att gå upp till den senaste versionen så snart som möjligt om du inte redan är där. Se <a href=\"https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/\">här</a> för mer information."
 
 #. Found in description list item.
 msgid "PHP streams? Yes, you still need them since SoapClient is actually using it."
-msgstr "PHP-streams? Ja, du behöver dem fortfarande eftersom SoapClient faktiskt använder det."
+msgstr "PHP streams? Ja, du behöver dem fortfarande eftersom SoapClient använder det."
 
 #. Found in description list item.
-msgid ""
-"Curl is highly <strong>recommended</strong> but not necessary. We suggest that you do not trust only PHP streams on this one\n"
-"as you may loose important features if you run explicitly with streams."
-msgstr ""
-"Curl <strong>rekommenderas starkt men</strong> inte nödvändigt. Vi föreslår att du inte bara litar på PHP-streams här\n"
-"eftersom du kan förlora viktiga funktioner om du kör explicit med strömmar."
+msgid "Curl is highly <strong>recommended</strong> but not necessary. We suggest that you do not trust only PHP streams on this one as you may loose important features if you run explicitly with streams."
+msgstr "Curl <strong>rekommenderas starkt men</strong> inte nödvändigt. Vi föreslår att du inte bara litar på PHP-streams på den här eftersom du kan förlora viktiga funktioner om du kör explicit med strömmar."
 
 #. Found in description list item.
-msgid ""
-"<strong>Required</strong>: SSL - HTTPS <strong>must</strong> be <strong>fully</strong> enabled. This is a callback security measure, which is\n"
-"required from Resurs Bank."
-msgstr ""
-"<strong>Krävs</strong>: SSL - HTTPS <strong>måste</strong> vara <strong>helt</strong> aktiverat. Detta är en säkerhetsåtgärd för callbacks, som är\n"
-"ett krav från Resurs Bank."
+msgid "<strong>Required</strong>: SSL - HTTPS <strong>must</strong> be <strong>fully</strong> enabled. This is a callback security measure, which is required from Resurs Bank."
+msgstr "<strong>Krävs</strong>: SSL - HTTPS <strong>måste</strong> vara <strong>helt</strong> aktiverat. Detta är en säkerhetsåtgärd som berör callbacks, vilket krävs av Resurs Bank."
 
 #. Found in description list item.
 msgid "<strong>Required</strong>: <a href=\"https://php.net/manual/en/class.soapclient.php\">SoapClient</a> with xml drivers and extensions."
-msgstr "<strong>Obligatoriskt</strong>: <a href=\"https://php.net/manual/en/class.soapclient.php\">SoapClient</a> med xml-drivrutiner och tillägg."
+msgstr "<strong>Krävs</strong>: <a href=\"https://php.net/manual/en/class.soapclient.php\">SoapClient</a> med xml-drivrutiner och tillägg."
 
 #. Found in description list item.
 msgid "<strong>Required</strong>: WooCommerce: v3.5.0 or higher!"
 msgstr "<strong>Krävs</strong>: WooCommerce: v3.5.0 eller högre!"
 
 #. Found in description list item.
-msgid ""
-"PHP: <a href=\"https://docs.woocommerce.com/document/server-requirements/\">Take a look here</a> to keep up with support. As of aug\n"
-"2021, both WooCommerce and WordPress is about to jump into 7.4 and higher.\n"
-"Also, <a href=\"https://wordpress.org/news/2019/04/minimum-php-version-update/\">read here</a> for information about lower versions\n"
-"of PHP. This plugin is written for 7.0 and higher - and the policy is following WooCommerce <em>lowest</em> requirement."
-msgstr ""
-"PHP: <a href=\"https://docs.woocommerce.com/document/server-requirements/\">Ta en titt här</a> för att hålla jämna steg med supporten. Från och med aug\n"
-"2021 är både WooCommerce och WordPress på väg att hoppa in i 7.4 och högre.\n"
-"Läs <a href=\"https://wordpress.org/news/2019/04/minimum-php-version-update/\">också här</a> för information om lägre versioner\n"
-"php. Detta plugin är skrivet för 7.0 och högre - och policyn följer WooCommerce <em>lägsta</em> krav."
+msgid "PHP: <a href=\"https://docs.woocommerce.com/document/server-requirements/\">Take a look here</a> to keep up with support. As of aug 2021, both WooCommerce and WordPress is about to jump into 7.4 and higher. Also, <a href=\"https://wordpress.org/news/2019/04/minimum-php-version-update/\">read here</a> for information about lower versions of PHP. This plugin is written for 7.0 or higher."
+msgstr "PHP: <a href=\"https://docs.woocommerce.com/document/server-requirements/\">Ta en titt här</a> för att hålla jämna steg med stödet. Från och med aug 2021 är både WooCommerce och WordPress på väg att hoppa in i 7.4 och högre. Läs också <a href=\"https://wordpress.org/news/2019/04/minimum-php-version-update/\">här</a> för information om lägre versioner av PHP. Detta plugin är skrivet för 7.0 eller högre."
 
 #. Found in description header.
 msgid "Contribute"
 msgstr "Bidra"
 
-#. Found in description header.
-msgid "System Requirements and packages"
-msgstr "Systemkrav och paket"
-
 #. Found in changelog paragraph.
-msgid "Active/open issues can be found <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">here</a> <a href=\"https://github.com/Tornevall/wpwc-resurs/issues\">and here</a>. You can also <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspect the project status here</a>!"
-msgstr "Aktiva/öppna frågor hittar du <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">här</a> <a href=\"https://github.com/Tornevall/wpwc-resurs/issues\">och här</a>. Du kan också <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspektera projektstatusen här</a>!"
+msgid ""
+"Active/open issues can be found <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">here</a> <a href=\"https://github.com/Tornevall/wpwc-resurs/issues\">and here</a>. You can also <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspect the project status here</a>!\n"
+"Most recent <a href=\"https://github.com/Tornevall/wpwc-resurs/blob/master/CHANGELOG.md\">CHANGELOG can be found here</a>."
+msgstr ""
+"Aktiva/öppna frågor hittar du <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">här</a> <a href=\"https://github.com/Tornevall/wpwc-resurs/issues\">och här</a>. Du kan också <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspektera projektstatusen här</a>!\n"
+"Senaste <a href=\"https://github.com/Tornevall/wpwc-resurs/blob/master/CHANGELOG.md\">CHANGELOG hittar du här</a>."
+
+#. Found in changelog list item.
+msgid "Spelling corrections, translations, etc."
+msgstr "Stavningskorrigeringar, översättningar m.m."
 
 #. Found in changelog list item.
 msgid "Content information, readme's, assets and other updates."
-msgstr "Innehållsinformation, viktigt, tillgångar och andra uppdateringar."
+msgstr "Innehållsinformation, readme-filer, tillgångar och andra uppdateringar."
 
 #. Found in changelog list item.
 msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-298\">RWC-298</a> - Extended test mode."

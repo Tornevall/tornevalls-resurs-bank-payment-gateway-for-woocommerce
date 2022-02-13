@@ -1,4 +1,4 @@
-=== Tornevalls Resurs Bank payment gateway for WooCommerce ===
+=== Tornevalls Resurs Bank Payment Gateway for WooCommerce ===
 Contributors: Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, resurs checkout, checkout, RCO, hosted, simplified, hosted flow, simplified flow
 Requires at least: 5.5
@@ -15,11 +15,11 @@ Tornevalls Resurs Bank Payment Gateway for WooCommerce.
 
 [![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
-Payment gateway for Resurs Bank AB with support for the most recent shop flows.
+Payment gateway for Resurs Bank AB.
 
 **SoapClient is required** for all actions related to "after shop", debiting, refunding, annulments, and so on. Also, your site has to be fully reachable with SSL/HTTPS. **For full list of requirements, look below.**
 
-There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you plan to use **this** plugin as it was an upgrade from the Resurs Bank supported release, since the settings and filters have been replaced.
+There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you plan to use **this** plugin, as it was an upgrade from the Resurs Bank supported release, since many of the settings and filters have been replaced.
 
 
 
@@ -31,7 +31,7 @@ See below for information about requirements.
 
 The main responsibility that this product works properly with your system is yours. For **your** safety you should therefore **TEST the plugin** in a dedicated test environment **before using it** in a production.
 
-If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is supposedly **equal** to a production environment. Never run any tests in production!
+If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is **equal** to your production environment. Never run any tests in production!
 
 Primary new problems should be discovered in TEST rather than production since the costs are way lower, where no real people are depending on failed orders or payments. If something fails in production it also means that you are the one that potentially looses traffic while your site is down.
 
@@ -42,12 +42,18 @@ Primary new problems should be discovered in TEST rather than production since t
 * **Required**: WooCommerce: v3.5.0 or higher!
 * **Required**: [SoapClient](https://php.net/manual/en/class.soapclient.php) with xml drivers and extensions.
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
-* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP streams on this one as you may loose important features if you run explicitly with streams.
+* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP built in communications as you may loose important features if you run explicitly with streams.
 * PHP streams? Yes, you still need them since SoapClient is actually using it.
 * WordPress: Preferably at least v5.5. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
-Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details. Documentation
-for this specific release is currently located at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
+Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details. Documentation for this specific release is currently located at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
+
+= Supported shop flows =
+
+* [Simplified Shop Flow](https://test.resurs.com/docs/display/ecom/Simplified+Flow+API). Integrated checkout that works with WooCommerce built in features.
+* [Resurs Checkout Web](https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web). Iframe integration. Currently supporting **RCOv1 and RCOv2**.
+* [Hosted Payment Flow](https://test.resurs.com/docs/display/ecom/Hosted+Payment+Flow). A paypal like checkout where most of the payment events takes place at Resurs Bank.
+
 
 
 = Contribute =
@@ -61,15 +67,15 @@ If you'd like to contribute to this project, you can either sign up to [github](
 
 Preferred Method is to install and activate the plugin through the WordPress plugin installer.
 
-1. Upload the plugin archive to the "/wp-content/plugins/" directory
-2. Activate the plugin through the "Plugins" menu in WordPress
-3. Configure the plugin via admin control panel
+1. Upload the plugin archive to the "/wp-content/plugins/" directory.
+2. Activate the plugin through the "Plugins" menu in WordPress.
+3. Configure the plugin via Resurs Bank control panel in admin.
 
-Are you using this plugin as an upgrade from an older version? Feel free to do that; upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own. This may be important especially if you have a custom setup.
+Are you using this plugin as an upgrade from an older version? No problems! Upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own. This may be important especially if you have a custom setup.
 
 When you install this plugin and eventually did use an older version, you will also get the opportunity to import the old credentials. For full documentation, take a look at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
 
-However, this plugin release should not be considered an official upgrade from "an older version" as there currently are no old versions available yet - except from the *official release* from Resurs Bank. For the moment, this is not the same thing.
+This plugin release should not be considered an official upgrade from "an older version" as there currently are no old versions available yet - except from the *official release* from Resurs Bank. For the moment, this is not the same thing.
 
 
 == Frequently Asked Questions ==
@@ -89,12 +95,12 @@ Breaking changes are collected [here](https://docs.tornevall.net/x/UwJzBQ).
 Examples of what could "break" is normally in the form of "no longer supported":
 
 * The prior payment method editor where title and description for each payment method could be edited. This is not really plugin side decided, but based on rules set by Resurs Bank. First of all, titles and descriptions are handled by Resurs Bank to simplify changes that is related to whatever could happen to a payment method. The same goes for the sorting of payment methods in the checkout. Some payment methods is regulated by laws and should be displayed in a certain order. This is no longer up to the plugin to decide and sorting is based on in which order Resurs Bank is returning them in the API. If you want anything changed, related to the payment method, you have to contact Resurs Bank support.
-* Many ideas are lifted straight out from the prior version - but not all of them. Remember, this is a third party reboot of an old release. There are settings in this version that is no longer working, especially features that is bound to filters and actions. For actions and filters, you can take a look at the [documentation](https://docs.tornevall.net/x/HoC4Aw). Further information about settings will come.
+* Many ideas are lifted straight out from the prior version - but not all of them. Remember, this is a third party reboot of an old release. There are settings in this version that is no longer working as before (or at least as expected), especially features that is bound to filters and actions. For actions and filters, you can take a look at the [documentation](https://docs.tornevall.net/x/HoC4Aw). Further information about settings will come.
 * Speaking of settings. Settings is almost similar to the old plugin, but with new identifiers. It is partially intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has also been removed as they did no longer fill any purpose.
 
 = Is this release a refactored version of Resurs Bank's? =
 
-No. This plugin is a complete reboot. The future intentions might be to replace the other version in the future and **this** release is currently considered a side project, *even if it has been developed by an employee* at Resurs Bank.
+No. This plugin is a complete reboot. The future intentions might be to replace the other version and **this** release is currently considered a side project.
 
 = Plugin is causing 40X errors on my site =
 
@@ -104,12 +110,12 @@ There are several reasons for the 40X errors, but if they are thrown from an ECo
   **Cause**: Bad credentials
   **Solution**: Contact Resurs Bank support for support questions regarding API credentials.
 * 403 = Forbidden.
-  **Cause**: This is a bit be more common during testing.
-  **Solution:** Resolution: Contact Resurs Bank for support.
+  **Cause**: During testing, this is a bit more common if you are using a server host that is not located in "safe countries".
+  **Solution:** Contact Resurs Bank for support.
 
 = What is a EComPHP API Message? =
 
-From time to time, you will notices that errors and exceptions shows up on your screen. Normally, when doing API calls, this is done by [Resurs Bank Ecommerce API for PHP](https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349). Such messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained. Resurs Bank also have furter information about some error messages. [You can see some of them here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases).
+From time to time, you will notices that errors and exceptions shows up on your screen. Normally, when doing API calls, this is done by [Resurs Bank Ecommerce API for PHP](https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349). Such messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained. For more information about this kind of messages can be answered by Resurs Bank support. [You can see some of them here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases).
 
 = I see an order but find no information connected to Resurs Bank =
 
@@ -127,8 +133,7 @@ Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Check
 
 == Changelog ==
 
-Active/open issues can be found [here](https://tracker.tornevall.net/projects/RWC/issues/) [and here](https://github.com/Tornevall/wpwc-resurs/issues). You can also [inspect the project status here](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200)!
-Most recent [CHANGELOG can be found here](https://github.com/Tornevall/wpwc-resurs/blob/master/CHANGELOG.md).
+Active/open issues can be found [here](https://tracker.tornevall.net/projects/RWC/issues/) [and here](https://github.com/Tornevall/wpwc-resurs/issues). You can also [inspect the project status here](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200)! Most recent [CHANGELOG can be found here](https://github.com/Tornevall/wpwc-resurs/blob/master/CHANGELOG.md).
 
 *0.0.1.0 is the first release candidate of what's planned to become 1.0.0.*
 Github references should be included for all releases.
