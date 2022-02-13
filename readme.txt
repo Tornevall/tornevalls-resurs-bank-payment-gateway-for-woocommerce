@@ -13,17 +13,23 @@ Tornevalls Resurs Bank Payment Gateway for WooCommerce.
 
 == Description ==
 
+Payment gateway for Resurs Bank.
+
+Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details. Documentation for this specific release is currently located at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
+
+*Please read the warning notes about testing and installing this plugin directly in a production environment below.*
+
+= Supported shop flows =
+
+* [Simplified Shop Flow](https://test.resurs.com/docs/display/ecom/Simplified+Flow+API). Integrated checkout that works with WooCommerce built in features.
+* [Resurs Checkout Web](https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web). Iframe integration. Currently supporting **RCOv1 and RCOv2**.
+* [Hosted Payment Flow](https://test.resurs.com/docs/display/ecom/Hosted+Payment+Flow). A paypal like checkout where most of the payment events takes place at Resurs Bank.
+
+There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you plan to use **this** plugin, as it was a direct upgrade of the Resurs Bank supported release.
+
 [![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
-Payment gateway for Resurs Bank AB.
-
-**SoapClient is required** for all actions related to "after shop", debiting, refunding, annulments, and so on. Also, your site has to be fully reachable with SSL/HTTPS. **For full list of requirements, look below.**
-
-There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you plan to use **this** plugin, as it was an upgrade from the Resurs Bank supported release, since many of the settings and filters have been replaced.
-
-
-
-See below for information about requirements.
+Requirements and system prerequisites are listed below.
 
 = WARNING =
 
@@ -46,13 +52,9 @@ Primary new problems should be discovered in TEST rather than production since t
 * PHP streams? Yes, you still need them since SoapClient is actually using it.
 * WordPress: Preferably at least v5.5. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
-Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details. Documentation for this specific release is currently located at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
+= SoapClient =
 
-= Supported shop flows =
-
-* [Simplified Shop Flow](https://test.resurs.com/docs/display/ecom/Simplified+Flow+API). Integrated checkout that works with WooCommerce built in features.
-* [Resurs Checkout Web](https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web). Iframe integration. Currently supporting **RCOv1 and RCOv2**.
-* [Hosted Payment Flow](https://test.resurs.com/docs/display/ecom/Hosted+Payment+Flow). A paypal like checkout where most of the payment events takes place at Resurs Bank.
+**SoapClient is required** for all actions related to "after shop", debiting, refunding, annulments, and so on. Also, your site has to be fully reachable with SSL/HTTPS. **For full list of requirements, look below.**
 
 
 
