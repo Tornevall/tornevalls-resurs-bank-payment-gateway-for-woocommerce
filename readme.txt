@@ -38,21 +38,13 @@ Primary new problems should be discovered in TEST rather than production since t
 
 = System Requirements and packages =
 
-* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug
-  2021, both WooCommerce and WordPress is about to jump into 7.4 and higher.
-  Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions
-  of PHP. This plugin is written for 7.0 and higher - and the policy is following WooCommerce *lowest* requirement.
+* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug 2021, both WooCommerce and WordPress is about to jump into 7.4 and higher. Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions of PHP. This plugin is written for 7.0 and higher - and the policy is following WooCommerce *lowest* requirement.
 * **Required**: WooCommerce: v3.5.0 or higher!
 * **Required**: [SoapClient](https://php.net/manual/en/class.soapclient.php) with xml drivers and extensions.
-* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is
-  required from Resurs Bank.
-* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP streams on this one
-  as you may loose important features if you run explicitly with streams.
+* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
+* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP streams on this one as you may loose important features if you run explicitly with streams.
 * PHP streams? Yes, you still need them since SoapClient is actually using it.
-* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly
-  recommended to go for the latest version as soon as possible if you're not already there.
-  See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more
-  information.
+* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
 Check out [README.md](https://github.com/Tornevall/wpwc-resurs/blob/master/README.md) for more details. Documentation
 for this specific release is currently located at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
@@ -73,30 +65,22 @@ Preferred Method is to install and activate the plugin through the WordPress plu
 2. Activate the plugin through the "Plugins" menu in WordPress
 3. Configure the plugin via admin control panel
 
-Are you using this plugin as an upgrade from an older version? Feel free to do that; upgrading is meant to be seamless
-and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look
-through, if they are still matching your own. This may be important especially if you have a custom setup.
+Are you using this plugin as an upgrade from an older version? Feel free to do that; upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own. This may be important especially if you have a custom setup.
 
-When you install this plugin and eventually did use an older version, you will also get the opportunity to import
-the old credentials. For full documentation, take a look at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
+When you install this plugin and eventually did use an older version, you will also get the opportunity to import the old credentials. For full documentation, take a look at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
 
-However, this plugin release should not be considered an official upgrade from "an older version" as there currently
-are no old versions available yet - except from them *official release* from Resurs Bank. For the moment, this is
-not the same thing.
+However, this plugin release should not be considered an official upgrade from "an older version" as there currently are no old versions available yet - except from them *official release* from Resurs Bank. For the moment, this is not the same thing.
 
 
 == Frequently Asked Questions ==
 
 = Where can I get more information about this plugin =
 
-You may visit [docs.tornevall.net](https://docs.tornevall.net/x/CoC4Aw) for more information regarding the
-plugin. For questions about API and Resurs Bank please visit [test.resurs.com/docs](https://test.resurs.com/docs/).
+You may visit [docs.tornevall.net](https://docs.tornevall.net/x/CoC4Aw) for more information regarding the plugin. For questions about API and Resurs Bank please visit [test.resurs.com/docs](https://test.resurs.com/docs/).
 
 = Can I upgrade from version 2.2.x =
 
-**"Version 2.2.x"** is currently the **official Resurs Bank release** and currently not the same as this release.
-However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the
-prior release can be handled by this one.
+**"Version 2.2.x"** is currently the **official Resurs Bank release** and currently not the same as this release. However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the prior release can be handled by this one.
 
 = What is considered "breaking changes"? =
 
@@ -110,13 +94,11 @@ Examples of what could "break" in the form of "no longer supported":
 
 = Is this release a refactored version of Resurs Bank's? =
 
-No. It's a rewrite. From scratch. The intentions may be to replace the other version in the future and this is
-currently considered a side project, *even if it has been developed by an employee* at Resurs Bank.
+No. It's a rewrite. From scratch. The intentions may be to replace the other version in the future and this is currently considered a side project, *even if it has been developed by an employee* at Resurs Bank.
 
 = Plugin is causing 40X errors on my site =
 
-There are several reasons for the 40X errors, but if they are thrown from an EComPHP API message there are few things
-to take in consideration:
+There are several reasons for the 40X errors, but if they are thrown from an EComPHP API message there are few things to take in consideration:
 
 * 401 = Unauthorized.
   **Cause**: Bad credentials
@@ -128,14 +110,11 @@ to take in consideration:
 
 ### There's an order created but there is no order information connected to Resurs Bank ###
 
-This is a common question about customer actions and how the order has been created/signed. Most of the details is
-usually placed in the order notes for the order, but if you need more information you could also consider contacting
-Resurs Bank support.
+This is a common question about customer actions and how the order has been created/signed. Most of the details is usually placed in the order notes for the order, but if you need more information you could also consider contacting Resurs Bank support.
 
 = How does the respective payment flows work with Resurs Bank in this plugin? =
 
-Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works, not only here, but mostly
-anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
+Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works, not only here, but mostly anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
 
 == Screenshots ==
 
