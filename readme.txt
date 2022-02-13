@@ -31,7 +31,7 @@ There is a publicly available release out supported by Resurs Bank (v2.2). There
 
 Requirements and system prerequisites are listed below.
 
-= WARNING =
+== WARNING ==
 
 **First time running should be a dedicated test environment!**
 
