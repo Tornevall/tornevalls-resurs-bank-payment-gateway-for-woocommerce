@@ -2413,7 +2413,7 @@ class Data
                         foreach ($rcoCustomer[$key] as $item => $value) {
                             $obfuscateThis['rco_customer'][$key][$item] = htmlentities($stringHandler->getObfuscatedStringFull(
                                 $value,
-                                3,
+                                2,
                                 0
                             ));
                         }
@@ -2421,7 +2421,7 @@ class Data
                         $obfuscateThis['rco_customer'][$key] = htmlentities(
                             $stringHandler->getObfuscatedStringFull(
                                 $rcoCustomer[$key],
-                                3,
+                                2,
                                 0
                             )
                         );
