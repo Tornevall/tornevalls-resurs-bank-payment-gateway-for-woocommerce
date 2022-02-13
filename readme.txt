@@ -130,6 +130,7 @@ Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Check
 1. Primary Basic Settings Configuration page.
 2. Part of the Payment Methods View.
 3. Part of the Order View.
+4. Resurs Checkout Variant 1.
 
 == Changelog ==
 
