@@ -56,6 +56,8 @@ class PluginApi
      */
     public static function execApi()
     {
+        // Logging $_REQUEST may break the WooCommerce status log view if not decoded first.
+        // For some reason, the logs can't handle utf8-strings.
         Data::canLog(
             Data::CAN_LOG_BACKEND,
             sprintf(
@@ -254,16 +256,15 @@ class PluginApi
             );
         }
 
-        echo Data::getEscapedHtml(
-            Data::getGenericClass()
-                ->getTemplate(
-                    'checkout_costofpurchase_default.phtml',
-                    [
-                        'priceInfoHtml' => $priceInfoHtml,
-                    ]
-                )
-        );
-
+        // Echoing this without escaping data through an external template as wp_head() is not properly
+        // supported by wp_kses (too many html tags to approve).
+        echo '
+            <html>
+            <head>'.wp_head().'</head>
+            <body>' . Data::getEscapedHtml($priceInfoHtml) . '
+            </body>
+        </html>
+        ';
         die;
     }
 

@@ -2391,6 +2391,9 @@ class Data
      * Selective string obfuscator for internal debugging.
      * Only call for this method when debugging since data will be rewritten.
      *
+     * Since this feature is built for the logging function, obfuscation also means html entites applied to each
+     * string, since the logging feature seems unable to handle utf8-transforming properly..
+     *
      * @param $obfuscateThis
      * @return array
      * @since 0.0.1.1
@@ -2403,14 +2406,24 @@ class Data
         $stringHandler = new Strings();
         if (isset($obfuscateThis['rco_customer'])) {
             $rcoCustomer = $obfuscateThis['rco_customer'];
-            $lookFor = ['billingAddress', 'deliveryAddress'];
+            $lookFor = ['billingAddress', 'deliveryAddress', 'phone', 'email'];
             foreach ($lookFor as $key) {
                 if (isset($rcoCustomer[$key])) {
-                    foreach ($rcoCustomer[$key] as $item => $value) {
-                        $obfuscateThis['rco_customer'][$key][$item] = $stringHandler->getObfuscatedStringFull(
-                            $value,
-                            2,
-                            0
+                    if (is_array($rcoCustomer[$key])) {
+                        foreach ($rcoCustomer[$key] as $item => $value) {
+                            $obfuscateThis['rco_customer'][$key][$item] = htmlentities($stringHandler->getObfuscatedStringFull(
+                                $value,
+                                2,
+                                0
+                            ));
+                        }
+                    } elseif (is_string($rcoCustomer[$key])) {
+                        $obfuscateThis['rco_customer'][$key] = htmlentities(
+                            $stringHandler->getObfuscatedStringFull(
+                                $rcoCustomer[$key],
+                                2,
+                                0
+                            )
                         );
                     }
                 }
@@ -2421,7 +2434,11 @@ class Data
             if (is_string($value) &&
                 ((bool)preg_match('/^billing_/i', $item) || (bool)preg_match('/^shipping_/i', $item))
             ) {
-                $obfuscateThis[$item] = $stringHandler->getObfuscatedStringFull($value, 2, 0);
+                $obfuscateThis[$item] = htmlentities($stringHandler->getObfuscatedStringFull(
+                    $value,
+                    2,
+                    0
+                ));
             }
         }
 
