@@ -133,6 +133,7 @@ The payment flow itself for each API [is described here](https://docs.tornevall.
 2. Part of the Payment Methods View.
 3. Part of the Order View.
 4. Resurs Checkout Variant 1.
+5. Fraud Configuration Section.
 
 == Changelog ==
 
