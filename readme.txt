@@ -4,7 +4,7 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 5.5
 Tested up to: 5.9
 Requires PHP: 7.0
-Stable tag: 0.0.1.3
+Stable tag: 0.0.1.4
 Plugin URI: https://github.com/Tornevall/wpwc-resurs
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -124,6 +124,8 @@ This is a common question about customer actions and how the order has been crea
 = How does the respective payment flows work with Resurs Bank in this plugin? =
 
 Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works, not only here, but mostly anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
+
+The payment flow itself for each API [is described here](https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described).
 
 == Screenshots ==
 
