@@ -58,14 +58,13 @@ class PluginApi
     {
         // Logging $_REQUEST may break the WooCommerce status log view if not decoded first.
         // For some reason, the logs can't handle utf8-strings.
-        $obfuscatedArray = Data::getObfuscatedData($_REQUEST);
         Data::canLog(
             Data::CAN_LOG_BACKEND,
             sprintf(
                 'Backend: %s (%s), params %s',
                 __FUNCTION__,
                 self::getAction(),
-                print_r($obfuscatedArray, true)
+                print_r(Data::getObfuscatedData($_REQUEST), true)
             )
         );
 
