@@ -134,6 +134,8 @@ The payment flow itself for each API [is described here](https://docs.tornevall.
 3. Part of the Order View.
 4. Resurs Checkout Variant 1.
 5. Fraud Configuration Section.
+6. Enabling Developer Mode.
+5. Customer Tweaking Section, with mock features.
 
 == Changelog ==
 

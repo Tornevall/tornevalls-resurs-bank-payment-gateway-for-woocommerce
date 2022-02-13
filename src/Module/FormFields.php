@@ -1191,8 +1191,9 @@ class FormFields extends WC_Settings_API
 
         $mockingTweaks = self::getMockingTweaks();
 
+        // Dev section should be the last one, in the wp-admin.
         if ((isset($section) && $section === 'all') || self::getShowDeveloper()) {
-            $return = array_merge($return, $developerArray, $mockingTweaks);
+            $return = array_merge($return, $mockingTweaks, $developerArray);
         }
 
         return $return;
