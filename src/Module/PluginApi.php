@@ -702,20 +702,18 @@ class PluginApi
     public static function getNetworkLookup()
     {
         if (is_admin()) {
-            // Using curl_multi via netwrapper if exists, otherwise there's a failover to at multi-request stream.
+            // Using curl_multi via netWrapper if exists, otherwise there's a backup to at multi-request stream.
             $httpWrapper = new NetWrapper();
-            $addressRequestUrls = [
+            $networkRequest = $httpWrapper->request($addressRequestUrls = [
                 'https://ipv4.netcurl.org',
                 'https://ipv6.netcurl.org',
-            ];
-
-            $networkRequest = $httpWrapper->request(
-                $addressRequestUrls
-            );
+            ]);
             $noSoapRequestResponse = '';
             try {
                 $noSoapRequest = new CurlWrapper();
-                $soapRequestBody = $noSoapRequest->request('https://test.resurs.com/ecommerce-test/ws/V4/ConfigurationService?wsdl')->getBody();
+                $soapRequestBody = $noSoapRequest->request(
+                    'https://test.resurs.com/ecommerce-test/ws/V4/ConfigurationService?wsdl'
+                )->getBody();
                 if (preg_match('/<?xml/i', $soapRequestBody)) {
                     $noSoapRequestResponse = __(
                         'SoapRequest to Resurs Bank contained SoapResponse',
