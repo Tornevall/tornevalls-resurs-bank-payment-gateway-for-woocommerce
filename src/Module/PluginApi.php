@@ -20,6 +20,7 @@ use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\Domain;
 use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use WC_Checkout;
 use WC_Order;
 use function count;
@@ -711,8 +712,27 @@ class PluginApi
             $networkRequest = $httpWrapper->request(
                 $addressRequestUrls
             );
+            $noSoapRequestResponse = '';
+            try {
+                $noSoapRequest = new CurlWrapper();
+                $soapRequestBody = $noSoapRequest->request('https://test.resurs.com/ecommerce-test/ws/V4/ConfigurationService?wsdl')->getBody();
+                if (preg_match('/<?xml/i', $soapRequestBody)) {
+                    $noSoapRequestResponse = __(
+                        'SoapRequest to Resurs Bank contained SoapResponse',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    );
+                }
+            } catch (Exception $e) {
+                $noSoapRequestResponse = sprintf(
+                    'SoapRequest to Resurs Bank contained error: %s (%s)',
+                    $e->getMessage(),
+                    $e->getCode()
+                );
+            }
 
             $addressRequestList = [];
+            $addressRequestList['Resurs XML Test'] = $noSoapRequestResponse;
+
             foreach ($addressRequestUrls as $addressRequestUrl) {
                 $addressRequestResponse = $networkRequest->getParsed($addressRequestUrl);
                 $protoNum = self::getProtocolByHostName($addressRequestUrl);
