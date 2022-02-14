@@ -45,12 +45,14 @@ function rbwcAdminNetworkLookup() {
             'get',
             'resursbank_get_network_lookup',
             {},
-            function(data) {
+            function (data) {
                 if (typeof data.addressRequest !== 'undefined') {
                     var displayAddressTypes = '';
                     for (var addressType in data.addressRequest) {
                         if (parseInt(addressType) > 0) {
                             displayAddressTypes += '<b>IPv' + addressType + '</b>: ' + data.addressRequest[addressType] + '<br>';
+                        } else {
+                            displayAddressTypes += '<b>' + addressType + '</b>: ' + data.addressRequest[addressType] + '<br>';
                         }
                     }
                     $rQuery('#rbwcNetworkLookup').html(displayAddressTypes);
