@@ -1383,7 +1383,7 @@ class WooCommerce
     public static function getSessionValue($key)
     {
         $return = null;
-        $session = Data::getSanitizedArray($_SESSION);
+        $session = Data::getSanitizedArray(isset($_SESSION) ? $_SESSION : []);
 
         if (self::getSession()) {
             $return = WC()->session->get($key);
