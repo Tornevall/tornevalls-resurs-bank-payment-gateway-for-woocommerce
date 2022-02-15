@@ -129,6 +129,7 @@ class AdminPage extends WC_Settings_Page
         global $current_section;
         $settings = $this->get_settings($current_section);
 
+        Data::getSafeStyle();
         echo '<table class="form-table">';
         WC_Admin_Settings::output_fields($settings);
         if ($current_section === 'information') {
