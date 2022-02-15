@@ -2298,28 +2298,37 @@ class Data
      * Recursive string sanitizer.
      *
      * @param $array
+     * @return array
+     * @throws Exception
      * @since 0.0.1.1
      */
     public static function getSanitizedArray($array)
     {
         $arrays = new Arrays();
         $returnArray = [];
-        if ($arrays->isAssoc($array)) {
-            foreach ($array as $arrayKey => $arrayValue) {
-                if (is_array($arrayValue)) {
-                    $returnArray[self::getSanitizedKeyElement($arrayKey)] = self::getSanitizedArray($arrayValue);
-                } elseif (!is_object($arrayValue)) {
-                    $returnArray[self::getSanitizedKeyElement($arrayKey)] = esc_html($arrayValue);
+        if (is_array($array)) {
+            if ($arrays->isAssoc($array)) {
+                foreach ($array as $arrayKey => $arrayValue) {
+                    if (is_array($arrayValue)) {
+                        $returnArray[self::getSanitizedKeyElement($arrayKey)] = self::getSanitizedArray($arrayValue);
+                    } elseif (!is_object($arrayValue)) {
+                        $returnArray[self::getSanitizedKeyElement($arrayKey)] = esc_html($arrayValue);
+                    }
+                }
+            } elseif ($array) {
+                foreach ($array as $item) {
+                    if (is_array($item)) {
+                        $returnArray[] = self::getSanitizedArray($item);
+                    } elseif (is_string($item)) {
+                        $returnArray[] = esc_html($item);
+                    }
                 }
             }
-        } elseif ($array) {
-            foreach ($array as $item) {
-                if (is_array($item)) {
-                    $returnArray[] = self::getSanitizedArray($item);
-                } elseif (is_string($item)) {
-                    $returnArray[] = esc_html($item);
-                }
-            }
+        } else {
+            Data::setLogError(
+                'Someone sent other data than arrays into the sanitizer!'
+            );
+            throw new Exception('Can not sanitize other data than arrays!', 500);
         }
 
         return $returnArray;
