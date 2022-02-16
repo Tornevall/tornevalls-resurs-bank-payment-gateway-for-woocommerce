@@ -3,6 +3,18 @@
 _0.0.1.0 is the first release candidate of what's planned to become 1.0.0._
 Github references should be included for all releases.
 
+# 0.0.1.4 + 1.0.0
+
+* [RWC-315](https://tracker.tornevall.net/browse/RWC-315) - (Bug) Logging obfuscated data causes log view unviewable
+* [RWC-316](https://tracker.tornevall.net/browse/RWC-316) - (Bug) get_cost_of_purchase default html view template includes wp_head which causes problems on sanitation
+* [RWC-314](https://tracker.tornevall.net/browse/RWC-314) - (Task) Clean up old settings button
+* [RWC-317](https://tracker.tornevall.net/browse/RWC-317) - (Task) Helpers should apply random phone and email in checkout fields when button is pressed
+* [RWC-319](https://tracker.tornevall.net/browse/RWC-319) - (Task) ip checking feature should also request a soapdocument
+
+# 0.0.1.3 + 1.0.0
+
+* Spelling corrections, translations, etc.
+
 # 0.0.1.2 + 1.0.0
 
 * [RWC-298](https://tracker.tornevall.net/browse/RWC-298) - Extended test mode.

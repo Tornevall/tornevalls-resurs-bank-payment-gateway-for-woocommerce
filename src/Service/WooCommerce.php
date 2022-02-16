@@ -774,7 +774,7 @@ class WooCommerce
                         true
                     );
                 } else {
-                    throw new Exception(
+                    throw new RuntimeException(
                         'Failed to instantiate $order during callback handling. Callback not updated.',
                         500
                     );

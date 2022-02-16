@@ -98,7 +98,7 @@ questions about API and Resurs Bank please visit [test.resurs.com/docs](https://
 practically a third party reboot. However, the intentions with this plugin is to run as seamless as possible. For
 example, payments placed with the prior release can be handled by this one.
 
-## What is considered "breaking changes"? =
+## What is considered "breaking changes"?
 
 Breaking changes are collected [here](https://docs.tornevall.net/x/UwJzBQ).
 
@@ -119,7 +119,7 @@ Examples of what could "break" is normally in the form of "no longer supported":
   intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has
   also been removed as they did no longer fill any purpose.
 
-## Is this release a refactored version of Resurs Bank's? =
+## Is this release a refactored version of Resurs Bank's?
 
 No. This plugin is a complete reboot. The future intentions might be to replace the other version and **this** release
 is currently considered a side project.
