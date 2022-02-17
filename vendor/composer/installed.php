@@ -1,11 +1,11 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => '0.0.1.0',
-        'version' => '0.0.1.0',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => NULL,
+        'reference' => 'd01d8f4ea4caeaccc841e56f1ab4a96370da8bd5',
         'name' => 'tornevall/resurs-bank-payment-gateway-for-woocommerce',
         'dev' => true,
     ),
@@ -29,12 +29,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/resurs-bank-payment-gateway-for-woocommerce' => array(
-            'pretty_version' => '0.0.1.0',
-            'version' => '0.0.1.0',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => NULL,
+            'reference' => 'd01d8f4ea4caeaccc841e56f1ab4a96370da8bd5',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-crypto' => array(
@@ -56,12 +56,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-flags' => array(
-            'pretty_version' => '6.1.3',
-            'version' => '6.1.3.0',
+            'pretty_version' => '6.1.4',
+            'version' => '6.1.4.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-flags',
             'aliases' => array(),
-            'reference' => 'ac1d240729891ef360fa4516013bdd88e3ed6420',
+            'reference' => '3ec838ceb7e30a859876a9ddbffcd6a119e9d77e',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-io' => array(
@@ -92,12 +92,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-utils' => array(
-            'pretty_version' => '6.1.16',
-            'version' => '6.1.16.0',
+            'pretty_version' => '6.1.17',
+            'version' => '6.1.17.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-utils',
             'aliases' => array(),
-            'reference' => '5da3e9e35e1130f89b05ada18f917d7bdb5c4197',
+            'reference' => 'f7e8e5066f87dbd37ed6f79b007865733883961f',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-version' => array(
