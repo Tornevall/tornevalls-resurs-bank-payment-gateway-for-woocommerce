@@ -1303,7 +1303,7 @@ class Data
                 __(
                     'Github',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ) => 'https://github.com/Tornevall/wpwc-resurs',
+                ) => 'https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce',
             ];
 
             foreach ($urls as $urlInfo => $url) {

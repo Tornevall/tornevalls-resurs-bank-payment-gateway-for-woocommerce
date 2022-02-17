@@ -1270,7 +1270,7 @@ class ResursDefault extends WC_Payment_Gateway
      *
      * @param int $minLimit
      * @return float
-     * @link https://github.com/Tornevall/wpwc-resurs/issues/42
+     * @link https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/42
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
      */
@@ -1294,7 +1294,7 @@ class ResursDefault extends WC_Payment_Gateway
      *
      * @param int $maxLimit
      * @return float
-     * @link https://github.com/Tornevall/wpwc-resurs/issues/42
+     * @link https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/42
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
      */

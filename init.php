@@ -7,7 +7,7 @@
  * Requires PHP: 7.0
  * Version: 0.0.1.4
  * Author: Tomas Tornevall
- * Plugin URI: https://github.com/Tornevall/wpwc-resurs
+ * Plugin URI: https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce
  * Author URI: https://developer.tornevall.net/
  * Text Domain: tornevalls-resurs-bank-payment-gateway-for-woocommerce
  * Domain Path: /language

@@ -1739,7 +1739,7 @@ msgid "Tornevalls Resurs Bank payment gateway for WooCommerce"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://github.com/Tornevall/wpwc-resurs"
+msgid "https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce"
 msgstr ""
 
 #. Description of the plugin/theme

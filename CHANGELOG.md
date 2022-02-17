@@ -45,12 +45,12 @@ Github references should be included for all releases.
   finished
 * [RWC-171](https://tracker.tornevall.net/browse/RWC-171) - adminpage_details.phtml bugs out due to RCO.
 * [RWC-198](https://tracker.tornevall.net/browse/RWC-198) - Simplified flow does not fill in country on getAddress
-* [RWC-200](https://tracker.tornevall.net/browse/RWC-200) - [#7](https://github.com/Tornevall/wpwc-resurs/issues/7):
+* [RWC-200](https://tracker.tornevall.net/browse/RWC-200) - [#7](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/7):
   simplified customerdata is not properly created
 * [RWC-207](https://tracker.tornevall.net/browse/RWC-207) - The credential validation Button when updating credentials
   is not present.
 * [RWC-223](https://tracker.tornevall.net/browse/RWC-223) - Weird behaviour in order process after delivery tests
-* [RWC-229](https://tracker.tornevall.net/browse/RWC-229) - [#25](https://github.com/Tornevall/wpwc-resurs/issues/25):
+* [RWC-229](https://tracker.tornevall.net/browse/RWC-229) - [#25](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/25):
   Password validation button disappeared
 * [RWC-231](https://tracker.tornevall.net/browse/RWC-231) - Check if this is ours (Trying to get property 'total' of
   non-object in
@@ -86,7 +86,7 @@ Github references should be included for all releases.
 * [RWC-59](https://tracker.tornevall.net/browse/RWC-59) - Order view credentials
 * [RWC-60](https://tracker.tornevall.net/browse/RWC-60) - Checkout: Simplified Shopflow
 * [RWC-61](https://tracker.tornevall.net/browse/RWC-61) - Checkout: Hosted Flow
-* [RWC-63](https://tracker.tornevall.net/browse/RWC-63) - [#1](https://github.com/Tornevall/wpwc-resurs/issues/1):
+* [RWC-63](https://tracker.tornevall.net/browse/RWC-63) - [#1](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/1):
   Implement RCO legacy (postMsg)
 * [RWC-64](https://tracker.tornevall.net/browse/RWC-64) - Checkout: Resurs Checkout (facelift) -- HappyFlow
 * [RWC-65](https://tracker.tornevall.net/browse/RWC-65) - prepare fraud control flags with actions on bad selections
@@ -111,7 +111,7 @@ Github references should be included for all releases.
 * [RWC-102](https://tracker.tornevall.net/browse/RWC-102) - Show all hidden metadata in the box of Resurs information
 * [RWC-103](https://tracker.tornevall.net/browse/RWC-103) - Ajax functions on API operation failures
 * [RWC-105](https://tracker.tornevall.net/browse/RWC-105) - Support "instant finalizations"
-* [RWC-107](https://tracker.tornevall.net/browse/RWC-107) - [#26](https://github.com/Tornevall/wpwc-resurs/issues/26):
+* [RWC-107](https://tracker.tornevall.net/browse/RWC-107) - [#26](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/26):
   Unregister callbacks one by one
 * [RWC-109](https://tracker.tornevall.net/browse/RWC-109) - Implement aftershop
 * [RWC-110](https://tracker.tornevall.net/browse/RWC-110) - Logging of errors should not crash when $return is something
@@ -143,35 +143,35 @@ Github references should be included for all releases.
 * [RWC-159](https://tracker.tornevall.net/browse/RWC-159) - Use filters to change min-max amount based on customizations
 * [RWC-161](https://tracker.tornevall.net/browse/RWC-161) - Deprecated functions from ECom 1.3.59 and inspections
 * [RWC-163](https://tracker.tornevall.net/browse/RWC-163) - Make sure the cart is always synchronizing in rco
-* [RWC-166](https://tracker.tornevall.net/browse/RWC-166) - [#15](https://github.com/Tornevall/wpwc-resurs/issues/15):
+* [RWC-166](https://tracker.tornevall.net/browse/RWC-166) - [#15](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/15):
   Checkout: Resurs Checkout (facelift) -- Payment failures
 * [RWC-173](https://tracker.tornevall.net/browse/RWC-173) - Add proper extended logging to RCO sessions
 * [RWC-174](https://tracker.tornevall.net/browse/RWC-174) - Is this really a proper value?
 * [RWC-176](https://tracker.tornevall.net/browse/RWC-176) - Hide getAddress button on unsupported countries.
 * [RWC-177](https://tracker.tornevall.net/browse/RWC-177) - When getAddress fields are not present
 * [RWC-179](https://tracker.tornevall.net/browse/RWC-179) - Denied payment, change govId, try again (v2)
-* [RWC-180](https://tracker.tornevall.net/browse/RWC-180) - [#2](https://github.com/Tornevall/wpwc-resurs/issues/2):
+* [RWC-180](https://tracker.tornevall.net/browse/RWC-180) - [#2](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/2):
   Synchronize billing address with getPayment
 * [RWC-182](https://tracker.tornevall.net/browse/RWC-182) - Activate script enqueue for RCO only if there is a cart
-* [RWC-183](https://tracker.tornevall.net/browse/RWC-183) - [#15](https://github.com/Tornevall/wpwc-resurs/issues/15):
+* [RWC-183](https://tracker.tornevall.net/browse/RWC-183) - [#15](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/15):
   Checkout: Resurs Checkout PaymentFail (Legacy)
-* [RWC-184](https://tracker.tornevall.net/browse/RWC-184) - [#3](https://github.com/Tornevall/wpwc-resurs/issues/3):
+* [RWC-184](https://tracker.tornevall.net/browse/RWC-184) - [#3](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/3):
   Resurs Checkout: Store and use payment method on purchase
 * [RWC-185](https://tracker.tornevall.net/browse/RWC-185) - Resurs Checkout Handle failures (signing=>mockfail) --
   FailUrl Redirect
-* [RWC-186](https://tracker.tornevall.net/browse/RWC-186) - [#4](https://github.com/Tornevall/wpwc-resurs/issues/4):
+* [RWC-186](https://tracker.tornevall.net/browse/RWC-186) - [#4](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/4):
   RCOv2 Resurs Checkout: Store and use payment method on purchase
 * [RWC-187](https://tracker.tornevall.net/browse/RWC-187) - Make sure we validate AES methods BEFORE using them in
   wc-api
-* [RWC-189](https://tracker.tornevall.net/browse/RWC-189) - [#11](https://github.com/Tornevall/wpwc-resurs/issues/11):
+* [RWC-189](https://tracker.tornevall.net/browse/RWC-189) - [#11](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/11):
   setOrderMeta after RCO session should include paymentMethodInformation
 * [RWC-190](https://tracker.tornevall.net/browse/RWC-190) - Docs only
-* [RWC-191](https://tracker.tornevall.net/browse/RWC-191) - [#5](https://github.com/Tornevall/wpwc-resurs/issues/5):
+* [RWC-191](https://tracker.tornevall.net/browse/RWC-191) - [#5](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/5):
   Update initial translations explicitly created during RCO
-* [RWC-195](https://tracker.tornevall.net/browse/RWC-195) - [#17](https://github.com/Tornevall/wpwc-resurs/issues/17):
+* [RWC-195](https://tracker.tornevall.net/browse/RWC-195) - [#17](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/17):
   setStoreId filter should not be an integer (prepare for future api's)
 * [RWC-196](https://tracker.tornevall.net/browse/RWC-196) - do_action at resurs statuses and callbacks
-* [RWC-199](https://tracker.tornevall.net/browse/RWC-199) - [#6](https://github.com/Tornevall/wpwc-resurs/issues/6):
+* [RWC-199](https://tracker.tornevall.net/browse/RWC-199) - [#6](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/6):
   setOrderMeta should have an insert function
 * [RWC-201](https://tracker.tornevall.net/browse/RWC-201) - Facelift: Make sure that payment method is updated, if
   clicked twice (during denied at first)
@@ -186,19 +186,19 @@ Github references should be included for all releases.
 * [RWC-209](https://tracker.tornevall.net/browse/RWC-209) - Monitor saved data to update methods and callbacks on
   credendial updates
 * [RWC-210](https://tracker.tornevall.net/browse/RWC-210) - price variations?
-* [RWC-214](https://tracker.tornevall.net/browse/RWC-214) - [#13](https://github.com/Tornevall/wpwc-resurs/issues/13),
-  [#8](https://github.com/Tornevall/wpwc-resurs/issues/8): Refuse to set a status that is already set.
-* [RWC-215](https://tracker.tornevall.net/browse/RWC-215) - [#9](https://github.com/Tornevall/wpwc-resurs/issues/9):
+* [RWC-214](https://tracker.tornevall.net/browse/RWC-214) - [#13](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/13),
+  [#8](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/8): Refuse to set a status that is already set.
+* [RWC-215](https://tracker.tornevall.net/browse/RWC-215) - [#9](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/9):
   Necessary callbacks, remove the rest (if not already removed).
 * [RWC-216](https://tracker.tornevall.net/browse/RWC-216) - updatePaymentReference and exceptions +logging when it
   happens
 * [RWC-217](https://tracker.tornevall.net/browse/RWC-217) - forceSigning is deprecated.
-* [RWC-219](https://tracker.tornevall.net/browse/RWC-219) - [#10](https://github.com/Tornevall/wpwc-resurs/issues/10):
+* [RWC-219](https://tracker.tornevall.net/browse/RWC-219) - [#10](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/10):
   According to how RCO works in the docs we probably should change canProcessOrder to avoid conflicts in the payment
   flow
-* [RWC-220](https://tracker.tornevall.net/browse/RWC-220) - [#13](https://github.com/Tornevall/wpwc-resurs/issues/13):
+* [RWC-220](https://tracker.tornevall.net/browse/RWC-220) - [#13](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/13):
   Refuse to set a status that is already set in synchronous mode
-* [RWC-221](https://tracker.tornevall.net/browse/RWC-221) - [#14](https://github.com/Tornevall/wpwc-resurs/issues/14):
+* [RWC-221](https://tracker.tornevall.net/browse/RWC-221) - [#14](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/14):
   During getMetaData-requests, make it possible to fetch getPaymentinfo
 * [RWC-224](https://tracker.tornevall.net/browse/RWC-224) - Errors caused by woocommerce thrown to setRbwcGenericError
   gets double div's for .woocommerce-error
@@ -207,7 +207,7 @@ Github references should be included for all releases.
 * [RWC-226](https://tracker.tornevall.net/browse/RWC-226) - Make sure that the customer session is really killed after
   success
 * [RWC-227](https://tracker.tornevall.net/browse/RWC-227) - nonces for background processing in wp-admin
-* [RWC-228](https://tracker.tornevall.net/browse/RWC-228) - [#23](https://github.com/Tornevall/wpwc-resurs/issues/23):
+* [RWC-228](https://tracker.tornevall.net/browse/RWC-228) - [#23](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/23):
   Credential validations by ajax must not activate getOptionsControl.
 * [RWC-230](https://tracker.tornevall.net/browse/RWC-230) - Make sure we synchronize order after successful orders with
   getPayment
@@ -262,5 +262,5 @@ Github references should be included for all releases.
 * [RWC-40](https://tracker.tornevall.net/browse/RWC-40) - resursbank_set_storeid
 * [RWC-43](https://tracker.tornevall.net/browse/RWC-43) - resurs_getaddress_enabled
 * [RWC-48](https://tracker.tornevall.net/browse/RWC-48) - resursbank_custom_annuity_string
-* [RWC-52](https://tracker.tornevall.net/browse/RWC-52) - [#16](https://github.com/Tornevall/wpwc-resurs/issues/16):
+* [RWC-52](https://tracker.tornevall.net/browse/RWC-52) - [#16](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/16):
   resursbank_temporary_disable_checkout

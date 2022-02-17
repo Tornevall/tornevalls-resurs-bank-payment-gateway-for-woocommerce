@@ -17,14 +17,14 @@ This responsibility is yours and this way of handling things is required for *yo
 ## CONTRIBUTION
 
 If you'd like to contribute to this project, you can either sign up
-to [github](https://github.com/Tornevall/wpwc-resurs/issues) and create an issue or use the
+to [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues) and create an issue or use the
 old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this on.
 
 ## DOCUMENTS AND LINKS
 
 * [Contribute with translations](https://crwd.in/trwbc)
 * [The current work-repository as of v0.0](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
-* [Github Synchronized repository](https://github.com/Tornevall/wpwc-resurs) will probably be the new official
+* [Github Synchronized repository](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce) will probably be the new official
   repository as bitbucket server will shut down in a few years from now.
 * [Documentation](https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway).
 
@@ -49,7 +49,7 @@ closer with other developers.
 
 The external official public repo is located
 at [bitbucket](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
-and [github](https://github.com/Tornevall/wpwc-resurs). The source code in those repositories **are not supported by
+and [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce). The source code in those repositories **are not supported by
 Resurs Bank**. The code that is supported by Resurs
 Bank [is always located here](https://bitbucket.org/resursbankplugins/resurs-bank-payment-gateway-for-woocommerce). The
 intentions with this plugin has partially been to replace the old release in the future, which also means that it may
