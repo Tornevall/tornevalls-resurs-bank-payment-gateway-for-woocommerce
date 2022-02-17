@@ -10,6 +10,7 @@ use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use TorneLIB\Utils\WordPress as WPUtils;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -177,6 +178,12 @@ class Data
         'resursbank_rco_v1' => ['jquery'],
         'resursbank_rco_v2' => ['jquery'],
     ];
+
+    /**
+     * @var WPUtils $wordpressUtils
+     * @since 0.0.1.0
+     */
+    private static $wordpressUtils;
 
     /**
      * @var array $jsDependenciesAdmin
@@ -1234,8 +1241,13 @@ class Data
      */
     private static function getPluginDataContent($key): string
     {
-        $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
-        return $pluginContent[$key];
+        if (!self::$wordpressUtils instanceof WPUtils) {
+            /** @var WPUtils WordpressUtils */
+            self::$wordpressUtils = new WPUtils();
+            self::$wordpressUtils->setPluginBaseFile(self::getPluginInitFile());
+        }
+
+        return self::$wordpressUtils->getPluginDataContent($key);
     }
 
     /**

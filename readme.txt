@@ -144,7 +144,6 @@ The payment flow itself for each API [is described here](https://docs.tornevall.
 
 Active/open issues can be found [here](https://tracker.tornevall.net/projects/RWC/issues/) [and here](https://github.com/Tornevall/wpwc-resurs/issues). You can also [inspect the project status here](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200)! Most recent [CHANGELOG can be found here](https://github.com/Tornevall/wpwc-resurs/blob/master/CHANGELOG.md).
 
-*0.0.1.0 is the first release candidate of what's planned to become 1.0.0.*
 Github references should be included for all releases.
 
 = 0.0.1.4 =
