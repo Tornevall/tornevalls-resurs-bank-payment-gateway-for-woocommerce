@@ -23,6 +23,9 @@ use function is_object;
  */
 class ResursBankAPI
 {
+    const UNSET_CREDENTIALS_EXCEPTION = 4444;
+
+
     /**
      * @var ResursBank $resursBank
      */
@@ -223,6 +226,7 @@ class ResursBankAPI
     public function getConnection(): ResursBank
     {
         $timeoutStatus = Data::getTimeoutStatus();
+
         if (empty($this->ecom)) {
             $this->getResolvedCredentials();
             $this->ecom = new ResursBank(
@@ -274,7 +278,7 @@ class ResursBankAPI
         $this->credentials['password'] = Data::getResursOption($getPasswordFrom);
 
         if (empty($this->credentials['username']) || empty($this->credentials['password'])) {
-            throw new RuntimeException('ECom credentials are not fully set.', 404);
+            throw new RuntimeException('ECom credentials are not fully set.', self::UNSET_CREDENTIALS_EXCEPTION);
         }
 
         return true;
@@ -649,9 +653,11 @@ class ResursBankAPI
         try {
             $this->getResolvedCredentials();
         } catch (Exception $e) {
-            Data::setTimeoutStatus(self::getResurs(), $e);
-            Data::setLogException($e, __FUNCTION__);
             $return = false;
+            if ($e->getCode() !== ResursBankAPI::UNSET_CREDENTIALS_EXCEPTION) {
+                Data::setTimeoutStatus(self::getResurs(), $e);
+                Data::setLogException($e, __FUNCTION__);
+            }
         }
         return $return;
     }

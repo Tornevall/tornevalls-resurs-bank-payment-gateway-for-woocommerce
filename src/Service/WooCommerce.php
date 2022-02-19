@@ -1330,8 +1330,10 @@ class WooCommerce
                         } catch (Exception $e) {
                             Data::setLogError(
                                 sprintf(
-                                    __('Exception (%s) from %s: %s.',
-                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                                    __(
+                                        'Exception (%s) from %s: %s.',
+                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                    ),
                                     $e->getCode(),
                                     __FUNCTION__,
                                     $e->getMessage()
@@ -1379,6 +1381,7 @@ class WooCommerce
     /**
      * @param $key
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getSessionValue($key)
@@ -1428,6 +1431,7 @@ class WooCommerce
 
     /**
      * @return array|mixed|string|null
+     * @throws Exception
      */
     public static function getCustomerCheckoutLocation()
     {

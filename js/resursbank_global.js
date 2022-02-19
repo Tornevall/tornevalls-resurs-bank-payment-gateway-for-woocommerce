@@ -98,7 +98,10 @@ function getResursError(data) {
             return rbwcShowErrorElement(data, null);
         }
     } else {
-        return rbwcShowErrorElement('RBWC Ajax Backend Error: ' + data, null);
+        if (data !== 'timeout') {
+            return rbwcShowErrorElement('RBWC Ajax Backend Error: ' + data, null);
+        }
+        console.log('RBWC Ajax Backend Error: ' + data);
     }
 }
 
@@ -118,8 +121,11 @@ function rbwcShowErrorElement(data, errorElement) {
             errorElement.html(data);
         }
     } else if (typeof data === 'string') {
-        // Only show errors on strings.
-        alert(data);
+        if (data !== '[object Object]' && data !== 'error' && data !== 'timeout') {
+            // Only scream errors when they are human understandable.
+            alert(data);
+        }
+        console.log(data);
     }
     if (typeof data['error'] !== 'undefined' && data['error'] === 'nonce_validation') {
         if (null !== errorElement) {

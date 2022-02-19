@@ -24,6 +24,7 @@ use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use WC_Checkout;
 use WC_Order;
 use function count;
+use function in_array;
 use function is_array;
 use function is_bool;
 
@@ -159,14 +160,21 @@ class PluginApi
      * @return bool
      * @since 0.0.1.0
      */
-    public static function getValidatedNonce($expire = null, $noReply = null): bool
-    {
+    public static function getValidatedNonce(
+        $expire = null,
+        $noReply = null,
+        $fromFunction = null
+    ): bool {
         $return = false;
         $expired = false;
         $preExpired = self::expireNonce(__FUNCTION__);
         $defaultNonceError = 'nonce_validation';
 
-        $isSafe = (is_admin() && is_ajax());
+        $isNotSafe = [
+            'resetPluginSettings',
+        ];
+
+        $isSafe = (is_admin() && is_ajax() && empty($fromFunction) && in_array($fromFunction, $isNotSafe, true));
         $nonceArray = [
             'admin',
             'all',
@@ -690,7 +698,7 @@ class PluginApi
             [
                 'id' => Data::getRequest('id'),
                 'duration' => Data::getResursOption('currentAnnuityDuration'),
-                'mode' => Data::getRequest('mode')
+                'mode' => Data::getRequest('mode'),
             ]
         );
     }
@@ -810,80 +818,85 @@ class PluginApi
      */
     public static function getCallbackMatches()
     {
-        $callbackConstant = 0;
+        $resursApiTest = new ResursBankAPI();
         $return['requireRefresh'] = false;
         $return['similarity'] = 0;
-        $errorMessage = '';
 
-        foreach (self::$callbacks as $callback) {
-            $callbackConstant += $callback;
-        }
+        if ($resursApiTest->getCredentialsPresent()) {
+            $callbackConstant = 0;
+            $errorMessage = '';
 
-        $current_tab = Data::getRequest('t');
-        $hasErrors = false;
-        $freshCallbackList = [];
-        $e = null;
-
-        $resursApi = ResursBankAPI::getResurs();
-        try {
-            $freshCallbackList = $resursApi->getRegisteredEventCallback($callbackConstant);
-            Data::clearCredentialNotice();
-        } catch (Exception $e) {
-            $hasErrors = true;
-            Data::setTimeoutStatus($resursApi, $e);
-
-            $errorMessage = $e->getMessage();
-            if ($e->getCode() === 401) {
-                Data::getCredentialNotice();
-            } else {
-                if (Data::getTimeoutStatus() > 0) {
-                    $errorMessage .= ' ' .
-                        __(
-                            'Connectivity may be a bit slower than normal.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        );
-                }
-
-                Data::setResursOption(
-                    'front_callbacks_credential_error',
-                    json_encode(['code' => $e->getCode(), 'message' => $errorMessage, 'function' => __FUNCTION__])
-                );
+            foreach (self::$callbacks as $callback) {
+                $callbackConstant += $callback;
             }
-        }
 
-        if ($current_tab === sprintf('%s_admin', Data::getPrefix()) &&
-            (time() - (int)Data::getResursOption('lastCallbackCheck')) > 60
-        ) {
-            $storedCallbacks = Data::getResursOption('callbacks');
+            $current_tab = Data::getRequest('t');
+            $hasErrors = false;
+            $freshCallbackList = [];
+            $e = null;
 
-            if (!$hasErrors) {
-                if (empty($storedCallbacks)) {
-                    $return['requireRefresh'] = true;
+            $resursApi = ResursBankAPI::getResurs();
+
+            try {
+                $freshCallbackList = $resursApi->getRegisteredEventCallback($callbackConstant);
+                Data::clearCredentialNotice();
+            } catch (Exception $e) {
+                $hasErrors = true;
+                Data::setTimeoutStatus($resursApi, $e);
+
+                $errorMessage = $e->getMessage();
+                if ($e->getCode() === 401) {
+                    Data::getCredentialNotice();
                 } else {
-                    foreach (self::$callbacks as $callback) {
-                        $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
-                        $callbackString = ResursBankAPI::getResurs()->getCallbackTypeString($callback);
-                        if (isset($callbackString)) {
-                            similar_text(
-                                $expectedUrl,
-                                $freshCallbackList[$callbackString],
-                                $percentualValue
+                    if (Data::getTimeoutStatus() > 0) {
+                        $errorMessage .= ' ' .
+                            __(
+                                'Connectivity may be a bit slower than normal.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                             );
-                        } else {
-                            $percentualValue = 0;
-                        }
+                    }
 
-                        if ($percentualValue < 90) {
-                            $return['requireRefresh'] = true;
+                    Data::setResursOption(
+                        'front_callbacks_credential_error',
+                        json_encode(['code' => $e->getCode(), 'message' => $errorMessage, 'function' => __FUNCTION__])
+                    );
+                }
+            }
+
+            if ($current_tab === sprintf('%s_admin', Data::getPrefix()) &&
+                (time() - (int)Data::getResursOption('lastCallbackCheck')) > 60
+            ) {
+                $storedCallbacks = Data::getResursOption('callbacks');
+
+                if (!$hasErrors) {
+                    if (empty($storedCallbacks)) {
+                        $return['requireRefresh'] = true;
+                    } else {
+                        foreach (self::$callbacks as $callback) {
+                            $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
+                            $callbackString = ResursBankAPI::getResurs()->getCallbackTypeString($callback);
+                            if (isset($callbackString)) {
+                                similar_text(
+                                    $expectedUrl,
+                                    $freshCallbackList[$callbackString],
+                                    $percentualValue
+                                );
+                            } else {
+                                $percentualValue = 0;
+                            }
+
+                            if ($percentualValue < 90) {
+                                $return['requireRefresh'] = true;
+                            }
+                            $return['similarity'] = $percentualValue;
                         }
-                        $return['similarity'] = $percentualValue;
                     }
                 }
             }
-        }
 
-        if (!$hasErrors && count($freshCallbackList) !== 4) {
-            $return['requireRefresh'] = true;
+            if (!$hasErrors && count($freshCallbackList) !== 4) {
+                $return['requireRefresh'] = true;
+            }
         }
 
         $return['errors'] = [
@@ -1027,13 +1040,50 @@ class PluginApi
     {
         $lastTestResponseString = Data::getResursOption('resurs_callback_test_response');
         if ((int)$lastTestResponseString === 1) {
-            return __('Waiting.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+            return __(
+                'Waiting.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
         }
         return $int ? (int)$lastTestResponseString : sprintf(
             '%s %s',
             __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
             strftime('%Y-%m-%d %H:%M:%S', (int)$lastTestResponseString)
         );
+    }
+
+    /**
+     * @since 0.0.1.4
+     */
+    public function resetPluginSettings()
+    {
+        global $wpdb;
+        self::getValidatedNonce(false, false, __FUNCTION__);
+        // Double insurances here, since we're about to reset stuff.
+        if (is_admin() && is_ajax()) {
+            $deleteNot = [
+                'admin_iv',
+                'admin_key',
+            ];
+            $deleteNotArray = [];
+            foreach ($deleteNot as $item) {
+                $deleteNotArray[] = sprintf("option_name != '%s_%s'", Data::getPrefix(), $item);
+            }
+
+            $deleteString = sprintf(
+                "DELETE FROM %s WHERE option_name LIKE '%s_%%' AND %s",
+                Data::getSanitizedKeyElement($wpdb->options),
+                Data::getPrefix(),
+                implode('AND ', $deleteNotArray)
+            );
+            $cleanUpQuery = $wpdb->query($deleteString);
+
+            self::reply(
+                [
+                    'finished' => $cleanUpQuery
+                ]
+            );
+        }
     }
 
     /**
