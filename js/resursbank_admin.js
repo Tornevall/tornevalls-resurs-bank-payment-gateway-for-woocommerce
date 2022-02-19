@@ -299,6 +299,7 @@ function getResursCallbackResponse() {
         clearInterval(resursCallbackTestHandle);
         resursCallbackActiveTime = 0;
         // Ask for the response one last time.
+        $rQuery('#resursWaitingForTest').html('OK');
         getResursAjaxify('post', 'resursbank_get_trigger_response', {"runTime": resursCallbackActiveTime}, function (response) {
             $rQuery('#resursWaitingForTest').html(response['lastResponse']);
             if (response['success'] === 1 || response['success'] === true) {
@@ -306,6 +307,26 @@ function getResursCallbackResponse() {
             }
         });
     }
+}
+
+/**
+ * Plugin defaults restoration. Dual checks for nonces, is_admin, ensuring this can't be sent into the system
+ * by anonymous forces.
+ * @since 0.0.1.4
+ */
+function rbwcResetThisPlugin() {
+    getResursAjaxify(
+        'post',
+        'resursbank_reset_plugin_settings',
+        {
+            'n': true
+        },
+        function (response) {
+            if (typeof response.finished !== 'undefined') {
+                alert(getResursLocalization('cleanup_reload'));
+            }
+        }
+    );
 }
 
 /**

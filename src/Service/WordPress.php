@@ -73,6 +73,7 @@ class WordPress
             'get_new_annuity_calculation',
             'get_cost_of_purchase',
             'get_network_lookup',
+            'reset_plugin_settings',
         ];
 
         foreach ($actionList as $action) {
@@ -768,6 +769,14 @@ class WordPress
         $return['current_tab'] = $current_tab;
         $return['enable'] = __('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['disable'] = __('Disable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $return['cleanup_reload'] = __(
+            'Settings has been restored to default values. You may now reconfigure this plugin.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+        $return['cleanup_failed_'] = __(
+            'Plugin configuration reset failed.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
 
         return self::applyFilters('localizationsAdmin', $return);
     }

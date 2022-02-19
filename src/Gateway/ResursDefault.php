@@ -640,6 +640,7 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $urlList = isset($this->rcoFrameData->script) ?
             (new Domain())->getUrlsFromHtml($this->rcoFrameData->script) : [];
+
         if (isset($this->rcoFrameData->script)) {
             if (!empty($this->rcoFrameData->script) && count($urlList)) {
                 $this->rcoFrameData->originHostName = $this

@@ -2191,8 +2191,10 @@ class Data
                 $currentPriceDecimals = wc_get_price_decimals();
                 if ($currentPriceDecimals < 2 && self::getResursOption('prevent_rounding_panic')) {
                     $settings[] = [
-                        'title' => __('Number of decimals headsup message',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        'title' => __(
+                            'Number of decimals headsup message',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
                         'type' => 'decimal_warning',
                         'desc' => 'Description',
                     ];
@@ -2342,10 +2344,12 @@ class Data
 
     /**
      * $_REQUEST-sanitizer.
+     * @param $requestArray
      * @return array
+     * @throws Exception
      * @since 0.0.1.1
      */
-    public static function getSanitizedRequest($requestArray)
+    public static function getSanitizedRequest($requestArray): array
     {
         $returnRequest = [];
         if (is_array($requestArray)) {

@@ -838,6 +838,17 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'complex_developer_section_end' => [
+                    'type' => 'sectionend',
+                ],
+                'tweaks' => [
+                    'type' => 'title',
+                    'title' => __('Special Tweaks Section', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc' => __(
+                        'If you have no idea what this is for, do not touch it.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                ],
                 'show_developer' => [
                     'title' => __(
                         'Activate Advanced Tweaking Mode (Developer)',
@@ -856,7 +867,23 @@ class FormFields extends WC_Settings_API
                     'type' => 'checkbox',
                     'default' => 'no',
                 ],
-                'complex_developer_section_end' => [
+                'the_reset_button' => [
+                    'type' => 'button',
+                    'action' => 'button',
+                    'title' => __(
+                        'Reset all settings',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __(
+                        'Resets the entire database settings storage of the plugin to its absolute defaults, ' .
+                        'except encryption keys.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'custom_attributes' => [
+                        'onclick' => 'rbwcResetThisPlugin()',
+                    ],
+                ],
+                'tweaks_end' => [
                     'type' => 'sectionend',
                 ],
             ],
@@ -929,12 +956,17 @@ class FormFields extends WC_Settings_API
             Data::getPrefix('admin_payment_methods_button'),
             Data::getPrefix('admin_callbacks_button'),
             Data::getPrefix('admin_trigger_callback_button'),
+            Data::getPrefix('admin_the_reset_button'),
         ];
 
         if (isset($formData['id']) && in_array($formData['id'], $allowedFormData, true)) {
             $formArray = $formData;
             $formArray['action'] = $action; // Our action
             $formArray['custom_attributes'] = $this->get_custom_attribute_html($formData);
+            $formArray['columns'] = [
+                'the_reset_button' => true,
+            ];
+            $formArray['short_id'] = preg_replace(sprintf('/%s_admin_/', Data::getPrefix()), '', $formArray['id']);
             echo Data::getEscapedHtml(
                 Data::getGenericClass()->getTemplate('adminpage_button', $formArray)
             );
