@@ -1513,8 +1513,8 @@ class Data
     /**
      * Make sure we have what we need before proceeding with the plugin.
      *
-     * @since 0.0.1.4
      * @return bool
+     * @since 0.0.1.4
      */
     public static function getExpectations(): bool
     {
