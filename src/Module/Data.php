@@ -1518,6 +1518,8 @@ class Data
      */
     public static function getExpectations(): bool
     {
+        $return = true;
+
         $genericController = new Generic();
         $genericController->setExpectedVersions(
             [
@@ -1528,7 +1530,6 @@ class Data
 
         try {
             $expectedVersions = $genericController->getExpectedVersions();
-            $return = true;
             if (!$expectedVersions) {
                 $return = false;
                 $expectationList = [];
@@ -1548,6 +1549,7 @@ class Data
         } catch (Exception $e) {
             WordPress::setGenericError($e);
         }
+
         return $return;
     }
 
