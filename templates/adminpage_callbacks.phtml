@@ -5,6 +5,21 @@
     ?>
 </h3>
 <?php if (!($exception instanceof Exception)) { ?>
+    <div style="font-size: 14px; font-weight: bold !important; color: #000099 !important;"><?php _e(
+            sprintf(
+                'Callbacks last update: %s',
+                $lastCallbackUpdate
+            ),
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        ); ?></div>
+    <div style="font-size: 14px; font-weight: bold !important; color: #000099 !important;"><?php _e(
+            sprintf(
+                'Callbacks tested and received: %s',
+                $lastCallbackTrigger
+            ),
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        ); ?></div>
+
     <table width="100%" style="border: none;">
         <tr>
             <td width="20%" class="resursMethodHead"><?php _e(

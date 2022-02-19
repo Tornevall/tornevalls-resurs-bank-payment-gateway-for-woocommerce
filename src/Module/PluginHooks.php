@@ -645,8 +645,6 @@ class PluginHooks
             Data::getRequest('section') === 'payment_methods'
         ) {
             try {
-                // Get payment methods locally for this request. We don't have to fetch
-                // this live each run for auto debitable methods.
                 $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
             } catch (Exception $e) {
                 Data::setLogException($e, __FUNCTION__);
