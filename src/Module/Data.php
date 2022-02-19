@@ -735,6 +735,7 @@ class Data
             ],
             'option' => [
                 'value' => [],
+                'selected' => []
             ],
             'button' => [
                 'id' => [],
