@@ -39,16 +39,16 @@ load_plugin_textdomain(
     dirname(plugin_basename(__FILE__)) . '/language/'
 );
 
-// This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
-// or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
-add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializePlugin');
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBleedingEdgeSettings', 10, 2);
 
-// Making sure that we do not coexist with prior versions.
-add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Service\WordPress::getPriorVersionsDisabled');
-
 if (!Data::getExpectations()) {
     return;
 }
+
+// This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
+// or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
+add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializePlugin');
+// Making sure that we do not coexist with prior versions.
+add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Service\WordPress::getPriorVersionsDisabled');
