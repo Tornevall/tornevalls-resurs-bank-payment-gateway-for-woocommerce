@@ -1524,7 +1524,7 @@ class Data
         $genericController->setExpectedVersions(
             [
                 ResursBank::class => '1.3.70',
-                NetWrapper::class => '6.1.6',
+                NetWrapper::class => '6.1.5',
             ]
         );
 
