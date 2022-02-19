@@ -25,7 +25,6 @@ class ResursBankAPI
 {
     const UNSET_CREDENTIALS_EXCEPTION = 4444;
 
-
     /**
      * @var ResursBank $resursBank
      */

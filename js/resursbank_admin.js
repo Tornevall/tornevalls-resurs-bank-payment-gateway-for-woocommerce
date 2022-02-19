@@ -310,6 +310,8 @@ function getResursCallbackResponse() {
 }
 
 /**
+ * Plugin defaults restoration. Dual checks for nonces, is_admin, ensuring this can't be sent into the system
+ * by anonymous forces.
  * @since 0.0.1.4
  */
 function rbwcResetThisPlugin() {

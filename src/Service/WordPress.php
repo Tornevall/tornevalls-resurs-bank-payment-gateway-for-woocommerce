@@ -770,7 +770,7 @@ class WordPress
         $return['enable'] = __('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['disable'] = __('Disable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['cleanup_reload'] = __(
-            'Plugin settings restored to defaults. You may now reconfigure this plugin.',
+            'Settings has been restored to default values. You may now reconfigure this plugin.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['cleanup_failed_'] = __(
