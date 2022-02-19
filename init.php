@@ -32,6 +32,8 @@ if (!defined('ABSPATH')) {
 if (!WooCommerce::getActiveState()) {
     return;
 }
+// Check and generate admin message if necessary.
+Data::getExpectations();
 
 load_plugin_textdomain(
     'tornevalls-resurs-bank-payment-gateway-for-woocommerce',
@@ -42,10 +44,6 @@ load_plugin_textdomain(
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBleedingEdgeSettings', 10, 2);
-
-if (!Data::getExpectations()) {
-    return;
-}
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
