@@ -13,6 +13,13 @@
  * Domain Path: /language
  */
 
+use ResursBank\Module\Data;
+use Resursbank\RBEcomPHP\ResursBank;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
+use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\Utils\Generic;
+
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
 define('RESURSBANK_PREFIX', 'trbwc');
 define('RESURSBANK_SNAKECASE_FILTERS', true);
@@ -22,8 +29,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 if (!defined('ABSPATH')) {
     exit;
 }
-
-if (!ResursBank\Service\WooCommerce::getActiveState()) {
+if (!WooCommerce::getActiveState()) {
     return;
 }
 
@@ -42,3 +48,7 @@ add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBlee
 
 // Making sure that we do not coexist with prior versions.
 add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Service\WordPress::getPriorVersionsDisabled');
+
+if (!Data::getExpectations()) {
+    return;
+}
