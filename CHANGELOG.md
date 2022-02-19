@@ -5,15 +5,15 @@ Github references should be included for all releases.
 
 # 0.0.1.4 + 1.0.0
 
-* [RWC-315](https://tracker.tornevall.net/browse/RWC-315) - Logging obfuscated data causes log view unviewable
-* [RWC-316](https://tracker.tornevall.net/browse/RWC-316) - get_cost_of_purchase default html view template includes wp_head which causes problems on sanitation
-* [RWC-314](https://tracker.tornevall.net/browse/RWC-314) - Clean up old settings button
-* [RWC-317](https://tracker.tornevall.net/browse/RWC-317) - Helpers should apply random phone and email in checkout fields when button is pressed
-* [RWC-319](https://tracker.tornevall.net/browse/RWC-319) - ip checking feature should also request a soapdocument
-* [RWC-322](https://tracker.tornevall.net/browse/RWC-322) - Timestamp last updated callbacks/payment methods
-* [RWC-323](https://tracker.tornevall.net/browse/RWC-323) - Callback trigger must keep its "last received"
-* [RWC-324](https://tracker.tornevall.net/browse/RWC-324) - Bug-ish in WooCommerce 6.2.0 causes our admin-layout to break
-* [RWC-325](https://tracker.tornevall.net/browse/RWC-325) - Check expected versions before allowing complete run
+* [RWC-315](https://tracker.tornevall.net/browse/RWC-315) - Bug: Logging obfuscated data causes log view unviewable
+* [RWC-316](https://tracker.tornevall.net/browse/RWC-316) - Bug: get_cost_of_purchase default html view template includes wp_head which causes problems on sanitation
+* [RWC-326](https://tracker.tornevall.net/browse/RWC-326) - Bug: Part payment settings don't seem to save 
+* [RWC-314](https://tracker.tornevall.net/browse/RWC-314) - Task: Clean up old settings button
+* [RWC-319](https://tracker.tornevall.net/browse/RWC-319) - Task: ip checking feature should also request a soapdocument
+* [RWC-322](https://tracker.tornevall.net/browse/RWC-322) - Task: Timestamp last updated callbacks/payment methods
+* [RWC-323](https://tracker.tornevall.net/browse/RWC-323) - Task: Callback trigger must keep its "last received"
+* [RWC-324](https://tracker.tornevall.net/browse/RWC-324) - Task: Bug-ish in WooCommerce 6.2.0 causes our admin-layout to break
+* [RWC-325](https://tracker.tornevall.net/browse/RWC-325) - Task: Check expected versions before allowing complete run
 
 # 0.0.1.3 + 1.0.0
 
