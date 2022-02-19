@@ -13,6 +13,13 @@
  * Domain Path: /language
  */
 
+use ResursBank\Module\Data;
+use Resursbank\RBEcomPHP\ResursBank;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
+use TorneLIB\Module\Network\NetWrapper;
+use TorneLIB\Utils\Generic;
+
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
 define('RESURSBANK_PREFIX', 'trbwc');
 define('RESURSBANK_SNAKECASE_FILTERS', true);
@@ -22,10 +29,11 @@ require_once(__DIR__ . '/vendor/autoload.php');
 if (!defined('ABSPATH')) {
     exit;
 }
-
-if (!ResursBank\Service\WooCommerce::getActiveState()) {
+if (!WooCommerce::getActiveState()) {
     return;
 }
+// Check and generate admin message if necessary.
+Data::getExpectations();
 
 load_plugin_textdomain(
     'tornevalls-resurs-bank-payment-gateway-for-woocommerce',
@@ -39,6 +47,5 @@ add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializePlugin');
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBleedingEdgeSettings', 10, 2);
-
 // Making sure that we do not coexist with prior versions.
 add_filter('resurs_obsolete_coexistence_disable', 'ResursBank\Service\WordPress::getPriorVersionsDisabled');

@@ -10,7 +10,6 @@ use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
-use TorneLIB\Utils\WordPress as WPUtils;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -21,6 +20,7 @@ use TorneLIB\IO\Data\Arrays;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
+use TorneLIB\Utils\WordPress as WPUtils;
 use WC_Customer;
 use WC_Logger;
 use WC_Order;
@@ -1511,12 +1511,59 @@ class Data
     }
 
     /**
+     * Make sure we have what we need before proceeding with the plugin.
+     *
+     * @return bool
+     * @since 0.0.1.4
+     */
+    public static function getExpectations(): bool
+    {
+        $return = true;
+
+        $genericController = new Generic();
+        $genericController->setExpectedVersions(
+            [
+                ResursBank::class => '1.3.70',
+                NetWrapper::class => '6.1.6',
+            ]
+        );
+
+        try {
+            $expectedVersions = $genericController->getExpectedVersions();
+            if (!$expectedVersions) {
+                $return = false;
+                $expectationList = [];
+                foreach ($genericController->getExpectationList() as $item => $value) {
+                    $expectationList[] = sprintf('%s: %s', $item, $value);
+                }
+                throw new Exception(
+                    __(
+                        sprintf(
+                            'Can not continue - required libraries is not matching the expectations: %s.',
+                            implode("\n", $expectationList)
+                        ),
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    )
+                );
+            }
+        } catch (Exception $e) {
+            WordPress::setGenericError($e);
+        }
+
+        return $return;
+    }
+
+    /**
      * @param $severity
      * @param $logMessage
      * @since 0.0.1.0
      */
     public static function setLogInternal($severity, $logMessage)
     {
+        // If WooComemrce has not WC_Logger instance ready, skip logging.
+        if (!class_exists('WC_Logger')) {
+            return;
+        }
         if (empty(self::$Log)) {
             self::$Log = new WC_Logger();
         }

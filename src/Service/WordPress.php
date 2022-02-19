@@ -320,11 +320,51 @@ class WordPress
                 }
             }
         } catch (Exception $e) {
-            if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
-                $_SESSION[Data::getPrefix()]['exception'] = [];
-            }
-            $_SESSION[Data::getPrefix()]['exception'][] = $e;
+            self::setGenericError($e);
         }
+    }
+
+    /**
+     * @param Exception $exception
+     * @since 0.0.1.4
+     */
+    public static function setGenericError($exception)
+    {
+        Data::setLogException($exception);
+        if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
+            $_SESSION[Data::getPrefix()]['exception'] = [];
+        }
+        if ($exception instanceof Exception && self::canAddException($exception)) {
+            $_SESSION[Data::getPrefix()]['exception'][] = $exception;
+        }
+    }
+
+    /**
+     * Look for duplicate messages in session exceptions.
+     *
+     * @param Exception $exception
+     * @since 0.0.1.4
+     */
+    private static function canAddException($exception): bool
+    {
+        $return = true;
+
+        if (isset($_SESSION[Data::getPrefix()]['exception']) && $exception instanceof Exception) {
+            /** @var Exception $item */
+            foreach ($_SESSION[Data::getPrefix()]['exception'] as $item) {
+                if ($item instanceof Exception) {
+                    $message = $item->getMessage();
+                    if ($exception->getMessage() === $message) {
+                        $return = false;
+                        break;
+                    }
+                }
+            }
+        } else {
+            $return = false;
+        }
+
+        return $return;
     }
 
     /**
