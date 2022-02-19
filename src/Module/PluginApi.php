@@ -1011,16 +1011,10 @@ class PluginApi
         $return['api'] = (bool)ResursBankAPI::getResurs()->triggerCallback();
         $return['html'] = sprintf(
             '<div>%s</div><div id="resursWaitingForTest"></div>',
-            sprintf(
-                __(
-                    '%s',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ),
-                $return['api'] ? __(
-                    'Test activated',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ) : __('Test failed to activate', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
-            )
+            $return['api'] ? __(
+                'Test activated.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) : __('Test failed to activate.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );
         $return = WordPress::applyFilters('triggerCallback', $return);
         return $return;
