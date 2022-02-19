@@ -851,6 +851,7 @@ class WooCommerce
         if ($callbackType === 'TEST') {
             $responseString = 'Test OK';
             Data::setResursOption('resurs_callback_test_response', time());
+            Data::setResursOption('resurs_callback_test_start', null);
             $code = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
 
             // There are not digest codes available in this state so we should throw the callback handler

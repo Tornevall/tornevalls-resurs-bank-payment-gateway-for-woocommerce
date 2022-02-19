@@ -17,6 +17,14 @@
 // $silentGetPaymentMethodsException
 ?>
 <?php if (!($exception instanceof Exception)) { ?>
+    <div style="font-size: 14px; font-weight: bold !important; color: #000099 !important;"><?php _e(
+            sprintf(
+                'Payment Methods last update: %s',
+                $lastMethodUpdate
+            ),
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        ); ?></div>
+
     <div style="font-style: italic;margin-bottom: 5px;">
         <?php
         _e(

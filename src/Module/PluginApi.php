@@ -261,7 +261,7 @@ class PluginApi
         // supported by wp_kses (too many html tags to approve).
         echo '
             <html>
-            <head>'.wp_head().'</head>
+            <head>' . wp_head() . '</head>
             <body>' . Data::getEscapedHtml($priceInfoHtml) . '
             </body>
         </html>
@@ -561,6 +561,7 @@ class PluginApi
                     $callbackUrl,
                     self::getCallbackDigestData()
                 );
+                Data::setResursOption('lastCallbackUpdate', time());
             } catch (Exception $e) {
                 Data::setLogException($e, __FUNCTION__);
             }
@@ -1004,21 +1005,41 @@ class PluginApi
      */
     public static function getTriggerTest(): array
     {
-        Data::setResursOption('resurs_callback_test_response', null);
+        Data::setResursOption('resurs_callback_test_start', time());
+        Data::setResursOption('resurs_callback_test_response', 1);
         $return = WordPress::applyFiltersDeprecated('resurs_trigger_test_callback', null);
         $return['api'] = (bool)ResursBankAPI::getResurs()->triggerCallback();
         $return['html'] = sprintf(
             '<div>%s</div><div id="resursWaitingForTest"></div>',
             sprintf(
                 __(
-                    'Activated test trigger. Response "%s" received.',
+                    '%s',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                $return['api'] ? 'success' : 'fail'
+                $return['api'] ? __(
+                    'Test activated',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) : __('Test failed to activate', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
             )
         );
         $return = WordPress::applyFilters('triggerCallback', $return);
         return $return;
+    }
+
+    /**
+     * @since 0.0.1.4
+     */
+    private function getTestCallbackLastResponse($int = true)
+    {
+        $lastTestResponseString = Data::getResursOption('resurs_callback_test_response');
+        if ((int)$lastTestResponseString === 1) {
+            return __('Waiting.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        }
+        return $int ? (int)$lastTestResponseString : sprintf(
+            '%s %s',
+            __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            strftime('%Y-%m-%d %H:%M:%S', (int)$lastTestResponseString)
+        );
     }
 
     /**
@@ -1032,14 +1053,13 @@ class PluginApi
         if (isset($_REQUEST['runTime'])) {
             $runTime = (int)$_REQUEST['runTime'];
         }
-        if ((int)Data::getResursOption('resurs_callback_test_response') > 0) {
-            $lastResponse = sprintf(
-                '%s %s',
-                __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                strftime('%Y-%m-%d %H:%M:%S', Data::getResursOption('resurs_callback_test_response'))
-            );
+        sleep(1);
+        $testCallbackStarted = Data::getResursOption('resurs_callback_test_start');
+        $lastTestResponse = self::getTestCallbackLastResponse();
+        if ($lastTestResponse !== '' && $lastTestResponse !== 1) {
+            $lastResponse = self::getTestCallbackLastResponse(false);
             $success = true;
-        } else {
+        } elseif ($testCallbackStarted && $lastTestResponse !== 1) {
             $lastResponse =
                 sprintf(
                     __(
@@ -1047,6 +1067,8 @@ class PluginApi
                     ),
                     $runTime
                 );
+        } else {
+            $lastResponse = self::getTestCallbackLastResponse(false);
         }
         $return = [
             'lastResponse' => $lastResponse,

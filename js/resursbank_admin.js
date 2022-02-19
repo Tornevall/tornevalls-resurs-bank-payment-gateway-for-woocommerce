@@ -241,12 +241,14 @@ function getResursCallbackTest() {
                 'style': 'font-weight: bold; color: #000099;'
             }).html(response['html'])
         );
+
         var testElement = $rQuery('#resursWaitingForTest');
         if (testElement.length > 0) {
+            testElement.css('color', '#000099');
             resursCallbackReceiveSuccess = false;
             testElement.html(getResursLocalization('waiting_for_callback'));
-            resursCallbackTestHandle = setInterval(getResursCallbackResponse, resursCallbackActiveInterval * 1000);
             getResursCallbackResponse();
+            resursCallbackTestHandle = setInterval(getResursCallbackResponse, resursCallbackActiveInterval * 1000);
         }
     });
 }
@@ -296,7 +298,13 @@ function getResursCallbackResponse() {
         console.log('Wait for received callback cancelled after success.');
         clearInterval(resursCallbackTestHandle);
         resursCallbackActiveTime = 0;
-        return;
+        // Ask for the response one last time.
+        getResursAjaxify('post', 'resursbank_get_trigger_response', {"runTime": resursCallbackActiveTime}, function (response) {
+            $rQuery('#resursWaitingForTest').html(response['lastResponse']);
+            if (response['success'] === 1 || response['success'] === true) {
+                $rQuery('#resursWaitingForTest').css('color', '#009900');
+            }
+        });
     }
 }
 

@@ -583,6 +583,7 @@ class ResursBankAPI
                     WooCommerce::applyMock('getPaymentMethodsException');
                 }
                 self::$paymentMethods = self::getResurs()->getPaymentMethods([], true);
+                Data::setResursOption('lastMethodUpdate', time());
             } catch (Exception $e) {
                 Data::setTimeoutStatus(self::getResurs());
                 WooCommerce::setSessionValue('silentGetPaymentMethodsException', $e);

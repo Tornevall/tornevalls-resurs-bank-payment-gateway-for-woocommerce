@@ -409,6 +409,15 @@ class FormFields extends WC_Settings_API
                     ),
                     'options' => WordPress::applyFilters('getPartPaymentPage', []),
                 ],
+                'payment_methods_settings_end' => [
+                    'id' => 'payment_methods_settings_end',
+                    'type' => 'sectionend',
+                ],
+                'order_status_section' => [
+                    'id' => 'order_status_section',
+                    'type' => 'title',
+                    'title' => 'Order Status Mapping',
+                ],
                 'order_instant_finalization_status' => [
                     'id' => 'order_instant_finalization_status',
                     'title' => 'Automatically debited order status',
@@ -458,7 +467,7 @@ class FormFields extends WC_Settings_API
                 ],
                 'payment_methods_list' => [
                     'type' => 'methodlist',
-                    'id' => 'payment_methods_list_section'
+                    'id' => 'payment_methods_list_section',
                 ],
                 'payment_methods_button' => [
                     'type' => 'button',
@@ -1500,6 +1509,45 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * @return string
+     * @since 0.0.1.4
+     */
+    private static function getLastPaymentMethodUpdate(): string
+    {
+        $lastMethodUpdateStored = (int)Data::getResursOption('lastMethodUpdate');
+        return $lastMethodUpdateStored ? strftime('%Y-%m-%d %H:%M', $lastMethodUpdateStored) : __(
+            'Never.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.4
+     */
+    private static function getLastCallbackUpdate(): string
+    {
+        $lastMethodUpdateStored = (int)Data::getResursOption('lastCallbackUpdate');
+        return $lastMethodUpdateStored ? strftime('%Y-%m-%d %H:%M', $lastMethodUpdateStored) : __(
+            'Never.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.4
+     */
+    private static function getLastCallbackTrigger(): string
+    {
+        $lastMethodUpdateStored = (int)Data::getResursOption('resurs_callback_test_response');
+        return $lastMethodUpdateStored ? strftime('%Y-%m-%d %H:%M:%S', $lastMethodUpdateStored) : __(
+            'Never.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+    }
+
+    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
@@ -1558,6 +1606,7 @@ class FormFields extends WC_Settings_API
                     'silentAnnuityException' => $silentAnnuityException,
                     'environment' => Data::getResursOption('environment'),
                     'isBleedingEdge' => Data::isBleedingEdge(),
+                    'lastMethodUpdate' => self::getLastPaymentMethodUpdate(),
                 ]
             );
             echo Data::getEscapedHtml($paymentMethodTemplate);
@@ -1643,6 +1692,8 @@ class FormFields extends WC_Settings_API
                     [
                         'callbacks' => $callbacks,
                         'exception' => $exception,
+                        'lastCallbackUpdate' => self::getLastCallbackUpdate(),
+                        'lastCallbackTrigger' => self::getLastCallbackTrigger(),
                     ]
                 )
             );
