@@ -663,26 +663,26 @@ class PluginApi
      */
     public static function setNewAnnuity()
     {
-        //self::getValidatedNonce();
+        if (is_admin()) {
+            $mode = Data::getRequest('mode');
 
-        $mode = Data::getRequest('mode');
-
-        switch ($mode) {
-            case 'e':
-                Data::setResursOption(
-                    'currentAnnuityFactor',
-                    Data::getRequest('id')
-                );
-                Data::setResursOption(
-                    'currentAnnuityDuration',
-                    (int)Data::getRequest('duration')
-                );
-                break;
-            case 'd':
-                Data::delResursOption('currentAnnuityFactor');
-                Data::delResursOption('currentAnnuityDuration');
-                break;
-            default:
+            switch ($mode) {
+                case 'e':
+                    Data::setResursOption(
+                        'currentAnnuityFactor',
+                        Data::getRequest('id')
+                    );
+                    Data::setResursOption(
+                        'currentAnnuityDuration',
+                        (int)Data::getRequest('duration')
+                    );
+                    break;
+                case 'd':
+                    Data::delResursOption('currentAnnuityFactor');
+                    Data::delResursOption('currentAnnuityDuration');
+                    break;
+                default:
+            }
         }
 
         // Confirm Request.
@@ -690,7 +690,7 @@ class PluginApi
             [
                 'id' => Data::getRequest('id'),
                 'duration' => Data::getResursOption('currentAnnuityDuration'),
-                'mode' => Data::getRequest('mode'),
+                'mode' => Data::getRequest('mode')
             ]
         );
     }
