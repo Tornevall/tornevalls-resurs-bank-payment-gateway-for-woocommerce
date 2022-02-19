@@ -23,10 +23,15 @@ use function is_object;
  */
 class ResursBankAPI
 {
+    /**
+     * @var int
+     * @since 0.0.1.4
+     */
     const UNSET_CREDENTIALS_EXCEPTION = 4444;
 
     /**
      * @var ResursBank $resursBank
+     * @since 0.0.1.0
      */
     public static $resursBank;
 
