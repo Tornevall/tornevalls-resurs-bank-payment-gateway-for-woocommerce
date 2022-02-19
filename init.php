@@ -14,11 +14,7 @@
  */
 
 use ResursBank\Module\Data;
-use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
-use ResursBank\Service\WordPress;
-use TorneLIB\Module\Network\NetWrapper;
-use TorneLIB\Utils\Generic;
 
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
 define('RESURSBANK_PREFIX', 'trbwc');
