@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Tornevalls Resurs Bank payment gateway for WooCommerce\n"
-"POT-Creation-Date: 2022-02-19 18:05+0100\n"
+"POT-Creation-Date: 2022-02-19 18:10+0100\n"
 "PO-Revision-Date: 2021-11-06 00:23+0100\n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: Tomas Tornevall <thorne@tornevall.net>\n"
@@ -1204,68 +1204,63 @@ msgstr ""
 msgid "Advanced mode is disabled. You can not make this change."
 msgstr ""
 
-#: src/Module/PluginApi.php:1016
-#, php-format
-msgid "%s"
+#: src/Module/PluginApi.php:1015
+msgid "Test activated."
 msgstr ""
 
-#: src/Module/PluginApi.php:1020
-msgid "Test activated"
+#: src/Module/PluginApi.php:1017
+msgid "Test failed to activate."
 msgstr ""
 
-#: src/Module/PluginApi.php:1022
-msgid "Test failed to activate"
-msgstr ""
-
-#: src/Module/PluginApi.php:1036
+#: src/Module/PluginApi.php:1030
 msgid "Waiting."
 msgstr ""
 
-#: src/Module/PluginApi.php:1040
+#: src/Module/PluginApi.php:1034
 msgid "Received"
 msgstr ""
 
-#: src/Module/PluginApi.php:1066
+#: src/Module/PluginApi.php:1060
 #, php-format
 msgid "Waiting for callback TEST (%d seconds)."
 msgstr ""
 
-#: src/Module/PluginApi.php:1116
+#: src/Module/PluginApi.php:1110
 msgid "By phone request."
 msgstr ""
 
-#: src/Module/PluginApi.php:1126
+#: src/Module/PluginApi.php:1120
 msgid "By phone request failed, executed failover by government id."
 msgstr ""
 
-#: src/Module/PluginApi.php:1135
+#: src/Module/PluginApi.php:1129
 msgid "By government id/company id (See customer type)."
 msgstr ""
 
-#: src/Module/PluginApi.php:1146
+#: src/Module/PluginApi.php:1140
 #, php-format
 msgid "By government id/company id (See customer type), but failed: (%d) %s."
 msgstr ""
 
-#: src/Module/PluginApi.php:1184
+#: src/Module/PluginApi.php:1178
 #, php-format
 msgid "getAddress request (country %s, type %s) for %s: %s"
 msgstr ""
 
-#: src/Module/PluginApi.php:1246
+#: src/Module/PluginApi.php:1240
 msgid "Failed"
 msgstr ""
 
-#: src/Module/PluginApi.php:1247
+#: src/Module/PluginApi.php:1241
 msgid "Denied"
 msgstr ""
 
-#: src/Module/PluginApi.php:1256
+#: src/Module/PluginApi.php:1250
 #, php-format
 msgid "Order was rejected with status \"%s\"."
 msgstr ""
 
-#: src/Module/PluginApi.php:1287
+#: src/Module/PluginApi.php:1281
 msgid "Please contact customer service for more information."
 msgstr ""
 
