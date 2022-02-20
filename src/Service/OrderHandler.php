@@ -95,7 +95,7 @@ class OrderHandler extends ResursDefault
                 'Data has synchronized with Resurs Bank billing data.',
                 'resurs-bank-payment-gateway-for-woocommerce'
             );
-            Data::setOrderMeta($order, 'customerSynchronization', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setOrderMeta($order, 'customerSynchronization', date('Y-m-d H:i:s', time()));
             Data::setLogNotice($synchNotice);
             WooCommerce::setOrderNote(
                 $order,

@@ -769,7 +769,7 @@ class WooCommerce
                     Data::setOrderMeta(
                         $order,
                         sprintf('callback_%s_receive', $callbackType),
-                        strftime('%Y-%m-%d %H:%M:%S', time()),
+                        date('Y-m-d H:i:s', time()),
                         true,
                         true
                     );
@@ -1237,14 +1237,14 @@ class WooCommerce
             Data::getOrderMeta('bookPaymentStatus', $orderId) &&
             empty(Data::getOrderMeta('signingOk', $orderId))
         ) {
-            Data::setOrderMeta($orderId, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
+            Data::setOrderMeta($orderId, 'signingOk', date('Y-m-d H:i:s', time()));
             Data::setOrderMeta(
                 $orderId,
                 'signingConfirmed',
                 sprintf(
                     'Callback:%s-%s',
                     $byCallback,
-                    strftime('%Y-%m-%d %H:%M:%S', time())
+                    date('Y-m-d H:i:s', time())
                 )
             );
         }

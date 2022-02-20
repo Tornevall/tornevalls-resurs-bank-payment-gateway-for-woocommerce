@@ -1547,7 +1547,7 @@ class FormFields extends WC_Settings_API
     private static function getLastPaymentMethodUpdate(): string
     {
         $lastMethodUpdateStored = (int)Data::getResursOption('lastMethodUpdate');
-        return $lastMethodUpdateStored ? strftime('%Y-%m-%d %H:%M', $lastMethodUpdateStored) : __(
+        return $lastMethodUpdateStored ? date('Y-m-d H:i', $lastMethodUpdateStored) : __(
             'Never.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
@@ -1560,7 +1560,7 @@ class FormFields extends WC_Settings_API
     private static function getLastCallbackUpdate(): string
     {
         $lastMethodUpdateStored = (int)Data::getResursOption('lastCallbackUpdate');
-        return $lastMethodUpdateStored ? strftime('%Y-%m-%d %H:%M', $lastMethodUpdateStored) : __(
+        return $lastMethodUpdateStored ? date('Y-m-d H:i', $lastMethodUpdateStored) : __(
             'Never.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
@@ -1573,7 +1573,7 @@ class FormFields extends WC_Settings_API
     private static function getLastCallbackTrigger(): string
     {
         $lastMethodUpdateStored = (int)Data::getResursOption('resurs_callback_test_response');
-        return $lastMethodUpdateStored ? strftime('%Y-%m-%d %H:%M:%S', $lastMethodUpdateStored) : __(
+        return $lastMethodUpdateStored ? date('Y-m-d H:i:s', $lastMethodUpdateStored) : __(
             'Never.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
