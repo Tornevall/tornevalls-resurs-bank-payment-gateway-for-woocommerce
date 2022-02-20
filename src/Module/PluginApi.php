@@ -1048,7 +1048,7 @@ class PluginApi
         return $int ? (int)$lastTestResponseString : sprintf(
             '%s %s',
             __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-            strftime('%Y-%m-%d %H:%M:%S', (int)$lastTestResponseString)
+            date('Y-m-d H:i:s', (int)$lastTestResponseString)
         );
     }
 
@@ -1317,7 +1317,7 @@ class PluginApi
                 sprintf(
                     '%s (%s)',
                     $rejectType,
-                    strftime('%Y-%m-%d %H:%M:%S', time())
+                    date('Y-m-d H:i:s', time())
                 ),
                 true,
                 true

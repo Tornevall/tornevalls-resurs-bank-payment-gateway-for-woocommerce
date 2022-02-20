@@ -1567,7 +1567,7 @@ class ResursDefault extends WC_Payment_Gateway
                             'initialUpdatePaymentReference',
                             sprintf('%s:%s', $idBeforeChange, $newPaymentId)
                         );
-                        Data::setOrderMeta($order, 'updatePaymentReference', strftime('%Y-%m-%d %H:%M:%S', time()));
+                        Data::setOrderMeta($order, 'updatePaymentReference', date('Y-m-d H:i:s', time()));
                         WooCommerce::setOrderNote(
                             $order,
                             sprintf(
@@ -2057,7 +2057,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $return = $this->getResult('success');
                 break;
             case 'SIGNING':
-                Data::setOrderMeta($this->order, 'signingRedirectTime', strftime('%Y-%m-%d %H:%M:%S', time()));
+                Data::setOrderMeta($this->order, 'signingRedirectTime', date('Y-m-d H:i:s', time()));
                 $this->updateOrderStatus(
                     self::STATUS_SIGNING,
                     __(
@@ -2124,13 +2124,13 @@ class ResursDefault extends WC_Payment_Gateway
             Data::getOrderMeta('bookPaymentStatus', $this->order) &&
             empty(Data::getOrderMeta('signingOk', $this->order))
         ) {
-            $return = Data::setOrderMeta($this->order, 'signingOk', strftime('%Y-%m-%d %H:%M:%S', time()));
+            $return = Data::setOrderMeta($this->order, 'signingOk', date('Y-m-d H:i:s', time()));
             Data::setOrderMeta(
                 $this->order,
                 'signingConfirmed',
                 sprintf(
                     'CustomerLanding:%s',
-                    strftime('%Y-%m-%d %H:%M:%S', time())
+                    date('Y-m-d H:i:s', time())
                 )
             );
         }
