@@ -5,18 +5,18 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'e1baa2e646ac6f7c58a87c32b424bc65c5330c7b',
+        'reference' => 'ced82ccb6af595c227f0f4cb202ae7674c634605',
         'name' => 'tornevall/resurs-bank-payment-gateway-for-woocommerce',
         'dev' => true,
     ),
     'versions' => array(
         'resursbank/ecomphp' => array(
-            'pretty_version' => '1.3.72',
-            'version' => '1.3.72.0',
+            'pretty_version' => '1.3.73',
+            'version' => '1.3.73.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../resursbank/ecomphp',
             'aliases' => array(),
-            'reference' => 'fc65ad679978de4eb7117903c7be5ec4e230f836',
+            'reference' => '32a6d6884ff5d1f2c68da9255a742c029b7118cd',
             'dev_requirement' => false,
         ),
         'resursbank/ecomphp-deprecated' => array(
@@ -34,7 +34,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'e1baa2e646ac6f7c58a87c32b424bc65c5330c7b',
+            'reference' => 'ced82ccb6af595c227f0f4cb202ae7674c634605',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-crypto' => array(
@@ -47,12 +47,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-errorhandler' => array(
-            'pretty_version' => '6.1.15',
-            'version' => '6.1.15.0',
+            'pretty_version' => '6.1.16',
+            'version' => '6.1.16.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-errorhandler',
             'aliases' => array(),
-            'reference' => '6fb9f50e2eabb6340d11001d1b532ebabffd8e05',
+            'reference' => '038b43d88542e4b82381bd49f96621b0a8519201',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-flags' => array(
@@ -92,12 +92,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-utils' => array(
-            'pretty_version' => '6.1.18',
-            'version' => '6.1.18.0',
+            'pretty_version' => '6.1.19',
+            'version' => '6.1.19.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-utils',
             'aliases' => array(),
-            'reference' => '67f1099faf9fc01ccc26a7a3de10ee056d362149',
+            'reference' => 'a4c6119251ea9fdf36949a887a764c1721522e09',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-version' => array(
