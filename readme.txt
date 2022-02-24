@@ -22,7 +22,7 @@ Check out [README.md](https://github.com/Tornevall/tornevalls-resurs-bank-paymen
 = Supported shop flows =
 
 * [Simplified Shop Flow](https://test.resurs.com/docs/display/ecom/Simplified+Flow+API). Integrated checkout that works with WooCommerce built in features.
-* [Resurs Checkout Web](https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web). Iframe integration. Currently supporting **RCOv1 and RCOv2**.
+* [Resurs Checkout Web](https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web). The payment solution is embedded in the checout as an iframe. Currently supporting **RCOv1 and RCOv2**.
 * [Hosted Payment Flow](https://test.resurs.com/docs/display/ecom/Hosted+Payment+Flow). A paypal like checkout where most of the payment events takes place at Resurs Bank.
 
 There is a publicly available release out supported by Resurs Bank (v2.2). There **may be breaking changes** if you plan to use **this** plugin, as it was a direct upgrade of the Resurs Bank supported release.
@@ -48,7 +48,7 @@ Primary new problems should be discovered in TEST rather than production since t
 * **Required**: WooCommerce: v3.5.0 or higher!
 * **Required**: [SoapClient](https://php.net/manual/en/class.soapclient.php) with xml drivers and extensions.
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
-* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP built in communications as you may loose important features if you run explicitly with streams.
+* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP built in communications as you may loose important features if you run explicitly with "streams".
 * PHP streams? Yes, you still need them since SoapClient is actually using it.
 * WordPress: Preferably at least v5.5. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
@@ -73,7 +73,7 @@ Preferred Method is to install and activate the plugin through the WordPress plu
 2. Activate the plugin through the "Plugins" menu in WordPress.
 3. Configure the plugin via Resurs Bank control panel in admin.
 
-Are you using this plugin as an upgrade from an older version? No problems! Upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own. This may be important especially if you have a custom setup.
+Are you using this plugin as an upgrade from an older version? No problems! Upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own requirements. This may be important especially if you have a custom setup.
 
 When you install this plugin and eventually did use an older version, you will also get the opportunity to import the old credentials. For full documentation, take a look at [https://docs.tornevall.net/x/CoC4Aw](https://docs.tornevall.net/x/CoC4Aw)
 
@@ -88,7 +88,7 @@ You may visit [docs.tornevall.net](https://docs.tornevall.net/x/CoC4Aw) for more
 
 = Can I upgrade from version 2.2.x? =
 
-**"Version 2.2.x"** is currently the **official Resurs Bank release** and not the same as this release that is a practically a third party reboot. However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the prior release can be handled by this one.
+**"Version 2.2.x"** is currently the **official Resurs Bank release** and not the same as this release, that is a practically a third party rewrite. However, the intentions with this plugin is to run as seamless as possible. For example, payments placed with the prior release can be handled by this one.
 
 = What is considered "breaking changes"? =
 
@@ -97,12 +97,12 @@ Breaking changes are collected [here](https://docs.tornevall.net/x/UwJzBQ).
 Examples of what could "break" is normally in the form of "no longer supported":
 
 * The prior payment method editor where title and description for each payment method could be edited. This is not really plugin side decided, but based on rules set by Resurs Bank. First of all, titles and descriptions are handled by Resurs Bank to simplify changes that is related to whatever could happen to a payment method. The same goes for the sorting of payment methods in the checkout. Some payment methods is regulated by laws and should be displayed in a certain order. This is no longer up to the plugin to decide and sorting is based on in which order Resurs Bank is returning them in the API. If you want anything changed, related to the payment method, you have to contact Resurs Bank support.
-* Many ideas are lifted straight out from the prior version - but not all of them. Remember, this is a third party reboot of an old release. There are settings in this version that is no longer working as before (or at least as expected), especially features that is bound to filters and actions. For actions and filters, you can take a look at the [documentation](https://docs.tornevall.net/x/HoC4Aw). Further information about settings will come.
+* Many ideas are lifted straight out from the prior version - but not all of them. Remember, this is a third party rewrite of an old release. There are settings in this version that is no longer working as before (or at least as expected), especially features that is bound to filters and actions. For actions and filters, you can take a look at the [documentation](https://docs.tornevall.net/x/HoC4Aw). Further information about settings will come.
 * Speaking of settings. Settings is almost similar to the old plugin, but with new identifiers. It is partially intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has also been removed as they did no longer fill any purpose.
 
 = Is this release a refactored version of Resurs Bank's? =
 
-No. This plugin is a complete reboot. The future intentions might be to replace the other version and **this** release is currently considered a side project.
+No. This plugin is a complete rewrite. The future intentions might be to replace the other version, but **this** release is currently considered a side project.
 
 = Plugin is causing 40X errors on my site =
 
@@ -111,9 +111,6 @@ There are several reasons for the 40X errors, but if they are thrown from an ECo
 * 401 = Unauthorized.
   **Cause**: Bad credentials
   **Solution**: Contact Resurs Bank support for support questions regarding API credentials.
-* 403 = Forbidden.
-  **Cause**: During testing, this is a bit more common if you are using a server host that is not located in "safe countries".
-  **Solution:** Contact Resurs Bank for support.
 
 = What is a EComPHP API Message? =
 
@@ -125,7 +122,7 @@ A common question about customer events is "what happened?" and "why" - very oft
 
 = How does the respective payment flows work with Resurs Bank in this plugin? =
 
-Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works for this plugin can be read at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
+Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works for this plugin can be read at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ).
 
 The payment flow itself for each API [is described here](https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described).
 
@@ -137,7 +134,7 @@ The payment flow itself for each API [is described here](https://docs.tornevall.
 4. Resurs Checkout Variant 1.
 5. Fraud Configuration Section.
 6. Enabling Developer Mode.
-7. Customer Tweaking Section, with mock features.
+7. Customer Tweaking Section, with ability to mock features in real time (for the test environment only).
 8. Support and help screen.
 
 == Changelog ==
