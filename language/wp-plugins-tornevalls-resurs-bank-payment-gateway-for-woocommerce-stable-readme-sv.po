@@ -1,15 +1,15 @@
-# Translation of Plugins - Tornevalls Resurs Bank payment gateway for WooCommerce - Stable Readme (latest release) in Swedish
-# This file is distributed under the same license as the Plugins - Tornevalls Resurs Bank payment gateway for WooCommerce - Stable Readme (latest release) package.
+# Translation of Plugins - Tornevalls Resurs Bank Payment Gateway for WooCommerce - Stable Readme (latest release) in Swedish
+# This file is distributed under the same license as the Plugins - Tornevalls Resurs Bank Payment Gateway for WooCommerce - Stable Readme (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-02-13 11:43+0100\n"
+"PO-Revision-Date: 2022-02-24 23:10+0100\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Poedit 3.0\n"
 "Language: sv_SE\n"
-"Project-Id-Version: Plugins - Tornevalls Resurs Bank payment gateway for WooCommerce - Stable Readme (latest release)\n"
+"Project-Id-Version: Plugins - Tornevalls Resurs Bank Payment Gateway for WooCommerce - Stable Readme (latest release)\n"
 "POT-Creation-Date: \n"
 "Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
 "Language-Team: \n"
@@ -19,20 +19,98 @@ msgid "Tornevalls Resurs Bank Payment Gateway for WooCommerce."
 msgstr "Tornevalls Resurs Bank betalningslösning för WooCommerce."
 
 #. Plugin name.
-msgid "Tornevalls Resurs Bank payment gateway for WooCommerce"
+msgid "Tornevalls Resurs Bank Payment Gateway for WooCommerce"
 msgstr "Tornevalls Resurs Bank betalningslösning för WooCommerce"
 
 #. Found in faq paragraph.
-msgid "From time to time, you will notices that errors and exceptions shows up on your screen. Normally, when doing API calls, this is done by <a href=\"https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349\">Resurs Bank Ecommerce API for PHP</a>. Such messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained. Resurs Bank also have furter information about some error messages. <a href=\"https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases\">You can see some of them here</a>."
-msgstr "Då och då kommer du att märka att fel och undantag visas på skärmen. Normalt sett, när du API-anrop utförs, görs detta av <a href=\"https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349\">Resurs Bank Ecommerce API för PHP</a>. Sådana meddelanden kan spåras av Resurs Bank support, om något är oklart men många gånger är felmeddelande självförklarande. Resurs Bank har mer information om dessa felmeddelanden. <a href=\"https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases\">Du kan se några av dem här</a>."
+msgid "The payment flow itself for each API <a href=\"https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described\">is described here</a>."
+msgstr "Själva betalningsflödet för varje API <a href=\"https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described\">beskrivs här</a>."
 
 #. Found in faq paragraph.
-msgid "No. This plugin is a complete reboot. The future intentions might be to replace the other version in the future and <strong>this</strong> release is currently considered a side project, <em>even if it has been developed by an employee</em> at Resurs Bank."
-msgstr "Nej. Detta plugin är en fullständig \"reboot\". De framtida avsikterna kan vara att ersätta den andra versionen i framtiden och <strong>denna</strong> utgåva betraktas för närvarande som ett sidoprojekt, <em>även om det har utvecklats av en anställd</em> på Resurs Bank."
+msgid "A common question about customer events is \"what happened?\" and \"why\" - very often about the order creation process and signing routines. Most of the details is usually placed in the order notes for the order so merchants can track down issues themselves, but if you need more information about events on Resurs Bank side you could also consider contacting the support."
+msgstr "En vanlig fråga om kundhändelser är \"vad hände?\" och \"varför\" - väldigt ofta om orderskapandeprocessen och signeringsrutiner. De flesta av dessa uppgifter läggs vanligtvis i orderanteckningarna för beställningen så att handlare själva kan spåra problem, men om du behöver mer information om händelser på Resurs Banks sida så kan du även överväga att kontakta supporten."
+
+#. Found in faq paragraph.
+msgid "From time to time, errors and exceptions shows up on your screen. Normally, when doing API calls, the messages comes from <a href=\"https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349\">Resurs Bank Ecommerce API</a>. Many of the messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained. If you are unsure, contact the support preferrably with information about your system attached (which in the plugin's admin interface can be found under \"Support and help\" or \"Support och hjälp\" in swedish). A screenshot of that layout are attached to this plugin-repository (screenshot 8). <a href=\"https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases\">You can also see some of the error messages produced by the library itself here</a>."
+msgstr "Då och då visas fel och undantag på skärmen. Normalt sett, när du gör API-samtal, kommer meddelandena från <a href=\"https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349\">Resurs Bank e-handels-API</a>. Många av meddelandena kan spåras av Resurs Banks support, om något är oklart men många gånger är felmeddelanden självförklarande. Om du är osäker, kontakta supporten gärna med information om ditt system bifogat (i pluginets administratörsgränssnitt finns detta under \"Support and help\" eller \"Support och hjälp\" på svenska). En skärmdump av den layouten är kopplad till detta plugin-arkiv (skärmdump 8). <a href=\"https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases\">Du kan också se några av felmeddelandena som produceras av själva biblioteket här</a>."
+
+#. Found in faq paragraph.
+msgid "No. This plugin is a complete reboot. The future intentions might be to replace the other version and <strong>this</strong> release is currently considered a side project."
+msgstr "Nej. Detta plugin är en fullständig omstart. De framtida avsikterna skulle kunna vara att ersätta den andra versionen och <strong>den här</strong> versionen betraktas för närvarande som ett sidoprojekt."
 
 #. Found in faq list item.
-msgid "Many ideas are lifted straight out from the prior version - but not all of them. Remember, this is a third party reboot of an old release. There are settings in this version that is no longer working, especially features that is bound to filters and actions. For actions and filters, you can take a look at the <a href=\"https://docs.tornevall.net/x/HoC4Aw\">documentation</a>. Further information about settings will come."
-msgstr "Många idéer lyfts direkt från den tidigare versionen - men inte alla. Kom ihåg att detta är en omstart från en tredje part av en äldre version. Det finns inställningar i den här versionen som inte längre fungerar, särskilt funktioner som är bundna till filter och åtgärder. För actions och filter kan du ta en titt på <a href=\"https://docs.tornevall.net/x/HoC4Aw\">dokumentationen</a>. Mer information om inställningar kommer."
+msgid ""
+"403 = Forbidden.\n"
+"<strong>Cause</strong>: During testing, this is a bit more common if you are using a server host that is not located in \"safe countries\".\n"
+"<strong>Solution:</strong> Contact Resurs Bank for support."
+msgstr ""
+"403 = Förbjudet.\n"
+"<strong>Orsak</strong>: Under testning så är detta något vanligare om du använder ett webbhotell som inte finns i \"säkra länder\".\n"
+"<strong>Lösning:</strong> Kontakta Resurs Bank för support."
+
+#. Found in installation list item.
+msgid "Configure the plugin via Resurs Bank control panel in admin."
+msgstr "Konfigurera tillägget via Resurs Banks kontrollpanel i admin."
+
+#. Found in description paragraph.
+msgid "Requirements and system prerequisites are listed below."
+msgstr "Krav och systemförutsättningar listas nedan."
+
+#. Found in description paragraph.
+msgid "There is a publicly available release out supported by Resurs Bank (v2.2). There <strong>may be breaking changes</strong> if you plan to use <strong>this</strong> plugin, as it was a direct upgrade of the Resurs Bank supported release."
+msgstr "Det finns en publikt tillgänglig utgåva ute som stöds av Resurs Bank (v2.2). Det <strong>kan uppstå brytande förändringar</strong> om du planerar att använda <strong>det här</strong> plugin-programmet, som om det vore en direkt uppgradering av Resurs Bank-stödd utgåva."
+
+#. Found in description paragraph.
+msgid "<em>Please read the warning notes about testing and installing this plugin directly in a production environment below.</em>"
+msgstr "<em>Vänligen läs varningsanteckningarna om att testa och installera det här plugin-programmet direkt i en produktionsmiljö nedan.</em>"
+
+#. Found in description paragraph.
+msgid "Payment gateway for Resurs Bank."
+msgstr "Betalningslösning för Resurs Bank."
+
+#. Found in description list item.
+msgid "<a href=\"https://test.resurs.com/docs/display/ecom/Hosted+Payment+Flow\">Hosted Payment Flow</a>. A paypal like checkout where most of the payment events takes place at Resurs Bank."
+msgstr "<a href=\"https://test.resurs.com/docs/display/ecom/Hosted+Payment+Flow\">Hostat betalningsflöde</a>. En PayPal-liknande kassa där de flesta betalningshändelserna sker hos Resurs Bank."
+
+#. Found in description list item.
+msgid "<a href=\"https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web\">Resurs Checkout Web</a>. Iframe integration. Currently supporting <strong>RCOv1 and RCOv2</strong>."
+msgstr "<a href=\"https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web\">Resurs Checkout-webb</a>. Iframe-integration. Stöder för närvarande <strong>RCOv1 och RCOv2</strong>."
+
+#. Found in description list item.
+msgid "<a href=\"https://test.resurs.com/docs/display/ecom/Simplified+Flow+API\">Simplified Shop Flow</a>. Integrated checkout that works with WooCommerce built in features."
+msgstr "<a href=\"https://test.resurs.com/docs/display/ecom/Simplified+Flow+API\">Förenklat butiksflöde</a>. Integrerad kassa som fungerar med WooCommerce inbyggda funktioner."
+
+#. Found in description header.
+msgid "SoapClient"
+msgstr "SoapClient"
+
+#. Found in description header.
+msgid "Supported shop flows"
+msgstr "Butiksflöden som stöds"
+
+#. Screenshot description.
+msgid "Support and help screen."
+msgstr "Support och hjälp-sida."
+
+#. Screenshot description.
+msgid "Customer Tweaking Section, with mock features."
+msgstr "\"Kund-tweaking\", med möjlighet att testa fel."
+
+#. Screenshot description.
+msgid "Enabling Developer Mode."
+msgstr "Aktiverande av utvecklarläget."
+
+#. Screenshot description.
+msgid "Fraud Configuration Section."
+msgstr "Sektion för bedrägerikontroller."
+
+#. Screenshot description.
+msgid "Resurs Checkout Variant 1."
+msgstr "Resurs Checkout Variant 1."
+
+#. Found in faq list item.
+msgid "Many ideas are lifted straight out from the prior version - but not all of them. Remember, this is a third party reboot of an old release. There are settings in this version that is no longer working as before (or at least as expected), especially features that is bound to filters and actions. For actions and filters, you can take a look at the <a href=\"https://docs.tornevall.net/x/HoC4Aw\">documentation</a>. Further information about settings will come."
+msgstr "Många idéer lyfts direkt från den tidigare versionen - men inte alla. Kom ihåg att detta är en omstartsprojekt byggt av tredje part från en gammal version. Det finns inställningar i den här versionen som inte längre fungerar som tidigare (åtminstone inte som förväntat), speciellt funktioner som är bundna till filter och actions. För actions och filter kan du ta en titt på <a href=\"https://docs.tornevall.net/x/HoC4Aw\">dokumentationen</a>. Mer information om inställningar kommer."
 
 #. Found in faq header.
 msgid "I see an order but find no information connected to Resurs Bank"
@@ -87,12 +165,8 @@ msgid "WARNING"
 msgstr "VARNING"
 
 #. Found in faq paragraph.
-msgid "Full description about how \"simplifiedShopFlow\", \"hosted flow\" and \"Resurs Checkout\" works, not only here, but mostly anywhere can be seen at <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
-msgstr "Fullständig beskrivning av hur \"simplifiedShopFlow\", \"hosted flow\" och \"Resurs Checkout\" fungerar, inte bara här, utan mestadels var som helst kan ses på <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
-
-#. Found in faq paragraph.
-msgid "This is a common question about customer actions and how the order has been created/signed. Most of the details is usually placed in the order notes for the order, but if you need more information you could also consider contacting Resurs Bank support."
-msgstr "Detta är en vanlig fråga om kundhändelser och hur ordern har skapats/signerats. De flesta uppgifterna placeras vanligtvis i orderanteckningarna för beställningen, men om du behöver mer information kan du också överväga att kontakta Resurs Banks support."
+msgid "Full description about how \"simplifiedShopFlow\", \"hosted flow\" and \"Resurs Checkout\" works for this plugin can be read at <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
+msgstr "Fullständig beskrivning av hur \"simplifiedShopFlow\", \"hosted flow\" och \"Resurs Checkout\" fungerar för detta plugin kan läsas på <a href=\"https://docs.tornevall.net/x/IAAkBQ\">https://docs.tornevall.net/x/IAAkBQ</a>"
 
 #. Found in faq paragraph.
 msgid "There are several reasons for the 40X errors, but if they are thrown from an EComPHP API message, there are few things to take in consideration:"
@@ -105,16 +179,6 @@ msgstr "<strong>\"Version 2.2.x\"</strong> är för närvarande den <strong>offi
 #. Found in faq paragraph.
 msgid "You may visit <a href=\"https://docs.tornevall.net/x/CoC4Aw\">docs.tornevall.net</a> for more information regarding the plugin. For questions about API and Resurs Bank please visit <a href=\"https://test.resurs.com/docs/\">test.resurs.com/docs</a>."
 msgstr "Du kan besöka <a href=\"https://docs.tornevall.net/x/CoC4Aw\">docs.tornevall.net</a> för mer information om plugin. För frågor om API och Resurs Bank, besök <a href=\"https://test.resurs.com/docs/\">test.resurs.com/docs</a>."
-
-#. Found in faq list item.
-msgid ""
-"403 = Forbidden.\n"
-"<strong>Cause</strong>: This is a bit be more common during testing.\n"
-"<strong>Solution:</strong> Resolution: Contact Resurs Bank for support."
-msgstr ""
-"403 = Förbjudet.\n"
-"<strong>Orsak</strong>: Detta är lite vanligare under testning.\n"
-"<strong>Lösning:</strong> Lösning: Kontakta Resurs Bank för support."
 
 #. Found in faq list item.
 msgid ""
@@ -147,32 +211,28 @@ msgid "Where can I get more information about this plugin?"
 msgstr "Var kan jag få mer information om det här tillägget?"
 
 #. Found in installation paragraph.
-msgid "However, this plugin release should not be considered an official upgrade from \"an older version\" as there currently are no old versions available yet - except from the <em>official release</em> from Resurs Bank. For the moment, this is not the same thing."
-msgstr "Denna plugin-utgåva bör dock inte betraktas som en officiell uppgradering från \"en äldre version\" eftersom det för närvarande inte finns några tidigare versioner tillgängliga ännu - förutom från den <em>officiella utgåvan</em> från Resurs Bank. För tillfället är detta inte samma sak."
+msgid "This plugin release should not be considered an official upgrade from \"an older version\" as there currently are no old versions available yet - except from the <em>official release</em> from Resurs Bank. For the moment, this is not the same thing."
+msgstr "Denna plugin-utgåva bör inte betraktas som en officiell uppgradering från \"en äldre version\" eftersom det för närvarande inte finns några tidigare versioner tillgängliga ännu - förutom genom den <em>officiella utgåvan</em> från Resurs Bank. För tillfället är detta inte samma sak."
 
 #. Found in installation paragraph.
 msgid "When you install this plugin and eventually did use an older version, you will also get the opportunity to import the old credentials. For full documentation, take a look at <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
 msgstr "När du installerar det här tillägget och så eventuellt har använt en äldre version, så får du också möjlighet att importera de gamla autentiseringsuppgifterna. För fullständig dokumentation, ta en titt på <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
 
 #. Found in installation paragraph.
-msgid "Are you using this plugin as an upgrade from an older version? Feel free to do that; upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own. This may be important especially if you have a custom setup."
-msgstr "Använder du det här tillägget som en uppgradering från en äldre version? Gör gärna det; uppgradering är avsedd att vara sömlös och bör inte leda till att något bryts. Det kan finnas konfigurationsinställningar att ta hänsyn till att titta igenom, om de fortfarande matchar dina. Detta kan vara viktigt, särskilt om du har anpassat installationen."
+msgid "Are you using this plugin as an upgrade from an older version? No problems! Upgrading is meant to be seamless and should not lead to hard breaking changes. There might be configuration settings to take in consideration to look through, if they are still matching your own. This may be important especially if you have a custom setup."
+msgstr "Använder du det här pluginet som en uppgradering från en äldre version? Inga problem! Uppgraderingar är tänkta att vara sömlösa och bör inte leda till besvärligare förändringar. Det kan dock finnas konfigurationsinställningar att ta hänsyn till och titta igenom, så att de fortfarande matchar dina egna krav. Detta kan vara viktigt, särskilt om du har en anpassad installation."
 
 #. Found in installation paragraph.
 msgid "Preferred Method is to install and activate the plugin through the WordPress plugin installer."
 msgstr "Föredragen metod är att installera och aktivera tillägget via WordPress plugin-hanterare."
 
 #. Found in installation list item.
-msgid "Configure the plugin via admin control panel"
-msgstr "Konfigurera tillägget via kontrollpanelen"
+msgid "Activate the plugin through the \"Plugins\" menu in WordPress."
+msgstr "Aktivera tillägget via menyn \"Plugins\" i WordPress."
 
 #. Found in installation list item.
-msgid "Activate the plugin through the \"Plugins\" menu in WordPress"
-msgstr "Aktivera tillägget via menyn \"Plugins\" i WordPress"
-
-#. Found in installation list item.
-msgid "Upload the plugin archive to the \"/wp-content/plugins/\" directory"
-msgstr "Ladda upp tilläggspaketet till katalogen \"/wp-content/plugins/\""
+msgid "Upload the plugin archive to the \"/wp-content/plugins/\" directory."
+msgstr "Ladda upp tilläggspaketet till katalogen \"/wp-content/plugins/\"."
 
 #. Found in description paragraph.
 msgid "If you'd like to contribute to this project, you can either sign up to <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues\">github</a> and create an issue or use the old <a href=\"https://tracker.tornevall.net/projects/RWC\">Bitbucket Project</a> to do this on. The full project status can be found <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">at this dashboard</a> since that's where the project started."
@@ -183,11 +243,9 @@ msgid "Help with translation of the plugin by joining <a href=\"https://crwd.in/
 msgstr "Hjälp till med översättning av tillägget genom att gå med i <a href=\"https://crwd.in/trwbc\">Crowdin</a>!"
 
 #. Found in description paragraph.
-msgid ""
-"Check out <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/README.md\">README.md</a> for more details. Documentation\n"
-"for this specific release is currently located at <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
+msgid "Check out <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/README.md\">README.md</a> for more details. Documentation for this specific release is currently located at <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
 msgstr ""
-"Kolla in <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/README.md\">README.md</a> för mer information. Dokumentation\n"
+"Kolla in <a href=\"https://github.com/Tornevall/wpwc-resurs/blob/master/README.md\">README.md</a> för mer information. Dokumentation\n"
 "för den här specifika versionen finns för närvarande på <a href=\"https://docs.tornevall.net/x/CoC4Aw\">https://docs.tornevall.net/x/CoC4Aw</a>"
 
 #. Found in description paragraph.
@@ -195,7 +253,7 @@ msgid "Primary new problems should be discovered in TEST rather than production 
 msgstr "Primära nya problem bör upptäckas i TEST snarare än produktion eftersom kostnaderna är mycket lägre, där inga riktiga människor är beroende av misslyckade köp eller betalningar. Om något misslyckas i produktionen betyder det också att du är den som potentiellt tappar trafik medan din webbplats är nere."
 
 #. Found in description paragraph.
-msgid "If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is supposedly <strong>equal</strong> to a production environment. Never run any tests in production!"
+msgid "If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is <strong>equal</strong> to your production environment. Never run any tests in production!"
 msgstr "Om du är helt ny på detta tillägg eller WordPress överlag, föreslår jag att du kör det i en dedikerad testmiljö som antas är <strong>likadan</strong> som en produktionsmiljö. Kör aldrig några tester i produktionen!"
 
 #. Found in description paragraph.
@@ -203,24 +261,12 @@ msgid "The main responsibility that this product works properly with your system
 msgstr "Huvudansvaret för att denna produkt fungerar korrekt ihop med ditt system är ditt. För <strong>din</strong> säkerhet bör du därför <strong>TESTA tillägget i</strong> en dedikerad testmiljö <strong>innan du använder den</strong> i en produktion."
 
 #. Found in description paragraph.
-msgid "See below for information about requirements."
-msgstr "Se nedan för information om krav."
-
-#. Found in description paragraph.
 msgid "<a href=\"https://crowdin.com/project/trwbc\"></a>"
 msgstr "<a href=\"https://crowdin.com/project/trwbc\"></a>"
 
 #. Found in description paragraph.
-msgid "There is a publicly available release out supported by Resurs Bank (v2.2). There <strong>may be breaking changes</strong> if you plan to use <strong>this</strong> plugin as it was an upgrade from the Resurs Bank supported release, since the settings and filters have been replaced."
-msgstr "Det finns en publikt tillgänglig version som har släppts av Resurs Bank (v2.2). Det <strong>kan finnas brytande ändringar</strong> om du planerar att använda <strong>det här</strong> tillägget som om det vore en uppgradering från Resurs Bank-stödda utgåvan, eftersom inställningarna och filtren har bytts ut."
-
-#. Found in description paragraph.
 msgid "<strong>SoapClient is required</strong> for all actions related to \"after shop\", debiting, refunding, annulments, and so on. Also, your site has to be fully reachable with SSL/HTTPS. <strong>For full list of requirements, look below.</strong>"
 msgstr "<strong>SoapClient krävs</strong> för alla händelser relaterade till \"after shop\", debitering, återbetalning, annulleringar och så vidare. Din webbplats måste också vara fullt nåbar med SSL / HTTPS. <strong>För fullständig lista över krav, se nedan.</strong>"
-
-#. Found in description paragraph.
-msgid "Payment gateway for Resurs Bank AB with support for the most recent shop flows."
-msgstr "Betalningsgateway för Resurs Bank AB med stöd för de senaste köpflödena."
 
 #. Found in description list item.
 msgid "WordPress: Preferably at least v5.5. It is highly recommended to go for the latest version as soon as possible if you're not already there. See <a href=\"https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/\">here</a> for more information."
@@ -231,8 +277,8 @@ msgid "PHP streams? Yes, you still need them since SoapClient is actually using 
 msgstr "PHP streams? Ja, du behöver dem fortfarande eftersom SoapClient använder det."
 
 #. Found in description list item.
-msgid "Curl is highly <strong>recommended</strong> but not necessary. We suggest that you do not trust only PHP streams on this one as you may loose important features if you run explicitly with streams."
-msgstr "Curl <strong>rekommenderas starkt men</strong> inte nödvändigt. Vi föreslår att du inte bara litar på PHP-streams på den här eftersom du kan förlora viktiga funktioner om du kör explicit med strömmar."
+msgid "Curl is highly <strong>recommended</strong> but not necessary. We suggest that you do not trust only PHP built in communications as you may loose important features if you run explicitly with streams."
+msgstr "Curl <strong>rekommenderas starkt men</strong> är inte nödvändigt. Vi föreslår dock att du inte bara litar på inbyggd PHP-kommunikation eftersom du kan förlora viktiga funktioner om du kör explicit med \"streams\"."
 
 #. Found in description list item.
 msgid "<strong>Required</strong>: SSL - HTTPS <strong>must</strong> be <strong>fully</strong> enabled. This is a callback security measure, which is required from Resurs Bank."
@@ -253,37 +299,6 @@ msgstr "PHP: <a href=\"https://docs.woocommerce.com/document/server-requirements
 #. Found in description header.
 msgid "Contribute"
 msgstr "Bidra"
-
-#. Found in changelog paragraph.
-msgid ""
-"Active/open issues can be found <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">here</a> <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues\">and here</a>. You can also <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspect the project status here</a>!\n"
-"Most recent <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/CHANGELOG.md\">CHANGELOG can be found here</a>."
-msgstr ""
-"Aktiva/öppna frågor hittar du <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">här</a> <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues\">och här</a>. Du kan också <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspektera projektstatusen här</a>!\n"
-"Senaste <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/CHANGELOG.md\">CHANGELOG hittar du här</a>."
-
-#. Found in changelog list item.
-msgid "Spelling corrections, translations, etc."
-msgstr "Stavningskorrigeringar, översättningar m.m."
-
-#. Found in changelog list item.
-msgid "Content information, readme's, assets and other updates."
-msgstr "Innehållsinformation, readme-filer, tillgångar och andra uppdateringar."
-
-#. Found in changelog list item.
-msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-298\">RWC-298</a> - Extended test mode."
-msgstr "<a href=\"https://tracker.tornevall.net/browse/RWC-298\">RWC-298</a> - Utökat testläge."
-
-#. Found in changelog paragraph.
-msgid ""
-"<strong>Sub-task</strong>\n"
-"* <a href=\"https://tracker.tornevall.net/browse/RWC-33\">RWC-33</a> - woocommerce_resurs_bank_' . $type . '_checkout_icon (iconified method)\n"
-"* <a href=\"https://tracker.tornevall.net/browse/RWC-38\">RWC-38</a> - resurs_trigger_test_callback\n"
-"* <a href=\"https://tracker.tornevall.net/browse/RWC-40\">RWC-40</a> - resursbank_set_storeid\n"
-"* <a href=\"https://tracker.tornevall.net/browse/RWC-43\">RWC-43</a> - resurs_getaddress_enabled\n"
-"* <a href=\"https://tracker.tornevall.net/browse/RWC-48\">RWC-48</a> - resursbank_custom_annuity_string\n"
-"* <a href=\"https://tracker.tornevall.net/browse/RWC-52\">RWC-52</a> - <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/16\">#16</a>: resursbank_temporary_disable_checkout"
-msgstr ""
 
 #. Found in changelog paragraph.
 msgid ""
@@ -425,6 +440,73 @@ msgid ""
 msgstr ""
 
 #. Found in changelog paragraph.
+msgid "Github references should be included for all releases."
+msgstr "Github-referenser skall inkluderas för alla utgåvor."
+
+#. Found in changelog paragraph.
+msgid "Active/open issues can be found <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">here</a> <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues\">and here</a>. You can also <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspect the project status here</a>! Most recent <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/CHANGELOG.md\">CHANGELOG can be found here</a>."
+msgstr "Aktiva/öppna frågor hittar du <a href=\"https://tracker.tornevall.net/projects/RWC/issues/\">här</a> <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues\">och här</a>. Du kan också <a href=\"https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200\">inspektera projektstatusen här</a>! Senaste <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/CHANGELOG.md\">CHANGELOG hittar du här</a>."
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-325\">RWC-325</a> - Check expected versions before allowing complete run"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-324\">RWC-324</a> - Bug-ish in WooCommerce 6.2.0 causes our admin-layout to break"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-323\">RWC-323</a> - Callback trigger must keep its \"last received\""
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-322\">RWC-322</a> - Timestamp last updated callbacks/payment methods"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-319\">RWC-319</a> - ip checking feature should also request a soapdocument"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-317\">RWC-317</a> - Helpers should apply random phone and email in checkout fields when button is pressed"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-314\">RWC-314</a> - Clean up old settings button"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-316\">RWC-316</a> - get_cost_of_purchase default html view template includes wp_head which causes problems on sanitation"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-315\">RWC-315</a> - Logging obfuscated data causes log view unviewable"
+msgstr ""
+
+#. Found in changelog list item.
+msgid "Spelling corrections, translations, etc."
+msgstr "Stavningskorrigeringar, översättningar m.m."
+
+#. Found in changelog list item.
+msgid "Content information, readme's, assets and other updates."
+msgstr "Innehållsinformation, readme-filer, tillgångar och andra uppdateringar."
+
+#. Found in changelog list item.
+msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-298\">RWC-298</a> - Extended test mode."
+msgstr "<a href=\"https://tracker.tornevall.net/browse/RWC-298\">RWC-298</a> - Utökat testläge."
+
+#. Found in changelog paragraph.
+msgid ""
+"<strong>Sub-task</strong>\n"
+"* <a href=\"https://tracker.tornevall.net/browse/RWC-33\">RWC-33</a> - woocommerce_resurs_bank_' . $type . '_checkout_icon (iconified method)\n"
+"* <a href=\"https://tracker.tornevall.net/browse/RWC-38\">RWC-38</a> - resurs_trigger_test_callback\n"
+"* <a href=\"https://tracker.tornevall.net/browse/RWC-40\">RWC-40</a> - resursbank_set_storeid\n"
+"* <a href=\"https://tracker.tornevall.net/browse/RWC-43\">RWC-43</a> - resurs_getaddress_enabled\n"
+"* <a href=\"https://tracker.tornevall.net/browse/RWC-48\">RWC-48</a> - resursbank_custom_annuity_string\n"
+"* <a href=\"https://tracker.tornevall.net/browse/RWC-52\">RWC-52</a> - <a href=\"https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/16\">#16</a>: resursbank_temporary_disable_checkout"
+msgstr ""
+
+#. Found in changelog paragraph.
 msgid ""
 "<strong>Bug</strong>\n"
 "* <a href=\"https://tracker.tornevall.net/browse/RWC-22\">RWC-22</a> - CRITICAL Uncaught Error: Maximum function nesting level of '500' reached\n"
@@ -444,12 +526,6 @@ msgstr ""
 
 #. Found in changelog paragraph.
 msgid "<strong>Milestone/Epic -- Release Candidate 1</strong>"
-msgstr ""
-
-#. Found in changelog paragraph.
-msgid ""
-"<em>0.0.1.0 is the first release candidate of what's planned to become 1.0.0.</em>\n"
-"Github references should be included for all releases."
 msgstr ""
 
 #. Found in changelog list item.
