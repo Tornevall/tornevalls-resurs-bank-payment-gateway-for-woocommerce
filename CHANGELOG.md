@@ -3,6 +3,13 @@
 _0.0.1.0 is the first release candidate of what's planned to become 1.0.0._
 Github references should be included for all releases.
 
+# 0.0.1.5 + 1.0.0
+
+* [RWC-76](https://tracker.tornevall.net/browse/RWC-76) - Support fees in orders
+* [RWC-318](https://tracker.tornevall.net/browse/RWC-318) - Tax setting when nothing else is applicable
+* [RWC-330](https://tracker.tornevall.net/browse/RWC-330) - Internal payment method titles/description
+* [RWC-331](https://tracker.tornevall.net/browse/RWC-331) - Part payment in checkout
+
 # 0.0.1.4 + 1.0.0
 
 * [RWC-315](https://tracker.tornevall.net/browse/RWC-315) - Bug: Logging obfuscated data causes log view unviewable
