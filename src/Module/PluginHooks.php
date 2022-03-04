@@ -238,8 +238,10 @@ class PluginHooks
 
         $connection->addOrderLine(
             WordPress::applyFilters('getShippingName', 'shipping'),
-            WordPress::applyFilters('getShippingDescription',
-                __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')),
+            WordPress::applyFilters(
+                'getShippingDescription',
+                __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+            ),
             preg_replace('/^-/', '', $shippingTotal),
             $shipping_tax_pct,
             'st',
