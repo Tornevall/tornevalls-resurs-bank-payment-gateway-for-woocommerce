@@ -1606,7 +1606,9 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     *
+     * @param array $paymentMethods
+     * @return array
+     * @since 0.0.1.5
      */
     private static function getInternalMethodDescriptions(array $paymentMethods): array
     {
