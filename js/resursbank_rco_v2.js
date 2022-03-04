@@ -98,6 +98,14 @@ jQuery(document).ready(function ($) {
         });
         $ResursCheckout.onPaymentChange(function (event) {
             resursBankRcoDataContainer.rco_payment = event
+            getResursAjaxify(
+                'post',
+                'resurs_bank_rco_synchronize',
+                event,
+                function (response) {
+                    // No action taken.
+                }
+            );
         });
         $ResursCheckout.onPaymentFail(function (event) {
             $('body').trigger('rbwc_purchase_reject', {type: 'fail'});

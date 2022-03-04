@@ -58,6 +58,7 @@
     padding: 2px !important;
     background: #ffffff;
     border: 1px solid #ffffff;
+    vertical-align: top;
 }
 
 .trbwc_cb_input {
@@ -65,6 +66,27 @@
     border: none;
     font-size: 12px;
     background: #ffffff !important;
+}
+
+.trbwc_method_description_input {
+    width: 100%;
+    border: none !important;
+    font-size: 12px;
+}
+
+.paymentMethodsInfoBox {
+    border: 1px solid black;
+    padding: 2px;
+    margin: 5px;
+    border-radius: 1px;
+    font-weight: bold;
+    background: #fffce8;
+}
+
+.trbwc_method_fee_input {
+    width: 100%;
+    border: none !important;
+    font-size: 12px;
 }
 
 .r_annuity {

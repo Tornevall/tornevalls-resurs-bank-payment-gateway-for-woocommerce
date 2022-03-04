@@ -385,15 +385,21 @@ class Data
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getAnnuityFactors()
+    public static function getAnnuityFactors($productPrice = null, $display = true)
     {
         global $product;
 
+        $return = null;
+
         $currentFactor = self::getResursOption('currentAnnuityFactor');
-        if (is_object($product) && !empty($currentFactor)) {
+        if ((is_object($product) || $productPrice > 0) && !empty($currentFactor)) {
+            if (is_object($product)) {
+                $productPrice = wc_get_price_to_display($product);
+            }
+
             try {
-                self::getAnnuityHtml(
-                    wc_get_price_to_display($product),
+                $return = self::getAnnuityHtml(
+                    (float)$productPrice,
                     self::getResursOption('currentAnnuityFactor'),
                     (int)self::getResursOption('currentAnnuityDuration')
                 );
@@ -412,6 +418,12 @@ class Data
                     );
                 }
             }
+        }
+
+        if ($display) {
+            echo $return;
+        } else {
+            return $return;
         }
     }
 
@@ -440,14 +452,17 @@ class Data
     }
 
     /**
-     * @param string $key
-     * @param null $namespace
+     * @param mixed $key
+     * @param mixed $namespace
      * @param bool $getDefaults
-     * @return bool|string
+     * @return bool|string|mixed
      * @since 0.0.1.0
      */
-    public static function getResursOption($key, $namespace = null, $getDefaults = true)
-    {
+    public static function getResursOption(
+        $key,
+        $namespace = '',
+        bool $getDefaults = true
+    ) {
         $return = null;
 
         if (preg_match('/woocom(.*?)resurs/', $namespace)) {
@@ -606,7 +621,7 @@ class Data
             );
 
             // Fetch the rest from the template and display.
-            echo Data::getEscapedHtml(
+            return Data::getEscapedHtml(
                 self::getGenericClass()->getTemplate(
                     'product_annuity.phtml',
                     [
@@ -713,6 +728,7 @@ class Data
                 'class' => [],
                 'label' => [],
                 'onclick' => [],
+                'title' => [],
             ],
             'p' => [
                 'style' => [],
@@ -735,7 +751,7 @@ class Data
             ],
             'option' => [
                 'value' => [],
-                'selected' => []
+                'selected' => [],
             ],
             'button' => [
                 'id' => [],
@@ -1172,6 +1188,7 @@ class Data
      * Get current payment method from session.
      *
      * @return string
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getPaymentMethodBySession(): string
@@ -2318,8 +2335,9 @@ class Data
 
     /**
      * @param $key
-     * @param bool|array $post_data
+     * @param null $post_data
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.1
      */
     public static function getRequest($key, $post_data = null)
@@ -2473,7 +2491,7 @@ class Data
      * @return array
      * @since 0.0.1.1
      */
-    public static function getObfuscatedData($obfuscateThis)
+    public static function getObfuscatedData($obfuscateThis): array
     {
         if (!Data::getResursOption('must_obfuscate_logged_personal_data')) {
             return $obfuscateThis;
@@ -2531,6 +2549,25 @@ class Data
 
         if (!$return && Data::canHandleOrder($paymentMethod)) {
             $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return string
+     * @since 0.0.1.5
+     */
+    public static function getResursMethodFromPrefix($paymentMethod): string
+    {
+        $return = '';
+        if (self::isResursMethod($paymentMethod)) {
+            $return = (string)preg_replace(
+                sprintf('/^%s_/', self::getPrefix()),
+                '',
+                $paymentMethod
+            );
         }
 
         return $return;

@@ -103,6 +103,17 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
+                'internal_tax' => [
+                    'id' => 'internal_tax',
+                    'title' => __('Internal Tax Class', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'type' => 'select',
+                    'options' => WordPress::applyFilters('getTaxClasses', []),
+                    'default' => 'standard',
+                    'desc' => __(
+                        'Tax class to use when nothing else is specified (for example, on payment fees).',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                ],
                 'environment' => [
                     'id' => 'environment',
                     'title' => __('Environment', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
@@ -397,7 +408,7 @@ class FormFields extends WC_Settings_API
                 'part_payment_template' => [
                     'type' => 'select',
                     'id' => 'part_payment_template',
-                    'title' => __('Part payment template', 'rbwc'),
+                    'title' => __('Part payment template', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'desc' => __(
                         'When you enable the part payment options for products, you can choose your own ' .
                         'template to display. Templates are built on WordPress pages. If you want to show a custom ' .
@@ -408,6 +419,21 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'options' => WordPress::applyFilters('getPartPaymentPage', []),
+                ],
+                'part_payment_sums' => [
+                    'type' => 'checkbox',
+                    'id' => 'part_payment_sums',
+                    'title' => __(
+                        'Allow part payment information in checkout',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'default' => 'no',
+                    'desc_tip' => __(
+                        'If part payment information is enabled with annuity factors, you can choose to activate ' .
+                        'this template in the cart review and the order review.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                 ],
                 'payment_methods_settings_end' => [
                     'id' => 'payment_methods_settings_end',
@@ -1580,6 +1606,27 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * @param array $paymentMethods
+     * @return array
+     * @since 0.0.1.5
+     */
+    private static function getInternalMethodDescriptions(array $paymentMethods): array
+    {
+        if (is_array($paymentMethods)) {
+            foreach ($paymentMethods as $methodIdx => $methodItem) {
+                if (is_object($methodItem)) {
+                    $description = Data::getResursOption(sprintf('method_custom_description_%s', $methodItem->id));
+                    $internalFee = Data::getResursOption(sprintf('method_custom_fee_%s', $methodItem->id));
+                    $methodItem->internalDescription = $description;
+                    $methodItem->internalFee = $internalFee;
+                    $paymentMethods[$methodIdx] = $methodItem;
+                }
+            }
+        }
+        return $paymentMethods;
+    }
+
+    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
@@ -1625,6 +1672,7 @@ class FormFields extends WC_Settings_API
                     }
                 }
             }
+            $paymentMethods = self::getInternalMethodDescriptions($paymentMethods);
 
             $paymentMethodTemplate = Data::getGenericClass()->getTemplate(
                 'adminpage_paymentmethods.phtml',
@@ -1639,6 +1687,7 @@ class FormFields extends WC_Settings_API
                     'environment' => Data::getResursOption('environment'),
                     'isBleedingEdge' => Data::isBleedingEdge(),
                     'lastMethodUpdate' => self::getLastPaymentMethodUpdate(),
+                    'canUseFee' => Data::getCheckoutType() !== 'rco'
                 ]
             );
             echo Data::getEscapedHtml($paymentMethodTemplate);

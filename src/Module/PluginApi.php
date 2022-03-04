@@ -158,6 +158,7 @@ class PluginApi
      * @param null $expire
      * @param null $noReply Boolean that returns the answer instead of replying live.
      * @return bool
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getValidatedNonce(
@@ -213,10 +214,34 @@ class PluginApi
     }
 
     /**
+     * Simple synchronizer for payment methods in RCOv2.
+     *
+     * @throws Exception
+     * @since 0.0.1.5
+     */
+    public static function resursBankRcoSynchronize()
+    {
+        $rcoId = Data::getRequest('id');
+
+        if (empty($rcoId)) {
+            // Synchronize and store payment method information in an early state.
+            WooCommerce::setSessionValue('paymentMethod', $rcoId);
+        }
+
+        self::reply(
+            [
+                'noAction' => true
+            ]
+        );
+    }
+
+
+    /**
      * Make sure the used nonce can only be used once.
      *
      * @param $nonceTag
      * @return bool
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function expireNonce($nonceTag): bool
@@ -1080,10 +1105,76 @@ class PluginApi
 
             self::reply(
                 [
-                    'finished' => $cleanUpQuery
+                    'finished' => $cleanUpQuery,
                 ]
             );
         }
+    }
+
+    /**
+     * @since 0.0.1.5
+     * @noinspection OffsetOperationsInspection
+     */
+    public static function updatePaymentMethodDescription()
+    {
+        self::getValidatedNonce(false, false, __FUNCTION__);
+
+        $id = explode('_', Data::getRequest('id'));
+        $newValue = '';
+
+        if (isset($id[2]) && !empty($id[2])) {
+            $paymentMethod = Data::getPaymentMethodById($id[2]);
+            if (is_object($paymentMethod)) {
+                $storeAsKey = sprintf('method_custom_description_%s', $paymentMethod->id);
+                Data::setResursOption($storeAsKey, sanitize_text_field(Data::getRequest('value')));
+                $newValue = Data::getResursOption($storeAsKey);
+            }
+        }
+
+        $result = [
+            'allowed' => isset($paymentMethod->id) ? true : false,
+            'newValue' => $newValue,
+        ];
+
+        self::reply(
+            $result
+        );
+    }
+
+    /**
+     * @since 0.0.1.5
+     * @noinspection OffsetOperationsInspection
+     */
+    public static function updatePaymentMethodFee()
+    {
+        $allowed = false;
+        if (is_admin() && is_ajax()) {
+            $id = explode('_', Data::getRequest('id'));
+            $newValue = '';
+
+            if (isset($id[2]) && !empty($id[2])) {
+                $paymentMethod = Data::getPaymentMethodById($id[2]);
+                $allowed = isset($paymentMethod->id) ? true : false;
+
+                $requestValue = Data::getRequest('value');
+                if (is_object($paymentMethod) && is_numeric($requestValue)) {
+                    $storeAsKey = sprintf('method_custom_fee_%s', $paymentMethod->id);
+                    Data::setResursOption($storeAsKey, (float)$requestValue);
+                    $newValue = Data::getResursOption($storeAsKey);
+                } else {
+                    $allowed = false;
+                }
+            }
+        }
+
+        $result = [
+            'allowed' => $allowed,
+            'newValue' => $newValue,
+        ];
+
+        self::reply(
+            $result
+        );
     }
 
     /**
