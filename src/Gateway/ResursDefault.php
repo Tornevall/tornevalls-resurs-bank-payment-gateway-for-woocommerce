@@ -1420,6 +1420,7 @@ class ResursDefault extends WC_Payment_Gateway
             $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
                 'method' => $this->paymentMethodInformation,
                 'total' => $this->cart->total ?? 0,
+                'customDescription' => WooCommerce::getCustomDescription($this->paymentMethodInformation->id),
             ]);
 
             // Considering this place as a safe place to apply display in styles.

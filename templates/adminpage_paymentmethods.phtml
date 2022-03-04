@@ -25,22 +25,23 @@
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         ); ?></div>
 
-    <div style="font-style: italic;margin-bottom: 5px;">
-        <?php
-        _e(
-            'Amount limits: Defines from-to which order amount a payment method will be displayed in the checkout.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        )
-        ?><br>
-        <?php
-        _e(
-            'Customer types: Which customers that can take advantage of a specific payment method (NATURAL: ' .
-            'Private customers, LEGAL: Company based customers).',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        )
-        ?><br>
+    <div class="paymentMethodsInfoBox">
+        <div style="font-style: italic;margin-bottom: 5px;">
+            <?php
+            _e(
+                'Amount limits: Defines from-to which order amount a payment method will be displayed in the checkout.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            )
+            ?><br>
+            <?php
+            _e(
+                'Customer types: Which customers that can take advantage of a specific payment method (NATURAL: ' .
+                'Private customers, LEGAL: Company based customers).',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            )
+            ?>
+        </div>
     </div>
-
     <table width="100%" style="border: none;">
         <tr>
             <td width="10%" class="resursMethodHead"><?php _e(
@@ -51,15 +52,21 @@
                     'Name/Title',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
-            <td width="20%" class="resursMethodHead"><?php _e(
+            <td width="30%" class="resursMethodHead"><?php _e(
                     'Description (No HTML)',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
+            <?php if ($canUseFee) { ?>
+                <td width="5%" class="resursMethodHead"><?php _e(
+                        'Payment Fee',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ) ?></td>
+            <?php } ?>
             <td width="10%" class="resursMethodHead"><?php _e(
-                    'Amount limits',
+                    'Amount Limits',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
-            <td width="20%" class="resursMethodHead"><?php _e(
+            <td width="10%" class="resursMethodHead"><?php _e(
                     'Method type',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
@@ -83,21 +90,41 @@
                         echo esc_html($methodObject->id);
                         if ((bool)$isBleedingEdge) {
                             ?>
-                            <div style="font-size: 12px; font-style: italic;"><?php echo esc_html($merchantMethodId) ?></div>
+                            <div style="font-size: 12px; font-style: italic;">
+                                <?php echo esc_html($merchantMethodId) ?>
+                            </div>
                             <?php
                         } ?>
                     </td>
-                    <td class="resursMethodBody"><?php echo esc_html($methodObject->description) ?></td>
                     <td class="resursMethodBody">
-                        <input class="trbwc_method_description_input"
-                               id="method_description_<?php echo Data::getSanitizedKeyElement($methodObject->id)?>"
-                               type="text"
-                               value="<?php echo esc_html($methodObject->internalDescription) ?>"
-                               onblur="rbwcUpdateMethodDescription(this)"
-                        >
+                        <?php echo esc_html($methodObject->description) ?><br>
                     </td>
                     <td class="resursMethodBody">
-                        <?php echo (float)$methodObject->minLimit ?> - <?php echo (float)$methodObject->maxLimit ?>
+                        <input class="trbwc_method_description_input"
+                               id="method_description_<?php echo Data::getSanitizedKeyElement($methodObject->id) ?>"
+                               type="text"
+                               value="<?php echo esc_html($methodObject->internalDescription) ?>"
+                               onchange="rbwcUpdateMethodDescription(this)"
+                        >
+                    </td>
+                    <?php if ($canUseFee) { ?>
+                        <td class="resursMethodBody">
+                            <input class="trbwc_method_fee_input"
+                                   id="method_fee_<?php echo Data::getSanitizedKeyElement($methodObject->id) ?>"
+                                   type="text"
+                                   size="4"
+                                   value="<?php echo esc_html($methodObject->internalFee) ?>"
+                                   onchange="rbwcUpdateMethodFee(this)"
+                            >
+                        </td>
+                    <?php } ?>
+                    <td class="resursMethodBody">
+                        <div title="<?php _e(
+                            'Amount limits (min - max).',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ); ?>" style="font-style: italic;">
+                            <?php echo (float)$methodObject->minLimit ?> - <?php echo (float)$methodObject->maxLimit ?>
+                        </div>
                     </td>
                     <td class="resursMethodBody">
                         <?php echo esc_html($methodObject->type) ?>
@@ -139,6 +166,26 @@
             }
         } ?>
     </table>
+
+    <?php
+    if (!$canUseFee) {
+        echo '<div style="color: #990000; font-width: bold;">';
+        _e(
+            'To be able to use fee settings, you have to change the plugin to work with ' .
+            'the simplified or hosted shopflow.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+        echo '</div>';
+    } else {
+        echo '<div style="color: #009900; font-weight: bold;">';
+        _e(
+            'Fee settings: Allowed.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+        echo '</div>';
+    }
+    ?>
+
 <?php } else { ?>
     <div style="border: 1px solid darkred; padding: 5px; background: #EA9090FF; margin-bottom: 5px;">
         <?php echo esc_html($exception->getMessage()) ?> (Code <?php echo esc_html($exception->getCode()) ?>)

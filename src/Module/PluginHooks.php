@@ -18,6 +18,7 @@ use WC_Order;
 use WC_Order_Item_Product;
 use WC_Order_Refund;
 use WC_Product;
+use WC_Tax;
 use function count;
 use function in_array;
 use function is_array;
@@ -49,6 +50,38 @@ class PluginHooks
         add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
         add_action('woocommerce_order_refunded', [$this, 'refundResursOrder'], 10, 2);
         add_action('woocommerce_ajax_order_items_removed', [$this, 'removeOrderItemFromResurs'], 10, 4);
+        add_action('rbwc_get_tax_classes', [$this, 'getTaxClasses']);
+    }
+
+    /**
+     * Tax class renderer for configuration.
+     *
+     * @return array
+     * @since 0.0.1.5
+     */
+    public function getTaxClasses(): array
+    {
+        $return = [];
+        $taxClasses = WC_Tax::get_tax_classes();
+        if (!in_array('', $taxClasses, true)) { // Make sure "Standard rate" (empty class name) is present.
+            array_unshift($taxClasses, 'Standard');
+        }
+        foreach ($taxClasses as $taxRateIndex => $taxClass) { // For each tax class, get all rates.
+            $rates = WC_Tax::get_rates_for_tax_class($taxClass);
+            if (count($rates)) {
+                if ($taxRateIndex === 0) {
+                    $taxRateName = 'standard';
+                    $return[$taxRateName] = $taxClass;
+                } else {
+                    foreach ($rates as $rate) {
+                        $taxRateName = $rate->tax_rate_class;
+                        $return[$taxRateName] = $taxClass;
+                    }
+                }
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -205,7 +238,8 @@ class PluginHooks
 
         $connection->addOrderLine(
             WordPress::applyFilters('getShippingName', 'shipping'),
-            WordPress::applyFilters('getShippingDescription', __('Shipping', 'rbwc')),
+            WordPress::applyFilters('getShippingDescription',
+                __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')),
             preg_replace('/^-/', '', $shippingTotal),
             $shipping_tax_pct,
             'st',

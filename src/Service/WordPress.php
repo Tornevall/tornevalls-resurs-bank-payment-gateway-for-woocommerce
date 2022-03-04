@@ -74,6 +74,9 @@ class WordPress
             'get_cost_of_purchase',
             'get_network_lookup',
             'reset_plugin_settings',
+            'update_payment_method_description',
+            'update_payment_method_fee',
+            'resurs_bank_rco_synchronize',
         ];
 
         foreach ($actionList as $action) {
@@ -214,6 +217,18 @@ class WordPress
         add_action(
             'woocommerce_checkout_update_order_review',
             'ResursBank\Service\WooCommerce::getOrderReviewSettings'
+        );
+        add_action(
+            'woocommerce_cart_calculate_fees',
+            'ResursBank\Service\WooCommerce::applyVisualPaymentFee'
+        );
+        add_action(
+            'woocommerce_cart_totals_after_order_total',
+            'ResursBank\Service\WooCommerce::applyVisualPartPaymentCartTotals'
+        );
+        add_action(
+            'woocommerce_review_order_after_order_total',
+            'ResursBank\Service\WooCommerce::applyVisualPartPaymentReview'
         );
     }
 

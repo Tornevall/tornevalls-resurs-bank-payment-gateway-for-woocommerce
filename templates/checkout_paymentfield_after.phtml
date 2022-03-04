@@ -1,3 +1,12 @@
+<?php use ResursBank\Module\Data;
+if (!empty($customDescription)) { ?>
+    <div>
+        <?php
+        echo Data::getEscapedHtml($customDescription);
+        ?>
+    </div>
+<?php } ?>
+
 <div class="resursReadMoreSpace">
     <?php if ($method->specificType !== 'CARD' && $method->type !== 'PAYMENT_PROVIDER') { ?>
         <div

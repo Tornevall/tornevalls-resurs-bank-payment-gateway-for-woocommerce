@@ -25,7 +25,9 @@ function getResursAdminFields() {
             '#trbwc_admin_password',
             '#trbwc_admin_login_production',
             '#trbwc_admin_password_production',
-            'select[id*=r_annuity_select]'
+            'select[id*=r_annuity_select]',
+            'input[id*=method_description]',
+            'input[id*=method_§]'
         ]
     );
     getResursEnvironmentFields();
@@ -70,6 +72,11 @@ function rbwcAdminNetworkLookup() {
 function getResursConfigPopupPrevention(elements) {
     for (var i = 0; i < elements.length; i++) {
         $rQuery(elements[i]).click(function (e) {
+            window.onbeforeunload = null;
+            e.preventDefault();
+            getResursEnvironmentFields();
+        });
+        $rQuery(elements[i]).blur(function (e) {
             window.onbeforeunload = null;
             e.preventDefault();
             getResursEnvironmentFields();
@@ -332,10 +339,59 @@ function rbwcResetThisPlugin() {
 /**
  * Update payment method description.
  * @param o
+ * @since 0.0.1.5
  */
 function rbwcUpdateMethodDescription(o) {
-    console.log(o.id);
-    console.log(o.value);
+    $rQuery('#' + o.id).css('background-color', '#7bbbff');
+    $rQuery('#' + o.id).attr('readonly', true);
+
+    getResursAjaxify(
+        'post',
+        'resursbank_update_payment_method_description',
+        {
+            'n': true,
+            'id': o.id,
+            'value': o.value
+        },
+        function (response) {
+            $rQuery('#' + o.id).attr('readonly', false);
+            if (typeof response.allowed && response.allowed) {
+                $rQuery('#' + o.id).css('background-color', '#99e79b');
+            } else {
+                alert(getResursLocalization('failed'));
+                $rQuery('#' + o.id).css('background-color', '#f59e9e');
+            }
+        }
+    );
+}
+
+/**
+ * Update payment method description.
+ * @param o
+ * @since 0.0.1.5
+ */
+function rbwcUpdateMethodFee(o) {
+    $rQuery('#' + o.id).css('background-color', '#7bbbff');
+    $rQuery('#' + o.id).attr('readonly', true);
+
+    getResursAjaxify(
+        'post',
+        'resursbank_update_payment_method_fee',
+        {
+            'n': true,
+            'id': o.id,
+            'value': o.value
+        },
+        function (response) {
+            $rQuery('#' + o.id).attr('readonly', false);
+            if (typeof response.allowed && response.allowed) {
+                $rQuery('#' + o.id).css('background-color', '#99e79b');
+                $rQuery('#' + o.id).val(response.newValue);
+            } else {
+                $rQuery('#' + o.id).css('background-color', '#f59e9e');
+            }
+        }
+    );
 }
 
 /**

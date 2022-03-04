@@ -20,7 +20,9 @@ use RuntimeException;
 use stdClass;
 use WC_Cart;
 use WC_Order;
+use WC_Order_Item_Fee;
 use WC_Product;
+use WC_Tax;
 use function count;
 use function func_get_args;
 use function in_array;
@@ -1422,11 +1424,111 @@ class WooCommerce
     public static function getOrderReviewSettings()
     {
         // Rounding panic prevention.
-
         if (Data::isResursMethod(Data::getRequest('payment_method', $_POST))) {
+            $methodFromPost = Data::getRequest('payment_method', $_POST);
+            if (!empty($methodFromPost)) {
+                WooCommerce::setSessionValue(
+                    'paymentMethod',
+                    Data::getResursMethodFromPrefix($methodFromPost)
+                );
+            }
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
         }
         self::setCustomerCheckoutLocation(true);
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.5
+     */
+    public static function applyVisualPartPaymentReview()
+    {
+        if (Data::getResursOption('part_payment_sums') && self::getValidCart()) {
+            echo sprintf(
+                '<tr class="order-total">
+                    <td colspan="2">%s</td>
+                </tr>',
+                Data::getAnnuityFactors(WC()->cart->total, false)
+            );
+        }
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.5
+     */
+    public static function applyVisualPartPaymentCartTotals()
+    {
+        if (Data::getResursOption('part_payment_sums') && self::getValidCart()) {
+            echo sprintf(
+                '<tr class="order-total">
+                    <td colspan="2">%s</td>
+                </tr>',
+                Data::getAnnuityFactors(WC()->cart->total, false)
+            );
+        }
+    }
+
+    /**
+     * Apply fee naturally to cart.
+     *
+     * @throws Exception
+     * @since 0.0.1.5
+     */
+    public static function applyVisualPaymentFee()
+    {
+        $paymentMethodbySession = Data::getPaymentMethodBySession();
+        $customFee = self::getCustomFee($paymentMethodbySession);
+        if ($paymentMethodbySession && $customFee > 0) {
+            WC()->cart->add_fee(
+                WordPress::applyFilters(
+                    'getFeeDescription',
+                    __('Payment fee', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                ),
+                $customFee,
+                true,
+                WooCommerce::getCustomTaxRate()
+            );
+        }
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return string
+     * @since 0.0.1.5
+     */
+    public static function getCustomFee($paymentMethod): string
+    {
+        return Data::getResursOption(sprintf('method_custom_fee_%s', $paymentMethod));
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return string
+     * @since 0.0.1.5
+     */
+    public static function getCustomDescription($paymentMethod): string
+    {
+        return Data::getResursOption(sprintf('method_custom_description_%s', $paymentMethod));
+    }
+
+    /**
+     * Get tax rate from plugin setting when nothing else applies.
+     * @return int
+     * @since 0.0.1.5
+     */
+    public static function getCustomTaxRate(): int
+    {
+        $return = 0;
+        $rateClassName = Data::getResursOption('internal_tax');
+        $rateByClass = WC_Tax::get_rates($rateClassName === 'standard' ? '' : $rateClassName);
+
+        if (is_array($rateByClass) && count($rateByClass)) {
+            $setRate = array_pop($rateByClass);
+            $return = $setRate['rate'] ?? 0;
+        }
+
+        return $return;
     }
 
     /**

@@ -11,6 +11,8 @@ use ResursBank\Module\ResursBankAPI;
 use WC_Cart;
 use WC_Coupon;
 use WC_Product;
+use function count;
+use function is_array;
 use function is_object;
 
 /**
@@ -107,12 +109,36 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * Apply Resurs internal payment fee naturally.
+     *
      * @return $this
-     * @since 0.0.1.0
-     * @todo Complete this.
+     * @throws Exception
+     * @since 0.0.1.5
      */
     private function setFee(): self
     {
+        if (isset(WC()->cart) && WC()->cart instanceof  WC_Cart) {
+            $fees = WC()->cart->get_fees();
+            if (is_array($fees) && count($fees)) {
+                foreach ($fees as $fee) {
+                    Data::setDeveloperLog(
+                        __FUNCTION__,
+                        sprintf('Apply payment fee %s', $fee->amount)
+                    );
+
+                    $this->API->getConnection()->addOrderLine(
+                        $fee->id,
+                        $fee->name,
+                        $fee->amount,
+                        round(
+                            $fee->tax / $fee->total,
+                            wc_get_price_decimals()
+                        ) * 100
+                    );
+                }
+            }
+        }
+
         return $this;
     }
 
@@ -133,7 +159,7 @@ class OrderHandler extends ResursDefault
             // Rounding is ironically used with wc settings.
             $this->API->getConnection()->addOrderLine(
                 WordPress::applyFilters('getShippingName', 'shipping'),
-                WordPress::applyFilters('getShippingDescription', __('Shipping', 'rbwc')),
+                WordPress::applyFilters('getShippingDescription', __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')),
                 $this->cart->get_shipping_total(),
                 round(
                     $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
