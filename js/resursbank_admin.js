@@ -27,7 +27,7 @@ function getResursAdminFields() {
             '#trbwc_admin_password_production',
             'select[id*=r_annuity_select]',
             'input[id*=method_description]',
-            'input[id*=method_§]'
+            'input[id*=method_fee]'
         ]
     );
     getResursEnvironmentFields();
