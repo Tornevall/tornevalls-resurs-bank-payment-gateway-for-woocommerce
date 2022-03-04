@@ -117,7 +117,7 @@ class OrderHandler extends ResursDefault
      */
     private function setFee(): self
     {
-        if (isset(WC()->cart) && WC()->cart instanceof  WC_Cart) {
+        if (isset(WC()->cart) && WC()->cart instanceof WC_Cart) {
             $fees = WC()->cart->get_fees();
             if (is_array($fees) && count($fees)) {
                 foreach ($fees as $fee) {
@@ -159,7 +159,10 @@ class OrderHandler extends ResursDefault
             // Rounding is ironically used with wc settings.
             $this->API->getConnection()->addOrderLine(
                 WordPress::applyFilters('getShippingName', 'shipping'),
-                WordPress::applyFilters('getShippingDescription', __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')),
+                WordPress::applyFilters(
+                    'getShippingDescription',
+                    __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                ),
                 $this->cart->get_shipping_total(),
                 round(
                     $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
