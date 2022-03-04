@@ -759,6 +759,8 @@ class Data
                 'value' => [],
                 'class' => [],
                 'readonly' => [],
+                'onblur' => [],
+                'onchange' => [],
             ],
             'h1' => [],
             'h2' => [],
