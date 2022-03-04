@@ -2,17 +2,17 @@
 # This file is distributed under the same license as the Plugins - Tornevalls Resurs Bank Payment Gateway for WooCommerce - Stable Readme (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-02-24 23:10+0100\n"
+"Project-Id-Version: Plugins - Tornevalls Resurs Bank Payment Gateway for WooCommerce - Stable Readme (latest release)\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2022-03-04 22:32+0100\n"
+"Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
+"Language-Team: \n"
+"Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 3.0\n"
-"Language: sv_SE\n"
-"Project-Id-Version: Plugins - Tornevalls Resurs Bank Payment Gateway for WooCommerce - Stable Readme (latest release)\n"
-"POT-Creation-Date: \n"
-"Last-Translator: Tomas Tornevall <thorne@tornevall.net>\n"
-"Language-Team: \n"
+"X-Generator: Poedit 3.0.1\n"
 
 #. Short description.
 msgid "Tornevalls Resurs Bank Payment Gateway for WooCommerce."
@@ -526,7 +526,7 @@ msgstr ""
 
 #. Found in changelog paragraph.
 msgid "<strong>Milestone/Epic -- Release Candidate 1</strong>"
-msgstr ""
+msgstr "<strong>Milstolpe/Episk -- Release-kandidat 1</strong>"
 
 #. Found in changelog list item.
 msgid "<a href=\"https://tracker.tornevall.net/browse/RWC-6\">RWC-6</a> - RBWC 0.0.1.0 (Pre-1.0.0) - Milestone Release"
