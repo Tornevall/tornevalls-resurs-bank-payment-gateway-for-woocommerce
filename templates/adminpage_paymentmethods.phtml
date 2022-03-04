@@ -43,12 +43,16 @@
 
     <table width="100%" style="border: none;">
         <tr>
-            <td width="20%" class="resursMethodHead"><?php _e(
+            <td width="10%" class="resursMethodHead"><?php _e(
                     'Method ID',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
+            <td width="10%" class="resursMethodHead"><?php _e(
+                    'Name/Title',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
             <td width="20%" class="resursMethodHead"><?php _e(
-                    'Description',
+                    'Description (No HTML)',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
             <td width="10%" class="resursMethodHead"><?php _e(
@@ -84,6 +88,14 @@
                         } ?>
                     </td>
                     <td class="resursMethodBody"><?php echo esc_html($methodObject->description) ?></td>
+                    <td class="resursMethodBody">
+                        <input class="trbwc_method_description_input"
+                               id="method_description_<?php echo Data::getSanitizedKeyElement($methodObject->id)?>"
+                               type="text"
+                               value="<?php echo esc_html($methodObject->internalDescription) ?>"
+                               onblur="rbwcUpdateMethodDescription(this)"
+                        >
+                    </td>
                     <td class="resursMethodBody">
                         <?php echo (float)$methodObject->minLimit ?> - <?php echo (float)$methodObject->maxLimit ?>
                     </td>

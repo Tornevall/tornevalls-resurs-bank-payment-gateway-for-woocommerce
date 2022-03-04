@@ -1580,6 +1580,23 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     *
+     */
+    private static function getInternalMethodDescriptions(array $paymentMethods): array
+    {
+        if (is_array($paymentMethods)) {
+            foreach ($paymentMethods as $methodIdx => $methodItem) {
+                if (is_object($methodItem)) {
+                    $description = Data::getResursOption(sprintf('custom_description_%s', $methodItem->id));
+                    $methodItem->internalDescription = $description;
+                    $paymentMethods[$methodIdx] = $methodItem;
+                }
+            }
+        }
+        return $paymentMethods;
+    }
+
+    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
@@ -1625,6 +1642,7 @@ class FormFields extends WC_Settings_API
                     }
                 }
             }
+            $paymentMethods = self::getInternalMethodDescriptions($paymentMethods);
 
             $paymentMethodTemplate = Data::getGenericClass()->getTemplate(
                 'adminpage_paymentmethods.phtml',

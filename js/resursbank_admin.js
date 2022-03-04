@@ -330,6 +330,15 @@ function rbwcResetThisPlugin() {
 }
 
 /**
+ * Update payment method description.
+ * @param o
+ */
+function rbwcUpdateMethodDescription(o) {
+    console.log(o.id);
+    console.log(o.value);
+}
+
+/**
  * @param pwBox
  * @since 0.0.1.0
  */

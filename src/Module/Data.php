@@ -440,14 +440,17 @@ class Data
     }
 
     /**
-     * @param string $key
-     * @param null $namespace
+     * @param mixed $key
+     * @param mixed $namespace
      * @param bool $getDefaults
-     * @return bool|string
+     * @return bool|string|mixed
      * @since 0.0.1.0
      */
-    public static function getResursOption($key, $namespace = null, $getDefaults = true)
-    {
+    public static function getResursOption(
+        $key,
+        $namespace = '',
+        bool $getDefaults = true
+    ) {
         $return = null;
 
         if (preg_match('/woocom(.*?)resurs/', $namespace)) {
@@ -735,7 +738,7 @@ class Data
             ],
             'option' => [
                 'value' => [],
-                'selected' => []
+                'selected' => [],
             ],
             'button' => [
                 'id' => [],
@@ -759,6 +762,8 @@ class Data
                 'value' => [],
                 'class' => [],
                 'readonly' => [],
+                'onblur' => [],
+                'onchange' => [],
             ],
             'h1' => [],
             'h2' => [],

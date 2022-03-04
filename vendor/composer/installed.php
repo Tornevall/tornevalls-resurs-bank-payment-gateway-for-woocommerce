@@ -5,18 +5,18 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'bc5891fdb926fa7b95ce34bce236e726b575c268',
+        'reference' => '99ba8a09ffba536bdd90d7ece2b0baa14d8328c2',
         'name' => 'tornevall/resurs-bank-payment-gateway-for-woocommerce',
         'dev' => true,
     ),
     'versions' => array(
         'resursbank/ecomphp' => array(
-            'pretty_version' => '1.3.73',
-            'version' => '1.3.73.0',
+            'pretty_version' => '1.3.76',
+            'version' => '1.3.76.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../resursbank/ecomphp',
             'aliases' => array(),
-            'reference' => '32a6d6884ff5d1f2c68da9255a742c029b7118cd',
+            'reference' => 'bef035785c269f4d9165b006c075bed9f9ea46bc',
             'dev_requirement' => false,
         ),
         'resursbank/ecomphp-deprecated' => array(
@@ -34,7 +34,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'bc5891fdb926fa7b95ce34bce236e726b575c268',
+            'reference' => '99ba8a09ffba536bdd90d7ece2b0baa14d8328c2',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-crypto' => array(
@@ -47,12 +47,12 @@
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-errorhandler' => array(
-            'pretty_version' => '6.1.16',
-            'version' => '6.1.16.0',
+            'pretty_version' => '6.1.17',
+            'version' => '6.1.17.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../tornevall/tornelib-php-errorhandler',
             'aliases' => array(),
-            'reference' => '038b43d88542e4b82381bd49f96621b0a8519201',
+            'reference' => 'f5a9d2cb919fc2f3fa76066dd960cf136bf5c7e7',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-flags' => array(

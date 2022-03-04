@@ -67,6 +67,13 @@
     background: #ffffff !important;
 }
 
+.trbwc_method_description_input {
+    width: 100%;
+    border: none !important;
+    font-size: 12px;
+    background: #ffffff !important;
+}
+
 .r_annuity {
     font-size: 12px !important;
 }
