@@ -11,6 +11,7 @@ use Resursbank\Ecommerce\Service\Merchant\Model\Method;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use stdClass;
+use TorneLIB\IO\Data\Arrays;
 use WC_Checkout;
 use WC_Settings_API;
 use function count;
@@ -552,8 +553,7 @@ class FormFields extends WC_Settings_API
                             'The settings below makes sure that orders that is frozen when the order has been ' .
                             'handled are automatically annulled. If the orders in other hands are healthy and booked ' .
                             'you can also set the process to automatically debit/finalize the order with the setup ' .
-                            'below. ' .
-                            'For more information, see <a href="%s" target="_blank">%s</a>.',
+                            'below. For more information, see <a href="%s" target="_blank">%s</a>.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         'https://test.resurs.com/docs/display/ecom/paymentData',
@@ -772,6 +772,23 @@ class FormFields extends WC_Settings_API
                         'you can choose the extras you want to see in your logs.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
+                ],
+                'payment_methods_on_first_page' => [
+                    'id' => 'payment_methods_on_first_page',
+                    'type' => 'checkbox',
+                    'title' => __(
+                        'Put payment methods and callbacks list on first tab',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc_tip' => __(
+                        'In the former plugin designed by Resurs Bank, payment methods and callbacks was listed ' .
+                        'on the first configuration tab. Some maybe prefer this before the centralization ' .
+                        'and the minimalistic view on the front configuration. Enable this flag, to move around ' .
+                        'the configuration.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => 'no',
                 ],
                 'must_obfuscate_logged_personal_data' => [
                     'id' => 'must_obfuscate_logged_personal_data',
