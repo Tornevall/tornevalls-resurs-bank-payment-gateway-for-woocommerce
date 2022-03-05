@@ -13,6 +13,7 @@ use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use RuntimeException;
+use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Utils\WordPress as wpHelper;
 use WC_Order;
 use WC_Order_Item_Product;
@@ -51,6 +52,61 @@ class PluginHooks
         add_action('woocommerce_order_refunded', [$this, 'refundResursOrder'], 10, 2);
         add_action('woocommerce_ajax_order_items_removed', [$this, 'removeOrderItemFromResurs'], 10, 4);
         add_action('rbwc_get_tax_classes', [$this, 'getTaxClasses']);
+        add_action('rbwc_get_custom_form_fields', [$this, 'getCustomFormFields'], 10, 2);
+    }
+
+    /**
+     * Moving specific form fields over to another tab of Resurs Bank.
+     * This function is mostly used as an example of the filters that can be used.
+     *
+     * @param $formFields
+     * @param $section
+     * @return mixed
+     * @since 0.0.1.6
+     */
+    public function getCustomFormFields($formFields, $section)
+    {
+        if (Data::getResursOption('payment_methods_on_first_page')) {
+            $array = new Arrays();
+
+            // Push the first array straight into the basic form.
+            $formFields['basic']['payment_methods_list'] = $formFields['payment_methods']['payment_methods_list'];
+            $formFields['basic'] = $array->moveArrayAfter(
+                $formFields['basic'],
+                $formFields['payment_methods']['payment_methods_button'],
+                'payment_methods_list',
+                'payment_methods_button'
+            );
+            $formFields['basic'] = $array->moveArrayAfter(
+                $formFields['basic'],
+                $formFields['payment_methods']['callbacks_list'],
+                'payment_methods_button',
+                'callbacks_list'
+            );
+            $formFields['basic'] = $array->moveArrayAfter(
+                $formFields['basic'],
+                $formFields['payment_methods']['callbacks_button'],
+                'callbacks_list',
+                'callbacks_button'
+            );
+            $formFields['basic'] = $array->moveArrayAfter(
+                $formFields['basic'],
+                $formFields['payment_methods']['trigger_callback_button'],
+                'callbacks_button',
+                'trigger_callback_button'
+            );
+
+            unset(
+                $formFields['payment_methods']['payment_methods_list'],
+                $formFields['payment_methods']['payment_methods_button'],
+                $formFields['payment_methods']['callbacks_list'],
+                $formFields['payment_methods']['callbacks_button'],
+                $formFields['payment_methods']['trigger_callback_button'],
+                $formFields['payment_methods']['accept_rejected_callbacks']
+            );
+        }
+
+        return $formFields;
     }
 
     /**
