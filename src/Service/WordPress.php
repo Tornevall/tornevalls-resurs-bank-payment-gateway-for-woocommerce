@@ -784,12 +784,22 @@ class WordPress
         $return['current_tab'] = $current_tab;
         $return['enable'] = __('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['disable'] = __('Disable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $return['cleanup_warning'] = __(
+            'By accepting this, all your settings for this plugin will be restored to the absolute defaults. ' .
+            'The only thing that will be kept intact is encryption keys, so that you do not loose access to ' .
+            'prior order data if they exist encrypted. Are you sure?',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
         $return['cleanup_reload'] = __(
             'Settings has been restored to default values. You may now reconfigure this plugin.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
-        $return['cleanup_failed_'] = __(
-            'Plugin configuration reset failed.',
+        $return['cleanup_failed'] = __(
+            'Plugin configuration reset failed. You may want to reload the page and try again.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+        $return['cleanup_aborted'] = __(
+            'Your cleanup has been cancelled.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
 
@@ -902,7 +912,7 @@ class WordPress
      */
     public static function getLocalizedScriptsDeprecated($return)
     {
-        $importDeprecated = get_option('resursImportCredentials');
+        $importDeprecated = (int)Data::getResursOption('resursImportCredentials');
 
         if (!$importDeprecated) {
             $return['deprecated_login'] = !empty(Data::getResursOptionDeprecated('login')) ? true : false;
