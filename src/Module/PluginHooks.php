@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
+
 /** @noinspection PhpUsageOfSilenceOperatorInspection */
 
 namespace ResursBank\Module;
@@ -52,6 +53,7 @@ class PluginHooks
         add_action('woocommerce_ajax_order_items_removed', [$this, 'removeOrderItemFromResurs'], 10, 4);
         add_action('rbwc_get_tax_classes', [$this, 'getTaxClasses']);
         add_action('rbwc_get_custom_form_fields', [$this, 'getCustomFormFields'], 10, 2);
+        add_action('rbwc_get_support_address_list', [$this, 'getSupportAddressList'], 10, 2);
     }
 
     /**
@@ -110,6 +112,74 @@ class PluginHooks
         }
 
         return $formFields;
+    }
+
+    /**
+     * @param array $addressList
+     * @return array
+     * @since 0.0.1.6
+     */
+    public function getSupportAddressList($addressList): array
+    {
+        if (Data::isTest()) {
+            $addressList['Resurs Bank (Staging Support)'] = $this->getContactEnvironmentString(
+                'test',
+                __(
+                    '(Selected Environment: Test - Suggested)',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                )
+            );
+            $addressList['Resurs Bank (Production Support)'] = $this->getContactEnvironmentString('production', '');
+        } else {
+            $addressList['Resurs Bank (Production Support)'] = $this->getContactEnvironmentString(
+                'production',
+                __(
+                    '(Selected Environment: Production - Suggested)',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                )
+            );
+            $addressList['Resurs Bank (Staging Support)'] = $this->getContactEnvironmentString('test', '');
+        }
+        if (Data::isOriginalCodeBase()) {
+            $addressList['Tornevall Plugin Issues'] = [
+                'info' => __(
+                    'Plugin related questions and things that is not related to Resurs Bank.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                'mail' => 'support@tornevall.net',
+            ];
+        }
+
+        return (array)$addressList;
+    }
+
+    /**
+     * @param $type
+     * @param $preferredString
+     * @return array
+     * @since 0.0.1.6
+     */
+    private function getContactEnvironmentString($type, $preferredString): array
+    {
+        if ($type === 'test') {
+            $return = [
+                'info' => sprintf(
+                    'Matters related to Resurs Bank in staging and test environments %s',
+                    $preferredString
+                ),
+                'mail' => 'onboarding@resurs.se',
+            ];
+        } else {
+            $return = [
+                'info' => sprintf(
+                    'Maters related to Resurs Bank in live production environments %s',
+                    $preferredString
+                ),
+                'mail' => 'support@resurs.se',
+            ];
+        }
+
+        return $return;
     }
 
     /**

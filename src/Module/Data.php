@@ -737,6 +737,8 @@ class Data
                 'name' => [],
                 'class' => [],
                 'style' => [],
+                'scope' => [],
+                'valign' => [],
             ],
             'th' => [
                 'id' => [],
@@ -744,12 +746,15 @@ class Data
                 'class' => [],
                 'style' => [],
                 'scope' => [],
+                'valign' => [],
             ],
             'td' => [
                 'id' => [],
                 'name' => [],
                 'class' => [],
                 'style' => [],
+                'scope' => [],
+                'valign' => [],
             ],
             'label' => [
                 'for' => [],
@@ -1054,6 +1059,15 @@ class Data
     }
 
     /**
+     * @return array
+     * @since 0.0.1.6
+     */
+    public static function getSupportArray(): array
+    {
+        return (array)WordPress::applyFilters('getSupportAddressList', []);
+    }
+
+    /**
      * @return Generic
      * @since 0.0.1.0
      */
@@ -1353,14 +1367,14 @@ class Data
         if (false !== strpos($file, WooCommerce::getBaseName())) {
             $urls = [
                 __(
-                    'Plugin Documentation',
+                    'Original Plugin Documentation',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) => 'https://docs.tornevall.net/x/CoC4Aw',
-                __(
-                    'Github',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ) => 'https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce',
             ];
+            if (self::isOriginalCodeBase()) {
+                $urls[__('Github', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')] =
+                    'https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce';
+            }
 
             foreach ($urls as $urlInfo => $url) {
                 $row_meta[$urlInfo] = sprintf(
@@ -1427,7 +1441,6 @@ class Data
             self::getGenericClass()->getTemplate(
                 'plugin_information',
                 [
-                    'required_drivers' => self::getSpecialString('required_drivers'),
                     'support_string' => self::getSpecialString('support_string'),
                     'render' => WordPress::applyFilters('renderInformationData', $renderData),
                 ]
@@ -1579,7 +1592,7 @@ class Data
         $genericController = new Generic();
         $genericController->setExpectedVersions(
             [
-                ResursBank::class => '1.3.72',
+                ResursBank::class => '1.3.76',
                 NetWrapper::class => '6.1.5',
             ]
         );
