@@ -878,7 +878,7 @@ class FormFields extends WC_Settings_API
                         'requests (ajaxify-js).',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
-                    'default' => 'no',
+                    'default' => 'yes',
                 ],
                 'complex_developer_section_end' => [
                     'type' => 'sectionend',
