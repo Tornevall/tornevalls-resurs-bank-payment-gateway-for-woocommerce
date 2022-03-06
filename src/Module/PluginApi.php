@@ -87,6 +87,7 @@ class PluginApi
 
     /**
      * @return string
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getAction(): string

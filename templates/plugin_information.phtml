@@ -1,26 +1,59 @@
-<div style="border: 1px solid #000099; padding-left: 5px; width: 800px;">
+<div style="border: 1px solid #000099; padding-left: 5px;">
     <div style="font-style: italic; margin-bottom: 5px; padding: 5px;">
         <?php use ResursBank\Module\Data;
+        use TorneLIB\IO\Data\Arrays;
 
         echo esc_html($support_string)
         ?>
     </div>
-    <table class="form-table">
-        <?php foreach ($render as $renderKey => $renderValue) { ?>
-            <tr style="border-top: 1px solid gray;">
-                <th scope="row"
-                    class="titledesc" style="border-right: 1px solid gray;"
-                    valign="top">
-                    <?php echo Data::getEscapedHtml($renderKey) ?>
-                </th>
-                <td class="forminp forminp-checkbox"
-                    valign="top">
-                    <?php echo Data::getEscapedHtml($renderValue) ?>
-                </td>
-            </tr>
-        <?php } ?>
-    </table>
-    <div style="font-style: italic; margin-bottom: 5px; padding: 5px; border-top: 1px solid gray;">
-        <?php echo Data::getEscapedHtml($required_drivers) ?>
-    </div>
+</div>
+
+<h2><?php _e('Contacting Support', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h2>
+<?php
+$supportAddressList = Data::getSupportArray();
+if (is_array($supportAddressList) && (new Arrays())->isAssoc($supportAddressList)) {
+    foreach ($supportAddressList as $name => $addressItem) {
+        if (isset($addressItem['info']) && isset($addressItem['mail'])) {
+            ?>
+            <div>
+                <span style="font-size: 14px !important; font-style: italic;">
+                    <a href="mailto:<?php echo sanitize_email($addressItem['mail']); ?>">
+                        <?php echo esc_html($addressItem['info']); ?></a>
+                </span>
+            </div>
+            <?php
+        }
+    }
+}
+
+if (Data::isOriginalCodeBase()) { ?>
+    <span style="font-size: 14px !important; font-style: italic;">
+        <a href="https://lists.tornevall.net/mailman/listinfo/resursbank-woocommerce" target="_blank">
+        <?php _e('Subscribe to newsletters!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?>
+        </a>
+    </span>
+    <?php
+}
+?>
+
+<h2><?php _e('About this plugin', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h2>
+
+<table class="form-table">
+    <?php foreach ($render as $renderKey => $renderValue) { ?>
+        <tr style="border-top: 1px solid gray;">
+            <th scope="row"
+                class="titledesc" style="border-right: 1px solid gray;"
+                valign="top">
+                <?php echo Data::getEscapedHtml($renderKey) ?>
+            </th>
+            <td class="forminp forminp-checkbox"
+                valign="top">
+                <?php echo Data::getEscapedHtml($renderValue) ?>
+            </td>
+        </tr>
+    <?php } ?>
+</table>
+
+<div style="font-style: italic; margin-bottom: 5px; padding: 5px; border-top: 1px solid gray;">
+    &nbsp;
 </div>
