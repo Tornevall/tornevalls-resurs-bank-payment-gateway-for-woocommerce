@@ -44,6 +44,8 @@ Primary new problems should be discovered in TEST rather than production since t
 
 = System prerequisites =
 
+Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
+
 * PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug 2021, both WooCommerce and WordPress is about to jump into 7.4 and higher. Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions of PHP. This plugin is written for 7.0 or higher.
 * **Required**: WooCommerce: v3.5.0 or higher!
 * **Required**: [SoapClient](https://php.net/manual/en/class.soapclient.php) with xml drivers and extensions.

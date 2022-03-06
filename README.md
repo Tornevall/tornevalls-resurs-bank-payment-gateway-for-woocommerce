@@ -59,6 +59,8 @@ The original codebase was initialized july 2020.
 
 ## REQUIREMENTS AND SECURITY CONSIDERATIONS
 
+Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
+
 * PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug
   2021, both WooCommerce and WordPress is about to jump into 7.4 and higher.
   Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions
