@@ -1475,7 +1475,7 @@ class FormFields extends WC_Settings_API
     public static function getShowDeveloper(): bool
     {
         if (!isset(self::$showDeveloper)) {
-            self::$showDeveloper = Data::getResursOption('show_developer', null, false);
+            self::$showDeveloper = (bool)Data::getResursOption('show_developer', null, false);
         }
         return self::$showDeveloper;
     }

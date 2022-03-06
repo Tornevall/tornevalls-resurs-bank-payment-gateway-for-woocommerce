@@ -146,8 +146,22 @@ class PluginApi
      */
     public static function importCredentials()
     {
-        update_option('resursImportCredentials', time());
+        Data::setResursOption('resursImportCredentials', time());
         self::getValidatedNonce();
+
+        $imports = [
+            'resursAnnuityDuration' => 'currentAnnuityDuration',
+            'resursAnnuityMethod' => 'currentAnnuityFactor',
+            'partPayWidgetPage' => 'part_payment_template',
+        ];
+
+        foreach ($imports as $key => $destKey) {
+            $oldValue = Data::getResursOptionDeprecated($key);
+            if (!empty($oldValue)) {
+                Data::setResursOption($destKey, $oldValue);
+            }
+        }
+
         self::reply([
             'login' => Data::getResursOptionDeprecated('login'),
             'pass' => Data::getResursOptionDeprecated('password'),
@@ -1095,6 +1109,8 @@ class PluginApi
                 $deleteNotArray[] = sprintf("option_name != '%s_%s'", Data::getPrefix(), $item);
             }
 
+            // Clean up old importer data.
+            Data::delResursOption('resursImportCredentials');
             $deleteString = sprintf(
                 "DELETE FROM %s WHERE option_name LIKE '%s_%%' AND %s",
                 Data::getSanitizedKeyElement($wpdb->options),

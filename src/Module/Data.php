@@ -455,7 +455,7 @@ class Data
      * @param mixed $key
      * @param mixed $namespace
      * @param bool $getDefaults
-     * @return bool|string|mixed
+     * @return mixed
      * @since 0.0.1.0
      */
     public static function getResursOption(
@@ -483,9 +483,10 @@ class Data
 
         /** @noinspection NullCoalescingOperatorCanBeUsedInspection */
         if ($testBoolean !== null) {
+            // If testBoolean returned anything but null, we know the value returned from option
+            // fetcher is a boolean and therefore return the value as such. With this in mind
+            // values expected as booleans can not be anything but a boolean.
             $return = $testBoolean;
-        } else {
-            $return = (string)$return;
         }
 
         return $return;

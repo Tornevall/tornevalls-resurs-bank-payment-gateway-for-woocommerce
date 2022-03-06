@@ -12,6 +12,7 @@ var resursCallbackActiveTimeout = 15;
 var resursCallbackTestHandle;
 var resursCallbackReceiveSuccess = false;
 var resursEnvironment;
+var resursJustImported = false;
 
 /**
  * Handle wp-admin, and update realtime fields.
@@ -111,6 +112,11 @@ function getResursEnvironmentFields() {
  * @since 0.0.1.0
  */
 function getCallbackMatches() {
+    if (resursJustImported) {
+        trbwcLog('Callback matches will not run this round, since credentials was imported.');
+        return;
+    }
+
     getResursAjaxify(
         'GET',
         'resursbank_get_callback_matches',
@@ -322,18 +328,27 @@ function getResursCallbackResponse() {
  * @since 0.0.1.4
  */
 function rbwcResetThisPlugin() {
-    getResursAjaxify(
-        'post',
-        'resursbank_reset_plugin_settings',
-        {
-            'n': true
-        },
-        function (response) {
-            if (typeof response.finished !== 'undefined') {
-                alert(getResursLocalization('cleanup_reload'));
+    if (confirm(getResursLocalization('cleanup_warning'))) {
+        getResursAjaxify(
+            'post',
+            'resursbank_reset_plugin_settings',
+            {
+                'n': true
+            },
+            function (response) {
+                if (typeof response.finished !== 'undefined') {
+                    alert(getResursLocalization('cleanup_reload'));
+                } else {
+                    alert(getResursLocalization('cleanup_failed'));
+                }
+            },
+            function () {
+                alert(getResursLocalization('cleanup_failed'));
             }
-        }
-    );
+        );
+    } else {
+        alert(getResursLocalization('cleanup_aborted'));
+    }
 }
 
 /**
@@ -534,6 +549,7 @@ function getResursDeprecatedLogin() {
         getResursSpin('#resurs_import_credentials_result');
         getResursAjaxify('post', 'resursbank_import_credentials', {}, function (data) {
             if (data['login'] !== '' && data['pass'] !== '') {
+                resursJustImported = true;
                 $rQuery('#resurs_import_credentials_result').html(getResursLocalization('credential_import_success'));
                 $rQuery('#trbwc_admin_login').val(data['login']);
                 $rQuery('#trbwc_admin_password').val(data['pass']);
