@@ -695,7 +695,7 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',
-                    'default' => 'yes',
+                    'default' => 'no',
                 ],
                 'deprecated_interference' => [
                     'id' => 'deprecated_interference',

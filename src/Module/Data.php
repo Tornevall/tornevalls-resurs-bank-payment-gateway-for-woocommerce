@@ -1687,13 +1687,14 @@ class Data
     }
 
     /**
-     * If plugin is enabled on admin level.
+     * If plugin is enabled on admin level as a payment method.
+     *
      * @return bool
      * @since 0.0.1.0
      */
     public static function isEnabled()
     {
-        return self::getResursOption('enabled', null, false);
+        return (bool)self::getResursOption('enabled');
     }
 
     /**
