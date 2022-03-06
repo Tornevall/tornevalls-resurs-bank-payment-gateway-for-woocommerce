@@ -11,7 +11,6 @@ use Resursbank\Ecommerce\Service\Merchant\Model\Method;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use stdClass;
-use TorneLIB\IO\Data\Arrays;
 use WC_Checkout;
 use WC_Settings_API;
 use function count;
@@ -1704,7 +1703,7 @@ class FormFields extends WC_Settings_API
                     'environment' => Data::getResursOption('environment'),
                     'isBleedingEdge' => Data::isBleedingEdge(),
                     'lastMethodUpdate' => self::getLastPaymentMethodUpdate(),
-                    'canUseFee' => Data::getCheckoutType() !== 'rco'
+                    'canUseFee' => Data::getCheckoutType() !== 'rco',
                 ]
             );
             echo Data::getEscapedHtml($paymentMethodTemplate);

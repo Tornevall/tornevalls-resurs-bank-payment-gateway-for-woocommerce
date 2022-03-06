@@ -147,6 +147,9 @@ class PluginApi
      */
     public static function importCredentials()
     {
+        Data::setLogInfo(
+            __('Import of old credentials initiated.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+        );
         Data::setResursOption('resursImportCredentials', time());
         self::getValidatedNonce();
 
@@ -162,6 +165,10 @@ class PluginApi
                 Data::setResursOption($destKey, $oldValue);
             }
         }
+
+        Data::setLogInfo(
+            __('Import of old credentials finished.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+        );
 
         self::reply([
             'login' => Data::getResursOptionDeprecated('login'),
@@ -209,11 +216,25 @@ class PluginApi
                 break;
             }
         }
+
         if (!$return && $isSafe && (bool)Data::getResursOption('nonce_trust_admin_session')) {
             // If request is based on ajax and admin.
             $return = true;
             $expired = false;
         }
+
+        // We do not ask if this can be logged before it is logged, so that we can backtrack
+        // errors without the permission from wp-admin.
+        Data::setLogInfo(
+            sprintf(
+                __(
+                    'Nonce validation accepted (from function: %s): %s.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                $fromFunction,
+                $return ? 'true' : 'false'
+            )
+        );
 
         if (!$return || $expired) {
             if (!(bool)$noReply) {
@@ -245,7 +266,7 @@ class PluginApi
 
         self::reply(
             [
-                'noAction' => true
+                'noAction' => true,
             ]
         );
     }
@@ -465,6 +486,17 @@ class PluginApi
          */
         $isLiveChange = Data::getResursOption('environment') !== Data::getRequest('e');
 
+        Data::setLogInfo(
+            sprintf(
+                __(
+                    'Credentials validation from wp-admin initiated for environment %s, username request %s.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                Data::getRequest('e'),
+                Data::getRequest('u')
+            )
+        );
+
         if ($isValid) {
             try {
                 $validationResponse = (new ResursBankAPI())->getConnection()->validateCredentials(
@@ -490,6 +522,13 @@ class PluginApi
 
         // Save when validating.
         if ($validationResponse) {
+            Data::setLogInfo(
+                __(
+                    'Credential validation was successful and therefore saved.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                )
+            );
+
             // Since credentials was verified, we can set the environment first to ensure credentials are stored
             // on the proper options.
             if (!$isLiveChange) {
