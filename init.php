@@ -3,7 +3,7 @@
  * @noinspection PhpCSValidationInspection
  * Plugin Name: Tornevalls Resurs Bank payment gateway for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
- * WC Tested up to: 6.2.0
+ * WC Tested up to: 6.2.1
  * Requires PHP: 7.0
  * Version: 0.0.1.5
  * Author: Tomas Tornevall
@@ -16,6 +16,8 @@
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
 
+// Note: The prefix below is used by this plugin only and should not be changed. Instead
+// you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
 define('RESURSBANK_PREFIX', 'trbwc');
 define('RESURSBANK_SNAKECASE_FILTERS', true);

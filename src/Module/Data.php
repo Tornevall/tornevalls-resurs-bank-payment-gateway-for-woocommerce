@@ -468,7 +468,7 @@ class Data
         if (preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
-        $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin'), $key);
+        $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin', true), $key);
         if ($getDefaults) {
             $return = self::getDefault($key);
         }
@@ -548,13 +548,48 @@ class Data
      * @return string
      * @since 0.0.1.0
      */
-    public static function getPrefix($extra = null): string
+    public static function getPrefix($extra = null, $ignoreCodeBase = null): string
     {
+        // If no extra data are added in the prefix handler, use the regular prefix.
         if (empty($extra)) {
-            return RESURSBANK_PREFIX;
+            // If we're in the original codebase slug, we should not allow any filters to hijack us.
+            if (!$ignoreCodeBase && self::isOriginalCodeBase()) {
+                $return = RESURSBANK_PREFIX;
+            } else {
+                // If we're in a forked repo, go for it.
+                $return = WordPress::applyFilters('getPluginPrefix', RESURSBANK_PREFIX);
+            }
+        } elseif ($ignoreCodeBase || self::isOriginalCodeBase()) {
+            $return = sprintf(
+                '%s_%s',
+                RESURSBANK_PREFIX,
+                $extra
+            );
+        } else {
+            // If we're in a forked repo, go for it.
+            $return = sprintf(
+                '%s_%s',
+                WordPress::applyFilters('getPluginPrefix', RESURSBANK_PREFIX),
+                $extra
+            );
         }
 
-        return RESURSBANK_PREFIX . '_' . $extra;
+        return $return;
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.6
+     */
+    public static function isOriginalCodeBase(): bool
+    {
+        $return = false;
+
+        if (WooCommerce::getBaseName() === 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') {
+            $return = true;
+        }
+
+        return $return;
     }
 
     /**

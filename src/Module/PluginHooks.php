@@ -1,7 +1,6 @@
 <?php
 
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
-
 /** @noinspection PhpUsageOfSilenceOperatorInspection */
 
 namespace ResursBank\Module;
@@ -66,7 +65,11 @@ class PluginHooks
      */
     public function getCustomFormFields($formFields, $section)
     {
-        if (Data::getResursOption('payment_methods_on_first_page')) {
+        $customPaymentMethodFields = WordPress::applyFilters(
+            'paymentMethodsOnFirstPage',
+            Data::getResursOption('payment_methods_on_first_page')
+        );
+        if ($customPaymentMethodFields) {
             $array = new Arrays();
 
             // Push the first array straight into the basic form.
