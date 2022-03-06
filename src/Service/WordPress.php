@@ -7,6 +7,7 @@ use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
+use ResursBank\ResursBank\ResursPlugin;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
 use WP_Post;
@@ -36,6 +37,10 @@ class WordPress
 
         // Initialize plugin functions.
         new PluginHooks();
+
+        // Initialize adaptions.
+        new ResursPlugin();
+
         // Always initialize defaults once on plugin loaded (performance saver).
         Data::getDefaultsInit();
         self::setupAjaxActions();
