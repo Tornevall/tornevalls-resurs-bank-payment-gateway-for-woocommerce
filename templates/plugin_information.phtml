@@ -25,6 +25,16 @@ if (is_array($supportAddressList) && (new Arrays())->isAssoc($supportAddressList
         }
     }
 }
+
+if (Data::isOriginalCodeBase()) { ?>
+    <br>
+    <span style="font-size: 14px !important; font-style: italic;">
+        <a href="https://lists.tornevall.net/mailman/listinfo/resursbank-woocommerce" target="_blank">
+        <?php _e('Subscribe to newsletters!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?>
+        </a>
+    </span>
+    <?php
+}
 ?>
 
 <h2><?php _e('About this plugin', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h2>
