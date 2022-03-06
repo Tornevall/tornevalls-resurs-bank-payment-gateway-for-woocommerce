@@ -804,7 +804,7 @@ class WordPress
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['cleanup_aborted'] = __(
-            'Your cleanup has been cancelled.',
+            'Plugin configuration reset has been cancelled.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
 

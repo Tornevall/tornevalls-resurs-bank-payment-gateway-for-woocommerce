@@ -125,7 +125,7 @@ class PluginHooks
             $addressList['Resurs Bank (Staging Support)'] = $this->getContactEnvironmentString(
                 'test',
                 __(
-                    '(Selected Environment: Test - Suggested)',
+                    '(Selected Environment: Test - Suggested contact method)',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 )
             );
@@ -134,7 +134,7 @@ class PluginHooks
             $addressList['Resurs Bank (Production Support)'] = $this->getContactEnvironmentString(
                 'production',
                 __(
-                    '(Selected Environment: Production - Suggested)',
+                    '(Selected Environment: Production - Suggested contact method)',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 )
             );
@@ -164,7 +164,10 @@ class PluginHooks
         if ($type === 'test') {
             $return = [
                 'info' => sprintf(
-                    'Matters related to Resurs Bank in staging and test environments %s',
+                    __(
+                        'Matters related to Resurs Bank in staging and test environments %s',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                     $preferredString
                 ),
                 'mail' => 'onboarding@resurs.se',
@@ -172,7 +175,10 @@ class PluginHooks
         } else {
             $return = [
                 'info' => sprintf(
-                    'Maters related to Resurs Bank in live production environments %s',
+                    __(
+                        'Matters related to Resurs Bank in live production environments %s',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                     $preferredString
                 ),
                 'mail' => 'support@resurs.se',
