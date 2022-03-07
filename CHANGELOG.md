@@ -3,6 +3,18 @@
 _0.0.1.0 is the first release candidate of what's planned to become 1.0.0._
 Github references should be included for all releases.
 
+# 0.0.1.6
+
+* [RWC-240](https://tracker.tornevall.net/browse/RWC-240) - Friendly feature: Import credentials based on RWC-238 should import credentials based on environment
+* [RWC-332](https://tracker.tornevall.net/browse/RWC-332) - Create snippet for rbwc_get_custom_form_fields and those who are used to an old format ([#85](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/85))
+* [RWC-335](https://tracker.tornevall.net/browse/RWC-335) - Fix support page with extra info
+* [RWC-336](https://tracker.tornevall.net/browse/RWC-336) - Slug detection support
+* [RWC-337](https://tracker.tornevall.net/browse/RWC-337) - Add email subscription to listserv IF ORIGINAL plugin
+* [RWC-338](https://tracker.tornevall.net/browse/RWC-338) - Allow prefix changes when not in original codebase
+* [RWC-340](https://tracker.tornevall.net/browse/RWC-340) - Contact information in support section
+* [RWC-341](https://tracker.tornevall.net/browse/RWC-341) - Check reaction from support page on disabled features like openssl and curl
+* [RWC-343](https://tracker.tornevall.net/browse/RWC-343) - Remove the v2.2 disabler option from plugin
+
 # 0.0.1.5 + 1.0.0
 
 * [RWC-76](https://tracker.tornevall.net/browse/RWC-76) - Support fees in orders
