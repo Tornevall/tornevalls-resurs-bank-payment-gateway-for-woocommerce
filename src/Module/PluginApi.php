@@ -804,7 +804,7 @@ class PluginApi
                 )->getBody();
                 if (preg_match('/<?xml/i', $soapRequestBody)) {
                     $noSoapRequestResponse = __(
-                        'SoapRequest to Resurs Bank contained SoapResponse',
+                        'Resurs Bank SOAP-services is currently returning a valid XML-response.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     );
                 }
