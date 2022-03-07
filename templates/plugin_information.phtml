@@ -1,44 +1,44 @@
-<div style="border: 1px solid #000099; padding-left: 5px;">
-    <div style="font-style: italic; margin-bottom: 5px; padding: 5px;">
-        <?php use ResursBank\Module\Data;
-        use TorneLIB\IO\Data\Arrays;
+<?php
+use ResursBank\Module\Data;
+use TorneLIB\IO\Data\Arrays;
+?>
 
-        echo esc_html($support_string)
-        ?>
-    </div>
+<h2><?php _e('Contacting Support', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?></h2>
+
+<div style="border: 1px solid #000099; font-style: italic; margin-bottom: 5px; padding: 5px;">
+    <?php echo esc_html($support_string) ?>
 </div>
 
-<h2><?php _e('Contacting Support', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h2>
 <table width="100%">
-<?php
-$supportAddressList = Data::getSupportArray();
-if (is_array($supportAddressList) && (new Arrays())->isAssoc($supportAddressList)) {
-    foreach ($supportAddressList as $name => $addressItem) {
-        if (isset($addressItem['info']) && isset($addressItem['mail'])) {
-            ?>
-            <tr>
-                <td>
-                    <a href="mailto:<?php echo sanitize_email($addressItem['mail']); ?>">
-                        <?php echo esc_html($addressItem['mail']); ?></a>
-                </td>
-                <td><?php echo esc_html($addressItem['info']); ?></td>
-            </tr>
-            <?php
+    <?php
+    $supportAddressList = Data::getSupportArray();
+    if (is_array($supportAddressList) && (new Arrays())->isAssoc($supportAddressList)) {
+        foreach ($supportAddressList as $name => $addressItem) {
+            if (isset($addressItem['info']) && isset($addressItem['mail'])) {
+                ?>
+                <tr>
+                    <td>
+                        <a href="mailto:<?php echo sanitize_email($addressItem['mail']); ?>">
+                            <?php echo esc_html($addressItem['mail']); ?></a>
+                    </td>
+                    <td><?php echo esc_html($addressItem['info']); ?></td>
+                </tr>
+                <?php
+            }
         }
     }
-}
 
-if (Data::isOriginalCodeBase()) { ?>
-    <tr>
-        <td colspan="2">
-        <a href="https://lists.tornevall.net/mailman/listinfo/resursbank-woocommerce" target="_blank">
-        <?php _e('Subscribe to newsletters.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?>
-        </a>
-        </td>
-    </tr>
-    <?php
-}
-?>
+    if (Data::isOriginalCodeBase()) { ?>
+        <tr>
+            <td colspan="2">
+                <a href="https://lists.tornevall.net/mailman/listinfo/resursbank-woocommerce" target="_blank">
+                    <?php _e('Subscribe to newsletters.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?>
+                </a>
+            </td>
+        </tr>
+        <?php
+    }
+    ?>
 </table>
 
 <h2><?php _e('About this plugin', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h2>
