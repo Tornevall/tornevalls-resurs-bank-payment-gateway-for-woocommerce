@@ -32,7 +32,6 @@ load_plugin_textdomain(
     false,
     dirname(plugin_basename(__FILE__)) . '/language/'
 );
-
 if (!WooCommerce::getActiveState()) {
     return;
 }
@@ -41,7 +40,7 @@ Data::getExpectations();
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.
-add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializePlugin');
+add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBleedingEdgeSettings', 10, 2);

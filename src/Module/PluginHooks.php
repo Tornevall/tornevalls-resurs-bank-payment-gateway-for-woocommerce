@@ -33,6 +33,11 @@ class PluginHooks
 {
     public function __construct()
     {
+        $this->getFilters();
+    }
+
+    private function getFilters()
+    {
         add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
         add_filter('rbwc_get_payment_method_icon', [$this, 'getMethodIconByContent'], 10, 2);
         add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);

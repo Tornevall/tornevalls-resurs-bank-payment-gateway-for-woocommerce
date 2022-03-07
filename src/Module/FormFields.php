@@ -1391,7 +1391,7 @@ class FormFields extends WC_Settings_API
                 'mock_get_empty_payment_methods_exception' => [
                     'id' => 'mock_get_empty_payment_methods_exception',
                     'title' => __(
-                        'wp-admin: getPaymentMethods will run without pre-stored data',
+                        'wp-admin: getPaymentMethods will run without pre stored data',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'type' => 'checkbox',

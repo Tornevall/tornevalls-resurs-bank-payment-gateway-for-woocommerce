@@ -14,7 +14,6 @@ use WP_Post;
 use function count;
 use function defined;
 use function func_get_args;
-use function in_array;
 use function is_array;
 
 /**
@@ -28,7 +27,7 @@ class WordPress
     /**
      * @since 0.0.1.0
      */
-    public static function initializePlugin()
+    public static function initializeWooCommerce()
     {
         // Do not actively work where WooCommerce isn't live.
         if (!class_exists('WC_Payment_Gateway')) {
