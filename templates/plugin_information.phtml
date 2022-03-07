@@ -9,32 +9,37 @@
 </div>
 
 <h2><?php _e('Contacting Support', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h2>
+<table width="100%">
 <?php
 $supportAddressList = Data::getSupportArray();
 if (is_array($supportAddressList) && (new Arrays())->isAssoc($supportAddressList)) {
     foreach ($supportAddressList as $name => $addressItem) {
         if (isset($addressItem['info']) && isset($addressItem['mail'])) {
             ?>
-            <div>
-                <span style="font-size: 14px !important; font-style: italic;">
+            <tr>
+                <td>
                     <a href="mailto:<?php echo sanitize_email($addressItem['mail']); ?>">
-                        <?php echo esc_html($addressItem['info']); ?></a>
-                </span>
-            </div>
+                        <?php echo esc_html($addressItem['mail']); ?></a>
+                </td>
+                <td><?php echo esc_html($addressItem['info']); ?></td>
+            </tr>
             <?php
         }
     }
 }
 
 if (Data::isOriginalCodeBase()) { ?>
-    <span style="font-size: 14px !important; font-style: italic;">
+    <tr>
+        <td colspan="2">
         <a href="https://lists.tornevall.net/mailman/listinfo/resursbank-woocommerce" target="_blank">
-        <?php _e('Subscribe to newsletters!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?>
+        <?php _e('Subscribe to newsletters.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?>
         </a>
-    </span>
+        </td>
+    </tr>
     <?php
 }
 ?>
+</table>
 
 <h2><?php _e('About this plugin', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'); ?></h2>
 
