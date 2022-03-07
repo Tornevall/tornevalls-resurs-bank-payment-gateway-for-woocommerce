@@ -1399,6 +1399,25 @@ class Data
     {
         $netWrapper = new NetWrapper();
 
+        $aes = new Aes();
+        switch ($aes->getCryptoLib()) {
+            case AES::CRYPTO_SSL:
+                $cryptoLibType = 'SSL/OpenSSL';
+                break;
+            case AES::CRYPTO_MCRYPT:
+                $cryptoLibType = __(
+                    'Your system has crypto support but currently you are using the deprecated module mcrypt for it. ' .
+                    'It is strongly recommended to upgrade to a modern package as soon as possible.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
+                break;
+            default:
+                $cryptoLibType = __(
+                    'Your system is missing support for crypto. This module may not work properly without it!',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
+        }
+
         $renderData = [
             __(
                 'Plugin version',
@@ -1431,6 +1450,10 @@ class Data
                 'Communication Drivers',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ) => nl2br(Data::getEscapedHtml(implode("\n", self::getWrapperList($netWrapper)))),
+            __(
+                'Crypto Library',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => $cryptoLibType,
             __(
                 'Network Lookup',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -1527,8 +1550,10 @@ class Data
         if ($dataEncryptionState instanceof Exception) {
             self::setLogNotice(
                 sprintf(
-                    __('%s failed encryption (%d): %s. Failover to base64.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    __(
+                        '%s failed encryption (%d): %s. Failover to base64.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
                     __FUNCTION__,
                     $dataEncryptionState->getCode(),
                     $dataEncryptionState->getMessage()

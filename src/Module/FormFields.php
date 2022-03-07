@@ -1104,22 +1104,6 @@ class FormFields extends WC_Settings_API
                     'type' => 'title',
                     'title' => 'Plugin Settings',
                 ],
-                'priorVersionsDisabled' => [
-                    'id' => 'priorVersionsDisabled',
-                    'title' => __('Disable RB 2.x', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'type' => 'checkbox',
-                    'desc' => __(
-                        'Disable prior similar versions of the Resurs Bank plugin (v2.x-series) - ' .
-                        'You might need an extra reload after save',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'desc_tip' => __(
-                        'This setting will disable, not entirely, but the functions in Resurs Bank Gateway v2.x ' .
-                        'with help from filters in that release.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => 'yes',
-                ],
                 'dev_section_end' => [
                     'type' => 'sectionend',
                 ],
