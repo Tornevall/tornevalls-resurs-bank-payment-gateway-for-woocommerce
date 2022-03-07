@@ -59,7 +59,7 @@ class WooCommerce
      * @var string
      * @since 0.0.1.0
      */
-    private static $requiredVersion = '3.4.0';
+    private static $requiredVersion = '3.5.0';
 
     /**
      * @return bool
