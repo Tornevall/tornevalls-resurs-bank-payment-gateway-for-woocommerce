@@ -31,6 +31,8 @@ if ($get_address_form || $get_address_form_always) { ?>
         <?php
         if (Data::isExtendedTest()) {
             $customerCountry = strtoupper(Data::getCustomerCountry());
+            //$customerCompany = Data::getCustomerCompanyName();
+            $chosenCustomerType = Data::getCustomerType();
             if (isset($liveTestData[$customerCountry]['payments']['civicNumber']) &&
                 is_array($liveTestData[$customerCountry]['payments']['civicNumber']) &&
                 count($liveTestData[$customerCountry]['payments']['civicNumber'])
@@ -39,6 +41,11 @@ if ($get_address_form || $get_address_form_always) { ?>
                 $civicNumberOptions = [];
                 if (is_array($civicNumberList) && count($civicNumberList)) {
                     foreach ($civicNumberList as $civicType => $civicNumber) {
+                        $isCompanyCivic = (bool)preg_match('/^company/i', $civicType);
+                        if (($chosenCustomerType !== 'LEGAL' && $isCompanyCivic) ||
+                            ($chosenCustomerType !== 'NATURAL' && !$isCompanyCivic)) {
+                            continue;
+                        }
                         $civicNumberOptions[] = sprintf(
                             '<option value="%s">%s (%s)</option>',
                             $civicNumber,

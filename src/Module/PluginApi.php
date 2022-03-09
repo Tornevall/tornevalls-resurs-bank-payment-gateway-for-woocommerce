@@ -130,7 +130,7 @@ class PluginApi
         // Can not sanitize output as the browser is strictly typed to specific content.
         echo json_encode($out);
         if ($dieInstantly) {
-            die();
+            exit;
         }
     }
 
@@ -968,7 +968,7 @@ class PluginApi
                         foreach (self::$callbacks as $callback) {
                             $expectedUrl = self::getCallbackUrl(self::getCallbackParams($callback));
                             $callbackString = ResursBankAPI::getResurs()->getCallbackTypeString($callback);
-                            if (isset($callbackString)) {
+                            if (isset($callbackString, $freshCallbackList[$callbackString])) {
                                 similar_text(
                                     $expectedUrl,
                                     $freshCallbackList[$callbackString],

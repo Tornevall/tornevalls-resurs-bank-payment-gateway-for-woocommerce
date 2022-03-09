@@ -9,7 +9,11 @@
                 "Annul After 5s": "197801069241",
                 "Unfreeze After 10m": "198101010000",
                 "Annul After 10m": "198909194451",
-                "Second Deny": "198909194451"
+                "Second Deny": "198909194451",
+                "Company Booked": "166997368573",
+                "Company Denied": "169468958195",
+                "Company Second Deny": "162177385255",
+                "Company Frozen": "162830419400"
             }
         }
     }
