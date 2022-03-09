@@ -1616,7 +1616,10 @@ class Data
 
         // Making sure this default is saved.
         $current = get_option('woocommerce_resurs-bank_settings');
-        if (isset($current['instant_migrations']) && !Data::getResursOption('resursImportCredentials')) {
+        if (isset($current['instant_migrations']) &&
+            self::getTruth($current['instant_migrations']) &&
+            !Data::getResursOption('resursImportCredentials')
+        ) {
             PluginApi::importCredentials(true);
         }
 

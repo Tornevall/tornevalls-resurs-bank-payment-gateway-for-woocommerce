@@ -839,9 +839,10 @@ class WordPress
     public static function getLocalizedScriptsDeprecated($return)
     {
         $importDeprecated = (int)Data::getResursOption('resursImportCredentials');
+        $deprecatedLoginInfo = Data::getResursOptionDeprecated('login');
 
         $return['deprecated_timestamp'] = Date('Y-m-d, H:i', $importDeprecated);
-        $return['deprecated_login'] = !empty(Data::getResursOptionDeprecated('login')) ? true : false;
+        $return['deprecated_login'] = !empty($deprecatedLoginInfo) && (int)$deprecatedLoginInfo > 0;
         $return['imported_credentials'] = __(
             'Credentials was imported from an older platform',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'

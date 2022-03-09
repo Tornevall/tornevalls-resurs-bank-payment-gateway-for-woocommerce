@@ -195,7 +195,7 @@ function getDeprecatedCredentialsForm() {
             )
         );
     } else if (userBox.length === 1 && hasImport) {
-        console.log('Absolutely');
+        console.log(getResursLocalization('deprecated_login'));
         userBox.after($rQuery('<div>', {
             'id': 'resurs_import_credentials_history',
             'style': 'margin-top: 3px; padding 5px; width: 640px; ' +
