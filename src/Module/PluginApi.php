@@ -186,9 +186,6 @@ class PluginApi
                 'login' => Data::getResursOptionDeprecated('login'),
                 'pass' => Data::getResursOptionDeprecated('password'),
             ]);
-        } else {
-            Data::getResursOptionDeprecated('login');
-            Data::getResursOptionDeprecated('password');
         }
     }
 
