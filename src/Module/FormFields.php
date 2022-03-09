@@ -1499,7 +1499,6 @@ class FormFields extends WC_Settings_API
             }
         }
 
-
         $return = Data::getGenericClass()->getTemplate(
             'checkout_getaddress.phtml',
             [

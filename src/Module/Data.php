@@ -1614,6 +1614,12 @@ class Data
     {
         $return = true;
 
+        // Making sure this default is saved.
+        $current = get_option('woocommerce_resurs-bank_settings');
+        if (isset($current['instant_migrations']) && !Data::getResursOption('resursImportCredentials')) {
+            PluginApi::importCredentials(true);
+        }
+
         $genericController = new Generic();
         $genericController->setExpectedVersions(
             [

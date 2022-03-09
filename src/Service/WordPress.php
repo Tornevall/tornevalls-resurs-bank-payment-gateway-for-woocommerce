@@ -840,8 +840,14 @@ class WordPress
     {
         $importDeprecated = (int)Data::getResursOption('resursImportCredentials');
 
+        $return['deprecated_timestamp'] = Date('Y-m-d, H:i', $importDeprecated);
+        $return['deprecated_login'] = !empty(Data::getResursOptionDeprecated('login')) ? true : false;
+        $return['imported_credentials'] = __(
+            'Credentials was imported from an older platform',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+
         if (!$importDeprecated) {
-            $return['deprecated_login'] = !empty(Data::getResursOptionDeprecated('login')) ? true : false;
             $return['resurs_deprecated_credentials'] = __(
                 'Import credentials from Resurs v2.x',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
