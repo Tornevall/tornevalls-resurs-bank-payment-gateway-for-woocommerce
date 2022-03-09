@@ -838,29 +838,34 @@ class WordPress
      */
     public static function getLocalizedScriptsDeprecated($return)
     {
-        $importDeprecated = (int)Data::getResursOption('resursImportCredentials');
+        $loginDeprecated = Data::getResursOptionDeprecated('login');
+        $return['can_import_deprecated_credentials'] = false;
 
-        $return['deprecated_unixtime'] = $importDeprecated;
-        $return['deprecated_timestamp'] = Date('Y-m-d, H:i', $importDeprecated);
-        $return['can_import_deprecated_credentials'] = $importDeprecated === 0;
-        $return['imported_credentials'] = __(
-            'Credentials was imported from an older platform',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
+        if (!empty($loginDeprecated)) {
+            $importDeprecated = (int)Data::getResursOption('resursImportCredentials');
 
-        if (!$importDeprecated) {
-            $return['resurs_deprecated_credentials'] = __(
-                'Import credentials from Resurs v2.x',
+            $return['deprecated_unixtime'] = $importDeprecated;
+            $return['deprecated_timestamp'] = Date('Y-m-d, H:i', $importDeprecated);
+            $return['can_import_deprecated_credentials'] = $importDeprecated === 0;
+            $return['imported_credentials'] = __(
+                'Credentials was imported from an older platform',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
-            $return['credential_import_success'] = __(
-                'Import successful.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            );
-            $return['credential_import_failed'] = __(
-                'Import failed.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            );
+
+            if (!$importDeprecated) {
+                $return['resurs_deprecated_credentials'] = __(
+                    'Import credentials from Resurs v2.x',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
+                $return['credential_import_success'] = __(
+                    'Import successful.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
+                $return['credential_import_failed'] = __(
+                    'Import failed.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
+            }
         }
         return $return;
     }
