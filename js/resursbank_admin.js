@@ -171,7 +171,7 @@ function getCallbackMatches() {
  */
 function getDeprecatedCredentialsForm() {
     var userBox = $rQuery('#trbwc_admin_login');
-    // deprecated_login is a boolean but can be returned as "1".
+    // deprecated_login is a boolean but can is sometimes returned as "1" instead of a true value.
     var canImport = getResursLocalization('can_import_deprecated_credentials') == 1;
     if (canImport) {
         userBox.after(
