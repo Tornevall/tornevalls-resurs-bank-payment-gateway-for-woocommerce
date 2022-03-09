@@ -145,24 +145,35 @@ class PluginApi
     /**
      * @since 0.0.1.0
      */
-    public static function importCredentials()
+    public static function importCredentials($force = null)
     {
         Data::setLogInfo(
             __('Import of old credentials initiated.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );
+        if (!(bool)$force) {
+            self::getValidatedNonce();
+        }
         Data::setResursOption('resursImportCredentials', time());
-        self::getValidatedNonce();
 
         $imports = [
             'resursAnnuityDuration' => 'currentAnnuityDuration',
             'resursAnnuityMethod' => 'currentAnnuityFactor',
             'partPayWidgetPage' => 'part_payment_template',
+            'postidreference' => 'order_id_type',
         ];
 
         foreach ($imports as $key => $destKey) {
             $oldValue = Data::getResursOptionDeprecated($key);
-            if (!empty($oldValue)) {
-                Data::setResursOption($destKey, $oldValue);
+
+            switch ($key) {
+                case 'postidreference':
+                    // if postidreference is set to true, that matches with the 'postid' in the new version.
+                    Data::setResursOption($destKey, (bool)$oldValue ? 'postid' : 'ecom');
+                    break;
+                default:
+                    if (!empty($oldValue)) {
+                        Data::setResursOption($destKey, $oldValue);
+                    }
             }
         }
 
@@ -170,10 +181,15 @@ class PluginApi
             __('Import of old credentials finished.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );
 
-        self::reply([
-            'login' => Data::getResursOptionDeprecated('login'),
-            'pass' => Data::getResursOptionDeprecated('password'),
-        ]);
+        if (!$force) {
+            self::reply([
+                'login' => Data::getResursOptionDeprecated('login'),
+                'pass' => Data::getResursOptionDeprecated('password'),
+            ]);
+        } else {
+            Data::getResursOptionDeprecated('login');
+            Data::getResursOptionDeprecated('password');
+        }
     }
 
     /**
@@ -250,29 +266,6 @@ class PluginApi
     }
 
     /**
-     * Simple synchronizer for payment methods in RCOv2.
-     *
-     * @throws Exception
-     * @since 0.0.1.5
-     */
-    public static function resursBankRcoSynchronize()
-    {
-        $rcoId = Data::getRequest('id');
-
-        if (empty($rcoId)) {
-            // Synchronize and store payment method information in an early state.
-            WooCommerce::setSessionValue('paymentMethod', $rcoId);
-        }
-
-        self::reply(
-            [
-                'noAction' => true,
-            ]
-        );
-    }
-
-
-    /**
      * Make sure the used nonce can only be used once.
      *
      * @param $nonceTag
@@ -292,6 +285,28 @@ class PluginApi
             update_option($optionTag, Data::getRequest('n'));
         }
         return $return;
+    }
+
+    /**
+     * Simple synchronizer for payment methods in RCOv2.
+     *
+     * @throws Exception
+     * @since 0.0.1.5
+     */
+    public static function resursBankRcoSynchronize()
+    {
+        $rcoId = Data::getRequest('id');
+
+        if (empty($rcoId)) {
+            // Synchronize and store payment method information in an early state.
+            WooCommerce::setSessionValue('paymentMethod', $rcoId);
+        }
+
+        self::reply(
+            [
+                'noAction' => true,
+            ]
+        );
     }
 
     /**
@@ -1113,61 +1128,6 @@ class PluginApi
     }
 
     /**
-     * @since 0.0.1.4
-     */
-    private function getTestCallbackLastResponse($int = true)
-    {
-        $lastTestResponseString = Data::getResursOption('resurs_callback_test_response');
-        if ((int)$lastTestResponseString === 1) {
-            return __(
-                'Waiting.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            );
-        }
-        return $int ? (int)$lastTestResponseString : sprintf(
-            '%s %s',
-            __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-            date('Y-m-d H:i:s', (int)$lastTestResponseString)
-        );
-    }
-
-    /**
-     * @since 0.0.1.4
-     */
-    public function resetPluginSettings()
-    {
-        global $wpdb;
-        self::getValidatedNonce(false, false, __FUNCTION__);
-        // Double insurances here, since we're about to reset stuff.
-        if (is_admin() && is_ajax()) {
-            $deleteNot = [
-                'admin_iv',
-                'admin_key',
-            ];
-            $deleteNotArray = [];
-            foreach ($deleteNot as $item) {
-                $deleteNotArray[] = sprintf("option_name != '%s_%s'", Data::getPrefix(), $item);
-            }
-
-            // Clean up old importer data.
-            Data::delResursOption('resursImportCredentials');
-            $deleteString = sprintf(
-                "DELETE FROM %s WHERE option_name LIKE '%s_%%' AND %s",
-                Data::getSanitizedKeyElement($wpdb->options),
-                Data::getPrefix(),
-                implode('AND ', $deleteNotArray)
-            );
-            $cleanUpQuery = $wpdb->query($deleteString);
-
-            self::reply(
-                [
-                    'finished' => $cleanUpQuery,
-                ]
-            );
-        }
-    }
-
-    /**
      * @since 0.0.1.5
      * @noinspection OffsetOperationsInspection
      */
@@ -1268,6 +1228,25 @@ class PluginApi
         ];
 
         return $return;
+    }
+
+    /**
+     * @since 0.0.1.4
+     */
+    private function getTestCallbackLastResponse($int = true)
+    {
+        $lastTestResponseString = Data::getResursOption('resurs_callback_test_response');
+        if ((int)$lastTestResponseString === 1) {
+            return __(
+                'Waiting.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
+        }
+        return $int ? (int)$lastTestResponseString : sprintf(
+            '%s %s',
+            __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            date('Y-m-d H:i:s', (int)$lastTestResponseString)
+        );
     }
 
     /**
@@ -1488,5 +1467,41 @@ class PluginApi
         }
 
         return $return;
+    }
+
+    /**
+     * @since 0.0.1.4
+     */
+    public function resetPluginSettings()
+    {
+        global $wpdb;
+        self::getValidatedNonce(false, false, __FUNCTION__);
+        // Double insurances here, since we're about to reset stuff.
+        if (is_admin() && is_ajax()) {
+            $deleteNot = [
+                'admin_iv',
+                'admin_key',
+            ];
+            $deleteNotArray = [];
+            foreach ($deleteNot as $item) {
+                $deleteNotArray[] = sprintf("option_name != '%s_%s'", Data::getPrefix(), $item);
+            }
+
+            // Clean up old importer data.
+            Data::delResursOption('resursImportCredentials');
+            $deleteString = sprintf(
+                "DELETE FROM %s WHERE option_name LIKE '%s_%%' AND %s",
+                Data::getSanitizedKeyElement($wpdb->options),
+                Data::getPrefix(),
+                implode('AND ', $deleteNotArray)
+            );
+            $cleanUpQuery = $wpdb->query($deleteString);
+
+            self::reply(
+                [
+                    'finished' => $cleanUpQuery,
+                ]
+            );
+        }
     }
 }

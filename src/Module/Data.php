@@ -1088,6 +1088,8 @@ class Data
      */
     public static function getDefaultsInit(): array
     {
+        $instantMigrationTest = self::getResursOptionDeprecated('instant_migrations');
+
         if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
             self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
         }
@@ -1613,6 +1615,12 @@ class Data
     public static function getExpectations(): bool
     {
         $return = true;
+
+        // Making sure this default is saved.
+        $current = get_option('woocommerce_resurs-bank_settings');
+        if (isset($current['instant_migrations']) && !Data::getResursOption('resursImportCredentials')) {
+            PluginApi::importCredentials(true);
+        }
 
         $genericController = new Generic();
         $genericController->setExpectedVersions(

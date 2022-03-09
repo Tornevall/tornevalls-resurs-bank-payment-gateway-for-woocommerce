@@ -170,8 +170,10 @@ function getCallbackMatches() {
  * @since 0.0.1.0
  */
 function getDeprecatedCredentialsForm() {
-    if (getResursLocalization('deprecated_login')) {
-        var userBox = $rQuery('#trbwc_admin_login');
+    var userBox = $rQuery('#trbwc_admin_login');
+    // deprecated_login is a boolean but can be returned as "1".
+    var hasImport = getResursLocalization('deprecated_login') == 1;
+    if (getResursLocalization('deprecated_login') === false) {
         userBox.after(
             $rQuery(
                 '<button>',
@@ -187,11 +189,20 @@ function getDeprecatedCredentialsForm() {
                 '<div>',
                 {
                     'id': 'resurs_import_credentials_result',
-                    'style': 'margin-top: 3px; padding 5px; width: 400px; ' +
+                    'style': 'margin-top: 3px; padding 5px; width: 640px; ' +
                         'font-style: italic; font-weight: bold; color: #000099;'
                 }
             )
         );
+    } else if (userBox.length === 1 && hasImport) {
+        console.log('Absolutely');
+        userBox.after($rQuery('<div>', {
+            'id': 'resurs_import_credentials_history',
+            'style': 'margin-top: 3px; padding 5px; width: 640px; ' +
+                'font-style: italic; color: #0000FF;'
+        }).html(
+            getResursLocalization('imported_credentials') + ' ' + getResursLocalization('deprecated_timestamp') + '.'
+        ));
     }
 }
 
