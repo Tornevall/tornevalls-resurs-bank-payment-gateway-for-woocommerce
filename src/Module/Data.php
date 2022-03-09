@@ -1088,8 +1088,6 @@ class Data
      */
     public static function getDefaultsInit(): array
     {
-        $instantMigrationTest = self::getResursOptionDeprecated('instant_migrations');
-
         if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
             self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
         }
