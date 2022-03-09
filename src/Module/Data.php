@@ -892,21 +892,43 @@ class Data
     }
 
     /**
-     * @return false|mixed|void
+     * @return string
+     * @since 0.0.1.6
+     */
+    public static function getCustomerCompanyName(): string
+    {
+        global $woocommerce;
+
+        $return = '';
+
+        /**
+         * @var WC_Customer $wcCustomer
+         */
+        $wcCustomer = $woocommerce->customer;
+        if ($wcCustomer instanceof WC_Customer) {
+            $return = $wcCustomer->get_billing_company();
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return string
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getCustomerCountry()
+    public static function getCustomerCountry(): string
     {
         global $woocommerce;
+
+        $return = '';
 
         /**
          * @var WC_Customer $wcCustomer
          */
         $wcCustomer = $woocommerce->customer;
 
-        $return = null;
-        if ($wcCustomer instanceof WC_Customer && method_exists($wcCustomer, 'get_billing_country')) {
+        if ($wcCustomer instanceof WC_Customer) {
             $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
             $return = !empty($woocommerceCustomerCountry) ?
                 $woocommerceCustomerCountry : WordPress::applyFilters(
@@ -2385,6 +2407,7 @@ class Data
 
     /**
      * @return string
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getCustomerType()
@@ -2407,6 +2430,7 @@ class Data
 
     /**
      * @return array|mixed|string|null
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getCustomerTypeFromSession()

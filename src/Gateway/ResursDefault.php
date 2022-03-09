@@ -1733,7 +1733,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         if (isset($_REQUEST['c'])) {
             WooCommerce::getHandledCallback();
-            die();
+            exit;
         }
 
         if (isset($_REQUEST['apiData'])) {
