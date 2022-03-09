@@ -838,10 +838,11 @@ class WordPress
      */
     public static function getLocalizedScriptsDeprecated($return)
     {
-        $loginDeprecated = Data::getResursOptionDeprecated('login');
+        // Setting defaults.
         $return['can_import_deprecated_credentials'] = false;
+        $return['deprecated_unixtime'] = 0;
 
-        if (!empty($loginDeprecated)) {
+        if (!empty(Data::getResursOptionDeprecated('login'))) {
             $importDeprecated = (int)Data::getResursOption('resursImportCredentials');
 
             $return['deprecated_unixtime'] = $importDeprecated;
