@@ -160,6 +160,8 @@ class PluginApi
             'resursAnnuityMethod' => 'currentAnnuityFactor',
             'partPayWidgetPage' => 'part_payment_template',
             'postidreference' => 'order_id_type',
+            'login' => 'login',
+            'password' => 'password',
         ];
 
         foreach ($imports as $key => $destKey) {
