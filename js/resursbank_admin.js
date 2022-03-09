@@ -172,8 +172,8 @@ function getCallbackMatches() {
 function getDeprecatedCredentialsForm() {
     var userBox = $rQuery('#trbwc_admin_login');
     // deprecated_login is a boolean but can be returned as "1".
-    var hasImport = getResursLocalization('deprecated_login') == 1;
-    if (getResursLocalization('deprecated_login') === false) {
+    var canImport = getResursLocalization('can_import_deprecated_credentials') == 1;
+    if (canImport) {
         userBox.after(
             $rQuery(
                 '<button>',
@@ -194,15 +194,16 @@ function getDeprecatedCredentialsForm() {
                 }
             )
         );
-    } else if (userBox.length === 1 && hasImport) {
-        console.log(getResursLocalization('deprecated_login'));
-        userBox.after($rQuery('<div>', {
-            'id': 'resurs_import_credentials_history',
-            'style': 'margin-top: 3px; padding 5px; width: 640px; ' +
-                'font-style: italic; color: #0000FF;'
-        }).html(
-            getResursLocalization('imported_credentials') + ' ' + getResursLocalization('deprecated_timestamp') + '.'
-        ));
+    } else if (userBox.length === 1) {
+        if (getResursLocalization('deprecated_unixtime') > 0) {
+            userBox.after($rQuery('<div>', {
+                'id': 'resurs_import_credentials_history',
+                'style': 'margin-top: 3px; padding 5px; width: 640px; ' +
+                    'font-style: italic; color: #0000FF;'
+            }).html(
+                getResursLocalization('imported_credentials') + ' ' + getResursLocalization('deprecated_timestamp') + '.'
+            ));
+        }
     }
 }
 
