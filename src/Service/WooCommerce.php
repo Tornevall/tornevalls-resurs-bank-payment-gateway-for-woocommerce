@@ -20,7 +20,6 @@ use RuntimeException;
 use stdClass;
 use WC_Cart;
 use WC_Order;
-use WC_Order_Item_Fee;
 use WC_Product;
 use WC_Tax;
 use function count;
@@ -189,6 +188,27 @@ class WooCommerce
     }
 
     /**
+     * @param bool $returnCart
+     * @return array|bool|WC_Cart
+     * @since 0.0.1.0
+     */
+    public static function getValidCart($returnCart = false)
+    {
+        $return = false;
+
+        if (isset(WC()->cart)) {
+            $cartContentCount = WC()->cart->get_cart_contents_count();
+            $return = $cartContentCount > 0;
+
+            if ($returnCart && $return && !empty(WC()->cart)) {
+                $return = WC()->cart->get_cart();
+            }
+        }
+
+        return $return;
+    }
+
+    /**
      * Self aware setup link.
      *
      * @param $links
@@ -308,31 +328,6 @@ class WooCommerce
             } else {
                 self::getAdminAfterOldCheck($order);
             }
-        }
-    }
-
-    /**
-     * @param $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getAdminAfterOldCheck($order)
-    {
-        if ($order->meta_exists('resursBankPaymentFlow') &&
-            !Data::hasOldGateway() &&
-            !Data::getResursOption('deprecated_interference')
-        ) {
-            echo Data::getEscapedHtml(
-                Data::getGenericClass()->getTemplate(
-                    'adminpage_woocommerce_version22',
-                    [
-                        'wooPlug22VersionInfo' => __(
-                            'Order has not been created by this plugin and the original plugin is currently unavailable.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                    ]
-                )
-            );
         }
     }
 
@@ -458,6 +453,31 @@ class WooCommerce
         }
 
         return $return;
+    }
+
+    /**
+     * @param $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getAdminAfterOldCheck($order)
+    {
+        if ($order->meta_exists('resursBankPaymentFlow') &&
+            !Data::hasOldGateway() &&
+            !Data::getResursOption('deprecated_interference')
+        ) {
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate(
+                    'adminpage_woocommerce_version22',
+                    [
+                        'wooPlug22VersionInfo' => __(
+                            'Order has not been created by this plugin and the original plugin is currently unavailable.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
+                    ]
+                )
+            );
+        }
     }
 
     /**
@@ -636,24 +656,6 @@ class WooCommerce
     }
 
     /**
-     * @param WC_Product $product
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getProperArticleNumber($product)
-    {
-        $return = $product->get_id();
-        $productSkuValue = $product->get_sku();
-        if (!empty($productSkuValue) &&
-            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
-        ) {
-            $return = $productSkuValue;
-        }
-
-        return WordPress::applyFilters('getArticleNumber', $return, $product);
-    }
-
-    /**
      * v3core: Checkout vs Cart Manipulation.
      *
      * @param $customerIsInCheckout
@@ -712,6 +714,24 @@ class WooCommerce
         }
 
         return $return;
+    }
+
+    /**
+     * @param WC_Product $product
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function getProperArticleNumber($product)
+    {
+        $return = $product->get_id();
+        $productSkuValue = $product->get_sku();
+        if (!empty($productSkuValue) &&
+            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
+        ) {
+            $return = $productSkuValue;
+        }
+
+        return WordPress::applyFilters('getArticleNumber', $return, $product);
     }
 
     /**
@@ -1172,34 +1192,6 @@ class WooCommerce
     }
 
     /**
-     * Set order status with prefixed note.
-     *
-     * @param $order
-     * @param $newOrderStatus
-     * @param $orderNote
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote): bool
-    {
-        if (Data::getResursOption('queue_order_statuses_on_success')) {
-            $return = OrderStatusHandler::setOrderStatusWithNotice(
-                $order,
-                $newOrderStatus,
-                $orderNote
-            );
-        } else {
-            $return = self::getProperOrder($order, 'order')->update_status(
-                $newOrderStatus,
-                self::getOrderNotePrefixed($orderNote)
-            );
-        }
-
-        return $return;
-    }
-
-    /**
      * @param null $key
      * @return mixed
      * @since 0.0.1.0
@@ -1268,6 +1260,34 @@ class WooCommerce
         // Can not sanitize output as the browser is strictly typed to specific content.
         echo json_encode($out);
         exit;
+    }
+
+    /**
+     * Set order status with prefixed note.
+     *
+     * @param $order
+     * @param $newOrderStatus
+     * @param $orderNote
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote): bool
+    {
+        if (Data::getResursOption('queue_order_statuses_on_success')) {
+            $return = OrderStatusHandler::setOrderStatusWithNotice(
+                $order,
+                $newOrderStatus,
+                $orderNote
+            );
+        } else {
+            $return = self::getProperOrder($order, 'order')->update_status(
+                $newOrderStatus,
+                self::getOrderNotePrefixed($orderNote)
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -1357,27 +1377,6 @@ class WooCommerce
         }
 
         self::setCustomerCheckoutLocation($isCheckout);
-    }
-
-    /**
-     * @param bool $returnCart
-     * @return array|bool|WC_Cart
-     * @since 0.0.1.0
-     */
-    public static function getValidCart($returnCart = false)
-    {
-        $return = false;
-
-        if (isset(WC()->cart)) {
-            $cartContentCount = WC()->cart->get_cart_contents_count();
-            $return = $cartContentCount > 0;
-
-            if ($returnCart && $return && !empty(WC()->cart)) {
-                $return = WC()->cart->get_cart();
-            }
-        }
-
-        return $return;
     }
 
     /**
@@ -1503,16 +1502,6 @@ class WooCommerce
     }
 
     /**
-     * @param $paymentMethod
-     * @return string
-     * @since 0.0.1.5
-     */
-    public static function getCustomDescription($paymentMethod): string
-    {
-        return Data::getResursOption(sprintf('method_custom_description_%s', $paymentMethod));
-    }
-
-    /**
      * Get tax rate from plugin setting when nothing else applies.
      * @return int
      * @since 0.0.1.5
@@ -1529,6 +1518,16 @@ class WooCommerce
         }
 
         return $return;
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return string
+     * @since 0.0.1.5
+     */
+    public static function getCustomDescription($paymentMethod): string
+    {
+        return Data::getResursOption(sprintf('method_custom_description_%s', $paymentMethod));
     }
 
     /**
