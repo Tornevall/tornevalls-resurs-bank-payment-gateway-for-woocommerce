@@ -116,44 +116,37 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      */
     protected $API;
-
+    /**
+     * @var WC_Cart $cart
+     * @since 0.0.1.0
+     */
+    protected $cart;
     /**
      * @var array $applicantPostData Applicant request.
      * @since 0.0.1.0
      */
     private $applicantPostData = [];
-
     /**
      * @var stdClass $paymentResponse
      * @since 0.0.1.0
      */
     private $paymentResponse;
-
     /**
      * @var array
      * @since 0.0.1.0
      */
     private $wcOrderData;
-
     /**
      * Data that will be sent between Resurs Bank and ourselves.
      * @var array $apiData
      * @since 0.0.1.0
      */
     private $apiData = [];
-
     /**
      * @var string $apiDataId
      * @since 0.0.1.0
      */
     private $apiDataId = '';
-
-    /**
-     * @var WC_Cart $cart
-     * @since 0.0.1.0
-     */
-    protected $cart;
-
     /**
      * @var array $paymentMethodInformation
      * @since 0.0.1.0
@@ -631,49 +624,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Prepare for RCO depending on what happened. We need to make exceptions available in frontend from this point.
-     *
-     * @throws Exception
-     * @since 1.0.0
-     */
-    private function getProperRcoEnqueue()
-    {
-        $urlList = isset($this->rcoFrameData->script) ?
-            (new Domain())->getUrlsFromHtml($this->rcoFrameData->script) : [];
-
-        if (isset($this->rcoFrameData->script)) {
-            if (!empty($this->rcoFrameData->script) && count($urlList)) {
-                $this->rcoFrameData->originHostName = $this
-                    ->API
-                    ->getConnection()
-                    ->getIframeOrigin($this->rcoFrameData->baseUrl);
-                wp_enqueue_script(
-                    'trbwc_rco',
-                    array_pop($urlList),
-                    ['jquery']
-                );
-                unset($this->rcoFrameData->customer);
-                wp_localize_script(
-                    'trbwc_rco',
-                    'trbwc_rco',
-                    (array)$this->rcoFrameData
-                );
-            } else {
-                wp_enqueue_script(
-                    'trbwc_rco',
-                    Data::getGatewayUrl() . '/js/trbwc_rco.js',
-                    ['jquery']
-                );
-                wp_localize_script(
-                    'trbwc_rco',
-                    'trbwc_rco',
-                    (array)$this->rcoFrameData
-                );
-            }
-        }
-    }
-
-    /**
      * Global order data handler. Things that happens to all flows.
      * @return $this
      * @throws Exception
@@ -1121,6 +1071,49 @@ class ResursDefault extends WC_Payment_Gateway
         );
 
         return !$returnAgeValue ? ($calculateAge > $rcoOrderAgeLimit) : $calculateAge;
+    }
+
+    /**
+     * Prepare for RCO depending on what happened. We need to make exceptions available in frontend from this point.
+     *
+     * @throws Exception
+     * @since 1.0.0
+     */
+    private function getProperRcoEnqueue()
+    {
+        $urlList = isset($this->rcoFrameData->script) ?
+            (new Domain())->getUrlsFromHtml($this->rcoFrameData->script) : [];
+
+        if (isset($this->rcoFrameData->script)) {
+            if (!empty($this->rcoFrameData->script) && count($urlList)) {
+                $this->rcoFrameData->originHostName = $this
+                    ->API
+                    ->getConnection()
+                    ->getIframeOrigin($this->rcoFrameData->baseUrl);
+                wp_enqueue_script(
+                    'trbwc_rco',
+                    array_pop($urlList),
+                    ['jquery']
+                );
+                unset($this->rcoFrameData->customer);
+                wp_localize_script(
+                    'trbwc_rco',
+                    'trbwc_rco',
+                    (array)$this->rcoFrameData
+                );
+            } else {
+                wp_enqueue_script(
+                    'trbwc_rco',
+                    Data::getGatewayUrl() . '/js/trbwc_rco.js',
+                    ['jquery']
+                );
+                wp_localize_script(
+                    'trbwc_rco',
+                    'trbwc_rco',
+                    (array)$this->rcoFrameData
+                );
+            }
+        }
     }
 
     /**
@@ -1932,16 +1925,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @return array|mixed|string
-     * @since 0.0.1.0
-     */
-    private function isSuccess($finalSigningResponse)
-    {
-        return isset($finalSigningResponse['result']) &&
-        $finalSigningResponse['result'] === 'failed' ? false : $this->getApiValue('success');
-    }
-
-    /**
      * Final signing: Checks and update order if signing was required initially. Let it through on hosted but
      * keep logging the details.
      *
@@ -2264,6 +2247,16 @@ class ResursDefault extends WC_Payment_Gateway
             'bookSignedPaymentExceptionMessage',
             $bookSignedException->getMessage()
         );
+    }
+
+    /**
+     * @return array|mixed|string
+     * @since 0.0.1.0
+     */
+    private function isSuccess($finalSigningResponse)
+    {
+        return isset($finalSigningResponse['result']) &&
+        $finalSigningResponse['result'] === 'failed' ? false : $this->getApiValue('success');
     }
 
     /**

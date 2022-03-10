@@ -472,39 +472,6 @@ class WordPress
     }
 
     /**
-     * WordPress equivalent for apply_filters, but properly prefixed with plugin name tag.
-     *
-     * @param $filterName
-     * @param $value
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function applyFilters($filterName, $value)
-    {
-        Data::canLog(
-            Data::CAN_LOG_JUNK,
-            sprintf(
-                __(
-                    'Apply filter: %s',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ),
-                $filterName
-            )
-        );
-
-        $applyArray = [
-            sprintf(
-                '%s_%s',
-                'rbwc',
-                self::getFilterName($filterName)
-            ),
-            $value,
-        ];
-
-        return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
      * @since 0.0.1.0
      */
     public static function setResursBankScriptsAdmin()
@@ -756,6 +723,39 @@ class WordPress
     public static function getNonceTag($tag, $strictify = true): string
     {
         return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
+    }
+
+    /**
+     * WordPress equivalent for apply_filters, but properly prefixed with plugin name tag.
+     *
+     * @param $filterName
+     * @param $value
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    public static function applyFilters($filterName, $value)
+    {
+        Data::canLog(
+            Data::CAN_LOG_JUNK,
+            sprintf(
+                __(
+                    'Apply filter: %s',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                $filterName
+            )
+        );
+
+        $applyArray = [
+            sprintf(
+                '%s_%s',
+                'rbwc',
+                self::getFilterName($filterName)
+            ),
+            $value,
+        ];
+
+        return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
     }
 
     /**

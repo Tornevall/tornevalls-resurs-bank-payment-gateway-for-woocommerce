@@ -1536,96 +1536,6 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * Fetch and compare a payment method with the simplified API list. Returns the index for which
-     * the expected payment method resides in the old format.
-     *
-     * @param Method $merchantApiMethod
-     * @param stdClass $paymentMethods
-     * @return int
-     * @since 0.0.1.0
-     */
-    private static function getMerchantMethodBySimplified($merchantApiMethod, $paymentMethods): int
-    {
-        $return = -1;
-
-        foreach ($paymentMethods as $paymentMethodIndex => $paymentMethod) {
-            $resursType = preg_replace('/^RESURS_/', '', $merchantApiMethod->getType());
-            // Need to look up customerType too.
-            if ($paymentMethod->description === $merchantApiMethod->getDescription() &&
-                (
-                    $paymentMethod->specificType === $merchantApiMethod->getType() ||
-                    $paymentMethod->specificType === $resursType
-                )
-            ) {
-                $return = $paymentMethodIndex;
-                break;
-            }
-        }
-
-        return (int)$return;
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.4
-     */
-    private static function getLastPaymentMethodUpdate(): string
-    {
-        $lastMethodUpdateStored = (int)Data::getResursOption('lastMethodUpdate');
-        return $lastMethodUpdateStored ? date('Y-m-d H:i', $lastMethodUpdateStored) : __(
-            'Never.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.4
-     */
-    private static function getLastCallbackUpdate(): string
-    {
-        $lastMethodUpdateStored = (int)Data::getResursOption('lastCallbackUpdate');
-        return $lastMethodUpdateStored ? date('Y-m-d H:i', $lastMethodUpdateStored) : __(
-            'Never.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.4
-     */
-    private static function getLastCallbackTrigger(): string
-    {
-        $lastMethodUpdateStored = (int)Data::getResursOption('resurs_callback_test_response');
-        return $lastMethodUpdateStored ? date('Y-m-d H:i:s', $lastMethodUpdateStored) : __(
-            'Never.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
-    }
-
-    /**
-     * @param array $paymentMethods
-     * @return array
-     * @since 0.0.1.5
-     */
-    private static function getInternalMethodDescriptions(array $paymentMethods): array
-    {
-        if (is_array($paymentMethods)) {
-            foreach ($paymentMethods as $methodIdx => $methodItem) {
-                if (is_object($methodItem)) {
-                    $description = Data::getResursOption(sprintf('method_custom_description_%s', $methodItem->id));
-                    $internalFee = Data::getResursOption(sprintf('method_custom_fee_%s', $methodItem->id));
-                    $methodItem->internalDescription = $description;
-                    $methodItem->internalFee = $internalFee;
-                    $paymentMethods[$methodIdx] = $methodItem;
-                }
-            }
-        }
-        return $paymentMethods;
-    }
-
-    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
@@ -1750,6 +1660,70 @@ class FormFields extends WC_Settings_API
     }
 
     /**
+     * Fetch and compare a payment method with the simplified API list. Returns the index for which
+     * the expected payment method resides in the old format.
+     *
+     * @param Method $merchantApiMethod
+     * @param stdClass $paymentMethods
+     * @return int
+     * @since 0.0.1.0
+     */
+    private static function getMerchantMethodBySimplified($merchantApiMethod, $paymentMethods): int
+    {
+        $return = -1;
+
+        foreach ($paymentMethods as $paymentMethodIndex => $paymentMethod) {
+            $resursType = preg_replace('/^RESURS_/', '', $merchantApiMethod->getType());
+            // Need to look up customerType too.
+            if ($paymentMethod->description === $merchantApiMethod->getDescription() &&
+                (
+                    $paymentMethod->specificType === $merchantApiMethod->getType() ||
+                    $paymentMethod->specificType === $resursType
+                )
+            ) {
+                $return = $paymentMethodIndex;
+                break;
+            }
+        }
+
+        return (int)$return;
+    }
+
+    /**
+     * @param array $paymentMethods
+     * @return array
+     * @since 0.0.1.5
+     */
+    private static function getInternalMethodDescriptions(array $paymentMethods): array
+    {
+        if (is_array($paymentMethods)) {
+            foreach ($paymentMethods as $methodIdx => $methodItem) {
+                if (is_object($methodItem)) {
+                    $description = Data::getResursOption(sprintf('method_custom_description_%s', $methodItem->id));
+                    $internalFee = Data::getResursOption(sprintf('method_custom_fee_%s', $methodItem->id));
+                    $methodItem->internalDescription = $description;
+                    $methodItem->internalFee = $internalFee;
+                    $paymentMethods[$methodIdx] = $methodItem;
+                }
+            }
+        }
+        return $paymentMethods;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.4
+     */
+    private static function getLastPaymentMethodUpdate(): string
+    {
+        $lastMethodUpdateStored = (int)Data::getResursOption('lastMethodUpdate');
+        return $lastMethodUpdateStored ? date('Y-m-d H:i', $lastMethodUpdateStored) : __(
+            'Never.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+    }
+
+    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
@@ -1778,6 +1752,32 @@ class FormFields extends WC_Settings_API
                 )
             );
         }
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.4
+     */
+    private static function getLastCallbackUpdate(): string
+    {
+        $lastMethodUpdateStored = (int)Data::getResursOption('lastCallbackUpdate');
+        return $lastMethodUpdateStored ? date('Y-m-d H:i', $lastMethodUpdateStored) : __(
+            'Never.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.4
+     */
+    private static function getLastCallbackTrigger(): string
+    {
+        $lastMethodUpdateStored = (int)Data::getResursOption('resurs_callback_test_response');
+        return $lastMethodUpdateStored ? date('Y-m-d H:i:s', $lastMethodUpdateStored) : __(
+            'Never.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
     }
 
     /**

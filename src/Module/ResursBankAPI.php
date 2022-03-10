@@ -52,13 +52,17 @@ class ResursBankAPI
      * @since 0.0.1.0
      */
     private static $annuityFactors;
-
+    /**
+     * Static variable of Resurs Bank Merchant API (early bleeding edge state).
+     * @var MerchantApi
+     * @since 0.0.1.0
+     */
+    private static $merchantApi;
     /**
      * @var ResursBank $ecom
      * @since 0.0.1.0
      */
     private $ecom;
-
     /**
      * @var array $credentials
      * @since 0.0.1.0
@@ -67,14 +71,6 @@ class ResursBankAPI
         'username' => '',
         'password' => '',
     ];
-
-    /**
-     * Static variable of Resurs Bank Merchant API (early bleeding edge state).
-     * @var MerchantApi
-     * @since 0.0.1.0
-     */
-    private static $merchantApi;
-
     /**
      * Resurs Bank Merchant API (early bleeding edge state).
      * @var MerchantApi
@@ -150,76 +146,6 @@ class ResursBankAPI
         }
 
         return self::$resursBank->getConnection();
-    }
-
-    /**
-     * @return MerchantApi
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getMerchantConnection(): MerchantApi
-    {
-        if (empty(self::$merchantApi)) {
-            // Instantiation.
-            self::$merchantApi = new self();
-        }
-
-        return self::$merchantApi->getMerchantApi();
-    }
-
-    /**
-     * @return MerchantApi
-     * @throws Exception
-     */
-    public function getMerchantApi(): MerchantApi
-    {
-        if (Data::isBleedingEdge() && Data::isBleedingEdgeApiReady()) {
-            try {
-                if (empty($this->merchantConnection)) {
-                    $livingTransientToken = (string)get_transient(
-                        sprintf('%s_bearer', Data::getPrefix())
-                    );
-
-                    if (empty($livingTransientToken)) {
-                        $this->merchantConnection = (new MerchantApi())
-                            ->setClientId(Data::getResursOption('jwt_client_id'))
-                            ->setClientSecret(Data::getResursOption('jwt_client_password'))
-                            ->setScope('mock-merchant-api')
-                            ->setGrantType('client_credentials');
-
-                        $tokenRequestData = $this->merchantConnection->getToken();
-                        if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
-                            Data::setDeveloperLog(
-                                __FUNCTION__,
-                                __(
-                                    'Merchant API token renewed.',
-                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                                )
-                            );
-                            $livingTransientToken = $tokenRequestData->getAccessToken();
-                            set_transient(
-                                sprintf('%s_bearer', Data::getPrefix()),
-                                $livingTransientToken,
-                                $tokenRequestData->getExpire()
-                            );
-                        }
-                    } else {
-                        $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
-                        Data::setDeveloperLog(
-                            __FUNCTION__,
-                            __(
-                                'Merchant API token reused.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                            )
-                        );
-                    }
-                }
-            } catch (Exception $e) {
-                Data::setLogException($e, __FUNCTION__);
-            }
-        }
-
-        return $this->merchantConnection;
     }
 
     /**
@@ -490,6 +416,76 @@ class ResursBankAPI
                 __FUNCTION__
             )
         );
+    }
+
+    /**
+     * @return MerchantApi
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getMerchantConnection(): MerchantApi
+    {
+        if (empty(self::$merchantApi)) {
+            // Instantiation.
+            self::$merchantApi = new self();
+        }
+
+        return self::$merchantApi->getMerchantApi();
+    }
+
+    /**
+     * @return MerchantApi
+     * @throws Exception
+     */
+    public function getMerchantApi(): MerchantApi
+    {
+        if (Data::isBleedingEdge() && Data::isBleedingEdgeApiReady()) {
+            try {
+                if (empty($this->merchantConnection)) {
+                    $livingTransientToken = (string)get_transient(
+                        sprintf('%s_bearer', Data::getPrefix())
+                    );
+
+                    if (empty($livingTransientToken)) {
+                        $this->merchantConnection = (new MerchantApi())
+                            ->setClientId(Data::getResursOption('jwt_client_id'))
+                            ->setClientSecret(Data::getResursOption('jwt_client_password'))
+                            ->setScope('mock-merchant-api')
+                            ->setGrantType('client_credentials');
+
+                        $tokenRequestData = $this->merchantConnection->getToken();
+                        if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
+                            Data::setDeveloperLog(
+                                __FUNCTION__,
+                                __(
+                                    'Merchant API token renewed.',
+                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                )
+                            );
+                            $livingTransientToken = $tokenRequestData->getAccessToken();
+                            set_transient(
+                                sprintf('%s_bearer', Data::getPrefix()),
+                                $livingTransientToken,
+                                $tokenRequestData->getExpire()
+                            );
+                        }
+                    } else {
+                        $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
+                        Data::setDeveloperLog(
+                            __FUNCTION__,
+                            __(
+                                'Merchant API token reused.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            )
+                        );
+                    }
+                }
+            } catch (Exception $e) {
+                Data::setLogException($e, __FUNCTION__);
+            }
+        }
+
+        return $this->merchantConnection;
     }
 
     /**

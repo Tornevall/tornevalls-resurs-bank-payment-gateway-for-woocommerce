@@ -305,6 +305,104 @@ class PluginHooks
     }
 
     /**
+     * @param $newSlug
+     * @param $order
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function handleOrderByNewSlug($newSlug, $order)
+    {
+        $afterShopResponseString = '';
+
+        $wpHelper = new wpHelper();
+        $resursConnection = (new ResursBankAPI())->getConnection();
+
+        // Userdata that should follow with the afterShopFlow when changing order status on Resurs side,
+        // for backtracking actions.
+        $resursConnection->setLoggedInUser($wpHelper->getUserInfo('user_login'));
+
+        $resursReference = Data::getResursReference($order);
+        switch ($newSlug) {
+            case 'completed':
+                // Make sure we also handle instant finalizations.
+                if ($resursConnection->canDebit($order['ecom'])) {
+                    $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
+                    if (!$fullAfterShopRequest) {
+                        $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
+                    }
+                    try {
+                        // Add feature here, for which we look for and add discounts and shipping if necessary.
+                        $finalizeResponse = $resursConnection->finalizePayment(
+                            $resursReference,
+                            null,
+                            false,
+                            $fullAfterShopRequest
+                        );
+                        $afterShopResponseString = $finalizeResponse ?
+                            __(
+                                'Success.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ) : __(
+                                'Failed without receiving any exception.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            );
+                    } catch (Exception $e) {
+                        $afterShopResponseString = $e->getMessage();
+                    }
+                }
+                break;
+            case 'cancelled':
+            case 'refunded':
+                if ($resursConnection->canCredit($order['ecom']) ||
+                    $resursConnection->canAnnul($order['ecom'])
+                ) {
+                    $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
+                    if (!$fullAfterShopRequest) {
+                        $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
+                    }
+
+                    // When an order is fully refunded or cancelled (as this slug represents), we should follow the
+                    // full cancellation method. As it seems, in v2.x cancellations and refunds are separated into
+                    // two different sections with identical code except for the slug name.
+                    try {
+                        $cancelResponse = $resursConnection->cancelPayment(
+                            $resursReference,
+                            null,
+                            $fullAfterShopRequest
+                        );
+                        $afterShopResponseString = $cancelResponse ?
+                            __(
+                                'Success.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            ) : __(
+                                'Failed without receiving any exception.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            );
+                    } catch (Exception $e) {
+                        $afterShopResponseString = $e->getMessage();
+                    }
+                }
+                break;
+            default:
+        }
+
+        if (!empty($afterShopResponseString)) {
+            WooCommerce::setOrderNote(
+                $order['order'],
+                __(
+                    sprintf(
+                        'WooCommerce signalled "%s"-request. Sent %s to Resurs Bank with result: %s.',
+                        $newSlug,
+                        $newSlug,
+                        $afterShopResponseString
+                    ),
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                )
+            );
+        }
+    }
+
+    /**
      * If an order is not creditable, not debited, not credited and not annulled it is still an order
      * that can be handled as a "full unhandled order".
      *
@@ -354,43 +452,6 @@ class PluginHooks
         }
 
         return $return;
-    }
-
-    /**
-     * @param $valueString
-     * @return float
-     * @since 0.0.1.0
-     */
-    private function getPositiveValueFromNegative($valueString): float
-    {
-        return (float)preg_replace('/^-/', '', $valueString);
-    }
-
-    /**
-     * @param $shippingTax
-     * @param $shippingTotal
-     * @since 0.0.1.0
-     */
-    private function addShippingOrderLine($shippingTax, $shippingTotal, $connection)
-    {
-        $shipping_tax_pct = (!is_nan(round($shippingTax / $shippingTotal, 2) * 100) ?
-            @round($shippingTax / $shippingTotal, 2) * 100 : 0);
-
-        $connection->addOrderLine(
-            WordPress::applyFilters('getShippingName', 'shipping'),
-            WordPress::applyFilters(
-                'getShippingDescription',
-                __(
-                    'Shipping',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                )
-            ),
-            preg_replace('/^-/', '', $shippingTotal),
-            $shipping_tax_pct,
-            'st',
-            'SHIPPING_FEE',
-            1
-        );
     }
 
     /**
@@ -491,6 +552,43 @@ class PluginHooks
     }
 
     /**
+     * @param $shippingTax
+     * @param $shippingTotal
+     * @since 0.0.1.0
+     */
+    private function addShippingOrderLine($shippingTax, $shippingTotal, $connection)
+    {
+        $shipping_tax_pct = (!is_nan(round($shippingTax / $shippingTotal, 2) * 100) ?
+            @round($shippingTax / $shippingTotal, 2) * 100 : 0);
+
+        $connection->addOrderLine(
+            WordPress::applyFilters('getShippingName', 'shipping'),
+            WordPress::applyFilters(
+                'getShippingDescription',
+                __(
+                    'Shipping',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                )
+            ),
+            preg_replace('/^-/', '', $shippingTotal),
+            $shipping_tax_pct,
+            'st',
+            'SHIPPING_FEE',
+            1
+        );
+    }
+
+    /**
+     * @param $valueString
+     * @return float
+     * @since 0.0.1.0
+     */
+    private function getPositiveValueFromNegative($valueString): float
+    {
+        return (float)preg_replace('/^-/', '', $valueString);
+    }
+
+    /**
      * Natural flow for refunds.
      *
      * @param $orderId
@@ -538,6 +636,52 @@ class PluginHooks
         }
 
         return $return;
+    }
+
+    /**
+     * @param ResursBank $connection
+     * @param WC_Order_Item_Product $item
+     * @param bool $discardCouponVat
+     * @param WC_Order_Refund $refundObject
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function addRefundRow($connection, $item, $discardCouponVat, $refundObject)
+    {
+        $amountPct = !is_nan(
+            @round($item->get_total_tax() / $item->get_total(), 2) * 100
+        ) ? @round($item->get_total_tax() / $item->get_total(), 2) * 100 : 0;
+
+        /** @var WC_Product $product */
+        $product = $item->get_product();
+
+        $itemQuantity = $this->getPositiveValueFromNegative($item->get_quantity());
+        $articleId = WooCommerce::getProperArticleNumber($product);
+        $itemTotal = $this->getPositiveValueFromNegative($item->get_total() / $itemQuantity);
+        $itemTotalTax = $this->getPositiveValueFromNegative($item->get_total_tax() / $itemQuantity);
+
+        // Defaults.
+        $realAmount = $itemTotal;
+        $vatPct = $amountPct;
+        $refundDiscount = $refundObject->get_discount_total();
+
+        /**
+         * $hasRefundDiscount is considered boolean even if it is at this point has a discount value.
+         */
+        if ((float)$refundDiscount && $discardCouponVat) {
+            $realAmount = $itemTotal + $itemTotalTax;
+            $vatPct = 0;
+        }
+
+        $connection->addOrderLine(
+            $articleId,
+            $product->get_title(),
+            $realAmount,
+            $vatPct,
+            '',
+            'ORDER_LINE',
+            $itemQuantity
+        );
     }
 
     /**
@@ -603,150 +747,6 @@ class PluginHooks
         }
 
         return $return;
-    }
-
-    /**
-     * @param ResursBank $connection
-     * @param WC_Order_Item_Product $item
-     * @param bool $discardCouponVat
-     * @param WC_Order_Refund $refundObject
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function addRefundRow($connection, $item, $discardCouponVat, $refundObject)
-    {
-        $amountPct = !is_nan(
-            @round($item->get_total_tax() / $item->get_total(), 2) * 100
-        ) ? @round($item->get_total_tax() / $item->get_total(), 2) * 100 : 0;
-
-        /** @var WC_Product $product */
-        $product = $item->get_product();
-
-        $itemQuantity = $this->getPositiveValueFromNegative($item->get_quantity());
-        $articleId = WooCommerce::getProperArticleNumber($product);
-        $itemTotal = $this->getPositiveValueFromNegative($item->get_total() / $itemQuantity);
-        $itemTotalTax = $this->getPositiveValueFromNegative($item->get_total_tax() / $itemQuantity);
-
-        // Defaults.
-        $realAmount = $itemTotal;
-        $vatPct = $amountPct;
-        $refundDiscount = $refundObject->get_discount_total();
-
-        /**
-         * $hasRefundDiscount is considered boolean even if it is at this point has a discount value.
-         */
-        if ((float)$refundDiscount && $discardCouponVat) {
-            $realAmount = $itemTotal + $itemTotalTax;
-            $vatPct = 0;
-        }
-
-        $connection->addOrderLine(
-            $articleId,
-            $product->get_title(),
-            $realAmount,
-            $vatPct,
-            '',
-            'ORDER_LINE',
-            $itemQuantity
-        );
-    }
-
-    /**
-     * @param $newSlug
-     * @param $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function handleOrderByNewSlug($newSlug, $order)
-    {
-        $afterShopResponseString = '';
-
-        $wpHelper = new wpHelper();
-        $resursConnection = (new ResursBankAPI())->getConnection();
-
-        // Userdata that should follow with the afterShopFlow when changing order status on Resurs side,
-        // for backtracking actions.
-        $resursConnection->setLoggedInUser($wpHelper->getUserInfo('user_login'));
-
-        $resursReference = Data::getResursReference($order);
-        switch ($newSlug) {
-            case 'completed':
-                // Make sure we also handle instant finalizations.
-                if ($resursConnection->canDebit($order['ecom'])) {
-                    $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
-                    if (!$fullAfterShopRequest) {
-                        $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
-                    }
-                    try {
-                        // Add feature here, for which we look for and add discounts and shipping if necessary.
-                        $finalizeResponse = $resursConnection->finalizePayment(
-                            $resursReference,
-                            null,
-                            false,
-                            $fullAfterShopRequest
-                        );
-                        $afterShopResponseString = $finalizeResponse ?
-                            __(
-                                'Success.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                            ) : __(
-                                'Failed without receiving any exception.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                            );
-                    } catch (Exception $e) {
-                        $afterShopResponseString = $e->getMessage();
-                    }
-                }
-                break;
-            case 'cancelled':
-            case 'refunded':
-                if ($resursConnection->canCredit($order['ecom']) ||
-                    $resursConnection->canAnnul($order['ecom'])
-                ) {
-                    $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
-                    if (!$fullAfterShopRequest) {
-                        $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
-                    }
-
-                    // When an order is fully refunded or cancelled (as this slug represents), we should follow the
-                    // full cancellation method. As it seems, in v2.x cancellations and refunds are separated into
-                    // two different sections with identical code except for the slug name.
-                    try {
-                        $cancelResponse = $resursConnection->cancelPayment(
-                            $resursReference,
-                            null,
-                            $fullAfterShopRequest
-                        );
-                        $afterShopResponseString = $cancelResponse ?
-                            __(
-                                'Success.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                            ) : __(
-                                'Failed without receiving any exception.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                            );
-                    } catch (Exception $e) {
-                        $afterShopResponseString = $e->getMessage();
-                    }
-                }
-                break;
-            default:
-        }
-
-        if (!empty($afterShopResponseString)) {
-            WooCommerce::setOrderNote(
-                $order['order'],
-                __(
-                    sprintf(
-                        'WooCommerce signalled "%s"-request. Sent %s to Resurs Bank with result: %s.',
-                        $newSlug,
-                        $newSlug,
-                        $afterShopResponseString
-                    ),
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                )
-            );
-        }
     }
 
     /**
@@ -861,6 +861,32 @@ class PluginHooks
     }
 
     /**
+     * @param $function
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private function getMockException($function)
+    {
+        $exceptionCode = 470;
+        Data::canLog(
+            Data::LOG_INFO,
+            sprintf(
+                __('Mocked Exception in action. Throwing MockException for function %s, with error code %d.'),
+                $function,
+                $exceptionCode
+            )
+        );
+
+        throw new RuntimeException(
+            sprintf(
+                'MockException: %s',
+                $function
+            ),
+            $exceptionCode
+        );
+    }
+
+    /**
      * @throws Exception
      * @since 0.0.1.0
      */
@@ -894,32 +920,6 @@ class PluginHooks
     public function mockRefundException()
     {
         $this->getMockException(__FUNCTION__);
-    }
-
-    /**
-     * @param $function
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function getMockException($function)
-    {
-        $exceptionCode = 470;
-        Data::canLog(
-            Data::LOG_INFO,
-            sprintf(
-                __('Mocked Exception in action. Throwing MockException for function %s, with error code %d.'),
-                $function,
-                $exceptionCode
-            )
-        );
-
-        throw new RuntimeException(
-            sprintf(
-                'MockException: %s',
-                $function
-            ),
-            $exceptionCode
-        );
     }
 
     /**

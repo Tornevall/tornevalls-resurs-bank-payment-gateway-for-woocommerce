@@ -278,15 +278,6 @@ class Data
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.2
-     */
-    public static function isExtendedTest(): bool
-    {
-        return (self::isTest() && self::getResursOption('extended_test_mode'));
-    }
-
-    /**
      * @param string $imageFileName
      * @return string
      * @version 0.0.1.0
@@ -329,126 +320,21 @@ class Data
     }
 
     /**
-     * @return int
-     * @since 0.0.1.0
+     * @return bool
+     * @since 0.0.1.2
      */
-    public static function getTimeoutStatus(): int
+    public static function isExtendedTest(): bool
     {
-        return (int)get_transient(
-            sprintf('%s_resurs_api_timeout', self::getPrefix())
-        );
+        return (self::isTest() && self::getResursOption('extended_test_mode'));
     }
 
     /**
-     * @param ResursBank $resursConnection
-     * @param Exception $exception
      * @return bool
      * @since 0.0.1.0
      */
-    public static function setTimeoutStatus($resursConnection, $exception = null): bool
+    public static function isTest(): bool
     {
-        $return = false;
-        $timeoutByException = false;
-
-        if ($exception instanceof Exception && !$resursConnection->hasTimeoutException()) {
-            $exceptionCode = $exception->getCode();
-            if ($exceptionCode === 28 || $exceptionCode === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
-                $timeoutByException = true;
-            }
-        }
-
-        // If positive values are sent here, we store a timestamp for 60 seconds with a transient entry.
-        if ($timeoutByException || $resursConnection->hasTimeoutException()) {
-            $return = set_transient(
-                sprintf('%s_resurs_api_timeout', self::getPrefix()),
-                time(),
-                60
-            );
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param null $forceTimeout
-     * @return int
-     * @since 0.0.1.0
-     */
-    public static function getDefaultApiTimeout($forceTimeout = null): int
-    {
-        $useDefault = $forceTimeout === null ? 10 : (int)$forceTimeout;
-        $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', $useDefault);
-        return ($currentTimeout > 0 ? $currentTimeout : $useDefault);
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getAnnuityFactors($productPrice = null, $display = true)
-    {
-        global $product;
-
-        $return = null;
-
-        $currentFactor = self::getResursOption('currentAnnuityFactor');
-        if ((is_object($product) || $productPrice > 0) && !empty($currentFactor)) {
-            if (is_object($product)) {
-                $productPrice = wc_get_price_to_display($product);
-            }
-
-            try {
-                $return = self::getAnnuityHtml(
-                    (float)$productPrice,
-                    self::getResursOption('currentAnnuityFactor'),
-                    (int)self::getResursOption('currentAnnuityDuration')
-                );
-            } catch (Exception $annuityException) {
-                $resursApi = ResursBankAPI::getResurs();
-                self::setTimeoutStatus($resursApi, $annuityException);
-                if ($resursApi->hasTimeoutException()) {
-                    echo Data::getEscapedHtml(
-                        sprintf(
-                            '<div class="annuityTimeout">%s</div>',
-                            __(
-                                'Resurs Bank price information is currently unavailable right now, due to timed out ' .
-                                'connection. Please try again in a moment.'
-                            )
-                        )
-                    );
-                }
-            }
-        }
-
-        if ($display) {
-            echo $return;
-        } else {
-            return $return;
-        }
-    }
-
-    /**
-     * Carefully check and return order from Resurs Bank but only if it does exist. We do this by checking
-     * if the payment method allows us doing a getPayment and if true, then we will return a new WC_Order with
-     * Resurs Bank ecom metadata included.
-     *
-     * @param int|WC_Order $orderData
-     * @return array|null
-     * @throws ResursException
-     * @since 0.0.1.0
-     */
-    public static function getResursOrderIfExists($orderData)
-    {
-        $return = null;
-        $order = WooCommerce::getProperOrder($orderData, 'order');
-        if (self::isResursMethod($order->get_payment_method())) {
-            $resursOrder = self::getOrderInfo($order);
-            if (!empty($resursOrder['ecom']) && isset($resursOrder['ecom']->id)) {
-                $return = $resursOrder;
-            }
-        }
-
-        return $return;
+        return (self::getResursOption('environment', null, false) === 'test');
     }
 
     /**
@@ -603,6 +489,75 @@ class Data
     }
 
     /**
+     * @return int
+     * @since 0.0.1.0
+     */
+    public static function getTimeoutStatus(): int
+    {
+        return (int)get_transient(
+            sprintf('%s_resurs_api_timeout', self::getPrefix())
+        );
+    }
+
+    /**
+     * @param null $forceTimeout
+     * @return int
+     * @since 0.0.1.0
+     */
+    public static function getDefaultApiTimeout($forceTimeout = null): int
+    {
+        $useDefault = $forceTimeout === null ? 10 : (int)$forceTimeout;
+        $currentTimeout = (int)WordPress::applyFilters('setCurlTimeout', $useDefault);
+        return ($currentTimeout > 0 ? $currentTimeout : $useDefault);
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getAnnuityFactors($productPrice = null, $display = true)
+    {
+        global $product;
+
+        $return = null;
+
+        $currentFactor = self::getResursOption('currentAnnuityFactor');
+        if ((is_object($product) || $productPrice > 0) && !empty($currentFactor)) {
+            if (is_object($product)) {
+                $productPrice = wc_get_price_to_display($product);
+            }
+
+            try {
+                $return = self::getAnnuityHtml(
+                    (float)$productPrice,
+                    self::getResursOption('currentAnnuityFactor'),
+                    (int)self::getResursOption('currentAnnuityDuration')
+                );
+            } catch (Exception $annuityException) {
+                $resursApi = ResursBankAPI::getResurs();
+                self::setTimeoutStatus($resursApi, $annuityException);
+                if ($resursApi->hasTimeoutException()) {
+                    echo Data::getEscapedHtml(
+                        sprintf(
+                            '<div class="annuityTimeout">%s</div>',
+                            __(
+                                'Resurs Bank price information is currently unavailable right now, due to timed out ' .
+                                'connection. Please try again in a moment.'
+                            )
+                        )
+                    );
+                }
+            }
+        }
+
+        if ($display) {
+            echo $return;
+        } else {
+            return $return;
+        }
+    }
+
+    /**
      * @param $wcDisplayPrice
      * @param $annuityMethod
      * @param $annuityDuration
@@ -672,244 +627,6 @@ class Data
                 )
             );
         }
-    }
-
-    /**
-     * Case fixed sanitizer, cloned from WordPress own functions, for which we sanitize keys based on
-     * element id's. Resurs Bank is very much built on case-sensitive values for why we want to sanitize
-     * on both lower- and uppercase.
-     * @param $key
-     * @return mixed
-     * @since 0.0.1.1
-     */
-    public static function getSanitizedKeyElement($key)
-    {
-        $sanitized_key = '';
-
-        if (is_scalar($key)) {
-            $sanitized_key = preg_replace('/[^a-z0-9_\-]/i', '', $key);
-        }
-
-        return apply_filters('sanitize_key', $sanitized_key, $key);
-    }
-
-    /**
-     * Centralized escaper for internal templates.
-     *
-     * @param $content
-     * @return string
-     * @since 0.0.1.1
-     */
-    public static function getEscapedHtml($content)
-    {
-        return wp_kses(
-            $content,
-            self::getSafeTags()
-        );
-    }
-
-    /**
-     * Get safe escape tags for html. Observe that we pass some of the elements through a purger, as
-     * some of the script based "on"-elements are limited to admin.
-     *
-     * @return array
-     * @since 0.0.1.1
-     */
-    private static function getSafeTags()
-    {
-        // Many of the html tags is depending on clickable elements, but we're limiting them here
-        // to only apply in the most important elements.
-        $return = [
-            'a' => [
-                'href' => [],
-                'target' => [],
-            ],
-            'br' => [],
-            'table' => [
-                'id' => [],
-                'name' => [],
-                'class' => [],
-                'style' => [],
-                'width' => [],
-            ],
-            'tr' => [
-                'id' => [],
-                'name' => [],
-                'class' => [],
-                'style' => [],
-                'scope' => [],
-                'valign' => [],
-            ],
-            'th' => [
-                'id' => [],
-                'name' => [],
-                'class' => [],
-                'style' => [],
-                'scope' => [],
-                'valign' => [],
-            ],
-            'td' => [
-                'id' => [],
-                'name' => [],
-                'class' => [],
-                'style' => [],
-                'scope' => [],
-                'valign' => [],
-            ],
-            'label' => [
-                'for' => [],
-                'style' => [],
-                'class' => [],
-                'onclick' => [],
-            ],
-            'div' => [
-                'style' => [],
-                'id' => [],
-                'name' => [],
-                'class' => [],
-                'label' => [],
-                'onclick' => [],
-                'title' => [],
-            ],
-            'p' => [
-                'style' => [],
-                'class' => [],
-                'label' => [],
-            ],
-            'span' => [
-                'id' => [],
-                'name' => [],
-                'label' => [],
-                'class' => [],
-                'style' => [],
-                'onclick' => [],
-            ],
-            'select' => [
-                'option' => [],
-                'class' => [],
-                'id' => [],
-                'onclick' => [],
-            ],
-            'option' => [
-                'value' => [],
-                'selected' => [],
-            ],
-            'button' => [
-                'id' => [],
-                'name' => [],
-                'class' => [],
-                'style' => [],
-                'onclick' => [],
-                'type' => [],
-            ],
-            'iframe' => [
-                'src' => [],
-                'class' => [],
-                'style' => [],
-            ],
-            'input' => [
-                'id' => [],
-                'name' => [],
-                'type' => [],
-                'size' => [],
-                'onkeyup' => [],
-                'value' => [],
-                'class' => [],
-                'readonly' => [],
-                'onblur' => [],
-                'onchange' => [],
-            ],
-            'h1' => [],
-            'h2' => [],
-            'h3' => [
-                'style' => [],
-                'class' => [],
-            ],
-        ];
-
-        return self::purgeSafeAdminTags($return);
-    }
-
-    /**
-     * Purge some html sanitizer elements before returning them to wp_kses.
-     * @since 0.0.1.1
-     */
-    private static function purgeSafeAdminTags($return)
-    {
-        if (!is_admin()) {
-            $unsetPublicClicks = [
-                'select',
-                'h1',
-                'h2',
-                'h3',
-            ];
-
-            foreach ($unsetPublicClicks as $element) {
-                if (isset($return[$element]['onclick'])) {
-                    unset($return[$element]['onclick']);
-                }
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Allowing specific styles if admin is active.
-     *
-     * @since 0.0.1.1
-     */
-    public static function getSafeStyle()
-    {
-        add_filter('safe_style_css', function ($styles) {
-            $styles[] = 'display';
-            $styles[] = 'border';
-            return $styles;
-        });
-    }
-
-    /**
-     * Escaping html where we only new a few elements.
-     *
-     * @return string
-     * @since 0.0.1.1
-     */
-    public static function getTinyEscapedHtml($content)
-    {
-        return wp_kses(
-            $content,
-            [
-                'div' => [
-                    'class' => [],
-                    'style' => [],
-                ],
-                'span' => [
-                    'class' => [],
-                    'style' => [],
-                ],
-            ]
-        );
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.6
-     */
-    public static function getCustomerCompanyName(): string
-    {
-        global $woocommerce;
-
-        $return = '';
-
-        /**
-         * @var WC_Customer $wcCustomer
-         */
-        $wcCustomer = $woocommerce->customer;
-        if ($wcCustomer instanceof WC_Customer) {
-            $return = $wcCustomer->get_billing_company();
-        }
-
-        return $return;
     }
 
     /**
@@ -1081,12 +798,164 @@ class Data
     }
 
     /**
-     * @return array
-     * @since 0.0.1.6
+     * Centralized escaper for internal templates.
+     *
+     * @param $content
+     * @return string
+     * @since 0.0.1.1
      */
-    public static function getSupportArray(): array
+    public static function getEscapedHtml($content)
     {
-        return (array)WordPress::applyFilters('getSupportAddressList', []);
+        return wp_kses(
+            $content,
+            self::getSafeTags()
+        );
+    }
+
+    /**
+     * Get safe escape tags for html. Observe that we pass some of the elements through a purger, as
+     * some of the script based "on"-elements are limited to admin.
+     *
+     * @return array
+     * @since 0.0.1.1
+     */
+    private static function getSafeTags()
+    {
+        // Many of the html tags is depending on clickable elements, but we're limiting them here
+        // to only apply in the most important elements.
+        $return = [
+            'a' => [
+                'href' => [],
+                'target' => [],
+            ],
+            'br' => [],
+            'table' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'width' => [],
+            ],
+            'tr' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'scope' => [],
+                'valign' => [],
+            ],
+            'th' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'scope' => [],
+                'valign' => [],
+            ],
+            'td' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'scope' => [],
+                'valign' => [],
+            ],
+            'label' => [
+                'for' => [],
+                'style' => [],
+                'class' => [],
+                'onclick' => [],
+            ],
+            'div' => [
+                'style' => [],
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'label' => [],
+                'onclick' => [],
+                'title' => [],
+            ],
+            'p' => [
+                'style' => [],
+                'class' => [],
+                'label' => [],
+            ],
+            'span' => [
+                'id' => [],
+                'name' => [],
+                'label' => [],
+                'class' => [],
+                'style' => [],
+                'onclick' => [],
+            ],
+            'select' => [
+                'option' => [],
+                'class' => [],
+                'id' => [],
+                'onclick' => [],
+            ],
+            'option' => [
+                'value' => [],
+                'selected' => [],
+            ],
+            'button' => [
+                'id' => [],
+                'name' => [],
+                'class' => [],
+                'style' => [],
+                'onclick' => [],
+                'type' => [],
+            ],
+            'iframe' => [
+                'src' => [],
+                'class' => [],
+                'style' => [],
+            ],
+            'input' => [
+                'id' => [],
+                'name' => [],
+                'type' => [],
+                'size' => [],
+                'onkeyup' => [],
+                'value' => [],
+                'class' => [],
+                'readonly' => [],
+                'onblur' => [],
+                'onchange' => [],
+            ],
+            'h1' => [],
+            'h2' => [],
+            'h3' => [
+                'style' => [],
+                'class' => [],
+            ],
+        ];
+
+        return self::purgeSafeAdminTags($return);
+    }
+
+    /**
+     * Purge some html sanitizer elements before returning them to wp_kses.
+     * @since 0.0.1.1
+     */
+    private static function purgeSafeAdminTags($return)
+    {
+        if (!is_admin()) {
+            $unsetPublicClicks = [
+                'select',
+                'h1',
+                'h2',
+                'h3',
+            ];
+
+            foreach ($unsetPublicClicks as $element) {
+                if (isset($return[$element]['onclick'])) {
+                    unset($return[$element]['onclick']);
+                }
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -1101,6 +970,588 @@ class Data
         }
 
         return self::$genericClass;
+    }
+
+    /**
+     * @param ResursBank $resursConnection
+     * @param Exception $exception
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setTimeoutStatus($resursConnection, $exception = null): bool
+    {
+        $return = false;
+        $timeoutByException = false;
+
+        if ($exception instanceof Exception && !$resursConnection->hasTimeoutException()) {
+            $exceptionCode = $exception->getCode();
+            if ($exceptionCode === 28 || $exceptionCode === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
+                $timeoutByException = true;
+            }
+        }
+
+        // If positive values are sent here, we store a timestamp for 60 seconds with a transient entry.
+        if ($timeoutByException || $resursConnection->hasTimeoutException()) {
+            $return = set_transient(
+                sprintf('%s_resurs_api_timeout', self::getPrefix()),
+                time(),
+                60
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * Carefully check and return order from Resurs Bank but only if it does exist. We do this by checking
+     * if the payment method allows us doing a getPayment and if true, then we will return a new WC_Order with
+     * Resurs Bank ecom metadata included.
+     *
+     * @param int|WC_Order $orderData
+     * @return array|null
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    public static function getResursOrderIfExists($orderData)
+    {
+        $return = null;
+        $order = WooCommerce::getProperOrder($orderData, 'order');
+        if (self::isResursMethod($order->get_payment_method())) {
+            $resursOrder = self::getOrderInfo($order);
+            if (!empty($resursOrder['ecom']) && isset($resursOrder['ecom']->id)) {
+                $return = $resursOrder;
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isResursMethod($paymentMethod): bool
+    {
+        $return = (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
+
+        if (!$return && Data::canHandleOrder($paymentMethod)) {
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Makes sure nothing interfering with orders that has not been created by us. If this returns false,
+     * it means we should not be there and touch things.
+     *
+     * @param $thisMethod
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function canHandleOrder($thisMethod): bool
+    {
+        $return = false;
+
+        $allowMethod = [
+            'resurs_bank_',
+            'rbwc_',
+            'trbwc_',
+        ];
+
+        $isResursDeprecated = false;
+        foreach ($allowMethod as $methodKey) {
+            if ((bool)preg_match(sprintf('/^%s/', $methodKey), $thisMethod)) {
+                if (self::isDeprecatedPluginOrder($thisMethod)) {
+                    $isResursDeprecated = true;
+                    break;
+                }
+                $return = true;
+                break;
+            }
+        }
+
+        if ($isResursDeprecated && self::getResursOption('deprecated_interference')) {
+            $return = true;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $thisMethod
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isDeprecatedPluginOrder($thisMethod): bool
+    {
+        return strncmp($thisMethod, 'resurs_bank_', 12) === 0;
+    }
+
+    /**
+     * Advanced order fetching. Make sure you use Data::canHandleOrder($paymentMethod) before running this.
+     * It is not our purpose to interfere with all orders.
+     *
+     * @param mixed $order
+     * @param null $orderIsResursReference
+     * @return array
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    public static function getOrderInfo($order, $orderIsResursReference = null): array
+    {
+        $return = [];
+        $orderId = null;
+        if (is_object($order)) {
+            $orderId = $order->get_id();
+        } elseif ((int)$order && !is_string($order) && !$orderIsResursReference) {
+            $orderId = $order;
+            $order = new WC_Order($orderId);
+        } elseif (is_string($order)) {
+            // Landing here it might be a Resurs or EComPHP reference.
+            $foundOrderId = self::getOrderByEcomRef($order);
+            if ($foundOrderId) {
+                $order = self::getOrderInfo($foundOrderId);
+                $orderId = $order['order']->get_id();
+            }
+        }
+
+        if ((int)($orderId) &&
+            is_object($order)
+        ) {
+            // Dynamically fetch order data during order-view session (sharable over many actions).
+            $return = self::getPrefetchedPayment($orderId);
+
+            if (!count($return)) {
+                $return = self::setPrefetchedPayment($orderId, $order);
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $orderReference
+     * @param null $asOrder
+     * @return null
+     * @since 0.0.1.0
+     */
+    public static function getOrderByEcomRef($orderReference, $asOrder = null)
+    {
+        $return = 0;
+
+        foreach (self::$searchArray as $key) {
+            $getPostId = self::getRefVarFromMeta($key, $orderReference);
+            if ($getPostId) {
+                $return = $getPostId;
+                break;
+            }
+        }
+
+        if ($return && (bool)$asOrder) {
+            $return = new WC_Order($return);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @param $reference
+     * @return int
+     * @since 0.0.1.0
+     */
+    private static function getRefVarFromMeta($key, $reference): int
+    {
+        $getPostId = self::getRefVarFromDatabase($key, $reference);
+        if (!$getPostId) {
+            $getPostId = self::getRefVarFromDatabase(
+                sprintf(
+                    '%s_%s',
+                    self::getPrefix(),
+                    $key
+                ),
+                $reference
+            );
+        }
+        if ((int)$getPostId) {
+            $return = (int)$getPostId;
+        }
+
+        return $return ?? 0;
+    }
+
+    /**
+     * @param $key
+     * @param $reference
+     * @return string|null
+     * @since 0.0.1.0
+     * @noinspection SqlResolve
+     * @noinspection UnknownInspectionInspection
+     */
+    private static function getRefVarFromDatabase($key, $reference)
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'postmeta';
+        return $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
+                $key,
+                $reference
+            )
+        );
+    }
+
+    /**
+     * Get locally stored payment if it is present.
+     *
+     * @param $key
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getPrefetchedPayment($key): array
+    {
+        return self::$payments[$key] ?? [];
+    }
+
+    /**
+     * Set and return order information.
+     *
+     * @param $orderId
+     * @param WC_Order $order
+     * @return array|mixed
+     * @since 0.0.1.0
+     */
+    private static function setPrefetchedPayment($orderId, $order)
+    {
+        $return['order'] = $order;
+        $return['meta'] = (int)$orderId ? get_post_custom($orderId) : [];
+        $return['resurs'] = self::getResursReference($return);
+        $return['resurs_secondary'] = self::getResursReference($return, ['resursDefaultReference']);
+
+        if (!empty($return['resurs'])) {
+            $return = self::getPreparedDataByEcom($return);
+            self::getLocalizedOrderData($return);
+        }
+        // Store payment for later use.
+        self::$payments[$orderId] = $return;
+
+        return $return;
+    }
+
+    /**
+     * @param $orderDataArray
+     * @param string|array $searchFor
+     * @return string
+     */
+    public static function getResursReference($orderDataArray, $searchFor = null): string
+    {
+        $return = '';
+
+        /** @noinspection CallableParameterUseCaseInTypeContextInspection */
+        $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
+        if (is_array($orderDataArray) && isset($orderDataArray['meta'])) {
+            foreach ($searchUsing as $searchKey) {
+                $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
+                if (isset($orderDataArray['meta'][$searchKey])) {
+                    $return = array_pop($orderDataArray['meta'][$searchKey]);
+                    break;
+                }
+                if (isset($orderDataArray['meta'][$protectedMetaKey])) {
+                    $return = array_pop($orderDataArray['meta'][$protectedMetaKey]);
+                    break;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * Fetch order info from EComPHP.
+     *
+     * @param $return
+     * @return mixed
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getPreparedDataByEcom($return)
+    {
+        $return = self::getOrderInfoExceptionData($return);
+        try {
+            if (!$return['ecomException']['code']) {
+                try {
+                    $return['ecom'] = ResursBankAPI::getPayment($return['resurs'], null, $return);
+                    $return['ecom_had_reference_problems'] = false;
+                } catch (Exception $e) {
+                    self::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
+                    if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
+                        $return['ecom'] = ResursBankAPI::getPayment($return['resurs_secondary'], null, $return);
+                    }
+                    $return['ecom_had_reference_problems'] = true;
+                    $return['ecomException']['code'] = $e->getCode();
+                    $return['ecomException']['message'] = $e->getMessage();
+                }
+                $return = WooCommerce::getFormattedPaymentData($return);
+                $return = WooCommerce::getPaymentInfoDetails($return);
+            }
+        } catch (Exception $e) {
+            self::canLog(
+                self::CAN_LOG_ORDER_EVENTS,
+                sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
+            );
+            self::setLogException($e, __FUNCTION__);
+            $return['ecomException'] = [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ];
+        }
+        return (array)$return;
+    }
+
+    /**
+     * Prepare for exceptions.
+     *
+     * @param $return
+     * @return mixed
+     * @since 0.0.1.0
+     */
+    private static function getOrderInfoExceptionData($return)
+    {
+        $return['errorString'] = __(
+            'An error occurred during the payment information retrieval from Resurs Bank so we can ' .
+            'not show the current order status for the moment.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+        $return['ecomException'] = [
+            'message' => null,
+            'code' => 0,
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @param $eventType
+     * @param $logData
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function canLog($eventType, $logData): bool
+    {
+        $return = false;
+
+        // Ask the data base once, then get local storage value.
+        if (!isset(self::$can[$eventType])) {
+            self::$can[$eventType] = (bool)self::getResursOption(
+                sprintf('can_log_%s', $eventType)
+            );
+        }
+
+        if (self::$can[$eventType]) {
+            $return = true;
+            self::setLogInfo($logData);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $logMessage
+     * @since 0.0.1.0
+     */
+    public static function setLogInfo($logMessage)
+    {
+        self::setLogInternal(
+            self::LOG_INFO,
+            $logMessage
+        );
+    }
+
+    /**
+     * @param $severity
+     * @param $logMessage
+     * @since 0.0.1.0
+     */
+    public static function setLogInternal($severity, $logMessage)
+    {
+        // If WooComemrce has not WC_Logger instance ready, skip logging.
+        if (!class_exists('WC_Logger')) {
+            return;
+        }
+        if (empty(self::$Log)) {
+            self::$Log = new WC_Logger();
+        }
+
+        $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
+        $from = $_SERVER['REMOTE_ADDR'] ?? 'Console';
+        $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
+
+        switch ($severity) {
+            case 'info':
+                self::$Log->info($message);
+                break;
+            case 'debug':
+                self::$Log->debug($message);
+                break;
+            case 'critical':
+                self::$Log->critical($message);
+                break;
+            case 'error':
+                self::$Log->error($message);
+                break;
+            case 'warning':
+                self::$Log->warning($message);
+                break;
+            default:
+                self::$Log->notice($message);
+        }
+    }
+
+    /**
+     * @param string $fromFunction
+     * @param Exception $exception
+     * @since 0.0.1.0
+     */
+    public static function setLogException($exception, $fromFunction = '')
+    {
+        if (!isset($_SESSION[self::getPrefix()])) {
+            $_SESSION[self::getPrefix()]['exception'] = [];
+        }
+        $_SESSION[self::getPrefix()]['exception'][] = $exception;
+
+        if (!empty($fromFunction)) {
+            $logMessage = __(
+                '%s internal generic exception %s from function %s: %s --- File %s, line %s.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
+            self::setLogError(
+                sprintf(
+                    $logMessage,
+                    self::getPrefix(),
+                    $exception->getCode(),
+                    $fromFunction,
+                    $exception->getMessage(),
+                    $exception->getFile(),
+                    $exception->getLine()
+                )
+            );
+        } else {
+            $logMessage = __(
+                '%s internal generic exception %s: %s --- File %s, line %s.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
+            self::setLogError(
+                sprintf(
+                    $logMessage,
+                    self::getPrefix(),
+                    $exception->getCode(),
+                    $exception->getMessage(),
+                    $exception->getFile(),
+                    $exception->getLine()
+                )
+            );
+        }
+    }
+
+    /**
+     * @param $logMessage
+     * @since 0.0.1.0
+     */
+    public static function setLogError($logMessage)
+    {
+        self::setLogInternal(
+            self::LOG_ERROR,
+            $logMessage
+        );
+    }
+
+    /**
+     * @param array $orderData
+     * @since 0.0.1.0
+     */
+    private static function getLocalizedOrderData($orderData = null)
+    {
+        $localizeArray = [
+            'resursOrder' => $orderData['resurs'] ?? '',
+            'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
+        ];
+
+        $scriptName = sprintf('%s_resursbank_order', self::getPrefix());
+        WordPress::setEnqueue(
+            $scriptName,
+            'resursbank_order.js',
+            is_admin(),
+            $localizeArray
+        );
+    }
+
+    /**
+     * Allowing specific styles if admin is active.
+     *
+     * @since 0.0.1.1
+     */
+    public static function getSafeStyle()
+    {
+        add_filter('safe_style_css', function ($styles) {
+            $styles[] = 'display';
+            $styles[] = 'border';
+            return $styles;
+        });
+    }
+
+    /**
+     * Escaping html where we only new a few elements.
+     *
+     * @return string
+     * @since 0.0.1.1
+     */
+    public static function getTinyEscapedHtml($content)
+    {
+        return wp_kses(
+            $content,
+            [
+                'div' => [
+                    'class' => [],
+                    'style' => [],
+                ],
+                'span' => [
+                    'class' => [],
+                    'style' => [],
+                ],
+            ]
+        );
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.6
+     */
+    public static function getCustomerCompanyName(): string
+    {
+        global $woocommerce;
+
+        $return = '';
+
+        /**
+         * @var WC_Customer $wcCustomer
+         */
+        $wcCustomer = $woocommerce->customer;
+        if ($wcCustomer instanceof WC_Customer) {
+            $return = $wcCustomer->get_billing_company();
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return array
+     * @since 0.0.1.6
+     */
+    public static function getSupportArray(): array
+    {
+        return (array)WordPress::applyFilters('getSupportAddressList', []);
     }
 
     /**
@@ -1161,15 +1612,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isTest(): bool
-    {
-        return (self::getResursOption('environment', null, false) === 'test');
     }
 
     /**
@@ -1679,46 +2121,6 @@ class Data
     }
 
     /**
-     * @param $severity
-     * @param $logMessage
-     * @since 0.0.1.0
-     */
-    public static function setLogInternal($severity, $logMessage)
-    {
-        // If WooComemrce has not WC_Logger instance ready, skip logging.
-        if (!class_exists('WC_Logger')) {
-            return;
-        }
-        if (empty(self::$Log)) {
-            self::$Log = new WC_Logger();
-        }
-
-        $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
-        $from = $_SERVER['REMOTE_ADDR'] ?? 'Console';
-        $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
-
-        switch ($severity) {
-            case 'info':
-                self::$Log->info($message);
-                break;
-            case 'debug':
-                self::$Log->debug($message);
-                break;
-            case 'critical':
-                self::$Log->critical($message);
-                break;
-            case 'error':
-                self::$Log->error($message);
-                break;
-            case 'warning':
-                self::$Log->warning($message);
-                break;
-            default:
-                self::$Log->notice($message);
-        }
-    }
-
-    /**
      * @param $data
      * @param bool $base64
      * @return mixed
@@ -1775,43 +2177,6 @@ class Data
     }
 
     /**
-     * @param $eventType
-     * @param $logData
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function canLog($eventType, $logData): bool
-    {
-        $return = false;
-
-        // Ask the data base once, then get local storage value.
-        if (!isset(self::$can[$eventType])) {
-            self::$can[$eventType] = (bool)self::getResursOption(
-                sprintf('can_log_%s', $eventType)
-            );
-        }
-
-        if (self::$can[$eventType]) {
-            $return = true;
-            self::setLogInfo($logData);
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $logMessage
-     * @since 0.0.1.0
-     */
-    public static function setLogInfo($logMessage)
-    {
-        self::setLogInternal(
-            self::LOG_INFO,
-            $logMessage
-        );
-    }
-
-    /**
      * @param $key
      * @param $order
      * @return mixed|null
@@ -1840,327 +2205,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * Advanced order fetching. Make sure you use Data::canHandleOrder($paymentMethod) before running this.
-     * It is not our purpose to interfere with all orders.
-     *
-     * @param mixed $order
-     * @param null $orderIsResursReference
-     * @return array
-     * @throws ResursException
-     * @since 0.0.1.0
-     */
-    public static function getOrderInfo($order, $orderIsResursReference = null): array
-    {
-        $return = [];
-        $orderId = null;
-        if (is_object($order)) {
-            $orderId = $order->get_id();
-        } elseif ((int)$order && !is_string($order) && !$orderIsResursReference) {
-            $orderId = $order;
-            $order = new WC_Order($orderId);
-        } elseif (is_string($order)) {
-            // Landing here it might be a Resurs or EComPHP reference.
-            $foundOrderId = self::getOrderByEcomRef($order);
-            if ($foundOrderId) {
-                $order = self::getOrderInfo($foundOrderId);
-                $orderId = $order['order']->get_id();
-            }
-        }
-
-        if ((int)($orderId) &&
-            is_object($order)
-        ) {
-            // Dynamically fetch order data during order-view session (sharable over many actions).
-            $return = self::getPrefetchedPayment($orderId);
-
-            if (!count($return)) {
-                $return = self::setPrefetchedPayment($orderId, $order);
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $orderReference
-     * @param null $asOrder
-     * @return null
-     * @since 0.0.1.0
-     */
-    public static function getOrderByEcomRef($orderReference, $asOrder = null)
-    {
-        $return = 0;
-
-        foreach (self::$searchArray as $key) {
-            $getPostId = self::getRefVarFromMeta($key, $orderReference);
-            if ($getPostId) {
-                $return = $getPostId;
-                break;
-            }
-        }
-
-        if ($return && (bool)$asOrder) {
-            $return = new WC_Order($return);
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $key
-     * @param $reference
-     * @return int
-     * @since 0.0.1.0
-     */
-    private static function getRefVarFromMeta($key, $reference): int
-    {
-        $getPostId = self::getRefVarFromDatabase($key, $reference);
-        if (!$getPostId) {
-            $getPostId = self::getRefVarFromDatabase(
-                sprintf(
-                    '%s_%s',
-                    self::getPrefix(),
-                    $key
-                ),
-                $reference
-            );
-        }
-        if ((int)$getPostId) {
-            $return = (int)$getPostId;
-        }
-
-        return $return ?? 0;
-    }
-
-    /**
-     * @param $key
-     * @param $reference
-     * @return string|null
-     * @since 0.0.1.0
-     * @noinspection SqlResolve
-     * @noinspection UnknownInspectionInspection
-     */
-    private static function getRefVarFromDatabase($key, $reference)
-    {
-        global $wpdb;
-        $tableName = $wpdb->prefix . 'postmeta';
-        return $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
-                $key,
-                $reference
-            )
-        );
-    }
-
-    /**
-     * Get locally stored payment if it is present.
-     *
-     * @param $key
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getPrefetchedPayment($key): array
-    {
-        return self::$payments[$key] ?? [];
-    }
-
-    /**
-     * Set and return order information.
-     *
-     * @param $orderId
-     * @param WC_Order $order
-     * @return array|mixed
-     * @since 0.0.1.0
-     */
-    private static function setPrefetchedPayment($orderId, $order)
-    {
-        $return['order'] = $order;
-        $return['meta'] = (int)$orderId ? get_post_custom($orderId) : [];
-        $return['resurs'] = self::getResursReference($return);
-        $return['resurs_secondary'] = self::getResursReference($return, ['resursDefaultReference']);
-
-        if (!empty($return['resurs'])) {
-            $return = self::getPreparedDataByEcom($return);
-            self::getLocalizedOrderData($return);
-        }
-        // Store payment for later use.
-        self::$payments[$orderId] = $return;
-
-        return $return;
-    }
-
-    /**
-     * @param $orderDataArray
-     * @param string|array $searchFor
-     * @return string
-     */
-    public static function getResursReference($orderDataArray, $searchFor = null): string
-    {
-        $return = '';
-
-        /** @noinspection CallableParameterUseCaseInTypeContextInspection */
-        $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
-        if (is_array($orderDataArray) && isset($orderDataArray['meta'])) {
-            foreach ($searchUsing as $searchKey) {
-                $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
-                if (isset($orderDataArray['meta'][$searchKey])) {
-                    $return = array_pop($orderDataArray['meta'][$searchKey]);
-                    break;
-                }
-                if (isset($orderDataArray['meta'][$protectedMetaKey])) {
-                    $return = array_pop($orderDataArray['meta'][$protectedMetaKey]);
-                    break;
-                }
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Fetch order info from EComPHP.
-     *
-     * @param $return
-     * @return mixed
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getPreparedDataByEcom($return)
-    {
-        $return = self::getOrderInfoExceptionData($return);
-        try {
-            if (!$return['ecomException']['code']) {
-                try {
-                    $return['ecom'] = ResursBankAPI::getPayment($return['resurs'], null, $return);
-                    $return['ecom_had_reference_problems'] = false;
-                } catch (Exception $e) {
-                    self::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
-                    if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
-                        $return['ecom'] = ResursBankAPI::getPayment($return['resurs_secondary'], null, $return);
-                    }
-                    $return['ecom_had_reference_problems'] = true;
-                    $return['ecomException']['code'] = $e->getCode();
-                    $return['ecomException']['message'] = $e->getMessage();
-                }
-                $return = WooCommerce::getFormattedPaymentData($return);
-                $return = WooCommerce::getPaymentInfoDetails($return);
-            }
-        } catch (Exception $e) {
-            self::canLog(
-                self::CAN_LOG_ORDER_EVENTS,
-                sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
-            );
-            self::setLogException($e, __FUNCTION__);
-            $return['ecomException'] = [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ];
-        }
-        return (array)$return;
-    }
-
-    /**
-     * Prepare for exceptions.
-     *
-     * @param $return
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    private static function getOrderInfoExceptionData($return)
-    {
-        $return['errorString'] = __(
-            'An error occurred during the payment information retrieval from Resurs Bank so we can ' .
-            'not show the current order status for the moment.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
-        $return['ecomException'] = [
-            'message' => null,
-            'code' => 0,
-        ];
-
-        return $return;
-    }
-
-    /**
-     * @param string $fromFunction
-     * @param Exception $exception
-     * @since 0.0.1.0
-     */
-    public static function setLogException($exception, $fromFunction = '')
-    {
-        if (!isset($_SESSION[self::getPrefix()])) {
-            $_SESSION[self::getPrefix()]['exception'] = [];
-        }
-        $_SESSION[self::getPrefix()]['exception'][] = $exception;
-
-        if (!empty($fromFunction)) {
-            $logMessage = __(
-                '%s internal generic exception %s from function %s: %s --- File %s, line %s.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            );
-            self::setLogError(
-                sprintf(
-                    $logMessage,
-                    self::getPrefix(),
-                    $exception->getCode(),
-                    $fromFunction,
-                    $exception->getMessage(),
-                    $exception->getFile(),
-                    $exception->getLine()
-                )
-            );
-        } else {
-            $logMessage = __(
-                '%s internal generic exception %s: %s --- File %s, line %s.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            );
-            self::setLogError(
-                sprintf(
-                    $logMessage,
-                    self::getPrefix(),
-                    $exception->getCode(),
-                    $exception->getMessage(),
-                    $exception->getFile(),
-                    $exception->getLine()
-                )
-            );
-        }
-    }
-
-    /**
-     * @param $logMessage
-     * @since 0.0.1.0
-     */
-    public static function setLogError($logMessage)
-    {
-        self::setLogInternal(
-            self::LOG_ERROR,
-            $logMessage
-        );
-    }
-
-    /**
-     * @param array $orderData
-     * @since 0.0.1.0
-     */
-    private static function getLocalizedOrderData($orderData = null)
-    {
-        $localizeArray = [
-            'resursOrder' => $orderData['resurs'] ?? '',
-            'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
-        ];
-
-        $scriptName = sprintf('%s_resursbank_order', self::getPrefix());
-        WordPress::setEnqueue(
-            $scriptName,
-            'resursbank_order.js',
-            is_admin(),
-            $localizeArray
-        );
     }
 
     /**
@@ -2195,53 +2239,6 @@ class Data
     public static function hasOldGateway(): bool
     {
         return defined('RB_WOO_VERSION') ? true : false;
-    }
-
-    /**
-     * Makes sure nothing interfering with orders that has not been created by us. If this returns false,
-     * it means we should not be there and touch things.
-     *
-     * @param $thisMethod
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function canHandleOrder($thisMethod): bool
-    {
-        $return = false;
-
-        $allowMethod = [
-            'resurs_bank_',
-            'rbwc_',
-            'trbwc_',
-        ];
-
-        $isResursDeprecated = false;
-        foreach ($allowMethod as $methodKey) {
-            if ((bool)preg_match(sprintf('/^%s/', $methodKey), $thisMethod)) {
-                if (self::isDeprecatedPluginOrder($thisMethod)) {
-                    $isResursDeprecated = true;
-                    break;
-                }
-                $return = true;
-                break;
-            }
-        }
-
-        if ($isResursDeprecated && self::getResursOption('deprecated_interference')) {
-            $return = true;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $thisMethod
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isDeprecatedPluginOrder($thisMethod): bool
-    {
-        return strncmp($thisMethod, 'resurs_bank_', 12) === 0;
     }
 
     /**
@@ -2429,19 +2426,6 @@ class Data
     }
 
     /**
-     * @return array|mixed|string|null
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getCustomerTypeFromSession()
-    {
-        $return = WooCommerce::getSessionValue('resursSsnCustomerType');
-        $customerTypeByCompanyName = self::getRequest('billing_company', true);
-
-        return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
-    }
-
-    /**
      * @param $key
      * @param null $post_data
      * @return mixed
@@ -2527,6 +2511,38 @@ class Data
     }
 
     /**
+     * Case fixed sanitizer, cloned from WordPress own functions, for which we sanitize keys based on
+     * element id's. Resurs Bank is very much built on case-sensitive values for why we want to sanitize
+     * on both lower- and uppercase.
+     * @param $key
+     * @return mixed
+     * @since 0.0.1.1
+     */
+    public static function getSanitizedKeyElement($key)
+    {
+        $sanitized_key = '';
+
+        if (is_scalar($key)) {
+            $sanitized_key = preg_replace('/[^a-z0-9_\-]/i', '', $key);
+        }
+
+        return apply_filters('sanitize_key', $sanitized_key, $key);
+    }
+
+    /**
+     * @return array|mixed|string|null
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    private static function getCustomerTypeFromSession()
+    {
+        $return = WooCommerce::getSessionValue('resursSsnCustomerType');
+        $customerTypeByCompanyName = self::getRequest('billing_company', true);
+
+        return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+    }
+
+    /**
      * @return bool
      * @since 0.0.1.0
      */
@@ -2566,16 +2582,6 @@ class Data
     }
 
     /**
-     * Check whether bleeding edge technology is enabled.
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isBleedingEdge(): bool
-    {
-        return (bool)self::getResursOption('bleeding_edge');
-    }
-
-    /**
      * Check if account for bleeding edge API has been set up.
      * @return bool
      * @since 0.0.1.0
@@ -2586,6 +2592,16 @@ class Data
             !empty(self::getResursOption('jwt_store_id')) &&
             !empty(self::getResursOption('jwt_client_id')) &&
             !empty(self::getResursOption('jwt_client_password')));
+    }
+
+    /**
+     * Check whether bleeding edge technology is enabled.
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function isBleedingEdge(): bool
+    {
+        return (bool)self::getResursOption('bleeding_edge');
     }
 
     /**
@@ -2644,22 +2660,6 @@ class Data
         }
 
         return $obfuscateThis;
-    }
-
-    /**
-     * @param $paymentMethod
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isResursMethod($paymentMethod): bool
-    {
-        $return = (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
-
-        if (!$return && Data::canHandleOrder($paymentMethod)) {
-            $return = true;
-        }
-
-        return $return;
     }
 
     /**
