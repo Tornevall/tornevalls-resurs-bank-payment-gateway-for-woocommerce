@@ -162,6 +162,7 @@ class PluginApi
             'postidreference' => 'order_id_type',
             'login' => 'login',
             'password' => 'password',
+            'checkout_type' => 'checkout_type'
         ];
 
         foreach ($imports as $key => $destKey) {
@@ -1367,6 +1368,7 @@ class PluginApi
      * @param $return
      * @param $addressResponse
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getTransformedAddressResponse($return, $addressResponse)

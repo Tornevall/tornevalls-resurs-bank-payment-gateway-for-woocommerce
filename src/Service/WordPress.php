@@ -790,6 +790,10 @@ class WordPress
         $return['getAddressFieldController'] = self::applyFilters('getAddressFieldController', []);
         $return['checkoutType'] = Data::getCheckoutType();
 
+        $pluginHooks = new PluginHooks();
+        $return['switchToLegal'] = $pluginHooks->getSwitchToCustomerTypeString('NATURAL');
+        $return['switchToNatural'] = $pluginHooks->getSwitchToCustomerTypeString('LEGAL');
+
         return self::applyFilters('localizationsGlobal', $return);
     }
 

@@ -1,4 +1,8 @@
-<?php use ResursBank\Module\Data;
+<?php
+
+use ResursBank\Module\Data;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
 
 if ($get_address_form || $get_address_form_always) { ?>
     <span id="rbGetAddressFields">
@@ -54,15 +58,13 @@ if ($get_address_form || $get_address_form_always) { ?>
                         );
                     }
                 }
-            }
-            ?>
+            } ?>
             <div class="woocommerce-input-wrapper" id="rbwc_extended_test_mode_helper">
                 <select id="rbwc_civic_number_selector"
                         size="<?php echo count($civicNumberOptions) ?>"
                         onchange="rbwcSetCivicNumber(this)">
                     <?php
-                    echo Data::getEscapedHtml(implode('', $civicNumberOptions));
-                    ?>
+                    echo Data::getEscapedHtml(implode('', $civicNumberOptions)); ?>
                 </select>
             </div>
             <?php
@@ -75,8 +77,31 @@ if ($get_address_form || $get_address_form_always) { ?>
     <?php
     if ($supported_country && $get_address_form) { ?>
         <div>
-            <button id="rbGetResursAddressButton" onclick="getResursAddress();return false;"><?php echo esc_html($customer_button_text); ?></button>
+            <button id="rbGetResursAddressButton"
+                    onclick="getResursAddress();return false;"><?php echo esc_html($customer_button_text); ?></button>
         </div>
     <?php } ?>
 </span>
-<?php } ?>
+<?php } else {
+    $hasBothMethodTypes = WooCommerce::hasMethodsLegal() && WooCommerce::hasMethodsNatural();;
+
+    if ($hasBothMethodTypes) {
+        $currentCustomerType = Data::getCustomerType();
+        if (empty($currentCustomerType)) {
+            $currentCustomerType = 'NATURAL';
+        }
+        $switchToMessageString = WordPress::applyFilters(
+            'getSwitchToCustomerTypeString',
+            $currentCustomerType,
+            ''
+        );
+        $switchTo = $currentCustomerType === 'NATURAL' ? 'LEGAL' : 'NATURAL';
+        ?>
+        <button
+                type="button"
+                id="rbCustomerSwitchButton"
+                onclick="rbSwitchCustomerType()"><?php echo esc_html($switchToMessageString) ?></button>
+        <input type="hidden" id="resursSsnCustomerType" name="resursSsnCustomerType">
+        <?php
+    }
+} ?>

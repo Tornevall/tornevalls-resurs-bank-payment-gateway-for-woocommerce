@@ -205,6 +205,20 @@ function setResursGetAddressCustomerType(clickedObject) {
 }
 
 /**
+ * Switch to another customer type without the radio buttons active.
+ * @param newCustomerType
+ * @since 0.0.1.6
+ */
+function rbSwitchCustomerType() {
+    //resursGetAddressCustomerType = newCustomerType;
+    //$rQuery('#resursSsnCustomerType').val(newCustomerType);
+    //var switchBack = newCustomerType === 'NATURAL' ? getResursLocalization('switchToNatural') : getResursLocalization('switchToLegal');
+    //console.log(switchBack);
+    //$rQuery('#rbCustomerSwitchButton').attr('value', switchBack);
+    //$rQuery('body').trigger('update_checkout');*/
+}
+
+/**
  * @since 0.0.1.0
  */
 function getResursAddress() {

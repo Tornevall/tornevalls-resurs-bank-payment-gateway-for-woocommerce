@@ -59,6 +59,23 @@ class PluginHooks
         add_action('rbwc_get_tax_classes', [$this, 'getTaxClasses']);
         add_action('rbwc_get_custom_form_fields', [$this, 'getCustomFormFields'], 10, 2);
         add_action('rbwc_get_support_address_list', [$this, 'getSupportAddressList'], 10, 2);
+        add_action('rbwc_get_switch_to_customer_type_string', [$this, 'getSwitchToCustomerTypeString']);
+    }
+
+    /**
+     * @param string $currentCustomerType
+     * @return string
+     * @since 0.0.1.6
+     */
+    public function getSwitchToCustomerTypeString(string $currentCustomerType): string
+    {
+        return $currentCustomerType === 'NATURAL' ? __(
+            'Switch to company',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        ) : __(
+            'Switch to private customer',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
     }
 
     /**

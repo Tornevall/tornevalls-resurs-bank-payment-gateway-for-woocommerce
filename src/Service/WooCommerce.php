@@ -144,6 +144,55 @@ class WooCommerce
     }
 
     /**
+     * Returns true if company/legal methods is present.
+     *
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function hasMethodsLegal(): bool
+    {
+        return (bool)self::getMethodsByType('legal');
+    }
+
+    /**
+     * @param $type
+     * @param string $returnAs
+     * @return array|bool
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    private static function getMethodsByType($type, $returnAs = 'bool')
+    {
+        $storedMethods = ResursBankAPI::getPaymentMethods(true);
+        $returnBool = false;
+
+        $paymentMethodList = [];
+        if (is_array($storedMethods) && count($storedMethods)) {
+            foreach ($storedMethods as $method) {
+                $customerType = (array)$method->customerType;
+                if (in_array(strtolower($type), array_map('strtolower', $customerType), true)) {
+                    $paymentMethodList[] = $method;
+                }
+            }
+            $returnBool = count($paymentMethodList) > 0;
+        }
+
+        return $returnAs !== 'bool' ? $paymentMethodList : $returnBool;
+    }
+
+    /**
+     * Returns true if private/naturali methods is present.
+     *
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function hasMethodsNatural(): bool
+    {
+        return (bool)self::getMethodsByType('natural');
+    }
+
+    /**
      * @param $gateways
      * @return mixed
      * @throws Exception
