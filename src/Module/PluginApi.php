@@ -153,7 +153,6 @@ class PluginApi
         if (!(bool)$force) {
             self::getValidatedNonce();
         }
-        Data::setResursOption('resursImportCredentials', time());
 
         $imports = [
             'resursAnnuityDuration' => 'currentAnnuityDuration',
@@ -179,6 +178,7 @@ class PluginApi
             }
         }
 
+        Data::setResursOption('resursImportCredentials', time());
         Data::setLogInfo(
             __('Import of old credentials finished.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );

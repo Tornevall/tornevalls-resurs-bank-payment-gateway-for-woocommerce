@@ -416,9 +416,9 @@ class Data
      */
     public static function getTruth($value)
     {
-        if (in_array($value, ['true', 'yes'])) {
+        if (in_array($value, ['true', 'yes'], true)) {
             $return = true;
-        } elseif (in_array($value, ['false', 'no'])) {
+        } elseif (in_array($value, ['false', 'no'], true)) {
             $return = false;
         } else {
             $return = null;
