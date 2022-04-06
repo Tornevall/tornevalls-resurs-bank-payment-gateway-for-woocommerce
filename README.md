@@ -1,10 +1,10 @@
-# Tornevalls Resurs Bank Payment Gateway for WooCommerce
+# Tornevalls Resurs Bank Payment Gateway for WooCommerce #
 
 This is a third party plugin written to work as a payment gateway for WooCommerce and WordPress.
 
 [![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
-# IMPORTANT -- First time running should be on a dedicated test environment
+# IMPORTANT -- First time running should be on a dedicated test environment #
 
 If you are entirely new to this plugin, I'd suggest you to run it in a dedicated test environment that is supposedly *
 equal* to a production environment - where you install the plugin live *AFTER* testing. Primary new problems should be
@@ -14,13 +14,18 @@ while your site is down.
 
 This responsibility is yours and this way of handling things is required for *your* safety!
 
-## CONTRIBUTION
+## Multisite/WordPress Networks ##
+
+The plugin **do** support WordPress networks (aka multisite), however it does not support running one webservice account over many sites at once. The main rule that Resurs Bank works with is that one webservice account only works for one site. Running multiple sites do **require** multiple webservice accounts!
+
+
+## CONTRIBUTION ##
 
 If you'd like to contribute to this project, you can either sign up
 to [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues) and create an issue or use the
 old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this on.
 
-## DOCUMENTS AND LINKS
+## DOCUMENTS AND LINKS ##
 
 * [Contribute with translations](https://crwd.in/trwbc)
 * [The current work-repository as of v0.0](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
@@ -28,9 +33,9 @@ old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this o
   repository as bitbucket server will shut down in a few years from now.
 * [Documentation](https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway).
 
-## DISCLAIMER
+## DISCLAIMER ##
 
-### BEWARE OF BREAKING CHANGES
+### BEWARE OF BREAKING CHANGES ###
 
 * There is a publicly available release out, supported by Resurs Bank (v2.2). There **may be breaking changes** if you
   tend to use **this** plugin as it is an upgrade from the Resurs supported release.
@@ -40,7 +45,7 @@ old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this o
   compatibility, but not the code. If you find that this codebase resides in the Resurs Bank supported repository, it is
   considered v3.x.
 
-### ABOUT THIS RELEASE
+### ABOUT THIS RELEASE ###
 
 The README you're reading right now is considered as a brand new edition, that can also potentially break something if
 you tend to handle it as an upgrade from an external repository. It won't break your *site*, but configuration layers
@@ -57,7 +62,7 @@ become externally supported one day.
 
 The original codebase was initialized july 2020.
 
-## REQUIREMENTS AND SECURITY CONSIDERATIONS
+## REQUIREMENTS AND SECURITY CONSIDERATIONS ##
 
 Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
 
@@ -77,30 +82,30 @@ Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/displ
   See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more
   information.
 
-### NEWS AND UPDATES
+### NEWS AND UPDATES ###
 
 This plugin do have a wide support for filters and actions, to simplify work for extended developers that need to
 connect their own features to whatever they need to do.
 
-## CONFIGURATION
+## CONFIGURATION ##
 
 Most of the configuring are made through the admin panel, which includes tweaking when advanced mode is enabled. Take a
 look at the documentation for more information.
 
-## Frequently Asked Questions
+## Frequently Asked Questions ##
 
 ### Where can I get more information about this plugin? ###
 
 You may visit [docs.tornevall.net](https://docs.tornevall.net/x/CoC4Aw) for more information regarding the plugin. For
 questions about API and Resurs Bank please visit [test.resurs.com/docs](https://test.resurs.com/docs/).
 
-## Can I upgrade from version 2.2.x?
+## Can I upgrade from version 2.2.x? ##
 
 **"Version 2.2.x"** is currently the **official Resurs Bank release** and not the same as this release that is a
 practically a third party reboot. However, the intentions with this plugin is to run as seamless as possible. For
 example, payments placed with the prior release can be handled by this one.
 
-## What is considered "breaking changes"?
+## What is considered "breaking changes"? ##
 
 Breaking changes are collected [here](https://docs.tornevall.net/x/UwJzBQ).
 
@@ -121,7 +126,7 @@ Examples of what could "break" is normally in the form of "no longer supported":
   intentional done, so we don't collide with old settings. Some of them are also not very effective, so some of them has
   also been removed as they did no longer fill any purpose.
 
-## Is this release a refactored version of Resurs Bank's?
+## Is this release a refactored version of Resurs Bank's? ##
 
 No. This plugin is a complete reboot. The future intentions might be to replace the other version and **this** release
 is currently considered a side project.
@@ -139,7 +144,7 @@ to take in consideration:
       countries".
     - **Solution:** Contact Resurs Bank for support.
 
-### What is a EComPHP API Message?
+### What is a EComPHP API Message? ###
 
 From time to time, errors and exceptions shows up on your screen. Normally, when doing API calls, the messages comes
 from [Resurs Bank Ecommerce API](https://test.resurs.com/docs/pages/viewpage.action?pageId=5014349). Many of the
@@ -148,13 +153,13 @@ If you are unsure, contact the support preferrably with information about your s
 admin interface can be found under "Support and help" or "Support och hjälp" in swedish). A screenshot of that layout
 are attached to this plugin-repository (screenshot 8). [You can also see some of the error messages produced by the library itself here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases).
 
-## I see an order but find no information connected to Resurs Bank =
+## I see an order but find no information connected to Resurs Bank ##
 
 This is a common question about customer actions and how the order has been created/signed. Most of the details is
 usually placed in the order notes for the order, but if you need more information you could also consider contacting
 Resurs Bank support.
 
-## How does the respective payment flows work with Resurs Bank in this plugin? =
+## How does the respective payment flows work with Resurs Bank in this plugin? ##
 
 Full description about how "simplifiedShopFlow", "hosted flow" and "Resurs Checkout" works, not only here, but mostly
 anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.tornevall.net/x/IAAkBQ)
@@ -162,7 +167,7 @@ anywhere can be seen at [https://docs.tornevall.net/x/IAAkBQ](https://docs.torne
 The payment flow itself for each
 API [is described here](https://docs.tornevall.net/display/TORNEVALL/Checkout+workflows+and+metadata+store+described).
 
-# Screenshots from the plugin
+# Screenshots from the plugin #
 
 [![Primary Basic Settings Configuration page.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-1.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-1.png)
 [![Part of the Payment Methods View.](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-2.png)](https://ps.w.org/tornevalls-resurs-bank-payment-gateway-for-woocommerce/assets/screenshot-2.png)

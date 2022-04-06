@@ -199,6 +199,7 @@ class ResursDefault extends WC_Payment_Gateway
             Data::getCheckoutType() === self::TYPE_SIMPLIFIED ||
             Data::getCheckoutType() === self::TYPE_HOSTED
         );
+
         if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)) {
             $this->has_fields = true;
         }
@@ -256,6 +257,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * Generic setup regardless of payment method.
      * @return $this
+     * @throws Exception
      * @since 0.0.1.0
      */
     private function setPaymentApiData(): self
@@ -1231,6 +1233,7 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         $customerType = Data::getCustomerType();
+
         // If this feature is not missing the method, we now know that there is chance that we're
         // located in a checkout. We will in this moment run through the min-max amount that resides
         // in each payment method that is requested here. If the payment method is not present,
