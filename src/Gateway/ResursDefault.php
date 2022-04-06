@@ -257,6 +257,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * Generic setup regardless of payment method.
      * @return $this
+     * @throws Exception
      * @since 0.0.1.0
      */
     private function setPaymentApiData(): self
