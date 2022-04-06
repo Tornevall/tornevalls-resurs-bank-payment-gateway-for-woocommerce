@@ -1771,6 +1771,7 @@ class Data
      *
      * @param $key
      * @return string
+     * @throws ExceptionHandler
      * @version 0.0.1.0
      */
     private static function getPluginDataContent($key): string
@@ -2418,7 +2419,7 @@ class Data
      */
     private static function setCustomerTypeToSession()
     {
-        $customerTypeByGetAddress = Data::getRequest('resursSsnCustomerType', true);
+        $customerTypeByGetAddress = self::getRequest('resursSsnCustomerType', true);
 
         if (!empty($customerTypeByGetAddress)) {
             WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
@@ -2427,7 +2428,7 @@ class Data
 
     /**
      * @param $key
-     * @param null $post_data
+     * @param $post_data
      * @return mixed
      * @throws Exception
      * @since 0.0.1.1
@@ -2486,6 +2487,7 @@ class Data
             if ($arrays->isAssoc($array)) {
                 foreach ($array as $arrayKey => $arrayValue) {
                     if (is_array($arrayValue)) {
+                        // Recursive request.
                         $returnArray[self::getSanitizedKeyElement($arrayKey)] = self::getSanitizedArray($arrayValue);
                     } elseif (!is_object($arrayValue)) {
                         $returnArray[self::getSanitizedKeyElement($arrayKey)] = esc_html($arrayValue);
@@ -2494,6 +2496,7 @@ class Data
             } elseif ($array) {
                 foreach ($array as $item) {
                     if (is_array($item)) {
+                        // Recursive request.
                         $returnArray[] = self::getSanitizedArray($item);
                     } elseif (is_string($item)) {
                         $returnArray[] = esc_html($item);
@@ -2501,10 +2504,10 @@ class Data
                 }
             }
         } else {
-            Data::setLogError(
+            self::setLogError(
                 'Someone sent other data than arrays into the sanitizer!'
             );
-            throw new Exception('Can not sanitize other data than arrays!', 500);
+            throw new RuntimeException('Can not sanitize other data than arrays!', 500);
         }
 
         return $returnArray;

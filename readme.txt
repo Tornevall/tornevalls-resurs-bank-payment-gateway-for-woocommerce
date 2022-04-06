@@ -41,6 +41,9 @@ If you are entirely new to this plugin or WordPress overall, I'd suggest you to 
 
 Primary new problems should be discovered in TEST rather than production since the costs are way lower, where no real people are depending on failed orders or payments. If something fails in production it also means that you are the one that potentially looses traffic while your site is down.
 
+== Multisite/WordPress Networks ==
+
+The plugin **do** support WordPress networks (aka multisite), however it does not support running one webservice account over many sites at once. The main rule that Resurs Bank works with is that one webservice account only works for one site. Running multiple sites do **require** multiple webservice accounts!
 
 = System prerequisites =
 

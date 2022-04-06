@@ -50,12 +50,12 @@ class OrderStatus
     const HTTP_RESPONSE_OK = 204;
 
     /**
-     * HTTP Response Code for test callbacks.
+     * HTTP Response Code for test callbacks. 209 is said to not be used by anyone for the moment.
      * @var int
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_RESPONSE_TEST_OK = 202;
+    const HTTP_RESPONSE_TEST_OK = 204;
 
     /**
      * What we handle through static calls.
