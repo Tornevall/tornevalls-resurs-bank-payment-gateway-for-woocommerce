@@ -205,6 +205,34 @@ function setResursGetAddressCustomerType(clickedObject) {
 }
 
 /**
+ * Switch to another customer type without the radio buttons active.
+ * @param newCustomerType
+ * @since 0.0.1.6
+ */
+function rbSwitchCustomerType() {
+    // What's currently set.
+    currentCustomerType = $rQuery('#resursSsnCustomerType').val();
+
+    // What the button should contain.
+    var newCustomerTypeString = currentCustomerType === 'LEGAL' ? getResursLocalization('switchToNatural') : getResursLocalization('switchToLegal');
+
+    // What the value in resursSsnCustomerType should hold.
+    var newCustomerType = currentCustomerType === 'NATURAL' ? 'LEGAL' : 'NATURAL';
+
+    // What we should keep in mind temporarily until next reload.
+    resursGetAddressCustomerType = newCustomerType;
+
+    // Set a new value for the hidden field.
+    $rQuery('#resursSsnCustomerType').val(newCustomerType);
+
+    // Set a new value for the button.
+    $rQuery('#rbCustomerSwitchButton').html(newCustomerTypeString);
+
+    // Trigger a checkout reload.
+    $rQuery('body').trigger('update_checkout');
+}
+
+/**
  * @since 0.0.1.0
  */
 function getResursAddress() {

@@ -790,6 +790,17 @@ class WordPress
         $return['getAddressFieldController'] = self::applyFilters('getAddressFieldController', []);
         $return['checkoutType'] = Data::getCheckoutType();
 
+        $return['switchToLegal'] = WordPress::applyFilters(
+            'getSwitchToCustomerTypeString',
+            'NATURAL',
+            __('Switch to private person', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+        );
+        $return['switchToNatural'] = WordPress::applyFilters(
+            'getSwitchToCustomerTypeString',
+            'LEGAL',
+            __('Switch to company', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+        );
+
         return self::applyFilters('localizationsGlobal', $return);
     }
 
