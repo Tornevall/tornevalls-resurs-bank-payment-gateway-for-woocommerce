@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUndefinedVariableInspection */
+
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
@@ -35,14 +37,16 @@ if ($get_address_form || $get_address_form_always) { ?>
         <?php
         if (Data::isExtendedTest()) {
             $customerCountry = strtoupper(Data::getCustomerCountry());
-            //$customerCompany = Data::getCustomerCompanyName();
             $chosenCustomerType = Data::getCustomerType();
+            $civicNumberOptions = [];
+            if ($chosenCustomerType === null) {
+                $chosenCustomerType = WooCommerce::hasMethodsNatural() ? 'NATURAL' : 'LEGAL';
+            }
             if (isset($liveTestData[$customerCountry]['payments']['civicNumber']) &&
                 is_array($liveTestData[$customerCountry]['payments']['civicNumber']) &&
                 count($liveTestData[$customerCountry]['payments']['civicNumber'])
             ) {
                 $civicNumberList = $liveTestData[$customerCountry]['payments']['civicNumber'];
-                $civicNumberOptions = [];
                 if (is_array($civicNumberList) && count($civicNumberList)) {
                     foreach ($civicNumberList as $civicType => $civicNumber) {
                         $isCompanyCivic = (bool)preg_match('/^company/i', $civicType);
@@ -61,7 +65,7 @@ if ($get_address_form || $get_address_form_always) { ?>
             } ?>
             <div class="woocommerce-input-wrapper" id="rbwc_extended_test_mode_helper">
                 <select id="rbwc_civic_number_selector"
-                        size="<?php echo count($civicNumberOptions) ?>"
+                        size="<?php echo count($civicNumberOptions) ?? 1 ?>"
                         onchange="rbwcSetCivicNumber(this)">
                     <?php
                     echo Data::getEscapedHtml(implode('', $civicNumberOptions)); ?>
@@ -82,26 +86,32 @@ if ($get_address_form || $get_address_form_always) { ?>
         </div>
     <?php } ?>
 </span>
-<?php } else {
-    $hasBothMethodTypes = WooCommerce::hasMethodsLegal() && WooCommerce::hasMethodsNatural();;
-
-    if ($hasBothMethodTypes) {
+    <?php
+} else {
         $currentCustomerType = Data::getCustomerType();
         if (empty($currentCustomerType)) {
-            $currentCustomerType = 'NATURAL';
+            // What we default to depends on what we have.
+            $chosenCustomerType = WooCommerce::hasMethodsNatural() ? 'NATURAL' : 'LEGAL';
+        } else {
+            $chosenCustomerType = $currentCustomerType;
         }
-        $switchToMessageString = WordPress::applyFilters(
-            'getSwitchToCustomerTypeString',
-            $currentCustomerType,
-            ''
-        );
-        $switchTo = $currentCustomerType === 'NATURAL' ? 'LEGAL' : 'NATURAL';
-        ?>
+
+        if (WooCommerce::hasDualCustomerTypes()) {
+            $switchToMessageString = WordPress::applyFilters(
+                'getSwitchToCustomerTypeString',
+                $chosenCustomerType === 'LEGAL' ? 'LEGAL' : 'NATURAL',
+                ''
+            ); ?>
         <button
                 type="button"
                 id="rbCustomerSwitchButton"
                 onclick="rbSwitchCustomerType()"><?php echo esc_html($switchToMessageString) ?></button>
-        <input type="hidden" id="resursSsnCustomerType" name="resursSsnCustomerType">
+        <input
+                type="hidden"
+                id="resursSsnCustomerType"
+                name="resursSsnCustomerType"
+                value="<?php echo esc_html($chosenCustomerType)?>">
         <?php
+        }
     }
-} ?>
+?>

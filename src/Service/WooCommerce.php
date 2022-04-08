@@ -155,6 +155,16 @@ class WooCommerce
     }
 
     /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function hasDualCustomerTypes(): bool
+    {
+        return self::hasMethodsNatural() && self::hasMethodsLegal();
+    }
+
+    /**
      * @param $type
      * @param string $returnAs
      * @return array|bool

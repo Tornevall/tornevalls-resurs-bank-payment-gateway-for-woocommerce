@@ -16,5 +16,20 @@
                 "Company Frozen": "162830419400"
             }
         }
+    },
+    "DK": {
+        "payments": {
+            "civicNumber": {
+                "Booked": "140285-3877",
+                "Denied": "021250-0003",
+                "Never Unfreeze": "060580-3736",
+                "Unfreeze After 5s": "140481-9652",
+                "Annul After 5s": "100677-2605",
+                "Unfreeze After 10m": "011183-1432",
+                "Annul After 10m": "240384-4340",
+                "Second Deny": "290550-1913",
+                "New card/Account": "2304881898"
+            }
+        }
     }
 }

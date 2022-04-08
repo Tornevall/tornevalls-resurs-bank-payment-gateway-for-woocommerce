@@ -660,6 +660,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function setCustomer(): self
     {
         $governmentId = $this->getCustomerData('government_id');
+        $customerType = Data::getCustomerType();
         Data::setDeveloperLog(__FUNCTION__, sprintf('setCountryByCountryCode:%s', $this->getCustomerData('country')));
         $this->API->getConnection()->setCountryByCountryCode($this->getCustomerData('country'));
         if ($governmentId) {
@@ -694,14 +695,17 @@ class ResursDefault extends WC_Payment_Gateway
             );
         }
 
+        $govIdData = $customerType === 'NATURAL' ? $this->getCustomerData('government_id') :
+            $this->getCustomerData('applicant_government_id');
+
         Data::setDeveloperLog(__FUNCTION__, 'setApiCustomer:$_POST');
         $this->API->getConnection()->setCustomer(
-            $this->getCustomerData('government_id'),
+            $govIdData,
             $this->getCustomerData('phone'),
             $this->getCustomerData('mobile'),
             $this->getCustomerData('email'),
-            'NATURAL',
-            $this->getCustomerData('government_id_contact')
+            $customerType,
+            $this->getCustomerData('contact_government_id')
         );
 
         return $this;
@@ -1363,44 +1367,49 @@ class ResursDefault extends WC_Payment_Gateway
     public function payment_fields()
     {
         $fieldHtml = null;
-        // If not here, no fields are required.
-        /** @noinspection PhpUndefinedFieldInspection */
-        $requiredFields = FormFields::getSpecificTypeFields($this->paymentMethodInformation->type);
 
         if (Data::getCheckoutType() === self::TYPE_RCO) {
             return;
         }
+
+        // If not here, no fields are required.
+        /** @noinspection PhpUndefinedFieldInspection */
+        $requiredFields = FormFields::getSpecificTypeFields(
+            $this->paymentMethodInformation->type,
+            Data::getCustomerType()
+        );
 
         if (count($requiredFields)) {
             $getAddressVisible = Data::canUseGetAddressForm();
             foreach ($requiredFields as $fieldName) {
                 $fieldValue = null;
                 $displayField = $this->getDisplayableField($fieldName);
-                $streamLineFields = Data::getResursOption('streamline_payment_fields');
+                $alwaysShowApplicantFields = Data::getResursOption('streamline_payment_fields');
                 switch ($fieldName) {
-                    case 'reserved-for-future-use':
-                        break;
                     case 'government_id':
                         $fieldValue = WooCommerce::getSessionValue('identification');
                         if (!$getAddressVisible) {
                             $displayField = true;
-                        } elseif (!$streamLineFields) {
+                        } elseif (!$alwaysShowApplicantFields) {
                             $displayField = false;
                         }
                         if ($this->paymentMethodInformation->type === 'PAYMENT_PROVIDER' && $displayField) {
                             $displayField = false;
                             // External payment methods does not require the govt. id.
-                            $streamLineFields = false;
+                            $alwaysShowApplicantFields = false;
                         }
                         break;
                     default:
+                        if (!$getAddressVisible || $alwaysShowApplicantFields) {
+                            $displayField = true;
+                        }
                 }
                 /** @noinspection SpellCheckingInspection */
                 $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
                     'displayMode' => $displayField ? '' : 'none',
                     'methodId' => $this->paymentMethodInformation->id ?? '?',
                     'fieldSize' => WordPress::applyFilters('getPaymentFieldSize', 24, $fieldName),
-                    'streamLine' => $streamLineFields,
+                    'alwaysShowApplicantFields' => $alwaysShowApplicantFields,
                     'fieldLabel' => FormFields::getFieldString($fieldName),
                     'fieldName' => sprintf(
                         '%s_%s_%s',

@@ -1541,7 +1541,7 @@ class FormFields extends WC_Settings_API
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getFieldMethodList()
+    public static function getFieldMethodList(): void
     {
         // Considering this place as a safe place to apply display in styles.
         Data::getSafeStyle();
@@ -1796,7 +1796,31 @@ class FormFields extends WC_Settings_API
                 'Applicant government id',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
+            'contact_government_id' => __(
+                'Contact government id',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
             'card_number' => __('Card number', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'applicant_government_id' => __(
+                'Applicant Government ID',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
+            'applicant_telephone_number' => __(
+                'Applicant Telephone Number',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
+            'applicant_mobile_number' => __(
+                'Applicant Mobile Number',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
+            'applicant_email_address' => __(
+                'Applicant E-Mail Address',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
+            'applicant_full_name' => __(
+                'Applicant Full Name',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ),
         ];
 
         // If no key are sent here, it is probably a localization request.
@@ -1824,54 +1848,76 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param null $key
+     * @param string $key
+     * @param string $customerType
      * @return array
      * @since 0.0.1.0
      */
-    public static function getSpecificTypeFields($key = null): array
+    public static function getSpecificTypeFields(string $key, string $customerType): array
     {
         $return = [
-            'INVOICE' => [
-                'government_id',
-                'phone',
-                'mobile',
-                'email',
+            'NATURAL' => [
+                'INVOICE' => [
+                    'government_id',
+                    'phone',
+                    'mobile',
+                    'email',
+                ],
+                'CARD' => [
+                    'government_id',
+                ],
+                'DEBIT_CARD' => [
+                    'government_id',
+                ],
+                'CREDIT_CARD' => [
+                    'government_id',
+                ],
+                'REVOLVING_CREDIT' => [
+                    'government_id',
+                    'mobile',
+                    'email',
+                ],
+                'PART_PAYMENT' => [
+                    'government_id',
+                    'phone',
+                    'mobile',
+                    'email',
+                ],
+                'undefined' => [
+                    'government_id',
+                    'phone',
+                    'mobile',
+                    'email',
+                ],
             ],
-            'INVOICE_LEGAL' => [
-                'government_id',
-                'phone',
-                'mobile',
-                'email',
-                'government_id_contact',
-            ],
-            'CARD' => [
-                'government_id',
-            ],
-            'REVOLVING_CREDIT' => [
-                'government_id',
-                'mobile',
-                'email',
-            ],
-            'PART_PAYMENT' => [
-                'government_id',
-                'phone',
-                'mobile',
-                'email',
-            ],
-            'undefined' => [
-                'government_id',
-                'phone',
-                'mobile',
-                'email',
+            'LEGAL' => [
+                'COMPINVOICE' => [
+                    'applicant_government_id',
+                    'applicant_telephone_number',
+                    'applicant_mobile_number',
+                    'applicant_email_address',
+                    'applicant_full_name',
+                    'contact_government_id',
+                ],
+                'INVOICE' => [
+                    'applicant_government_id',
+                    'applicant_telephone_number',
+                    'applicant_mobile_number',
+                    'applicant_email_address',
+                    'applicant_full_name',
+                    'contact_government_id',
+                ],
+                'undefined' => [
+                    'phone',
+                    'mobile',
+                    'email',
+                ],
             ],
         ];
 
-        if (!empty($key) && isset($return[$key])) {
-            $return = $return[$key];
-        } else {
-            $return = $return['undefined'];
-        }
+        $return = $return[$customerType][$key] ?? $return[$customerType]['undefined'];
 
+        // Hand over the result to the filter on your way back.
         return WordPress::applyFilters('getSpecificTypeFields', $return, $key);
     }
 }
