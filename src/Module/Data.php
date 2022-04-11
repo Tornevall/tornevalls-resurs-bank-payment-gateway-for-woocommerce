@@ -2541,6 +2541,7 @@ class Data
     {
         $return = WooCommerce::getSessionValue('resursSsnCustomerType');
 
+        // If this is empty, it has not been pre-selected.
         if (empty($return)) {
             if (WooCommerce::hasMethodsNatural()) {
                 $return = 'NATURAL';
