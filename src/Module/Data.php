@@ -2540,6 +2540,16 @@ class Data
     private static function getCustomerTypeFromSession()
     {
         $return = WooCommerce::getSessionValue('resursSsnCustomerType');
+
+        // If this is empty, it has not been pre-selected.
+        if (empty($return)) {
+            if (WooCommerce::hasMethodsNatural()) {
+                $return = 'NATURAL';
+            } else {
+                $return = 'LEGAL';
+            }
+        }
+
         $customerTypeByCompanyName = self::getRequest('billing_company', true);
 
         return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
