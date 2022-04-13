@@ -772,23 +772,6 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
-                'payment_methods_on_first_page' => [
-                    'id' => 'payment_methods_on_first_page',
-                    'type' => 'checkbox',
-                    'title' => __(
-                        'Put payment methods and callbacks list on first tab',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'desc_tip' => __(
-                        'In the former plugin designed by Resurs Bank, payment methods and callbacks was listed ' .
-                        'on the first configuration tab. Some maybe prefer this before the centralization ' .
-                        'and the minimalistic view on the front configuration. Enable this flag, to move around ' .
-                        'the configuration.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => 'no',
-                ],
                 'must_obfuscate_logged_personal_data' => [
                     'id' => 'must_obfuscate_logged_personal_data',
                     'type' => 'checkbox',

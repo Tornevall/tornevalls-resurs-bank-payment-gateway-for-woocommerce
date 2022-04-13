@@ -97,7 +97,7 @@ class PluginHooks
     {
         $customPaymentMethodFields = WordPress::applyFilters(
             'paymentMethodsOnFirstPage',
-            Data::getResursOption('payment_methods_on_first_page')
+            false
         );
         if ($customPaymentMethodFields) {
             $array = new Arrays();
