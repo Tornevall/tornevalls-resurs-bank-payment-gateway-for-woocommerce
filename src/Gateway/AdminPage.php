@@ -108,7 +108,8 @@ class AdminPage extends WC_Settings_Page
 
         foreach ($formFields as $sectionKey => $sectionArray) {
             if ($sectionKey === 'basic') {
-                $return[''] = $sectionArray['title'] ?? __(
+                $return[''] = $sectionArray['title'] ??
+                    __(
                         'Plugin and account settings',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     );
