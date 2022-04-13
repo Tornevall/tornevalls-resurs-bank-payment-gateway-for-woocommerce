@@ -469,6 +469,23 @@ class FormFields extends WC_Settings_API
                         'multiple' => 'multiple',
                     ],
                 ],
+                'fix_callback_urls' => [
+                    'id' => 'fix_callback_urls',
+                    'type' => 'checkbox',
+                    'title' => __(
+                        'Fix mismatching callback urls automatically',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'default' => 'no',
+                    'desc_tip' => __(
+                        'When you test a lot or switching between different environments there might be glitches ' .
+                        'in the registered callback URLs. Enabling this makes the plugin try to fix this ' .
+                        'automatically when desynchronized. If this setting is enabled, callback urls will be ' .
+                        'silently update in background when logged into admin',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                ],
                 'accept_rejected_callbacks' => [
                     'id' => 'accept_rejected_callbacks',
                     'type' => 'checkbox',

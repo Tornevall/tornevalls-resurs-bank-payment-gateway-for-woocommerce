@@ -141,7 +141,12 @@ function getCallbackMatches() {
                 }
             }
             if (typeof data['requireRefresh'] !== "undefined" && data['requireRefresh'] === true) {
-                var canUpdate = confirm(getResursLocalization('update_callbacks_required'));
+                var canUpdateAuto = parseInt(getResursLocalization('fix_callback_urls'));
+                if (canUpdateAuto !== 1) {
+                    var canUpdate = confirm(getResursLocalization('update_callbacks_required'));
+                } else {
+                    canUpdate = true;
+                }
                 if (canUpdate) {
                     getResursAjaxify('post', 'get_internal_resynch', {'n': true}, function () {
                         if ($rQuery('#button_trbwc_admin_payment_methods_button').length > 0) {
@@ -157,7 +162,9 @@ function getCallbackMatches() {
                             );
                             document.location.reload();
                         } else {
-                            alert(getResursLocalization('update_callbacks_refresh'));
+                            if (canUpdateAuto !== 1) {
+                                alert(getResursLocalization('update_callbacks_refresh'));
+                            }
                         }
                     });
                 }
