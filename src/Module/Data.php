@@ -2533,6 +2533,15 @@ class Data
     }
 
     /**
+     * @return bool
+     * @since 0.0.1.6
+     */
+    public static function isPaymentFeeAllowed(): bool
+    {
+        return defined('RESURSBANK_ALLOW_PAYMENT_FEE') ? (bool)RESURSBANK_ALLOW_PAYMENT_FEE : false;
+    }
+
+    /**
      * @return array|mixed|string|null
      * @throws Exception
      * @since 0.0.1.0

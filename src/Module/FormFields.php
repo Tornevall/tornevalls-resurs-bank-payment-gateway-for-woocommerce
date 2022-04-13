@@ -1596,7 +1596,7 @@ class FormFields extends WC_Settings_API
                     'environment' => Data::getResursOption('environment'),
                     'isBleedingEdge' => Data::isBleedingEdge(),
                     'lastMethodUpdate' => self::getLastPaymentMethodUpdate(),
-                    'canUseFee' => Data::getCheckoutType() !== 'rco',
+                    'canUseFee' => Data::getCheckoutType() !== 'rco' && Data::isPaymentFeeAllowed(),
                 ]
             );
             echo Data::getEscapedHtml($paymentMethodTemplate);

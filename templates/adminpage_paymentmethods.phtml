@@ -169,13 +169,15 @@
 
     <?php
     if (!$canUseFee) {
-        echo '<div style="color: #990000; font-width: bold;">';
-        _e(
-            'To be able to use fee settings, you have to change the plugin to work with ' .
-            'the simplified or hosted shopflow.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
-        echo '</div>';
+        if (Data::isPaymentFeeAllowed()) {
+            echo '<div style="color: #990000; font-width: bold;">';
+            _e(
+                'To be able to use fee settings, you have to change the plugin to work with ' .
+                'the simplified or hosted shopflow.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            );
+            echo '</div>';
+        }
     } else {
         echo '<div style="color: #009900; font-weight: bold;">';
         _e(
