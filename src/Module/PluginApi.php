@@ -1164,7 +1164,7 @@ class PluginApi
     public static function updatePaymentMethodFee()
     {
         $allowed = false;
-        if (is_admin() && is_ajax()) {
+        if (is_admin() && is_ajax() && Data::isPaymentFeeAllowed()) {
             $id = explode('_', Data::getRequest('id'));
             $newValue = '';
 

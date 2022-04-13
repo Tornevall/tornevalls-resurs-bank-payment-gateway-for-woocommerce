@@ -71,7 +71,7 @@ class OrderHandler extends ResursDefault
      */
     private function setFee(): self
     {
-        if (isset(WC()->cart) && WC()->cart instanceof WC_Cart) {
+        if (isset(WC()->cart) && WC()->cart instanceof WC_Cart && Data::isPaymentFeeAllowed()) {
             $fees = WC()->cart->get_fees();
             if (is_array($fees) && count($fees)) {
                 foreach ($fees as $fee) {
