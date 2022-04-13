@@ -480,7 +480,8 @@ class WordPress
     }
 
     /**
-     * @param bool $isAdmin
+     * @param null $isAdmin
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function setResursBankScripts($isAdmin = null)
@@ -800,6 +801,7 @@ class WordPress
             'LEGAL',
             __('Switch to company', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );
+        $return['fix_callback_urls'] = Data::getResursOption('fix_callback_urls');
 
         return self::applyFilters('localizationsGlobal', $return);
     }
