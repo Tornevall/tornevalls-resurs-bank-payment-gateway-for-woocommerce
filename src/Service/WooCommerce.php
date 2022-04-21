@@ -843,6 +843,14 @@ class WooCommerce
 
             self::getHandledCallbackNullOrder($order, $pRequest);
 
+            $cbUri = $_SERVER['REQUEST_URI'] ?: '';
+            if (!empty($cbUri)) {
+                Data::setLogInternal(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf('Callback received by URI: %s', $cbUri)
+                );
+            }
+
             $callbackEarlyFailure = false;
             try {
                 self::applyMock('updateCallbackException');
