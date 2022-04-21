@@ -558,6 +558,24 @@ class Data
     }
 
     /**
+     * @param $customerCountry
+     * @return float
+     * @since 0.0.1.6
+     */
+    private static function getDefaultPartPaymentThreshold($customerCountry): float
+    {
+        $threshold = (float)Data::getResursOption('part_payment_threshold');
+
+        if ($threshold === 150.00 && $customerCountry === 'FI') {
+            $threshold = 15.00;
+        } elseif ((int)$threshold === 0) {
+            $threshold = 150.00;
+        }
+
+        return (float)WordPress::applyFilters('getMinimumAnnuityPrice', $threshold, $customerCountry);
+    }
+
+    /**
      * @param $wcDisplayPrice
      * @param $annuityMethod
      * @param $annuityDuration
@@ -567,24 +585,15 @@ class Data
     private static function getAnnuityHtml($wcDisplayPrice, $annuityMethod, $annuityDuration)
     {
         $customerCountry = self::getCustomerCountry();
-        switch ($customerCountry) {
-            case 'US':
-                // Resides here as an example.
-                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
-                break;
-            case 'FI':
-                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 15, $customerCountry);
-                break;
-            default:
-                $minimumPaymentLimit = (float)WordPress::applyFilters('getMinimumAnnuityPrice', 150, $customerCountry);
-        }
 
         $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
             $wcDisplayPrice,
             $annuityMethod,
             $annuityDuration
         );
-        if ($monthlyPrice >= $minimumPaymentLimit || self::getTestMode()) {
+        $defaultThreshold = self::getDefaultPartPaymentThreshold($customerCountry);
+
+        if ($monthlyPrice >= $defaultThreshold || self::getTestMode()) {
             $annuityPaymentMethod = (array)self::getPaymentMethodById($annuityMethod);
 
             // Customized string.
@@ -604,7 +613,7 @@ class Data
                     'currency' => get_woocommerce_currency_symbol(),
                     'monthlyPrice' => (float)$monthlyPrice,
                     'monthlyDuration' => (int)$annuityDuration,
-                    'paymentLimit' => (int)$minimumPaymentLimit,
+                    'paymentLimit' => $defaultThreshold,
                     'paymentMethod' => $annuityPaymentMethod,
                     'isTest' => self::getTestMode(),
                     'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),

@@ -435,6 +435,19 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
+                'part_payment_threshold' => [
+                    'id' => 'part_payment_threshold',
+                    'title' => __('Part payment threshold', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'type' => 'text',
+                    'desc' => __(
+                        'Minimum installment amount per month for when part payment information should be displayed. ' .
+                        'Default is 150. When set to 150, this value will be automatically adjusted to ' .
+                        '15 if country is set to FI, since EUR is used there. If any other sum is set here, that ' .
+                        'value will always be used instead of the defaults. ',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => '150',
+                ],
                 'payment_methods_settings_end' => [
                     'id' => 'payment_methods_settings_end',
                     'type' => 'sectionend',
