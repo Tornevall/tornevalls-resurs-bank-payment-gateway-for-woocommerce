@@ -4,6 +4,8 @@
     use Resursbank\Ecommerce\Service\Merchant\Model\Method;
     use ResursBank\Module\Data;
 
+    $extendView = (bool)Data::getResursOption('payment_methods_extended');
+
     _e(
         sprintf(
             'Available payment methods (Environment %s)',
@@ -44,10 +46,12 @@
     </div>
     <table width="100%" style="border: none;">
         <tr>
-            <td width="10%" class="resursMethodHead"><?php _e(
-                    'Method ID',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ) ?></td>
+            <?php if ($extendView) { ?>
+                <td width="10%" class="resursMethodHead"><?php _e(
+                        'Method ID',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ) ?></td>
+            <?php } ?>
             <td width="10%" class="resursMethodHead"><?php _e(
                     'Name/Title',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -66,10 +70,12 @@
                     'Amount Limits',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
-            <td width="10%" class="resursMethodHead"><?php _e(
-                    'Method type',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ) ?></td>
+            <?php if ($extendView) { ?>
+                <td width="10%" class="resursMethodHead"><?php _e(
+                        'Method type',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ) ?></td>
+            <?php } ?>
             <td width="10%" class="resursMethodHead"><?php _e(
                     'Customer types',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -85,17 +91,19 @@
                 $merchantMethod = esc_html(isset($methodObject->merchantMethod) ? $methodObject->merchantMethod : null);
                 $merchantMethodId = esc_html($merchantMethod instanceof Method ? $merchantMethod->getId() : ''); ?>
                 <tr>
-                    <td class="resursMethodBody">
-                        <?php
-                        echo esc_html($methodObject->id);
-                        if ((bool)$isBleedingEdge) {
-                            ?>
-                            <div style="font-size: 12px; font-style: italic;">
-                                <?php echo esc_html($merchantMethodId) ?>
-                            </div>
+                    <?php if ($extendView) { ?>
+                        <td class="resursMethodBody">
                             <?php
-                        } ?>
-                    </td>
+                            echo esc_html($methodObject->id);
+                            if ((bool)$isBleedingEdge) {
+                                ?>
+                                <div style="font-size: 12px; font-style: italic;">
+                                    <?php echo esc_html($merchantMethodId) ?>
+                                </div>
+                                <?php
+                            } ?>
+                        </td>
+                    <?php } ?>
                     <td class="resursMethodBody">
                         <?php echo esc_html($methodObject->description) ?><br>
                     </td>
@@ -126,14 +134,16 @@
                             <?php echo (float)$methodObject->minLimit ?> - <?php echo (float)$methodObject->maxLimit ?>
                         </div>
                     </td>
-                    <td class="resursMethodBody">
-                        <?php echo esc_html($methodObject->type) ?>
-                        <?php
-                        if ($methodObject->type !== $methodObject->specificType) {
-                            printf('(<i>%s</i>)', esc_html($methodObject->specificType));
-                        } ?>
-                        <br>
-                    </td>
+                    <?php if ($extendView) { ?>
+                        <td class="resursMethodBody">
+                            <?php echo esc_html($methodObject->type) ?>
+                            <?php
+                            if ($methodObject->type !== $methodObject->specificType) {
+                                printf('(<i>%s</i>)', esc_html($methodObject->specificType));
+                            } ?>
+                            <br>
+                        </td>
+                    <?php } ?>
                     <td class="resursMethodBody">
                         <?php echo esc_html(implode(', ', (array)$methodObject->customerType)); ?>
                     </td>
