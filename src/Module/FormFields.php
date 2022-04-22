@@ -448,6 +448,20 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => '150',
                 ],
+                'payment_methods_extended' => [
+                    'id' => 'payment_methods_extended',
+                    'type' => 'checkbox',
+                    'title' => __(
+                        'Extended Payment Methods View',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc_tip' => __(
+                        'Show more information about the payment methods in the payment method listview.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => 'no',
+                ],
                 'payment_methods_settings_end' => [
                     'id' => 'payment_methods_settings_end',
                     'type' => 'sectionend',
