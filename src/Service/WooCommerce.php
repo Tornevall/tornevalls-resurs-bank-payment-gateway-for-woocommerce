@@ -865,7 +865,7 @@ class WooCommerce
                 } else {
                     throw new RuntimeException(
                         'Failed to instantiate $order during callback handling. Callback not updated.',
-                        500
+                        OrderStatusHandler::HTTP_RESPONSE_GONE_NOT_OURS
                     );
                 }
             } catch (Exception $e) {
