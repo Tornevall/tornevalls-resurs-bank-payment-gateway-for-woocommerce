@@ -1517,7 +1517,7 @@ class FormFields extends WC_Settings_API
         $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
         $customerTypeByConditions = Data::getCustomerType();
 
-        if (Data::isExtendedTest() && file_exists(Data::getGatewayPath() . '/testdata.json')) {
+        if (Data::isTest() && Data::isExtendedTest() && file_exists(Data::getGatewayPath() . '/testdata.json')) {
             try {
                 $testDataFile = Data::getGatewayPath() . '/testdata.json';
                 $liveTestData = json_decode(@file_get_contents($testDataFile), true, 512);
@@ -1539,7 +1539,7 @@ class FormFields extends WC_Settings_API
                 'supported_country' => Data::isGetAddressSupported(),
                 'get_address_form' => Data::canUseGetAddressForm(),
                 'get_address_form_always' => $getAddressFormAlways,
-                'liveTestData' => $liveTestData,
+                'liveTestData' => $liveTestData ?? [],
             ]
         );
 
