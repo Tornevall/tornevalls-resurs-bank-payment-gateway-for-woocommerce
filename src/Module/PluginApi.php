@@ -161,7 +161,7 @@ class PluginApi
             'postidreference' => 'order_id_type',
             'login' => 'login',
             'password' => 'password',
-            'checkout_type' => 'checkout_type'
+            'checkout_type' => 'checkout_type',
         ];
 
         foreach ($imports as $key => $destKey) {
@@ -795,6 +795,33 @@ class PluginApi
                 'mode' => Data::getRequest('mode'),
             ]
         );
+    }
+
+    /**
+     * @since 0.0.1.6
+     */
+    public static function setMethodState()
+    {
+        $newState = false;
+        if (is_admin()) {
+            $id = preg_replace('/^rbenabled_/', '', Data::getRequest('id'));
+            $checked = Data::getTruth(Data::getRequest('checked'));
+
+            $oldSetting = Data::getPaymentMethodSetting('enabled', $id);
+            Data::setPaymentMethodSetting('enabled', $checked, $id);
+            $newSetting = Data::getPaymentMethodSetting('enabled', $id);
+
+            self::reply([
+                'newState' => $oldSetting !== $newSetting,
+                'id' => $id ?? null,
+                'checked' => $checked ?? false,
+                'setResponse' => $setResponse ?? false
+            ]);
+        } else {
+            self::reply([
+                'newState' => 'Not Allowed.'
+            ]);
+        }
     }
 
     /**

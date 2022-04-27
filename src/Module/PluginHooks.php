@@ -47,6 +47,7 @@ class PluginHooks
         add_action('rbwc_mock_callback_update_exception', [$this, 'mockCallbackUpdateException']);
         add_action('rbwc_mock_get_payment_methods_exception', [$this, 'mockGetPaymentMethodsException']);
         add_action('rbwc_mock_annuity_factor_config_exception', [$this, 'mockAnnuityFactorConfigException']);
+        add_action('rbwc_mock_get_payment_method_namespace_exception', [$this, 'mockGetPaymentMethodNamespaceException']);
         add_action('rbwc_mock_empty_price_info_html', [$this, 'mockEmptyPriceInfoHtml']);
         add_action('mock_update_callback_exception', [$this, 'mockUpdateCallbackException']);
         add_action('mock_refund_exception', [$this, 'mockRefundException']);
@@ -923,6 +924,15 @@ class PluginHooks
      * @since 0.0.1.0
      */
     public function mockGetPaymentMethodsException()
+    {
+        $this->getMockException(__FUNCTION__);
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public function mockGetPaymentMethodNamespaceException()
     {
         $this->getMockException(__FUNCTION__);
     }
