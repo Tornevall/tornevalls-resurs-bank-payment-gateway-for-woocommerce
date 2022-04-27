@@ -338,6 +338,86 @@ class Data
     }
 
     /**
+     * Check if payment method for specific credentials are enabled or disabled.
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function isPaymentMethodEnabled($paymentMethod): bool
+    {
+        return self::getPaymentMethodSetting('enabled', $paymentMethod) ?? true;
+    }
+
+    /**
+     * Resolve namespace by current environment setup (using environment_username_paymentmethod).
+     *
+     * @param $paymentMethod
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    private static function getPaymentMethodNameSpace($paymentMethod): string
+    {
+        WooCommerce::applyMock('getPaymentMethodNamespaceException');
+
+        return sprintf(
+            '%s_%s',
+            (new ResursBankAPI())->getCredentialString(),
+            $paymentMethod
+        );
+    }
+
+    /**
+     * @param string $paymentMethod
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    private static function getPaymentMethodSettings(string $paymentMethod)
+    {
+        return Data::getResursOption(
+            sprintf(
+                '%s_settings',
+                self::getPaymentMethodNameSpace($paymentMethod)
+            )
+        ) ?: [];
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @param $paymentMethod
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function setPaymentMethodSetting(string $key, $value, $paymentMethod)
+    {
+        $settings = self::getPaymentMethodSettings($paymentMethod);
+        $settings[$key] = $value;
+        return Data::setResursOption(
+            sprintf(
+                '%s_settings',
+                self::getPaymentMethodNameSpace($paymentMethod)
+            ),
+            $settings
+        );
+    }
+
+    /**
+     * @param string $key
+     * @param $paymentMethod
+     * @return mixed|null
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function getPaymentMethodSetting(string $key, $paymentMethod)
+    {
+        $settingBlock = (array)self::getPaymentMethodSettings($paymentMethod);
+
+        return $settingBlock[$key] ?? null;
+    }
+
+    /**
      * @param mixed $key
      * @param mixed $namespace
      * @param bool $getDefaults
@@ -931,6 +1011,7 @@ class Data
                 'readonly' => [],
                 'onblur' => [],
                 'onchange' => [],
+                'checked' => [],
             ],
             'h1' => [],
             'h2' => [],

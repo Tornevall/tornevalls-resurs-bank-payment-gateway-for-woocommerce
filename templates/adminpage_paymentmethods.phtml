@@ -46,6 +46,11 @@
     </div>
     <table width="100%" style="border: none;">
         <tr>
+            <td width="5%" class="resursMethodHead">
+                <?php _e(
+                    'Enabled Status',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
             <?php if ($extendView) { ?>
                 <td width="10%" class="resursMethodHead"><?php _e(
                         'Method ID',
@@ -56,7 +61,7 @@
                     'Name/Title',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
-            <td width="30%" class="resursMethodHead"><?php _e(
+            <td width="35%" class="resursMethodHead"><?php _e(
                     'Description (No HTML)',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
@@ -91,6 +96,22 @@
                 $merchantMethod = esc_html(isset($methodObject->merchantMethod) ? $methodObject->merchantMethod : null);
                 $merchantMethodId = esc_html($merchantMethod instanceof Method ? $merchantMethod->getId() : ''); ?>
                 <tr>
+                    <td class="resursMethodBody" id="td_rbenabled_<?php echo $methodObject->id ?>">
+                        <input
+                                id="rbenabled_<?php echo $methodObject->id ?>"
+                                type="checkbox"
+                                onchange="rbwcMethodState(this)"
+                            <?php
+                            try {
+                                // Mark method enabled or disabled. Skip if not configured for some reason.
+                                echo Data::isPaymentMethodEnabled($methodObject->id) ? 'checked="checked"' : '';
+                            } catch (Exception $e) {
+                                // Considered enabled on errors.
+                                echo 'checked="checked"';
+                            } ?>
+                        >
+                        <?php _e('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?>
+                    </td>
                     <?php if ($extendView) { ?>
                         <td class="resursMethodBody">
                             <?php

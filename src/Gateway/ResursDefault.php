@@ -1237,6 +1237,11 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         $customerType = Data::getCustomerType();
+        $isEnabled = Data::getPaymentMethodSetting('enabled', $this->paymentMethodInformation->id);
+
+        if (!$isEnabled) {
+            $return = false;
+        }
 
         // If this feature is not missing the method, we now know that there is chance that we're
         // located in a checkout. We will in this moment run through the min-max amount that resides

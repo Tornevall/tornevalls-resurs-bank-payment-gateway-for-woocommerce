@@ -215,6 +215,22 @@ class ResursBankAPI
     }
 
     /**
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public function getCredentialString(): string
+    {
+        $this->getResolvedCredentials();
+
+        return sprintf(
+            '%s_%s',
+            Data::isTest() ? 'test' : 'live',
+            $this->credentials['username']
+        );
+    }
+
+    /**
      * @return bool
      * @since 0.0.1.0
      */
