@@ -828,6 +828,7 @@ class WordPress
 
     /**
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getAddressFieldController()
