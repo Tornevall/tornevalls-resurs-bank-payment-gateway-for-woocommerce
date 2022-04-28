@@ -5,7 +5,9 @@ Github references should be included for all releases.
 
 # 0.0.1.6
 
+* [RWC-353](https://tracker.tornevall.net/browse/RWC-353) - Resurs Bank Deprecated imports breaks annuity factors
 * [RWC-240](https://tracker.tornevall.net/browse/RWC-240) - Friendly feature: Import credentials based on RWC-238 should import credentials based on environment
+* [RWC-320](https://tracker.tornevall.net/browse/RWC-320) - Partpayment threshold
 * [RWC-332](https://tracker.tornevall.net/browse/RWC-332) - Create snippet for rbwc_get_custom_form_fields and those who are used to an old format ([#85](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/85))
 * [RWC-335](https://tracker.tornevall.net/browse/RWC-335) - Fix support page with extra info
 * [RWC-336](https://tracker.tornevall.net/browse/RWC-336) - Slug detection support
@@ -14,6 +16,15 @@ Github references should be included for all releases.
 * [RWC-340](https://tracker.tornevall.net/browse/RWC-340) - Contact information in support section
 * [RWC-341](https://tracker.tornevall.net/browse/RWC-341) - Check reaction from support page on disabled features like openssl and curl
 * [RWC-343](https://tracker.tornevall.net/browse/RWC-343) - Remove the v2.2 disabler option from plugin
+* [RWC-345](https://tracker.tornevall.net/browse/RWC-345) - Allow instant import
+* [RWC-347](https://tracker.tornevall.net/browse/RWC-347) - Civic by type helper
+* [RWC-348](https://tracker.tornevall.net/browse/RWC-348) - Remove fee
+* [RWC-349](https://tracker.tornevall.net/browse/RWC-349) - Show extra data in methods (wp-admin) on demand instead of always
+* [RWC-352](https://tracker.tornevall.net/browse/RWC-352) - Payment methods view setting for firstpage is removable
+* [RWC-356](https://tracker.tornevall.net/browse/RWC-356) - Action resurs_bank_order_status_update for payment_complete --- newly implemented in v2, and will still be needed in next version
+* [RWC-359](https://tracker.tornevall.net/browse/RWC-359) - Log callbacks with full url
+* [RWC-364](https://tracker.tornevall.net/browse/RWC-364) - Make sure payment methods CAN be enabled/disabled on fly, at least for debugging purposes
+* [RWC-376](https://tracker.tornevall.net/browse/RWC-376) - If formfield data is empty or we are in test mode, disable liveTestData
 
 # 0.0.1.5 + 1.0.0
 
