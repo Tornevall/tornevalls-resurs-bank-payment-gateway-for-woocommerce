@@ -207,7 +207,7 @@ class Data
      * @var array $fileImageExtensions
      * @since 0.0.1.0
      */
-    private static $fileImageExtensions = ['jpg', 'gif', 'png'];
+    private static $fileImageExtensions = ['jpg', 'gif', 'png', 'svg'];
 
     /**
      * @var array $formFieldDefaults
