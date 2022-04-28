@@ -3,6 +3,9 @@
 namespace ResursBank\ResursBank;
 
 use ResursBank\Module\Data;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
+use function is_array;
 
 /**
  * Suggested class to handle simpler actions from, if something has to be changed.
@@ -21,7 +24,7 @@ class ResursPlugin
      * @var string
      * @since 0.0.1.6
      */
-    const RESURS_BANK_PREFIX = 'resursbank';
+    public const RESURS_BANK_PREFIX = 'resursbank';
 
     /**
      * Set this to true, to make a permanent for the official Resurs Bank release.
@@ -52,6 +55,36 @@ class ResursPlugin
         add_filter('rbwc_payment_methods_on_first_page', [$this, 'paymentMethodsOnFirstPage']);
         add_filter('rbwc_get_custom_form_fields', [$this, 'getCustomFormFields']);
         add_filter('rbwc_get_plugin_prefix', [$this, 'getPluginPrefix']);
+        add_filter('rbwc_get_obfuscate_lookup_keys', [$this, 'getObfuscateLookupKeys']);
+    }
+
+    /**
+     * @param $currentObfuscateArray
+     * @return mixed
+     * @since 0.0.1.6
+     */
+    public function getObfuscateLookupKeys($currentObfuscateArray): array
+    {
+        if (is_array($currentObfuscateArray)) {
+            $currentObfuscateArray = array_merge($currentObfuscateArray, [
+                'fullName',
+                'firstName',
+                'lastName',
+                'addressRow1',
+                'addressRow2',
+                'postalArea',
+                'postalCode',
+            ]);
+
+            $extraFormFields = WordPress::getAddressFieldController();
+            if (is_array($extraFormFields)) {
+                foreach ($extraFormFields as $fieldKey => $fieldValue) {
+                    $currentObfuscateArray[] = $fieldKey;
+                }
+            }
+        }
+
+        return $currentObfuscateArray;
     }
 
     /**

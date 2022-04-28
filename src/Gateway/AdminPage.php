@@ -37,7 +37,7 @@ class AdminPage extends WC_Settings_Page
     public function __construct()
     {
         $this->id = Data::getPrefix('admin');
-        $this->label = 'Resurs Bank';
+        $this->label = 'Resurs';
 
         // In case we need it in future.
         /** @noinspection HtmlUnknownTarget */

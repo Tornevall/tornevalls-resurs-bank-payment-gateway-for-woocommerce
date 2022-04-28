@@ -2727,29 +2727,34 @@ class Data
      * @return array
      * @since 0.0.1.1
      */
-    public static function getObfuscatedData($obfuscateThis): array
+    public static function getObfuscatedData($obfuscateThis, string $keyStart = 'rco_customer'): array
     {
         if (!Data::getResursOption('must_obfuscate_logged_personal_data')) {
             return $obfuscateThis;
         }
         $stringHandler = new Strings();
-        if (isset($obfuscateThis['rco_customer'])) {
-            $rcoCustomer = $obfuscateThis['rco_customer'];
-            $lookFor = ['billingAddress', 'deliveryAddress', 'phone', 'email'];
+        if (isset($obfuscateThis[$keyStart])) {
+            $obfuscationObject = $obfuscateThis[$keyStart];
+            $lookFor = WordPress::applyFilters('getObfuscateLookupKeys', [
+                'billingAddress',
+                'deliveryAddress',
+                'phone',
+                'email'
+            ]);
             foreach ($lookFor as $key) {
-                if (isset($rcoCustomer[$key])) {
-                    if (is_array($rcoCustomer[$key])) {
-                        foreach ($rcoCustomer[$key] as $item => $value) {
-                            $obfuscateThis['rco_customer'][$key][$item] = htmlentities($stringHandler->getObfuscatedStringFull(
+                if (isset($obfuscationObject[$key])) {
+                    if (is_array($obfuscationObject[$key])) {
+                        foreach ($obfuscationObject[$key] as $item => $value) {
+                            $obfuscateThis[$keyStart][$key][$item] = htmlentities($stringHandler->getObfuscatedStringFull(
                                 $value,
                                 2,
                                 0
                             ));
                         }
-                    } elseif (is_string($rcoCustomer[$key])) {
-                        $obfuscateThis['rco_customer'][$key] = htmlentities(
+                    } elseif (is_string($obfuscationObject[$key])) {
+                        $obfuscateThis[$keyStart][$key] = htmlentities(
                             $stringHandler->getObfuscatedStringFull(
-                                $rcoCustomer[$key],
+                                $obfuscationObject[$key],
                                 2,
                                 0
                             )

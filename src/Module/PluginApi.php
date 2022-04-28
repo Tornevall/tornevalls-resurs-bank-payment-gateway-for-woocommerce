@@ -71,16 +71,8 @@ class PluginApi
         );
 
         $returnedValue = WordPress::applyFilters(self::getAction(), null, $_REQUEST);
+
         if (!empty($returnedValue)) {
-            Data::canLog(
-                Data::CAN_LOG_BACKEND,
-                sprintf(
-                    'Backend: %s (%s), params %s',
-                    __FUNCTION__,
-                    self::getAction(),
-                    print_r($returnedValue, true)
-                )
-            );
             self::reply($returnedValue);
         }
     }
@@ -108,8 +100,9 @@ class PluginApi
     }
 
     /**
-     * @param $out
+     * @param null $out
      * @param bool $dieInstantly Set to exit after reply if true.
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function reply($out = null, $dieInstantly = true)
@@ -125,6 +118,21 @@ class PluginApi
             }
             $out['ajax_success'] = $success;
         }
+
+        $out['action'] = self::getAction();
+
+        Data::canLog(
+            Data::CAN_LOG_BACKEND,
+            sprintf(
+                'Backend Reply: %s (%s), params %s',
+                __FUNCTION__,
+                self::getAction(),
+                print_r(self::getAction() !== 'getAddress' ? $out : Data::getObfuscatedData(
+                    $out,
+                    'identificationResponse'
+                ), true)
+            )
+        );
 
         header('Content-type: application/json; charset=utf-8', true, 200);
         // Can not sanitize output as the browser is strictly typed to specific content.
@@ -802,7 +810,6 @@ class PluginApi
      */
     public static function setMethodState()
     {
-        $newState = false;
         if (is_admin()) {
             $id = preg_replace('/^rbenabled_/', '', Data::getRequest('id'));
             $checked = Data::getTruth(Data::getRequest('checked'));
@@ -811,15 +818,27 @@ class PluginApi
             Data::setPaymentMethodSetting('enabled', $checked, $id);
             $newSetting = Data::getPaymentMethodSetting('enabled', $id);
 
+            // This is vital information that should always be traceable.
+            Data::setLogInfo(
+                sprintf(
+                    __(
+                        'Payment method %s has been %s.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    $id,
+                    $newSetting ? __('enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') :
+                        __('disabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                )
+            );
+
             self::reply([
                 'newState' => $oldSetting !== $newSetting,
                 'id' => $id ?? null,
                 'checked' => $checked ?? false,
-                'setResponse' => $setResponse ?? false
             ]);
         } else {
             self::reply([
-                'newState' => 'Not Allowed.'
+                'newState' => 'Not Allowed.',
             ]);
         }
     }

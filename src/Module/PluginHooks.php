@@ -34,25 +34,35 @@ class PluginHooks
     public function __construct()
     {
         $this->getFilters();
+        $this->getActions();
     }
 
+    /**
+     * @since 0.0.1.0
+     */
     private function getFilters()
     {
         add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
         add_filter('rbwc_get_payment_method_icon', [$this, 'getMethodIconByContent'], 10, 2);
         add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
+        add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
+        add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
+    }
+
+    /**
+     * @since 0.0.1.6
+     */
+    private function getActions()
+    {
         add_action('rbwc_mock_update_payment_reference_failure', [$this, 'mockUpdatePaymentFailure']);
         add_action('rbwc_mock_create_iframe_exception', [$this, 'mockCreateIframeException']);
         add_action('rbwc_mock_callback_update_exception', [$this, 'mockCallbackUpdateException']);
         add_action('rbwc_mock_get_payment_methods_exception', [$this, 'mockGetPaymentMethodsException']);
         add_action('rbwc_mock_annuity_factor_config_exception', [$this, 'mockAnnuityFactorConfigException']);
-        add_action('rbwc_mock_get_payment_method_namespace_exception', [$this, 'mockGetPaymentMethodNamespaceException']);
         add_action('rbwc_mock_empty_price_info_html', [$this, 'mockEmptyPriceInfoHtml']);
         add_action('mock_update_callback_exception', [$this, 'mockUpdateCallbackException']);
         add_action('mock_refund_exception', [$this, 'mockRefundException']);
-        add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
-        add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
         add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
         add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
         add_action('woocommerce_order_refunded', [$this, 'refundResursOrder'], 10, 2);
@@ -61,6 +71,41 @@ class PluginHooks
         add_action('rbwc_get_custom_form_fields', [$this, 'getCustomFormFields'], 10, 2);
         add_action('rbwc_get_support_address_list', [$this, 'getSupportAddressList'], 10, 2);
         add_action('rbwc_get_switch_to_customer_type_string', [$this, 'getSwitchToCustomerTypeString'], 10, 2);
+        add_action('rbwc_update_order_status_event', [$this, 'updateOrderStatusEvent'], 10, 2);
+        add_action(
+            'rbwc_mock_get_payment_method_namespace_exception',
+            [$this, 'mockGetPaymentMethodNamespaceException']
+        );
+    }
+
+    /**
+     * @param int $orderId
+     * @param string $status
+     * @since 0.0.1.6
+     */
+    public function updateOrderStatusEvent(int $orderId, string $status): void
+    {
+        // Vital information that should always be logged to confirm the action.
+        Data::setLogInfo(
+            sprintf(
+                __(
+                    'Passed %d through function %s with order status "%s" for some extra handling.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                $orderId,
+                __FUNCTION__,
+                $status
+            )
+        );
+
+        // Copy & Paste.
+        $currentOrder = new WC_Order($orderId);
+        if (($currentOrder instanceof WC_Order) && $status === 'completed') {
+            Data::setLogInfo(
+                sprintf('Order %d is completed - executing payment_complete().', $orderId)
+            );
+            $currentOrder->payment_complete();
+        }
     }
 
     /**
@@ -794,6 +839,10 @@ class PluginHooks
                     $status,
                     WooCommerce::getOrderNotePrefixed($notice)
                 );
+                // v2.x deprecated action.
+                do_action('resurs_bank_order_status_update', $properOrder->get_id(), $status);
+                // Action for all new plugin versions.
+                WordPress::doAction('updateOrderStatusEvent', $properOrder->get_id(), $status);
                 Data::canLog(
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf(
