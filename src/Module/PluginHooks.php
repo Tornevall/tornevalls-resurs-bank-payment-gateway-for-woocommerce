@@ -1065,7 +1065,7 @@ class PluginHooks
                 // Shorten up credit cards.
                 $itemName = 'pspcard';
             }
-            $byItem = sprintf('method_%s.png', $itemName);
+            $byItem = sprintf('method_%s', $itemName);
 
             $imageByMethodContent = Data::getImage($byItem);
             if ($imageByMethodContent) {

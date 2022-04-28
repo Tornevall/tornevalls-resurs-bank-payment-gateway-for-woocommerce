@@ -235,8 +235,10 @@ class Data
             $imageName
         );
 
+        $hasExtension = (bool)preg_match('/\./', $imageName);
+
         // Match allowed file extensions and return if it exists within the file name.
-        if ((bool)preg_match(
+        if ($hasExtension && (bool)preg_match(
             sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
             $imageFile
         )) {
@@ -245,13 +247,15 @@ class Data
                 '$1',
                 $imageFile
             );
-        } else {
-            return null;
         }
 
         foreach (self::$fileImageExtensions as $extension) {
             if (file_exists($imageFile . '.' . $extension)) {
                 $imageFileName = $imageFile . '.' . $extension;
+                if (false === strpos($imageName, '.')) {
+                    $imageName .= '.' . $extension;
+                }
+                break;
             }
         }
 
@@ -2739,7 +2743,7 @@ class Data
                 'billingAddress',
                 'deliveryAddress',
                 'phone',
-                'email'
+                'email',
             ]);
             foreach ($lookFor as $key) {
                 if (isset($obfuscationObject[$key])) {

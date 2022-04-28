@@ -1239,7 +1239,8 @@ class ResursDefault extends WC_Payment_Gateway
         $customerType = Data::getCustomerType();
         $isEnabled = Data::getPaymentMethodSetting('enabled', $this->paymentMethodInformation->id);
 
-        if (!$isEnabled) {
+        // Nulled enabled states are always considered enabled as noone has edited them yet.
+        if (!$isEnabled && $isEnabled !== null) {
             $return = false;
         }
 
