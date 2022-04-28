@@ -18,7 +18,7 @@ class OrderStatus
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_RESPONSE_DIGEST_IS_WRONG = 406;
+    public const HTTP_RESPONSE_DIGEST_IS_WRONG = 406;
 
     /**
      * HTTP Response Code for "order not found".
@@ -27,7 +27,7 @@ class OrderStatus
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_RESPONSE_GONE_NOT_OURS = 410;
+    public const HTTP_RESPONSE_GONE_NOT_OURS = 410;
 
     /**
      * HTTP Response Code for "order not found".
@@ -37,7 +37,7 @@ class OrderStatus
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED = 202;
+    public const HTTP_RESPONSE_NOT_OURS_BUT_ACCEPTED = 202;
 
     /**
      * HTTP Response Code for a successfully handled callback.
@@ -47,7 +47,7 @@ class OrderStatus
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_RESPONSE_OK = 204;
+    public const HTTP_RESPONSE_OK = 204;
 
     /**
      * HTTP Response Code for test callbacks. 209 is said to not be used by anyone for the moment.
@@ -55,7 +55,7 @@ class OrderStatus
      * @link https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
      * @since 0.0.1.0
      */
-    const HTTP_RESPONSE_TEST_OK = 204;
+    public const HTTP_RESPONSE_TEST_OK = 204;
 
     /**
      * What we handle through static calls.
