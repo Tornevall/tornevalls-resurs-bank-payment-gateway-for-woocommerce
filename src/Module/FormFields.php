@@ -1469,6 +1469,24 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => 'no',
                 ],
+                'mock_get_payment_method_namespace_exception' => [
+                    'id' => 'mock_get_payment_method_namespace_exception',
+                    'title' => __(
+                        'Throw getPaymentMethodNamespace exception',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'type' => 'checkbox',
+                    'desc' => __(
+                        'Enable.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc_tip' => __(
+                        'Throw an exception on getPaymentMethodNamespace checks (used when checking whether a ' .
+                        'payment method is enabled or not, and is based on environment and username.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => 'no',
+                ],
                 'mocking_section_end' => [
                     'type' => 'sectionend',
                 ],

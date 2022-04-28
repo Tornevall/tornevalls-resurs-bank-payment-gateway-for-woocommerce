@@ -81,6 +81,7 @@ class WordPress
             'update_payment_method_description',
             'update_payment_method_fee',
             'resurs_bank_rco_synchronize',
+            'set_method_state',
         ];
 
         foreach ($actionList as $action) {
@@ -694,6 +695,10 @@ class WordPress
         );
         $return['cleanup_aborted'] = __(
             'Plugin configuration reset has been cancelled.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+        $return['method_state_change_failure'] = __(
+            'Failed change payment method state.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
 

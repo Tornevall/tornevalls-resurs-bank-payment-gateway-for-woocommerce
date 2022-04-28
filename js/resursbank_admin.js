@@ -28,7 +28,8 @@ function getResursAdminFields() {
             '#trbwc_admin_password_production',
             'select[id*=r_annuity_select]',
             'input[id*=method_description]',
-            'input[id*=method_fee]'
+            'input[id*=method_fee]',
+            'input[id^=rbenabled_]'
         ]
     );
     getResursEnvironmentFields();
@@ -74,7 +75,7 @@ function getResursConfigPopupPrevention(elements) {
     for (var i = 0; i < elements.length; i++) {
         $rQuery(elements[i]).click(function (e) {
             window.onbeforeunload = null;
-            e.preventDefault();
+            //e.preventDefault();
             getResursEnvironmentFields();
         });
         $rQuery(elements[i]).blur(function (e) {
@@ -818,4 +819,42 @@ function setResursAnnuityClick(o, id, action) {
 function resursToggleMetaData() {
     $rQuery('.resurs_order_meta_container').toggle('medium');
     $rQuery('#resurs_meta_expand_button').toggle();
+}
+
+/**
+ * Set state on payment method live.
+ *
+ * @param o
+ * @since 0.0.1.6
+ */
+function rbwcMethodState(o) {
+    $rQuery('#td_' + o.id).css('background-color', '#7bbbff');
+
+    getResursAjaxify(
+        'get',
+        'resursbank_set_method_state',
+        {
+            'n': '',
+            'id': o.id,
+            'value': o.value,
+            'checked': o.checked
+        },
+        function (data) {
+            if (typeof data['newState'] !== 'undefined') {
+                if (data['newState'] !== true) {
+                    $rQuery('#td_' + o.id).css('background-color', '#f59e9e');
+                    if (o.checked === true) {
+                        $rQuery('#' + o.id).prop('checked', false);
+                    } else {
+                        $rQuery('#' + o.id).prop('checked', true);
+                    }
+                    alert(getResursLocalization('method_state_change_failure'));
+                } else {
+                    $rQuery('#td_' + o.id).css('background-color', '#99e79b');
+                }
+            } else {
+                alert(getResursLocalization('method_state_change_failure'));
+            }
+        }
+    );
 }
