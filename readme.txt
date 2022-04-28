@@ -149,6 +149,8 @@ Active/open issues can be found [here](https://tracker.tornevall.net/projects/RW
 = 0.0.1.6 =
 
 * [RWC-353](https://tracker.tornevall.net/browse/RWC-353) - Resurs Bank Deprecated imports breaks annuity factors
+* [RWC-367](https://tracker.tornevall.net/browse/RWC-367) - CustomerType from session can be empty on "first time visits"
+* [RWC-382](https://tracker.tornevall.net/browse/RWC-382) - Enabling/Disabling method separately can be considered disabled if value is null
 * [RWC-240](https://tracker.tornevall.net/browse/RWC-240) - Friendly feature: Import credentials based on RWC-238 should import credentials based on environment
 * [RWC-320](https://tracker.tornevall.net/browse/RWC-320) - Partpayment threshold
 * [RWC-332](https://tracker.tornevall.net/browse/RWC-332) - Create snippet for rbwc_get_custom_form_fields and those who are used to an old format ([#85](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/85))
@@ -160,6 +162,7 @@ Active/open issues can be found [here](https://tracker.tornevall.net/projects/RW
 * [RWC-341](https://tracker.tornevall.net/browse/RWC-341) - Check reaction from support page on disabled features like openssl and curl
 * [RWC-343](https://tracker.tornevall.net/browse/RWC-343) - Remove the v2.2 disabler option from plugin
 * [RWC-345](https://tracker.tornevall.net/browse/RWC-345) - Allow instant import
+* [RWC-346](https://tracker.tornevall.net/browse/RWC-346) - Importing credentials for production is required for production based environments?
 * [RWC-347](https://tracker.tornevall.net/browse/RWC-347) - Civic by type helper
 * [RWC-348](https://tracker.tornevall.net/browse/RWC-348) - Remove fee
 * [RWC-349](https://tracker.tornevall.net/browse/RWC-349) - Show extra data in methods (wp-admin) on demand instead of always
@@ -167,7 +170,9 @@ Active/open issues can be found [here](https://tracker.tornevall.net/projects/RW
 * [RWC-356](https://tracker.tornevall.net/browse/RWC-356) - Action resurs_bank_order_status_update for payment_complete --- newly implemented in v2, and will still be needed in next version
 * [RWC-359](https://tracker.tornevall.net/browse/RWC-359) - Log callbacks with full url
 * [RWC-364](https://tracker.tornevall.net/browse/RWC-364) - Make sure payment methods CAN be enabled/disabled on fly, at least for debugging purposes
+* [RWC-368](https://tracker.tornevall.net/browse/RWC-368) - Automatically update mismatching callback urls
 * [RWC-376](https://tracker.tornevall.net/browse/RWC-376) - If formfield data is empty or we are in test mode, disable liveTestData
+* [RWC-381](https://tracker.tornevall.net/browse/RWC-381) - Rebranding
 
 = 0.0.1.5 =
 

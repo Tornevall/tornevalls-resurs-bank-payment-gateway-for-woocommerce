@@ -1,11 +1,13 @@
-# CHANGELOG -- *trbwc series*.
+# CHANGELOG -- *trbwc series* #
 
 _0.0.1.0 is the first release candidate of what's planned to become 1.0.0._
 Github references should be included for all releases.
 
-# 0.0.1.6
+# 0.0.1.6 #
 
 * [RWC-353](https://tracker.tornevall.net/browse/RWC-353) - Resurs Bank Deprecated imports breaks annuity factors
+* [RWC-367](https://tracker.tornevall.net/browse/RWC-367) - CustomerType from session can be empty on "first time visits"
+* [RWC-382](https://tracker.tornevall.net/browse/RWC-382) - Enabling/Disabling method separately can be considered disabled if value is null
 * [RWC-240](https://tracker.tornevall.net/browse/RWC-240) - Friendly feature: Import credentials based on RWC-238 should import credentials based on environment
 * [RWC-320](https://tracker.tornevall.net/browse/RWC-320) - Partpayment threshold
 * [RWC-332](https://tracker.tornevall.net/browse/RWC-332) - Create snippet for rbwc_get_custom_form_fields and those who are used to an old format ([#85](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/85))
@@ -17,6 +19,7 @@ Github references should be included for all releases.
 * [RWC-341](https://tracker.tornevall.net/browse/RWC-341) - Check reaction from support page on disabled features like openssl and curl
 * [RWC-343](https://tracker.tornevall.net/browse/RWC-343) - Remove the v2.2 disabler option from plugin
 * [RWC-345](https://tracker.tornevall.net/browse/RWC-345) - Allow instant import
+* [RWC-346](https://tracker.tornevall.net/browse/RWC-346) - Importing credentials for production is required for production based environments?
 * [RWC-347](https://tracker.tornevall.net/browse/RWC-347) - Civic by type helper
 * [RWC-348](https://tracker.tornevall.net/browse/RWC-348) - Remove fee
 * [RWC-349](https://tracker.tornevall.net/browse/RWC-349) - Show extra data in methods (wp-admin) on demand instead of always
@@ -24,16 +27,18 @@ Github references should be included for all releases.
 * [RWC-356](https://tracker.tornevall.net/browse/RWC-356) - Action resurs_bank_order_status_update for payment_complete --- newly implemented in v2, and will still be needed in next version
 * [RWC-359](https://tracker.tornevall.net/browse/RWC-359) - Log callbacks with full url
 * [RWC-364](https://tracker.tornevall.net/browse/RWC-364) - Make sure payment methods CAN be enabled/disabled on fly, at least for debugging purposes
+* [RWC-368](https://tracker.tornevall.net/browse/RWC-368) - Automatically update mismatching callback urls
 * [RWC-376](https://tracker.tornevall.net/browse/RWC-376) - If formfield data is empty or we are in test mode, disable liveTestData
+* [RWC-381](https://tracker.tornevall.net/browse/RWC-381) - Rebranding
 
-# 0.0.1.5 + 1.0.0
+# 0.0.1.5 + 1.0.0 #
 
 * [RWC-76](https://tracker.tornevall.net/browse/RWC-76) - Support fees in orders
 * [RWC-318](https://tracker.tornevall.net/browse/RWC-318) - Tax setting when nothing else is applicable
 * [RWC-330](https://tracker.tornevall.net/browse/RWC-330) - Internal payment method titles/description
 * [RWC-331](https://tracker.tornevall.net/browse/RWC-331) - Part payment in checkout
 
-# 0.0.1.4 + 1.0.0
+# 0.0.1.4 + 1.0.0 #
 
 * [RWC-315](https://tracker.tornevall.net/browse/RWC-315) - Bug: Logging obfuscated data causes log view unviewable
 * [RWC-316](https://tracker.tornevall.net/browse/RWC-316) - Bug: get_cost_of_purchase default html view template includes wp_head which causes problems on sanitation
@@ -45,16 +50,16 @@ Github references should be included for all releases.
 * [RWC-324](https://tracker.tornevall.net/browse/RWC-324) - Task: Bug-ish in WooCommerce 6.2.0 causes our admin-layout to break
 * [RWC-325](https://tracker.tornevall.net/browse/RWC-325) - Task: Check expected versions before allowing complete run
 
-# 0.0.1.3 + 1.0.0
+# 0.0.1.3 + 1.0.0 #
 
 * Spelling corrections, translations, etc.
 
-# 0.0.1.2 + 1.0.0
+# 0.0.1.2 + 1.0.0 #
 
 * [RWC-298](https://tracker.tornevall.net/browse/RWC-298) - Extended test mode.
 * Content information, readme's, assets and other updates.
 
-# 0.0.1.1 + 1.0.0
+# 0.0.1.1 + 1.0.0 #
 
 * [RWC-299](https://tracker.tornevall.net/browse/RWC-299) - Discount handling and buttons on zero orders (adjust)
 * [RWC-306](https://tracker.tornevall.net/browse/RWC-306) - Callbacks not properly fetched due to how we handle parameters
@@ -65,7 +70,7 @@ Github references should be included for all releases.
 * [RWC-309](https://tracker.tornevall.net/browse/RWC-309) - Ip control section in support section
 * [RWC-310](https://tracker.tornevall.net/browse/RWC-310) - Logging customer events masked
 
-# 0.0.1.0 + 1.0.0
+# 0.0.1.0 + 1.0.0 #
 
 **Milestone/Epic -- Release Candidate 1**
 
