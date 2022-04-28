@@ -175,7 +175,22 @@ class PluginApi
         foreach ($imports as $key => $destKey) {
             $oldValue = Data::getResursOptionDeprecated($key);
 
+            // Below: Selectively choosing credentials based on the current environment.
             switch ($key) {
+                case 'login':
+                    if (Data::isTest()) {
+                        Data::setResursOption($destKey, $oldValue);
+                    } else {
+                        Data::setResursOption('login_production', $oldValue);
+                    }
+                    break;
+                case 'password':
+                    if (Data::isTest()) {
+                        Data::setResursOption($destKey, $oldValue);
+                    } else {
+                        Data::setResursOption('password_production', $oldValue);
+                    }
+                    break;
                 case 'postidreference':
                     // if postidreference is set to true, that matches with the 'postid' in the new version.
                     Data::setResursOption($destKey, (bool)$oldValue ? 'postid' : 'ecom');
