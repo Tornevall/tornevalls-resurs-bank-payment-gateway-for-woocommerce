@@ -2,6 +2,7 @@
 
 namespace ResursBank\ResursBank;
 
+use Exception;
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
@@ -61,6 +62,7 @@ class ResursPlugin
     /**
      * @param $currentObfuscateArray
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.6
      */
     public function getObfuscateLookupKeys($currentObfuscateArray): array
@@ -130,6 +132,17 @@ class ResursPlugin
     private function isEnforcedPaymentMethodsTab(): bool
     {
         return $this->canUseFeature() ? $this->forcePaymentMethodsToFirstTab : false;
+    }
+
+    /**
+     * Resurs has its own codebase. This feature will return positive if we're there.
+     *
+     * @return bool
+     * @since 0.0.1.7
+     */
+    public static function isResursCodeBase(): bool
+    {
+        return WooCommerce::getBaseName() === 'resurs-bank-payment-gateway-for-woocommerce';
     }
 
     /**
