@@ -11,6 +11,7 @@ use Resursbank\Ecommerce\Service\Merchant\Model\Method;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use stdClass;
+use TorneLIB\IO\Data\Arrays;
 use WC_Checkout;
 use WC_Settings_API;
 use function count;
@@ -961,6 +962,32 @@ class FormFields extends WC_Settings_API
             ],
         ];
 
+        $hasOldSettings = get_option('woocommerce_resurs-bank_settings');
+        if (is_array($hasOldSettings) && isset($hasOldSettings['enabled'])) {
+            $array = new Arrays();
+            $formFields['advanced'] = $array->moveArrayAfter(
+                $formFields['advanced'],
+                [
+                    'type' => 'button',
+                    'action' => 'button',
+                    'title' => __(
+                        'Clean up prior version settings',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __(
+                        'Removes all traces of resurs-plugin v2.2 from the database.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'custom_attributes' => [
+                        'onclick' => 'rbwcResetVersion22()',
+                    ],
+                ],
+                'the_reset_button',
+                'reset_former_plugin_settings'
+            );
+        }
+
+
         $formFields = WordPress::applyFilters('getCustomFormFields', $formFields, $section);
 
         if ($section === 'all') {
@@ -1026,6 +1053,7 @@ class FormFields extends WC_Settings_API
             Data::getPrefix('admin_callbacks_button'),
             Data::getPrefix('admin_trigger_callback_button'),
             Data::getPrefix('admin_the_reset_button'),
+            Data::getPrefix('admin_reset_former_plugin_settings'),
         ];
 
         if (isset($formData['id']) && in_array($formData['id'], $allowedFormData, true)) {
@@ -1034,6 +1062,7 @@ class FormFields extends WC_Settings_API
             $formArray['custom_attributes'] = $this->get_custom_attribute_html($formData);
             $formArray['columns'] = [
                 'the_reset_button' => true,
+                'reset_former_plugin_settings' => true
             ];
             $formArray['short_id'] = preg_replace(sprintf('/%s_admin_/', Data::getPrefix()), '', $formArray['id']);
             echo Data::getEscapedHtml(

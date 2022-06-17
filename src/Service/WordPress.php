@@ -78,6 +78,7 @@ class WordPress
             'get_cost_of_purchase',
             'get_network_lookup',
             'reset_plugin_settings',
+            'reset_old_plugin_settings',
             'update_payment_method_description',
             'update_payment_method_fee',
             'resurs_bank_rco_synchronize',
@@ -689,6 +690,10 @@ class WordPress
             'prior order data if they exist encrypted. Are you sure?',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
+        $return['old_cleanup_warning'] = __(
+            'This will remove all v2.2-based settings from the database. Are you sure?',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
         $return['cleanup_reload'] = __(
             'Settings has been restored to default values. You may now reconfigure this plugin.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -697,8 +702,16 @@ class WordPress
             'Plugin configuration reset failed. You may want to reload the page and try again.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
+        $return['old_cleanup_failed'] = __(
+            'Cleanup of v2.2 data failed. You may want to reload the page and try again.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
         $return['cleanup_aborted'] = __(
             'Plugin configuration reset has been cancelled.',
+            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        );
+        $return['old_cleanup_aborted'] = __(
+            'Cleanup of v2.2 data aborted.',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['method_state_change_failure'] = __(

@@ -372,6 +372,35 @@ function rbwcResetThisPlugin() {
 }
 
 /**
+ * Plugin defaults restoration. Dual checks for nonces, is_admin, ensuring this can't be sent into the system
+ * by anonymous forces.
+ * @since 0.0.1.7
+ */
+function rbwcResetVersion22() {
+    if (confirm(getResursLocalization('old_cleanup_warning'))) {
+        getResursAjaxify(
+            'post',
+            'resursbank_reset_old_plugin_settings',
+            {
+                'n': true
+            },
+            function (response) {
+                if (typeof response.finished !== 'undefined') {
+                    document.location.reload();
+                } else {
+                    alert(getResursLocalization('old_cleanup_failed'));
+                }
+            },
+            function () {
+                alert(getResursLocalization('old_cleanup_failed'));
+            }
+        );
+    } else {
+        alert(getResursLocalization('old_cleanup_aborted'));
+    }
+}
+
+/**
  * Update payment method description.
  * @param o
  * @since 0.0.1.5
