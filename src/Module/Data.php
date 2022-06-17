@@ -1977,6 +1977,10 @@ class Data
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ) => esc_html(self::getCurrentVersion()),
             __(
+                'Internal Release Prefix',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            ) => esc_html(self::getPrefix()),
+            __(
                 'WooCommerce',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ) => sprintf(
