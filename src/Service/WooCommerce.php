@@ -173,7 +173,15 @@ class WooCommerce
      */
     private static function getMethodsByType($type, $returnAs = 'bool')
     {
-        $storedMethods = ResursBankAPI::getPaymentMethods(true);
+        try {
+            $storedMethods = ResursBankAPI::getPaymentMethods(true);
+        } catch (Exception $e) {
+            if ($e->getCode() === ResursBankAPI::UNSET_CREDENTIALS_EXCEPTION) {
+                $storedMethods = [];
+            } else {
+                throw $e;
+            }
+        }
         $returnBool = false;
 
         $paymentMethodList = [];
