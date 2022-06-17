@@ -1133,11 +1133,11 @@ class PluginApi
     public static function getOptionsControl($option, $old, $new)
     {
         $actOn = [
-            sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getPaymentMethods'],
-            sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
-            sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
-            sprintf('%s_admin_login_production', Data::getPrefix()) => ['getNewCallbacks'],
-            sprintf('%s_admin_password_production', Data::getPrefix()) => ['getPaymentMethods'],
+            sprintf('%s_admin_environment', Data::getPrefix(null, true)) => ['getNewCallbacks', 'getPaymentMethods'],
+            sprintf('%s_admin_login', Data::getPrefix(null, true)) => ['getNewCallbacks'],
+            sprintf('%s_admin_password', Data::getPrefix(null, true)) => ['getPaymentMethods'],
+            sprintf('%s_admin_login_production', Data::getPrefix(null, true)) => ['getNewCallbacks'],
+            sprintf('%s_admin_password_production', Data::getPrefix(null, true)) => ['getPaymentMethods'],
         ];
         if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
             foreach ($actOn[$option] as $execFunction) {

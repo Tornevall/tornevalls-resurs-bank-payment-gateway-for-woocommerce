@@ -620,6 +620,7 @@ class WordPress
     private static function getLocalizationDataAdmin($return)
     {
         global $current_tab;
+        $return['prefix'] = Data::getPrefix();
         $return['noncify'] = self::getNonce('admin');
         $return['environment'] = ResursBankAPI::getEnvironment();
         $return['wsdl'] = ResursBankAPI::getWsdlMode();

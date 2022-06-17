@@ -1064,7 +1064,7 @@ class FormFields extends WC_Settings_API
                 'the_reset_button' => true,
                 'reset_former_plugin_settings' => true
             ];
-            $formArray['short_id'] = preg_replace(sprintf('/%s_admin_/', Data::getPrefix()), '', $formArray['id']);
+            $formArray['short_id'] = preg_replace(sprintf('/%s_admin_/', Data::getPrefix(null, true)), '', $formArray['id']);
             echo Data::getEscapedHtml(
                 Data::getGenericClass()->getTemplate('adminpage_button', $formArray)
             );

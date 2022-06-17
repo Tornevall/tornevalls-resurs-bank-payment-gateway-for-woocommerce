@@ -13,6 +13,7 @@ var resursCallbackTestHandle;
 var resursCallbackReceiveSuccess = false;
 var resursEnvironment;
 var resursJustImported = false;
+var resursPluginPrefix = getResursLocalization('prefix');
 
 /**
  * Handle wp-admin, and update realtime fields.
@@ -21,11 +22,11 @@ var resursJustImported = false;
 function getResursAdminFields() {
     getResursConfigPopupPrevention(
         [
-            '#trbwc_admin_environment',
-            '#trbwc_admin_login',
-            '#trbwc_admin_password',
-            '#trbwc_admin_login_production',
-            '#trbwc_admin_password_production',
+            '#' + resursPluginPrefix + '_admin_environment',
+            '#' + resursPluginPrefix + '_admin_login',
+            '#' + resursPluginPrefix + '_admin_password',
+            '#' + resursPluginPrefix + '_admin_login_production',
+            '#' + resursPluginPrefix + '_admin_password_production',
             'select[id*=r_annuity_select]',
             'input[id*=method_description]',
             'input[id*=method_fee]',
@@ -90,19 +91,19 @@ function getResursConfigPopupPrevention(elements) {
  * @since 0.0.1.0
  */
 function getResursEnvironmentFields() {
-    resursEnvironment = $rQuery('#trbwc_admin_environment').find(':selected').val();
+    resursEnvironment = $rQuery('#' + resursPluginPrefix + '_admin_environment').find(':selected').val();
     switch (resursEnvironment) {
         case 'test':
-            $rQuery('#trbwc_admin_login_production').parent().parent().hide();
-            $rQuery('#trbwc_admin_password_production').parent().parent().hide();
-            $rQuery('#trbwc_admin_login').parent().parent().fadeIn();
-            $rQuery('#trbwc_admin_password').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_login_production').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_password_production').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_login').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_password').parent().parent().fadeIn();
             break;
         case 'live':
-            $rQuery('#trbwc_admin_login_production').parent().parent().fadeIn();
-            $rQuery('#trbwc_admin_password_production').parent().parent().fadeIn();
-            $rQuery('#trbwc_admin_login').parent().parent().hide();
-            $rQuery('#trbwc_admin_password').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_login_production').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_password_production').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_login').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_password').parent().parent().hide();
             break;
         default:
     }
@@ -150,13 +151,13 @@ function getCallbackMatches() {
                 }
                 if (canUpdate) {
                     getResursAjaxify('post', 'get_internal_resynch', {'n': true}, function () {
-                        if ($rQuery('#button_trbwc_admin_payment_methods_button').length > 0) {
-                            $rQuery('#div_trbwc_admin_payment_methods_button').html(
+                        if ($rQuery('#button_' + resursPluginPrefix + '_admin_payment_methods_button').length > 0) {
+                            $rQuery('#div_' + resursPluginPrefix + '_admin_payment_methods_button').html(
                                 $rQuery('<div>', {
                                     'style': 'font-weight: bold; color: #000099;'
                                 }).html(getResursLocalization('reloading'))
                             );
-                            $rQuery('#div_trbwc_admin_callbacks_button').html(
+                            $rQuery('#div_' + resursPluginPrefix + '_admin_callbacks_button').html(
                                 $rQuery('<div>', {
                                     'style': 'font-weight: bold; color: #000099;'
                                 }).html(getResursLocalization('reloading'))
@@ -178,7 +179,7 @@ function getCallbackMatches() {
  * @since 0.0.1.0
  */
 function getDeprecatedCredentialsForm() {
-    var userBox = $rQuery('#trbwc_admin_login');
+    var userBox = $rQuery('#' + resursPluginPrefix + '_admin_login');
     // deprecated_login is a boolean but can is sometimes returned as "1" instead of a true value.
     var canImport = getResursLocalization('can_import_deprecated_credentials') == 1;
     if (canImport) {
@@ -219,22 +220,22 @@ function getDeprecatedCredentialsForm() {
  * @since 0.0.1.0
  */
 function getResursPaymentMethods() {
-    getResursSpin('#div_trbwc_admin_payment_methods_button');
+    getResursSpin('#div_' + resursPluginPrefix + '_admin_payment_methods_button');
     getResursAjaxify('post', 'resursbank_get_payment_methods', {'n': true}, function (data) {
         if (data['reload'] === true) {
-            $rQuery('#div_trbwc_admin_payment_methods_button').html(
+            $rQuery('#div_' + resursPluginPrefix + '_admin_payment_methods_button').html(
                 $rQuery('<div>', {
                     'style': 'font-weight: bold; color: #000099;'
                 }).html(getResursLocalization('reloading'))
             );
             document.location.reload();
         } else if (data['error'] !== '') {
-            getResursError(data['error'], '#div_trbwc_admin_payment_methods_button');
+            getResursError(data['error'], '#div_' + resursPluginPrefix + '_admin_payment_methods_button');
         } else {
-            getResursError('Unable to update.', '#div_trbwc_admin_payment_methods_button');
+            getResursError('Unable to update.', '#div_' + resursPluginPrefix + '_admin_payment_methods_button');
         }
     }, function (d) {
-        getResursError(d, '#div_trbwc_admin_payment_methods_button');
+        getResursError(d, '#div_' + resursPluginPrefix + '_admin_payment_methods_button');
     });
 }
 
@@ -242,23 +243,23 @@ function getResursPaymentMethods() {
  * @since 0.0.1.0
  */
 function getResursCallbacks() {
-    getResursSpin('#div_trbwc_admin_callbacks_button');
+    getResursSpin('#div_' + resursPluginPrefix + '_admin_callbacks_button');
     getResursAjaxify('post', 'resursbank_get_new_callbacks', {'n': ''}, function (data) {
         if (data['reload'] === true || data['reload'] === '1') {
-            $rQuery('#div_trbwc_admin_callbacks_button').html(
+            $rQuery('#div_' + resursPluginPrefix + '_admin_callbacks_button').html(
                 $rQuery('<div>', {
                     'style': 'font-weight: bold; color: #000099;'
                 }).html(getResursLocalization('reloading'))
             );
             document.location.reload();
         } else if (data['error'] !== '') {
-            getResursError(data['error'], '#div_trbwc_admin_callbacks_button');
+            getResursError(data['error'], '#div_' + resursPluginPrefix + '_admin_callbacks_button');
         } else {
-            getResursError('Unable to update.', '#div_trbwc_admin_callbacks_button');
+            getResursError('Unable to update.', '#div_' + resursPluginPrefix + '_admin_callbacks_button');
         }
     }, function (data) {
         if (typeof data.statusText !== 'undefined') {
-            getResursError(data.statusText, '#div_trbwc_admin_callbacks_button');
+            getResursError(data.statusText, '#div_' + resursPluginPrefix + '_admin_callbacks_button');
         }
     });
 }
@@ -267,9 +268,9 @@ function getResursCallbacks() {
  * @since 0.0.1.0
  */
 function getResursCallbackTest() {
-    getResursSpin('#div_trbwc_admin_trigger_callback_button');
+    getResursSpin('#div_' + resursPluginPrefix + '_admin_trigger_callback_button');
     getResursAjaxify('post', 'resursbank_get_trigger_test', {}, function (response) {
-        $rQuery('#div_trbwc_admin_trigger_callback_button').html(
+        $rQuery('#div_' + resursPluginPrefix + '_admin_trigger_callback_button').html(
             $rQuery('<div>', {
                 'style': 'font-weight: bold; color: #000099;'
             }).html(response['html'])
@@ -495,11 +496,11 @@ function getResursCredentialsTestForm(pwBox, pwBoxId) {
  */
 function getResursAdminPasswordButton() {
     // This box became too big so functions are split up.
-    if ($rQuery('#trbwc_admin_password').length > 0) {
+    if ($rQuery('#' + resursPluginPrefix + '_admin_password').length > 0) {
         // One time nonce controlled credential importer.
         getDeprecatedCredentialsForm();
-        getResursCredentialsTestForm($rQuery('#trbwc_admin_password'), 'trbwc_admin_password');
-        getResursCredentialsTestForm($rQuery('#trbwc_admin_password_production'), 'trbwc_admin_password_production');
+        getResursCredentialsTestForm($rQuery('#' + resursPluginPrefix + '_admin_password'), '' + resursPluginPrefix + '_admin_password');
+        getResursCredentialsTestForm($rQuery('#' + resursPluginPrefix + '_admin_password_production'), '' + resursPluginPrefix + '_admin_password_production');
         getResursCredentialDivs();
     }
 }
@@ -509,7 +510,7 @@ function getResursAdminPasswordButton() {
  */
 function getResursCredentialDivs() {
     // Create an empty div here for credentials stuff.
-    $rQuery('#trbwc_admin_login').parent().children('.description').before(
+    $rQuery('#' + resursPluginPrefix + '_admin_login').parent().children('.description').before(
         $rQuery(
             '<div>',
             {
@@ -517,7 +518,7 @@ function getResursCredentialDivs() {
             }
         )
     );
-    $rQuery('#trbwc_admin_login_production').parent().children('.description').before(
+    $rQuery('#' + resursPluginPrefix + '_admin_login_production').parent().children('.description').before(
         $rQuery(
             '<div>',
             {
@@ -594,14 +595,14 @@ function doResursUpdateCallback(cbid) {
  * @since 0.0.1.0
  */
 function getResursDeprecatedLogin() {
-    if ($rQuery('#trbwc_admin_password').length > 0) {
+    if ($rQuery('#' + resursPluginPrefix + '_admin_password').length > 0) {
         getResursSpin('#resurs_import_credentials_result');
         getResursAjaxify('post', 'resursbank_import_credentials', {}, function (data) {
             if (data['login'] !== '' && data['pass'] !== '') {
                 resursJustImported = true;
                 $rQuery('#resurs_import_credentials_result').html(getResursLocalization('credential_import_success'));
-                $rQuery('#trbwc_admin_login').val(data['login']);
-                $rQuery('#trbwc_admin_password').val(data['pass']);
+                $rQuery('#' + resursPluginPrefix + '_admin_login').val(data['login']);
+                $rQuery('#' + resursPluginPrefix + '_admin_password').val(data['pass']);
                 getResursCredentialsResult();
             } else {
                 $rQuery('#resurs_import_credentials_result').html(getResursLocalization('credential_import_failed'));
@@ -621,22 +622,22 @@ function getResursCredentialsResult() {
 
     switch (resursEnvironment) {
         case 'live':
-            apiLoginBox = '#trbwc_admin_login_production';
-            apiPwBox = '#trbwc_admin_password_production';
-            resultBox = '#trbwc_admin_password_production_result';
+            apiLoginBox = '#' + resursPluginPrefix + '_admin_login_production';
+            apiPwBox = '#' + resursPluginPrefix + '_admin_password_production';
+            resultBox = '#' + resursPluginPrefix + '_admin_password_production_result';
             break;
         default:
-            apiLoginBox = '#trbwc_admin_login';
-            apiPwBox = '#trbwc_admin_password';
-            resultBox = '#trbwc_admin_password_result';
+            apiLoginBox = '#' + resursPluginPrefix + '_admin_login';
+            apiPwBox = '#' + resursPluginPrefix + '_admin_password';
+            resultBox = '#' + resursPluginPrefix + '_admin_password_result';
     }
 
-    if ($rQuery('#trbwc_admin_password').length > 0) {
+    if ($rQuery('#' + resursPluginPrefix + '_admin_password').length > 0) {
         getResursSpin(resultBox);
         var uData = {
             'p': $rQuery(apiPwBox).val(),
             'u': $rQuery(apiLoginBox).val(),
-            'e': $rQuery('#trbwc_admin_environment').val()
+            'e': $rQuery('#' + resursPluginPrefix + '_admin_environment').val()
         };
         getResursAjaxify(
             'post',
@@ -667,9 +668,9 @@ function getResursCredentialsResult() {
  * @since 0.0.1.0
  */
 function getResursAdminCheckoutType() {
-    var checkoutType = $rQuery('#trbwc_admin_checkout_type');
+    var checkoutType = $rQuery('#' + resursPluginPrefix + '_admin_checkout_type');
     if (checkoutType.length > 0) {
-        $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
+        $rQuery('#' + resursPluginPrefix + '_admin_checkout_type').parent().children('.description').html(
             getResursLocalization('translate_checkout_' + checkoutType.val())
         );
     }
@@ -680,7 +681,7 @@ function getResursAdminCheckoutType() {
  * @since 0.0.1.0
  */
 function resursUpdateFlowDescription(current) {
-    $rQuery('#trbwc_admin_checkout_type').parent().children('.description').html(
+    $rQuery('#' + resursPluginPrefix + '_admin_checkout_type').parent().children('.description').html(
         getResursLocalization('translate_checkout_' + current.value)
     );
 }
@@ -709,9 +710,9 @@ function getResursLocalization(key) {
  * @since 0.0.1.0
  */
 function setResursFraudControl() {
-    $rQuery('#trbwc_admin_waitForFraudControl').attr('checked', 'checked');
+    $rQuery('#' + resursPluginPrefix + '_admin_waitForFraudControl').attr('checked', 'checked');
     if ($rQuery('.waitForFraudControlWarning').length === 0) {
-        $rQuery('#trbwc_admin_annulIfFrozen').parent().after(
+        $rQuery('#' + resursPluginPrefix + '_admin_annulIfFrozen').parent().after(
             $rQuery(
                 '<div>',
                 {
@@ -726,11 +727,11 @@ function setResursFraudControl() {
  * @since 0.0.1.0
  */
 function getResursFraudFlags(clickObject) {
-    if ($rQuery('#trbwc_admin_waitForFraudControl').length) {
+    if ($rQuery('#' + resursPluginPrefix + '_admin_waitForFraudControl').length) {
         var fraudSettings = {
-            'waitForFraudControl': $rQuery('#trbwc_admin_waitForFraudControl').is(':checked'),
-            'annulIfFrozen': $rQuery('#trbwc_admin_annulIfFrozen').is(':checked'),
-            'finalizeIfBooked': $rQuery('#trbwc_admin_finalizeIfBooked').is(':checked'),
+            'waitForFraudControl': $rQuery('#' + resursPluginPrefix + '_admin_waitForFraudControl').is(':checked'),
+            'annulIfFrozen': $rQuery('#' + resursPluginPrefix + '_admin_annulIfFrozen').is(':checked'),
+            'finalizeIfBooked': $rQuery('#' + resursPluginPrefix + '_admin_finalizeIfBooked').is(':checked'),
         };
 
         if (!fraudSettings['annulIfFrozen']) {
