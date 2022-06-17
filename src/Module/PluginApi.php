@@ -234,6 +234,7 @@ class PluginApi
 
         $isNotSafe = [
             'resetPluginSettings',
+            'resetOldPluginSettings',
         ];
 
         $isSafe = (is_admin() && is_ajax() && empty($fromFunction) && in_array($fromFunction, $isNotSafe, true));
@@ -1551,13 +1552,50 @@ class PluginApi
 
             // Clean up old importer data.
             Data::delResursOption('resursImportCredentials');
-            $deleteString = sprintf(
-                "DELETE FROM %s WHERE option_name LIKE '%s_%%' AND %s",
-                Data::getSanitizedKeyElement($wpdb->options),
-                Data::getPrefix(),
-                implode('AND ', $deleteNotArray)
+            // Make sure that both original prefixes and special adapted slugs are cleaned up.
+            $deleteArray = [
+                sprintf(
+                    "DELETE FROM %s WHERE option_name LIKE '%s_%%' AND %s",
+                    Data::getSanitizedKeyElement($wpdb->options),
+                    Data::getPrefix(),
+                    implode(' AND ', $deleteNotArray)
+                ),
+                sprintf(
+                    "DELETE FROM %s WHERE option_name LIKE '%s_%%' AND %s",
+                    Data::getSanitizedKeyElement($wpdb->options),
+                    Data::getPrefix('admin', true),
+                    implode(' AND ', $deleteNotArray)
+                )
+            ];
+
+            foreach ($deleteArray as $deleteString) {
+                $cleanUpQuery = $wpdb->query($deleteString);
+            }
+
+            self::reply(
+                [
+                    'finished' => $cleanUpQuery,
+                ]
             );
-            $cleanUpQuery = $wpdb->query($deleteString);
+        }
+    }
+
+    /**
+     * @since 0.0.1.7
+     */
+    public function resetOldPluginSettings()
+    {
+        global $wpdb;
+        self::getValidatedNonce(false, false, __FUNCTION__);
+        // Double insurances here, since we're about to reset stuff.
+        if (is_admin() && is_ajax()) {
+            $cleanUpQuery = $wpdb->query(
+                sprintf(
+                    "DELETE FROM %s WHERE option_name 
+                         LIKE 'woocommerce_resurs-bank_%%' OR option_name like 'woocommerce_resurs_bank%%'",
+                    $wpdb->options
+                )
+            );
 
             self::reply(
                 [
