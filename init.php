@@ -26,7 +26,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 // Note: The prefix below is used by this plugin only and should not be changed. Instead
 // you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.
 define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
-define('RESURSBANK_PREFIX', 'resursbank');
+define('RESURSBANK_PREFIX', 'trbwc');
 define('RESURSBANK_SNAKECASE_FILTERS', true);
 define('RESURSBANK_ALLOW_PAYMENT_FEE', WordPress::applyFilters('allowPaymentFee', false));
 
