@@ -553,13 +553,7 @@ class Data
      */
     public static function isOriginalCodeBase(): bool
     {
-        $return = false;
-
-        if (WooCommerce::getBaseName() === 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') {
-            $return = true;
-        }
-
-        return $return;
+        return WooCommerce::getBaseName() === 'tornevalls-resurs-bank-payment-gateway-for-woocommerce';
     }
 
     /**
