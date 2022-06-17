@@ -487,9 +487,13 @@ class WordPress
      */
     public static function setResursBankScripts($isAdmin = null)
     {
+        // Note: This section used to be called with a prefix to define which version of the plugin
+        // we use. However, as there's a static setup in the front-end section, the prefix can not in this
+        // case be used without having problems loading scripts. So: Do not use dynamic prefixes in this
+        // autoloader.
         foreach (Data::getPluginStyles($isAdmin) as $styleName => $styleFile) {
             wp_enqueue_style(
-                sprintf('%s_%s', Data::getPrefix(), $styleName),
+                sprintf('trbwc_%s', $styleName),
                 sprintf(
                     '%s/css/%s?%s',
                     Data::getGatewayUrl(),
@@ -502,7 +506,7 @@ class WordPress
         }
 
         foreach (Data::getPluginScripts($isAdmin) as $scriptName => $scriptFile) {
-            $realScriptName = sprintf('%s_%s', Data::getPrefix(), $scriptName);
+            $realScriptName = sprintf('trbwc_%s', $scriptName);
             self::setEnqueue($realScriptName, $scriptFile, $isAdmin);
         }
 
