@@ -698,6 +698,15 @@ class ResursDefault extends WC_Payment_Gateway
         $govIdData = $customerType === 'NATURAL' ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                '%s: govIdData %s',
+                __FUNCTION__,
+                $govIdData
+            )
+        );
+
         Data::setDeveloperLog(__FUNCTION__, 'setApiCustomer:$_POST');
         $this->API->getConnection()->setCustomer(
             $govIdData,
@@ -757,12 +766,20 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setSigning(): self
     {
+        $successUrl = $this->getSigningUrl(['success' => true, 'urlType' => 'success']);
+        $failUrl = $this->getSigningUrl(['success' => false, 'urlType' => 'fail']);
+        $backUrl = $this->getSigningUrl(['success' => false, 'urlType' => 'back']);
+
         $this->API->getConnection()->setSigning(
-            $this->getSigningUrl(['success' => true, 'urlType' => 'success']),
-            $this->getSigningUrl(['success' => false, 'urlType' => 'fail']),
+            $successUrl,
+            $failUrl,
             false,
-            $this->getSigningUrl(['success' => false, 'urlType' => 'back'])
+            $backUrl
         );
+
+        $this->setLoggedSigningUrl('success', $successUrl);
+        $this->setLoggedSigningUrl('fail', $failUrl);
+        $this->setLoggedSigningUrl('back', $backUrl);
 
         // Running in RCO mode we most likely don't have any order to put metadata into, yet.
         if ($this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
@@ -771,6 +788,23 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         return $this;
+    }
+
+    /**
+     * @param $type
+     * @param $url
+     * @since 0.0.1.7
+     */
+    private function setLoggedSigningUrl($type, $url)
+    {
+        Data::canLog(
+            Data::CAN_LOG_ORDER_EVENTS,
+            sprintf(
+                '%s %s',
+                $type,
+                $url
+            )
+        );
     }
 
     /**
@@ -897,6 +931,14 @@ class ResursDefault extends WC_Payment_Gateway
             $orderHandler->setApi($this->API);
             $orderHandler->setPreparedOrderLines();
             $this->API = $orderHandler->getApi();
+
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    '%s',
+                    __FUNCTION__,
+                )
+            );
         } else {
             Data::setLogError(
                 sprintf(
@@ -927,6 +969,15 @@ class ResursDefault extends WC_Payment_Gateway
         $deprecatedStoreId = WordPress::applyFiltersDeprecated('set_storeid', null);
         $storeId = WordPress::applyFilters('setStoreId', $deprecatedStoreId);
         if (!empty($storeId)) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    '%s: %s',
+                    __FUNCTION__,
+                    $storeId
+                )
+            );
+
             $this->API->getConnection()->setStoreId($storeId);
         }
 
@@ -943,6 +994,15 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $customerId = $this->getCustomerId();
         if ($customerId) {
+            Data::canLog(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    '%s: %s',
+                    __FUNCTION__,
+                    $customerId
+                )
+            );
+
             $this->API->getConnection()->setMetaData('CustomerId', $customerId);
         }
         return $this;

@@ -392,19 +392,26 @@ class Data
      * @param mixed $value
      * @param $paymentMethod
      * @throws Exception
+     * @return bool
      * @since 0.0.1.6
      */
     public static function setPaymentMethodSetting(string $key, $value, $paymentMethod)
     {
-        $settings = self::getPaymentMethodSettings($paymentMethod);
-        $settings[$key] = $value;
-        return Data::setResursOption(
-            sprintf(
-                '%s_settings',
-                self::getPaymentMethodNameSpace($paymentMethod)
-            ),
-            $settings
-        );
+        $rturn = false;
+
+        if (!empty($paymentMethod)) {
+            $settings = self::getPaymentMethodSettings($paymentMethod);
+            $settings[$key] = $value;
+            $return = Data::setResursOption(
+                sprintf(
+                    '%s_settings',
+                    self::getPaymentMethodNameSpace($paymentMethod)
+                ),
+                $settings
+            );
+        }
+
+        return $return;
     }
 
     /**
@@ -416,7 +423,9 @@ class Data
      */
     public static function getPaymentMethodSetting(string $key, $paymentMethod)
     {
-        $settingBlock = (array)self::getPaymentMethodSettings($paymentMethod);
+        if (!empty($paymentMethod)) {
+            $settingBlock = (array)self::getPaymentMethodSettings($paymentMethod);
+        }
 
         return $settingBlock[$key] ?? null;
     }
