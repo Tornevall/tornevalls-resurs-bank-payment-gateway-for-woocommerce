@@ -1479,7 +1479,7 @@ class ResursDefault extends WC_Payment_Gateway
                     'fieldLabel' => FormFields::getFieldString($fieldName),
                     'fieldName' => sprintf(
                         '%s_%s_%s',
-                        Data::getPrefix('', true),
+                        Data::getPrefix(),
                         $fieldName,
                         $this->paymentMethodInformation->id
                     ),
