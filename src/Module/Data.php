@@ -1155,6 +1155,7 @@ class Data
             'resurs_bank_',
             'rbwc_',
             'trbwc_',
+            Data::getPrefix() . '_'
         ];
 
         $isResursDeprecated = false;
@@ -1346,18 +1347,26 @@ class Data
     {
         $return = '';
 
+        // Looking for meta root keys.
+        $metaKeys = [
+            'trbwc',
+            self::getPrefix()
+        ];
+
         /** @noinspection CallableParameterUseCaseInTypeContextInspection */
         $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
         if (is_array($orderDataArray) && isset($orderDataArray['meta'])) {
             foreach ($searchUsing as $searchKey) {
-                $protectedMetaKey = sprintf('%s_%s', self::getPrefix(), $searchKey);
-                if (isset($orderDataArray['meta'][$searchKey])) {
-                    $return = array_pop($orderDataArray['meta'][$searchKey]);
-                    break;
-                }
-                if (isset($orderDataArray['meta'][$protectedMetaKey])) {
-                    $return = array_pop($orderDataArray['meta'][$protectedMetaKey]);
-                    break;
+                foreach ($metaKeys as $prefixedMeta) {
+                    $protectedMetaKey = sprintf('%s_%s', $prefixedMeta, $searchKey);
+                    if (isset($orderDataArray['meta'][$searchKey])) {
+                        $return = array_pop($orderDataArray['meta'][$searchKey]);
+                        break;
+                    }
+                    if (isset($orderDataArray['meta'][$protectedMetaKey])) {
+                        $return = array_pop($orderDataArray['meta'][$protectedMetaKey]);
+                        break;
+                    }
                 }
             }
         }
