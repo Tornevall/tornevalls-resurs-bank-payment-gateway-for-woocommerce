@@ -95,7 +95,7 @@ class FormFields extends WC_Settings_API
                         ),
                     ],
                     'custom_attributes' => [
-                        'size' => 3,
+                        'size' => 1,
                         'onchange' => 'resursUpdateFlowDescription(this)',
                     ],
                     'default' => 'rco',
