@@ -1349,24 +1349,30 @@ class Data
 
         // Looking for meta root keys.
         $metaKeys = [
+            self::getPrefix(),
             'trbwc',
-            self::getPrefix()
         ];
 
         /** @noinspection CallableParameterUseCaseInTypeContextInspection */
         $searchUsing = !empty($searchFor) && is_array($searchFor) ? $searchFor : self::$searchArray;
+        $breakSearch = false;
         if (is_array($orderDataArray) && isset($orderDataArray['meta'])) {
             foreach ($searchUsing as $searchKey) {
                 foreach ($metaKeys as $prefixedMeta) {
                     $protectedMetaKey = sprintf('%s_%s', $prefixedMeta, $searchKey);
                     if (isset($orderDataArray['meta'][$searchKey])) {
                         $return = array_pop($orderDataArray['meta'][$searchKey]);
+                        $breakSearch = true;
                         break;
                     }
                     if (isset($orderDataArray['meta'][$protectedMetaKey])) {
                         $return = array_pop($orderDataArray['meta'][$protectedMetaKey]);
+                        $breakSearch = true;
                         break;
                     }
+                }
+                if ($breakSearch) {
+                    break;
                 }
             }
         }
