@@ -1,9 +1,17 @@
 /**
  * Admin CSS.
  */
+
+.resursOrderInfoTitle {
+    /*background: #211551 !important;*/
+    background: #22817c !important;
+    color: #000000 !important;
+    padding: 5px !important;
+}
 .resursOrderInfoContainer {
-    background: #129fdc !important;
-    color: #FFFFFF !important;
+    /*background: #129fdc !important;*/
+    background: #2a9a90;
+    color: #000000;
     padding: 5px !important;
 }
 
@@ -17,12 +25,6 @@
 .resursOrderInfoLabel {
     cursor: default !important;
     font-weight: bold !important;
-}
-
-.resursOrderInfoTitle {
-    background: #211551 !important;
-    color: #ffffff !important;
-    padding: 5px !important;
 }
 
 .resursOrderInfoDifferentCredentials {
