@@ -333,6 +333,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @return array
+     * @throws Exception
      * @since 0.0.1.0
      */
     private function getApplicantPostData(): array
@@ -371,7 +372,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getRealMethodId()
     {
-        return preg_replace('/^trbwc_/', '', $this->id);
+        return preg_replace(sprintf('/^%s_/', Data::getPrefix()), '', $this->id);
     }
 
     /**
