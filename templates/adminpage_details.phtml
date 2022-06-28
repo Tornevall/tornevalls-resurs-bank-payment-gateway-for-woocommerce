@@ -2,28 +2,18 @@
     For order info details we show a basic view with exception notification fields.
     If EComPHP triggers any exceptions they are shown here and then nowhere else.
  -->
-<?php
-// Sanitizing checked 220210.
-use ResursBank\Module\Data;
 
-$isDifferentAccount = false;
+<table width="100%" class="r_payment_info_table">
+    <tbody>
+    <?php
+    use ResursBank\Module\Data;
 
-// If $ecom not present, something went wrong in the core functions of the plugin.
-// Payments should be fully shown even if there is no payment.
-if (isset($ecom)) {
-    ?>
-    <p class="form-field form-field-wide">
-        <label for="resurs_order_details"
-               style="font-weight: bold;cursor: pointer; font-size: 16px;"
-               class="resursOrderInfoTitle"
-               onclick="resursToggleMetaData()">
-            <?php
-            _e(
-                'Order information and metadata for Resurs Bank',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            )
-            ?>
-        </label>
+    $isDifferentAccount = false;
+
+    // If $ecom not present, something went wrong in the core functions of the plugin.
+    // Payments should be fully shown even if there is no payment.
+    if (isset($ecom)) {
+        ?>
         <?php
         if (isset($ecomException['code']) && (int)$ecomException['code']) {
             ?>
@@ -56,7 +46,7 @@ if (isset($ecom)) {
             <span>
                 <?php
                 if ($v2) { ?>
-                    <span class="resursOrderInfoContainer resursOrderInfoOldPluginNote">
+                    <span class="resursOrderInfoRow resursOrderInfoOldPluginNote">
                         <?php
                         echo strtoupper(
                             __(
@@ -88,8 +78,9 @@ printf(__(
             $addExpanderAfter = 'paymentMethodType';
             $setExpander = false;
             $hasExpander = false;
+            $allowExpander = false;
             foreach ($ecom_short as $key => $value) {
-                if ($setExpander) {
+                if ($setExpander && $allowExpander) {
                     $hasExpander = true;
                     $setExpander = false; ?>
                     <button type="button"
@@ -102,89 +93,91 @@ printf(__(
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ); ?>
                     </button>
-                    <span class="resurs_order_meta_container">
                     <?php
                 }
                 if (!empty($addExpanderAfter) && $key === $addExpanderAfter) {
                     $setExpander = true;
                 } ?>
-                <span style="display: block;" class="resursOrderInfoContainer">
-                    <label for="resurs_order_<?php echo sha1($key) ?>" class="resursOrderInfoLabel">
-                        <?php echo esc_html(ucfirst($key)) ?>
-                    </label>
-                    <?php
-                    if ($key === 'paymentMethodInformation' && !empty($value)) {
-                        // This data is stored for informative purpise in case merchants are changing credentials
-                        // for an account with different payment methods available. It should therefore only show up
-                        // if credentials has changed since this purchase.
-                        if (!$isDifferentAccount) {
-                            $value = __(
-                                'Data will only be displayed if the purchase has been made with another merchant ' .
-                                'account than the current in use.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                            );
-                        } else {
-                            $jsonPayment = json_decode($value, true);
-                            if (is_array($jsonPayment)) {
-                                $newValue =
-                                    __(
-                                        'This data is shown to you since the purchase has been made with another ' .
-                                        'merchant account than the current in use.',
-                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                                    ) .
-                                    '<br><br>';
-                                foreach ($jsonPayment as $methodKey => $methodValue) {
-                                    if (is_string($methodValue)) {
-                                        $newValue .= Data::getEscapedHtml(
-                                            sprintf(
-                                                '<div class="row"><b>%s</b>: %s</div>',
-                                                $methodKey,
-                                                $methodValue
-                                            )
-                                        );
-                                    }
-                                }
-                                $value = sprintf(
-                                    '<div class="container resursOrderInfoContainer">%s</div>',
-                                    esc_html($newValue)
+                <tr class="resursOrderInfoRow">
+                    <th>
+                        <?php echo strlen($key) > 2 ? esc_html(ucfirst($key)) : esc_html(strtoupper($key)) ?>
+                    </th>
+                    <td>
+                        <?php
+                        if ($key === 'paymentMethodInformation' && !empty($value)) {
+                            // This data is stored for informative purpise in case merchants are changing credentials
+                            // for an account with different payment methods available. It should therefore only show up
+                            // if credentials has changed since this purchase.
+                            if (!$isDifferentAccount) {
+                                $value = __(
+                                    'Data will only be displayed if the purchase has been made with another merchant ' .
+                                    'account than the current in use.',
+                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                                 );
+                            } else {
+                                $jsonPayment = json_decode($value, true);
+                                if (is_array($jsonPayment)) {
+                                    $newValue =
+                                        __(
+                                            'This data is shown to you since the purchase has been made with another ' .
+                                            'merchant account than the current in use.',
+                                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                        ) .
+                                        '<br><br>';
+                                    foreach ($jsonPayment as $methodKey => $methodValue) {
+                                        if (is_string($methodValue)) {
+                                            $newValue .= Data::getEscapedHtml(
+                                                sprintf(
+                                                    '<div class="row"><b>%s</b>: %s</div>',
+                                                    $methodKey,
+                                                    $methodValue
+                                                )
+                                            );
+                                        }
+                                    }
+                                    $value = sprintf(
+                                        '<div class="container resursOrderInfoRow">%s</div>',
+                                        esc_html($newValue)
+                                    );
+                                }
                             }
                         }
-                    }
-                    if (is_numeric($value)) {
-                        // sanitize_key is better to use than our own preg_replace.
-                        echo
-                        strtolower(
-                            sprintf(
-                                '<span id="rbwc_value_%s">%s</span>',
-                                esc_attr($key),
-                                esc_html($value)
-                            )
-                        );
-                    } elseif (is_bool($value)) {
-                        echo $value ? __('Yes.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __(
-                            'No.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        );
-                    } elseif ($key === 'status') {
-                        echo esc_html(implode(', ', (array)$value));
-                    } elseif (is_array($value)) {
-                        echo Data::getEscapedHtml(implode('<br>', $value));
-                    } else {
-                        echo esc_html($value);
-                    } ?>
-                </span>
+                        if (is_numeric($value)) {
+                            // sanitize_key is better to use than our own preg_replace.
+                            echo
+                            strtolower(
+                                sprintf(
+                                    '<span id="rbwc_value_%s">%s</span>',
+                                    esc_attr($key),
+                                    esc_html($value)
+                                )
+                            );
+                        } elseif (is_bool($value)) {
+                            echo $value ? __('Yes.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __(
+                                'No.',
+                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            );
+                        } elseif ($key === 'status') {
+                            echo esc_html(implode(', ', (array)$value));
+                        } elseif (preg_match("/\n/", $value)) {
+                            echo nl2br($value);
+                        } elseif (is_array($value)) {
+                            echo Data::getEscapedHtml(implode('<br>', $value));
+                        } else {
+                            echo esc_html($value);
+                        } ?>
+                </tr>
                 <?php
             }
 
             if ($hasExpander) {
                 ?>
-                </span>
+                </td>
                 <?php
             }
         } ?>
-
-    </p>
-    <?php
-}
-?>
+        <?php
+    }
+    ?>
+    </tbody>
+</table>

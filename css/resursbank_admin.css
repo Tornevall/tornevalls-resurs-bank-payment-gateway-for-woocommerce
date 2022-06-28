@@ -3,16 +3,39 @@
  */
 
 .resursOrderInfoTitle {
-    /*background: #211551 !important;*/
     background: #22817c !important;
     color: #000000 !important;
     padding: 5px !important;
 }
-.resursOrderInfoContainer {
-    /*background: #129fdc !important;*/
-    background: #2a9a90;
+
+.resursOrderInfoRow {
     color: #000000;
-    padding: 5px !important;
+    text-align: left;
+    padding: 5px;
+    margin: 5px;
+    font-size: 14px !important;
+    white-space: nowrap;
+}
+
+#resursbank_orderinfo > .inside {
+    padding: 0px;
+    margin: 0px;
+}
+
+.r_payment_info_table {
+    padding: 5px;
+    margin: 0px;
+    margin-top: 5px;
+    background-color: #2a9a90;
+}
+
+.r_payment_info_table tr:nth-child(odd) th,
+.r_payment_info_table tr:nth-child(odd) td
+{
+    background: #22817c !important;
+}
+.r_payment_info_table td {
+    padding: 5px 10px;
 }
 
 .resursOrderInfoOldPluginNote {
