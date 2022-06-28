@@ -89,7 +89,7 @@ class PluginHooks
         Data::setLogInfo(
             sprintf(
                 __(
-                    'Passed %d through function %s with order status "%s" for some extra handling.',
+                    'Passed %d through function %s with order status "%s" for extra handling.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $orderId,
