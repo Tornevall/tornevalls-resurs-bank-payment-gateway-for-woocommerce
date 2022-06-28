@@ -3,21 +3,20 @@
     If EComPHP triggers any exceptions they are shown here and then nowhere else.
  -->
 
-<table width="100%" class="r_payment_info_table">
-    <tbody>
+<?php
+
+use ResursBank\Module\Data;
+
+$isDifferentAccount = false;
+
+// If $ecom not present, something went wrong in the core functions of the plugin.
+// Payments should be fully shown even if there is no payment.
+if (isset($ecom)) {
+    ?>
     <?php
-    use ResursBank\Module\Data;
-
-    $isDifferentAccount = false;
-
-    // If $ecom not present, something went wrong in the core functions of the plugin.
-    // Payments should be fully shown even if there is no payment.
-    if (isset($ecom)) {
+    if (isset($ecomException['code']) && (int)$ecomException['code']) {
         ?>
-        <?php
-        if (isset($ecomException['code']) && (int)$ecomException['code']) {
-            ?>
-            <span class="resursApiException">
+        <span class="resursApiException">
         <?php
         $exceptionString = esc_html(sprintf('Exception %d: %s', $ecomException['code'], $ecomException['message']));
         // Error code 8 = Payment unexistent.
@@ -40,10 +39,10 @@
             echo esc_html($exceptionString); ?>
         </b>
         </span>
-            <?php
-        } else {
-            ?>
-            <span>
+        <?php
+    } else {
+        ?>
+        <span>
                 <?php
                 if ($v2) { ?>
                     <span class="resursOrderInfoRow resursOrderInfoOldPluginNote">
@@ -57,6 +56,8 @@
                     </span>
                     <?php
                 } ?>
+            <table width="100%" class="r_payment_info_table">
+            <tbody>
                 <?php
                 if (isset($ecom->isCurrentCredentials) && !$ecom->isCurrentCredentials) {
                     $isDifferentAccount = true; ?>
@@ -70,114 +71,116 @@ printf(__(
                     <?php
                 } ?>
     </span>
-            <?php
-        } ?>
-
         <?php
-        if (is_array($ecom_short) && count($ecom_short)) {
-            $addExpanderAfter = 'paymentMethodType';
-            $setExpander = false;
-            $hasExpander = false;
-            $allowExpander = false;
-            foreach ($ecom_short as $key => $value) {
-                if ($setExpander && $allowExpander) {
-                    $hasExpander = true;
-                    $setExpander = false; ?>
-                    <button type="button"
-                            class="button"
-                            id="resurs_meta_expand_button"
-                            onclick="resursToggleMetaData()"
-                    ><?php
-                        _e(
-                            'Expand metadata view',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ); ?>
-                    </button>
+    } ?>
+
+    <?php
+    if (is_array($ecom_short) && count($ecom_short)) {
+        $addExpanderAfter = 'paymentMethodType';
+        $setExpander = false;
+        $hasExpander = false;
+        $allowExpander = false;
+        foreach ($ecom_short as $key => $value) {
+            if ($setExpander && $allowExpander) {
+                $hasExpander = true;
+                $setExpander = false; ?>
+                <button type="button"
+                        class="button"
+                        id="resurs_meta_expand_button"
+                        onclick="resursToggleMetaData()"
+                ><?php
+                    _e(
+                        'Expand metadata view',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ); ?>
+                </button>
+                <?php
+            }
+            if (!empty($addExpanderAfter) && $key === $addExpanderAfter) {
+                $setExpander = true;
+            } ?>
+            <tr class="resursOrderInfoRow">
+                <th>
+                    <?php echo strlen($key) > 2 ? esc_html(ucfirst($key)) : esc_html(strtoupper($key)) ?>
+                </th>
+                <td>
                     <?php
-                }
-                if (!empty($addExpanderAfter) && $key === $addExpanderAfter) {
-                    $setExpander = true;
-                } ?>
-                <tr class="resursOrderInfoRow">
-                    <th>
-                        <?php echo strlen($key) > 2 ? esc_html(ucfirst($key)) : esc_html(strtoupper($key)) ?>
-                    </th>
-                    <td>
-                        <?php
-                        if ($key === 'paymentMethodInformation' && !empty($value)) {
-                            // This data is stored for informative purpise in case merchants are changing credentials
-                            // for an account with different payment methods available. It should therefore only show up
-                            // if credentials has changed since this purchase.
-                            if (!$isDifferentAccount) {
-                                $value = __(
-                                    'Data will only be displayed if the purchase has been made with another merchant ' .
-                                    'account than the current in use.',
-                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                                );
-                            } else {
-                                $jsonPayment = json_decode($value, true);
-                                if (is_array($jsonPayment)) {
-                                    $newValue =
-                                        __(
-                                            'This data is shown to you since the purchase has been made with another ' .
-                                            'merchant account than the current in use.',
-                                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                                        ) .
-                                        '<br><br>';
-                                    foreach ($jsonPayment as $methodKey => $methodValue) {
-                                        if (is_string($methodValue)) {
-                                            $newValue .= Data::getEscapedHtml(
-                                                sprintf(
-                                                    '<div class="row"><b>%s</b>: %s</div>',
-                                                    $methodKey,
-                                                    $methodValue
-                                                )
-                                            );
-                                        }
-                                    }
-                                    $value = sprintf(
-                                        '<div class="container resursOrderInfoRow">%s</div>',
-                                        esc_html($newValue)
-                                    );
-                                }
-                            }
-                        }
-                        if (is_numeric($value)) {
-                            // sanitize_key is better to use than our own preg_replace.
-                            echo
-                            strtolower(
-                                sprintf(
-                                    '<span id="rbwc_value_%s">%s</span>',
-                                    esc_attr($key),
-                                    esc_html($value)
-                                )
-                            );
-                        } elseif (is_bool($value)) {
-                            echo $value ? __('Yes.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __(
-                                'No.',
+                    if ($key === 'paymentMethodInformation' && !empty($value)) {
+                        // This data is stored for informative purpise in case merchants are changing credentials
+                        // for an account with different payment methods available. It should therefore only show up
+                        // if credentials has changed since this purchase.
+                        if (!$isDifferentAccount) {
+                            $value = __(
+                                'Data will only be displayed if the purchase has been made with another merchant ' .
+                                'account than the current in use.',
                                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                             );
-                        } elseif ($key === 'status') {
-                            echo esc_html(implode(', ', (array)$value));
-                        } elseif (preg_match("/\n/", $value)) {
-                            echo nl2br($value);
-                        } elseif (is_array($value)) {
-                            echo Data::getEscapedHtml(implode('<br>', $value));
                         } else {
-                            echo esc_html($value);
-                        } ?>
-                </tr>
-                <?php
-            }
+                            $jsonPayment = json_decode($value, true);
+                            if (is_array($jsonPayment)) {
+                                $newValue =
+                                    __(
+                                        'This data is shown to you since the purchase has been made with another ' .
+                                        'merchant account than the current in use.',
+                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                    ) .
+                                    '<br><br>';
+                                foreach ($jsonPayment as $methodKey => $methodValue) {
+                                    if (is_string($methodValue)) {
+                                        $newValue .= Data::getEscapedHtml(
+                                            sprintf(
+                                                '<div class="row"><b>%s</b>: %s</div>',
+                                                $methodKey,
+                                                $methodValue
+                                            )
+                                        );
+                                    }
+                                }
+                                $value = sprintf(
+                                    '<div class="container resursOrderInfoRow">%s</div>',
+                                    esc_html($newValue)
+                                );
+                            }
+                        }
+                    }
+                    if (is_numeric($value)) {
+                        // sanitize_key is better to use than our own preg_replace.
+                        echo
+                        strtolower(
+                            sprintf(
+                                '<span id="rbwc_value_%s">%s</span>',
+                                esc_attr($key),
+                                esc_html($value)
+                            )
+                        );
+                    } elseif (is_bool($value)) {
+                        echo $value ? __('Yes.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') : __(
+                            'No.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        );
+                    } elseif ($key === 'status') {
+                        echo esc_html(implode(', ', (array)$value));
+                    } elseif (preg_match("/\n/", $value)) {
+                        echo nl2br($value);
+                    } elseif (is_array($value)) {
+                        echo Data::getEscapedHtml(implode('<br>', $value));
+                    } else {
+                        echo esc_html($value);
+                    } ?>
+            </tr>
+            <?php
+        }
 
-            if ($hasExpander) {
-                ?>
-                </td>
-                <?php
-            }
-        } ?>
-        <?php
-    }
-    ?>
+        if ($hasExpander) {
+            ?>
+            </td>
+            <?php
+        }
+    } ?>
+
     </tbody>
-</table>
+    </table>
+
+    <?php
+}
+?>
