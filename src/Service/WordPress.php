@@ -164,6 +164,7 @@ class WordPress
         if (Data::isEnabled()) {
             add_filter('woocommerce_before_checkout_billing_form', 'ResursBank\Module\FormFields::getGetAddressForm');
         }
+        add_action('add_meta_boxes', '\ResursBank\Service\WordPress::getMetaBoxes', 10);
     }
 
     /**
@@ -236,6 +237,27 @@ class WordPress
             'woocommerce_review_order_after_order_total',
             'ResursBank\Service\WooCommerce::applyVisualPartPaymentReview'
         );
+    }
+
+    /**
+     * Order data meta box for Resurs.
+     * @since 0.0.1.7
+     */
+    public static function getMetaBoxes()
+    {
+        $screen = get_current_screen();
+        $screen_id = $screen ? $screen->id : '';
+
+        if ($screen_id === 'shop_order') {
+            add_meta_box(
+                'resursbank_orderinfo',
+                sprintf(
+                    __('%s order information', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'Resurs'
+                ),
+                'ResursBank\Module\OrderMetaBox::output'
+            );
+        }
     }
 
     /**

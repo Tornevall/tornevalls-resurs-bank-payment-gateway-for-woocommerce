@@ -144,17 +144,6 @@ class WooCommerce
     }
 
     /**
-     * Returns true if company/legal methods is present.
-     *
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function hasMethodsLegal(): bool
-    {
-        return (bool)self::getMethodsByType('legal');
-    }
-
-    /**
      * @return bool
      * @throws Exception
      * @since 0.0.1.6
@@ -162,6 +151,18 @@ class WooCommerce
     public static function hasDualCustomerTypes(): bool
     {
         return self::hasMethodsNatural() && self::hasMethodsLegal();
+    }
+
+    /**
+     * Returns true if private/naturali methods is present.
+     *
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function hasMethodsNatural(): bool
+    {
+        return (bool)self::getMethodsByType('natural');
     }
 
     /**
@@ -199,15 +200,14 @@ class WooCommerce
     }
 
     /**
-     * Returns true if private/naturali methods is present.
+     * Returns true if company/legal methods is present.
      *
-     * @return bool
      * @throws Exception
      * @since 0.0.1.6
      */
-    public static function hasMethodsNatural(): bool
+    public static function hasMethodsLegal(): bool
     {
-        return (bool)self::getMethodsByType('natural');
+        return (bool)self::getMethodsByType('legal');
     }
 
     /**
@@ -368,80 +368,34 @@ class WooCommerce
 
         if ($order instanceof WC_Order) {
             $paymentMethod = $order->get_payment_method();
-            if (Data::canHandleOrder($paymentMethod)) {
-                $orderData = Data::getOrderInfo($order);
-                self::setOrderMetaInformation($orderData);
-                $orderData['ecom_meta'] = [];
-                if (!isset($orderData['ecom'])) {
-                    $orderData['ecom'] = [];
-                    $orderData['ecom_short'] = [];
-                }
-                if (isset($orderData['meta']) && is_array($orderData['meta'])) {
-                    $orderData['ecom_short'] = self::getMetaDataFromOrder($orderData['ecom_short'], $orderData['meta']);
-                }
-                $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
-                if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
-                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-                        $orderData['ecom_short']['ecom_had_reference_problems'] =
-                            self::getEcomHadProblemsInfo($orderData);
-                    }
-                    echo Data::getEscapedHtml(
-                        Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
-                    );
-                }
-                // Adaptable action. Makes it possible to go back to the prior "blue box view" from v2.x
-                // if someone wants to create their own view.
-                WordPress::doAction('showOrderDetails', $orderData);
-            } else {
+            if (!Data::canHandleOrder($paymentMethod)) {
                 self::getAdminAfterOldCheck($order);
             }
         }
     }
 
     /**
-     * @param $orderData
+     * @param $order
      * @throws Exception
-     * @throws ResursException
      * @since 0.0.1.0
      */
-    private static function setOrderMetaInformation($orderData)
+    private static function getAdminAfterOldCheck($order)
     {
-        if (isset($orderData['ecom_short']) &&
-            is_array($orderData['ecom_short']) &&
-            count($orderData['ecom_short'])
+        if ($order->meta_exists('resursBankPaymentFlow') &&
+            !Data::hasOldGateway() &&
+            !Data::getResursOption('deprecated_interference')
         ) {
-            $login = Data::getResursOption('login');
-            $password = Data::getResursOption('password');
-            if (!empty($password) &&
-                !empty($login) &&
-                Data::getResursOption('store_api_history') &&
-                !Data::getOrderMeta('orderapi', $orderData['order'])) {
-                Data::setLogInternal(
-                    Data::LOG_NOTICE,
-                    sprintf(
-                        __(
-                            'EComPHP data present. Saving metadata for order %s.',
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate(
+                    'adminpage_woocommerce_version22',
+                    [
+                        'wooPlug22VersionInfo' => __(
+                            'Order has not been created by this plugin and the original plugin is currently unavailable.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
-                        $orderData['order']->get_id()
-                    )
-                );
-
-                // Set encrypted order meta data with api credentials that belongs to this order.
-                Data::setOrderMeta(
-                    $orderData['order'],
-                    'orderapi',
-                    Data::setEncryptData(
-                        json_encode(
-                            [
-                                'l' => $login,
-                                'p' => $password,
-                                'e' => Data::getResursOption('environment'),
-                            ]
-                        )
-                    )
-                );
-            }
+                    ]
+                )
+            );
         }
     }
 
@@ -451,7 +405,7 @@ class WooCommerce
      * @return mixed
      * @since 0.0.1.0
      */
-    private static function getMetaDataFromOrder($ecomHolder, $metaArray)
+    public static function getMetaDataFromOrder($ecomHolder, $metaArray)
     {
         $metaPrefix = Data::getPrefix();
         /** @var array $ecomMetaArray */
@@ -497,57 +451,6 @@ class WooCommerce
     }
 
     /**
-     * @param $orderData
-     * @since 0.0.1.0
-     */
-    private static function getEcomHadProblemsInfo($orderData)
-    {
-        $return = false;
-        if (isset($orderData['ecom_had_reference_problems']) && $orderData['ecom_had_reference_problems']) {
-            $return = sprintf(
-                __(
-                    'This payment is marked with reference problems. This means that there might have been ' .
-                    'problems when the payment was executed and tried to update the payment reference (%s) to a new ' .
-                    'id (%s). You can check the UpdatePaymentReference values for errors.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ),
-                $orderData['resurs_secondary'] ?? __(
-                    '[missing reference]',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ),
-                $orderData['resurs']
-            );
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getAdminAfterOldCheck($order)
-    {
-        if ($order->meta_exists('resursBankPaymentFlow') &&
-            !Data::hasOldGateway() &&
-            !Data::getResursOption('deprecated_interference')
-        ) {
-            echo Data::getEscapedHtml(
-                Data::getGenericClass()->getTemplate(
-                    'adminpage_woocommerce_version22',
-                    [
-                        'wooPlug22VersionInfo' => __(
-                            'Order has not been created by this plugin and the original plugin is currently unavailable.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                    ]
-                )
-            );
-        }
-    }
-
-    /**
      * @param $methodName
      * @return bool
      * @since 0.0.1.0
@@ -579,6 +482,7 @@ class WooCommerce
     }
 
     /**
+     * Address blocks that on demand can be displayed in the upper section of the order view.
      * @param null $order
      * @throws ResursException
      * @throws Exception
@@ -588,7 +492,7 @@ class WooCommerce
     {
         Data::getSafeStyle();
         if (!empty($order) &&
-            WordPress::applyFilters('canDisplayOrderInfoAfterBilling', true) &&
+            WordPress::applyFilters('canDisplayOrderInfoAfterBilling', false) &&
             Data::canHandleOrder($order->get_payment_method())
         ) {
             $orderData = Data::getOrderInfo($order);
@@ -599,6 +503,7 @@ class WooCommerce
     }
 
     /**
+     * Address blocks that on demand can be displayed in the upper section of the order view.
      * @param null $order
      * @throws ResursException
      * @throws Exception
@@ -608,7 +513,7 @@ class WooCommerce
     {
         Data::getSafeStyle();
         if (!empty($order) &&
-            WordPress::applyFilters('canDisplayOrderInfoAfterShipping', true) &&
+            WordPress::applyFilters('canDisplayOrderInfoAfterShipping', false) &&
             Data::canHandleOrder($order->get_payment_method())
         ) {
             $orderData = Data::getOrderInfo($order);
@@ -699,16 +604,65 @@ class WooCommerce
             'username',
             'isCurrentCredentials',
             'environment',
+            'cache',
         ];
+
         if (isset($return['ecom'])) {
             $purgedEcom = (array)$return['ecom'];
+            $billingAddress = $purgedEcom['customer']->address ?? [];
+            $deliveryAddress = $purgedEcom['deliveryAddress'] ?? [];
+
             foreach ($purgedEcom as $key => $value) {
                 if (in_array($key, $purge, true)) {
                     unset($purgedEcom[$key]);
                 }
             }
             $return['ecom_short'] = $purgedEcom;
+            $return['ecom_short']['billingAddress'] = implode("\n", self::getCompactAddress($billingAddress));
+            $return['ecom_short']['deliveryAddress'] = implode("\n", self::getCompactAddress($deliveryAddress));
         }
+
+        return $return;
+    }
+
+    /**
+     * @param $addressData
+     * @since 0.0.1.7
+     */
+    private static function getCompactAddress($addressData): array
+    {
+        $purge = [
+            'fullName',
+            'firstName',
+            'lastName',
+        ];
+        $ignore = ['country', 'postalCode', 'postalArea'];
+
+        $return = [
+            'fullName' => sprintf(
+                '%s %s',
+                $addressData->firstName ?? '',
+                $addressData->lastName ?? ''
+            ),
+        ];
+        foreach ($purge as $key) {
+            if (isset($addressData->{$key})) {
+                unset($addressData->{$key});
+            }
+        }
+        foreach ($addressData as $key => $value) {
+            if (!in_array($key, $ignore)) {
+                $return[$key] = $value;
+            }
+        }
+
+        $return['postalCity'] = sprintf(
+            '%s-%s %s',
+            $addressData->country ?? '',
+            $addressData->postalCode ?? '',
+            $addressData->postalArea ?? ''
+        );
+
         return $return;
     }
 
@@ -1621,6 +1575,32 @@ class WooCommerce
      */
     public static function getAllowResursRun($return)
     {
+        return $return;
+    }
+
+    /**
+     * @param $orderData
+     * @since 0.0.1.0
+     */
+    private static function getEcomHadProblemsInfo($orderData)
+    {
+        $return = false;
+        if (isset($orderData['ecom_had_reference_problems']) && $orderData['ecom_had_reference_problems']) {
+            $return = sprintf(
+                __(
+                    'This payment is marked with reference problems. This means that there might have been ' .
+                    'problems when the payment was executed and tried to update the payment reference (%s) to a new ' .
+                    'id (%s). You can check the UpdatePaymentReference values for errors.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                $orderData['resurs_secondary'] ?? __(
+                    '[missing reference]',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                $orderData['resurs']
+            );
+        }
+
         return $return;
     }
 }

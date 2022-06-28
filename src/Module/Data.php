@@ -1230,6 +1230,15 @@ class Data
     }
 
     /**
+     * @return string
+     * @since 0.0.1.7
+     */
+    public static function getBrandName(): string
+    {
+        return 'Rɘsurs';
+    }
+
+    /**
      * @param $orderReference
      * @param null $asOrder
      * @return null
