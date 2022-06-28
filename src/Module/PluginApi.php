@@ -867,12 +867,27 @@ class PluginApi
     public static function getNetworkLookup()
     {
         if (is_admin()) {
+            $addressRequestList = [];
+
             // Using curl_multi via netWrapper if exists, otherwise there's a backup to at multi-request stream.
             $httpWrapper = new NetWrapper();
-            $networkRequest = $httpWrapper->request($addressRequestUrls = [
-                'https://ipv4.netcurl.org',
-                'https://ipv6.netcurl.org',
-            ]);
+            $serviceLookupErrors = false;
+            $serviceException = null;
+            try {
+                $networkRequest = $httpWrapper->request($addressRequestUrls = [
+                    'https://ipv4.netcurl.org',
+                    'https://ipv6.netcurl.org',
+                ]);
+            } catch (Exception $e) {
+                $serviceLookupErrors = true;
+                $serviceException = $e;
+                // Both responses dies when one error occurs here.
+                $addressRequestList['4'] = 'service_error';
+                $addressRequestList['6'] = 'service_error';
+                // On exceptions from netcurl, we will instead use the extended version of the CurlWrapper but (as above)
+                // prepare the address request list with service error information.
+		$networkRequest = $e->getExtendException();
+            }
             $noSoapRequestResponse = '';
             try {
                 $noSoapRequest = new CurlWrapper();
@@ -893,19 +908,20 @@ class PluginApi
                 );
             }
 
-            $addressRequestList = [];
             $addressRequestList['Resurs XML Test'] = $noSoapRequestResponse;
 
             foreach ($addressRequestUrls as $addressRequestUrl) {
-                $addressRequestResponse = $networkRequest->getParsed($addressRequestUrl);
-                $protoNum = self::getProtocolByHostName($addressRequestUrl);
-                if ($protoNum) {
-                    if (isset($addressRequestResponse->ip) &&
-                        filter_var($addressRequestResponse->ip, FILTER_VALIDATE_IP)
-                    ) {
+                if ($networkRequest instanceof CurlWrapper) {
+                    $addressRequestResponse = $networkRequest->getParsed($addressRequestUrl);
+                    $protoNum = self::getProtocolByHostName($addressRequestUrl);
+                    if ($protoNum) {
+                        if (isset($addressRequestResponse->ip) &&
+                            filter_var($addressRequestResponse->ip, FILTER_VALIDATE_IP)
+                        ) {
                         $addressRequestList[$protoNum] = $addressRequestResponse->ip;
-                    } else {
+                        } else {
                         $addressRequestList[$protoNum] = 'N/A';
+                        }
                     }
                 }
             }
