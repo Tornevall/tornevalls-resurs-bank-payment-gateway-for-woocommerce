@@ -130,7 +130,7 @@ class FormFields extends WC_Settings_API
                         ),
                     ],
                     'custom_attributes' => [
-                        'size' => 2,
+                        'size' => 1,
                     ],
                     'default' => 'test',
                     'desc' => __(
@@ -267,7 +267,7 @@ class FormFields extends WC_Settings_API
                         ),
                     ],
                     'custom_attributes' => [
-                        'size' => 2,
+                        'size' => 1,
                     ],
                 ],
                 'payment_method_icons' => [
@@ -297,7 +297,7 @@ class FormFields extends WC_Settings_API
                         ),
                     ],
                     'custom_attributes' => [
-                        'size' => 4,
+                        'size' => 1,
                     ],
                     'desc' => __(
                         'If there are branded payment methods in your checkout, that you prefer to display, choose ' .
@@ -373,7 +373,7 @@ class FormFields extends WC_Settings_API
                     ],
                     'default' => 'default',
                     'custom_attributes' => [
-                        'size' => 3,
+                        'size' => 1,
                     ],
                     'desc' => __(
                         'When payment methods are mentioned in order data and Resurs Checkout payments, you can ' .
@@ -403,7 +403,7 @@ class FormFields extends WC_Settings_API
                     ],
                     'default' => 'after_checkout_form',
                     'custom_attributes' => [
-                        'size' => 2,
+                        'size' => 1,
                     ],
                 ],
                 'part_payment_template' => [
@@ -493,7 +493,7 @@ class FormFields extends WC_Settings_API
                     'options' => WordPress::applyFilters('getAvailableAutoDebitMethods', []),
                     'default' => 'default',
                     'custom_attributes' => [
-                        'size' => count(WordPress::applyFilters('getAvailableAutoDebitMethods', [])),
+                        'size' => 1,
                         'multiple' => 'multiple',
                     ],
                 ],
