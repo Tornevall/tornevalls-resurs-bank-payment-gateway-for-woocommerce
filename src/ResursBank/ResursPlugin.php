@@ -66,11 +66,7 @@ class ResursPlugin
      */
     public function getOrderNotePrefix($prefix): string
     {
-        if (self::canUseFeature()) {
-            $prefix = 'Resurs Bank';
-        }
-
-        return $prefix;
+        return $this->canUseFeature() ? 'Resurs Bank' : $prefix;
     }
 
     /**
