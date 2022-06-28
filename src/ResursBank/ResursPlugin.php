@@ -57,6 +57,20 @@ class ResursPlugin
         add_filter('rbwc_get_custom_form_fields', [$this, 'getCustomFormFields']);
         add_filter('rbwc_get_plugin_prefix', [$this, 'getPluginPrefix']);
         add_filter('rbwc_get_obfuscate_lookup_keys', [$this, 'getObfuscateLookupKeys']);
+        add_filter('rbwc_get_order_note_prefix', [$this, 'getOrderNotePrefix']);
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.7
+     */
+    public function getOrderNotePrefix($prefix): string
+    {
+        if (self::canUseFeature()) {
+            $prefix = 'Resurs Bank';
+        }
+
+        return $prefix;
     }
 
     /**
