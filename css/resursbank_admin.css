@@ -21,6 +21,10 @@
     padding: 0px;
     margin: 0px;
 }
+#resursbank_order_meta_details > .inside {
+    padding: 0px;
+    margin: 0px;
+}
 
 .r_payment_info_table {
     padding: 5px;
