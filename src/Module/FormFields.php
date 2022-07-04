@@ -493,7 +493,7 @@ class FormFields extends WC_Settings_API
                     'options' => WordPress::applyFilters('getAvailableAutoDebitMethods', []),
                     'default' => 'default',
                     'custom_attributes' => [
-                        'size' => 1,
+                        'size' => count(WordPress::applyFilters('getAvailableAutoDebitMethods', [])),
                         'multiple' => 'multiple',
                     ],
                 ],
