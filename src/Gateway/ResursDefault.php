@@ -2222,11 +2222,7 @@ class ResursDefault extends WC_Payment_Gateway
         } else {
             $currentOrderStatus = $this->order->get_status();
             if ($currentOrderStatus !== $woocommerceStatus) {
-                OrderStatus::setOrderStatusWithNotice(
-                    $this->order,
-                    $woocommerceStatus,
-                    $statusNotification
-                );
+                OrderStatus::setOrderStatusByQueue($this->order);
             } else {
                 $orderStatusUpdateNotice = __(
                     sprintf(

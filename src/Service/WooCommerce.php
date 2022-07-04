@@ -1110,32 +1110,9 @@ class WooCommerce
             //self::getCustomerRealAddress($order);
             $orderHandler = new OrderHandler();
             $orderHandler->getCustomerRealAddress($order);
-            self::setOrderStatusByCallback(
-                $order
-            );
-        }
-    }
 
-    /**
-     * @param WC_Order $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function setOrderStatusByCallback($order): void
-    {
-        /*
-        self::setOrderNote(
-            $order,
-            sprintf(
-                __(
-                    'Callback received for order %s. Status update added to queue.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ),
-                $order->get_id()
-            )
-        );
-        */
-        self::setOrderStatusWithNotice($order);
+            self::setOrderStatus($order);
+        }
     }
 
     /**
@@ -1148,10 +1125,10 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function setOrderStatusWithNotice($order)
+    private static function setOrderStatus($order)
     {
         // Don't get fooled by the same name. This function is set elsewhere.
-        return OrderStatusHandler::setOrderStatusWithNotice($order);
+        return OrderStatusHandler::setOrderStatusByQueue($order);
     }
 
     /**
@@ -1188,7 +1165,7 @@ class WooCommerce
      * @throws ResursException
      * @since 0.0.1.0
      */
-    private static function setSigningMarked($orderId, $byCallback)
+    private static function setSigningMarked($orderId, $byCallback): void
     {
         if (Data::getOrderMeta('signingRedirectTime', $orderId) &&
             Data::getOrderMeta('bookPaymentStatus', $orderId) &&
@@ -1237,7 +1214,7 @@ class WooCommerce
      */
     public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote): bool
     {
-        return OrderStatusHandler::setOrderStatusWithNotice($order);
+        return OrderStatusHandler::setOrderStatusByQueue($order);
     }
 
     /**

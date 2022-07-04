@@ -88,7 +88,7 @@ class OrderStatus
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderStatusWithNotice($order): string
+    public static function setOrderStatusByQueue($order): string
     {
         return (self::getStaticQueue())->setOrderStatus($order);
     }
