@@ -146,6 +146,29 @@ The payment flow itself for each API [is described here](https://docs.tornevall.
 
 Active/open issues can be found [here](https://tracker.tornevall.net/projects/RWC/issues/) [and here](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues). You can also [inspect the project status here](https://tracker.tornevall.net/secure/Dashboard.jspa?selectPageId=11200)! Most recent [CHANGELOG can be found here](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/blob/master/CHANGELOG.md).
 
+= 0.0.1.7 =
+
+* [RWC-398] - Plugin activation may fail when credentials are not set
+* [RWC-399] - At first time activation, verify account credentials button are missing
+* [RWC-400] - "Credentials are not fully set"-warnings (+env-switcher is out of order)
+* [RWC-401] - Database cleaner does not remove all prefixed settings properly
+* [RWC-411] - getPayment in a prefixed environment fails on order id
+* [RWC-415] - Problems with network lookups inside ipv4/ipv6-resolver
+* [RWC-425] - Queue-handler leaves auto debited statuses out of action
+* [RWC-396] - Maintain plugin compatibility by not using prefixes on autoloading frontend scripts
+* [RWC-402] - Automatically handle correct plugin prefix
+* [RWC-405] - Environment listview should be restored (skip dropdown)
+* [RWC-406] - Fraudcontrol admin should only be shown when correct flow is chosen
+* [RWC-409] - Rebranded colour set (by CSS)
+* [RWC-410] - Order information prefixed root keys must include both default and special prefix
+* [RWC-414] - All listboxes are suggested to be dropdowns
+* [RWC-416] - Payment information meta (extend view on demand)
+* [RWC-419] - Move Resurs info into meta boxes
+* [RWC-421] - Unavailabe resurs payments in meta-box
+* [RWC-422] - Resurs metadata toggler does not work in the table view
+* [RWC-424] - DENIED message string (change)
+* [RWC-426] - Customer landing status should also be queued
+
 = 0.0.1.6 =
 
 * [RWC-353](https://tracker.tornevall.net/browse/RWC-353) - Resurs Bank Deprecated imports breaks annuity factors
