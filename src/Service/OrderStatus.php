@@ -3,6 +3,7 @@
 namespace ResursBank\Service;
 
 use Exception;
+use WC_Order;
 use WC_Queue_Interface;
 
 /**
@@ -83,39 +84,29 @@ class OrderStatus
     /**
      * Order status helper.
      *
-     * @param $order
-     * @param $status
-     * @param $notice
+     * @param WC_Order|int $order
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function setOrderStatusWithNotice($order, $status, $notice): string
+    public static function setOrderStatusWithNotice($order): string
     {
-        return (self::getStaticQueue())->setOrderStatus(
-            $order,
-            $status,
-            $notice
-        );
+        return (self::getStaticQueue())->setOrderStatus($order);
     }
 
     /**
      * This is where we push the order statuses into a queue. Can be called directly if not using the static method.
      *
      * @param $order
-     * @param $status
-     * @param $notice
      * @return string
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function setOrderStatus($order, $status, $notice): string
+    public function setOrderStatus($order): string
     {
         return WooCommerce::applyQueue(
             'updateOrderStatusByQueue',
             [
-                WooCommerce::getProperOrder($order, 'id'),
-                $status,
-                $notice,
+                WooCommerce::getProperOrder($order, 'id')
             ]
         );
     }

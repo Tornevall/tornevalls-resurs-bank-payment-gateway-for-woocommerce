@@ -13,6 +13,7 @@ use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderStatus as OrderStatusHandler;
 use ResursException;
@@ -1103,51 +1104,38 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getUpdatedOrderByCallback($paymentId, $orderId, $order)
+    private static function getUpdatedOrderByCallback($paymentId, $orderId, $order): void
     {
         if ($orderId) {
             //self::getCustomerRealAddress($order);
             $orderHandler = new OrderHandler();
             $orderHandler->getCustomerRealAddress($order);
             self::setOrderStatusByCallback(
-                ResursBankAPI::getResurs()->getOrderStatusByPayment($paymentId),
                 $order
             );
         }
     }
 
     /**
-     * @param $ecomOrderStatus
      * @param WC_Order $order
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function setOrderStatusByCallback($ecomOrderStatus, $order)
+    private static function setOrderStatusByCallback($order): void
     {
-        switch (true) {
-            case $ecomOrderStatus & OrderStatus::PENDING:
-                self::setOrderStatusWithNotice($order, OrderStatus::PENDING);
-                break;
-            case $ecomOrderStatus & OrderStatus::PROCESSING:
-                self::setOrderStatusWithNotice($order, OrderStatus::PROCESSING);
-                break;
-            case $ecomOrderStatus & OrderStatus::AUTO_DEBITED:
-                self::setOrderStatusWithNotice($order, OrderStatus::AUTO_DEBITED);
-                break;
-            case $ecomOrderStatus & OrderStatus::COMPLETED:
-                self::setOrderStatusWithNotice($order, OrderStatus::COMPLETED);
-                break;
-            case $ecomOrderStatus & OrderStatus::ANNULLED:
-                self::setOrderStatusWithNotice($order, OrderStatus::ANNULLED);
-                break;
-            case $ecomOrderStatus & OrderStatus::CREDITED:
-                self::setOrderStatusWithNotice($order, OrderStatus::CREDITED);
-                break;
-            case $ecomOrderStatus & OrderStatus::MANUAL_INSPECTION:
-                self::setOrderStatusWithNotice($order, OrderStatus::MANUAL_INSPECTION);
-                break;
-            default:
-        }
+        /*
+        self::setOrderNote(
+            $order,
+            sprintf(
+                __(
+                    'Callback received for order %s. Status update added to queue.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ),
+                $order->get_id()
+            )
+        );
+        */
+        self::setOrderStatusWithNotice($order);
     }
 
     /**
@@ -1156,68 +1144,14 @@ class WooCommerce
      * be depending on this. Other functions using this feature should not be required to validate success.
      *
      * @param WC_Order $order
-     * @param $ecomOrderStatus
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function setOrderStatusWithNotice($order, $ecomOrderStatus)
+    private static function setOrderStatusWithNotice($order)
     {
-        $currentStatus = $order->get_status();
-        $requestedStatus = self::getOrderStatuses($ecomOrderStatus);
-
-        if (strtolower($currentStatus) !== strtolower($requestedStatus)) {
-            if ($ecomOrderStatus & OrderStatus::AUTO_DEBITED) {
-                self::setOrderNote(
-                    $order,
-                    __(
-                        'Resurs Bank order status update indicates direct debited payment method.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    )
-                );
-            }
-
-            self::setOrderNote(
-                $order,
-                sprintf(
-                    __(
-                        'Order status update to %s has been queued.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    $requestedStatus
-                )
-            );
-
-            // Don't get fooled by the same name. This function is set elsewhere.
-            $return = OrderStatusHandler::setOrderStatusWithNotice(
-                $order,
-                $requestedStatus,
-                sprintf(
-                    __(
-                        'Resurs Bank queued order update: Change from %s to %s from queue.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    $currentStatus,
-                    $requestedStatus
-                )
-            );
-        } else {
-            $orderStatusUpdateNotice = __(
-                sprintf(
-                    '%s notice: Request to set order to status "%s" but current status is already set.',
-                    __FUNCTION__,
-                    $requestedStatus
-                ),
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            );
-            $return = self::setOrderNote(
-                $order,
-                $orderStatusUpdateNotice
-            );
-            Data::setLogNotice($orderStatusUpdateNotice);
-        }
-
-        return $return;
+        // Don't get fooled by the same name. This function is set elsewhere.
+        return OrderStatusHandler::setOrderStatusWithNotice($order);
     }
 
     /**
@@ -1226,7 +1160,7 @@ class WooCommerce
      * @since 0.0.1.0
      * @noinspection PhpDeprecationInspection
      */
-    private static function getOrderStatuses($key = null)
+    public static function getOrderStatuses($key = null)
     {
         $returnStatusString = 'on-hold';
         $autoFinalizationString = Data::getResursOption('order_instant_finalization_status');
@@ -1303,20 +1237,7 @@ class WooCommerce
      */
     public static function setOrderStatusUpdate($order, $newOrderStatus, $orderNote): bool
     {
-        if (Data::getResursOption('queue_order_statuses_on_success')) {
-            $return = OrderStatusHandler::setOrderStatusWithNotice(
-                $order,
-                $newOrderStatus,
-                $orderNote
-            );
-        } else {
-            $return = self::getProperOrder($order, 'order')->update_status(
-                $newOrderStatus,
-                self::getOrderNotePrefixed($orderNote)
-            );
-        }
-
-        return $return;
+        return OrderStatusHandler::setOrderStatusWithNotice($order);
     }
 
     /**

@@ -693,22 +693,6 @@ class FormFields extends WC_Settings_API
                     ),
                     'default' => '3600',
                 ],
-                'queue_order_statuses_on_success' => [
-                    'id' => 'queue_order_statuses_on_success',
-                    'title' => __(
-                        'Queue order statuses on successpage',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'desc' => __('Enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'desc_tip' => __(
-                        'If you suspect that there may be race conditions between order status updates in the ' .
-                        'customer-success landing page, and the order statuses updated with callbacks you can ' .
-                        'enable this option to queue not only the callback updates but also the other updates.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'type' => 'checkbox',
-                    'default' => 'no',
-                ],
                 'discard_coupon_vat' => [
                     'id' => 'discard_coupon_vat',
                     'title' => __(

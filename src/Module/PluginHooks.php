@@ -822,23 +822,27 @@ class PluginHooks
      * Queued status handler. Should not be called directly as it is based on WC_Queue.
      *
      * @param $order
-     * @param $status
-     * @param $notice
      * @throws Exception
      * @since 0.0.1.0
      * @link https://github.com/woocommerce/woocommerce/wiki/WC_Queue---WooCommerce-Worker-Queue
      */
-    public function updateOrderStatusByQueue($order = '', $status = '', $notice = '')
+    public function updateOrderStatusByQueue($order = ''): void
     {
-        if (!empty($status)) {
-            $properOrder = WooCommerce::getProperOrder($order, 'order');
+        $resursOrder = Data::getResursOrderIfExists($order);
+
+        if (isset($resursOrder['order'], $resursOrder['ecom']->id) && $resursOrder['order'] instanceof WC_Order) {
+            $properOrder = $resursOrder['order'];
+            $resursConnection = (new ResursBankAPI())->getConnection();
+            $statusId = $resursConnection->getOrderStatusByPayment($resursOrder['ecom']->id);
+            $status = WooCommerce::getOrderStatuses($statusId);
 
             $currentStatus = $properOrder->get_status();
             if ($currentStatus !== $status) {
                 $properOrder->update_status(
                     $status,
-                    WooCommerce::getOrderNotePrefixed($notice)
+                    WooCommerce::getOrderNotePrefixed('Queued Order Status Update.')
                 );
+
                 // v2.x deprecated action.
                 do_action('resurs_bank_order_status_update', $properOrder->get_id(), $status);
                 // Action for all new plugin versions.
@@ -847,12 +851,11 @@ class PluginHooks
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf(
                         __(
-                            'Queued Status Handler: Updated status for %s to %s with notice: %s',
+                            'Queued Status Handler: Updated status for %s to %s.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $order,
                         $status,
-                        $notice
                     )
                 );
             } else {
@@ -864,7 +867,7 @@ class PluginHooks
                             'status was already set.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
-                        $order,
+                        $properOrder->get_id(),
                         $status
                     )
                 );

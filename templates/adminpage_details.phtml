@@ -160,7 +160,7 @@ printf(__(
                         );
                     } elseif ($key === 'status') {
                         echo esc_html(implode(', ', (array)$value));
-                    } elseif (preg_match("/\n/", $value)) {
+                    } elseif (is_string($value) && preg_match("/\n/", $value)) {
                         echo nl2br($value);
                     } elseif (is_array($value)) {
                         echo Data::getEscapedHtml(implode('<br>', $value));
