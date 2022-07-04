@@ -8,6 +8,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use Resursbank\Ecommerce\Service\Merchant\Model\Method;
+use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use stdClass;
@@ -945,6 +946,12 @@ class FormFields extends WC_Settings_API
                 'title' => __('Support', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
             ],
         ];
+
+        if (Data::getCheckoutType() !== ResursDefault::TYPE_SIMPLIFIED &&
+            WordPress::applyFilters('canHideFraudControl', true)
+        ) {
+            unset($formFields['fraud_control']);
+        }
 
         $hasOldSettings = get_option('woocommerce_resurs-bank_settings');
         if (is_array($hasOldSettings) && isset($hasOldSettings['enabled'])) {
