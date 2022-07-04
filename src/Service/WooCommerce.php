@@ -1154,14 +1154,8 @@ class WooCommerce
         ]);
         if (isset($key, $return[$key])) {
             $returnStatusString = $return[$key];
-        } else {
-            // Handle specials.
-            switch (true) {
-                case $key & OrderStatus::AUTO_DEBITED:
-                    $returnStatusString = $return[OrderStatus::AUTO_DEBITED];
-                    break;
-                default:
-            }
+        } elseif ($key & OrderStatus::AUTO_DEBITED) {
+            $returnStatusString = $return[OrderStatus::AUTO_DEBITED];
         }
 
         return $returnStatusString;
