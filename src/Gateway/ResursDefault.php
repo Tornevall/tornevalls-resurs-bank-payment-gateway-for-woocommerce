@@ -2154,7 +2154,7 @@ class ResursDefault extends WC_Payment_Gateway
                 );
                 wc_add_notice(
                     __(
-                        'The payment can not complete. Contact customer services for more information.',
+                        'The payment can not complete. Please choose another payment method.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'error'
