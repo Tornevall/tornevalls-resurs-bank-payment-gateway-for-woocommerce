@@ -2091,29 +2091,38 @@ class ResursDefault extends WC_Payment_Gateway
                 $bookPaymentStatus
             )
         );
+
+        // Always add status update to queue instead of setting it instantly. Further below we will
+        // only add an order note, so the queue-system will handle the proper status (this also prevents
+        // race conditions between customer and callback).
+        OrderStatus::setOrderStatusByQueue($this->order);
+
         switch ($bookPaymentStatus) {
             case 'FINALIZED':
                 $this->setSigningMarked();
-                $this->updateOrderStatus(
-                    self::STATUS_FINALIZED,
-                    __('Order is debited and completed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                $this->order->add_order_note(
+                    __(
+                        'Order is reportedly debited and completed. Status update request is queued.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    )
                 );
                 $return = $this->getResult('success');
                 break;
             case 'BOOKED':
                 $this->setSigningMarked();
-                $this->updateOrderStatus(
-                    self::STATUS_BOOKED,
-                    __('Order is booked and ready to handle.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                $this->order->add_order_note(
+                    __(
+                        'Order is booked and ready to handle. Status update request is queued.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    )
                 );
                 $return = $this->getResult('success');
                 break;
             case 'FROZEN':
                 $this->setSigningMarked();
-                $this->updateOrderStatus(
-                    self::STATUS_FROZEN,
+                $this->order->add_order_note(
                     __(
-                        'Order is frozen and waiting for manual inspection.',
+                        'Order is frozen and waiting for manual inspection. Status update request is queued.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     )
                 );
@@ -2121,8 +2130,8 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'SIGNING':
                 Data::setOrderMeta($this->order, 'signingRedirectTime', date('Y-m-d H:i:s', time()));
-                $this->updateOrderStatus(
-                    self::STATUS_SIGNING,
+                // self::STATUS_SIGNING = on-hold
+                $this->order->add_order_note(
                     __(
                         'Resurs Bank requires external handling/signing on this order. Customer redirected.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'

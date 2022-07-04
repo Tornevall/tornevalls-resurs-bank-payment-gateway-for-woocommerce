@@ -249,16 +249,13 @@ class OrderHandler extends ResursDefault
         }
 
         if ($return) {
-            $synchNotice = __(
-                'Resurs Bank billing address mismatch with current address in order. ' .
-                'Data has synchronized with Resurs Bank billing data.',
-                'resurs-bank-payment-gateway-for-woocommerce'
-            );
             Data::setOrderMeta($order, 'customerSynchronization', date('Y-m-d H:i:s', time()));
-            Data::setLogNotice($synchNotice);
-            WooCommerce::setOrderNote(
-                $order,
-                $synchNotice
+            Data::setLogNotice(
+                __(
+                    'Resurs Bank billing address mismatch with current address in order. ' .
+                    'Data has synchronized with Resurs Bank billing data.',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                )
             );
         }
 
