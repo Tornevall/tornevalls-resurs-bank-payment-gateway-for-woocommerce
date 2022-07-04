@@ -1485,7 +1485,7 @@ class WooCommerce
      * @param $orderData
      * @since 0.0.1.0
      */
-    private static function getEcomHadProblemsInfo($orderData)
+    public static function getEcomHadProblemsInfo($orderData)
     {
         $return = false;
         if (isset($orderData['ecom_had_reference_problems']) && $orderData['ecom_had_reference_problems']) {

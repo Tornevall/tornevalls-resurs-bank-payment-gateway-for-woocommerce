@@ -2,13 +2,13 @@
 
 namespace ResursBank\Module;
 
+use Exception;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use ResursException;
 use WC_Order;
 use WP_Post;
-use Exception;
-use ResursException;
 
 /**
  * @since 0.0.1.7
@@ -16,12 +16,12 @@ use ResursException;
 class OrderMetaBox
 {
     /**
-     * @param $post
+     * @param WP_Post $post
      * @param $boxinfo
      * @throws ResursException
      * @since 0.0.1.7
      */
-    public static function output($post, $boxinfo)
+    public static function output_order($post)
     {
         if (!$post instanceof WP_Post && $post->post_type !== 'shop_order') {
             return;
@@ -40,21 +40,59 @@ class OrderMetaBox
             if (isset($orderData['meta']) && is_array($orderData['meta'])) {
                 $orderData['ecom_short'] = WooCommerce::getMetaDataFromOrder(
                     $orderData['ecom_short'],
+                    []
+                );
+            }
+            $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
+            if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                $orderData['ecom_short']['ecom_had_reference_problems'] =
+                    WooCommerce::getEcomHadProblemsInfo($orderData);
+            }
+
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
+            );
+            WordPress::doAction('showOrderDetails', $orderData);
+        }
+    }
+
+    /**
+     * @param WP_Post $post
+     * @throws ResursException
+     * @since 0.0.1.7
+     */
+    public static function output_meta_details($post)
+    {
+        if (!$post instanceof WP_Post && $post->post_type !== 'shop_order') {
+            return;
+        }
+        $order = new WC_Order($post->ID);
+        $paymentMethod = $order->get_payment_method();
+
+        if (Data::canHandleOrder($paymentMethod)) {
+            $orderData = Data::getOrderInfo($order);
+            self::setOrderMetaInformation($orderData);
+            $orderData['ecom_meta'] = [];
+            if (!isset($orderData['ecom'])) {
+                $orderData['ecom'] = [];
+                $orderData['ecom_short'] = [];
+            }
+            if (isset($orderData['meta']) && is_array($orderData['meta'])) {
+                $orderData['ecom_short'] = WooCommerce::getMetaDataFromOrder(
+                    [],
                     $orderData['meta']
                 );
             }
             $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
-            if (WordPress::applyFilters('canDisplayOrderInfoAfterDetails', true)) {
-                if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-                    $orderData['ecom_short']['ecom_had_reference_problems'] =
-                        self::getEcomHadProblemsInfo($orderData);
-                }
-
-                echo Data::getEscapedHtml(
-                    Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
-                );
-                WordPress::doAction('showOrderDetails', $orderData);
+            if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
+                $orderData['ecom_short']['ecom_had_reference_problems'] =
+                    WooCommerce::getEcomHadProblemsInfo($orderData);
             }
+
+            echo Data::getEscapedHtml(
+                Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
+            );
+            WordPress::doAction('showOrderDetails', $orderData);
         }
     }
 

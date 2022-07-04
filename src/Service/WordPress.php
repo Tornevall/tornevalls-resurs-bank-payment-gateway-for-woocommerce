@@ -254,7 +254,15 @@ class WordPress
                     __('%s order information', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     'Resurs'
                 ),
-                'ResursBank\Module\OrderMetaBox::output'
+                'ResursBank\Module\OrderMetaBox::output_order'
+            );
+            add_meta_box(
+                'resursbank_order_meta_details',
+                sprintf(
+                    __('%s order meta data', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'Resurs'
+                ),
+                'ResursBank\Module\OrderMetaBox::output_meta_details'
             );
         }
     }
