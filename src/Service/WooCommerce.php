@@ -798,6 +798,7 @@ class WooCommerce
             $replyArray['i'] = $orderId;
             if ($orderId) {
                 $order = new WC_Order($orderId);
+                Data::setOrderMeta($order, 'resursCallbackReceived', true);
                 self::setOrderNote(
                     new WC_Order($orderId),
                     $logNotice
@@ -956,6 +957,7 @@ class WooCommerce
     /**
      * @param $getConfirmedSalt
      * @return string
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getCallbackLogNotice($getConfirmedSalt): string

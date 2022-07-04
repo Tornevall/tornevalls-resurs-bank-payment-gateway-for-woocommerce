@@ -2019,13 +2019,36 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->getCheckoutType() === self::TYPE_HOSTED
             ) {
                 $bookSignedOrderReference = Data::getOrderMeta('resursReference', $this->wcOrderData);
-                $this->setFinalSigningNotes($bookSignedOrderReference);
-                // Signing is only necessary for simplified flow.
-                if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
-                    $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
-                        $bookSignedOrderReference
+                // This part of the plugin is intended to save performance by not running bookSignedPayment if
+                // callbacks are reaching the platform before the customer landing.
+                if (Data::getOrderMeta('resursCallbackReceived', $this->order)) {
+                    $return = [
+                        'result' => 'success',
+                        'redirect' => $this->get_return_url($this->order),
+                    ];
+                    $quickLandResponse = sprintf(
+                        __(
+                            'Callback retrieved for order %s before customer reached the order confirmation page.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
+                        $this->order->get_id()
                     );
-                    $return = $this->getResultByPaymentStatus();
+                    Data::canLog(
+                        Data::LOG_NOTICE,
+                        $quickLandResponse
+                    );
+                    $this->order->add_order_note(
+                        $quickLandResponse
+                    );
+                } else {
+                    $this->setFinalSigningNotes($bookSignedOrderReference);
+                    // Signing is only necessary for simplified flow.
+                    if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
+                        $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
+                            $bookSignedOrderReference
+                        );
+                        $return = $this->getResultByPaymentStatus();
+                    }
                 }
             } else {
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
@@ -2101,9 +2124,11 @@ class ResursDefault extends WC_Payment_Gateway
             case 'FINALIZED':
                 $this->setSigningMarked();
                 $this->order->add_order_note(
-                    __(
-                        'Order is reportedly debited and completed. Status update request is queued.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    WooCommerce::getOrderNotePrefixed(
+                        __(
+                            'Order is reportedly debited and completed. Status update request is queued.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        )
                     )
                 );
                 $return = $this->getResult('success');
