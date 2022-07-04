@@ -834,9 +834,10 @@ class PluginHooks
             $properOrder = $resursOrder['order'];
             $resursConnection = (new ResursBankAPI())->getConnection();
             $statusId = $resursConnection->getOrderStatusByPayment($resursOrder['ecom']->id);
+            $currentStatus = $properOrder->get_status();
+
             $status = WooCommerce::getOrderStatuses($statusId);
 
-            $currentStatus = $properOrder->get_status();
             if ($currentStatus !== $status) {
                 $properOrder->update_status(
                     $status,

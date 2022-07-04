@@ -1154,6 +1154,14 @@ class WooCommerce
         ]);
         if (isset($key, $return[$key])) {
             $returnStatusString = $return[$key];
+        } else {
+            // Handle specials.
+            switch (true) {
+                case $key & OrderStatus::AUTO_DEBITED:
+                    $returnStatusString = $return[OrderStatus::AUTO_DEBITED];
+                    break;
+                default:
+            }
         }
 
         return $returnStatusString;
@@ -1234,6 +1242,9 @@ class WooCommerce
             ),
             $value,
         ];
+
+        // Special debugging row for queued order statuses.
+        //(new PluginHooks())->updateOrderStatusByQueue($value[0]);
 
         return WC()->queue()->add(
             ...array_merge($applyArray, WordPress::getFilterArgs(func_get_args()))
