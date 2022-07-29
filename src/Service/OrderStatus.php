@@ -114,10 +114,19 @@ class OrderStatus
      */
     public function setOrderStatus($order): string
     {
+        $orderId = WooCommerce::getProperOrder($order, 'id');
+
+        Data::setLogNotice(
+            sprintf(
+                'applyQueue(updateOrderStatusByQueue) for order %d.',
+                $orderId
+            )
+        );
+
         return WooCommerce::applyQueue(
             'updateOrderStatusByQueue',
             [
-                WooCommerce::getProperOrder($order, 'id')
+                $orderId
             ]
         );
     }
