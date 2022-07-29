@@ -630,7 +630,7 @@ class ResursBankAPI
     {
         $return = self::$callbacks;
         $stored = json_decode(Data::getResursOption('callbacks'), false);
-        if ($fromStorage && is_array($stored)) {
+        if ($fromStorage && (is_array($stored) || is_object($stored))) {
             $return = $stored;
         }
 
@@ -655,7 +655,7 @@ class ResursBankAPI
             Data::setResursOption('callbacks', json_encode(self::$callbacks));
         }
 
-        return $return;
+        return (array)$return;
     }
 
     /**

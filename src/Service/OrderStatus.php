@@ -3,6 +3,7 @@
 namespace ResursBank\Service;
 
 use Exception;
+use ResursBank\Module\Data;
 use WC_Order;
 use WC_Queue_Interface;
 
@@ -90,6 +91,21 @@ class OrderStatus
      */
     public static function setOrderStatusByQueue($order): string
     {
+        $orderId = null;
+        if ($order instanceof WC_Order) {
+            $orderId = $order->get_id();
+        } elseif (is_numeric($order) && (int)$order > 0) {
+            $orderId = $order;
+        }
+
+        if ($orderId > 0) {
+            Data::setLogNotice(
+                sprintf(
+                    'OrderStatus::setOrderStatusByQueue(), id %d.',
+                    $orderId
+                )
+            );
+        }
         return (self::getStaticQueue())->setOrderStatus($order);
     }
 

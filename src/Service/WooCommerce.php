@@ -907,6 +907,8 @@ class WooCommerce
             Data::setResursOption('resurs_callback_test_start', null);
             $code = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
 
+            Data::setLogNotice('Callback TEST OK.');
+
             // There are not digest codes available in this state so we should throw the callback handler
             // a success regardless.
             $replyArray['digestCode'] = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
@@ -915,7 +917,7 @@ class WooCommerce
         Data::setLogNotice(
             sprintf(
                 __(
-                    'Callback (%s) Handling for %s finished.',
+                    'Callback %s for %s received.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $callbackType,
@@ -964,9 +966,10 @@ class WooCommerce
     {
         return sprintf(
             __(
-                'Callback received from Resurs Bank: %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
+                'Callback received from Resurs Bank (%s): %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
+            $_SERVER['REMOTE_ADDR'] ?? 'NO IP FOUND',
             Data::getRequest('c'),
             $getConfirmedSalt ? __(
                 'Valid',
@@ -1175,6 +1178,7 @@ class WooCommerce
             Data::getOrderMeta('bookPaymentStatus', $orderId) &&
             empty(Data::getOrderMeta('signingOk', $orderId))
         ) {
+            Data::setLogNotice(sprintf('%s for %s -- OK', __FUNCTION__, $orderId));
             Data::setOrderMeta($orderId, 'signingOk', date('Y-m-d H:i:s', time()));
             Data::setOrderMeta(
                 $orderId,
@@ -1185,7 +1189,11 @@ class WooCommerce
                     date('Y-m-d H:i:s', time())
                 )
             );
+
+            return;
         }
+
+        Data::setLogNotice(sprintf('%s for %s - skipped handler.', __FUNCTION__, $orderId));
     }
 
     /**
