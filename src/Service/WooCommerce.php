@@ -1030,19 +1030,6 @@ class WooCommerce
      */
     public static function getProperOrder($orderContainer, $returnAs, $log = false)
     {
-        if ($log) {
-            Data::setLogNotice(
-                sprintf(
-                    __(
-                        'getProperOrder for %s (as %s).',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    $orderContainer,
-                    $returnAs
-                )
-            );
-        }
-
         if (method_exists($orderContainer, 'get_id')) {
             $orderId = $orderContainer->get_id();
             $order = $orderContainer;
@@ -1056,6 +1043,19 @@ class WooCommerce
             throw new RuntimeException(
                 sprintf('Order id not found when looked up in %s.', __FUNCTION__),
                 400
+            );
+        }
+
+        if ($log) {
+            Data::setLogNotice(
+                sprintf(
+                    __(
+                        'getProperOrder for %s (as %s).',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    $orderId,
+                    $returnAs
+                )
             );
         }
 
