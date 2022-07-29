@@ -852,6 +852,7 @@ class PluginHooks
                         'Update order %s from queue requested: %s -> %s',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
+                    $order,
                     $currentStatus,
                     $status
                 )
