@@ -838,6 +838,17 @@ class PluginHooks
 
             $status = WooCommerce::getOrderStatuses($statusId);
 
+            Data::setLogNotice(
+                sprintf(
+                    __(
+                        'Update order %s from queue requested: %s -> %s',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    $currentStatus,
+                    $status
+                )
+            );
+
             if ($currentStatus !== $status) {
                 $properOrder->update_status(
                     $status,
@@ -848,20 +859,19 @@ class PluginHooks
                 do_action('resurs_bank_order_status_update', $properOrder->get_id(), $status);
                 // Action for all new plugin versions.
                 WordPress::doAction('updateOrderStatusEvent', $properOrder->get_id(), $status);
-                Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS,
+                Data::setLogNotice(
                     sprintf(
                         __(
                             'Queued Status Handler: Updated status for %s to %s.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $order,
-                        $status,
+                        $status
                     )
                 );
             } else {
-                Data::canLog(
-                    Data::CAN_LOG_ORDER_EVENTS,
+                // Must always log what happens in the queue.
+                Data::setLogNotice(
                     sprintf(
                         __(
                             'Queued Status Handler: Status for %s not updated to %s, because that ' .
@@ -873,6 +883,16 @@ class PluginHooks
                     )
                 );
             }
+        } else {
+            Data::setLogNotice(
+                sprintf(
+                    __(
+                        'Queued Status Handler: Order %s was not properly queued.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    $order
+                )
+            );
         }
     }
 
