@@ -91,12 +91,7 @@ class OrderStatus
      */
     public static function setOrderStatusByQueue($order): string
     {
-        $orderId = null;
-        if ($order instanceof WC_Order) {
-            $orderId = $order->get_id();
-        } elseif (is_numeric($order) && (int)$order > 0) {
-            $orderId = $order;
-        }
+        $orderId = WooCommerce::getProperOrder($order, 'id', true);
 
         if ($orderId > 0) {
             Data::setLogNotice(

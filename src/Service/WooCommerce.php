@@ -1024,12 +1024,25 @@ class WooCommerce
      * Centralized order retrieval.
      * @param $orderContainer
      * @param $returnAs
+     * @param bool $log
      * @return int|WC_Order
-     * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getProperOrder($orderContainer, $returnAs)
+    public static function getProperOrder($orderContainer, $returnAs, $log = false)
     {
+        if ($log) {
+            Data::setLogNotice(
+                sprintf(
+                    __(
+                        'getProperOrder for %s (as %s).',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    $orderContainer,
+                    $returnAs
+                )
+            );
+        }
+
         if (method_exists($orderContainer, 'get_id')) {
             $orderId = $orderContainer->get_id();
             $order = $orderContainer;
@@ -1192,8 +1205,6 @@ class WooCommerce
 
             return;
         }
-
-        Data::setLogNotice(sprintf('%s for %s - skipped handler.', __FUNCTION__, $orderId));
     }
 
     /**

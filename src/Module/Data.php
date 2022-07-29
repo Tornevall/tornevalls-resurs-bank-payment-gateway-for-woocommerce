@@ -1109,7 +1109,7 @@ class Data
      * @throws ResursException
      * @since 0.0.1.0
      */
-    public static function getResursOrderIfExists($orderData)
+    public static function getResursOrderIfExists($orderData): ?array
     {
         $return = null;
         $order = WooCommerce::getProperOrder($orderData, 'order');
