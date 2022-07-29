@@ -821,13 +821,21 @@ class PluginHooks
     /**
      * Queued status handler. Should not be called directly as it is based on WC_Queue.
      *
-     * @param $order
+     * @param int $order
      * @throws Exception
      * @since 0.0.1.0
      * @link https://github.com/woocommerce/woocommerce/wiki/WC_Queue---WooCommerce-Worker-Queue
      */
-    public function updateOrderStatusByQueue($order = ''): void
+    public function updateOrderStatusByQueue(int $order): void
     {
+        Data::setLogNotice(
+            sprintf(
+                '%s: %s',
+                __FUNCTION__,
+                $order
+            )
+        );
+
         $resursOrder = Data::getResursOrderIfExists($order);
 
         if (isset($resursOrder['order'], $resursOrder['ecom']->id) && $resursOrder['order'] instanceof WC_Order) {

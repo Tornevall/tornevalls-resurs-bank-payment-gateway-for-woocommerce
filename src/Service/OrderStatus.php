@@ -101,7 +101,7 @@ class OrderStatus
         if ($orderId > 0) {
             Data::setLogNotice(
                 sprintf(
-                    'OrderStatus::setOrderStatusByQueue(), id %d.',
+                    'OrderStatus::setOrderStatusByQueue(%d).',
                     $orderId
                 )
             );
