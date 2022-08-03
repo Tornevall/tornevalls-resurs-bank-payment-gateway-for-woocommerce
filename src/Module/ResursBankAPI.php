@@ -647,7 +647,7 @@ class ResursBankAPI
             $this->getResolvedCredentials();
         } catch (Exception $e) {
             $return = false;
-            if ($e->getCode() !== ResursBankAPI::UNSET_CREDENTIALS_EXCEPTION) {
+            if ($e->getCode() !== Data::UNSET_CREDENTIALS_EXCEPTION) {
                 Data::setTimeoutStatus(self::getResurs(), $e);
                 Data::setLogException($e, __FUNCTION__);
             }
