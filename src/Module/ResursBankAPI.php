@@ -24,12 +24,6 @@ use function is_object;
 class ResursBankAPI
 {
     /**
-     * @var int
-     * @since 0.0.1.4
-     */
-    const UNSET_CREDENTIALS_EXCEPTION = 4444;
-
-    /**
      * @var ResursBank $resursBank
      * @since 0.0.1.0
      */
@@ -189,29 +183,12 @@ class ResursBankAPI
     }
 
     /**
+     * @return bool
      * @throws Exception
-     * @since 0.0.1.0
      */
     private function getResolvedCredentials(): bool
     {
-        $environment = Data::getResursOption('environment');
-
-        if ($environment === 'live') {
-            $getUserFrom = 'login_production';
-            $getPasswordFrom = 'password_production';
-        } else {
-            $getUserFrom = 'login';
-            $getPasswordFrom = 'password';
-        }
-
-        $this->credentials['username'] = Data::getResursOption($getUserFrom);
-        $this->credentials['password'] = Data::getResursOption($getPasswordFrom);
-
-        if (empty($this->credentials['username']) || empty($this->credentials['password'])) {
-            throw new RuntimeException('ECom credentials are not fully set.', self::UNSET_CREDENTIALS_EXCEPTION);
-        }
-
-        return true;
+        return Data::getResolvedCredentials();
     }
 
     /**

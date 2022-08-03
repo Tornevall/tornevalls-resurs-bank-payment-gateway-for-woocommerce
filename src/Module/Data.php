@@ -40,6 +40,12 @@ use function is_string;
 class Data
 {
     /**
+     * @var int
+     * @since 0.0.1.4
+     */
+    const UNSET_CREDENTIALS_EXCEPTION = 4444;
+
+    /**
      * @var string
      * @since 0.0.1.0
      */
@@ -2687,6 +2693,60 @@ class Data
         $customerTypeByCompanyName = self::getRequest('billing_company', true);
 
         return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getResolvedCredentials(): bool
+    {
+        $credentials = self::getResolvedCredentialData();
+
+        if (empty($credentials['username']) || empty($credentials['password'])) {
+            throw new RuntimeException('ECom credentials are not fully set.', self::UNSET_CREDENTIALS_EXCEPTION);
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.8
+     */
+    public static function hasCredentials(): bool
+    {
+        try {
+            self::getResolvedCredentials();
+            $return = true;
+        } catch (RuntimeException $e) {
+            $return = false;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return array
+     * @since 0.0.1.8
+     */
+    private static function getResolvedCredentialData(): array
+    {
+        $environment = self::getResursOption('environment');
+
+        if ($environment === 'live') {
+            $getUserFrom = 'login_production';
+            $getPasswordFrom = 'password_production';
+        } else {
+            $getUserFrom = 'login';
+            $getPasswordFrom = 'password';
+        }
+
+        $credentials['username'] = self::getResursOption($getUserFrom);
+        $credentials['password'] = self::getResursOption($getPasswordFrom);
+
+        return $credentials;
     }
 
     /**

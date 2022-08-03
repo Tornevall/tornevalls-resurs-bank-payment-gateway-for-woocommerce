@@ -99,7 +99,10 @@ class WooCommerce
         if (is_admin()) {
             $gateways[] = ResursDefault::class;
         } else {
-            $gateways = self::getGatewaysFromPaymentMethods($gateways);
+            // Make sure there are credentials before generating gateways.
+            if (Data::hasCredentials()) {
+                $gateways = self::getGatewaysFromPaymentMethods($gateways);
+            }
         }
         return $gateways;
     }
@@ -178,7 +181,7 @@ class WooCommerce
         try {
             $storedMethods = ResursBankAPI::getPaymentMethods(true);
         } catch (Exception $e) {
-            if ($e->getCode() === ResursBankAPI::UNSET_CREDENTIALS_EXCEPTION) {
+            if ($e->getCode() === Data::UNSET_CREDENTIALS_EXCEPTION) {
                 $storedMethods = [];
             } else {
                 throw $e;
@@ -576,7 +579,7 @@ class WooCommerce
      */
     public static function getGenericLocalization($return, $scriptName)
     {
-        if (is_checkout() && preg_match('/_checkout$/', $scriptName)) {
+        if (preg_match('/_checkout$/', $scriptName) && is_checkout() && Data::hasCredentials()) {
             $return[sprintf(
                 '%s_rco_suggest_id',
                 Data::getPrefix()
