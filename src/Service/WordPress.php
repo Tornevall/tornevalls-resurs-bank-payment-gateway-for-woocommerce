@@ -601,6 +601,7 @@ class WordPress
      * @param $scriptName
      * @param null $isAdmin
      * @param null $extraLocalizationData
+     * @throws Exception
      * @since 0.0.1.0
      */
     public static function getLocalizedScripts($scriptName, $isAdmin = null, $extraLocalizationData = null)
