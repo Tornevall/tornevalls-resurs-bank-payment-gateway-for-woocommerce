@@ -576,6 +576,7 @@ class WooCommerce
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
+     * @noinspection PhpUnused
      */
     public static function getGenericLocalization($return, $scriptName)
     {
