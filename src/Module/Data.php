@@ -2731,7 +2731,7 @@ class Data
      * @return array
      * @since 0.0.1.8
      */
-    private static function getResolvedCredentialData(): array
+    public static function getResolvedCredentialData(): array
     {
         $environment = self::getResursOption('environment');
 

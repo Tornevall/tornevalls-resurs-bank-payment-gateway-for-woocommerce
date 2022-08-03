@@ -188,6 +188,12 @@ class ResursBankAPI
      */
     private function getResolvedCredentials(): bool
     {
+        // Make sure we still get credentials for the API specifically.
+        if (Data::hasCredentials()) {
+            $this->credentials = Data::getResolvedCredentialData();
+        }
+
+        // Keep handling exceptions as before.
         return Data::getResolvedCredentials();
     }
 
