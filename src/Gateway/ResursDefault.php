@@ -2126,7 +2126,8 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->order->add_order_note(
                     WooCommerce::getOrderNotePrefixed(
                         __(
-                            'Order is reportedly debited and completed. Status update request is queued.',
+                            'Customer Landing Page: Order is reportedly debited and completed. ' .
+                            'Status update request is queued.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         )
                     )
