@@ -37,6 +37,9 @@ function getResursAdminFields() {
     getResursAdminCheckoutType();
     getResursAdminPasswordButton();
     rbwcAdminNetworkLookup();
+    if (getResursLocalization('current_section') === 'information') {
+        $rQuery('.woocommerce-save-button').hide();
+    }
 }
 
 /**

@@ -1248,6 +1248,7 @@ class WooCommerce
      *
      * @param $queueName
      * @param $value
+     * @return string
      * @since 0.0.1.0
      */
     public static function applyQueue($queueName, $value): string
