@@ -649,8 +649,9 @@ class WordPress
      */
     private static function getLocalizationDataAdmin($return)
     {
-        global $current_tab;
+        global $current_tab, $current_section;
         $return['prefix'] = Data::getPrefix();
+        $return['current_section'] = $current_section;
         $return['noncify'] = self::getNonce('admin');
         $return['environment'] = ResursBankAPI::getEnvironment();
         $return['wsdl'] = ResursBankAPI::getWsdlMode();
