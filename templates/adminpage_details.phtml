@@ -81,6 +81,11 @@ printf(__(
         $hasExpander = false;
         $allowExpander = false;
         foreach ($ecom_short as $key => $value) {
+            // Only show ecom reference problems IF there was a problem.
+            if ($key === 'ecom_had_reference_problems' && $value === false) {
+                $key = 'ECom Reference Error';
+                continue;
+            }
             if ($setExpander && $allowExpander) {
                 $hasExpander = true;
                 $setExpander = false; ?>

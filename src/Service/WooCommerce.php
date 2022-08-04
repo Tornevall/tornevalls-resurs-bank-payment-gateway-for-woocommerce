@@ -404,12 +404,12 @@ class WooCommerce
     }
 
     /**
-     * @param $ecomHolder
-     * @param $metaArray
+     * @param array $ecomHolder
+     * @param array $metaArray
      * @return mixed
      * @since 0.0.1.0
      */
-    public static function getMetaDataFromOrder($ecomHolder, $metaArray)
+    public static function getMetaDataFromOrder(array $ecomHolder, array $metaArray)
     {
         $metaPrefix = Data::getPrefix();
         /** @var array $ecomMetaArray */
@@ -425,7 +425,8 @@ class WooCommerce
                 }
             }
         }
-        return array_merge($ecomHolder, self::getPurgedMetaData($ecomMetaArray));
+
+        return array_merge((array)self::getPurgedMetaData($ecomHolder), (array)self::getPurgedMetaData($ecomMetaArray));
     }
 
     /**
@@ -433,25 +434,29 @@ class WooCommerce
      * @return mixed
      * @since 0.0.1.0
      */
-    private static function getPurgedMetaData($metaDataContainer)
+    private static function getPurgedMetaData($metaDataContainer): array
     {
-        $purgeArray = [
+        $purgeArray = WordPress::applyFilters('purgeMetaData', [
             'orderSigningPayload',
             'orderapi',
             'apiDataId',
-        ];
+            'cached',
+            'requestMethod',
+        ]);
         // Not necessary for customer to view.
         $metaPrefix = Data::getPrefix();
-        foreach ($purgeArray as $purgeKey) {
-            if (isset($metaDataContainer[$purgeKey])) {
-                unset($metaDataContainer[$purgeKey]);
-            }
-            $prefixed = sprintf('%s_%s', $metaPrefix, $purgeKey);
-            if (isset($metaDataContainer[$prefixed])) {
-                unset($metaDataContainer[$prefixed]);
+        if (is_array($metaDataContainer) && count($metaDataContainer)) {
+            foreach ($purgeArray as $purgeKey) {
+                if (isset($metaDataContainer[$purgeKey])) {
+                    unset($metaDataContainer[$purgeKey]);
+                }
+                $prefixed = sprintf('%s_%s', $metaPrefix, $purgeKey);
+                if (isset($metaDataContainer[$prefixed])) {
+                    unset($metaDataContainer[$prefixed]);
+                }
             }
         }
-        return $metaDataContainer;
+        return (array)$metaDataContainer;
     }
 
     /**
@@ -1514,6 +1519,7 @@ class WooCommerce
     public static function getEcomHadProblemsInfo($orderData)
     {
         $return = false;
+
         if (isset($orderData['ecom_had_reference_problems']) && $orderData['ecom_had_reference_problems']) {
             $return = sprintf(
                 __(
@@ -1522,7 +1528,8 @@ class WooCommerce
                     'id (%s). You can check the UpdatePaymentReference values for errors.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                $orderData['resurs_secondary'] ?? __(
+                $orderData['resurs_secondary'] ??
+                __(
                     '[missing reference]',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
