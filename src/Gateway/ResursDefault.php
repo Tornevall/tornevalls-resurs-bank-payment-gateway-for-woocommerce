@@ -2042,6 +2042,7 @@ class ResursDefault extends WC_Payment_Gateway
                     );
                 } else {
                     $this->setFinalSigningNotes($bookSignedOrderReference);
+
                     // Signing is only necessary for simplified flow.
                     if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
                         $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
@@ -2082,7 +2083,8 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $customerSignedMessage = sprintf(
             __(
-                'Customer returned from Resurs Bank to complete order %s.',
+                'Customer returned from external source. Order statuses for order %s that is not yet handled, ' .
+                'are queued.',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             ),
             $bookSignedOrderReference
@@ -2126,7 +2128,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->order->add_order_note(
                     WooCommerce::getOrderNotePrefixed(
                         __(
-                            'Customer Landing Page: Order is reportedly debited and completed. ' .
+                            'Order is reportedly debited and completed. ' .
                             'Status update request is queued.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         )
