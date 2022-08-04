@@ -937,7 +937,7 @@ class ResursDefault extends WC_Payment_Gateway
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     '%s',
-                    __FUNCTION__,
+                    __FUNCTION__
                 )
             );
         } else {

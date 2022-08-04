@@ -9,6 +9,7 @@ use ResursBank\Service\WordPress;
 use ResursException;
 use WC_Order;
 use WP_Post;
+use function is_array;
 
 /**
  * @since 0.0.1.7
@@ -17,7 +18,6 @@ class OrderMetaBox
 {
     /**
      * @param WP_Post $post
-     * @param $boxinfo
      * @throws ResursException
      * @since 0.0.1.7
      */
@@ -35,8 +35,11 @@ class OrderMetaBox
             $orderData['ecom_meta'] = [];
             if (!isset($orderData['ecom'])) {
                 $orderData['ecom'] = [];
+            }
+            if (!isset($orderData['ecom_short'])) {
                 $orderData['ecom_short'] = [];
             }
+
             if (isset($orderData['meta']) && is_array($orderData['meta'])) {
                 $orderData['ecom_short'] = WooCommerce::getMetaDataFromOrder(
                     $orderData['ecom_short'],
@@ -73,6 +76,7 @@ class OrderMetaBox
             $orderData = Data::getOrderInfo($order);
             self::setOrderMetaInformation($orderData);
             $orderData['ecom_meta'] = [];
+
             if (!isset($orderData['ecom'])) {
                 $orderData['ecom'] = [];
                 $orderData['ecom_short'] = [];
@@ -80,7 +84,7 @@ class OrderMetaBox
             if (isset($orderData['meta']) && is_array($orderData['meta'])) {
                 $orderData['ecom_short'] = WooCommerce::getMetaDataFromOrder(
                     [],
-                    $orderData['meta']
+                    $orderData['meta'] ?? []
                 );
             }
             $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;

@@ -81,6 +81,19 @@ printf(__(
         $hasExpander = false;
         $allowExpander = false;
         foreach ($ecom_short as $key => $value) {
+            // Only show ecom reference problems IF there was a problem.
+            if ($key === 'ecom_had_reference_problems') {
+                // Rename display key and translate it.
+                $key = __(
+                    'ECom Reference Error',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                );
+
+                // Do not show this key if value is false.
+                if ($value === false) {
+                    continue;
+                }
+            }
             if ($setExpander && $allowExpander) {
                 $hasExpander = true;
                 $setExpander = false; ?>
