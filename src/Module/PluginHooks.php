@@ -10,8 +10,10 @@ use Exception;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
+use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use ResursException;
 use RuntimeException;
 use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Utils\WordPress as wpHelper;
@@ -65,6 +67,7 @@ class PluginHooks
         add_action('mock_refund_exception', [$this, 'mockRefundException']);
         add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
         add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
+        add_action('woocommerce_order_status_completed', [$this, 'updateOrderStatusByCompletion'], 10, 2);
         add_action('woocommerce_order_refunded', [$this, 'refundResursOrder'], 10, 2);
         add_action('woocommerce_ajax_order_items_removed', [$this, 'removeOrderItemFromResurs'], 10, 4);
         add_action('rbwc_get_tax_classes', [$this, 'getTaxClasses']);
@@ -308,6 +311,31 @@ class PluginHooks
     }
 
     /**
+     * Early exception when orders are frozen and woocommerce transitions they payment to completed.
+     *
+     * @param $orderId
+     * @return void
+     * @throws ResursException
+     * @throws Exception
+     * @since 0.0.1.8
+     */
+    public function updateOrderStatusByCompletion($orderId): void
+    {
+        $findEcom = Data::getResursOrderIfExists($orderId);
+        if (!empty($findEcom) && isset($findEcom['ecom'])) {
+            /** @var WC_Order $order */
+            //$order = $findEcom['order'];
+            $connection = (new ResursBankAPI())->getConnection();
+            if ($connection->isFrozen($findEcom['ecom'])) {
+                // WooCommerce tend to set the order status as completed even if we throw an exception.
+                // To properly make sure this is not happening, we'll put a new status queue up before the throw.
+                OrderStatus::setOrderStatusByQueue($findEcom['order']);
+                throw new Exception('Payment is in frozen state. Can not finalize!', 999);
+            }
+        }
+    }
+
+    /**
      * @param $orderId
      * @param $oldSlug
      * @param $newSlug
@@ -336,7 +364,7 @@ class PluginHooks
 
             // This is where we handle order statuses changed from WooCommerce.
             // Send the full order object here, not just WC_Order.
-            $this->handleOrderByNewSlug($newSlug, $order);
+            $this->handleOrderByNewSlug($newSlug, $order, $oldSlug);
         }
     }
 
@@ -374,12 +402,13 @@ class PluginHooks
     }
 
     /**
-     * @param $newSlug
-     * @param $order
+     * @param string $newSlug
+     * @param array $order
+     * @param string $oldSlug
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function handleOrderByNewSlug($newSlug, $order)
+    private function handleOrderByNewSlug(string $newSlug, array $order, string $oldSlug)
     {
         $afterShopResponseString = '';
 
@@ -389,15 +418,30 @@ class PluginHooks
         // Userdata that should follow with the afterShopFlow when changing order status on Resurs side,
         // for backtracking actions.
         $resursConnection->setLoggedInUser($wpHelper->getUserInfo('user_login'));
+        /** @var WC_Order $wcOrder */
+        $wcOrder = $order['order'];
 
         $resursReference = Data::getResursReference($order);
         switch ($newSlug) {
             case 'completed':
                 // Make sure we also handle instant finalizations.
+                if ($resursConnection->isFrozen($order['ecom'])) {
+                    $wcOrder->add_order_note(
+                        __(
+                            'Unable to finalize: Payment is in frozen state.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        )
+                    );
+                    // WooCommerce tend to set the order status as completed even if we throw an exception.
+                    // To properly make sure this is not happening, we'll put a new status queue up before the throw.
+                    OrderStatus::setOrderStatusByQueue($wcOrder);
+                    throw new Exception('Payment is in frozen state. Can not finalize!', 999);
+                }
+
                 if ($resursConnection->canDebit($order['ecom'])) {
                     $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
                     if (!$fullAfterShopRequest) {
-                        $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
+                        $this->hasCustomAfterShopOrderLines($wcOrder, $resursConnection);
                     }
                     try {
                         // Add feature here, for which we look for and add discounts and shipping if necessary.
@@ -427,7 +471,7 @@ class PluginHooks
                 ) {
                     $fullAfterShopRequest = $this->isFullAfterShopRequest($resursReference, $resursConnection);
                     if (!$fullAfterShopRequest) {
-                        $this->hasCustomAfterShopOrderLines($order['order'], $resursConnection);
+                        $this->hasCustomAfterShopOrderLines($wcOrder, $resursConnection);
                     }
 
                     // When an order is fully refunded or cancelled (as this slug represents), we should follow the
@@ -457,7 +501,7 @@ class PluginHooks
 
         if (!empty($afterShopResponseString)) {
             WooCommerce::setOrderNote(
-                $order['order'],
+                $wcOrder,
                 __(
                     sprintf(
                         'WooCommerce signalled "%s"-request. Sent %s to Resurs Bank with result: %s.',

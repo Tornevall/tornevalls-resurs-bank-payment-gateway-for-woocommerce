@@ -1293,7 +1293,10 @@ class ResursDefault extends WC_Payment_Gateway
         $return = parent::is_available();
 
         // @link https://wordpress.org/support/topic/php-notice-trying-to-get-property-total-of-non-object-2/
-        if (!isset($woocommerce->cart) || !method_exists($this, 'get_order_total')) {
+        if (!isset($woocommerce->cart) ||
+            !method_exists($this, 'get_order_total') ||
+            !isset($this->paymentMethodInformation->id)
+        ) {
             return Data::isEnabled();
         }
 
@@ -1398,7 +1401,8 @@ class ResursDefault extends WC_Payment_Gateway
             $return = $classButtonHtml;
         }
 
-        return $return;
+        // Cast it securely.
+        return (string)$return;
     }
 
     /**
