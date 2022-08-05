@@ -1117,7 +1117,6 @@ class Data
      */
     public static function getResursOrderIfExists($orderData): ?array
     {
-        $return = null;
         $order = WooCommerce::getProperOrder($orderData, 'order');
         if (self::isResursMethod($order->get_payment_method())) {
             $resursOrder = self::getOrderInfo($order);
@@ -1126,7 +1125,7 @@ class Data
             }
         }
 
-        return $return;
+        return (array)$return;
     }
 
     /**
