@@ -317,17 +317,31 @@ class PluginHooks
      * @param $orderId
      * @param Order $wcThis
      * @return void
-     * @throws ResursException
+     * @throws Exception
      * @since 0.0.1.8
      */
     public function updateOrderStatusByCompletion($orderId, $wcThis): void
     {
         $findEcom = Data::getResursOrderIfExists($orderId);
+
         if (!empty($findEcom) && isset($findEcom['ecom'])) {
+            $canIgnoreFrozen = Data::canIgnoreFrozen($findEcom['ecom']);
+            if ($canIgnoreFrozen) {
+                $wcThis->add_order_note(
+                    WooCommerce::getOrderNotePrefixed(
+                        __(
+                            'Emergency Mode: Order status is set to be allowed to be changed, via ignore_frozen ' .
+                            'meta data, despite the frozen state.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        )
+                    )
+                );
+            }
+
             /** @var WC_Order $order */
             //$order = $findEcom['order'];
             $connection = (new ResursBankAPI())->getConnection();
-            if ($connection->isFrozen($findEcom['ecom'])) {
+            if (!$canIgnoreFrozen && $connection->isFrozen($findEcom['ecom'])) {
                 // WooCommerce tend to set the order status as completed even if we throw an exception.
                 // To properly make sure this is not happening, we'll put a new status queue up before the throw.
                 $wcThis->set_status('on-hold');
@@ -427,6 +441,9 @@ class PluginHooks
         $resursReference = Data::getResursReference($order);
         switch ($newSlug) {
             case 'completed':
+                if (Data::canIgnoreFrozen($order['ecom'])) {
+                    break;
+                }
                 // Make sure we also handle instant finalizations.
                 if ($resursConnection->isFrozen($order['ecom'])) {
                     $wcOrder->add_order_note(
