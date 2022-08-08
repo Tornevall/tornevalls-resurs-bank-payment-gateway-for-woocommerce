@@ -10,6 +10,7 @@ use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursException;
 use RuntimeException;
+use stdClass;
 use TorneLIB\Exception\Constants;
 use function count;
 use function in_array;
@@ -96,18 +97,20 @@ class ResursBankAPI
             self::getResurs()->setFlag('GET_PAYMENT_BY_REST');
         }
         try {
-            $credentialMeta = self::getMatchingCredentials($orderInfo);
-            if ($credentialMeta !== null) {
-                $resurs = self::getEcomBySecondaryCredentials($credentialMeta, $orderId);
-                $return = $resurs->getPayment($orderId);
-                $return->isCurrentCredentials = false;
-                $return->username = $credentialMeta->l ?? '';
-                $return->environment = $credentialMeta->e ?? 1;
-            } else {
-                $return = self::getResurs()->getPayment($orderId);
-                $return->isCurrentCredentials = true;
-                $return->username = null;
-                $return->environment = null;
+            if (isset($orderInfo)) {
+                $credentialMeta = self::getMatchingCredentials($orderInfo);
+                if (isset($credentialMeta) && !empty($credentialMeta)) {
+                    $resurs = self::getEcomBySecondaryCredentials($credentialMeta, $orderId);
+                    $return = $resurs->getPayment($orderId);
+                    $return->isCurrentCredentials = false;
+                    $return->username = $credentialMeta->l ?? '';
+                    $return->environment = $credentialMeta->e ?? 1;
+                } else {
+                    $return = self::getResurs()->getPayment($orderId);
+                    $return->isCurrentCredentials = true;
+                    $return->username = null;
+                    $return->environment = null;
+                }
             }
         } catch (Exception $e) {
             Data::setTimeoutStatus(self::getResurs(), $e);
@@ -124,7 +127,7 @@ class ResursBankAPI
         // Restore.
         self::getResurs()->deleteFlag('GET_PAYMENT_BY_REST');
 
-        return $return;
+        return isset($return) && !empty($return) ? $return : new stdClass();
     }
 
     /**
@@ -334,20 +337,24 @@ class ResursBankAPI
 
     /**
      * @param $orderData
-     * @return false|string
+     * @return mixed|null
      * @throws ResursException
      * @since 0.0.1.0
      * @noinspection SpellCheckingInspection
      */
     private static function getApiMeta($orderData)
     {
-        $return = Data::getDecryptData(
-            Data::getOrderMeta('orderapi', $orderData)
-        );
+        if (isset($orderData)) {
+            $return = Data::getDecryptData(
+                Data::getOrderMeta('orderapi', $orderData)
+            );
 
-        if (empty($return)) {
-            // Encryption may have failed.
-            $return = Data::getDecryptData(Data::getOrderMeta('orderapi', $orderData), true);
+            if (!isset($return) || empty($return)) {
+                // Encryption may have failed.
+                $return = Data::getDecryptData(Data::getOrderMeta('orderapi', $orderData), true);
+            }
+        } else {
+            $return = '';
         }
 
         return $return;

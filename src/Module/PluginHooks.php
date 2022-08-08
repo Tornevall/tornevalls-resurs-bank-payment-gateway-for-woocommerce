@@ -6,6 +6,7 @@
 
 namespace ResursBank\Module;
 
+use Automattic\WooCommerce\Admin\Overrides\Order;
 use Exception;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Gateway\ResursDefault;
@@ -67,7 +68,7 @@ class PluginHooks
         add_action('mock_refund_exception', [$this, 'mockRefundException']);
         add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
         add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
-        add_action('woocommerce_order_status_completed', [$this, 'updateOrderStatusByCompletion'], 10, 2);
+        add_action('woocommerce_order_status_completed', [$this, 'updateOrderStatusByCompletion'], 10, 3);
         add_action('woocommerce_order_refunded', [$this, 'refundResursOrder'], 10, 2);
         add_action('woocommerce_ajax_order_items_removed', [$this, 'removeOrderItemFromResurs'], 10, 4);
         add_action('rbwc_get_tax_classes', [$this, 'getTaxClasses']);
@@ -314,23 +315,39 @@ class PluginHooks
      * Early exception when orders are frozen and woocommerce transitions they payment to completed.
      *
      * @param $orderId
+     * @param Order $wcThis
      * @return void
-     * @throws ResursException
      * @throws Exception
      * @since 0.0.1.8
      */
-    public function updateOrderStatusByCompletion($orderId): void
+    public function updateOrderStatusByCompletion($orderId, $wcThis): void
     {
         $findEcom = Data::getResursOrderIfExists($orderId);
+
         if (!empty($findEcom) && isset($findEcom['ecom'])) {
+            $canIgnoreFrozen = Data::canIgnoreFrozen($findEcom['ecom']);
+            if ($canIgnoreFrozen) {
+                $wcThis->add_order_note(
+                    WooCommerce::getOrderNotePrefixed(
+                        __(
+                            'Emergency Mode: Order status is set to be allowed to be changed, via ignore_frozen ' .
+                            'meta data, despite the frozen state.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        )
+                    )
+                );
+            }
+
             /** @var WC_Order $order */
             //$order = $findEcom['order'];
             $connection = (new ResursBankAPI())->getConnection();
-            if ($connection->isFrozen($findEcom['ecom'])) {
+            if (!$canIgnoreFrozen && $connection->isFrozen($findEcom['ecom'])) {
                 // WooCommerce tend to set the order status as completed even if we throw an exception.
                 // To properly make sure this is not happening, we'll put a new status queue up before the throw.
-                OrderStatus::setOrderStatusByQueue($findEcom['order']);
-                throw new Exception('Payment is in frozen state. Can not finalize!', 999);
+                $wcThis->set_status('on-hold');
+                $wcThis->save();
+                //OrderStatus::setOrderStatusByQueue($findEcom['order']);
+                throw new Exception('Payment is in frozen state. Can not finalize!');
             }
         }
     }
@@ -424,6 +441,9 @@ class PluginHooks
         $resursReference = Data::getResursReference($order);
         switch ($newSlug) {
             case 'completed':
+                if (Data::canIgnoreFrozen($order['ecom'])) {
+                    break;
+                }
                 // Make sure we also handle instant finalizations.
                 if ($resursConnection->isFrozen($order['ecom'])) {
                     $wcOrder->add_order_note(

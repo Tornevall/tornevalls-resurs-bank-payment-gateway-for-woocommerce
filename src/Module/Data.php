@@ -1125,7 +1125,7 @@ class Data
             }
         }
 
-        return (array)$return;
+        return (array)(isset($return) ? $return : []);
     }
 
     /**
@@ -1198,15 +1198,17 @@ class Data
      *
      * @param mixed $order
      * @param null $orderIsResursReference
-     * @return array
+     * @return mixed
      * @throws ResursException
      * @since 0.0.1.0
      */
-    public static function getOrderInfo($order, $orderIsResursReference = null): array
+    public static function getOrderInfo($order, $orderIsResursReference = null)
     {
         $return = [];
         $orderId = null;
-        if (is_object($order)) {
+
+        // get_id does not exist in the Order class when Override is used.
+        if (is_object($order) && method_exists($order, 'get_id')) {
             $orderId = $order->get_id();
         } elseif ((int)$order && !is_string($order) && !$orderIsResursReference) {
             $orderId = $order;
@@ -2252,27 +2254,33 @@ class Data
     }
 
     /**
-     * @param $data
+     * @param string $data
      * @param bool $base64
      * @return mixed
      * @since 0.0.1.0
      * @noinspection BadExceptionsProcessingInspection
      */
-    public static function getDecryptData($data, $base64 = false)
+    public static function getDecryptData($data = '', bool $base64 = false)
     {
-        try {
-            if ($base64) {
-                $return = (new Strings())->base64urlDecode($data);
-            } else {
-                $crypt = self::getCrypt();
-                $return = $crypt->aesDecrypt($data);
-            }
-        } catch (Exception $e) {
-            self::setLogException($e, __FUNCTION__);
-            $return = (new Strings())->base64urlDecode($data);
+        if (!isset($data)) {
+            $data = '';
         }
 
-        return $return;
+        if (isset($data)) {
+            try {
+                if ($base64) {
+                    $return = (new Strings())->base64urlDecode($data);
+                } else {
+                    $crypt = self::getCrypt();
+                    $return = $crypt->aesDecrypt($data);
+                }
+            } catch (Exception $e) {
+                self::setLogException($e, __FUNCTION__);
+                $return = (new Strings())->base64urlDecode($data);
+            }
+        }
+
+        return $return ?? $data;
     }
 
     /**
@@ -2316,7 +2324,6 @@ class Data
      */
     public static function getOrderMeta($key, $order)
     {
-        $return = null;
         if (is_array($order) && isset($order['order'])) {
             // Get from a prefetched request.
             $orderData = $order;
@@ -2324,18 +2331,37 @@ class Data
             $orderData = self::getOrderInfo($order);
         }
 
-        if (isset($orderData['meta'][$key])) {
-            $return = $orderData['meta'][$key];
+        if (isset($key, $orderData['meta'][$key])) {
+            //$return = $orderData['meta'][$key];
+            $return = self::getOrderMetaByKey($key, $orderData['meta']);
         }
         $pluginPrefixedKey = sprintf('%s_%s', self::getPrefix(), $key);
         if (isset($orderData['meta'])) {
-            $return = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
+            $pluginReturn = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
+            if (!empty($pluginReturn) && empty($return)) {
+                $return = $pluginReturn;
+            }
         }
         if ($key === 'resurspayment' && isset($orderData['ecom']) && is_object($orderData['ecom'])) {
             $return = $orderData['ecom'];
         }
 
-        return $return;
+        return $return ?? null;
+    }
+
+    /**
+     * @param $ecomObject
+     * @return bool
+     * @throws ResursException
+     * @since 0.0.1.8
+     */
+    public static function canIgnoreFrozen($ecomObject): bool
+    {
+        // Apply hidden feature, if something go sideways.
+        return (bool)Data::getOrderMeta(
+            'ignore_frozen',
+            $ecomObject
+        );
     }
 
     /**
@@ -2346,7 +2372,6 @@ class Data
      */
     private static function getOrderMetaByKey($suffixedKey, $orderDataMeta)
     {
-        $return = null;
         if (is_array($orderDataMeta)) {
             foreach (['', 'u_'] as $orderMetaKey) {
                 $currentMetaKey = sprintf('%s%s', $orderMetaKey, $suffixedKey);
@@ -2360,7 +2385,7 @@ class Data
                 }
             }
         }
-        return $return;
+        return $return ?? null;
     }
 
     /**
