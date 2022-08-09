@@ -14,7 +14,6 @@ use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
-use ResursException;
 use RuntimeException;
 use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Utils\WordPress as wpHelper;
@@ -347,7 +346,7 @@ class PluginHooks
                 $wcThis->set_status('on-hold');
                 $wcThis->save();
                 //OrderStatus::setOrderStatusByQueue($findEcom['order']);
-                throw new Exception('Payment is in frozen state. Can not finalize!');
+                throw new Exception('Payment is in frozen state. Can not finalize!', 999);
             }
         }
     }
