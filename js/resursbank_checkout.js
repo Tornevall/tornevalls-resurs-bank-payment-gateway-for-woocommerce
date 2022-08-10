@@ -29,6 +29,13 @@ var rbwcCustomerTransformationContainer = {
 };
 
 /**
+ * Payment method from WooCommerce session that currently is selected.
+ * @type {string}
+ * @since 0.0.1.8
+ */
+var rbWcFragMethod = '';
+
+/**
  * Boolean set depending on if RCO has a delivery address or not.
  * @type {boolean}
  * @since 0.0.1.0
@@ -92,6 +99,9 @@ function getResursGateway() {
             var that = this;
             $rQuery('body').on('updated_checkout', function (e, info) {
                 if (typeof info.fragments !== 'undefined' && typeof info.fragments.rbwc_cart_total) {
+                    if (typeof info.fragments.fragmethod !== 'undefined') {
+                        rbWcFragMethod = info.fragments.fragmethod;
+                    }
                     resursTemporaryCartTotal = info.fragments.rbwc_cart_total;
                     resursPlaceOrderControl();
                 }

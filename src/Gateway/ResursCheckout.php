@@ -73,6 +73,7 @@ class ResursCheckout
     public $specificType;
 
     /**
+     * @param $iframeContainer
      * @return bool
      * @since 0.0.1.0
      */

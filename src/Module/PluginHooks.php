@@ -308,6 +308,7 @@ class PluginHooks
     public function removeOrderItemFromResurs($itemId, $item, $changedStore, $order)
     {
         // Currently unsupported.
+        $removeHere = true;
     }
 
     /**

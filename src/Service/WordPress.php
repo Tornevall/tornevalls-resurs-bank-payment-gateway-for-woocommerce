@@ -831,6 +831,8 @@ class WordPress
         $return['spin'] = Data::getImage('spin.gif');
         $return['success'] = __('Successful.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['failed'] = __('Failed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+        $return['fragmethod'] = WooCommerce::getSessionValue('fragment_update_payment_method');
+
         $return['reloading'] = __(
             'Please wait while reloading...',
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'

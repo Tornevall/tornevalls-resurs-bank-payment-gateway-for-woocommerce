@@ -175,13 +175,23 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * ResursDefault constructor.
-     * @param $resursPaymentMethodObject
+     * @param array $resursPaymentMethodObject
+     * @throws Exception
      * @noinspection ParameterDefaultValueIsNotNullInspection
      * @since 0.0.1.0
      */
     public function __construct($resursPaymentMethodObject = [])
     {
         global $woocommerce;
+
+        // If payment methods are changed during this session moment, it should be stored as a fragment
+        // update. This value should be pushed out through the fragment update section to the front end
+        // script so that the front-end script can see which payment method that is currently selected
+        // and hide RCO if something else is active.
+        if (isset($_REQUEST['payment_method'])) {
+            WooCommerce::setSessionValue('fragment_update_payment_method', $_REQUEST['payment_method']);
+        }
+
         $this->cart = $woocommerce->cart ?? null;
         $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
@@ -210,6 +220,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * Initializer. It is not until we have payment method information we can start using this class for real.
      * @param $paymentMethodInformation
+     * @throws Exception
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
      */
@@ -1299,10 +1310,10 @@ class ResursDefault extends WC_Payment_Gateway
         ) {
             return Data::isEnabled();
         }
-
         $customerType = Data::getCustomerType();
         $isEnabled = Data::getPaymentMethodSetting('enabled', $this->paymentMethodInformation->id);
 
+        $pses = Data::getPaymentMethodBySession();
         // Nulled enabled states are always considered enabled as noone has edited them yet.
         if (!$isEnabled && $isEnabled !== null) {
             $return = false;
