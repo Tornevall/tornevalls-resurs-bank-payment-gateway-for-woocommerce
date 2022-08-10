@@ -180,16 +180,22 @@ function resursPlaceOrderControl() {
         } else {
             resursHasPlaceOrder = false;
         }
-        if (resursTemporaryCartTotal === 0) {
-            trbwcLog('Button for placing order is visible and cart control indicates a price of 0.');
+        if (rbWcFragMethod.indexOf('RESURS_CHECKOUT') > -1) {
+            if (resursTemporaryCartTotal === 0) {
+                trbwcLog('Button for placing order is visible and cart control indicates a price of 0.');
+                $rQuery('#resursbank_rco_container').hide();
+                $rQuery('.woocommerce-billing-fields').show();
+                $rQuery('.woocommerce-shipping-fields').show();
+            } else if (resursTemporaryCartTotal > 0) {
+                trbwcLog('Cart control indicates change to ' + resursTemporaryCartTotal + '.');
+                $rQuery('.woocommerce-billing-fields').hide();
+                $rQuery('.woocommerce-shipping-fields').hide();
+                $rQuery('#resursbank_rco_container').show();
+            }
+        } else {
             $rQuery('#resursbank_rco_container').hide();
             $rQuery('.woocommerce-billing-fields').show();
             $rQuery('.woocommerce-shipping-fields').show();
-        } else if (resursTemporaryCartTotal > 0) {
-            trbwcLog('Cart control indicates change to ' + resursTemporaryCartTotal + '.');
-            $rQuery('.woocommerce-billing-fields').hide();
-            $rQuery('.woocommerce-shipping-fields').hide();
-            $rQuery('#resursbank_rco_container').show();
         }
     }
 }
