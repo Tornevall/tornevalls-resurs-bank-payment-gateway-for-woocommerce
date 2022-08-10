@@ -2189,7 +2189,8 @@ class ResursDefault extends WC_Payment_Gateway
                     $this->order,
                     sprintf(
                         __(
-                            'The booking failed with status %s. Customer notified in checkout.',
+                            'Credit application could not be approved (status received: %s). ' .
+                            'Customer was notified to choose another payment method.',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                         $this->getBookPaymentStatus()
