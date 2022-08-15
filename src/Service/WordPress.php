@@ -818,6 +818,7 @@ class WordPress
      *
      * @param $return
      * @return mixed
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getLocalizationDataGlobal($return)
@@ -831,7 +832,7 @@ class WordPress
         $return['spin'] = Data::getImage('spin.gif');
         $return['success'] = __('Successful.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['failed'] = __('Failed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
-        $return['fragmethod'] = WooCommerce::getSessionValue('fragment_update_payment_method');
+        $return['fragmethod'] = Data::getMethodFromFragmentOrSession();
 
         $return['reloading'] = __(
             'Please wait while reloading...',

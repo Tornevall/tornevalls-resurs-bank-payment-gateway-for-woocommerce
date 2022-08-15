@@ -1374,7 +1374,7 @@ class WooCommerce
     {
         $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
         $fragments['rbwc_cart_total'] = (float)(self::getValidCart() ? WC()->cart->total : 0.00);
-        $fragments['fragmethod'] = WooCommerce::getSessionValue('fragment_update_payment_method');
+        $fragments['fragmethod'] = Data::getMethodFromFragmentOrSession();
         self::setCustomerCheckoutLocation(true);
 
         return $fragments;

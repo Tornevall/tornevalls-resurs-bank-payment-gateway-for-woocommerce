@@ -1839,6 +1839,24 @@ class Data
     }
 
     /**
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.8
+     */
+    public static function getMethodFromFragmentOrSession(): string
+    {
+        // If payment methods are changed during this session moment, it should be stored as a fragment
+        // update. This value should be pushed out through the fragment update section to the front end
+        // script so that the front-end script can see which payment method that is currently selected
+        // and hide RCO if something else is active.
+        if (isset($_REQUEST['payment_method'])) {
+            WooCommerce::setSessionValue('fragment_update_payment_method', $_REQUEST['payment_method']);
+        }
+
+        return (string)WooCommerce::getSessionValue('fragment_update_payment_method');
+    }
+
+    /**
      * Get the name of current checkout in use.
      * @return string
      * @since 0.0.1.0
