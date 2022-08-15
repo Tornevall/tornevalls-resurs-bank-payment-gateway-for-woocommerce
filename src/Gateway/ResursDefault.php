@@ -774,6 +774,10 @@ class ResursDefault extends WC_Payment_Gateway
         $failUrl = $this->getSigningUrl(['success' => false, 'urlType' => 'fail']);
         $backUrl = $this->getSigningUrl(['success' => false, 'urlType' => 'back']);
 
+        $this->apiData['successUrl'] = $successUrl;
+        $this->apiData['failUrl'] = $failUrl;
+        $this->apiData['backUrl'] = $backUrl;
+
         $this->API->getConnection()->setSigning(
             $successUrl,
             $failUrl,
@@ -1838,16 +1842,7 @@ class ResursDefault extends WC_Payment_Gateway
             ));
 
             $this->order = $this->getCurrentOrder();
-
             $this->apiData['isReturningCustomer'] = false;
-            if ($this->getApiValue('wc_order_id') && $this->getApiValue('preferred_id')) {
-                $this->apiData['isReturningCustomer'] = true;
-
-                if ($this->order instanceof WC_Order && Data::getCheckoutType() === self::TYPE_RCO) {
-                    $orderHandler = new OrderHandler();
-                    $orderHandler->getCustomerRealAddress($this->order);
-                }
-            }
 
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
@@ -1865,8 +1860,17 @@ class ResursDefault extends WC_Payment_Gateway
                 )
             );
             $this->wcOrderData = Data::getOrderInfo($this->order);
-
             $finalSigningResponse = $this->setFinalSigning();
+
+            if ($this->getApiValue('wc_order_id') && $this->getApiValue('preferred_id')) {
+                $this->apiData['isReturningCustomer'] = true;
+
+                if ($this->order instanceof WC_Order) {
+                    $orderHandler = new OrderHandler();
+                    $orderHandler->getCustomerRealAddress($this->order);
+                }
+            }
+
             if ($this->isSuccess($finalSigningResponse)) {
                 // Inspections reacted on this if conditions and suggested merging the isset. That, we won't do.
                 if (isset($finalSigningResponse) &&
@@ -2001,6 +2005,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @return WC_Order
+     * @throws Exception
      * @since 0.0.1.0
      */
     private function getCurrentOrder(): WC_Order
@@ -2166,7 +2171,7 @@ class ResursDefault extends WC_Payment_Gateway
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     )
                 );
-                $return = $this->getResult('success');
+                $return = $this->getResult('success', $this->getApiValue('successUrl'));
                 break;
             case 'FROZEN':
                 $this->setSigningMarked();
@@ -2176,7 +2181,7 @@ class ResursDefault extends WC_Payment_Gateway
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     )
                 );
-                $return = $this->getResult('success');
+                $return = $this->getResult('success', $this->getApiValue('successUrl'));
                 break;
             case 'SIGNING':
                 Data::setOrderMeta($this->order, 'signingRedirectTime', date('Y-m-d H:i:s', time()));
