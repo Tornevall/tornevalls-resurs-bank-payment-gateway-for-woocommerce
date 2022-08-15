@@ -184,14 +184,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         global $woocommerce;
 
-        // If payment methods are changed during this session moment, it should be stored as a fragment
-        // update. This value should be pushed out through the fragment update section to the front end
-        // script so that the front-end script can see which payment method that is currently selected
-        // and hide RCO if something else is active.
-        if (isset($_REQUEST['payment_method'])) {
-            WooCommerce::setSessionValue('fragment_update_payment_method', $_REQUEST['payment_method']);
-        }
-
         $this->cart = $woocommerce->cart ?? null;
         $this->generic = Data::getGenericClass();
         $this->id = Data::getPrefix('default');
@@ -1400,13 +1392,19 @@ class ResursDefault extends WC_Payment_Gateway
      *
      * @param $classButtonHtml
      * @return string
+     * @throws Exception
      * @since 0.0.1.0
      */
     public function getOrderButtonHtml($classButtonHtml): string
     {
         $return = '';
 
-        if (Data::getCheckoutType() !== self::TYPE_RCO) {
+        $woocommerceMethodName = Data::getMethodFromFragmentOrSession();
+        $checkoutType = Data::getCheckoutType();
+
+        if (($checkoutType === self::TYPE_RCO && !preg_match('/RESURS_CHECKOUT$/', $woocommerceMethodName)) ||
+            $checkoutType !== self::TYPE_RCO
+        ) {
             $return = $classButtonHtml;
         } elseif (WooCommerce::getValidCart() && (float)WC()->cart->total === 0.00) {
             $return = $classButtonHtml;
