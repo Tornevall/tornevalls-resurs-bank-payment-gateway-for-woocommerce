@@ -1799,7 +1799,7 @@ class FormFields extends WC_Settings_API
         $exception = null;
         $callbacks = [];
         try {
-            $callbacks = ResursBankAPI::getCallbackList();
+            $callbacks = ResursBankAPI::getCallbackList(false);
         } catch (Exception $e) {
             $exception = $e;
         }
