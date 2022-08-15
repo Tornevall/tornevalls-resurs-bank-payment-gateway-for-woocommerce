@@ -1460,6 +1460,8 @@ class ResursDefault extends WC_Payment_Gateway
         );
 
         if (count($requiredFields)) {
+            $ecomHelper = (new ResursBankAPI())->getConnection();
+
             $getAddressVisible = Data::canUseGetAddressForm();
             foreach ($requiredFields as $fieldName) {
                 $fieldValue = null;
@@ -1473,10 +1475,18 @@ class ResursDefault extends WC_Payment_Gateway
                         } elseif (!$alwaysShowApplicantFields) {
                             $displayField = false;
                         }
-                        if ($this->paymentMethodInformation->type === 'PAYMENT_PROVIDER' && $displayField) {
+                        $isInternal = $ecomHelper->isInternalMethod($this->paymentMethodInformation);
+                        if (!$isInternal && $displayField) {
                             $displayField = false;
                             // External payment methods does not require the govt. id.
                             $alwaysShowApplicantFields = false;
+                        }
+
+                        // As we don't know if this field is filled in when we enter the page, we prefer to
+                        // properly show it, if it has been seen as empty when entering the checkout. Letting
+                        // the ecom-helper decide if the method is internal, this is easier to follow.
+                        if ($isInternal && !$displayField && empty($fieldValue)) {
+                            $displayField = true;
                         }
                         break;
                     default:
