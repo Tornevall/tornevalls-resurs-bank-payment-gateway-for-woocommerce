@@ -1461,7 +1461,6 @@ class ResursDefault extends WC_Payment_Gateway
 
         if (count($requiredFields)) {
             $ecomHelper = (new ResursBankAPI())->getConnection();
-
             $getAddressVisible = Data::canUseGetAddressForm();
             foreach ($requiredFields as $fieldName) {
                 $fieldValue = null;
