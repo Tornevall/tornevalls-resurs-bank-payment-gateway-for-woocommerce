@@ -541,35 +541,8 @@ class WooCommerce
     {
         // This won't work if the payment is not at Resurs yet.
         if (isset($return['ecom'])) {
-            $return['customer_billing'] = self::getAdminCustomerAddress(
-                $return['ecom']->customer->address
-            );
-
-            $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ?
-                self::getAdminCustomerAddress($return['ecom']->deliveryAddress) : [];
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param stdClass $ecomCustomer
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getAdminCustomerAddress($ecomCustomer): array
-    {
-        $return = [
-            'fullName' => !empty($ecomCustomer->fullName) ? $ecomCustomer->fullName : $ecomCustomer->firstName,
-            'addressRow1' => $ecomCustomer->addressRow1,
-            'postal' => sprintf('%s  %s', $ecomCustomer->postalCode, $ecomCustomer->postalArea),
-            'country' => $ecomCustomer->country,
-        ];
-        if (empty($ecomCustomer->fullName)) {
-            $return['fullName'] .= ' ' . $ecomCustomer->lastName;
-        }
-        if (isset($ecomCustomer->addressRow2) && !empty($ecomCustomer->addressRow2)) {
-            $return['addressRow1'] .= "\n" . $ecomCustomer->addressRow2;
+            $return['customer_billing'] = $return['ecom']->customer->address;
+            $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ? $return['ecom']->deliveryAddress : [];
         }
 
         return $return;
@@ -637,14 +610,15 @@ class WooCommerce
 
     /**
      * @param $addressData
+     * @return array
      * @since 0.0.1.7
      */
     private static function getCompactAddress($addressData): array
     {
+        // We no longer have to make this data compact, and show the full customer object.
+        // The new way of showing the data in the meta boxes makes this much better.
         $purge = [
             'fullName',
-            'firstName',
-            'lastName',
         ];
         $ignore = ['country', 'postalCode', 'postalArea'];
 
@@ -1134,7 +1108,6 @@ class WooCommerce
     private static function getUpdatedOrderByCallback($paymentId, $orderId, $order): void
     {
         if ($orderId) {
-            //self::getCustomerRealAddress($order);
             $orderHandler = new OrderHandler();
             $orderHandler->getCustomerRealAddress($order);
 

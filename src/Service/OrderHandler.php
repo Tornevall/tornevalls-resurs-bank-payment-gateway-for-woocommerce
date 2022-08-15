@@ -10,6 +10,7 @@ use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
 use WC_Cart;
 use WC_Coupon;
+use WC_Order;
 use WC_Product;
 use function count;
 use function is_array;
@@ -220,7 +221,7 @@ class OrderHandler extends ResursDefault
     }
 
     /**
-     * @param $order
+     * @param WC_Order $order
      * @return bool
      * @throws Exception
      * @since 0.0.1.0
@@ -249,14 +250,14 @@ class OrderHandler extends ResursDefault
         }
 
         if ($return) {
-            Data::setOrderMeta($order, 'customerSynchronization', date('Y-m-d H:i:s', time()));
-            Data::setLogNotice(
-                __(
-                    'Resurs Bank billing address mismatch with current address in order. ' .
-                    'Data has synchronized with Resurs Bank billing data.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                )
+            $syncNotice = __(
+                'Resurs Bank billing address mismatch with current address in order. ' .
+                'Data has synchronized with Resurs Bank billing data.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
+            $order->add_order_note($syncNotice);
+            Data::setOrderMeta($order, 'customerSynchronization', date('Y-m-d H:i:s', time()));
+            Data::setLogNotice($syncNotice);
         }
 
         return $return;
