@@ -26,7 +26,7 @@ var RESURSCHECKOUT_IFRAME_URL = '';
  * @since 0.0.1.0
  */
 function trbwcLog(consEntry) {
-    console.log('[trbwc] ' + consEntry);
+    console.log('[' + getResursLocalization('prefix') + '] ' + consEntry);
 }
 
 /**
@@ -80,7 +80,11 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
             } else {
                 callbackMethod(data, typeof data.statusText !== 'undefined' ? data.statusText : textStatus, jqXhr);
             }
-            getResursError(typeof data.statusText !== 'undefined' ? data.statusText : textStatus);
+            getResursError(
+                typeof data.statusText !== 'undefined' ? data.statusText : textStatus,
+                null,
+                requestVerb
+            );
         }
     );
 }
@@ -90,16 +94,22 @@ function getResursAjaxify(requestMethod, requestVerb, requestData, callbackMetho
  * @since 0.0.1.0
  */
 function getResursError(data) {
+    var requestVerb = typeof arguments[2] !== 'undefined' ? arguments[2] : '';
+
     if (typeof arguments[1] !== 'undefined') {
         var isWarningElement = $rQuery(arguments[1]);
         if (isWarningElement.length > 0) {
-            return rbwcShowErrorElement(data, isWarningElement);
+            return rbwcShowErrorElement(data, isWarningElement, requestVerb);
         } else {
-            return rbwcShowErrorElement(data, null);
+            return rbwcShowErrorElement(data, null, requestVerb);
         }
     } else {
         if (data !== 'timeout') {
-            return rbwcShowErrorElement('RBWC Ajax Backend Error: ' + data, null);
+            return rbwcShowErrorElement(
+                'RBWC Ajax Backend Error: ' + data,
+                null,
+                requestVerb
+            );
         }
         console.log('RBWC Ajax Backend Error: ' + data);
     }
@@ -110,7 +120,9 @@ function getResursError(data) {
  * @param data
  * @param errorElement
  */
-function rbwcShowErrorElement(data, errorElement) {
+function rbwcShowErrorElement(data, errorElement, requestVerb) {
+    var reqVerb = requestVerb !== null ? ' (Request: ' + requestVerb + ')' : '';
+
     if (typeof data === 'string') {
         console.log('RBWC Ajax Backend Error: ', data);
     }
@@ -121,9 +133,9 @@ function rbwcShowErrorElement(data, errorElement) {
             errorElement.html(data);
         }
     } else if (typeof data === 'string') {
-        if (data !== '[object Object]' && data !== 'error' && data !== 'timeout') {
+        if (data !== '[object Object]' && data !== 'timeout') {
             // Only scream errors when they are human understandable.
-            alert(data);
+            alert(data + ' ' + reqVerb);
         }
         console.log(data);
     }
