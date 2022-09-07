@@ -1130,6 +1130,7 @@ class ResursDefault extends WC_Payment_Gateway
      * Find out if payment id is too old to be kept in session.
      * @param bool $returnAgeValue
      * @return bool|int
+     * @throws Exception
      * @since 0.0.1.0
      * @noinspection ParameterDefaultValueIsNotNullInspection
      * @noinspection SpellCheckingInspection
@@ -1885,7 +1886,12 @@ class ResursDefault extends WC_Payment_Gateway
                 switch ($this->getCheckoutType()) {
                     case self::TYPE_SIMPLIFIED:
                         // When someone returns with a successful call.
-                        if (Data::getOrderMeta('signingRedirectTime', $this->wcOrderData)) {
+                        $signingRedirectTime = Data::getOrderMeta('signingRedirectTime', $this->wcOrderData);
+                        if ($signingRedirectTime) {
+                            $finalRedirectUrl = $this->get_return_url($this->order);
+                        } elseif ($finalSigningResponse['result'] === 'success') {
+                            Data::setLogInfo('Final Signing Response was reported success, but redirect triggered too fast.');
+                            // Race conditions could happen when redirects are too fast.
                             $finalRedirectUrl = $this->get_return_url($this->order);
                         }
                         break;
@@ -1932,14 +1938,13 @@ class ResursDefault extends WC_Payment_Gateway
             }
         }
 
-        Data::canLog(
-            Data::CAN_LOG_ORDER_EVENTS,
+        Data::setLogInfo(
             sprintf(
                 __(
                     'Finishing. Ready to redirect customer. Using URL %s',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
-                $finalRedirectUrl
+                print_r($finalRedirectUrl, true)
             )
         );
 
