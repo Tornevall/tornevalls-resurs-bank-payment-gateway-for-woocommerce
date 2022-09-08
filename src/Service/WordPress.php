@@ -33,8 +33,6 @@ class WordPress
         if (!class_exists('WC_Payment_Gateway')) {
             return;
         }
-        // Initialize plugin functions.
-        new PluginHooks();
 
         // Initialize adaptions.
         new ResursPlugin();

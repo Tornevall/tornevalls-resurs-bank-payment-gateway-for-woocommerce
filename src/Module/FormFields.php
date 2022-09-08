@@ -978,7 +978,6 @@ class FormFields extends WC_Settings_API
             );
         }
 
-
         $formFields = WordPress::applyFilters('getCustomFormFields', $formFields, $section);
 
         if ($section === 'all') {
@@ -1060,64 +1059,6 @@ class FormFields extends WC_Settings_API
                 Data::getGenericClass()->getTemplate('adminpage_button', $formArray)
             );
         }
-    }
-
-    /**
-     * Bleeding edge settings block. Activates currently unstable features.
-     *
-     * @param $currentArray
-     * @since 0.0.1.0
-     */
-    public static function getBleedingEdgeSettings($currentArray)
-    {
-        if (Data::isBleedingEdge()) {
-            $bleedingEdgeEcommerceJWT = [
-                'jwt_client_id' => [
-                    'id' => 'jwt_client_id',
-                    'title' => __('JWT Client ID', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'type' => 'text',
-                    'desc' => __(
-                        'JWT Client ID.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => '',
-                ],
-                'jwt_client_password' => [
-                    'id' => 'jwt_client_password',
-                    'title' => __('JWT Client Password', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'type' => 'password',
-                    'desc' => __(
-                        'JWT Client Password.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => '',
-                ],
-                'jwt_store_id' => [
-                    'id' => 'jwt_store_id',
-                    'title' => __('JWT Store ID', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'type' => 'text',
-                    'desc' => __(
-                        'Numeric store id or uuid-based.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => '',
-                ],
-            ];
-
-            $basicArray = $currentArray['basic'];
-
-            $newArraySetup = [];
-            foreach ($basicArray as $itemSetting => $value) {
-                $newArraySetup[$itemSetting] = $value;
-                if ($itemSetting === 'password_production') {
-                    // Apply bleeding edge MerchantAPI setting just after the old account settings.
-                    $newArraySetup += $bleedingEdgeEcommerceJWT;
-                }
-            }
-            $currentArray['basic'] = $newArraySetup;
-        }
-
-        return $currentArray;
     }
 
     /**
