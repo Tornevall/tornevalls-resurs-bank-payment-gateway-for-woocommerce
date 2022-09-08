@@ -67,11 +67,25 @@ class WooCommerce
      */
     public static function getActiveState(): bool
     {
+        // Initialize plugin functions.
+        new PluginHooks();
+
+        add_filter('rbwc_is_available', 'ResursBank\Service\WooCommerce::rbwcIsAvailable', 999);
+
         return in_array(
             'woocommerce/woocommerce.php',
             apply_filters('active_plugins', get_option('active_plugins')),
             true
         );
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.8
+     */
+    public static function rbwcIsAvailable(): bool
+    {
+        return true;
     }
 
     /**
