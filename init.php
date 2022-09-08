@@ -24,6 +24,7 @@ if (!defined('ABSPATH')) {
 }
 
 require_once(__DIR__ . '/vendor/autoload.php');
+require_once(__DIR__ . '/globals.php');
 
 // Note: The prefix below is used by this plugin only and should not be changed. Instead
 // you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.
@@ -53,4 +54,3 @@ Data::getExpectations();
 add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
-add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getBleedingEdgeSettings', 10, 2);
