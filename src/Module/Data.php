@@ -245,9 +245,9 @@ class Data
 
         // Match allowed file extensions and return if it exists within the file name.
         if ($hasExtension && (bool)preg_match(
-            sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
-            $imageFile
-        )) {
+                sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
+                $imageFile
+            )) {
             $imageFile = preg_replace(
                 sprintf('/^(.*)(.%s)$/', implode('|.', self::$fileImageExtensions)),
                 '$1',
@@ -397,8 +397,8 @@ class Data
      * @param string $key
      * @param mixed $value
      * @param $paymentMethod
-     * @throws Exception
      * @return bool
+     * @throws Exception
      * @since 0.0.1.6
      */
     public static function setPaymentMethodSetting(string $key, $value, $paymentMethod)
