@@ -527,9 +527,8 @@ class Data
     }
 
     /**
-     * Anti collider.
-     *
      * @param null $extra
+     * @param null $ignoreCodeBase
      * @return string
      * @since 0.0.1.0
      */
@@ -2552,28 +2551,6 @@ class Data
         }
 
         return $getAddressFormDefault;
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getErrorNotices(): string
-    {
-        $wcNotices = wc_get_notices();
-        $internalErrorMessage = '';
-        if (isset($wcNotices['error']) && count($wcNotices['error'])) {
-            $wcErrorCollection = [];
-            foreach ($wcNotices['error'] as $arr) {
-                $wcErrorCollection[] = $arr['notice'];
-            }
-            $internalErrorMessage = implode("<br>\n", $wcErrorCollection);
-            self::canLog(
-                self::LOG_ERROR,
-                $internalErrorMessage
-            );
-        }
-        return $internalErrorMessage;
     }
 
     /**

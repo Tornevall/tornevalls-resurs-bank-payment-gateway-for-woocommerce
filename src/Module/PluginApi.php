@@ -1367,9 +1367,10 @@ class PluginApi
                 } catch (Exception $e) {
                     Data::setLogException($e, __FUNCTION__);
                     Data::setTimeoutStatus($apiRequest);
-                    // If we get an error here, it might be cause by credential errors.
+                    // If we get an error here, it might be caused by credential errors.
                     // In that case lets fall back to the default lookup.
-                    $addressResponse = (array)$apiRequest->getAddress($identification, $customerType);
+                    $addressResponse = [];
+                    WordPress::applyFilters('getAddressRequest', $addressResponse, $identification, $customerType);
                     self::getAddressLog($customerCountry, $customerType, $identification, __(
                         'By phone request failed, executed failover by government id.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'

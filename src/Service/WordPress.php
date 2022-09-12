@@ -5,7 +5,6 @@ namespace ResursBank\Service;
 use Exception;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use RuntimeException;
@@ -297,10 +296,14 @@ class WordPress
         // See if there is a credential error for Resurs Bank.
         self::getCredentialError();
 
-        if (isset($_SESSION[Data::getPrefix()]['exception'])) {
+        $internalExceptions = self::applyFilters('getPluginAdminNotices',
+            (isset($_SESSION[Data::getPrefix()]['exception']) ? $_SESSION[Data::getPrefix()]['exception'] : [])
+        );
+
+        if (count($internalExceptions)) {
             $class = 'notice notice-error is-dismissible';
             /** @noinspection PhpUnusedLocalVariableInspection */
-            foreach ($_SESSION[Data::getPrefix()]['exception'] as $index => $item) {
+            foreach ($internalExceptions as $index => $item) {
                 printf(
                     '<div class="%1$s"><p>[%3$s] %2$s</p></div>',
                     esc_attr($class),
@@ -308,7 +311,9 @@ class WordPress
                     Data::getPrefix()
                 );
             }
-            unset($_SESSION[Data::getPrefix()]['exception']);
+            if (isset($_SESSION[Data::getPrefix()]['exception'])) {
+                unset($_SESSION[Data::getPrefix()]['exception']);
+            }
         }
 
         $requiredVersionNotice = sprintf(
