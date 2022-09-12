@@ -44,6 +44,7 @@ class WordPress
         self::setupActions();
         self::setupWoocommerceAdminActions();
         self::setupWoocommerceCheckoutActions();
+        WordPress::doAction('isLoaded', true);
     }
 
     /**
@@ -832,7 +833,7 @@ class WordPress
         $return['noncify'] = self::getNonce('all');
         $return['ajaxify'] = admin_url('admin-ajax.php');
         $return['ajaxifyTimeout'] = (int)$setAjaxifyTimeout ? $setAjaxifyTimeout : $defaultTimeout;
-        $return['spin'] = Data::getImage('spin.gif');
+        $return['spin'] = WordPress::applyFilters('getImageSpinner', Data::getImage('spin.gif'));
         $return['success'] = __('Successful.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['failed'] = __('Failed.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
         $return['fragmethod'] = Data::getMethodFromFragmentOrSession();
