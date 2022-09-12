@@ -59,7 +59,7 @@ class ResursPlugin
         add_filter('rbwc_get_plugin_prefix', [$this, 'getPluginPrefix']);
         add_filter('rbwc_get_obfuscate_lookup_keys', [$this, 'getObfuscateLookupKeys']);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getOrderNotePrefix']);
-        add_filter('getAddressRequest', [$this, 'getAddressRequest']);
+        add_filter('rbwc_get_address_request', [$this, 'getAddressRequest'], 10, 3);
     }
 
     /**
@@ -72,7 +72,9 @@ class ResursPlugin
      */
     public function getAddressRequest($addressResponse, $identification, $customerType): array
     {
-        $addressResponse = (array)ResursBankAPI::getResurs()->getAddress($identification, $customerType);
+        if (WordPress::applyFilters('setInternalAddressRequestEnabled', true)) {
+            $addressResponse = (array)ResursBankAPI::getResurs()->getAddress($identification, $customerType);
+        }
 
         return $addressResponse;
     }

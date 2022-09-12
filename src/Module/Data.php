@@ -219,7 +219,7 @@ class Data
      * @var array $formFieldDefaults
      * @since 0.0.1.0
      */
-    private static $formFieldDefaults;
+    private static $formFieldDefaults = [];
 
     /**
      * @var Aes
@@ -237,7 +237,12 @@ class Data
         $imageFileName = null;
         $imageFile = sprintf(
             '%s/%s',
-            self::getGatewayPath('images'),
+            self::getImagePath(),
+            $imageName
+        );
+        $realImageFile = sprintf(
+            '%s/%s',
+            self::getImagePath(false),
             $imageName
         );
 
@@ -253,19 +258,77 @@ class Data
                 '$1',
                 $imageFile
             );
+            $realImageFile = preg_replace(
+                sprintf('/^(.*)(.%s)$/', implode('|.', self::$fileImageExtensions)),
+                '$1',
+                $realImageFile
+            );
         }
 
+        $internalUrl = false;
         foreach (self::$fileImageExtensions as $extension) {
-            if (file_exists($imageFile . '.' . $extension)) {
-                $imageFileName = $imageFile . '.' . $extension;
+            if (self::getImageFileNameWithExtension($imageFile, $extension)) {
                 if (false === strpos($imageName, '.')) {
                     $imageName .= '.' . $extension;
                 }
+                $imageFileName = $imageFile . '.' . $extension;
+                break;
+            }
+            if (self::getImageFileNameWithExtension($realImageFile, $extension)) {
+                // Override when it exists internally.
+                $internalUrl = true;
+                if (false === strpos($imageName, '.')) {
+                    $imageName .= '.' . $extension;
+                }
+                $imageFileName = $realImageFile . '.' . $extension;
                 break;
             }
         }
 
-        return $imageFileName !== null ? self::getImageUrl($imageName) : null;
+        $imageUrl = $internalUrl ? self::getImageUrl($imageName) : self::getImageUrl($imageName, true);
+
+        return $imageFileName !== null ? $imageUrl : null;
+    }
+
+    /**
+     * @param $imageFile
+     * @param $extension
+     * @return bool
+     * @since 0.0.1.8
+     */
+    private static function getImageFileNameWithExtension($imageFile, $extension): bool
+    {
+        $imageFileName = sprintf('%s.%s', $imageFile, $extension);
+
+        return file_exists($imageFileName);
+    }
+
+    /**
+     * @param bool $filtered
+     * @return string
+     * @since 0.0.1.8
+     */
+    public static function getImagePath(bool $filtered = true): string
+    {
+        $subPathTest = preg_replace('/\//', '', 'images');
+        $gatewayPath = preg_replace(
+            '/\/+$/',
+            '',
+            RESURSBANK_GATEWAY_PATH
+        );
+        if ($filtered) {
+            $gatewayPath = preg_replace(
+                '/\/+$/',
+                '',
+                WordPress::applyFilters('getImageGatewayPath', RESURSBANK_GATEWAY_PATH)
+            );
+        }
+
+        if (!empty($subPathTest) && file_exists($gatewayPath . '/' . $subPathTest)) {
+            $gatewayPath .= '/' . $subPathTest;
+        }
+
+        return $gatewayPath;
     }
 
     /**
@@ -288,16 +351,24 @@ class Data
     }
 
     /**
-     * @param string $imageFileName
+     * @param null $imageFileName
+     * @param bool $filtered
      * @return string
      * @version 0.0.1.0
      */
-    private static function getImageUrl($imageFileName = null): string
+    private static function getImageUrl($imageFileName = null, bool $filtered = false): string
     {
-        $return = sprintf(
-            '%s/images',
-            self::getGatewayUrl()
-        );
+        if ($filtered) {
+            $return = sprintf(
+                '%s/images',
+                WordPress::applyFilters('getImageGatewayUrl', self::getGatewayUrl())
+            );
+        } else {
+            $return = sprintf(
+                '%s/images',
+                self::getGatewayUrl()
+            );
+        }
 
         if (!empty($imageFileName)) {
             $return .= '/' . $imageFileName;
