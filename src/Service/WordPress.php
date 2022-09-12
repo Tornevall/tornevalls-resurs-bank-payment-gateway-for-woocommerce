@@ -452,7 +452,7 @@ class WordPress
     public static function getFilterName($filterName): string
     {
         $return = $filterName;
-        if (defined('RESURSBANK_SNAKECASE_FILTERS')) {
+        if (defined('RESURSBANK_SNAKE_CASE_FILTERS')) {
             $return = (new Strings())->getSnakeCase($filterName);
         }
 

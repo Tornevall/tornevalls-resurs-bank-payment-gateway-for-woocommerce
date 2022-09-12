@@ -63,8 +63,8 @@ class PluginHooks
     public function getAvailableConfigurationFields($inboundFields, string $section = 'basic', $id = null): array
     {
         return FormFields::getFormFields(
-            section: $section,
-            id: $id
+            $section,
+            $id
         );
     }
 

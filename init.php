@@ -12,6 +12,7 @@
  * Domain Path: /language
  *
  * @noinspection PhpCSValidationInspection
+ * @noinspection PhpDefineCanBeReplacedWithConstInspection
  */
 
 use ResursBank\Module\Data;
@@ -35,7 +36,7 @@ if (Data::isOriginalCodeBase()) {
     // Look for an alternative origin.
     define('RESURSBANK_PREFIX', ResursPlugin::RESURS_BANK_PREFIX);
 }
-define('RESURSBANK_SNAKECASE_FILTERS', true);
+define('RESURSBANK_SNAKE_CASE_FILTERS', true);
 define('RESURSBANK_ALLOW_PAYMENT_FEE', WordPress::applyFilters('allowPaymentFee', false));
 
 load_plugin_textdomain(

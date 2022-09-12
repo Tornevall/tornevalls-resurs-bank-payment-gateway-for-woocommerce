@@ -79,7 +79,6 @@ function getResursConfigPopupPrevention(elements) {
     for (var i = 0; i < elements.length; i++) {
         $rQuery(elements[i]).click(function (e) {
             window.onbeforeunload = null;
-            //e.preventDefault();
             getResursEnvironmentFields();
         });
         $rQuery(elements[i]).blur(function (e) {

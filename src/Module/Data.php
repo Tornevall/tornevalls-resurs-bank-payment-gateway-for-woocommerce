@@ -275,7 +275,7 @@ class Data
      * @return string
      * @version 0.0.1.0
      */
-    public static function getGatewayPath($subDirectory = null): string
+    public static function getGatewayPath(string $subDirectory = ''): string
     {
         $subPathTest = preg_replace('/\//', '', $subDirectory);
         $gatewayPath = preg_replace('/\/+$/', '', RESURSBANK_GATEWAY_PATH);
