@@ -4,6 +4,7 @@ namespace ResursBank\ResursBank;
 
 use Exception;
 use ResursBank\Module\Data;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use function is_array;
@@ -58,9 +59,26 @@ class ResursPlugin
         add_filter('rbwc_get_plugin_prefix', [$this, 'getPluginPrefix']);
         add_filter('rbwc_get_obfuscate_lookup_keys', [$this, 'getObfuscateLookupKeys']);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getOrderNotePrefix']);
+        add_filter('getAddressRequest', [$this, 'getAddressRequest']);
     }
 
     /**
+     * @param $addressResponse
+     * @param $identification
+     * @param $customerType
+     * @return array
+     * @throws Exception
+     * @since 0.0.1.8
+     */
+    public function getAddressRequest($addressResponse, $identification, $customerType): array
+    {
+        $addressResponse = (array)ResursBankAPI::getResurs()->getAddress($identification, $customerType);
+
+        return $addressResponse;
+    }
+
+    /**
+     * @param $prefix
      * @return string
      * @since 0.0.1.7
      */
