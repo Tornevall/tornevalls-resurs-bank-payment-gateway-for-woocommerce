@@ -499,7 +499,10 @@ class ResursBankAPI
                     // Also this part is used for the specific admin section.
                     WooCommerce::applyMock('getPaymentMethodsException');
                 }
-                $paymentMethodArray = self::updateSoapMethods(self::getResurs()->getPaymentMethods([], true));
+                $soapMethods = WordPress::applyFilters(
+                    'canUseSoapMethods', true
+                ) ? self::getResurs()->getPaymentMethods([], true) : [];
+                $paymentMethodArray = self::updateSoapMethods($soapMethods);
                 self::$paymentMethods = WordPress::applyFilters('paymentMethodArray',
                     $paymentMethodArray
                 );
