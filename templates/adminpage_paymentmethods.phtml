@@ -51,6 +51,13 @@
                     'Enabled Status',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
+          <?php if ($hasSeveralApiTypes) { ?>
+            <td width="5%" class="resursMethodHead">
+                <?php _e(
+                    'API',
+                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                ) ?></td>
+                <?php } ?>
             <?php if ($extendView) { ?>
                 <td width="10%" class="resursMethodHead"><?php _e(
                         'Method ID',
@@ -112,6 +119,13 @@
                         >
                         <?php _e('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?>
                     </td>
+
+                    <?php if ($hasSeveralApiTypes) { ?>
+                      <td class="resursMethodBody">
+                        <?php echo isset($methodObject->apiType) && esc_html($methodObject->apiType) ? $methodObject->apiType : '' ?>
+                      </td>
+                    <?php } ?>
+
                     <?php if ($extendView) { ?>
                         <td class="resursMethodBody">
                             <?php

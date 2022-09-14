@@ -3,13 +3,11 @@
 namespace ResursBank\Module;
 
 use Exception;
-use Resursbank\Ecommerce\Service\Merchant\MerchantApi;
-use Resursbank\Ecommerce\Service\Merchant\ResursToken;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
 use ResursException;
-use RuntimeException;
 use stdClass;
 use TorneLIB\Exception\Constants;
 use function count;
@@ -46,18 +44,14 @@ class ResursBankAPI
      * @var array $annuityFactors
      * @since 0.0.1.0
      */
-    private static $annuityFactors;
-    /**
-     * Static variable of Resurs Bank Merchant API (early bleeding edge state).
-     * @var MerchantApi
-     * @since 0.0.1.0
-     */
-    private static $merchantApi;
+    private static $annuityFactors = [];
+
     /**
      * @var ResursBank $ecom
      * @since 0.0.1.0
      */
     private $ecom;
+
     /**
      * @var array $credentials
      * @since 0.0.1.0
@@ -66,12 +60,6 @@ class ResursBankAPI
         'username' => '',
         'password' => '',
     ];
-    /**
-     * Resurs Bank Merchant API (early bleeding edge state).
-     * @var MerchantApi
-     * @since 0.0.1.0
-     */
-    private $merchantConnection;
 
     /**
      * @return bool|string
@@ -198,22 +186,6 @@ class ResursBankAPI
 
         // Keep handling exceptions as before.
         return Data::getResolvedCredentials();
-    }
-
-    /**
-     * @return string
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public function getCredentialString(): string
-    {
-        $this->getResolvedCredentials();
-
-        return sprintf(
-            '%s_%s',
-            Data::isTest() ? 'test' : 'live',
-            $this->credentials['username']
-        );
     }
 
     /**
@@ -425,76 +397,6 @@ class ResursBankAPI
     }
 
     /**
-     * @return MerchantApi
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getMerchantConnection(): MerchantApi
-    {
-        if (empty(self::$merchantApi)) {
-            // Instantiation.
-            self::$merchantApi = new self();
-        }
-
-        return self::$merchantApi->getMerchantApi();
-    }
-
-    /**
-     * @return MerchantApi
-     * @throws Exception
-     */
-    public function getMerchantApi(): MerchantApi
-    {
-        if (Data::isBleedingEdge() && Data::isBleedingEdgeApiReady()) {
-            try {
-                if (empty($this->merchantConnection)) {
-                    $livingTransientToken = (string)get_transient(
-                        sprintf('%s_bearer', Data::getPrefix())
-                    );
-
-                    if (empty($livingTransientToken)) {
-                        $this->merchantConnection = (new MerchantApi())
-                            ->setClientId(Data::getResursOption('jwt_client_id'))
-                            ->setClientSecret(Data::getResursOption('jwt_client_password'))
-                            ->setScope('mock-merchant-api')
-                            ->setGrantType('client_credentials');
-
-                        $tokenRequestData = $this->merchantConnection->getToken();
-                        if ($tokenRequestData instanceof ResursToken && $tokenRequestData->getAccessToken() !== '') {
-                            Data::setDeveloperLog(
-                                __FUNCTION__,
-                                __(
-                                    'Merchant API token renewed.',
-                                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                                )
-                            );
-                            $livingTransientToken = $tokenRequestData->getAccessToken();
-                            set_transient(
-                                sprintf('%s_bearer', Data::getPrefix()),
-                                $livingTransientToken,
-                                $tokenRequestData->getExpire()
-                            );
-                        }
-                    } else {
-                        $this->merchantConnection = (new MerchantApi())->setBearer($livingTransientToken);
-                        Data::setDeveloperLog(
-                            __FUNCTION__,
-                            __(
-                                'Merchant API token reused.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                            )
-                        );
-                    }
-                }
-            } catch (Exception $e) {
-                Data::setLogException($e, __FUNCTION__);
-            }
-        }
-
-        return $this->merchantConnection;
-    }
-
-    /**
      * Fetch annuity factors from storage or new data.
      * @param $fromStorage
      * @return array|int|mixed|null
@@ -523,6 +425,9 @@ class ResursBankAPI
                 /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (count($paymentMethods)) {
                     foreach ($paymentMethods as $paymentMethod) {
+                        if ($paymentMethod->apiType !== 'SOAP') {
+                            continue;
+                        }
                         $annuityResponse = self::getResurs()->getAnnuityFactors($paymentMethod->id);
                         if (is_array($annuityResponse) || is_object($annuityResponse)) {
                             // Are we running side by side with v2.x?
@@ -534,7 +439,9 @@ class ResursBankAPI
                     self::$annuityFactors = $annuityArray;
                 }
             } catch (Exception $e) {
-                if (is_object($stored)) {
+                if ($e->getCode() === 8) {
+                    // Ignore this error, as it may be caused by wrong API.
+                } elseif (is_object($stored)) {
                     WooCommerce::setSessionValue('silentAnnuityException', $e);
                     // If there are errors during this procedure, override the stored controller
                     // and return data if there is a cached storage. This makes it possible for the
@@ -592,7 +499,13 @@ class ResursBankAPI
                     // Also this part is used for the specific admin section.
                     WooCommerce::applyMock('getPaymentMethodsException');
                 }
-                self::$paymentMethods = self::getResurs()->getPaymentMethods([], true);
+                $soapMethods = WordPress::applyFilters(
+                    'canUseSoapMethods', true
+                ) ? self::getResurs()->getPaymentMethods([], true) : [];
+                $paymentMethodArray = self::updateSoapMethods($soapMethods);
+                self::$paymentMethods = WordPress::applyFilters('paymentMethodArray',
+                    $paymentMethodArray
+                );
                 Data::setResursOption('lastMethodUpdate', time());
             } catch (Exception $e) {
                 Data::setTimeoutStatus(self::getResurs());
@@ -607,6 +520,22 @@ class ResursBankAPI
         }
 
         return $return;
+    }
+
+    /**
+     * @param $paymentMethodList
+     * @return array
+     * @since 0.0.1.8
+     */
+    private static function updateSoapMethods($paymentMethodList): array
+    {
+        if (is_array($paymentMethodList) && count($paymentMethodList)) {
+            foreach ($paymentMethodList as $item) {
+                $item->apiType = 'SOAP';
+            }
+        }
+
+        return $paymentMethodList;
     }
 
     /**
@@ -646,6 +575,22 @@ class ResursBankAPI
         }
 
         return (array)$return;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public function getCredentialString(): string
+    {
+        $this->getResolvedCredentials();
+
+        return sprintf(
+            '%s_%s',
+            Data::isTest() ? 'test' : 'live',
+            $this->credentials['username']
+        );
     }
 
     /**
