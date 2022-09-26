@@ -2325,10 +2325,24 @@ class ResursDefault extends WC_Payment_Gateway
             $redirect = $status === 'failed' ?
                 $this->order->get_cancel_order_url() : $this->get_return_url($this->order);
         }
+        $redirectString = is_string($redirect) ? $redirect : print_r($redirect, true);
         Data::setDeveloperLog(
             __FUNCTION__,
-            sprintf('Result: %s, Redirect to %s.', $status, $redirect)
+            sprintf(
+                'Result: %s, Redirect to %s.',
+                $status,
+                $redirectString
+            )
         );
+
+        $successRedirect = $this->get_return_url($this->order);
+        // If we get an array instead of a string here, then we should consider the handling
+        // currently not finally processed. This status should be forwarded back as is, unless
+        // the success is true. Then we give the service a proper redirection url instead.
+        if (is_array($redirect) && isset($redirect['success']) && $redirect['success']) {
+            $redirect = $successRedirect;
+        }
+
         return [
             'result' => $status,
             'redirect' => $redirect,

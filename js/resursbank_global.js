@@ -144,7 +144,10 @@ function rbwcShowErrorElement(data, errorElement, requestVerb) {
             errorElement.html(getResursLocalization('nonce_error'));
         }
     }
-    trbwcLog('ErrorLog By Element:');
+    if (typeof data.statusText !== 'undefined' && data.statusText === 'timeout') {
+        alert('Timeout error. Please try again.');
+    }
+    trbwcLog('ErrorLog (rbwcShowErrorElement):');
     console.dir(data);
 }
 
