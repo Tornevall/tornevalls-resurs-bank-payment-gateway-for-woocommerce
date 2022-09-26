@@ -7,6 +7,7 @@ use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use stdClass;
 use function is_array;
 
 /**

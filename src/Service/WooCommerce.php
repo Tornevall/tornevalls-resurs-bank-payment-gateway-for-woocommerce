@@ -554,8 +554,8 @@ class WooCommerce
     public static function getFormattedPaymentData($return)
     {
         // This won't work if the payment is not at Resurs yet.
-        if (isset($return['ecom'])) {
-            $return['customer_billing'] = $return['ecom']->customer->address;
+        if (isset($return['ecom']) && is_array($return['ecom']) && count($return['ecom'])) {
+            $return['customer_billing'] = isset($return['ecom']->customer->address) ? $return['ecom']->customer->address : [];
             $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ? $return['ecom']->deliveryAddress : [];
         }
 
@@ -1027,7 +1027,7 @@ class WooCommerce
      */
     public static function getProperOrder($orderContainer, $returnAs, $log = false)
     {
-        if (method_exists($orderContainer, 'get_id')) {
+        if (is_object($orderContainer) && method_exists($orderContainer, 'get_id')) {
             $orderId = $orderContainer->get_id();
             $order = $orderContainer;
         } elseif ((int)$orderContainer > 0) {
