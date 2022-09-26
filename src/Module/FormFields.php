@@ -1200,30 +1200,6 @@ class FormFields extends WC_Settings_API
                 'api_tweaking_section_end' => [
                     'type' => 'sectionend',
                 ],
-                'bleeding_edge_settings' => [
-                    'type' => 'title',
-                    'title' => 'Bleeding Edge',
-                ],
-                'bleeding_edge' => [
-                    'id' => 'bleeding_edge',
-                    'title' => __(
-                        'Bleeding Edge Checkout Technology',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'type' => 'checkbox',
-                    'desc' => __('Enable', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'desc_tip' => __(
-                        'Enable features that is still under development. The features enabled here are not ' .
-                        'guaranteed to work in production environments and should only be enabled by a developer.' .
-                        'Bleeding edge mode can currently only be used in test. Also please note, that features' .
-                        'within this area, requires higher versions of PHP.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => 'no',
-                ],
-                'bleeding_edge_settings_end' => [
-                    'type' => 'sectionend',
-                ],
             ],
         ];
 
@@ -1575,23 +1551,12 @@ class FormFields extends WC_Settings_API
 
         if (is_array($paymentMethods)) {
             $annuityEnabled = Data::getResursOption('currentAnnuityFactor');
-
-            if (Data::isBleedingEdgeApiReady()) {
-                $merch = ResursBankAPI::getMerchantConnection();
-                $bleedingMethods = $merch->getPaymentMethods(Data::getResursOption('jwt_store_id'))->getList();
-                /** @var Method $bleedingMethod */
-                foreach ($bleedingMethods as $bleedingMethod) {
-                    $paymentMethodIndex = self::getMerchantMethodBySimplified($bleedingMethod, $paymentMethods);
-                    if ($paymentMethodIndex > -1) {
-                        $paymentMethods[$paymentMethodIndex]->merchantMethod = $bleedingMethod;
-                    }
-                }
-            }
             $paymentMethods = self::getInternalMethodDescriptions($paymentMethods);
 
             $paymentMethodTemplate = Data::getGenericClass()->getTemplate(
                 'adminpage_paymentmethods.phtml',
                 [
+                    'hasSeveralApiTypes' => self::hasSeveralApiTypes($paymentMethods),
                     'paymentMethods' => $paymentMethods,
                     'annuityFactors' => $annuityFactors,
                     'exception' => $exception,
@@ -1607,6 +1572,22 @@ class FormFields extends WC_Settings_API
             );
             echo Data::getEscapedHtml($paymentMethodTemplate);
         }
+    }
+
+    /**
+     * Confirm if several API's have payment methods present.
+     *
+     * @param $paymentMethods
+     * @return bool
+     * @since 0.0.1.8
+     */
+    private static function hasSeveralApiTypes($paymentMethods): bool
+    {
+        $apiType = [];
+        foreach ($paymentMethods as $method) {
+            if (isset($method->apiType)) {$apiType[$method->apiType] = true;}
+        }
+        return count($apiType) > 1;
     }
 
     /**
@@ -1663,36 +1644,6 @@ class FormFields extends WC_Settings_API
             'options' => $options,
             'enabled' => $enabled,
         ]);
-    }
-
-    /**
-     * Fetch and compare a payment method with the simplified API list. Returns the index for which
-     * the expected payment method resides in the old format.
-     *
-     * @param Method $merchantApiMethod
-     * @param stdClass $paymentMethods
-     * @return int
-     * @since 0.0.1.0
-     */
-    private static function getMerchantMethodBySimplified($merchantApiMethod, $paymentMethods): int
-    {
-        $return = -1;
-
-        foreach ($paymentMethods as $paymentMethodIndex => $paymentMethod) {
-            $resursType = preg_replace('/^RESURS_/', '', $merchantApiMethod->getType());
-            // Need to look up customerType too.
-            if ($paymentMethod->description === $merchantApiMethod->getDescription() &&
-                (
-                    $paymentMethod->specificType === $merchantApiMethod->getType() ||
-                    $paymentMethod->specificType === $resursType
-                )
-            ) {
-                $return = $paymentMethodIndex;
-                break;
-            }
-        }
-
-        return (int)$return;
     }
 
     /**

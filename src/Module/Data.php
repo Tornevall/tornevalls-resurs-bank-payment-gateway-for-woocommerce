@@ -291,19 +291,6 @@ class Data
     }
 
     /**
-     * @param $imageFile
-     * @param $extension
-     * @return bool
-     * @since 0.0.1.8
-     */
-    private static function getImageFileNameWithExtension($imageFile, $extension): bool
-    {
-        $imageFileName = sprintf('%s.%s', $imageFile, $extension);
-
-        return file_exists($imageFileName);
-    }
-
-    /**
      * @param bool $filtered
      * @return string
      * @since 0.0.1.8
@@ -332,22 +319,16 @@ class Data
     }
 
     /**
-     * Get file path for major initializer (init.php).
-     *
-     * @param string $subDirectory
-     * @return string
-     * @version 0.0.1.0
+     * @param $imageFile
+     * @param $extension
+     * @return bool
+     * @since 0.0.1.8
      */
-    public static function getGatewayPath(string $subDirectory = ''): string
+    private static function getImageFileNameWithExtension($imageFile, $extension): bool
     {
-        $subPathTest = preg_replace('/\//', '', $subDirectory);
-        $gatewayPath = preg_replace('/\/+$/', '', RESURSBANK_GATEWAY_PATH);
+        $imageFileName = sprintf('%s.%s', $imageFile, $extension);
 
-        if (!empty($subPathTest) && file_exists($gatewayPath . '/' . $subPathTest)) {
-            $gatewayPath .= '/' . $subPathTest;
-        }
-
-        return $gatewayPath;
+        return file_exists($imageFileName);
     }
 
     /**
@@ -401,6 +382,25 @@ class Data
     }
 
     /**
+     * Get file path for major initializer (init.php).
+     *
+     * @param string $subDirectory
+     * @return string
+     * @version 0.0.1.0
+     */
+    public static function getGatewayPath(string $subDirectory = ''): string
+    {
+        $subPathTest = preg_replace('/\//', '', $subDirectory);
+        $gatewayPath = preg_replace('/\/+$/', '', RESURSBANK_GATEWAY_PATH);
+
+        if (!empty($subPathTest) && file_exists($gatewayPath . '/' . $subPathTest)) {
+            $gatewayPath .= '/' . $subPathTest;
+        }
+
+        return $gatewayPath;
+    }
+
+    /**
      * @return bool
      * @since 0.0.1.2
      */
@@ -416,95 +416,6 @@ class Data
     public static function isTest(): bool
     {
         return (self::getResursOption('environment', null, false) === 'test');
-    }
-
-    /**
-     * Check if payment method for specific credentials are enabled or disabled.
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function isPaymentMethodEnabled($paymentMethod): bool
-    {
-        return self::getPaymentMethodSetting('enabled', $paymentMethod) ?? true;
-    }
-
-    /**
-     * Resolve namespace by current environment setup (using environment_username_paymentmethod).
-     *
-     * @param $paymentMethod
-     * @return string
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    private static function getPaymentMethodNameSpace($paymentMethod): string
-    {
-        WooCommerce::applyMock('getPaymentMethodNamespaceException');
-
-        return sprintf(
-            '%s_%s',
-            (new ResursBankAPI())->getCredentialString(),
-            $paymentMethod
-        );
-    }
-
-    /**
-     * @param string $paymentMethod
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    private static function getPaymentMethodSettings(string $paymentMethod)
-    {
-        return Data::getResursOption(
-            sprintf(
-                '%s_settings',
-                self::getPaymentMethodNameSpace($paymentMethod)
-            )
-        ) ?: [];
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @param $paymentMethod
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function setPaymentMethodSetting(string $key, $value, $paymentMethod)
-    {
-        $rturn = false;
-
-        if (!empty($paymentMethod)) {
-            $settings = self::getPaymentMethodSettings($paymentMethod);
-            $settings[$key] = $value;
-            $return = Data::setResursOption(
-                sprintf(
-                    '%s_settings',
-                    self::getPaymentMethodNameSpace($paymentMethod)
-                ),
-                $settings
-            );
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param string $key
-     * @param $paymentMethod
-     * @return mixed|null
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function getPaymentMethodSetting(string $key, $paymentMethod)
-    {
-        if (!empty($paymentMethod)) {
-            $settingBlock = (array)self::getPaymentMethodSettings($paymentMethod);
-        }
-
-        return $settingBlock[$key] ?? null;
     }
 
     /**
@@ -652,6 +563,106 @@ class Data
     }
 
     /**
+     * Check if payment method for specific credentials are enabled or disabled.
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function isPaymentMethodEnabled($paymentMethod): bool
+    {
+        return self::getPaymentMethodSetting('enabled', $paymentMethod) ?? true;
+    }
+
+    /**
+     * @param string $key
+     * @param $paymentMethod
+     * @return mixed|null
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function getPaymentMethodSetting(string $key, $paymentMethod)
+    {
+        if (!empty($paymentMethod)) {
+            $settingBlock = (array)self::getPaymentMethodSettings($paymentMethod);
+        }
+
+        return $settingBlock[$key] ?? null;
+    }
+
+    /**
+     * @param string $paymentMethod
+     * @return mixed
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    private static function getPaymentMethodSettings(string $paymentMethod)
+    {
+        return Data::getResursOption(
+            sprintf(
+                '%s_settings',
+                self::getPaymentMethodNameSpace($paymentMethod)
+            )
+        ) ?: [];
+    }
+
+    /**
+     * Resolve namespace by current environment setup (using environment_username_paymentmethod).
+     *
+     * @param $paymentMethod
+     * @return string
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    private static function getPaymentMethodNameSpace($paymentMethod): string
+    {
+        WooCommerce::applyMock('getPaymentMethodNamespaceException');
+
+        return sprintf(
+            '%s_%s',
+            (new ResursBankAPI())->getCredentialString(),
+            $paymentMethod
+        );
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @param $paymentMethod
+     * @return bool
+     * @throws Exception
+     * @since 0.0.1.6
+     */
+    public static function setPaymentMethodSetting(string $key, $value, $paymentMethod)
+    {
+        $rturn = false;
+
+        if (!empty($paymentMethod)) {
+            $settings = self::getPaymentMethodSettings($paymentMethod);
+            $settings[$key] = $value;
+            $return = Data::setResursOption(
+                sprintf(
+                    '%s_settings',
+                    self::getPaymentMethodNameSpace($paymentMethod)
+                ),
+                $settings
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function setResursOption($key, $value): bool
+    {
+        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
+    }
+
+    /**
      * @return int
      * @since 0.0.1.0
      */
@@ -718,24 +729,6 @@ class Data
         } else {
             return $return;
         }
-    }
-
-    /**
-     * @param $customerCountry
-     * @return float
-     * @since 0.0.1.6
-     */
-    private static function getDefaultPartPaymentThreshold($customerCountry): float
-    {
-        $threshold = (float)Data::getResursOption('part_payment_threshold');
-
-        if ($threshold === 150.00 && $customerCountry === 'FI') {
-            $threshold = 15.00;
-        } elseif ((int)$threshold === 0) {
-            $threshold = 150.00;
-        }
-
-        return (float)WordPress::applyFilters('getMinimumAnnuityPrice', $threshold, $customerCountry);
     }
 
     /**
@@ -827,6 +820,24 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @param $customerCountry
+     * @return float
+     * @since 0.0.1.6
+     */
+    private static function getDefaultPartPaymentThreshold($customerCountry): float
+    {
+        $threshold = (float)Data::getResursOption('part_payment_threshold');
+
+        if ($threshold === 150.00 && $customerCountry === 'FI') {
+            $threshold = 15.00;
+        } elseif ((int)$threshold === 0) {
+            $threshold = 150.00;
+        }
+
+        return (float)WordPress::applyFilters('getMinimumAnnuityPrice', $threshold, $customerCountry);
     }
 
     /**
@@ -1232,6 +1243,8 @@ class Data
             'trbwc_',
             Data::getPrefix() . '_'
         ];
+        $canHandleOrderMethodPrefix = (array)WordPress::applyFilters('canHandleOrderPrefix', $allowMethod);
+        $allowMethod += $canHandleOrderMethodPrefix;
 
         $isResursDeprecated = false;
         foreach ($allowMethod as $methodKey) {
@@ -1304,15 +1317,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.7
-     */
-    public static function getBrandName(): string
-    {
-        return 'Rɘsurs';
     }
 
     /**
@@ -1469,30 +1473,50 @@ class Data
     /**
      * Fetch order info from EComPHP.
      *
-     * @param $return
+     * @param $prefetchObject
      * @return mixed
-     * @return array
+     * @throws ResursException
      * @since 0.0.1.0
      */
-    public static function getPreparedDataByEcom($return)
+    public static function getPreparedDataByEcom($prefetchObject)
     {
-        $return = self::getOrderInfoExceptionData($return);
+        $prefetchObject = self::getOrderInfoExceptionData($prefetchObject);
+        $prefetchObject = self::getPreparedDataByExternal($prefetchObject);
+
         try {
-            if (!$return['ecomException']['code']) {
+            if (!$prefetchObject['ecomException']['code']) {
+                $prefetchObject['apiType'] = self::getMethodApiTypeByPreFetch($prefetchObject);
                 try {
-                    $return['ecom'] = ResursBankAPI::getPayment($return['resurs'], null, $return);
-                    $return['ecom_had_reference_problems'] = false;
+                    // This feature can be used to exclude execution of internal getPayments.
+                    // However, IF we skip this section, other things, like bookSignedPayment may be defected, so
+                    // we can not currently disable this one entirely. A suggestion is to match this filter with
+                    // isInternalPayment to see if it is necessary to run a getPayment at all.
+                    //$return['ecom'] = WordPress::applyFilters('canUseInternalGetPayment', true) ? ResursBankAPI::getPayment($return['resurs'], null, $return) : [];
+
+                    // Do not allow this ecom-block to be overwritten by external plugins. It is still
+                    // necessary for internal payment management requests. However, we will make sure - at this point -
+                    // that the payment will only be fetched internally if it is possible/necessary (I.E. when
+                    // the payment has been created by this plugin with legacy features and not an external party).
+                    $prefetchObject['ecom'] = self::isInternalPayment($prefetchObject) ?
+                        ResursBankAPI::getPayment($prefetchObject['resurs'], null, $prefetchObject) : [];
+                    // Instead, let external payment information requests be stored in a separate variable.
+                    if (!is_array($prefetchObject['externalPaymentInformation'])) {
+                        // Make sure it is properly updated if something went wrong during the filtered request.
+                        $prefetchObject['externalPaymentInformation'] = [];
+                    }
+                    $prefetchObject['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
                     self::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
-                    if (!empty($return['resurs_secondary']) && $return['resurs_secondary'] !== $return['resurs']) {
-                        $return['ecom'] = ResursBankAPI::getPayment($return['resurs_secondary'], null, $return);
+                    if (!empty($prefetchObject['resurs_secondary']) && $prefetchObject['resurs_secondary'] !== $prefetchObject['resurs']) {
+                        $prefetchObject['ecom'] = ResursBankAPI::getPayment($prefetchObject['resurs_secondary'], null,
+                            $prefetchObject);
                     }
-                    $return['ecom_had_reference_problems'] = true;
-                    $return['ecomException']['code'] = $e->getCode();
-                    $return['ecomException']['message'] = $e->getMessage();
+                    $prefetchObject['ecom_had_reference_problems'] = true;
+                    $prefetchObject['ecomException']['code'] = $e->getCode();
+                    $prefetchObject['ecomException']['message'] = $e->getMessage();
                 }
-                $return = WooCommerce::getFormattedPaymentData($return);
-                $return = WooCommerce::getPaymentInfoDetails($return);
+                $prefetchObject = WooCommerce::getFormattedPaymentData($prefetchObject);
+                $prefetchObject = WooCommerce::getPaymentInfoDetails($prefetchObject);
             }
         } catch (Exception $e) {
             self::canLog(
@@ -1500,12 +1524,12 @@ class Data
                 sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
             );
             self::setLogException($e, __FUNCTION__);
-            $return['ecomException'] = [
+            $prefetchObject['ecomException'] = [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
             ];
         }
-        return (array)$return;
+        return (array)$prefetchObject;
     }
 
     /**
@@ -1531,80 +1555,27 @@ class Data
     }
 
     /**
-     * @param $eventType
-     * @param $logData
-     * @return bool
-     * @since 0.0.1.0
+     * @param $prefetchObject
+     * @return array
      */
-    public static function canLog($eventType, $logData): bool
+    private static function getPreparedDataByExternal($prefetchObject): array
     {
-        $return = false;
-
-        // Ask the data base once, then get local storage value.
-        if (!isset(self::$can[$eventType])) {
-            self::$can[$eventType] = (bool)self::getResursOption(
-                sprintf('can_log_%s', $eventType)
+        try {
+            // Collect external data before internal.
+            $prefetchObject['externalPaymentInformation'] = WordPress::applyFilters(
+                'getResursPayment',
+                [],
+                $prefetchObject['resurs'],
+                $prefetchObject['resurs'] === $prefetchObject['resurs_secondary'] ? null : $prefetchObject['resurs_secondary']
+            );
+        } catch (Exception $externalGetpaymentException) {
+            self::setLogException(
+                $externalGetpaymentException,
+                sprintf('%s_filtered_get_payment', __FUNCTION__)
             );
         }
 
-        if (self::$can[$eventType]) {
-            $return = true;
-            self::setLogInfo($logData);
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $logMessage
-     * @since 0.0.1.0
-     */
-    public static function setLogInfo($logMessage)
-    {
-        self::setLogInternal(
-            self::LOG_INFO,
-            $logMessage
-        );
-    }
-
-    /**
-     * @param $severity
-     * @param $logMessage
-     * @since 0.0.1.0
-     */
-    public static function setLogInternal($severity, $logMessage)
-    {
-        // If WooComemrce has not WC_Logger instance ready, skip logging.
-        if (!class_exists('WC_Logger')) {
-            return;
-        }
-        if (empty(self::$Log)) {
-            self::$Log = new WC_Logger();
-        }
-
-        $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
-        $from = $_SERVER['REMOTE_ADDR'] ?? 'Console';
-        $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
-
-        switch ($severity) {
-            case 'info':
-                self::$Log->info($message);
-                break;
-            case 'debug':
-                self::$Log->debug($message);
-                break;
-            case 'critical':
-                self::$Log->critical($message);
-                break;
-            case 'error':
-                self::$Log->error($message);
-                break;
-            case 'warning':
-                self::$Log->warning($message);
-                break;
-            default:
-                self::$Log->notice($message);
-        }
+        return $prefetchObject;
     }
 
     /**
@@ -1666,6 +1637,179 @@ class Data
     }
 
     /**
+     * @param $severity
+     * @param $logMessage
+     * @since 0.0.1.0
+     */
+    public static function setLogInternal($severity, $logMessage)
+    {
+        // If WooComemrce has not WC_Logger instance ready, skip logging.
+        if (!class_exists('WC_Logger')) {
+            return;
+        }
+        if (empty(self::$Log)) {
+            self::$Log = new WC_Logger();
+        }
+
+        $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
+        $from = $_SERVER['REMOTE_ADDR'] ?? 'Console';
+        $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
+
+        switch ($severity) {
+            case 'info':
+                self::$Log->info($message);
+                break;
+            case 'debug':
+                self::$Log->debug($message);
+                break;
+            case 'critical':
+                self::$Log->critical($message);
+                break;
+            case 'error':
+                self::$Log->error($message);
+                break;
+            case 'warning':
+                self::$Log->warning($message);
+                break;
+            default:
+                self::$Log->notice($message);
+        }
+    }
+
+    /**
+     * @param $prefetchObject
+     * @return string
+     * @throws ResursException
+     */
+    private static function getMethodApiTypeByPreFetch($prefetchObject): string
+    {
+        $return = '';
+        if (isset($prefetchObject['meta']) && is_array($prefetchObject['meta'])) {
+            $paymentMethodInformation = json_decode(self::getOrderMeta('paymentMethodInformation', $prefetchObject));
+            if (is_object($paymentMethodInformation) && isset($paymentMethodInformation->apiType)) {
+                $return = $paymentMethodInformation->apiType;
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * @param $key
+     * @param $order
+     * @return mixed|null
+     * @throws ResursException
+     * @since 0.0.1.0
+     */
+    public static function getOrderMeta($key, $order)
+    {
+        if (is_array($order) && isset($order['order'])) {
+            // Get from a prefetched request.
+            $orderData = $order;
+        } else {
+            $orderData = self::getOrderInfo($order);
+        }
+
+        if (isset($key, $orderData['meta'][$key])) {
+            //$return = $orderData['meta'][$key];
+            $return = self::getOrderMetaByKey($key, $orderData['meta']);
+        }
+        $pluginPrefixedKey = sprintf('%s_%s', self::getPrefix(), $key);
+        if (isset($orderData['meta'])) {
+            $pluginReturn = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
+            if (!empty($pluginReturn) && empty($return)) {
+                $return = $pluginReturn;
+            }
+        }
+        if ($key === 'resurspayment' && isset($orderData['ecom']) && is_object($orderData['ecom'])) {
+            $return = $orderData['ecom'];
+        }
+
+        return $return ?? null;
+    }
+
+    /**
+     * @param $suffixedKey
+     * @param $orderDataMeta
+     * @return mixed|null
+     * @since 0.0.1.0
+     */
+    private static function getOrderMetaByKey($suffixedKey, $orderDataMeta)
+    {
+        if (is_array($orderDataMeta)) {
+            foreach (['', 'u_'] as $orderMetaKey) {
+                $currentMetaKey = sprintf('%s%s', $orderMetaKey, $suffixedKey);
+                if (isset($orderDataMeta[$currentMetaKey])) {
+                    $handleResult = $orderDataMeta[$currentMetaKey];
+                    if (is_array($handleResult)) {
+                        $return = array_pop($handleResult);
+                    } else {
+                        $return = $handleResult;
+                    }
+                }
+            }
+        }
+        return $return ?? null;
+    }
+
+    /**
+     * Returns a true value if the metadata contains internal payment indicators.
+     * By means, we check if the current payment is created by this plugin.
+     *
+     * @param $prefetchObject
+     * @return bool
+     * @throws ResursException
+     * @since 0.0.1.8
+     */
+    private static function isInternalPayment($prefetchObject): bool
+    {
+        return (isset($prefetchObject['apiType']) && in_array($prefetchObject['apiType'], ['SOAP', 'REST'])) ||
+            in_array(
+                self::getOrderMeta('checkoutType', $prefetchObject), [
+                    ResursDefault::TYPE_SIMPLIFIED,
+                    ResursDefault::TYPE_RCO,
+                    ResursDefault::TYPE_HOSTED
+                ]
+            );
+    }
+
+    /**
+     * @param $eventType
+     * @param $logData
+     * @return bool
+     * @since 0.0.1.0
+     */
+    public static function canLog($eventType, $logData): bool
+    {
+        $return = false;
+
+        // Ask the data base once, then get local storage value.
+        if (!isset(self::$can[$eventType])) {
+            self::$can[$eventType] = (bool)self::getResursOption(
+                sprintf('can_log_%s', $eventType)
+            );
+        }
+
+        if (self::$can[$eventType]) {
+            $return = true;
+            self::setLogInfo($logData);
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $logMessage
+     * @since 0.0.1.0
+     */
+    public static function setLogInfo($logMessage)
+    {
+        self::setLogInternal(
+            self::LOG_INFO,
+            $logMessage
+        );
+    }
+
+    /**
      * @param array $orderData
      * @since 0.0.1.0
      */
@@ -1683,6 +1827,15 @@ class Data
             is_admin(),
             $localizeArray
         );
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.7
+     */
+    public static function getBrandName(): string
+    {
+        return 'Rɘsurs';
     }
 
     /**
@@ -1786,6 +1939,16 @@ class Data
     }
 
     /**
+     * @param bool $getBasic
+     * @return array
+     * @since 0.0.1.0
+     */
+    public static function getFormFields($getBasic = null): array
+    {
+        return FormFields::getFormFields($getBasic);
+    }
+
+    /**
      * @param string $specificMock
      * @param bool $resetMock Ability to not reset mock mode for specific mock if it has to be checked first.
      * @return bool
@@ -1810,17 +1973,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function setResursOption($key, $value): bool
-    {
-        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
     }
 
     /**
@@ -2023,16 +2175,6 @@ class Data
     public static function getPluginTitle($getBaseName = null): string
     {
         return !$getBaseName ? self::getPluginDataContent('Plugin Name') : WooCommerce::getBaseName();
-    }
-
-    /**
-     * @param bool $getBasic
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getFormFields($getBasic = null): array
-    {
-        return FormFields::getFormFields($getBasic);
     }
 
     /**
@@ -2404,40 +2546,6 @@ class Data
     }
 
     /**
-     * @param $key
-     * @param $order
-     * @return mixed|null
-     * @throws ResursException
-     * @since 0.0.1.0
-     */
-    public static function getOrderMeta($key, $order)
-    {
-        if (is_array($order) && isset($order['order'])) {
-            // Get from a prefetched request.
-            $orderData = $order;
-        } else {
-            $orderData = self::getOrderInfo($order);
-        }
-
-        if (isset($key, $orderData['meta'][$key])) {
-            //$return = $orderData['meta'][$key];
-            $return = self::getOrderMetaByKey($key, $orderData['meta']);
-        }
-        $pluginPrefixedKey = sprintf('%s_%s', self::getPrefix(), $key);
-        if (isset($orderData['meta'])) {
-            $pluginReturn = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
-            if (!empty($pluginReturn) && empty($return)) {
-                $return = $pluginReturn;
-            }
-        }
-        if ($key === 'resurspayment' && isset($orderData['ecom']) && is_object($orderData['ecom'])) {
-            $return = $orderData['ecom'];
-        }
-
-        return $return ?? null;
-    }
-
-    /**
      * @param $ecomObject
      * @return bool
      * @throws ResursException
@@ -2450,30 +2558,6 @@ class Data
             'ignore_frozen',
             $ecomObject
         );
-    }
-
-    /**
-     * @param $suffixedKey
-     * @param $orderDataMeta
-     * @return mixed|null
-     * @since 0.0.1.0
-     */
-    private static function getOrderMetaByKey($suffixedKey, $orderDataMeta)
-    {
-        if (is_array($orderDataMeta)) {
-            foreach (['', 'u_'] as $orderMetaKey) {
-                $currentMetaKey = sprintf('%s%s', $orderMetaKey, $suffixedKey);
-                if (isset($orderDataMeta[$currentMetaKey])) {
-                    $handleResult = $orderDataMeta[$currentMetaKey];
-                    if (is_array($handleResult)) {
-                        $return = array_pop($handleResult);
-                    } else {
-                        $return = $handleResult;
-                    }
-                }
-            }
-        }
-        return $return ?? null;
     }
 
     /**
@@ -2498,7 +2582,7 @@ class Data
      */
     public static function setOrderMeta($order, $key, $value, $protected = true, $insert = false)
     {
-        if (method_exists($order, 'get_id')) {
+        if (is_object($order) && method_exists($order, 'get_id')) {
             $orderId = $order->get_id();
         } elseif ((int)$order > 0) {
             $orderId = $order;
@@ -2754,15 +2838,6 @@ class Data
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.6
-     */
-    public static function isPaymentFeeAllowed(): bool
-    {
-        return defined('RESURSBANK_ALLOW_PAYMENT_FEE') ? (bool)RESURSBANK_ALLOW_PAYMENT_FEE : false;
-    }
-
-    /**
      * @return array|mixed|string|null
      * @throws Exception
      * @since 0.0.1.0
@@ -2786,18 +2861,12 @@ class Data
     }
 
     /**
-     * @throws Exception
-     * @since 0.0.1.0
+     * @return bool
+     * @since 0.0.1.6
      */
-    public static function getResolvedCredentials(): bool
+    public static function isPaymentFeeAllowed(): bool
     {
-        $credentials = self::getResolvedCredentialData();
-
-        if (empty($credentials['username']) || empty($credentials['password'])) {
-            throw new RuntimeException('ECom credentials are not fully set.', self::UNSET_CREDENTIALS_EXCEPTION);
-        }
-
-        return true;
+        return defined('RESURSBANK_ALLOW_PAYMENT_FEE') ? (bool)RESURSBANK_ALLOW_PAYMENT_FEE : false;
     }
 
     /**
@@ -2815,6 +2884,21 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public static function getResolvedCredentials(): bool
+    {
+        $credentials = self::getResolvedCredentialData();
+
+        if (empty($credentials['username']) || empty($credentials['password'])) {
+            throw new RuntimeException('ECom credentials are not fully set.', self::UNSET_CREDENTIALS_EXCEPTION);
+        }
+
+        return true;
     }
 
     /**
