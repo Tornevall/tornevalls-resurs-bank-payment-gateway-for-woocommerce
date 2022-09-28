@@ -69,3 +69,14 @@ if (!function_exists('rbwc_get_order_info')) {
         return Data::getOrderInfo($order);
     }
 }
+
+if (!function_exists('rbwc_get_escaped_html')) {
+    /**
+     * @param $html
+     * @return string
+     * @since 0.0.1.8
+     */
+    function rbwc_get_escaped_html($html) {
+        return Data::getEscapedHtml($html);
+    }
+}
