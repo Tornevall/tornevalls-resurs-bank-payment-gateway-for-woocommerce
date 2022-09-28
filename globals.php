@@ -83,3 +83,19 @@ if (!function_exists('rbwc_get_escaped_html')) {
         return Data::getEscapedHtml($html);
     }
 }
+
+if (!function_exists('getOrderMeta')) {
+    /**
+     * Get metadata values from specific order, by key name.
+     *
+     * @param string $key
+     * @param $order
+     * @return mixed|null
+     * @throws ResursException
+     * @since 0.0.1.8
+     */
+    function rbwc_get_order_meta(string $key, $order)
+    {
+        return Data::getOrderMeta($key, $order);
+    }
+}
