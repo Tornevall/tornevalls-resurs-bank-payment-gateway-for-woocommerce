@@ -84,7 +84,7 @@ if (!function_exists('rbwc_get_escaped_html')) {
     }
 }
 
-if (!function_exists('getOrderMeta')) {
+if (!function_exists('rbwc_get_order_meta')) {
     /**
      * Get metadata values from specific order, by key name.
      *
