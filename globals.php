@@ -30,7 +30,7 @@ if (!function_exists('rbwc_get_prefix')) {
      * @return string
      * @since 0.0.1.8
      */
-    function rbwc_get_prefix($extra = null, $ignoreCodeBase = null)
+    function rbwc_get_prefix($extra = null, $ignoreCodeBase = null): string
     {
         return Data::getPrefix($extra, $ignoreCodeBase);
     }
@@ -42,7 +42,8 @@ if (!function_exists('rbwc_get_truth')) {
      * @return bool|null
      * @since 0.0.1.8
      */
-    function rbwc_get_truth($value) {
+    function rbwc_get_truth($value): ?bool
+    {
         return Data::getTruth($value);
     }
 }
@@ -53,7 +54,8 @@ if (!function_exists('rbwc_can_handle_order')) {
      * @return bool
      * @since 0.0.1.8
      */
-    function rbwc_can_handle_order($paymentMethod) {
+    function rbwc_can_handle_order($paymentMethod): bool
+    {
         return Data::canHandleOrder($paymentMethod);
     }
 }
@@ -76,7 +78,8 @@ if (!function_exists('rbwc_get_escaped_html')) {
      * @return string
      * @since 0.0.1.8
      */
-    function rbwc_get_escaped_html($html) {
+    function rbwc_get_escaped_html($html): string
+    {
         return Data::getEscapedHtml($html);
     }
 }
