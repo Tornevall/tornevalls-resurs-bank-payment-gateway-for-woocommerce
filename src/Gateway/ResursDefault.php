@@ -1636,9 +1636,8 @@ class ResursDefault extends WC_Payment_Gateway
         if (empty($resursReturnUrl)) {
             $returnUrl = $resursReturnUrl;
         }
-        $failUrl = html_entity_decode($order->get_cancel_order_url());
 
-        return $result === 'success' ? $returnUrl : $failUrl;
+        return $result === 'success' ? $returnUrl : html_entity_decode($order->get_cancel_order_url());
     }
 
     /**
