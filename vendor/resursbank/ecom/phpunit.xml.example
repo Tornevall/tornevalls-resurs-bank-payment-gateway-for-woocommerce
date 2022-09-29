@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit bootstrap="vendor/autoload.php" colors="true" verbose="true" stopOnFailure="false">
+    <testsuites>
+        <testsuite name="ecom2_unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="ecom2_integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="BASIC_AUTH_USERNAME" value="REPLACEME" force="true" />
+        <env name="BASIC_AUTH_PASSWORD" value="REPLACEME" force="true" />
+        <env name="STORE_ID" value="REPLACEME" force="true" />
+        <env name="STORE_ID_NATIONAL" value="REPLACEME" force="true" />
+        <env name="JWT_AUTH_CLIENT_ID" value="REPLACEME" force="true" />
+        <env name="JWT_AUTH_CLIENT_SECRET" value="REPLACEME" force="true" />
+        <env name="JWT_AUTH_SCOPE" value="mock-merchant-api" force="true" />
+        <env name="JWT_AUTH_GRANT_TYPE" value="client_credentials" force="true" />
+        <env name="REDIS_HOST" value="redis" force="true" />
+        <env name="PAYMENT_METHOD_ID" value="REPLACEME" force="true" />
+        <env name="GOVERNMENT_ID_HAPPY_NATURAL" value="REPLACEME" force="true" />
+        <env name="ANNUITY_PAYMENT_METHOD_ID" value="REPLACEME" force="true" />
+    </php>
+</phpunit>
