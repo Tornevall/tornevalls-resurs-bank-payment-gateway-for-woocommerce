@@ -1636,8 +1636,8 @@ class ResursDefault extends WC_Payment_Gateway
         if (empty($resursReturnUrl)) {
             $returnUrl = $resursReturnUrl;
         }
-        return $result === 'success' || (bool)$result === true ?
-            $returnUrl : html_entity_decode($order->get_cancel_order_url());
+
+        return $result === 'success' ? $returnUrl : html_entity_decode($order->get_cancel_order_url());
     }
 
     /**
@@ -1749,50 +1749,66 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function processResursOrder($order): array
     {
-        // Available options: simplified, hosted, rco. Methods should exists for each of them.
+        $return = [];
         $checkoutRequestType = sprintf('process%s', ucfirst(Data::getCheckoutType()));
+        if ($this->paymentMethodInformation->apiType === 'SOAP') {
+            // Available options: simplified, hosted, rco. Methods should exists for each of them.
+            if (method_exists($this, $checkoutRequestType)) {
+                WooCommerce::setOrderNote(
+                    $this->order,
+                    sprintf(
+                        __('Resurs Bank processing order (%s).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                        $checkoutRequestType
+                    )
+                );
+                // Automatically process orders with a checkout type that is supported by this plugin.
+                // Checkout types will become available as the method starts to exist.
 
-        if (method_exists($this, $checkoutRequestType)) {
-            WooCommerce::setOrderNote(
-                $this->order,
-                sprintf(
-                    __('Resurs Bank processing order (%s).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    $checkoutRequestType
-                )
-            );
-            // Automatically process orders with a checkout type that is supported by this plugin.
-            // Checkout types will become available as the method starts to exist.
+                Data::canLog(
+                    Data::CAN_LOG_ORDER_EVENTS,
+                    sprintf(
+                        __(
+                            '%s: Initialize Resurs Bank process, order %s (%s) via %s.',
+                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        ),
+                        __FUNCTION__,
+                        $this->order->get_id(),
+                        $this->getPaymentId(),
+                        $checkoutRequestType
+                    )
+                );
 
-            Data::canLog(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
+                $return = $this->{$checkoutRequestType}($order);
+            } else {
+                Data::setLogError(
+                    sprintf(
+                        'Merchant is trying to run this plugin with an unsupported checkout type (%s).',
+                        $checkoutRequestType
+                    )
+                );
+                throw new RuntimeException(
                     __(
-                        '%s: Initialize Resurs Bank process, order %s (%s) via %s.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'Chosen checkout type is currently unsupported'
                     ),
-                    __FUNCTION__,
-                    $this->order->get_id(),
-                    $this->getPaymentId(),
-                    $checkoutRequestType
-                )
-            );
-
-            $return = $this->{$checkoutRequestType}($order);
+                    404
+                );
+            }
         } else {
-            Data::setLogError(
-                sprintf(
-                    'Merchant is trying to run this plugin with an unsupported checkout type (%s).',
-                    $checkoutRequestType
-                )
-            );
-            throw new RuntimeException(
-                __(
-                    'Chosen checkout type is currently unsupported'
-                ),
-                404
+            // Passing the order to third party scripts. Using a format in this filter that in the end supports
+            // WordPress standards with snake_cases.
+            $return = WordPress::applyFilters(
+                sprintf('processOrder%s', ucfirst($this->paymentMethodInformation->apiType ?? '')),
+                [],
+                $order,
+                $this->paymentMethodInformation,
+                $this
             );
         }
-        if (is_array($return)) {
+
+        // $return should at this moment contain an array with a result and redirect-url:
+        // [result => success|failure, redirect => url]
+
+        if (is_array($return) && count($return)) {
             Data::canLog(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
@@ -1802,7 +1818,7 @@ class ResursDefault extends WC_Payment_Gateway
                     ),
                     __FUNCTION__,
                     $order->get_id(),
-                    $return['result']
+                    $return['result'] ?? 'failure'
                 )
             );
         } else {
@@ -1816,6 +1832,13 @@ class ResursDefault extends WC_Payment_Gateway
                     $checkoutRequestType
                 )
             );
+        }
+
+        if (!isset($return['result'])) {
+            $return = [
+                'result' => 'failure',
+                'redirect' => $this->getReturnUrl($order, 'failure')
+            ];
         }
 
         return $return;
