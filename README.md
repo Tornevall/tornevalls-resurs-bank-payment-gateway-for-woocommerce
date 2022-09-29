@@ -6,8 +6,8 @@ there will be breaking changes that will make it impossible to overwrite version
 
 **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
 
-As PHP 7.4 is about to get outdated, this entire module requires you to upgrade to the latest release of PHP (currently
-8.1+) since Resurs Bank is strictly require as high security as possible.
+As PHP 7.4 is nearing its end of life this entire module requires the latest version of PHP (currently 8.1+) since for
+security reasons Resurs Bank will not support versions that no longer receive updates.
 
 Translations are currently under reconstruction as Resurs Bank has requirements of how they should look and be
 implemented.
@@ -32,8 +32,12 @@ site. Running multiple sites do **require** multiple webservice accounts!
 
 ## CONTRIBUTION ##
 
-If you'd like to contribute to this project, you can now sign up with [Resurs Bitbucket](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/) and start creating pull requests.
-There are an old issue tracker that will in time be discontinued and replaced with [Resurs JIRA](https://resursbankplugins.atlassian.net/jira/software/c/projects/WOO). The old issue tracker is located [here](https://tracker.tornevall.net/projects/RWC) where most of the to-do list still reside.
+If you'd like to contribute to this project, you can now sign up
+with [Resurs Bitbucket](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/) and start creating pull
+requests.
+There are an old issue tracker that will in time be discontinued and replaced
+with [Resurs JIRA](https://resursbankplugins.atlassian.net/jira/software/c/projects/WOO). The old issue tracker is
+located [here](https://tracker.tornevall.net/projects/RWC) where most of the to-do list still reside.
 
 ## DOCUMENTS AND LINKS ##
 
@@ -74,9 +78,13 @@ for an extended explanation about how PHP is used.
 
 * **Required**: PHP: 8.1 or later.
 * **Required**: WooCommerce: v3.5.0 or higher - preferably *always* the latest release!
-* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
+* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from
+  Resurs Bank.
 * **Required**: CURL (php-curl).
-* WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
+* WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as
+  possible if you're not already there.
+  See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more
+  information.
 
 ### NEWS AND UPDATES ###
 
@@ -147,7 +155,7 @@ from [Resurs Bank Ecommerce API](https://test.resurs.com/docs/pages/viewpage.act
 messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained.
 If you are unsure, contact the support preferrably with information about your system attached (which in the plugin's
 admin interface can be found under "Support and help" or "Support och hjälp" in swedish). A screenshot of that layout
-are attached to this plugin-repository (screenshot 8)
+is attached to this plugin-repository (screenshot 8)
 . [You can also see some of the error messages produced by the library itself here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases)
 .
 
