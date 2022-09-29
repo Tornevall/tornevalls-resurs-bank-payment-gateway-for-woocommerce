@@ -32,10 +32,8 @@ site. Running multiple sites do **require** multiple webservice accounts!
 
 ## CONTRIBUTION ##
 
-If you'd like to contribute to this project, you can either sign up
-to [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues) and create an
-issue or use the
-old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this on.
+If you'd like to contribute to this project, you can now sign up with [Resurs Bitbucket](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/) and start creating pull requests.
+There are an old issue tracker that will in time be discontinued and replaced with [Resurs JIRA](https://resursbankplugins.atlassian.net/jira/software/c/projects/WOO). The old issue tracker is located [here](https://tracker.tornevall.net/projects/RWC) where most of the to-do list still reside.
 
 ## DOCUMENTS AND LINKS ##
 
