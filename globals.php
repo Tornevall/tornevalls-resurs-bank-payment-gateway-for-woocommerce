@@ -1,6 +1,7 @@
 <?php
 
 use ResursBank\Module\Data;
+use ResursBank\Service\WooCommerce;
 
 if (!function_exists('rbwc_get_option')) {
     /**
@@ -97,5 +98,54 @@ if (!function_exists('rbwc_get_order_meta')) {
     function rbwc_get_order_meta(string $key, $order)
     {
         return Data::getOrderMeta($key, $order);
+    }
+}
+
+if (!function_exists('rbwc_log_info')) {
+    /**
+     * @param string $message
+     * @return void
+     * @since 0.0.1.8
+     */
+    function rbwc_log_info(string $message)
+    {
+        Data::setLogInfo($message);
+    }
+}
+
+if (!function_exists('rbwc_log_error')) {
+    /**
+     * @param string $logMessage
+     * @return void
+     * @since 0.0.1.8
+     */
+    function rbwc_log_error(string $logMessage)
+    {
+        Data::setLogError($logMessage);
+    }
+}
+
+if (!function_exists('rbwc_log_exception')) {
+    /**
+     * @param Exception $exception
+     * @param string $fromFunction
+     * @return void
+     * @since 0.0.1.8
+     */
+    function rbwc_log_exception(Exception $exception, string $fromFunction = '')
+    {
+        Data::setLogException($exception, $fromFunction);
+    }
+}
+
+if (!function_exists('rbwc_apply_mock')) {
+    /**
+     * Apply a specific filter used for mocking.
+     * @param $mock
+     * @return mixed|null
+     * @since 0.0.1.8
+     */
+    function rbwc_apply_mock($mock) {
+        return WooCommerce::applyMock($mock);
     }
 }
