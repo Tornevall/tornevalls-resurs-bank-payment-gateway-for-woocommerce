@@ -1,0 +1,33 @@
+pipelines:
+  default:
+    - parallel:
+        - step:
+            name: ECom2 for PHP 8.1
+            image: php:8.1
+            caches:
+              - composer
+            script:
+              - apt-get update && apt-get install -y unzip git redis
+              - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+              - pecl install redis
+              - docker-php-ext-enable redis
+              - echo "127.0.0.1 redis" >>/etc/hosts
+              - cp phpunit.xml.example phpunit.xml
+              - sed -i 's/name="BASIC_AUTH_USERNAME" value="REPLACEME"/name="BASIC_AUTH_USERNAME" value="au2toto2"/' phpunit.xml
+              - sed -i 's/name="BASIC_AUTH_PASSWORD" value="REPLACEME"/name="BASIC_AUTH_PASSWORD" value="m7O2O7V6zXZOy54DIk4L3SM1oWp73itU"/' phpunit.xml
+              - sed -i 's/name="STORE_ID" value="REPLACEME"/name="STORE_ID" value="23b213f8-0ea4-4c25-97b6-8810760087a8"/' phpunit.xml
+              - sed -i 's/name="JWT_AUTH_CLIENT_ID" value="REPLACEME"/name="JWT_AUTH_CLIENT_ID" value="mikael_j"/' phpunit.xml
+              - sed -i 's/name="JWT_AUTH_CLIENT_SECRET" value="REPLACEME"/name="JWT_AUTH_CLIENT_SECRET" value="seBy7YdqGoiwL8G7"/' phpunit.xml
+              - sed -i 's/name="REDIS_HOST" value="REPLACEME"/name="REDIS_HOST" value="redis"/' phpunit.xml
+              - sed -i 's/name="PAYMENT_METHOD_ID" value="REPLACEME"/name="PAYMENT_METHOD_ID" value="07df8603-1fd0-48fc-b17a-cb538ccaede4"/' phpunit.xml
+              - sed -i 's/name="GOVERNMENT_ID_HAPPY_NATURAL" value="REPLACEME"/name="GOVERNMENT_ID_HAPPY_NATURAL" value="198305147715"/' phpunit.xml
+              - composer install
+              - composer require phpunit/phpunit
+              - vendor/bin/phpunit --configuration ./phpunit.xml
+            services:
+              - redis
+
+definitions:
+  services:
+    redis:
+      image: redis:5.0-alpine
