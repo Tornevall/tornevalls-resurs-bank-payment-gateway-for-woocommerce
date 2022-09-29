@@ -1795,11 +1795,14 @@ class ResursDefault extends WC_Payment_Gateway
                 );
             }
         } else {
-            // Passing the order to third party scripts.
+            // Passing the order to third party scripts. Using a format in this filter that in the end supports
+            // WordPress standards with snake_cases.
             $return = WordPress::applyFilters(
-                sprintf('processOrder%s', $this->paymentMethodInformation->apiType ?? ''),
+                sprintf('processOrder%s', ucfirst($this->paymentMethodInformation->apiType ?? '')),
                 [],
-                $order
+                $order,
+                $this->paymentMethodInformation,
+                $this
             );
         }
 
