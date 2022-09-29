@@ -55,7 +55,7 @@ The plugin **do** support WordPress networks (aka multisite), however it does no
 
 Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
 
-* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug 2021, both WooCommerce and WordPress is about to jump into 7.4 and higher. Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions of PHP. This plugin is written for 7.0 or higher.
+* **Required**: PHP: 8.1 or later.
 * **Required**: WooCommerce: v3.5.0 or higher - preferably *always* the latest release!
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
 * **Required**: CURL (php-curl).

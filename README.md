@@ -1,6 +1,16 @@
-# Tornevalls Resurs Bank Payment Gateway for WooCommerce #
+# Resurs Bank Plus Payment Gateway for WooCommerce #
 
-This is a third party plugin written to work as a payment gateway for WooCommerce and WordPress.
+This is a third party plugin written to work as a payment gateway for WooCommerce and WordPress. It has been approved as
+a working project by Resurs developers and will therefore soon be imported as an official release for Resurs. However,
+there will be breaking changes that will make it impossible to overwrite version 2.2 properly.
+
+**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+
+As PHP 7.4 is about to get outdated, this entire module requires you to upgrade to the latest release of PHP (currently
+8.1+) since Resurs Bank is strictly require as high security as possible.
+
+Translations are currently under reconstruction as Resurs Bank has requirements of how they should look and be
+implemented.
 
 [![Crowdin](https://badges.crowdin.net/trwbc/localized.svg)](https://crowdin.com/project/trwbc)
 
@@ -16,34 +26,29 @@ This responsibility is yours and this way of handling things is required for *yo
 
 ## Multisite/WordPress Networks ##
 
-The plugin **do** support WordPress networks (aka multisite), however it does not support running one webservice account over many sites at once. The main rule that Resurs Bank works with is that one webservice account only works for one site. Running multiple sites do **require** multiple webservice accounts!
-
+The plugin **do** support WordPress networks (aka multisite), however it does not support running one webservice account
+over many sites at once. The main rule that Resurs Bank works with is that one webservice account only works for one
+site. Running multiple sites do **require** multiple webservice accounts!
 
 ## CONTRIBUTION ##
 
 If you'd like to contribute to this project, you can either sign up
-to [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues) and create an issue or use the
+to [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues) and create an
+issue or use the
 old [Bitbucket Tracker](https://tracker.tornevall.net/projects/RWC) to do this on.
 
 ## DOCUMENTS AND LINKS ##
 
-* [Contribute with translations](https://crwd.in/trwbc)
-* [The current work-repository as of v0.0](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
-* [Github Synchronized repository](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce) will probably be the new official
-  repository as bitbucket server will shut down in a few years from now.
+* [The current work-repository as of v0.0](https://bitbucket.org/resursbankplugins/resursbank-woocommerce)
+* [The prior startup repository](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
 * [Documentation](https://docs.tornevall.net/display/TORNEVALL/RBWC+Payment+Gateway).
 
 ## DISCLAIMER ##
 
 ### BEWARE OF BREAKING CHANGES ###
 
-* There is a publicly available release out, supported by Resurs Bank (v2.2). There **may be breaking changes** if you
-  tend to use **this** plugin as it is an upgrade from the Resurs supported release.
-* This version is not a continued v3.x. It is starting at 1.x, except for during development and as long as it is under
-  development (where it starts at 0.0). The plugin should **NOT** be considered an upgrade from a prior release, but a
-  whole new release. The intentions with this plugin has been to completely rewrite the codebase and keep some of the
-  compatibility, but not the code. If you find that this codebase resides in the Resurs Bank supported repository, it is
-  considered v3.x.
+* As PHP 7.4 is about to get outdated, this entire module requires you to upgrade to the latest release of PHP (
+  currently 8.1+) since Resurs Bank is strictly require as high security as possible.
 
 ### ABOUT THIS RELEASE ###
 
@@ -54,7 +59,8 @@ closer with other developers.
 
 The external official public repo is located
 at [bitbucket](https://bitbucket.tornevall.net/projects/WWW/repos/tornevall-networks-resurs-bank-payment-gateway-for-woocommerce)
-and [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce). The source code in those repositories **are not supported by
+and [github](https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce). The source code in
+those repositories **are not supported by
 Resurs Bank**. The code that is supported by Resurs
 Bank [is always located here](https://bitbucket.org/resursbankplugins/resurs-bank-payment-gateway-for-woocommerce). The
 intentions with this plugin has partially been to replace the old release in the future, which also means that it may
@@ -64,23 +70,15 @@ The original codebase was initialized july 2020.
 
 ## REQUIREMENTS AND SECURITY CONSIDERATIONS ##
 
-Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
+Take a look
+at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions)
+for an extended explanation about how PHP is used.
 
-* PHP: [Take a look here](https://docs.woocommerce.com/document/server-requirements/) to keep up with support. As of aug
-  2021, both WooCommerce and WordPress is about to jump into 7.4 and higher.
-  Also, [read here](https://wordpress.org/news/2019/04/minimum-php-version-update/) for information about lower versions
-  of PHP. This plugin is written for 7.0 and higher - and the policy is following WooCommerce *lowest* requirement.
-* **Required**: WooCommerce: v3.5.0 or higher!
-* **Required**: [SoapClient](https://php.net/manual/en/class.soapclient.php) with xml drivers and extensions.
-* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from
-  Resurs Bank.
-* Curl is highly **recommended** but not necessary. We suggest that you do not trust only PHP streams on this one as you
-  may loose important features if you run explicitly with streams.
-* PHP streams? Yes, you still need them since SoapClient is actually using it.
-* WordPress: Preferably at least v5.5. It has supported, and probably will, older releases but it is highly recommended
-  to go for the latest version as soon as possible if you're not already there.
-  See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more
-  information.
+* **Required**: PHP: 8.1 or later.
+* **Required**: WooCommerce: v3.5.0 or higher - preferably *always* the latest release!
+* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
+* **Required**: CURL (php-curl).
+* WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
 ### NEWS AND UPDATES ###
 
@@ -151,7 +149,9 @@ from [Resurs Bank Ecommerce API](https://test.resurs.com/docs/pages/viewpage.act
 messages can be traced by Resurs Bank support, if something is unclear but many times error messages are self explained.
 If you are unsure, contact the support preferrably with information about your system attached (which in the plugin's
 admin interface can be found under "Support and help" or "Support och hjälp" in swedish). A screenshot of that layout
-are attached to this plugin-repository (screenshot 8). [You can also see some of the error messages produced by the library itself here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases).
+are attached to this plugin-repository (screenshot 8)
+. [You can also see some of the error messages produced by the library itself here](https://test.resurs.com/docs/display/ecom/Errors%2C+problem+solving+and+corner+cases)
+.
 
 ## I see an order but find no information connected to Resurs Bank ##
 
