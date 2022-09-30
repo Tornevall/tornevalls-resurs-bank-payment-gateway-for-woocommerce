@@ -51,25 +51,14 @@
                     'Enabled Status',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
-          <?php if ($hasSeveralApiTypes) { ?>
-            <td width="5%" class="resursMethodHead">
-                <?php _e(
-                    'API',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ) ?></td>
-                <?php } ?>
             <?php if ($extendView) { ?>
                 <td width="10%" class="resursMethodHead"><?php _e(
                         'Method ID',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ) ?></td>
             <?php } ?>
-            <td width="10%" class="resursMethodHead"><?php _e(
-                    'Name/Title',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                ) ?></td>
             <td width="35%" class="resursMethodHead"><?php _e(
-                    'Description (No HTML)',
+                    'Name (No HTML)',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
             <?php if ($canUseFee) { ?>
@@ -82,12 +71,6 @@
                     'Amount Limits',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ) ?></td>
-            <?php if ($extendView) { ?>
-                <td width="10%" class="resursMethodHead"><?php _e(
-                        'Method type',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ) ?></td>
-            <?php } ?>
             <td width="10%" class="resursMethodHead"><?php _e(
                     'Customer types',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -100,8 +83,7 @@
         <?php
         if (is_array($paymentMethods) && count($paymentMethods)) {
             foreach ($paymentMethods as $methodObject) {
-                $merchantMethod = esc_html(isset($methodObject->merchantMethod) ? $methodObject->merchantMethod : null);
-                $merchantMethodId = esc_html($merchantMethod instanceof Method ? $merchantMethod->getId() : ''); ?>
+                ?>
                 <tr>
                     <td class="resursMethodBody" id="td_rbenabled_<?php echo $methodObject->id ?>">
                         <input
@@ -120,33 +102,16 @@
                         <?php _e('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?>
                     </td>
 
-                    <?php if ($hasSeveralApiTypes) { ?>
-                      <td class="resursMethodBody">
-                        <?php echo strtoupper(isset($methodObject->apiType) && esc_html($methodObject->apiType) ? $methodObject->apiType : '') ?>
-                      </td>
-                    <?php } ?>
-
                     <?php if ($extendView) { ?>
                         <td class="resursMethodBody">
-                            <?php
-                            echo esc_html($methodObject->id);
-                            if ((bool)$isBleedingEdge) {
-                                ?>
-                                <div style="font-size: 12px; font-style: italic;">
-                                    <?php echo esc_html($merchantMethodId) ?>
-                                </div>
-                                <?php
-                            } ?>
+                            <?php echo esc_html($methodObject->id); ?>
                         </td>
                     <?php } ?>
-                    <td class="resursMethodBody">
-                        <?php echo esc_html($methodObject->description) ?><br>
-                    </td>
                     <td class="resursMethodBody">
                         <input class="trbwc_method_description_input"
                                id="method_description_<?php echo Data::getSanitizedKeyElement($methodObject->id) ?>"
                                type="text"
-                               value="<?php echo esc_html($methodObject->internalDescription) ?>"
+                               value="<?php echo esc_html($methodObject->name) ?>"
                                onchange="rbwcUpdateMethodDescription(this)"
                         >
                     </td>
@@ -166,21 +131,21 @@
                             'Amount limits (min - max).',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ); ?>" style="font-style: italic;">
-                            <?php echo (float)$methodObject->minLimit ?> - <?php echo (float)$methodObject->maxLimit ?>
+                            <?php echo (float)$methodObject->minPurchaseLimit ?> - <?php echo (float)$methodObject->maxPurchaseLimit ?>
                         </div>
                     </td>
-                    <?php if ($extendView) { ?>
-                        <td class="resursMethodBody">
-                            <?php echo esc_html($methodObject->type) ?>
-                            <?php
-                            if ($methodObject->type !== $methodObject->specificType) {
-                                printf('(<i>%s</i>)', esc_html($methodObject->specificType));
-                            } ?>
-                            <br>
-                        </td>
-                    <?php } ?>
                     <td class="resursMethodBody">
-                        <?php echo esc_html(implode(', ', (array)$methodObject->customerType)); ?>
+                        <?php
+                        $customerTypes = [];
+                        // @todo Find out a better way to handle this.
+                        if ($methodObject->enabledForLegalCustomer) {
+                          $customerTypes[] = 'LEGAL';
+                        }
+                        if ($methodObject->enabledForNaturalCustomer) {
+                          $customerTypes[] = 'NATURAL';
+                        }
+                        echo esc_html(implode(', ', $customerTypes));
+                        ?>
                     </td>
                     <?php
                     $annuityClass = ($annuityEnabled === $methodObject->id) ? 'r_annuity_enabled' : 'r_annuity_disabled';

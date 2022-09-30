@@ -3,14 +3,8 @@
  */
 $rQuery(document).ready(function ($) {
     getResursAdminFields();
-    setTimeout('getCallbackMatches()', 5000);
 });
 
-var resursCallbackActiveTime = 0;
-var resursCallbackActiveInterval = 2;
-var resursCallbackActiveTimeout = 15;
-var resursCallbackTestHandle;
-var resursCallbackReceiveSuccess = false;
 var resursEnvironment;
 var resursJustImported = false;
 var resursPluginPrefix = getResursLocalization('prefix');
@@ -23,10 +17,10 @@ function getResursAdminFields() {
     getResursConfigPopupPrevention(
         [
             '#' + resursPluginPrefix + '_admin_environment',
-            '#' + resursPluginPrefix + '_admin_login',
-            '#' + resursPluginPrefix + '_admin_password',
-            '#' + resursPluginPrefix + '_admin_login_production',
-            '#' + resursPluginPrefix + '_admin_password_production',
+            '#' + resursPluginPrefix + '_admin_jwt_client_id',
+            '#' + resursPluginPrefix + '_admin_jwt_client_secret',
+            '#' + resursPluginPrefix + '_admin_jwt_client_id_production',
+            '#' + resursPluginPrefix + '_admin_jwt_client_secret_production',
             'select[id*=r_annuity_select]',
             'input[id*=method_description]',
             'input[id*=method_fee]',
@@ -96,92 +90,26 @@ function getResursEnvironmentFields() {
     resursEnvironment = $rQuery('#' + resursPluginPrefix + '_admin_environment').find(':selected').val();
     switch (resursEnvironment) {
         case 'test':
-            $rQuery('#' + resursPluginPrefix + '_admin_login_production').parent().parent().hide();
-            $rQuery('#' + resursPluginPrefix + '_admin_password_production').parent().parent().hide();
-            $rQuery('#' + resursPluginPrefix + '_admin_login').parent().parent().fadeIn();
-            $rQuery('#' + resursPluginPrefix + '_admin_password').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id_production').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_secret_production').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_secret').parent().parent().fadeIn();
             break;
         case 'live':
-            $rQuery('#' + resursPluginPrefix + '_admin_login_production').parent().parent().fadeIn();
-            $rQuery('#' + resursPluginPrefix + '_admin_password_production').parent().parent().fadeIn();
-            $rQuery('#' + resursPluginPrefix + '_admin_login').parent().parent().hide();
-            $rQuery('#' + resursPluginPrefix + '_admin_password').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id_production').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_secret_production').parent().parent().fadeIn();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id').parent().parent().hide();
+            $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_secret').parent().parent().hide();
             break;
         default:
     }
 }
 
 /**
- * Make sure we have data up-to-date.
- * @since 0.0.1.0
- */
-function getCallbackMatches() {
-    if (resursJustImported) {
-        trbwcLog('Callback matches will not run this round, since credentials was imported.');
-        return;
-    }
-
-    getResursAjaxify(
-        'GET',
-        'resursbank_get_callback_matches',
-        {
-            'n': true,
-            't': getResursLocalization('current_tab')
-        },
-        function (data) {
-            if (typeof data['errors'] !== 'undefined' &&
-                parseInt(data['errors']['code']) > 0
-            ) {
-                if ($rQuery('#resurs_credentials_test_username_box').length > 0) {
-                    if (resursEnvironment === 'test') {
-                        $rQuery('#resurs_credentials_test_username_box').css('font-weight', 'bold');
-                        $rQuery('#resurs_credentials_test_username_box').css('color', '#990000');
-                        $rQuery('#resurs_credentials_test_username_box').html(data['errors']['message']);
-                    } else {
-                        $rQuery('#resurs_credentials_production_username_box').css('font-weight', 'bold');
-                        $rQuery('#resurs_credentials_production_username_box').css('color', '#990000');
-                        $rQuery('#resurs_credentials_production_username_box').html(data['errors']['message']);
-                    }
-                }
-            }
-            if (typeof data['requireRefresh'] !== "undefined" && data['requireRefresh'] === true) {
-                var canUpdateAuto = parseInt(getResursLocalization('fix_callback_urls'));
-                if (canUpdateAuto !== 1) {
-                    var canUpdate = confirm(getResursLocalization('update_callbacks_required'));
-                } else {
-                    canUpdate = true;
-                }
-                if (canUpdate) {
-                    getResursAjaxify('post', 'get_internal_resynch', {'n': true}, function () {
-                        if ($rQuery('#button_' + resursPluginPrefix + '_admin_payment_methods_button').length > 0) {
-                            $rQuery('#div_' + resursPluginPrefix + '_admin_payment_methods_button').html(
-                                $rQuery('<div>', {
-                                    'style': 'font-weight: bold; color: #000099;'
-                                }).html(getResursLocalization('reloading'))
-                            );
-                            $rQuery('#div_' + resursPluginPrefix + '_admin_callbacks_button').html(
-                                $rQuery('<div>', {
-                                    'style': 'font-weight: bold; color: #000099;'
-                                }).html(getResursLocalization('reloading'))
-                            );
-                            document.location.reload();
-                        } else {
-                            if (canUpdateAuto !== 1) {
-                                alert(getResursLocalization('update_callbacks_refresh'));
-                            }
-                        }
-                    });
-                }
-            }
-        }
-    )
-}
-
-/**
  * @since 0.0.1.0
  */
 function getDeprecatedCredentialsForm() {
-    var userBox = $rQuery('#' + resursPluginPrefix + '_admin_login');
+    var userBox = $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id');
     // deprecated_login is a boolean but can is sometimes returned as "1" instead of a true value.
     var canImport = getResursLocalization('can_import_deprecated_credentials') == 1;
     if (canImport) {
@@ -239,110 +167,6 @@ function getResursPaymentMethods() {
     }, function (d) {
         getResursError(d, '#div_' + resursPluginPrefix + '_admin_payment_methods_button');
     });
-}
-
-/**
- * @since 0.0.1.0
- */
-function getResursCallbacks() {
-    getResursSpin('#div_' + resursPluginPrefix + '_admin_callbacks_button');
-    getResursAjaxify('post', 'resursbank_get_new_callbacks', {'n': ''}, function (data) {
-        if (data['reload'] === true || data['reload'] === '1') {
-            $rQuery('#div_' + resursPluginPrefix + '_admin_callbacks_button').html(
-                $rQuery('<div>', {
-                    'style': 'font-weight: bold; color: #000099;'
-                }).html(getResursLocalization('reloading'))
-            );
-            document.location.reload();
-        } else if (data['error'] !== '') {
-            getResursError(data['error'], '#div_' + resursPluginPrefix + '_admin_callbacks_button');
-        } else {
-            getResursError('Unable to update.', '#div_' + resursPluginPrefix + '_admin_callbacks_button');
-        }
-    }, function (data) {
-        if (typeof data.statusText !== 'undefined') {
-            getResursError(data.statusText, '#div_' + resursPluginPrefix + '_admin_callbacks_button');
-        }
-    });
-}
-
-/**
- * @since 0.0.1.0
- */
-function getResursCallbackTest() {
-    getResursSpin('#div_' + resursPluginPrefix + '_admin_trigger_callback_button');
-    getResursAjaxify('post', 'resursbank_get_trigger_test', {}, function (response) {
-        $rQuery('#div_' + resursPluginPrefix + '_admin_trigger_callback_button').html(
-            $rQuery('<div>', {
-                'style': 'font-weight: bold; color: #000099;'
-            }).html(response['html'])
-        );
-
-        var testElement = $rQuery('#resursWaitingForTest');
-        if (testElement.length > 0) {
-            testElement.css('color', '#000099');
-            resursCallbackReceiveSuccess = false;
-            testElement.html(getResursLocalization('waiting_for_callback'));
-            getResursCallbackResponse();
-            resursCallbackTestHandle = setInterval(getResursCallbackResponse, resursCallbackActiveInterval * 1000);
-        }
-    });
-}
-
-/**
- * Wait for callback (TEST) data response.
- * @since 0.0.1.0
- */
-function getResursCallbackAnalyze() {
-    getResursAjaxify('post', 'resursbank_get_trigger_response', {"runTime": resursCallbackActiveTime}, function (response) {
-        var replyString;
-        if (typeof response['lastResponse'] !== 'undefined') {
-            replyString = response['lastResponse'];
-        } else {
-            replyString = getResursLocalization('trigger_test_fail');
-        }
-        $rQuery('#resursWaitingForTest').html(replyString);
-        if (typeof response['success'] !== 'undefined') {
-            resursCallbackReceiveSuccess = true;
-        }
-    });
-}
-
-/**
- * Looking for callback test.
- * @since 0.0.1.0
- */
-function getResursCallbackResponse() {
-    resursCallbackActiveTime = resursCallbackActiveTime + resursCallbackActiveInterval;
-    console.log('getResursCallbackResponse waited ' +
-        'for ' + resursCallbackActiveTime + '/' + resursCallbackActiveTimeout + ' seconds.');
-
-    if (resursCallbackActiveTime >= resursCallbackActiveTimeout) {
-        console.log('Wait for received callback cancelled after callback timeout.');
-        clearInterval(resursCallbackTestHandle);
-        $rQuery('#resursWaitingForTest').html(
-            getResursLocalization('callback_test_timeout') + ' ' + resursCallbackActiveTime + 's.'
-        );
-        resursCallbackActiveTime = 0;
-        return;
-    }
-
-    getResursCallbackAnalyze();
-
-    // Break after second run.
-    if (resursCallbackReceiveSuccess) {
-        console.log('Wait for received callback cancelled after success.');
-        clearInterval(resursCallbackTestHandle);
-        resursCallbackActiveTime = 0;
-        // Ask for the response one last time.
-        $rQuery('#resursWaitingForTest').html('OK');
-        getResursAjaxify('post', 'resursbank_get_trigger_response', {"runTime": resursCallbackActiveTime}, function (response) {
-            $rQuery('#resursWaitingForTest').html(response['lastResponse']);
-            if (response['success'] === 1 || response['success'] === true) {
-                $rQuery('#resursWaitingForTest').css('color', '#009900');
-            }
-        });
-    }
 }
 
 /**
@@ -512,7 +336,7 @@ function getResursAdminPasswordButton() {
  */
 function getResursCredentialDivs() {
     // Create an empty div here for credentials stuff.
-    $rQuery('#' + resursPluginPrefix + '_admin_login').parent().children('.description').before(
+    $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id').parent().children('.description').before(
         $rQuery(
             '<div>',
             {
@@ -520,7 +344,7 @@ function getResursCredentialDivs() {
             }
         )
     );
-    $rQuery('#' + resursPluginPrefix + '_admin_login_production').parent().children('.description').before(
+    $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id_production').parent().children('.description').before(
         $rQuery(
             '<div>',
             {
@@ -529,67 +353,6 @@ function getResursCredentialDivs() {
         )
     );
 
-}
-
-/**
- * Restore the removal button after spinner.
- * @param cbid
- * @since 0.0.1.0
- */
-function getCallbackButtonRestored(cbid) {
-    $rQuery('#remove_cb_btn_' + cbid).html($rQuery('<button>', {
-        type: 'button',
-        click: function () {
-            doResursRemoveCallback(cbid)
-        }
-    }).html('X'));
-}
-
-/**
- * unregisterEventCallback
- * @param cbid
- * @since 0.0.1.0
- */
-function doResursRemoveCallback(cbid) {
-    if (confirm(getResursLocalization('remove_callback_confirm') + ' ' + cbid + '?')) {
-        getResursSpin('#remove_cb_btn_' + cbid);
-
-        getResursAjaxify(
-            'post',
-            'resursbank_callback_unregister',
-            {
-                'callback': cbid,
-                'n': true
-            },
-            function (data) {
-                if (typeof data['unreg'] !== 'undefined' &&
-                    data['unreg'] === true &&
-                    data['callback'] !== ''
-                ) {
-                    $rQuery('#callback_row_' + data['callback']).hide('medium');
-                } else {
-                    getCallbackButtonRestored(data['callback']);
-                    // There might be a denial here that needs to be alerted.
-                    if (typeof data['message'] === 'string' && data['message'] !== '') {
-                        alert(data['message']);
-                    }
-                    if (typeof data === 'string' && data !== '') {
-                        alert(data);
-                    }
-                }
-            }
-        );
-    }
-}
-
-/**
- * registerEventCallback
- * @param cbid
- * @since 0.0.1.0
- * @deprecated Not in use.
- */
-function doResursUpdateCallback(cbid) {
-    //alert("Update " + cbid);
 }
 
 /**
@@ -603,7 +366,7 @@ function getResursDeprecatedLogin() {
             if (data['login'] !== '' && data['pass'] !== '') {
                 resursJustImported = true;
                 $rQuery('#resurs_import_credentials_result').html(getResursLocalization('credential_import_success'));
-                $rQuery('#' + resursPluginPrefix + '_admin_login').val(data['login']);
+                $rQuery('#' + resursPluginPrefix + '_admin_jwt_client_id').val(data['jwt_client_id']);
                 $rQuery('#' + resursPluginPrefix + '_admin_password').val(data['pass']);
                 getResursCredentialsResult();
             } else {
@@ -624,12 +387,12 @@ function getResursCredentialsResult() {
 
     switch (resursEnvironment) {
         case 'live':
-            apiLoginBox = '#' + resursPluginPrefix + '_admin_login_production';
+            apiLoginBox = '#' + resursPluginPrefix + '_admin_jwt_client_id_production';
             apiPwBox = '#' + resursPluginPrefix + '_admin_password_production';
             resultBox = '#' + resursPluginPrefix + '_admin_password_production_result';
             break;
         default:
-            apiLoginBox = '#' + resursPluginPrefix + '_admin_login';
+            apiLoginBox = '#' + resursPluginPrefix + '_admin_jwt_client_id';
             apiPwBox = '#' + resursPluginPrefix + '_admin_password';
             resultBox = '#' + resursPluginPrefix + '_admin_password_result';
     }

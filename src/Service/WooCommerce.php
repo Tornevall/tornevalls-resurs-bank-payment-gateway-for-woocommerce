@@ -205,11 +205,13 @@ class WooCommerce
 
         $paymentMethodList = [];
         if (is_array($storedMethods) && count($storedMethods)) {
+            // @todo customerType no longer exists in getPaymentMethods so this feature is broken until we
+            // @todo adjust the customerType check to the MAPI content!
             foreach ($storedMethods as $method) {
-                $customerType = (array)$method->customerType;
-                if (in_array(strtolower($type), array_map('strtolower', $customerType), true)) {
-                    $paymentMethodList[] = $method;
-                }
+                //$customerType = (array)$method->customerType;
+                //if (in_array(strtolower($type), array_map('strtolower', $customerType), true)) {
+                //    $paymentMethodList[] = $method;
+                //}
             }
             $returnBool = count($paymentMethodList) > 0;
         }
@@ -599,6 +601,7 @@ class WooCommerce
             'totalBonusPoints',
             'metaData',
             'username',
+            'jwt_client_id',
             'isCurrentCredentials',
             'environment',
             'cache',

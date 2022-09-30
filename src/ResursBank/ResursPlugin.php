@@ -3,11 +3,22 @@
 namespace ResursBank\ResursBank;
 
 use Exception;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethodCollection;
+use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
-use stdClass;
 use function is_array;
 
 /**
@@ -28,7 +39,6 @@ class ResursPlugin
      * @since 0.0.1.6
      */
     public const RESURS_BANK_PREFIX = 'resursbank';
-
     /**
      * Set this to true, to make a permanent for the official Resurs Bank release.
      *
@@ -39,7 +49,7 @@ class ResursPlugin
      * @see https://tracker.tornevall.net/browse/RWC-336
      * @since 0.0.1.6
      */
-    private $forcePaymentMethodsToFirstTab = false;
+    private bool $forcePaymentMethodsToFirstTab = false;
 
     /**
      * @since 0.0.1.6
@@ -61,6 +71,39 @@ class ResursPlugin
         add_filter('rbwc_get_obfuscate_lookup_keys', [$this, 'getObfuscateLookupKeys']);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getOrderNotePrefix']);
         add_filter('rbwc_get_address_request', [$this, 'getAddressRequest'], 10, 3);
+    }
+
+    /**
+     * Resurs has its own codebase. This feature will return positive if we're there.
+     *
+     * @return bool
+     * @since 0.0.1.7
+     */
+    public static function isResursCodeBase(): bool
+    {
+        return WooCommerce::getBaseName() === 'resurs-bank-payment-gateway-for-woocommerce';
+    }
+
+    /**
+     * @param string $storeId
+     * @param bool $asArray
+     * @return array|PaymentMethodCollection
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws ValidationException
+     * @throws JsonException
+     * @throws ReflectionException
+     */
+    public static function getPaymentMethodCollection(
+        string $storeId,
+        bool $asArray = true
+    ): array|PaymentMethodCollection {
+        return $asArray ? Repository::getPaymentMethods($storeId)->toArray() : Repository::getPaymentMethods($storeId);
     }
 
     /**
@@ -89,6 +132,19 @@ class ResursPlugin
     {
         return $this->canUseFeature() ? 'Resurs Bank' : $prefix;
     }
+
+    /**
+     * Make sure we are not breaking original code base on enforced features.
+     *
+     * @return bool
+     * @since 0.0.1.6
+     */
+    private function canUseFeature(): bool
+    {
+        return !Data::isOriginalCodeBase();
+    }
+
+    ///////////////////// MAPI IMPORTS /////////////////////
 
     /**
      * @param $currentObfuscateArray
@@ -131,17 +187,6 @@ class ResursPlugin
     }
 
     /**
-     * Make sure we are not breaking original code base on enforced features.
-     *
-     * @return bool
-     * @since 0.0.1.6
-     */
-    private function canUseFeature(): bool
-    {
-        return !Data::isOriginalCodeBase();
-    }
-
-    /**
      * @param $formFieldArray
      * @return mixed
      * @since 0.0.1.6
@@ -163,17 +208,6 @@ class ResursPlugin
     private function isEnforcedPaymentMethodsTab(): bool
     {
         return $this->canUseFeature() ? $this->forcePaymentMethodsToFirstTab : false;
-    }
-
-    /**
-     * Resurs has its own codebase. This feature will return positive if we're there.
-     *
-     * @return bool
-     * @since 0.0.1.7
-     */
-    public static function isResursCodeBase(): bool
-    {
-        return WooCommerce::getBaseName() === 'resurs-bank-payment-gateway-for-woocommerce';
     }
 
     /**

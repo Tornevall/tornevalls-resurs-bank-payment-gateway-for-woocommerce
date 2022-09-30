@@ -3,6 +3,31 @@
 namespace ResursBank\Module;
 
 use Exception;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\FormatException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Log\FileLogger;
+use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
+use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod;
+use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Module\Store\Models\Store;
+use Resursbank\Ecom\Module\Store\Models\StoreCollection;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use Resursbank\Ecommerce\Service\Merchant\Model\PaymentMethods;
+use ResursBank\Exception\MapiCredentialsException;
+use ResursBank\Exception\StoreException;
+use ResursBank\Exception\WooCommerceException;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
@@ -45,21 +70,35 @@ class ResursBankAPI
      * @since 0.0.1.0
      */
     private static $annuityFactors = [];
-
+    /**
+     * @var StoreCollection $storeCollection
+     */
+    private static StoreCollection $storeCollection;
     /**
      * @var ResursBank $ecom
      * @since 0.0.1.0
      */
     private $ecom;
-
     /**
      * @var array $credentials
      * @since 0.0.1.0
      */
     private $credentials = [
-        'username' => '',
-        'password' => '',
+        'jwt_client_id' => '',
+        'jwt_client_secret' => '',
     ];
+
+    /**
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws FormatException
+     * @throws MapiCredentialsException
+     * @throws WooCommerceException
+     */
+    public function __construct()
+    {
+        $this->getConnection();
+    }
 
     /**
      * @return bool|string
@@ -129,53 +168,81 @@ class ResursBankAPI
             // Instantiation.
             self::$resursBank = new self();
         }
-
-        return self::$resursBank->getConnection();
     }
 
     /**
-     * @return ResursBank
-     * @throws Exception
+     * @return string
+     * @since 0.0.1.9
+     */
+    private function getClientId(): string {
+        return Data::getResursOption('environment') === 'test' ?
+            Data::getResursOption('jwt_client_id') : Data::getResursOption('jwt_client_id_production');
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.9
+     */
+    private function getClientSecret(): string
+    {
+        return Data::getResursOption('environment') === 'test' ?
+            Data::getResursOption('jwt_client_secret') : Data::getResursOption('jwt_client_secret_production');
+    }
+
+    /**
+     * @return void
+     * @throws EmptyValueException
+     * @throws MapiCredentialsException
+     * @throws WooCommerceException
+     * @throws FilesystemException
+     * @throws FormatException
      * @since 0.0.1.0
      */
-    public function getConnection(): ResursBank
+    public function getConnection(): void
     {
-        $timeoutStatus = Data::getTimeoutStatus();
+        // @todo Make sure the scope for production is correct.
+        $scope = Data::getResursOption('environment') === 'test' ? 'mock-merchant-api' : 'merchant-api';
+        $grantType = 'client_credentials';
 
-        if (empty($this->ecom)) {
-            $this->getResolvedCredentials();
-            $this->ecom = new ResursBank(
-                $this->credentials['username'],
-                $this->credentials['password'],
-                self::getEnvironment()
+        if (empty(self::getClientId()) || empty(self::getClientSecret())) {
+            throw new MapiCredentialsException(
+                message: 'Credentials not set.'
             );
         }
 
-        if (!empty(Data::getResursOption('api_soap_url'))) {
-            $soapUrl = sprintf('%s/', preg_replace('/\/$/', '', Data::getResursOption('api_soap_url')));
-            if (!empty($soapUrl) && self::getEnvironment() === RESURS_ENVIRONMENTS::TEST) {
-                $this->ecom->setTestUrl(
-                    $soapUrl,
-                    Data::getCheckoutType()
-                );
-            }
+        if (!defined('WC_LOG_DIR')) {
+            throw new WooCommerceException('Can not find WooCommerce in this platform.');
         }
 
-        $this->setWsdlCache();
-        $this->setEcomConfiguration();
-        $this->setEcomTimeout();
-        $this->setEcomAutoDebitMethods();
+        /** @noinspection PhpUndefinedConstantInspection */
+        Config::setup(
+            logger: new FileLogger(path: self::getWcLogDir()),
+            cache: new None(),
+            jwtAuth: new Jwt(
+                clientId: $this->getClientId(),
+                clientSecret: $this->getClientSecret(),
+                scope: $scope,
+                grantType: $grantType
+            )
+        );
+    }
 
-        if ($timeoutStatus > 0) {
-            $this->setEcomTimeout(4);
-        }
-
-        return $this->ecom;
+    /**
+     * Since ecom2 does not want trailing slashes in its logger, we use this method to trim away
+     * all trailing slashes.
+     * @return string
+     * @since 0.0.1.9
+     */
+    private static function getWcLogDir(): string
+    {
+        /** @noinspection PhpUndefinedConstantInspection */
+        return preg_replace('/\/$/', '', WC_LOG_DIR);
     }
 
     /**
      * @return bool
      * @throws Exception
+     * @since 0.0.1.9
      */
     private function getResolvedCredentials(): bool
     {
@@ -494,48 +561,18 @@ class ResursBankAPI
         }
 
         if (!$fromStorage || empty($return)) {
-            try {
-                if (Data::getRequest('section') === 'payment_methods') {
-                    // Also this part is used for the specific admin section.
-                    WooCommerce::applyMock('getPaymentMethodsException');
-                }
-                $soapMethods = WordPress::applyFilters(
-                    'canUseSoapMethods', true
-                ) ? self::getResurs()->getPaymentMethods([], true) : [];
-                $paymentMethodArray = self::updateSoapMethods($soapMethods);
-                self::$paymentMethods = WordPress::applyFilters('paymentMethodArray',
-                    $paymentMethodArray
-                );
-                Data::setResursOption('lastMethodUpdate', time());
-            } catch (Exception $e) {
-                Data::setTimeoutStatus(self::getResurs());
-                WooCommerce::setSessionValue('silentGetPaymentMethodsException', $e);
-                // We do not want to reset on errors, right?
-                //Data::setResursOption('paymentMethods', null);
-                throw $e;
+            if (Data::getRequest('section') === 'payment_methods') {
+                // Also this part is used for the specific admin section.
+                WooCommerce::applyMock('getPaymentMethodsException');
             }
+            self::$paymentMethods = Repository::getPaymentMethods(self::getStoreUuidByNationalId(Data::getStoreId()))->toArray();
+            Data::setResursOption('lastMethodUpdate', time());
             WooCommerce::setSessionValue('silentGetPaymentMethodsException', null);
             $return = self::$paymentMethods;
             Data::setResursOption('paymentMethods', json_encode(self::$paymentMethods));
         }
 
         return $return;
-    }
-
-    /**
-     * @param $paymentMethodList
-     * @return array
-     * @since 0.0.1.8
-     */
-    private static function updateSoapMethods($paymentMethodList): array
-    {
-        if (is_array($paymentMethodList) && count($paymentMethodList)) {
-            foreach ($paymentMethodList as $item) {
-                $item->apiType = 'SOAP';
-            }
-        }
-
-        return $paymentMethodList;
     }
 
     /**
@@ -578,6 +615,94 @@ class ResursBankAPI
     }
 
     /**
+     * Render an array with available stores at Resurs. This is used to automatically generate an options
+     * list for the API stores.
+     *
+     * @return array
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws ValidationException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @since 0.0.1.9
+     */
+    public static function getRenderedStores(): array
+    {
+        $storeArray = [];
+
+        $storeCollection = self::getStoreCollection();
+        foreach ($storeCollection as $store) {
+            $storeArray[$store->nationalStoreId] = sprintf('(%s) %s', $store->nationalStoreId, $store->name);
+        }
+
+        return $storeArray;
+    }
+
+    /**
+     * @return array
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @since 0.0.1.9
+     */
+    public static function getStoreCollection(): array
+    {
+        if (empty(self::$storeCollection)) {
+            self::$storeCollection = StoreRepository::getStores();
+        }
+
+        return self::$storeCollection->toArray();
+    }
+
+    /**
+     * @param int $storeId
+     * @return string
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws StoreException
+     * @throws ValidationException
+     * @since 0.0.1.9
+     */
+    public static function getStoreUuidByNationalId(int $storeId): string
+    {
+        $return = '';
+        /** @var Store $store */
+        $storeCollection = self::getStoreCollection();
+        foreach ($storeCollection as $store) {
+            if ($store->nationalStoreId === $storeId) {
+                $return = $store->id;
+                break;
+            }
+        }
+
+        if (empty($return)) {
+            throw new StoreException('Store could not be found.');
+        }
+
+        return $return;
+    }
+
+    /**
+     * String to identify environment and credentials.
      * @return string
      * @throws Exception
      * @since 0.0.1.6
@@ -589,9 +714,12 @@ class ResursBankAPI
         return sprintf(
             '%s_%s',
             Data::isTest() ? 'test' : 'live',
-            $this->credentials['username']
+            $this->credentials['jwt_client_id']
         );
     }
+
+
+    ///////////////////// MAPI Based Features that is supposed to replace SOAP ///////////////////////
 
     /**
      * @return bool

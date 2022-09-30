@@ -1487,29 +1487,16 @@ class Data
             if (!$prefetchObject['ecomException']['code']) {
                 $prefetchObject['apiType'] = self::getMethodApiTypeByPreFetch($prefetchObject);
                 try {
-                    // This feature can be used to exclude execution of internal getPayments.
-                    // However, IF we skip this section, other things, like bookSignedPayment may be defected, so
-                    // we can not currently disable this one entirely. A suggestion is to match this filter with
-                    // isInternalPayment to see if it is necessary to run a getPayment at all.
-                    //$return['ecom'] = WordPress::applyFilters('canUseInternalGetPayment', true) ? ResursBankAPI::getPayment($return['resurs'], null, $return) : [];
-
-                    // Do not allow this ecom-block to be overwritten by external plugins. It is still
-                    // necessary for internal payment management requests. However, we will make sure - at this point -
-                    // that the payment will only be fetched internally if it is possible/necessary (I.E. when
-                    // the payment has been created by this plugin with legacy features and not an external party).
-                    $prefetchObject['ecom'] = self::isInternalPayment($prefetchObject) ?
-                        ResursBankAPI::getPayment($prefetchObject['resurs'], null, $prefetchObject) : [];
-                    // Instead, let external payment information requests be stored in a separate variable.
-                    if (!is_array($prefetchObject['externalPaymentInformation'])) {
-                        // Make sure it is properly updated if something went wrong during the filtered request.
-                        $prefetchObject['externalPaymentInformation'] = [];
-                    }
+                    $prefetchObject['ecom'] = ResursBankAPI::getPayment($prefetchObject['resurs'], null, $prefetchObject);
                     $prefetchObject['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
                     self::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
                     if (!empty($prefetchObject['resurs_secondary']) && $prefetchObject['resurs_secondary'] !== $prefetchObject['resurs']) {
-                        $prefetchObject['ecom'] = ResursBankAPI::getPayment($prefetchObject['resurs_secondary'], null,
-                            $prefetchObject);
+                        $prefetchObject['ecom'] = ResursBankAPI::getPayment(
+                            $prefetchObject['resurs_secondary'],
+                            null,
+                            $prefetchObject
+                        );
                     }
                     $prefetchObject['ecom_had_reference_problems'] = true;
                     $prefetchObject['ecomException']['code'] = $e->getCode();
@@ -2894,11 +2881,30 @@ class Data
     {
         $credentials = self::getResolvedCredentialData();
 
-        if (empty($credentials['username']) || empty($credentials['password'])) {
+        if (empty($credentials['jwt_client_id']) || empty($credentials['jwt_client_secret'])) {
             throw new RuntimeException('ECom credentials are not fully set.', self::UNSET_CREDENTIALS_EXCEPTION);
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.9
+     */
+    private function getClientId(): string {
+        return Data::getResursOption('environment') === 'test' ?
+            Data::getResursOption('jwt_client_id') : Data::getResursOption('jwt_client_id_production');
+    }
+
+    /**
+     * @return string
+     * @since 0.0.1.9
+     */
+    private function getClientSecret(): string
+    {
+        return Data::getResursOption('environment') === 'test' ?
+            Data::getResursOption('jwt_client_secret') : Data::getResursOption('jwt_client_secret_production');
     }
 
     /**
@@ -2910,15 +2916,15 @@ class Data
         $environment = self::getResursOption('environment');
 
         if ($environment === 'live') {
-            $getUserFrom = 'login_production';
-            $getPasswordFrom = 'password_production';
+            $getUserFrom = 'jwt_client_id_production';
+            $getPasswordFrom = 'jwt_client_secret_production';
         } else {
-            $getUserFrom = 'login';
-            $getPasswordFrom = 'password';
+            $getUserFrom = 'jwt_client_id';
+            $getPasswordFrom = 'jwt_client_secret';
         }
 
-        $credentials['username'] = self::getResursOption($getUserFrom);
-        $credentials['password'] = self::getResursOption($getPasswordFrom);
+        $credentials['jwt_client_id'] = self::getResursOption($getUserFrom);
+        $credentials['jwt_client_secret'] = self::getResursOption($getPasswordFrom);
 
         return $credentials;
     }
@@ -2960,29 +2966,6 @@ class Data
                 ]
             )
         );
-    }
-
-    /**
-     * Check if account for bleeding edge API has been set up.
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isBleedingEdgeApiReady(): bool
-    {
-        return (self::isBleedingEdge() &&
-            !empty(self::getResursOption('jwt_store_id')) &&
-            !empty(self::getResursOption('jwt_client_id')) &&
-            !empty(self::getResursOption('jwt_client_password')));
-    }
-
-    /**
-     * Check whether bleeding edge technology is enabled.
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isBleedingEdge(): bool
-    {
-        return (bool)self::getResursOption('bleeding_edge');
     }
 
     /**
@@ -3065,5 +3048,14 @@ class Data
         }
 
         return $return;
+    }
+
+    /**
+     * @return int
+     * @since 0.0.1.9
+     */
+    public static function getStoreId(): int
+    {
+        return (int)self::getResursOption('mapi_store_id');
     }
 }
