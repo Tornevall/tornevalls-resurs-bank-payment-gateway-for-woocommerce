@@ -224,7 +224,7 @@ class ResursDefault extends WC_Payment_Gateway
         if (is_object($paymentMethodInformation)) {
             $this->paymentMethodInformation = $paymentMethodInformation;
             $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
-            $this->title = $this->paymentMethodInformation->description;
+            $this->title = $this->paymentMethodInformation->name;
             $this->method_description = '';
 
             // Separated this setting to make it easier to expand for future.
@@ -332,8 +332,7 @@ class ResursDefault extends WC_Payment_Gateway
             null,
             [
                 'id' => $this->paymentMethodInformation->id,
-                'type' => $this->paymentMethodInformation->type,
-                'specificType' => $this->paymentMethodInformation->specificType,
+                'type' => $this->paymentMethodInformation->type ?? null
             ]
         );
     }
@@ -1469,7 +1468,6 @@ class ResursDefault extends WC_Payment_Gateway
         );
 
         if (count($requiredFields)) {
-            $ecomHelper = (new ResursBankAPI())->getConnection();
             $getAddressVisible = Data::canUseGetAddressForm();
             foreach ($requiredFields as $fieldName) {
                 $fieldValue = null;
@@ -1483,7 +1481,7 @@ class ResursDefault extends WC_Payment_Gateway
                         } elseif (!$alwaysShowApplicantFields) {
                             $displayField = false;
                         }
-                        $isInternal = $ecomHelper->isInternalMethod($this->paymentMethodInformation);
+                        $isInternal = $this->isInternalMethod();
                         if (!$isInternal && $displayField) {
                             $displayField = false;
                             // External payment methods does not require the govt. id.
@@ -1534,6 +1532,15 @@ class ResursDefault extends WC_Payment_Gateway
 
             echo Data::getEscapedHtml($fieldHtml);
         }
+    }
+
+    /**
+     * @return bool
+     * @since 0.0.1.9
+     */
+    private function isInternalMethod(): bool
+    {
+        return str_starts_with($this->paymentMethodInformation->type, 'RESURS_');
     }
 
     /**
