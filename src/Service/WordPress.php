@@ -148,12 +148,6 @@ class WordPress
         add_action('woocommerce_admin_field_button', '\ResursBank\Module\FormFields::getFieldButton', 10, 2);
         add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
-        add_action(
-            'woocommerce_admin_field_callbacklist',
-            '\ResursBank\Module\FormFields::getFieldCallbackList',
-            10,
-            2
-        );
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
         add_action('woocommerce_single_product_summary', 'ResursBank\Module\Data::getAnnuityFactors');
         add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);

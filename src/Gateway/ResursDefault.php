@@ -301,16 +301,20 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Payment method icon (deprecated filter).
+     *
      * @param $typeCheck
      * @return string
      * @since 0.0.1.0
      */
     private function getMethodIconDeprecated($typeCheck): string
     {
+        // @todo The typeCheck part is currently failing as MAPI has taken over the content.
+        // @todo Since we're leaving v2.2 entirely, this filter may no longer be necessary.
         return !isset($this->paymentMethodInformation->{$typeCheck}) ? WordPress::applyFiltersDeprecated(
             sprintf(
                 'woocommerce_resurs_bank_%s_checkout_icon',
-                $this->paymentMethodInformation->{$typeCheck}
+                $this->paymentMethodInformation->{$typeCheck} ?? ''
             ),
             ''
         ) : '';

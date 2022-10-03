@@ -631,7 +631,8 @@ class PluginApi
         // Re-fetch payment methods.
         try {
             ResursBankAPI::getPaymentMethods(false);
-            ResursBankAPI::getAnnuityFactors(false);
+            // @todo Can't use old SOAP annuities, so we disable this one during the initial migration!
+            //ResursBankAPI::getAnnuityFactors(false);
             $canReload = true;
         } catch (Exception $e) {
             Data::setLogException($e, __FUNCTION__);
