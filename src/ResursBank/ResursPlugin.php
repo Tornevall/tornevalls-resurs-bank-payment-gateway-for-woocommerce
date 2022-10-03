@@ -39,6 +39,7 @@ class ResursPlugin
      * @since 0.0.1.6
      */
     public const RESURS_BANK_PREFIX = 'resursbank';
+
     /**
      * Set this to true, to make a permanent for the official Resurs Bank release.
      *
@@ -81,7 +82,7 @@ class ResursPlugin
      */
     public static function isResursCodeBase(): bool
     {
-        return WooCommerce::getBaseName() === 'resurs-bank-payment-gateway-for-woocommerce';
+        return WooCommerce::getBaseName() !== 'tornevalls-resurs-bank-payment-gateway-for-woocommerce';
     }
 
     /**
