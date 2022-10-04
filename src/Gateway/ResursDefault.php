@@ -1481,7 +1481,7 @@ class ResursDefault extends WC_Payment_Gateway
                         } elseif (!$alwaysShowApplicantFields) {
                             $displayField = false;
                         }
-                        $isInternal = $this->isInternalMethod();
+                        $isInternal = self::isInternalMethod($this->paymentMethodInformation);
                         if (!$isInternal && $displayField) {
                             $displayField = false;
                             // External payment methods does not require the govt. id.
@@ -1535,12 +1535,13 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @param $paymentMethod
      * @return bool
      * @since 0.0.1.9
      */
-    private function isInternalMethod(): bool
+    public static function isInternalMethod($paymentMethod): bool
     {
-        return str_starts_with($this->paymentMethodInformation->type, 'RESURS_');
+        return isset($paymentMethod->type) && str_starts_with($paymentMethod->type, 'RESURS_');
     }
 
     /**
