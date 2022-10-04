@@ -224,7 +224,7 @@ class ResursDefault extends WC_Payment_Gateway
         if (is_object($paymentMethodInformation)) {
             $this->paymentMethodInformation = $paymentMethodInformation;
             $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
-            $this->title = $this->paymentMethodInformation->name;
+            $this->title = $this->paymentMethodInformation->name ?? '';
             $this->method_description = '';
 
             // Separated this setting to make it easier to expand for future.
@@ -1299,6 +1299,17 @@ class ResursDefault extends WC_Payment_Gateway
     public function is_available(): bool
     {
         global $woocommerce;
+
+        // If the payment method information is missing, it is not available.
+        // Usually occurs when plugin is recently installed and not synchronized with Resurs.
+        // This is also very common when merchants still have old SOAP-based methods available.
+        if (!isset($this->paymentMethodInformation) || isset($this->paymentMethodInformation->id)) {
+            return false;
+        }
+        // Legacy methods can not be used anymore.
+        if (isset($this->paymentMethodInformation->description)) {
+            return false;
+        }
 
         // This feature is primarily for the storefront.
         $return = parent::is_available();
