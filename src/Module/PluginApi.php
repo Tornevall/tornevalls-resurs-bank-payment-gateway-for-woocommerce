@@ -1532,7 +1532,7 @@ class PluginApi
     /**
      * @since 0.0.1.4
      */
-    public function resetPluginSettings()
+    public static function resetPluginSettings()
     {
         global $wpdb;
         self::getValidatedNonce(false, false, __FUNCTION__);
@@ -1580,7 +1580,7 @@ class PluginApi
     /**
      * @since 0.0.1.7
      */
-    public function resetOldPluginSettings()
+    public static function resetOldPluginSettings()
     {
         global $wpdb;
         self::getValidatedNonce(false, false, __FUNCTION__);
