@@ -7,7 +7,7 @@
 namespace ResursBank\Module;
 
 use Exception;
-use Resursbank\Ecom\Module\Customer\Repository as CustomerRespoitory;
+use Resursbank\Ecom\Module\Customer\Repository as CustomerRepoitory;
 use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
@@ -58,6 +58,8 @@ class PluginApi
      */
     public static function execApi()
     {
+        // Making sure ecom2 is preconfigured during ajax-calls too.
+        new ResursBankAPI();
         // Logging $_REQUEST may break the WooCommerce status log view if not decoded first.
         // For some reason, the logs can't handle utf8-strings.
         Data::canLog(
@@ -75,6 +77,16 @@ class PluginApi
         if (!empty($returnedValue)) {
             self::reply($returnedValue);
         }
+    }
+
+    /**
+     * @since 0.0.1.0
+     */
+    public static function execApiNoPriv()
+    {
+        // Making sure ecom2 is preconfigured during ajax-calls too.
+        new ResursBankAPI();
+        WordPress::doAction(self::getAction(), null);
     }
 
     /**
@@ -140,14 +152,6 @@ class PluginApi
         if ($dieInstantly) {
             exit;
         }
-    }
-
-    /**
-     * @since 0.0.1.0
-     */
-    public static function execApiNoPriv()
-    {
-        WordPress::doAction(self::getAction(), null);
     }
 
     /**
@@ -1351,7 +1355,7 @@ class PluginApi
                 try {
                     // This request is a display-only solution, so it has to be returned as an array so
                     // that the fron script can fetch it.
-                    $addressResponse = CustomerRespoitory::getAddress(
+                    $addressResponse = CustomerRepoitory::getAddress(
                         ResursBankAPI::getStoreUuidByNationalId(Data::getStoreId()),
                         $identification,
                         $customerType,
