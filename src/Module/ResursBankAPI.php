@@ -97,7 +97,17 @@ class ResursBankAPI
      */
     public function __construct()
     {
-        $this->getConnection();
+        try {
+            $this->getConnection();
+        } catch (Exception $connectionException) {
+            // Ignore on failures at this point, since we must be able to reach places
+            // where the connection is not necessary. For example, if no credentials are set
+            // when trying to reach wp-admin, section will make the platform bail out.
+            if (is_admin()) {
+                // If we are in wp-admin, we allow an error message to be shown on screen.
+                WordPress::setGenericError($connectionException);
+            }
+        }
     }
 
     /**
