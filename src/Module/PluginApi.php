@@ -1153,21 +1153,14 @@ class PluginApi
     {
         $actOn = [
             sprintf('%s_admin_environment', Data::getPrefix()) => ['getNewCallbacks', 'getPaymentMethods'],
-            sprintf('%s_admin_login', Data::getPrefix()) => ['getNewCallbacks'],
-            sprintf('%s_admin_password', Data::getPrefix()) => ['getPaymentMethods'],
-            sprintf('%s_admin_login_production', Data::getPrefix()) => ['getNewCallbacks'],
-            sprintf('%s_admin_password_production', Data::getPrefix()) => ['getPaymentMethods'],
+            sprintf('%s_admin_jwt_client_secret', Data::getPrefix()) => ['getPaymentMethods'],
+            sprintf('%s_admin_jwt_client_secret_production', Data::getPrefix()) => ['getPaymentMethods'],
+            sprintf('%s_admin_mapi_store_id', Data::getPrefix()) => ['getPaymentMethods'],
         ];
         if ($old !== $new && isset($actOn[$option]) && !is_ajax()) {
             foreach ($actOn[$option] as $execFunction) {
                 try {
                     switch ($execFunction) {
-                        case 'getNewCallbacks':
-                            // This function is called from front-end too and in such cases it does nonce
-                            // checks. When saving from admin, nonce checks are not needed - it rather breaks
-                            // the saving itself. So in this particular case, nonce checks are disabled.
-                            self::{$execFunction}(false);
-                            break;
                         case 'getPaymentMethods':
                             self::{$execFunction}(false, false);
                             break;
