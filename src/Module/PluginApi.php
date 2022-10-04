@@ -7,10 +7,10 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Module\Customer\Repository as CustomerRespoitory;
 use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
-use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use ResursException;
@@ -378,6 +378,49 @@ class PluginApi
     }
 
     /**
+     * @param bool $reply
+     * @param bool $validate
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection BadExceptionsProcessingInspection
+     */
+    public static function getPaymentMethods($reply = true, $validate = true)
+    {
+        if ($validate) {
+            self::getValidatedNonce();
+        }
+        $e = null;
+
+        // Re-fetch payment methods.
+        try {
+            ResursBankAPI::getPaymentMethods(false);
+            // @todo Can't use old SOAP annuities, so we disable this one during the initial migration!
+            //ResursBankAPI::getAnnuityFactors(false);
+            $canReload = true;
+        } catch (Exception $e) {
+            Data::setLogException($e, __FUNCTION__);
+            $canReload = false;
+        }
+        if (self::canReply($reply)) {
+            self::reply([
+                'reload' => $canReload,
+                'error' => $e instanceof Exception ? $e->getMessage() : '',
+                'code' => $e instanceof Exception ? $e->getCode() : 0,
+            ]);
+        }
+    }
+
+    /**
+     * @param $reply
+     * @return bool
+     * @since 0.0.1.0
+     */
+    private static function canReply($reply): bool
+    {
+        return $reply === null || (bool)$reply === true;
+    }
+
+    /**
      * @return array
      * @throws Exception
      * @since 0.0.1.0
@@ -520,8 +563,6 @@ class PluginApi
          * Defines whether this is a live change or just a test. This occurs when the user is switching
          * environment without saving the data. This allows us - for example - to validate production
          * before switching over.
-         *
-         * @var bool $isLiveChange
          */
         $isLiveChange = Data::getResursOption('environment') !== Data::getRequest('e');
 
@@ -612,49 +653,6 @@ class PluginApi
                 'validation' => $validationResponse,
             ]
         );
-    }
-
-    /**
-     * @param bool $reply
-     * @param bool $validate
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection BadExceptionsProcessingInspection
-     */
-    public static function getPaymentMethods($reply = true, $validate = true)
-    {
-        if ($validate) {
-            self::getValidatedNonce();
-        }
-        $e = null;
-
-        // Re-fetch payment methods.
-        try {
-            ResursBankAPI::getPaymentMethods(false);
-            // @todo Can't use old SOAP annuities, so we disable this one during the initial migration!
-            //ResursBankAPI::getAnnuityFactors(false);
-            $canReload = true;
-        } catch (Exception $e) {
-            Data::setLogException($e, __FUNCTION__);
-            $canReload = false;
-        }
-        if (self::canReply($reply)) {
-            self::reply([
-                'reload' => $canReload,
-                'error' => $e instanceof Exception ? $e->getMessage() : '',
-                'code' => $e instanceof Exception ? $e->getCode() : 0,
-            ]);
-        }
-    }
-
-    /**
-     * @param $reply
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private static function canReply($reply): bool
-    {
-        return $reply === null || (bool)$reply === true;
     }
 
     /**
@@ -887,7 +885,7 @@ class PluginApi
                 $addressRequestList['6'] = 'service_error';
                 // On exceptions from netcurl, we will instead use the extended version of the CurlWrapper but (as above)
                 // prepare the address request list with service error information.
-		$networkRequest = $e->getExtendException();
+                $networkRequest = $e->getExtendException();
             }
             $noSoapRequestResponse = '';
             try {
@@ -919,9 +917,9 @@ class PluginApi
                         if (isset($addressRequestResponse->ip) &&
                             filter_var($addressRequestResponse->ip, FILTER_VALIDATE_IP)
                         ) {
-                        $addressRequestList[$protoNum] = $addressRequestResponse->ip;
+                            $addressRequestList[$protoNum] = $addressRequestResponse->ip;
                         } else {
-                        $addressRequestList[$protoNum] = 'N/A';
+                            $addressRequestList[$protoNum] = 'N/A';
                         }
                     }
                 }
@@ -1334,19 +1332,10 @@ class PluginApi
      */
     public static function getAddress()
     {
-        $apiRequest = ResursBankAPI::getResurs();
         $addressResponse = [];
         $identification = Data::getRequest('identification');
         $customerType = Data::getCustomerType();
         $customerCountry = Data::getCustomerCountry();
-
-        if (Data::isTest() && Data::isProductionAvailable() && Data::getResursOption('simulate_real_getaddress')) {
-            $apiRequest->setEnvironment(RESURS_ENVIRONMENTS::PRODUCTION);
-            $apiRequest->setAuthentication(
-                Data::getResursOption('login_production'),
-                Data::getResursOption('password_production')
-            );
-        }
 
         $return = [
             'api_error' => '',
@@ -1356,34 +1345,22 @@ class PluginApi
 
         WooCommerce::setSessionValue('identification', Data::getRequest('identification'));
 
+        // getAddress for NO was explicitly available from ecom1 only.
         switch ($customerCountry) {
-            case 'NO':
-                // This request works only on norwegian accounts.
-                try {
-                    $addressResponse = (array)$apiRequest->getAddressByPhone($identification, $customerType);
-                    self::getAddressLog($customerCountry, $customerType, $identification, __(
-                        'By phone request.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ));
-                } catch (Exception $e) {
-                    Data::setLogException($e, __FUNCTION__);
-                    Data::setTimeoutStatus($apiRequest);
-                    // We should not use fail-overs for Norway if requests fail here.
-                    self::getAddressLog($customerCountry, $customerType, $identification, __(
-                        'Address request by phone failed.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ));
-                }
-                break;
             case 'SE':
                 try {
-                    $addressResponse = WordPress::applyFilters('getAddressRequest', $addressResponse, $identification, $customerType);
+                    // This request is a display-only solution, so it has to be returned as an array so
+                    // that the fron script can fetch it.
+                    $addressResponse = CustomerRespoitory::getAddress(
+                        ResursBankAPI::getStoreUuidByNationalId(Data::getStoreId()),
+                        $identification,
+                        $customerType,
+                    )->toArray();
                     self::getAddressLog($customerCountry, $customerType, $identification, __(
                         'By government id/company id (See customer type).',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ));
                 } catch (Exception $e) {
-                    Data::setTimeoutStatus($apiRequest);
                     self::getAddressLog(
                         $customerCountry,
                         $customerType,
