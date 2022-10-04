@@ -1340,6 +1340,14 @@ class PluginApi
             'identificationResponse' => [],
         ];
 
+        if (!Data::hasCredentials()) {
+            $return['api_error'] = __(
+                'Service is currently not active.',
+                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+             );
+            self::reply($return);
+        }
+
         WooCommerce::setSessionValue('identification', Data::getRequest('identification'));
 
         // getAddress for NO was explicitly available from ecom1 only.
