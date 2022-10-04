@@ -843,7 +843,12 @@ class WordPress
             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
         );
         $return['checkout_fields'] = FormFields::getFieldString();
-        $return['getAddressFieldController'] = Data::hasCredentials() ? self::applyFilters('getAddressFieldController', []) : [];
+        try {
+            $getAddressFieldController = WordPress::getAddressFieldController();
+        } catch (Exception) {
+            $getAddressFieldController = [];
+        }
+        $return['getAddressFieldController'] = Data::hasCredentials() ? $getAddressFieldController : [];
         $return['checkoutType'] = Data::getCheckoutType();
 
         $return['switchToLegal'] = WordPress::applyFilters(
