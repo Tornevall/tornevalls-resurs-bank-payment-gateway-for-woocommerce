@@ -330,10 +330,7 @@ class ResursDefault extends WC_Payment_Gateway
         return WordPress::applyFilters(
             'getPaymentMethodIcon',
             null,
-            [
-                'id' => $this->paymentMethodInformation->id,
-                'type' => $this->paymentMethodInformation->type ?? null
-            ]
+            $this->paymentMethodInformation
         );
     }
 

@@ -193,10 +193,10 @@ class WooCommerce
     private static function getMethodsByType($type, $returnAs = 'bool')
     {
         try {
-            $storedMethods = ResursBankAPI::getPaymentMethods(true);
+            $paymentMethods = ResursBankAPI::getPaymentMethods(true);
         } catch (Exception $e) {
             if ($e->getCode() === Data::UNSET_CREDENTIALS_EXCEPTION) {
-                $storedMethods = [];
+                $paymentMethods = [];
             } else {
                 throw $e;
             }
@@ -204,14 +204,15 @@ class WooCommerce
         $returnBool = false;
 
         $paymentMethodList = [];
-        if (is_array($storedMethods) && count($storedMethods)) {
-            // @todo customerType no longer exists in getPaymentMethods so this feature is broken until we
-            // @todo adjust the customerType check to the MAPI content!
-            foreach ($storedMethods as $method) {
-                //$customerType = (array)$method->customerType;
-                //if (in_array(strtolower($type), array_map('strtolower', $customerType), true)) {
-                //    $paymentMethodList[] = $method;
-                //}
+        if (is_array($paymentMethods) && count($paymentMethods)) {
+            foreach ($paymentMethods as $method) {
+                switch ($type) {
+                    case 'legal' && $method->enabledForLegalCustomer:
+                    case 'natural' && $method->enabledForNaturalCustomer:
+                        $paymentMethodList[] = $method;
+                        break;
+                    default:
+                }
             }
             $returnBool = count($paymentMethodList) > 0;
         }

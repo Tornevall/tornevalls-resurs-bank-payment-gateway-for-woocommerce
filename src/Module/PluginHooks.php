@@ -8,6 +8,8 @@ namespace ResursBank\Module;
 
 use Automattic\WooCommerce\Admin\Overrides\Order;
 use Exception;
+use Resursbank\Ecom\Module\PaymentMethod\Enum\Type;
+use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
@@ -76,7 +78,6 @@ class PluginHooks
         add_action('rbwc_mock_update_payment_reference_failure', [$this, 'mockUpdatePaymentFailure']);
         add_action('rbwc_mock_create_iframe_exception', [$this, 'mockCreateIframeException']);
         add_action('rbwc_mock_callback_update_exception', [$this, 'mockCallbackUpdateException']);
-        add_action('rbwc_mock_get_payment_methods_exception', [$this, 'mockGetPaymentMethodsException']);
         add_action('rbwc_mock_annuity_factor_config_exception', [$this, 'mockAnnuityFactorConfigException']);
         add_action('rbwc_mock_empty_price_info_html', [$this, 'mockEmptyPriceInfoHtml']);
         add_action('mock_update_callback_exception', [$this, 'mockUpdateCallbackException']);
@@ -1083,15 +1084,6 @@ class PluginHooks
 
     /**
      * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function mockGetPaymentMethodsException()
-    {
-        $this->getMockException(__FUNCTION__);
-    }
-
-    /**
-     * @throws Exception
      * @since 0.0.1.6
      */
     public function mockGetPaymentMethodNamespaceException()
@@ -1165,31 +1157,32 @@ class PluginHooks
 
     /**
      * @param $url
-     * @param $methodInformation
+     * @param PaymentMethod $paymentMethod
+     * @return mixed|string|null
      * @since 0.0.1.0
      * @noinspection NotOptimalRegularExpressionsInspection
      */
-    public function getMethodIconByContent($url, $methodInformation)
+    public function getMethodIconByContent($url, $paymentMethod)
     {
         $iconSetting = Data::getResursOption('payment_method_icons');
-        foreach ($methodInformation as $item) {
-            $itemName = strtolower($item);
-            if (preg_match('/^pspcard_/i', strtolower($item))) {
-                // Shorten up credit cards.
+        switch ($paymentMethod->type) {
+            case Type::DEBIT_CARD:
+            case Type::CREDIT_CARD:
+            case Type::CARD:
+                // This is the generic name of the icon being used for "internals".
                 $itemName = 'pspcard';
-            }
-            $byItem = sprintf('method_%s', $itemName);
-
-            $imageByMethodContent = Data::getImage($byItem);
-            if ($imageByMethodContent) {
-                $url = $imageByMethodContent;
                 break;
-            }
+            default:
+                $itemName = $paymentMethod->type;
+        }
+        $byItem = sprintf('method_%s', $itemName);
+        $imageByMethodContent = Data::getImage($byItem);
+        if ($imageByMethodContent) {
+            $url = $imageByMethodContent;
         }
 
         if (empty($url) &&
-            $iconSetting === 'specifics_and_resurs' &&
-            $methodInformation['type'] !== 'PAYMENT_PROVIDER'
+            $iconSetting === 'specifics_and_resurs' && str_starts_with($paymentMethod->type, 'RESURS')
         ) {
             $url = Data::getImage('resurs-logo.png');
         }
