@@ -601,17 +601,6 @@ class FormFields extends WC_Settings_API
                 'fraud_finalization_section_end' => [
                     'type' => 'sectionend',
                 ],
-                'rco_customer_behaviour' => [
-                    'type' => 'title',
-                    'title' => __(
-                        'Resurs Checkout customer interaction behaviour',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                ],
-                'rco_customer_behaviour_end' => [
-                    'id' => 'rco_customer_behaviour_end',
-                    'type' => 'sectionend',
-                ],
             ],
             'advanced' => [
                 'title' => __('Advanced Merchant', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
