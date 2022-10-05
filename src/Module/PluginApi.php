@@ -171,8 +171,8 @@ class PluginApi
             'resursAnnuityMethod' => 'currentAnnuityFactor',
             'partPayWidgetPage' => 'part_payment_template',
             'postidreference' => 'order_id_type',
-            'login' => 'login',
-            'password' => 'password',
+            'login' => 'jwt_client_id',
+            'password' => 'jwt_client_secret',
             'checkout_type' => 'checkout_type',
         ];
 
@@ -185,14 +185,14 @@ class PluginApi
                     if (Data::isTest()) {
                         Data::setResursOption($destKey, $oldValue);
                     } else {
-                        Data::setResursOption('login_production', $oldValue);
+                        Data::setResursOption('jwt_client_id_production', $oldValue);
                     }
                     break;
                 case 'password':
                     if (Data::isTest()) {
                         Data::setResursOption($destKey, $oldValue);
                     } else {
-                        Data::setResursOption('password_production', $oldValue);
+                        Data::setResursOption('jwt_client_secret_production', $oldValue);
                     }
                     break;
                 case 'postidreference':
