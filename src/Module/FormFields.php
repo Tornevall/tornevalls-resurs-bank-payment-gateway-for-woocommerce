@@ -898,8 +898,8 @@ class FormFields extends WC_Settings_API
 
         if (Data::hasCredentials()) {
             try {
-                //$renderedStores = ResursBankAPI::getRenderedStores();
-                $renderedStores = (new ResursBankAPI())->getRenderedStores();
+                $defaultStore = ['0'=>''];
+                $renderedStores = $defaultStore + (new ResursBankAPI())->getRenderedStores();
 
                 // This section is now reserved in the configuration set.
                 $formFields['basic']['mapi_store_id'] = [
@@ -1276,43 +1276,6 @@ class FormFields extends WC_Settings_API
                     'desc_tip' => __(
                         'Ensure that the priceinfo box still shows data when no data has been ' .
                         'retrieved from priceinfo.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => 'no',
-                ],
-                'mock_get_payment_methods_exception' => [
-                    'id' => 'mock_get_payment_methods_exception',
-                    'title' => __(
-                        'wp-admin: Generate an exception in AJAX-based getPaymentMethods-requests',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'type' => 'checkbox',
-                    'desc' => __(
-                        'Enable.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'desc_tip' => __(
-                        'This setting enables a fictive getPaymentMethods problem when we update payment methods ' .
-                        'in admin manually.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => 'no',
-                ],
-                'mock_get_empty_payment_methods_exception' => [
-                    'id' => 'mock_get_empty_payment_methods_exception',
-                    'title' => __(
-                        'wp-admin: getPaymentMethods will run without pre stored data',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'type' => 'checkbox',
-                    'desc' => __(
-                        'Enable.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'desc_tip' => __(
-                        'This setting enables a fictive getPaymentMethods problem where we request for payment ' .
-                        'methods the first time. To test exceptions with the API update, this should be combined ' .
-                        'with the getPaymentMethods in AJAX-mock.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => 'no',

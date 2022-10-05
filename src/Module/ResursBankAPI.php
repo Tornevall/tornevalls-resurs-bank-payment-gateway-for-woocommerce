@@ -19,12 +19,10 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
-use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Models\StoreCollection;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use Resursbank\Ecommerce\Service\Merchant\Model\PaymentMethods;
 use ResursBank\Exception\MapiCredentialsException;
 use ResursBank\Exception\StoreException;
 use ResursBank\Exception\WooCommerceException;
@@ -187,7 +185,8 @@ class ResursBankAPI
      * @return string
      * @since 0.0.1.9
      */
-    private function getClientId(): string {
+    private function getClientId(): string
+    {
         return Data::getResursOption('environment') === 'test' ?
             Data::getResursOption('jwt_client_id') : Data::getResursOption('jwt_client_id_production');
     }
@@ -211,7 +210,8 @@ class ResursBankAPI
      * @throws FormatException
      * @since 0.0.1.0
      */
-    public function getConnection(): void {
+    public function getConnection(): void
+    {
         // @todo Make sure the scope for production is correct.
         $scope = Data::getResursOption('environment') === 'test' ? 'mock-merchant-api' : 'merchant-api';
         $grantType = 'client_credentials';
@@ -536,34 +536,19 @@ class ResursBankAPI
      */
     public static function getPaymentMethods($fromStorage = true)
     {
-        // Mocking feature that reveals that this payment methods request is effective all around
-        // the admin platform. When this mock is triggered, other pages (like the mock-admin) may
-        // fail. This feature turned out to fix an important bug. We also knows that requesting payment
-        // methods can also affect admin panel if Resurs Bank throws an exception if the method request
-        // is failing at this point (since we're cleaning up the storage).
-        if (Data::getRequest('section') === 'payment_methods' &&
-            !WooCommerce::getSessionValue('rb_requesting_debit_methods') &&
-            Data::canMock('getEmptyPaymentMethodsException')
-        ) {
-            // But this feature is only set for visual testing.
-            // Note: As the wp-admin is running, we will first pass through "auto debitable methods".
-            Data::setResursOption('paymentMethods', null);
-        }
-
         $return = self::$paymentMethods;
-        if ($fromStorage) {
-            /** @noinspection JsonEncodingApiUsageInspection */
-            $stored = json_decode(Data::getResursOption('paymentMethods'));
-            if (is_array($stored)) {
-                $return = $stored;
+        if ($fromStorage && !empty(Data::getResursOption('paymentMethods'))) {
+            try {
+                $return = json_decode(
+                    Data::getResursOption('paymentMethods'),
+                    associative: false,
+                    flags: JSON_THROW_ON_ERROR
+                );
+            } catch (Exception) {
             }
         }
 
-        if (!$fromStorage || empty($return)) {
-            if (Data::getRequest('section') === 'payment_methods') {
-                // Also this part is used for the specific admin section.
-                WooCommerce::applyMock('getPaymentMethodsException');
-            }
+        if (Data::getStoreId() > 0 && (!$fromStorage || empty($return))) {
             self::$paymentMethods = Repository::getPaymentMethods(self::getStoreUuidByNationalId(Data::getStoreId()))->toArray();
             Data::setResursOption('lastMethodUpdate', time());
             WooCommerce::setSessionValue('silentGetPaymentMethodsException', null);
