@@ -574,11 +574,13 @@ class WooCommerce
      */
     public static function getGenericLocalization($return, $scriptName)
     {
+        // @todo ECom1 was generating a temporary order id sequence that do longer exist. This has to be fixed
+        // @todo some other way then this random sha1-string.
         if (preg_match('/_checkout$/', $scriptName) && is_checkout() && Data::hasCredentials()) {
             $return[sprintf(
                 '%s_rco_suggest_id',
                 Data::getPrefix()
-            )] = ResursBankAPI::getResurs()->getPreferredPaymentId();
+            )] = sha1(microtime(true));
             $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
         }
 
@@ -1350,6 +1352,18 @@ class WooCommerce
         }
 
         return $return;
+    }
+
+    /**
+     * Since ecom2 does not want trailing slashes in its logger, we use this method to trim away
+     * all trailing slashes.
+     * @return string
+     * @since 0.0.1.9
+     */
+    public static function getWcLogDir(): string
+    {
+        /** @noinspection PhpUndefinedConstantInspection */
+        return preg_replace('/\/$/', '', WC_LOG_DIR);
     }
 
     /**

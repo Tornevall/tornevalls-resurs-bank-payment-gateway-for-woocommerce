@@ -1091,24 +1091,6 @@ class FormFields extends WC_Settings_API
                     'type' => 'title',
                     'title' => 'Customer & Checkout Tweaking',
                 ],
-                'simulate_real_getaddress' => [
-                    'id' => 'simulate_real_getaddress',
-                    'title' => __(
-                        'Activate "real people"-mode in test, for getAddress.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'type' => 'checkbox',
-                    'desc' => __(
-                        'Enable.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'desc_tip' => __(
-                        'Required production credentials available: When activating this mode, getAddress will use ' .
-                        'real lookups for getAddress rather than the mocked data.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => 'no',
-                ],
                 'allow_mocking' => [
                     'id' => 'allow_mocking',
                     'title' => __('Allow mocked behaviours', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),

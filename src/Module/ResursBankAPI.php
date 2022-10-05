@@ -97,7 +97,17 @@ class ResursBankAPI
      */
     public function __construct()
     {
-        $this->getConnection();
+        try {
+            $this->getConnection();
+        } catch (Exception $connectionException) {
+            // Ignore on failures at this point, since we must be able to reach places
+            // where the connection is not necessary. For example, if no credentials are set
+            // when trying to reach wp-admin, section will make the platform bail out.
+            if (is_admin()) {
+                // If we are in wp-admin, we allow an error message to be shown on screen.
+                WordPress::setGenericError($connectionException);
+            }
+        }
     }
 
     /**
@@ -158,16 +168,19 @@ class ResursBankAPI
     }
 
     /**
-     * @return ResursBank
+     * @return ResursBankAPI|ResursBank
      * @throws Exception
      * @since 0.0.1.0
+     * @todo Fix the return type (or use void).
      */
-    public static function getResurs(): ResursBank
+    public static function getResurs(): ResursBank|ResursBankAPI
     {
         if (empty(self::$resursBank)) {
             // Instantiation.
             self::$resursBank = new self();
         }
+
+        return self::$resursBank;
     }
 
     /**
@@ -198,8 +211,7 @@ class ResursBankAPI
      * @throws FormatException
      * @since 0.0.1.0
      */
-    public function getConnection(): void
-    {
+    public function getConnection(): void {
         // @todo Make sure the scope for production is correct.
         $scope = Data::getResursOption('environment') === 'test' ? 'mock-merchant-api' : 'merchant-api';
         $grantType = 'client_credentials';
@@ -214,9 +226,8 @@ class ResursBankAPI
             throw new WooCommerceException('Can not find WooCommerce in this platform.');
         }
 
-        /** @noinspection PhpUndefinedConstantInspection */
         Config::setup(
-            logger: new FileLogger(path: self::getWcLogDir()),
+            logger: new FileLogger(path: WooCommerce::getWcLogDir()),
             cache: new None(),
             jwtAuth: new Jwt(
                 clientId: $this->getClientId(),
@@ -225,18 +236,6 @@ class ResursBankAPI
                 grantType: $grantType
             )
         );
-    }
-
-    /**
-     * Since ecom2 does not want trailing slashes in its logger, we use this method to trim away
-     * all trailing slashes.
-     * @return string
-     * @since 0.0.1.9
-     */
-    private static function getWcLogDir(): string
-    {
-        /** @noinspection PhpUndefinedConstantInspection */
-        return preg_replace('/\/$/', '', WC_LOG_DIR);
     }
 
     /**

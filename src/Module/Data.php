@@ -432,7 +432,7 @@ class Data
     ) {
         $return = null;
 
-        if (preg_match('/woocom(.*?)resurs/', $namespace)) {
+        if (!is_null($namespace) && preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
         $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin', true), $key);
@@ -2703,6 +2703,7 @@ class Data
     public static function getCustomerType()
     {
         self::setCustomerTypeToSession();
+
         return self::getCustomerTypeFromSession();
     }
 

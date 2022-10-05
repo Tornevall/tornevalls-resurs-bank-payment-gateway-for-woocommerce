@@ -273,6 +273,11 @@ function getResursAddress() {
                         $rQuery("#billing_country").val(response.billing_country).change();
                     }
                 }
+            },
+            function (requestFailure) {
+                $rQuery('.resursGetAddressError').text(requestFailure.statusText);
+                $rQuery('.resursGetAddressError').show();
+                $rQuery('.resursGetAddressError').delay('4000').fadeOut('medium');
             }
         );
     }

@@ -1,4 +1,5 @@
-<?php use ResursBank\Module\Data;
+<?php use ResursBank\Gateway\ResursDefault;
+use ResursBank\Module\Data;
 if (!empty($customDescription)) { ?>
     <div>
         <?php
@@ -8,7 +9,7 @@ if (!empty($customDescription)) { ?>
 <?php } ?>
 
 <div class="resursReadMoreSpace">
-    <?php if ($method->specificType !== 'CARD' && $method->type !== 'PAYMENT_PROVIDER') { ?>
+    <?php if (ResursDefault::isInternalMethod($method)) { ?>
         <div
                 type="button"
                 class="btn btn-info active resursReadMoreButton"

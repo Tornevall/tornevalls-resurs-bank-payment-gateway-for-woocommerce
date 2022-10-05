@@ -54,6 +54,10 @@ class OrderHandler extends ResursDefault
      */
     public function setPreparedOrderLines(): self
     {
+        // @todo WOO-764
+        // Reactivate the payload storage again.
+        return $this;
+
         $this
             ->setOrderRows()
             ->setCoupon()
