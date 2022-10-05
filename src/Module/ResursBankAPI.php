@@ -735,16 +735,4 @@ class ResursBankAPI
     {
         //$this->getConnection()->setPreferredPaymentFlowService($checkoutType);
     }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     * @todo Adapt for ecom2.
-     */
-    public function setFraudFlags()
-    {
-        //$this->getConnection()->setWaitForFraudControl(Data::getResursOption('waitForFraudControl'));
-        //$this->getConnection()->setAnnulIfFrozen(Data::getResursOption('waitForFraudControl'));
-        //$this->getConnection()->setFinalizeIfBooked(Data::getResursOption('waitForFraudControl'));
-    }
 }

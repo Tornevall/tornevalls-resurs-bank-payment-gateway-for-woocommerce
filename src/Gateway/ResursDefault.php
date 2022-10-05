@@ -2542,7 +2542,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         // Section #1: Prepare order.
         $this->API->setCheckoutType(CheckoutType::SIMPLIFIED_FLOW);
-        $this->API->setFraudFlags();
         $this->setOrderData();
         $this->setCreatePaymentNotice(__FUNCTION__);
 
@@ -2582,7 +2581,6 @@ class ResursDefault extends WC_Payment_Gateway
     private function processHosted()
     {
         $this->API->setCheckoutType(CheckoutType::HOSTED_FLOW);
-        $this->API->setFraudFlags();
         $this->setOrderData();
         $this->setCreatePaymentNotice(__FUNCTION__);
 
