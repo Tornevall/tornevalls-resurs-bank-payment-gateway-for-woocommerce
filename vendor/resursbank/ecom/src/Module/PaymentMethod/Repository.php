@@ -125,6 +125,44 @@ class Repository
 
     /**
      * @param string $storeId
+     * @param string $paymentMethodId
+     * @param float|null $amount
+     * @return PaymentMethod|null
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    public static function getById(
+        string $storeId,
+        string $paymentMethodId,
+        ?float $amount = null
+    ): ?PaymentMethod {
+        $result = null;
+
+        $paymentMethods = self::getPaymentMethods(
+            storeId: $storeId,
+            amount: $amount
+        );
+
+        /** @var PaymentMethod $paymentMethod */
+        foreach ($paymentMethods as $paymentMethod) {
+            if ($paymentMethod->id === $paymentMethodId) {
+                $result = $paymentMethod;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param string $storeId
      * @return void
      * @throws IllegalValueException
      */
