@@ -47,7 +47,6 @@ class Payment extends Model
      * @param Order|null $order
      * @param Application|null $application
      * @param Information|null $information
-     * @param Metadata|null $metadata
      * @param CoApplicant|null $coApplicant
      * @param TaskRedirectionUrls|null $taskRedirectionUrls
      * @param StringValidation $stringValidation
@@ -68,7 +67,6 @@ class Payment extends Model
         public readonly ?Order $order = null,
         public readonly ?Application $application = null,
         public readonly ?Information $information = null,
-        public readonly ?Metadata $metadata = null,
         public readonly ?CoApplicant $coApplicant = null,
         public readonly ?TaskRedirectionUrls $taskRedirectionUrls = null,
         private readonly StringValidation $stringValidation = new StringValidation(),

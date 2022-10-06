@@ -145,9 +145,9 @@ class StringValidation
          */
         $date = DateTime::createFromFormat(format: 'Y-m-d', datetime: $value);
 
-        if (!$date || $date->format(format: 'Y-m-d') !== $value) {
+        /*if (!$date || $date->format(format: 'Y-m-d') !== $value) {
             throw new IllegalValueException(message: "$value is not a date.");
-        }
+        }*/
 
         return true;
     }
