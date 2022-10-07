@@ -708,19 +708,6 @@ class Data
                     (int)self::getResursOption('currentAnnuityDuration')
                 );
             } catch (Exception $annuityException) {
-                $resursApi = ResursBankAPI::getResurs();
-                self::setTimeoutStatus($resursApi, $annuityException);
-                if ($resursApi->hasTimeoutException()) {
-                    echo Data::getEscapedHtml(
-                        sprintf(
-                            '<div class="annuityTimeout">%s</div>',
-                            __(
-                                'Resurs Bank price information is currently unavailable right now, due to timed out ' .
-                                'connection. Please try again in a moment.'
-                            )
-                        )
-                    );
-                }
             }
         }
 
@@ -1157,36 +1144,6 @@ class Data
     }
 
     /**
-     * @param ResursBank $resursConnection
-     * @param Exception $exception
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function setTimeoutStatus($resursConnection, $exception = null): bool
-    {
-        $return = false;
-        $timeoutByException = false;
-
-        if ($exception instanceof Exception && !$resursConnection->hasTimeoutException()) {
-            $exceptionCode = $exception->getCode();
-            if ($exceptionCode === 28 || $exceptionCode === Constants::LIB_NETCURL_SOAP_TIMEOUT) {
-                $timeoutByException = true;
-            }
-        }
-
-        // If positive values are sent here, we store a timestamp for 60 seconds with a transient entry.
-        if ($timeoutByException || $resursConnection->hasTimeoutException()) {
-            $return = set_transient(
-                sprintf('%s_resurs_api_timeout', self::getPrefix()),
-                time(),
-                60
-            );
-        }
-
-        return $return;
-    }
-
-    /**
      * Carefully check and return order from Resurs Bank but only if it does exist. We do this by checking
      * if the payment method allows us doing a getPayment and if true, then we will return a new WC_Order with
      * Resurs Bank ecom metadata included.
@@ -1490,13 +1447,8 @@ class Data
                     $prefetchObject['ecom'] = ResursBankAPI::getPayment($prefetchObject['resurs'], null, $prefetchObject);
                     $prefetchObject['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
-                    self::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
                     if (!empty($prefetchObject['resurs_secondary']) && $prefetchObject['resurs_secondary'] !== $prefetchObject['resurs']) {
-                        $prefetchObject['ecom'] = ResursBankAPI::getPayment(
-                            $prefetchObject['resurs_secondary'],
-                            null,
-                            $prefetchObject
-                        );
+                        $prefetchObject['ecom'] = ResursBankAPI::getPayment($prefetchObject['resurs_secondary']);
                     }
                     $prefetchObject['ecom_had_reference_problems'] = true;
                     $prefetchObject['ecomException']['code'] = $e->getCode();
