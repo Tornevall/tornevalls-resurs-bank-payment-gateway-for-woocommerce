@@ -160,10 +160,22 @@ class StringValidation
      * @psalm-suppress InvalidNamedArgument
      * @noinspection PhpNamedArgumentMightBeUnresolvedInspection
      */
-    public function isIso8601Date(string $value): bool
+    public function isIso8601DateTime(string $value): bool
     {
-        $date = DateTime::createFromFormat(format: '', datetime: $value);
-        if (!$date || $date->format(format: '') !== $value) {
+        $sanitizedValue = preg_replace(
+            pattern: '/Z$/',
+            replacement: '+00:00',
+            subject: $value
+        );
+        $date = DateTime::createFromFormat(format: DATE_ATOM, datetime: $value);
+        if (
+            !$date ||
+            preg_replace(
+                pattern: '/Z$/',
+                replacement: '+00:00',
+                subject: $date->format(format: DATE_ATOM)
+            ) !== $sanitizedValue
+        ) {
             // Ugly hack because PHP's ISO 8601 parsing has been broken since forever and is still "not a bug"
             $noNanoseconds = substr(string: $value, offset: 0, length: 23);
             $remainder = substr(string: $value, offset: 23);

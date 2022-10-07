@@ -105,7 +105,7 @@ class Payment extends Model
      */
     private function validateCreated(): void
     {
-        $this->stringValidation->isDate(value: $this->created);
+        $this->stringValidation->isIso8601DateTime(value: $this->created);
     }
 
     /**

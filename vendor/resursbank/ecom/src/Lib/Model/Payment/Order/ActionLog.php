@@ -62,7 +62,7 @@ class ActionLog extends Model
      */
     private function validateCreated(): void
     {
-        $this->stringValidation->isIso8601Date(value: $this->created);
+        $this->stringValidation->isIso8601DateTime(value: $this->created);
     }
 
     /**

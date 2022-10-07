@@ -193,7 +193,7 @@ class Repository
      * @param ActionLogOrderLineCollection|null $orderLines
      * @param string|null $creator
      * @param string|null $transactionId
-     * @return \Resursbank\Ecom\Lib\Model\Payment
+     * @return Payment
      * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
