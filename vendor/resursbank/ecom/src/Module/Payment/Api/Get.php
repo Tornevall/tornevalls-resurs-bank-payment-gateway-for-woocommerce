@@ -66,6 +66,10 @@ class Get
             $data instanceof stdClass
         ) ? $data : new stdClass();
 
+        if (isset($content->metadata->custom) && $content->metadata->custom instanceof stdClass) {
+            $content->metadata->custom = (array) $content->metadata->custom;
+        }
+
         $result = DataConverter::stdClassToType(
             object: $content,
             type: Payment::class
