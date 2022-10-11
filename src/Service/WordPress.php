@@ -33,6 +33,8 @@ class WordPress
             return;
         }
 
+        // Make sure Ecom2 is loaded as soon as possible.
+        new ResursBankAPI();
         // Initialize adaptions.
         new ResursPlugin();
 
