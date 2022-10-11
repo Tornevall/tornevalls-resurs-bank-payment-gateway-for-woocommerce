@@ -311,7 +311,7 @@ class WooCommerce
             /** @noinspection HtmlUnknownTarget */
             $links[] = sprintf(
                 '<a href="%s?page=wc-settings&tab=%s&section=%s">%s</a>',
-                admin_url(),
+                admin_url('admin.php'),
                 Data::getPrefix('admin'),
                 $section,
                 __(
