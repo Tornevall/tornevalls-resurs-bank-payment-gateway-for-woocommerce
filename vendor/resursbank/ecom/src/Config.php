@@ -14,6 +14,7 @@ use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Locale\Locale;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Basic;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 
@@ -70,7 +71,7 @@ final class Config
      * @noinspection PhpTooManyParametersInspection
      */
     public static function setup(
-        LoggerInterface $logger,
+        LoggerInterface $logger = new NoneLogger(),
         CacheInterface $cache = new None(),
         Basic|null $basicAuth = null,
         Jwt|null $jwtAuth = null,
