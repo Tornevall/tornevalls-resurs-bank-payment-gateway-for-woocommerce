@@ -71,6 +71,7 @@ class Repository
                     throw new ApiException(message: 'Invalid API response.');
                 }
 
+                $result = self::setCollectionSortOrder($result);
                 $cache->write(data: $result);
             }
         } catch (Exception $e) {
@@ -80,6 +81,23 @@ class Repository
         }
 
         return $result;
+    }
+
+    /**
+     * Updates sort order of fetched payment methods.
+     *
+     * @param PaymentMethodCollection $collection
+     * @return PaymentMethodCollection
+     */
+    public static function setCollectionSortOrder(
+        PaymentMethodCollection $collection
+    ): PaymentMethodCollection {
+        /** @var PaymentMethod $method */
+        foreach ($collection as $method) {
+            $method->sortOrder = ((int) $collection->key() + 1) * 100;
+        }
+
+        return $collection;
     }
 
     /**
@@ -107,7 +125,8 @@ class Repository
      * @param string $storeId
      * @param float|null $amount
      * @return Get
-     * @throws IllegalValueException|IllegalTypeException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      */
     public static function getApi(
         string $storeId,

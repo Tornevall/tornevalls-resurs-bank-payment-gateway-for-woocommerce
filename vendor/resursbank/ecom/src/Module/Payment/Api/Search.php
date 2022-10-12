@@ -84,9 +84,9 @@ class Search
 
         $content = (
             $data instanceof stdClass &&
-            isset($data->results) &&
-            is_array(value: $data->results)
-        ) ? $data->results : [];
+            isset($data->content) &&
+            is_array(value: $data->content)
+        ) ? $data->content : [];
 
         $result = DataConverter::arrayToCollection(
             data: $content,
