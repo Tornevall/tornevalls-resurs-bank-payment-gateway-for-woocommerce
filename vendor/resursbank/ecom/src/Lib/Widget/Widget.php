@@ -32,7 +32,7 @@ class Widget
             );
         }
 
-        require_once($file);
+        require $file;
 
         return ob_get_clean();
     }

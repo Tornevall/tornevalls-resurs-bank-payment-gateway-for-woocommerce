@@ -11,8 +11,10 @@ namespace Resursbank\Ecom;
 
 use Resursbank\Ecom\Lib\Cache\CacheInterface;
 use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Locale\Locale;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Basic;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 
@@ -34,6 +36,7 @@ final class Config
      * @param string $proxy
      * @param int $proxyType
      * @param int $timeout
+     * @param Locale $locale
      * @todo Create a null cache driver, so there always is one, returns null always
      * @todo Create a null database driver, so there always is one, returns null always
      */
@@ -47,7 +50,8 @@ final class Config
         public readonly bool $isProduction = false,
         public readonly string $proxy = '',
         public readonly int $proxyType = 0,
-        public readonly int $timeout = 60
+        public readonly int $timeout = 60,
+        public readonly Locale $locale = Locale::en,
     ) {
     }
 
@@ -62,11 +66,12 @@ final class Config
      * @param string $proxy
      * @param int $proxyType
      * @param int $timeout
+     * @param Locale $locale
      * @return void
      * @noinspection PhpTooManyParametersInspection
      */
     public static function setup(
-        LoggerInterface $logger,
+        LoggerInterface $logger = new NoneLogger(),
         CacheInterface $cache = new None(),
         Basic|null $basicAuth = null,
         Jwt|null $jwtAuth = null,
@@ -75,7 +80,8 @@ final class Config
         bool $isProduction = false,
         string $proxy = '',
         int $proxyType = 0,
-        int $timeout = 0
+        int $timeout = 0,
+        Locale $locale = Locale::en,
     ): void {
         self::$instance = new Config(
             logger: $logger,
@@ -87,7 +93,8 @@ final class Config
             isProduction: $isProduction,
             proxy: $proxy,
             proxyType: $proxyType,
-            timeout: $timeout
+            timeout: $timeout,
+            locale: $locale
         );
     }
 
