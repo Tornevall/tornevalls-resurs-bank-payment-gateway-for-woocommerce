@@ -1361,10 +1361,10 @@ class WooCommerce
      * @return string
      * @since 0.0.1.9
      */
-    public static function getWcLogDir(): string
+    public static function getPluginLogDir(): string
     {
         /** @noinspection PhpUndefinedConstantInspection */
-        return preg_replace('/\/$/', '', WC_LOG_DIR);
+        return preg_replace('/\/$/', '', Data::getResursOption('log_dir'));
     }
 
     /**

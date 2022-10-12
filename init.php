@@ -16,6 +16,7 @@
  */
 
 use ResursBank\Module\Data;
+use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;

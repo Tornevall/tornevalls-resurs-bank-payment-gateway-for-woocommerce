@@ -134,8 +134,15 @@ class ResursBankAPI
             throw new WooCommerceException('Can not find WooCommerce in this platform.');
         }
 
+        if (file_exists(WooCommerce::getPluginLogDir())) {
+            $fileLogger = new FileLogger(WooCommerce::getPluginLogDir());
+        } else {
+            /** @noinspection PhpUndefinedConstantInspection */
+            $fileLogger = new FileLogger(preg_replace('/\/$/', '', WC_LOG_DIR));
+        }
+
         Config::setup(
-            logger: new FileLogger(path: WooCommerce::getWcLogDir()),
+            logger: $fileLogger,
             cache: new None(),
             jwtAuth: new Jwt(
                 clientId: $this->getClientId(),

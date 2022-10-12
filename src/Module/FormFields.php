@@ -733,6 +733,21 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
+                'log_dir' => [
+                    'id' => 'log_dir',
+                    'type' => 'checkbox',
+                    'title' => __(
+                        'Log path',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'desc_tip' => __(
+                        'To enable logging, you actively have to fill in the path for where you want to keep them. ' .
+                        'To avoid data leaks we suggest that this path not be accessible from the internet.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => 'yes',
+                ],
                 'must_obfuscate_logged_personal_data' => [
                     'id' => 'must_obfuscate_logged_personal_data',
                     'type' => 'checkbox',
