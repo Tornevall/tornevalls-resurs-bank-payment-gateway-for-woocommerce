@@ -16,4 +16,6 @@ use Exception;
  */
 class FilesystemException extends Exception
 {
+    public const CODE_FILE_MISSING = 1;
+    public const CODE_FILE_EMPTY = 2;
 }

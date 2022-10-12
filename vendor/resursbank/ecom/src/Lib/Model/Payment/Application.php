@@ -24,7 +24,7 @@ class Application extends Model
      */
     public function __construct(
         public readonly float $requestedCreditLimit,
-        public readonly int $approvedCreditLimit,
+        public readonly ?int $approvedCreditLimit = null,
         public readonly ?int $reference = null,
         public readonly ?CoApplicant $coApplicant = null,
     ) {

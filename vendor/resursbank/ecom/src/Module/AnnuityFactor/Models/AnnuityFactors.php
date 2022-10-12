@@ -17,10 +17,10 @@ use Resursbank\Ecom\Lib\Model\Model;
 class AnnuityFactors extends Model
 {
     /**
-     * @param AnnuityInformationCollection $annuityFactors
+     * @param AnnuityInformationCollection $content
      */
     public function __construct(
-        public readonly AnnuityInformationCollection $annuityFactors,
+        public readonly AnnuityInformationCollection $content,
     ) {
     }
 }
