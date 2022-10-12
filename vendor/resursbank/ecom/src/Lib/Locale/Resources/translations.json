@@ -1,0 +1,44 @@
+[
+  {
+    "id": "read-more",
+    "translation": {
+      "en": "Read More",
+      "sv": "Läs Mer"
+    }
+  },
+  {
+    "id": "name",
+    "translation": {
+      "en": "Name",
+      "sv": "Namn"
+    }
+  },
+  {
+    "id": "min-total",
+    "translation": {
+      "en": "Min. total",
+      "sv": "Min. total"
+    }
+  },
+  {
+    "id": "max-total",
+    "translation": {
+      "en": "Max. total",
+      "sv": "Max. total"
+    }
+  },
+  {
+    "id": "sort-order",
+    "translation": {
+      "en": "Sort order",
+      "sv": "Sortering"
+    }
+  },
+  {
+    "id": "no-payment-methods",
+    "translation": {
+      "en": "No payment methods.",
+      "sv": "Inga betalningsmetoder."
+    }
+  }
+]

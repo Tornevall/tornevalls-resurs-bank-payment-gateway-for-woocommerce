@@ -43,6 +43,7 @@ class MockSigner
         if (!$payment->taskRedirectionUrls) {
             throw new EmptyValueException(message: 'No redirection URL object found');
         }
+        sleep(2);
         $curl = new Curl(
             url: $payment->taskRedirectionUrls->customerUrl,
             requestMethod: RequestMethod::GET,
@@ -66,5 +67,6 @@ class MockSigner
             responseContentType: ContentType::RAW
         );
         $curl->exec();
+        sleep(2);
     }
 }
