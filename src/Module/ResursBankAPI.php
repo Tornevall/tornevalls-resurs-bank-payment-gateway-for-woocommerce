@@ -121,15 +121,16 @@ class ResursBankAPI
             return;
         }
 
+        // Default logs to no writer, in case we don't have a logger available.
+        $fileLogger = new NoneLogger();
+
+        // Check if the proper logger is available.
         if (file_exists(WooCommerce::getPluginLogDir())) {
             try {
                 $fileLogger = new FileLogger(WooCommerce::getPluginLogDir());
             } catch (FilesystemException $e) {
-                $fileLogger = new NoneLogger();
                 WordPress::setGenericError($e);
             }
-        } else {
-            $fileLogger = new NoneLogger();
         }
 
         if (empty(self::getClientId()) || empty(self::getClientSecret())) {

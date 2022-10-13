@@ -1579,7 +1579,7 @@ class Data
                 self::$logger->warning($message);
                 break;
             default:
-                self::$logger->notice($message);
+                self::$logger->info($message);
         }
     }
 
