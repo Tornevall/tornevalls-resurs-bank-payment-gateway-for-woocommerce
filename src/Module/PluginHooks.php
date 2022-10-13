@@ -8,6 +8,7 @@ namespace ResursBank\Module;
 
 use Automattic\WooCommerce\Admin\Overrides\Order;
 use Exception;
+use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Module\PaymentMethod\Enum\Type;
 use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod;
 use Resursbank\Ecommerce\Types\CheckoutType;
@@ -106,7 +107,7 @@ class PluginHooks
     public function updateOrderStatusEvent(int $orderId, string $status): void
     {
         // Vital information that should always be logged to confirm the action.
-        Data::setLogInfo(
+        Data::writeLogInfo(
             sprintf(
                 __(
                     'Passed %d through function %s with order status "%s" for extra handling.',
@@ -121,7 +122,7 @@ class PluginHooks
         // Copy & Paste.
         $currentOrder = new WC_Order($orderId);
         if (($currentOrder instanceof WC_Order) && $status === 'completed') {
-            Data::setLogInfo(
+            Data::writeLogInfo(
                 sprintf('Order %d is completed - executing payment_complete().', $orderId)
             );
             $currentOrder->payment_complete();
@@ -381,7 +382,7 @@ class PluginHooks
         /** @var array $order */
         $order = Data::getResursOrderIfExists($orderId);
         if (!empty($order) && isset($order['ecom'])) {
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     '%s: orderId=%s, oldSlug=%s, newSlug=%s',
@@ -883,7 +884,7 @@ class PluginHooks
                 )
             );
         } catch (Exception $e) {
-            Data::setLogException($e, __FUNCTION__);
+            Data::writeLogException($e, __FUNCTION__);
             $order['order']->add_order_note(
                 sprintf(
                     __(
@@ -909,7 +910,7 @@ class PluginHooks
      */
     public function updateOrderStatusByQueue(int $order): void
     {
-        Data::setLogNotice(
+        Data::writeLogNotice(
             sprintf(
                 '%s: %s',
                 __FUNCTION__,
@@ -927,7 +928,7 @@ class PluginHooks
 
             $status = WooCommerce::getOrderStatuses($statusId);
 
-            Data::setLogNotice(
+            Data::writeLogNotice(
                 sprintf(
                     __(
                         'Update order %s from queue requested: %s -> %s',
@@ -949,7 +950,7 @@ class PluginHooks
                 do_action('resurs_bank_order_status_update', $properOrder->get_id(), $status);
                 // Action for all new plugin versions.
                 WordPress::doAction('updateOrderStatusEvent', $properOrder->get_id(), $status);
-                Data::setLogNotice(
+                Data::writeLogNotice(
                     sprintf(
                         __(
                             'Queued Status Handler: Updated status for %s to %s.',
@@ -961,7 +962,7 @@ class PluginHooks
                 );
             } else {
                 // Must always log what happens in the queue.
-                Data::setLogNotice(
+                Data::writeLogNotice(
                     sprintf(
                         __(
                             'Queued Status Handler: Status for %s not updated to %s, because that ' .
@@ -974,7 +975,7 @@ class PluginHooks
                 );
             }
         } else {
-            Data::setLogNotice(
+            Data::writeLogNotice(
                 sprintf(
                     __(
                         'Queued Status Handler: Order %s was not properly queued.',
@@ -1013,7 +1014,7 @@ class PluginHooks
             try {
                 $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
             } catch (Exception $e) {
-                Data::setLogException($e, __FUNCTION__);
+                Data::writeLogException($e, __FUNCTION__);
                 $return = [
                     'default' => __(
                         'Payment Methods are currently unavailable!',
@@ -1055,8 +1056,8 @@ class PluginHooks
     private function getMockException($function)
     {
         $exceptionCode = 470;
-        Data::canLog(
-            Data::LOG_INFO,
+        Data::writeLogEvent(
+            LogLevel::INFO,
             sprintf(
                 __('Mocked Exception in action. Throwing MockException for function %s, with error code %d.'),
                 $function,
@@ -1196,8 +1197,8 @@ class PluginHooks
     public function setRcoDisabledWarning($filterIsActive)
     {
         if ($filterIsActive) {
-            Data::setLogInternal(
-                Data::LOG_WARNING,
+            Data::writeLogInternal(
+                LogLevel::WARNING,
                 sprintf(
                     __(
                         'The filter "%s" is currently put in an active state by an unknown third party plugin. This ' .

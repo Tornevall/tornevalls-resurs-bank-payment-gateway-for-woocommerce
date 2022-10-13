@@ -15,7 +15,7 @@ if (!function_exists('rbwc_get_option')) {
         string $key,
         string $namespace = '',
         bool $getDefaults = true
-    ) {
+    ): mixed {
         return Data::getResursOption(
             $key,
             $namespace,
@@ -68,7 +68,8 @@ if (!function_exists('rbwc_get_order_info')) {
      * @throws ResursException
      * @since 0.0.1.8
      */
-    function rbwc_get_order_info($order) {
+    function rbwc_get_order_info($order): mixed
+    {
         return Data::getOrderInfo($order);
     }
 }
@@ -95,7 +96,7 @@ if (!function_exists('rbwc_get_order_meta')) {
      * @throws ResursException
      * @since 0.0.1.8
      */
-    function rbwc_get_order_meta(string $key, $order)
+    function rbwc_get_order_meta(string $key, $order): mixed
     {
         return Data::getOrderMeta($key, $order);
     }
@@ -107,9 +108,9 @@ if (!function_exists('rbwc_log_info')) {
      * @return void
      * @since 0.0.1.8
      */
-    function rbwc_log_info(string $message)
+    function rbwc_log_info(string $message): void
     {
-        Data::setLogInfo($message);
+        Data::writeLogInfo($message);
     }
 }
 
@@ -119,9 +120,9 @@ if (!function_exists('rbwc_log_error')) {
      * @return void
      * @since 0.0.1.8
      */
-    function rbwc_log_error(string $logMessage)
+    function rbwc_log_error(string $logMessage): void
     {
-        Data::setLogError($logMessage);
+        Data::writeLogError($logMessage);
     }
 }
 
@@ -132,9 +133,9 @@ if (!function_exists('rbwc_log_exception')) {
      * @return void
      * @since 0.0.1.8
      */
-    function rbwc_log_exception(Exception $exception, string $fromFunction = '')
+    function rbwc_log_exception(Exception $exception, string $fromFunction = ''): void
     {
-        Data::setLogException($exception, $fromFunction);
+        Data::writeLogException($exception, $fromFunction);
     }
 }
 
@@ -145,7 +146,8 @@ if (!function_exists('rbwc_apply_mock')) {
      * @return mixed|null
      * @since 0.0.1.8
      */
-    function rbwc_apply_mock($mock) {
+    function rbwc_apply_mock($mock): mixed
+    {
         return WooCommerce::applyMock($mock);
     }
 }

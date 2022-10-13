@@ -6,6 +6,9 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Lib\Log\LoggerInterface;
+use Resursbank\Ecom\Lib\Log\LogLevel;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
@@ -44,42 +47,6 @@ class Data
      * @since 0.0.1.4
      */
     const UNSET_CREDENTIALS_EXCEPTION = 4444;
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    const LOG_INFO = 'info';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    const LOG_DEBUG = 'debug';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    const LOG_NOTICE = 'notice';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    const LOG_CRITICAL = 'critical';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    const LOG_ERROR = 'error';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    const LOG_WARNING = 'warning';
 
     /**
      * @var string
@@ -130,10 +97,10 @@ class Data
     ];
 
     /**
-     * @var WC_Logger $Log
+     * @var LoggerInterface $logger
      * @since 0.0.1.0
      */
-    private static $Log;
+    private static LoggerInterface $logger;
 
     /**
      * @var array $payments
@@ -1458,11 +1425,11 @@ class Data
                 $prefetchObject = WooCommerce::getPaymentInfoDetails($prefetchObject);
             }
         } catch (Exception $e) {
-            self::canLog(
+            self::writeLogEvent(
                 self::CAN_LOG_ORDER_EVENTS,
                 sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
             );
-            self::setLogException($e, __FUNCTION__);
+            self::writeLogException($e, __FUNCTION__);
             $prefetchObject['ecomException'] = [
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),
@@ -1508,7 +1475,7 @@ class Data
                 $prefetchObject['resurs'] === $prefetchObject['resurs_secondary'] ? null : $prefetchObject['resurs_secondary']
             );
         } catch (Exception $externalGetpaymentException) {
-            self::setLogException(
+            self::writeLogException(
                 $externalGetpaymentException,
                 sprintf('%s_filtered_get_payment', __FUNCTION__)
             );
@@ -1522,7 +1489,7 @@ class Data
      * @param Exception $exception
      * @since 0.0.1.0
      */
-    public static function setLogException($exception, $fromFunction = '')
+    public static function writeLogException(Exception $exception, string $fromFunction = ''): void
     {
         if (!isset($_SESSION[self::getPrefix()])) {
             $_SESSION[self::getPrefix()]['exception'] = [];
@@ -1534,7 +1501,7 @@ class Data
                 '%s internal generic exception %s from function %s: %s --- File %s, line %s.',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
-            self::setLogError(
+            self::writeLogError(
                 sprintf(
                     $logMessage,
                     self::getPrefix(),
@@ -1550,7 +1517,7 @@ class Data
                 '%s internal generic exception %s: %s --- File %s, line %s.',
                 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
             );
-            self::setLogError(
+            self::writeLogError(
                 sprintf(
                     $logMessage,
                     self::getPrefix(),
@@ -1564,54 +1531,55 @@ class Data
     }
 
     /**
-     * @param $logMessage
+     * @param string $logMessage
      * @since 0.0.1.0
      */
-    public static function setLogError($logMessage)
+    public static function writeLogError(string $logMessage): void
     {
-        self::setLogInternal(
-            self::LOG_ERROR,
+        self::writeLogInternal(
+            LogLevel::ERROR,
             $logMessage
         );
     }
 
     /**
-     * @param $severity
-     * @param $logMessage
+     * @param LogLevel $logLevel
+     * @param string $logMessage
      * @since 0.0.1.0
      */
-    public static function setLogInternal($severity, $logMessage)
+    public static function writeLogInternal(LogLevel $logLevel, string $logMessage): void
     {
-        // If WooComemrce has not WC_Logger instance ready, skip logging.
-        if (!class_exists('WC_Logger')) {
+        if (empty(WooCommerce::getPluginLogDir())) {
+            // We no longer use WC_Log but a more safe way to write logs that should not be exposed
+            // to the public.
             return;
         }
-        if (empty(self::$Log)) {
-            self::$Log = new WC_Logger();
+
+        if (empty(self::$logger)) {
+            self::$logger = Config::$instance->logger;
         }
 
-        $prefix = sprintf('%s_%s', self::getPrefix(), $severity);
-        $from = $_SERVER['REMOTE_ADDR'] ?? 'Console';
-        $message = sprintf('%s (%s): %s', $prefix, $from, $logMessage);
+        $message = sprintf(
+            '%s: %s',
+            $_SERVER['REMOTE_ADDR'] ?? 'Console',
+            $logMessage
+        );
 
-        switch ($severity) {
-            case 'info':
-                self::$Log->info($message);
+        switch ($logLevel) {
+            case LogLevel::INFO:
+                self::$logger->info($message);
                 break;
-            case 'debug':
-                self::$Log->debug($message);
+            case LogLevel::DEBUG:
+                self::$logger->debug($message);
                 break;
-            case 'critical':
-                self::$Log->critical($message);
+            case LogLevel::ERROR:
+                self::$logger->error($message);
                 break;
-            case 'error':
-                self::$Log->error($message);
-                break;
-            case 'warning':
-                self::$Log->warning($message);
+            case LogLevel::WARNING:
+                self::$logger->warning($message);
                 break;
             default:
-                self::$Log->notice($message);
+                self::$logger->notice($message);
         }
     }
 
@@ -1712,12 +1680,13 @@ class Data
     }
 
     /**
+     * Check if severity level is allowed before writing to log.
      * @param $eventType
      * @param $logData
      * @return bool
      * @since 0.0.1.0
      */
-    public static function canLog($eventType, $logData): bool
+    public static function writeLogEvent($eventType, $logData): bool
     {
         $return = false;
 
@@ -1730,21 +1699,21 @@ class Data
 
         if (self::$can[$eventType]) {
             $return = true;
-            self::setLogInfo($logData);
+            self::writeLogInfo($logData);
         }
 
         return $return;
     }
 
     /**
-     * @param $logMessage
+     * @param string $logMessage
      * @since 0.0.1.0
      */
-    public static function setLogInfo($logMessage)
+    public static function writeLogInfo(string $logMessage): void
     {
-        self::setLogInternal(
-            self::LOG_INFO,
-            $logMessage
+        self::writeLogInternal(
+            logLevel:LogLevel::INFO,
+            logMessage: $logMessage
         );
     }
 
@@ -2314,7 +2283,7 @@ class Data
         }
 
         if ($dataEncryptionState instanceof Exception) {
-            self::setLogNotice(
+            self::writeLogNotice(
                 sprintf(
                     __(
                         '%s failed encryption (%d): %s. Failover to base64.',
@@ -2362,10 +2331,10 @@ class Data
      * @param $logMessage
      * @since 0.0.1.0
      */
-    public static function setLogNotice($logMessage)
+    public static function writeLogNotice($logMessage)
     {
-        self::setLogInternal(
-            self::LOG_NOTICE,
+        self::writeLogInternal(
+            LogLevel::INFO,
             $logMessage
         );
     }
@@ -2444,7 +2413,7 @@ class Data
                     $return = $crypt->aesDecrypt($data);
                 }
             } catch (Exception $e) {
-                self::setLogException($e, __FUNCTION__);
+                self::writeLogException($e, __FUNCTION__);
                 $return = (new Strings())->base64urlDecode($data);
             }
         }
@@ -2471,7 +2440,7 @@ class Data
      */
     public static function setDeveloperLog($fromFunction, $message): bool
     {
-        return self::canLog(
+        return self::writeLogEvent(
             self::CAN_LOG_ORDER_DEVELOPER,
             sprintf(
                 __(
@@ -2528,7 +2497,7 @@ class Data
         }
 
         if (isset($orderId)) {
-            self::canLog(
+            self::writeLogEvent(
                 self::CAN_LOG_JUNK,
                 sprintf(
                     '%s (%s): %s=%s (protected=%s).',
@@ -2749,7 +2718,7 @@ class Data
                 }
             }
         } else {
-            self::setLogError(
+            self::writeLogError(
                 'Someone sent other data than arrays into the sanitizer!'
             );
             throw new RuntimeException('Can not sanitize other data than arrays!', 500);
@@ -2929,8 +2898,10 @@ class Data
      * string, since the logging feature seems unable to handle utf8-transforming properly..
      *
      * @param $obfuscateThis
+     * @param string $keyStart
      * @return array
      * @since 0.0.1.1
+     * @todo Adapt this into the new ecom2 methods.
      */
     public static function getObfuscatedData($obfuscateThis, string $keyStart = 'rco_customer'): array
     {
