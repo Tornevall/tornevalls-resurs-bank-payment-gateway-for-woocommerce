@@ -123,7 +123,7 @@ class OrderMetaBox
                 !empty($login) &&
                 Data::getResursOption('store_api_history') &&
                 !Data::getOrderMeta('orderapi', $orderData['order'])) {
-                Data::writeLogInternal(
+                Data::writeLogByLogLevel(
                     LogLevel::INFO,
                     sprintf(
                         __(

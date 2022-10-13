@@ -812,7 +812,7 @@ class WooCommerce
 
             $cbUri = $_SERVER['REQUEST_URI'] ?: '';
             if (!empty($cbUri)) {
-                Data::writeLogInternal(
+                Data::writeLogByLogLevel(
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf('Callback received by URI: %s', $cbUri)
                 );

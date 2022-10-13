@@ -1197,7 +1197,7 @@ class PluginHooks
     public function setRcoDisabledWarning($filterIsActive)
     {
         if ($filterIsActive) {
-            Data::writeLogInternal(
+            Data::writeLogByLogLevel(
                 LogLevel::WARNING,
                 sprintf(
                     __(

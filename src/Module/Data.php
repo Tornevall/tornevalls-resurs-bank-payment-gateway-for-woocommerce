@@ -1536,7 +1536,7 @@ class Data
      */
     public static function writeLogError(string $logMessage): void
     {
-        self::writeLogInternal(
+        self::writeLogByLogLevel(
             LogLevel::ERROR,
             $logMessage
         );
@@ -1547,7 +1547,7 @@ class Data
      * @param string $logMessage
      * @since 0.0.1.0
      */
-    public static function writeLogInternal(LogLevel $logLevel, string $logMessage): void
+    public static function writeLogByLogLevel(LogLevel $logLevel, string $logMessage): void
     {
         if (empty(WooCommerce::getPluginLogDir())) {
             // We no longer use WC_Log but a more safe way to write logs that should not be exposed
@@ -1711,7 +1711,7 @@ class Data
      */
     public static function writeLogInfo(string $logMessage): void
     {
-        self::writeLogInternal(
+        self::writeLogByLogLevel(
             logLevel:LogLevel::INFO,
             logMessage: $logMessage
         );
@@ -2333,7 +2333,7 @@ class Data
      */
     public static function writeLogNotice($logMessage)
     {
-        self::writeLogInternal(
+        self::writeLogByLogLevel(
             LogLevel::INFO,
             $logMessage
         );
