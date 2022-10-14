@@ -134,16 +134,16 @@ class ResursBankAPI
             throw new WooCommerceException('Can not find WooCommerce in this platform.');
         }
 
-        Config::setup(
-            logger: new FileLogger(path: WooCommerce::getWcLogDir()),
-            cache: new None(),
-            jwtAuth: new Jwt(
-                clientId: $this->getClientId(),
-                clientSecret: $this->getClientSecret(),
-                scope: $scope,
-                grantType: $grantType
-            )
-        );
+//        Config::setup(
+//            logger: new FileLogger(path: WooCommerce::getWcLogDir()),
+//            cache: new None(),
+//            jwtAuth: new Jwt(
+//                clientId: $this->getClientId(),
+//                clientSecret: $this->getClientSecret(),
+//                scope: $scope,
+//                grantType: $grantType
+//            )
+//        );
     }
 
     /**

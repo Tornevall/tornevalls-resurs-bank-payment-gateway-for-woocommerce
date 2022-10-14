@@ -3,8 +3,15 @@
 namespace ResursBank\Service;
 
 use Exception;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Log\FileLogger;
+use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use Resursbank\Woocommerce\Database\Options\ClientId;
+use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use RuntimeException;
@@ -16,7 +23,7 @@ use function func_get_args;
 use function is_array;
 
 /**
- * Class WordPress WordPress related actions.
+ * Class WordPress related actions.
  *
  * @package ResursBank
  * @since 0.0.1.0
@@ -36,15 +43,26 @@ class WordPress
         // Initialize adaptions.
         new ResursPlugin();
 
+        Config::setup(
+            logger: new FileLogger(path: WooCommerce::getWcLogDir()),
+            cache: new None(),
+            jwtAuth: new Jwt(
+                clientId: ClientId::getData(),
+                clientSecret: ClientSecret::getData(),
+                scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
+                grantType: 'client_credentials',
+            )
+        );
+
         // Always initialize defaults once on plugin loaded (performance saver).
-        Data::getDefaultsInit();
+//         Data::getDefaultsInit();
         self::setupAjaxActions();
         self::setupFilters();
         self::setupScripts();
         self::setupActions();
         self::setupWoocommerceAdminActions();
         self::setupWoocommerceCheckoutActions();
-        WordPress::doAction('isLoaded', true);
+        self::doAction('isLoaded', true);
     }
 
     /**

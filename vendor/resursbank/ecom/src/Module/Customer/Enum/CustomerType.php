@@ -14,6 +14,6 @@ namespace Resursbank\Ecom\Module\Customer\Enum;
  */
 enum CustomerType: string
 {
-    const NATURAL = 'NATURAL';
-    const LEGAL = 'LEGAL';
+    case NATURAL = 'NATURAL';
+    case LEGAL = 'LEGAL';
 }

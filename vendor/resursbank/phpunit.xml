@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit bootstrap="src/vendor/autoload.php" colors="true" verbose="true" stopOnFailure="false">
+    <testsuites>
+        <testsuite name="ecom2_unit">
+            <directory>src/tests/Unit</directory>
+        </testsuite>
+        <testsuite name="ecom2_integration">
+            <directory>src/tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="NATIONAL_STORE_ID" value="8927" force="true" />
+        <env name="SKIP_PROXY_TESTS" value="false" force="true" />
+        <env name="IS_PIPELINE" value="false" force="true" />
+        <env name="BASIC_AUTH_USERNAME" value="pesj_mapi" force="true" />
+        <env name="BASIC_AUTH_PASSWORD" value="resurs123" force="true" />
+        <env name="JWT_AUTH_CLIENT_ID" value="pesj_mapi" force="true" />
+        <env name="JWT_AUTH_CLIENT_SECRET" value="resurs123" force="true" />
+        <env name="JWT_AUTH_SCOPE" value="mock-merchant-api" force="true" />
+        <env name="JWT_AUTH_GRANT_TYPE" value="client_credentials" force="true" />
+        <env name="REDIS_HOST" value="redis" force="true" />
+        <env name="STORE_ID" value="45e0a591-4365-414e-82dc-5fc5eafe95ff" force="true" />
+        <env name="PAYMENT_METHOD_ID" value="07df8603-1fd0-48fc-b17a-cb538ccaede4" force="true" />
+        <env name="ANNUITY_PAYMENT_METHOD_ID" value="42ddcc32-d70a-4e34-806e-5331e6fa0dd2" force="true" />
+        <env name="GOVERNMENT_ID_HAPPY_NATURAL" value="198305147715" force="true" />
+    </php>
+</phpunit>

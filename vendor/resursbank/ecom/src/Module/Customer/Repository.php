@@ -44,12 +44,11 @@ class Repository
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
-     * @todo Use CustomerType-enum instead of string.
      */
     public static function getAddress(
         string $storeId,
         string $governmentId,
-        string $customerType,
+        CustomerType $customerType,
         GetAddress $api = new GetAddress()
     ): Address {
         try {
