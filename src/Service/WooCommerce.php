@@ -1341,7 +1341,7 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getSessionValue($key)
+    public static function getSessionValue($key): mixed
     {
         $return = null;
         $session = Data::getSanitizedArray(isset($_SESSION) ? $_SESSION : []);
@@ -1365,7 +1365,7 @@ class WooCommerce
     {
         $pluginLogDir = preg_replace('/\/$/', '', Data::getResursOption('log_dir'));
 
-        return file_exists($pluginLogDir) ? $pluginLogDir : '';
+        return is_dir($pluginLogDir) ? $pluginLogDir : '';
     }
 
     /**

@@ -211,20 +211,6 @@ class FormFields extends WC_Settings_API
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                 ],
-                'log_dir' => [
-                    'id' => 'log_dir',
-                    'type' => 'text',
-                    'title' => __(
-                        'Log path',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'desc' => __(
-                        'To enable logging, you actively have to fill in the path for where you want to keep them. ' .
-                        'To avoid data leaks we suggest that this path not be accessible from the internet.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => '',
-                ],
                 'extended_test_mode' => [
                     'id' => 'extended_test_mode',
                     'title' => __(
@@ -746,6 +732,20 @@ class FormFields extends WC_Settings_API
                         'you can choose the extras you want to see in your logs.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
+                ],
+                'log_dir' => [
+                    'id' => 'log_dir',
+                    'type' => 'text',
+                    'title' => __(
+                        'Log path',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __(
+                        'To enable logging, you actively have to fill in the path for where you want to keep them. ' .
+                        'To avoid data leaks we suggest that this path not be accessible from the internet.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => '',
                 ],
                 'must_obfuscate_logged_personal_data' => [
                     'id' => 'must_obfuscate_logged_personal_data',

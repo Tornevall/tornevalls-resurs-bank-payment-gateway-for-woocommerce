@@ -1547,7 +1547,7 @@ class Data
      * @param string $logMessage
      * @since 0.0.1.0
      */
-    public static function writeLogByLogLevel(LogLevel $logLevel, string $logMessage): void
+    public static function writeLogByLogLevel(LogLevel $logLevel, string $message): void
     {
         if (empty(WooCommerce::getPluginLogDir())) {
             // We no longer use WC_Log but a more safe way to write logs that should not be exposed
@@ -1558,12 +1558,6 @@ class Data
         if (empty(self::$logger)) {
             self::$logger = Config::$instance->logger;
         }
-
-        $message = sprintf(
-            '%s: %s',
-            $_SERVER['REMOTE_ADDR'] ?? 'Console',
-            $logMessage
-        );
 
         switch ($logLevel) {
             case LogLevel::INFO:
@@ -1713,7 +1707,7 @@ class Data
     {
         self::writeLogByLogLevel(
             logLevel:LogLevel::INFO,
-            logMessage: $logMessage
+            message: $logMessage
         );
     }
 

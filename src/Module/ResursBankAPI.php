@@ -125,7 +125,7 @@ class ResursBankAPI
         $fileLogger = new NoneLogger();
 
         // Check if the proper logger is available.
-        if (file_exists(WooCommerce::getPluginLogDir())) {
+        if (WooCommerce::getPluginLogDir()) {
             try {
                 $fileLogger = new FileLogger(WooCommerce::getPluginLogDir());
             } catch (FilesystemException $e) {
