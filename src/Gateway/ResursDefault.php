@@ -10,6 +10,7 @@ namespace ResursBank\Gateway;
 
 use Exception;
 use JsonException;
+use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
@@ -490,7 +491,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $return = $internalPaymentTitle;
                 }
             } catch (Exception $e) {
-                Data::setLogException($e, __FUNCTION__);
+                Data::writeLogException($e, __FUNCTION__);
             }
         }
 
@@ -545,7 +546,7 @@ class ResursDefault extends WC_Payment_Gateway
                         }
                     }
                 } catch (Exception $e) {
-                    Data::setLogException($e, __FUNCTION__);
+                    Data::writeLogException($e, __FUNCTION__);
                 }
             }
         }
@@ -591,7 +592,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             } catch (Exception $e) {
                 Data::setTimeoutStatus($this->API->getConnection());
-                Data::canLog(
+                Data::writeLogEvent(
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf(
                         __(
@@ -702,7 +703,7 @@ class ResursDefault extends WC_Payment_Gateway
         $govIdData = $customerType === 'NATURAL' ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
                 '%s: govIdData %s',
@@ -758,7 +759,7 @@ class ResursDefault extends WC_Payment_Gateway
             $return = sprintf('%s %s', $this->getCustomerData('first_name'), $this->getCustomerData('last_name'));
         }
 
-        Data::canLog(Data::CAN_LOG_JUNK, sprintf('%s:%s,%s', __FUNCTION__, $key, $return));
+        Data::writeLogEvent(Data::CAN_LOG_JUNK, sprintf('%s:%s,%s', __FUNCTION__, $key, $return));
 
         return (string)$return;
     }
@@ -805,7 +806,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setLoggedSigningUrl($type, $url)
     {
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
                 '%s %s',
@@ -940,7 +941,7 @@ class ResursDefault extends WC_Payment_Gateway
             $orderHandler->setPreparedOrderLines();
             $this->API = $orderHandler->getApi();
 
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     '%s',
@@ -948,7 +949,7 @@ class ResursDefault extends WC_Payment_Gateway
                 )
             );
         } else {
-            Data::setLogError(
+            Data::writeLogError(
                 sprintf(
                     __(
                         '%s: Could not create order from an empty cart.',
@@ -977,7 +978,7 @@ class ResursDefault extends WC_Payment_Gateway
         $deprecatedStoreId = WordPress::applyFiltersDeprecated('set_storeid', null);
         $storeId = WordPress::applyFilters('setStoreId', $deprecatedStoreId);
         if (!empty($storeId)) {
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     '%s: %s',
@@ -1002,7 +1003,7 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $customerId = $this->getCustomerId();
         if ($customerId) {
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     '%s: %s',
@@ -1096,7 +1097,7 @@ class ResursDefault extends WC_Payment_Gateway
             $paymentId = $lastRcoOrderId;
             $this->API->getConnection()->setPreferredId($paymentId);
 
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     __(
@@ -1109,7 +1110,7 @@ class ResursDefault extends WC_Payment_Gateway
             );
         } else {
             WooCommerce::setSessionValue('rco_order_id_age', time());
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     __(
@@ -1588,7 +1589,7 @@ class ResursDefault extends WC_Payment_Gateway
             // still in the API call. This data becomes reachable as soon as WooCommerce gives us this
             // through here.
             $sessionCheckoutType = WooCommerce::getSessionValue('resursCheckoutType');
-            Data::setLogNotice(
+            Data::writeLogNotice(
                 __(
                     sprintf(
                         'Checkout type in order meta is empty, but found in session as %s. This usually ' .
@@ -1713,7 +1714,7 @@ class ResursDefault extends WC_Payment_Gateway
                     }
                 } catch (Exception $e) {
                     Data::setTimeoutStatus(ResursBankAPI::getResurs());
-                    Data::setLogNotice(
+                    Data::writeLogNotice(
                         sprintf(
                             'updatePaymentReference failed: %s (code %s).',
                             $e->getMessage(),
@@ -1784,7 +1785,7 @@ class ResursDefault extends WC_Payment_Gateway
                 // Automatically process orders with a checkout type that is supported by this plugin.
                 // Checkout types will become available as the method starts to exist.
 
-                Data::canLog(
+                Data::writeLogEvent(
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf(
                         __(
@@ -1800,7 +1801,7 @@ class ResursDefault extends WC_Payment_Gateway
 
                 $return = $this->{$checkoutRequestType}($order);
             } else {
-                Data::setLogError(
+                Data::writeLogError(
                     sprintf(
                         'Merchant is trying to run this plugin with an unsupported checkout type (%s).',
                         $checkoutRequestType
@@ -1829,7 +1830,7 @@ class ResursDefault extends WC_Payment_Gateway
         // [result => success|failure, redirect => url]
 
         if (is_array($return) && count($return)) {
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     __(
@@ -1842,7 +1843,7 @@ class ResursDefault extends WC_Payment_Gateway
                 )
             );
         } else {
-            Data::setLogError(
+            Data::writeLogError(
                 sprintf(
                     __(
                         '$return is not an object as expected in function %s (Checkout request type is %s).',
@@ -1888,7 +1889,7 @@ class ResursDefault extends WC_Payment_Gateway
             $this->order = $this->getCurrentOrder();
             $this->apiData['isReturningCustomer'] = false;
 
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     __('API data request: %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
@@ -1933,7 +1934,7 @@ class ResursDefault extends WC_Payment_Gateway
                         if ($signingRedirectTime) {
                             $finalRedirectUrl = $this->get_return_url($this->order);
                         } elseif ($finalSigningResponse['result'] === 'success') {
-                            Data::setLogInfo('Final Signing Response was reported success, but redirect triggered too fast.');
+                            Data::writeLogInfo('Final Signing Response was reported success, but redirect triggered too fast.');
                             // Race conditions could happen when redirects are too fast.
                             $finalRedirectUrl = $this->get_return_url($this->order);
                         }
@@ -1942,7 +1943,7 @@ class ResursDefault extends WC_Payment_Gateway
                     case self::TYPE_RCO:
                         // Logging for specific flow.
                         if ($this->getCheckoutType() === self::TYPE_RCO) {
-                            Data::canLog(
+                            Data::writeLogEvent(
                                 Data::CAN_LOG_ORDER_EVENTS,
                                 __(
                                     'Session value rco_order_id has been reset after successful ' .
@@ -1970,7 +1971,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $cancelNote = $this->getCancelNotice($signing);
                 // For the sake of logging, we'll also add that note to the logged to keep them collected for
                 // debugging.
-                Data::canLog(Data::CAN_LOG_ORDER_EVENTS, $cancelNote);
+                Data::writeLogEvent(Data::CAN_LOG_ORDER_EVENTS, $cancelNote);
                 // Now that we have all necessary data, we'll cancelling the order.
                 $this->updateOrderStatus(
                     self::STATUS_CANCELLED,
@@ -1981,7 +1982,7 @@ class ResursDefault extends WC_Payment_Gateway
             }
         }
 
-        Data::setLogInfo(
+        Data::writeLogInfo(
             sprintf(
                 __(
                     'Finishing. Ready to redirect customer. Using URL %s',
@@ -2108,8 +2109,8 @@ class ResursDefault extends WC_Payment_Gateway
                         ),
                         $this->order->get_id()
                     );
-                    Data::canLog(
-                        Data::LOG_NOTICE,
+                    Data::writeLogEvent(
+                        LogLevel::INFO,
                         $quickLandResponse
                     );
                     $this->order->add_order_note(
@@ -2130,7 +2131,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->setFinalSigningProblemNotes($lastExceptionCode);
             }
         } catch (Exception $bookSignedException) {
-            Data::setLogException($bookSignedException, __FUNCTION__);
+            Data::writeLogException($bookSignedException, __FUNCTION__);
             Data::setTimeoutStatus($this->API->getConnection());
             $this->setFinalSigningExceptionNotes($bookSignedException);
         }
@@ -2164,7 +2165,7 @@ class ResursDefault extends WC_Payment_Gateway
             ),
             $bookSignedOrderReference
         );
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             $customerSignedMessage
         );
@@ -2182,7 +2183,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function getResultByPaymentStatus()
     {
         $bookPaymentStatus = $this->getBookPaymentStatus();
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
                 '%s bookPaymentStatus order %s:%s',
@@ -2349,7 +2350,7 @@ class ResursDefault extends WC_Payment_Gateway
                     $this->order,
                     $orderStatusUpdateNotice
                 );
-                Data::setLogNotice($orderStatusUpdateNotice);
+                Data::writeLogNotice($orderStatusUpdateNotice);
             }
         }
 
@@ -2419,7 +2420,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $lastExceptionCode
             )
         );
-        Data::setLogNotice(
+        Data::writeLogNotice(
             sprintf(
                 __(
                     'Tried to book signed payment but skipped: This has happened before and an ' .
@@ -2438,7 +2439,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setFinalSigningExceptionNotes($bookSignedException)
     {
-        Data::setLogException($bookSignedException, __FUNCTION__);
+        Data::writeLogException($bookSignedException, __FUNCTION__);
         Data::setOrderMeta(
             $this->order,
             'bookSignedPaymentExceptionCode',
@@ -2552,7 +2553,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         // Section #3: Log, handle and return response
         Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->getBookPaymentStatus());
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
                 '%s: %s:bookPaymentStatus:%s, signingUrl: %s',
@@ -2599,7 +2600,7 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->paymentResponse);
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
                 '%s: %s:bookPaymentStatus:hosted:%s',

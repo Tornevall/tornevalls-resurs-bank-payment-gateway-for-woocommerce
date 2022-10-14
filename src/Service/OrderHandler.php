@@ -261,7 +261,7 @@ class OrderHandler extends ResursDefault
             );
             $order->add_order_note($syncNotice);
             Data::setOrderMeta($order, 'customerSynchronization', date('Y-m-d H:i:s', time()));
-            Data::setLogNotice($syncNotice);
+            Data::writeLogNotice($syncNotice);
         }
 
         return $return;

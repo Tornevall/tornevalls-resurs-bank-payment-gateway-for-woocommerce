@@ -3,12 +3,14 @@
 namespace ResursBank\Service;
 
 use Exception;
+use Resursbank\Ecom\Config;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
+use WC_Logger;
 use WP_Post;
 use function count;
 use function defined;
@@ -329,7 +331,7 @@ class WordPress
                 WooCommerce::testRequiredVersion(false);
             }
         } catch (Exception $e) {
-            Data::setLogException($e, __FUNCTION__);
+            Data::writeLogException($e, __FUNCTION__);
             echo Data::getEscapedHtml(
                 Data::getGenericClass()->getTemplate(
                     'adminpage_woocommerce_requirement',
@@ -381,7 +383,12 @@ class WordPress
      */
     public static function setGenericError($exception)
     {
-        Data::setLogException($exception);
+        if (!isset(Config::$instance)) {
+            // Critical errors where ecom can not log must be logged somewhere.
+            (new WC_Logger())->critical(
+                'Resurs Bank Critical: ' . $exception->getMessage()
+            );
+        }
         if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
             $_SESSION[Data::getPrefix()]['exception'] = [];
         }
@@ -623,6 +630,7 @@ class WordPress
      * @param $scriptName
      * @param $isAdmin
      * @return array
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function getLocalizationData($scriptName, $isAdmin): array
@@ -790,7 +798,7 @@ class WordPress
      */
     public static function applyFilters($filterName, $value)
     {
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_JUNK,
             sprintf(
                 __(
@@ -846,11 +854,11 @@ class WordPress
         );
         $return['checkout_fields'] = FormFields::getFieldString();
         try {
-            $getAddressFieldController = WordPress::getAddressFieldController();
+            if (!is_admin()) {
+                $return['getAddressFieldController'] = !is_admin() && Data::hasCredentials() ? WordPress::getAddressFieldController() : [];
+            }
         } catch (Exception) {
-            $getAddressFieldController = [];
         }
-        $return['getAddressFieldController'] = Data::hasCredentials() ? $getAddressFieldController : [];
         $return['checkoutType'] = Data::getCheckoutType();
 
         $return['switchToLegal'] = WordPress::applyFilters(

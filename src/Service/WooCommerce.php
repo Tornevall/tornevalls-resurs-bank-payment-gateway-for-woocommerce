@@ -155,7 +155,7 @@ class WooCommerce
                 $gateways[] = $gatewayClass;
             }
         } catch (Exception $e) {
-            Data::setLogException($e, __FUNCTION__);
+            Data::writeLogException($e, __FUNCTION__);
         }
 
         return $gateways;
@@ -245,7 +245,7 @@ class WooCommerce
             if ($customerCountry !== get_option('woocommerce_default_country')) {
                 if (WooCommerce::getValidCart()) {
                     // This log should only apply when there is a customer going somewhere.
-                    Data::canLog(
+                    Data::writeLogEvent(
                         Data::CAN_LOG_ORDER_EVENTS,
                         sprintf(
                             __(
@@ -688,7 +688,7 @@ class WooCommerce
      */
     private static function setCustomerCheckoutLocation($customerIsInCheckout)
     {
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_JUNK,
             sprintf(
                 __(
@@ -709,7 +709,7 @@ class WooCommerce
      */
     public static function setSessionValue($key, $value)
     {
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_JUNK,
             sprintf(
                 '%s, %s=%s',
@@ -781,7 +781,7 @@ class WooCommerce
         $logNotice = self::getCallbackLogNotice($getConfirmedSalt);
 
         // This should be both logged as entries and in order.
-        Data::setLogNotice($logNotice);
+        Data::writeLogNotice($logNotice);
         $callbackType = Data::getRequest('c');
         $replyArray = [
             'aliveConfirm' => true,
@@ -812,7 +812,7 @@ class WooCommerce
 
             $cbUri = $_SERVER['REQUEST_URI'] ?: '';
             if (!empty($cbUri)) {
-                Data::setLogInternal(
+                Data::writeLogByLogLevel(
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf('Callback received by URI: %s', $cbUri)
                 );
@@ -843,7 +843,7 @@ class WooCommerce
                     'code' => $code,
                     'message' => $e->getMessage(),
                 ];
-                Data::setLogException($e, __FUNCTION__);
+                Data::writeLogException($e, __FUNCTION__);
             }
 
             if (!$callbackEarlyFailure) {
@@ -863,7 +863,7 @@ class WooCommerce
                     } catch (Exception $e) {
                         $code = $e->getCode();
                         $responseString = $e->getMessage();
-                        Data::setLogException($e, __FUNCTION__);
+                        Data::writeLogException($e, __FUNCTION__);
                     }
                 } else {
                     // Reaching here means something went wrong.
@@ -884,7 +884,7 @@ class WooCommerce
                             $responseString = 'Order is not ours, but it is still accepted.';
                         }
                     }
-                    Data::canLog(
+                    Data::writeLogEvent(
                         Data::CAN_LOG_ORDER_EVENTS,
                         sprintf(
                             __(
@@ -910,14 +910,14 @@ class WooCommerce
             Data::setResursOption('resurs_callback_test_start', null);
             $code = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
 
-            Data::setLogNotice('Callback TEST OK.');
+            Data::writeLogNotice('Callback TEST OK.');
 
             // There are not digest codes available in this state so we should throw the callback handler
             // a success regardless.
             $replyArray['digestCode'] = OrderStatusHandler::HTTP_RESPONSE_TEST_OK;
         }
 
-        Data::setLogNotice(
+        Data::writeLogNotice(
             sprintf(
                 __(
                     'Callback %s for %s received.',
@@ -1003,7 +1003,7 @@ class WooCommerce
 
         $properOrder = self::getProperOrder($order, 'order');
         if (method_exists($properOrder, 'get_id') && $properOrder->get_id()) {
-            Data::canLog(
+            Data::writeLogEvent(
                 Data::CAN_LOG_ORDER_EVENTS,
                 sprintf(
                     __(
@@ -1050,7 +1050,7 @@ class WooCommerce
         }
 
         if ($log) {
-            Data::setLogNotice(
+            Data::writeLogNotice(
                 sprintf(
                     __(
                         'getProperOrder for %s (as %s).',
@@ -1089,7 +1089,7 @@ class WooCommerce
     private static function getHandledCallbackNullOrder($order, $pRequest)
     {
         if ($order === null) {
-            Data::setLogError(
+            Data::writeLogError(
                 sprintf(
                     __(
                         'Callback with parameter %s received, but failed because $order could not ' .
@@ -1193,7 +1193,7 @@ class WooCommerce
             Data::getOrderMeta('bookPaymentStatus', $orderId) &&
             empty(Data::getOrderMeta('signingOk', $orderId))
         ) {
-            Data::setLogNotice(sprintf('%s for %s -- OK', __FUNCTION__, $orderId));
+            Data::writeLogNotice(sprintf('%s for %s -- OK', __FUNCTION__, $orderId));
             Data::setOrderMeta($orderId, 'signingOk', date('Y-m-d H:i:s', time()));
             Data::setOrderMeta(
                 $orderId,
@@ -1306,7 +1306,7 @@ class WooCommerce
                                 $orderHandler->getOrderLines()
                             );
                         } catch (Exception $e) {
-                            Data::setLogError(
+                            Data::writeLogError(
                                 sprintf(
                                     __(
                                         'Exception (%s) from %s: %s.',
@@ -1322,7 +1322,7 @@ class WooCommerce
                 }
             }
         } catch (Exception $e) {
-            Data::setLogError(
+            Data::writeLogError(
                 sprintf(
                     __('Exception (%s) from %s: %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                     $e->getCode(),
@@ -1341,7 +1341,7 @@ class WooCommerce
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getSessionValue($key)
+    public static function getSessionValue($key): mixed
     {
         $return = null;
         $session = Data::getSanitizedArray(isset($_SESSION) ? $_SESSION : []);
@@ -1361,10 +1361,11 @@ class WooCommerce
      * @return string
      * @since 0.0.1.9
      */
-    public static function getWcLogDir(): string
+    public static function getPluginLogDir(): string
     {
-        /** @noinspection PhpUndefinedConstantInspection */
-        return preg_replace('/\/$/', '', WC_LOG_DIR);
+        $pluginLogDir = preg_replace('/\/$/', '', Data::getResursOption('log_dir'));
+
+        return is_dir($pluginLogDir) ? $pluginLogDir : '';
     }
 
     /**
