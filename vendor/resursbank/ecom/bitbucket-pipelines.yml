@@ -13,6 +13,9 @@ pipelines:
               - docker-php-ext-enable redis
               - echo "127.0.0.1 redis" >>/etc/hosts
               - cp phpunit.xml.example phpunit.xml
+              - sed -i 's/name="NATIONAL_STORE_ID" value="REPLACEME"/name="NATIONAL_STORE_ID" value="8977"/' phpunit.xml
+              - sed -i 's/name="SKIP_PROXY_TESTS" value="REPLACEME"/name="SKIP_PROXY_TESTS" value="true"/' phpunit.xml
+              - sed -i 's/name="IS_PIPELINE" value="REPLACEME"/name="IS_PIPELINE" value="true"/' phpunit.xml
               - sed -i 's/name="BASIC_AUTH_USERNAME" value="REPLACEME"/name="BASIC_AUTH_USERNAME" value="au2toto2"/' phpunit.xml
               - sed -i 's/name="BASIC_AUTH_PASSWORD" value="REPLACEME"/name="BASIC_AUTH_PASSWORD" value="m7O2O7V6zXZOy54DIk4L3SM1oWp73itU"/' phpunit.xml
               - sed -i 's/name="STORE_ID" value="REPLACEME"/name="STORE_ID" value="23b213f8-0ea4-4c25-97b6-8810760087a8"/' phpunit.xml

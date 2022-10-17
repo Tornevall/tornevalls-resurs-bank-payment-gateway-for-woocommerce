@@ -7,15 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Module\PaymentMethod\Models;
+namespace Resursbank\Ecom\Lib\Model;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Model\Model;
+use Resursbank\Ecom\Lib\Model\PaymentMethod\LegalLinkCollection;
 use Resursbank\Ecom\Lib\Validation\FloatValidation;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\Type;
-use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod\LegalLink;
+use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 
 /**
  * Defines payment method entity.
@@ -33,7 +32,7 @@ class PaymentMethod extends Model
      * @param float $maxPurchaseLimit
      * @param float $minApplicationLimit
      * @param float $maxApplicationLimit
-     * @param array<int, LegalLink> $legalLinks
+     * @param LegalLinkCollection $legalLinks
      * @param bool $enabledForLegalCustomer
      * @param bool $enabledForNaturalCustomer
      * @param int $sortOrder
@@ -41,8 +40,7 @@ class PaymentMethod extends Model
      * @param FloatValidation $floatValidation
      * @throws EmptyValueException
      * @throws IllegalValueException
-     * @todo $legalLinks should be validated to be an array of LegalLink by support in DataConverter.
-     * @todo $legalLinks can be empty?
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         public readonly string $id,
@@ -52,7 +50,7 @@ class PaymentMethod extends Model
         public readonly float $maxPurchaseLimit,
         public readonly float $minApplicationLimit,
         public readonly float $maxApplicationLimit,
-        public readonly array $legalLinks,
+        public readonly LegalLinkCollection $legalLinks,
         public readonly bool $enabledForLegalCustomer,
         public readonly bool $enabledForNaturalCustomer,
         public int $sortOrder = 0,

@@ -45,7 +45,7 @@ class GetAddress
     /**
      * @param string $storeId
      * @param string $governmentId
-     * @param string $customerType
+     * @param CustomerType $customerType
      * @return Address
      * @throws AuthException
      * @throws CurlException
@@ -55,17 +55,19 @@ class GetAddress
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
-     * @todo Use CustomerType-enum instead of string.
      */
-    public function call(string $storeId, string $governmentId, string $customerType): Address
-    {
+    public function call(
+        string $storeId,
+        string $governmentId,
+        CustomerType $customerType
+    ): Address {
         // REMOTE_ADDR is normally present, however - if this is running from console or similar (when REMOTE_ADDR
         // is simply absent) we should add localhost as remote.
         $payload = [
             'storeId' => $storeId,
             'customerIp' => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
             'governmentId' => $governmentId,
-            'customerType' => $customerType,
+            'customerType' => $customerType->value,
         ];
 
         $curl = new Curl(

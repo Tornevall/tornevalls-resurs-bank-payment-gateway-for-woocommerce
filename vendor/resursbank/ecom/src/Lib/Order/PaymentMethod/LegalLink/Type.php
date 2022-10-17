@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Module\PaymentMethod\Enum\LegalLink;
+namespace Resursbank\Ecom\Lib\Order\PaymentMethod\LegalLink;
 
 /**
  * @codingStandardsIgnoreStart
@@ -15,6 +15,6 @@ namespace Resursbank\Ecom\Module\PaymentMethod\Enum\LegalLink;
 enum Type: string
 {
     case GENERAL_TERMS = 'GENERAL_TERMS';
-    case SEKKI = 'SEKKI';
+    case SECCI = 'SECCI';
     case PRICE_INFO = 'PRICE_INFO';
 }

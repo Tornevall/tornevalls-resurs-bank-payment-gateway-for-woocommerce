@@ -146,7 +146,10 @@ class Curl
      */
     public function getEffectiveUrl(): string
     {
-        return curl_getinfo(handle: $this->ch, option: CURLINFO_EFFECTIVE_URL);
+        return (string) curl_getinfo(
+            handle: $this->ch,
+            option: CURLINFO_EFFECTIVE_URL
+        );
     }
 
     /**

@@ -16,7 +16,7 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Widget\Widget;
-use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 
 /**
  * Payment methods table widget.

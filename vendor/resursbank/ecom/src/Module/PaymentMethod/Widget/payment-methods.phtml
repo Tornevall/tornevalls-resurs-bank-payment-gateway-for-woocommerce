@@ -5,13 +5,12 @@
  * See LICENSE for license details.
  */
 
-/** @psalm-scope-this Resursbank\Ecom\Module\PaymentMethod\Widget\PaymentMethods */
-
 declare(strict_types=1);
 
 /** @var PaymentMethods $this */
+/** @psalm-scope-this \Resursbank\Ecom\Module\PaymentMethod\Widget\PaymentMethods */
 
-use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PaymentMethods;
 
 $paymentMethods = $this->paymentMethods;
