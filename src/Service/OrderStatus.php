@@ -94,7 +94,7 @@ class OrderStatus
         $orderId = WooCommerce::getProperOrder($order, 'id', true);
 
         if ($orderId > 0) {
-            Data::setLogNotice(
+            Data::writeLogNotice(
                 sprintf(
                     'OrderStatus::setOrderStatusByQueue(%d).',
                     $orderId
@@ -116,7 +116,7 @@ class OrderStatus
     {
         $orderId = WooCommerce::getProperOrder($order, 'id');
 
-        Data::setLogNotice(
+        Data::writeLogNotice(
             sprintf(
                 'applyQueue(updateOrderStatusByQueue) for order %d.',
                 $orderId

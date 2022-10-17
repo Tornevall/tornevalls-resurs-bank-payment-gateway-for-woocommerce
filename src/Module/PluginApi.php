@@ -62,7 +62,7 @@ class PluginApi
         new ResursBankAPI();
         // Logging $_REQUEST may break the WooCommerce status log view if not decoded first.
         // For some reason, the logs can't handle utf8-strings.
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_BACKEND,
             sprintf(
                 'Backend: %s (%s), params %s',
@@ -133,7 +133,7 @@ class PluginApi
 
         $out['action'] = self::getAction();
 
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_BACKEND,
             sprintf(
                 'Backend Reply: %s (%s), params %s',
@@ -159,7 +159,7 @@ class PluginApi
      */
     public static function importCredentials($force = null)
     {
-        Data::setLogInfo(
+        Data::writeLogInfo(
             __('Import of old credentials initiated.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );
         if (!(bool)$force) {
@@ -207,7 +207,7 @@ class PluginApi
         }
 
         Data::setResursOption('resursImportCredentials', time());
-        Data::setLogInfo(
+        Data::writeLogInfo(
             __('Import of old credentials finished.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
         );
 
@@ -269,7 +269,7 @@ class PluginApi
 
         // We do not ask if this can be logged before it is logged, so that we can backtrack
         // errors without the permission from wp-admin.
-        Data::setLogInfo(
+        Data::writeLogInfo(
             sprintf(
                 __(
                     'Nonce validation accepted (from function: %s): %s.',
@@ -402,7 +402,7 @@ class PluginApi
             //ResursBankAPI::getAnnuityFactors(false);
             $canReload = true;
         } catch (Exception $e) {
-            Data::setLogException($e, __FUNCTION__);
+            Data::writeLogException($e, __FUNCTION__);
             $canReload = false;
         }
         if (self::canReply($reply)) {
@@ -570,7 +570,7 @@ class PluginApi
          */
         $isLiveChange = Data::getResursOption('environment') !== Data::getRequest('e');
 
-        Data::setLogInfo(
+        Data::writeLogInfo(
             sprintf(
                 __(
                     'Credentials validation from wp-admin initiated for environment %s, username request %s.',
@@ -591,7 +591,7 @@ class PluginApi
                 Data::delResursOption('front_credential_error');
             } catch (RuntimeException $e) {
                 $validationResponse = $e->getMessage();
-                Data::setLogNotice(
+                Data::writeLogNotice(
                     sprintf(
                         __(
                             'An error occured during credential checking: %s (%d).',
@@ -606,7 +606,7 @@ class PluginApi
 
         // Save when validating.
         if ($validationResponse) {
-            Data::setLogInfo(
+            Data::writeLogInfo(
                 __(
                     'Credential validation was successful and therefore saved.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
@@ -636,7 +636,7 @@ class PluginApi
             }
         }
 
-        Data::setLogNotice(
+        Data::writeLogNotice(
             sprintf(
                 __(
                     'Resurs Bank credential validation for environment %s executed, response was %s.',
@@ -684,7 +684,7 @@ class PluginApi
         foreach (self::$callbacks as $ecomCallbackId) {
             $callbackUrl = self::getCallbackUrl(self::getCallbackParams($ecomCallbackId));
             try {
-                Data::setLogNotice(sprintf('Callback Registration: %s.', $callbackUrl));
+                Data::writeLogNotice(sprintf('Callback Registration: %s.', $callbackUrl));
                 ResursBankAPI::getResurs()->setRegisterCallback(
                     $ecomCallbackId,
                     $callbackUrl,
@@ -692,7 +692,7 @@ class PluginApi
                 );
                 Data::setResursOption('lastCallbackUpdate', time());
             } catch (Exception $e) {
-                Data::setLogException($e, __FUNCTION__);
+                Data::writeLogException($e, __FUNCTION__);
             }
         }
         ResursBankAPI::getCallbackList(false);
@@ -838,7 +838,7 @@ class PluginApi
             $newSetting = Data::getPaymentMethodSetting('enabled', $id);
 
             // This is vital information that should always be traceable.
-            Data::setLogInfo(
+            Data::writeLogInfo(
                 sprintf(
                     __(
                         'Payment method %s has been %s.',
@@ -1406,7 +1406,7 @@ class PluginApi
      */
     private static function getAddressLog($customerCountry, $customerType, $identification, $runFunctionInfo)
     {
-        Data::canLog(
+        Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
                 __(
@@ -1491,7 +1491,7 @@ class PluginApi
                 'failed',
                 $failNote
             );
-            Data::setLogNotice(
+            Data::writeLogNotice(
                 $failNote
             );
 

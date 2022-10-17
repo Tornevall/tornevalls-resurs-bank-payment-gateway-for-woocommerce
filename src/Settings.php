@@ -20,6 +20,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use WC_Admin_Settings;
@@ -31,9 +32,9 @@ use WC_Settings_Page;
 class Settings extends WC_Settings_Page
 {
     /**
-     * This prefix is used for various parts of the settings by WooCommerce.
-     * It's, for example, used as an ID for these settings, and as a prefix for
-     * the values in the database.
+     * This prefix is used for various parts of the settings by WooCommerce,
+     * for example, as an ID for these settings, and as a prefix for the values
+     * in the database.
      */
     public const PREFIX = 'resursbank';
 
@@ -89,6 +90,7 @@ class Settings extends WC_Settings_Page
         return [
             Api::SECTION_ID => Api::SECTION_TITLE,
             PaymentMethods::SECTION_ID => PaymentMethods::SECTION_TITLE,
+            Advanced::SECTION_ID => Advanced::SECTION_TITLE,
         ];
     }
 
@@ -144,6 +146,7 @@ class Settings extends WC_Settings_Page
         $result = array_merge(
             Api::getSettings(),
             PaymentMethods::getSettings(),
+            Advanced::getSettings(),
         );
 
         return $result[$section] ?? $result;

@@ -3,6 +3,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Lib\Log\LogLevel;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
@@ -122,8 +123,8 @@ class OrderMetaBox
                 !empty($login) &&
                 Data::getResursOption('store_api_history') &&
                 !Data::getOrderMeta('orderapi', $orderData['order'])) {
-                Data::setLogInternal(
-                    Data::LOG_NOTICE,
+                Data::writeLogByLogLevel(
+                    LogLevel::INFO,
                     sprintf(
                         __(
                             'EComPHP data present. Saving metadata for order %s.',

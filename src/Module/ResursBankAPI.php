@@ -18,6 +18,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Log\FileLogger;
+use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
@@ -46,6 +47,7 @@ use function is_object;
  */
 class ResursBankAPI
 {
+
     /**
      * @var ResursBank $resursBank
      * @since 0.0.1.0
@@ -87,13 +89,6 @@ class ResursBankAPI
         'jwt_client_secret' => '',
     ];
 
-    /**
-     * @throws EmptyValueException
-     * @throws FilesystemException
-     * @throws FormatException
-     * @throws MapiCredentialsException
-     * @throws WooCommerceException
-     */
     public function __construct()
     {
         try {
@@ -112,10 +107,8 @@ class ResursBankAPI
     /**
      * @return void
      * @throws EmptyValueException
-     * @throws MapiCredentialsException
-     * @throws WooCommerceException
-     * @throws FilesystemException
      * @throws FormatException
+     * @throws MapiCredentialsException
      * @since 0.0.1.0
      */
     public function getConnection(): void
@@ -123,6 +116,22 @@ class ResursBankAPI
         // @todo Make sure the scope for production is correct.
         $scope = Data::getResursOption('environment') === 'test' ? 'mock-merchant-api' : 'merchant-api';
         $grantType = 'client_credentials';
+
+        if (isset(Config::$instance)) {
+            return;
+        }
+
+        // Default logs to no writer, in case we don't have a logger available.
+        $fileLogger = new NoneLogger();
+
+        // Check if the proper logger is available.
+        if (WooCommerce::getPluginLogDir()) {
+            try {
+                $fileLogger = new FileLogger(WooCommerce::getPluginLogDir());
+            } catch (FilesystemException $e) {
+                WordPress::setGenericError($e);
+            }
+        }
 
         if (empty(self::getClientId()) || empty(self::getClientSecret())) {
             throw new MapiCredentialsException(
@@ -133,17 +142,6 @@ class ResursBankAPI
         if (!defined('WC_LOG_DIR')) {
             throw new WooCommerceException('Can not find WooCommerce in this platform.');
         }
-
-//        Config::setup(
-//            logger: new FileLogger(path: WooCommerce::getWcLogDir()),
-//            cache: new None(),
-//            jwtAuth: new Jwt(
-//                clientId: $this->getClientId(),
-//                clientSecret: $this->getClientSecret(),
-//                scope: $scope,
-//                grantType: $grantType
-//            )
-//        );
     }
 
     /**
@@ -198,7 +196,7 @@ class ResursBankAPI
         try {
             $return = PaymentRepository::get($paymentId);
         } catch (Exception $e) {
-            Data::setLogException($e, __FUNCTION__);
+            Data::writeLogException($e, __FUNCTION__);
 
             // Only look for legacy payments if the initial get fails.
             $searchPayment = PaymentRepository::search(
@@ -305,6 +303,7 @@ class ResursBankAPI
      */
     public static function getAnnuityFactors($fromStorage = true)
     {
+        return [];
         $return = self::$annuityFactors;
         $stored = json_decode(Data::getResursOption('annuityFactors'), false);
         if ($fromStorage && !empty($stored)) {
@@ -324,9 +323,6 @@ class ResursBankAPI
                 /** @noinspection CallableParameterUseCaseInTypeContextInspection */
                 if (count($paymentMethods)) {
                     foreach ($paymentMethods as $paymentMethod) {
-                        if ($paymentMethod->apiType !== 'SOAP') {
-                            continue;
-                        }
                         $annuityResponse = self::getResurs()->getAnnuityFactors($paymentMethod->id);
                         if (is_array($annuityResponse) || is_object($annuityResponse)) {
                             // Are we running side by side with v2.x?
@@ -540,7 +536,7 @@ class ResursBankAPI
      */
     private static function getEcomBySecondaryCredentials($credentialMeta, $orderId): ResursBank
     {
-        Data::setLogNotice(
+        Data::writeLogNotice(
             sprintf(
                 __(
                     'Ecom request %s for %s with different credentials (%s, in environment %s).',
@@ -583,7 +579,7 @@ class ResursBankAPI
      */
     private static function getPaymentByRestNotice($e)
     {
-        Data::setLogNotice(
+        Data::writeLogNotice(
             sprintf(
                 __(
                     'Got exception %d in %s, will retry with REST.',
@@ -642,7 +638,7 @@ class ResursBankAPI
             $return = false;
             if ($e->getCode() !== Data::UNSET_CREDENTIALS_EXCEPTION) {
                 Data::setTimeoutStatus(self::getResurs(), $e);
-                Data::setLogException($e, __FUNCTION__);
+                Data::writeLogException($e, __FUNCTION__);
             }
         }
         return $return;

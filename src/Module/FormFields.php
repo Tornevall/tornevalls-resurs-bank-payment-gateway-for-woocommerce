@@ -489,7 +489,7 @@ class FormFields extends WC_Settings_API
                         'annulled' => __('Annulled (cancelled)', 'resurs-bank-payment-gateway-for-woocommerce'),
                     ],
                 ],
-                'order_instant_finalization_methods' => [
+                /*'order_instant_finalization_methods' => [
                     'id' => 'order_instant_finalization_methods',
                     'title' => 'Payment methods defined as automatically debited',
                     'type' => 'select',
@@ -499,7 +499,7 @@ class FormFields extends WC_Settings_API
                         'size' => count(WordPress::applyFilters('getAvailableAutoDebitMethods', [])),
                         'multiple' => 'multiple',
                     ],
-                ],
+                ],*/
                 'order_status_mapping_section_end' => [
                     'id' => 'order_status_mapping_section_end',
                     'type' => 'sectionend',
@@ -732,6 +732,20 @@ class FormFields extends WC_Settings_API
                         'you can choose the extras you want to see in your logs.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
+                ],
+                'log_dir' => [
+                    'id' => 'log_dir',
+                    'type' => 'text',
+                    'title' => __(
+                        'Log path',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __(
+                        'To enable logging, you actively have to fill in the path for where you want to keep them. ' .
+                        'To avoid data leaks we suggest that this path not be accessible from the internet.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'default' => '',
                 ],
                 'must_obfuscate_logged_personal_data' => [
                     'id' => 'must_obfuscate_logged_personal_data',
@@ -1375,7 +1389,7 @@ class FormFields extends WC_Settings_API
                 $testDataFile = Data::getGatewayPath() . '/testdata.json';
                 $liveTestData = json_decode(@file_get_contents($testDataFile), true, 512);
             } catch (Exception $e) {
-                Data::setLogException($e, __FUNCTION__);
+                Data::writeLogException($e, __FUNCTION__);
             }
         }
 
