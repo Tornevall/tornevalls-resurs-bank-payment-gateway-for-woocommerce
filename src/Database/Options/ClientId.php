@@ -5,36 +5,23 @@
  * See LICENSE for license details.
  */
 
-namespace Resursbank\Woocommerce\Database\Options;
+declare(strict_types=1);
 
-use function get_option;
-use function update_option;
+namespace Resursbank\Woocommerce\Database\Options;
 
 /**
  * Database interface for client_id in wp_options table.
+ *
+ * NOTE: We actively avoid validating this value to avoid exploits based on
+ * validation errors.
  */
-class ClientId
+class ClientId extends Option
 {
-    /**
-     * Name of the database table field this class touches in the wp_options
-     * table.
-     */
-    public const NAME = Option::NAME_PREFIX . 'client_id';
-
-    /**
-     * @return string|null
-     */
-    public static function getData(): ?string
-    {
-        return get_option(option: self::NAME, default: null);
-    }
-
-    /**
-     * @param string $value
-     * @return bool
-     */
-    public static function setData(string $value): bool
-    {
-        return update_option(option: self::NAME, value: $value);
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public static function getName(): string
+	{
+		return self::NAME_PREFIX . 'client_id';
+	}
 }

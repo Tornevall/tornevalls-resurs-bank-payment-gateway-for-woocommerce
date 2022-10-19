@@ -138,10 +138,6 @@ class ResursBankAPI
                 message: 'Credentials not set.'
             );
         }
-
-        if (!defined('WC_LOG_DIR')) {
-            throw new WooCommerceException('Can not find WooCommerce in this platform.');
-        }
     }
 
     /**

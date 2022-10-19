@@ -5,6 +5,8 @@
  * See LICENSE for license details.
  */
 
+declare(strict_types=1);
+
 namespace Resursbank\Woocommerce;
 
 use JsonException;
@@ -133,7 +135,7 @@ class Settings extends WC_Settings_Page
     }
 
     /**
-     * Returns a list of settings fields. The fields are in a format that
+     * Return a list of setting fields. The fields are in a format that
      * WooCommerce can parse and render.
      *
      * @param string $section - If you specify a section, then the list will

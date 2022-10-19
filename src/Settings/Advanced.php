@@ -5,6 +5,8 @@
  * See LICENSE for license details.
  */
 
+declare(strict_types=1);
+
 namespace Resursbank\Woocommerce\Settings;
 
 use Exception;
@@ -22,7 +24,10 @@ use function is_string;
 use function is_dir;
 
 /**
- * Advanced settings section and fields for WooCommerce.
+ * Advanced settings section.
+ *
+ * @todo Translations should be moved to ECom. See WOO-802 & ECP-205.
+ * @todo Directory validation should be centralised in ECom. See WOO-803 & ECP-202.
  */
 class Advanced
 {
@@ -30,8 +35,8 @@ class Advanced
     public const SECTION_TITLE = 'Advanced Settings';
 
     /**
-     * Returns a list of settings fields. This array is meant to be used by
-     * WooCommerce to convert them to HTML and render them.
+     * Returns settings provided by this section. These will be rendered by
+     * WooCommerce to a form on the config page.
      *
      * @return array[]
      */
@@ -41,25 +46,28 @@ class Advanced
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
                 'log_dir' => [
-                    'id' => LogDir::NAME,
+                    'id' => LogDir::getName(),
                     'type' => 'text',
                     'title' => __(
                         'Log path',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'desc' => __(
-                        'To enable logging, you actively have to fill in the path for where you want to keep them. ' .
-                        'To avoid data leaks we suggest that this path not be accessible from the internet.',
+                        'Leave empty to disable logging.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
                 'cache_dir' => [
-                    'id' => CacheDir::NAME,
+                    'id' => CacheDir::getName(),
                     'type' => 'text',
                     'title' => __(
                         'Cache path',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    'desc' => __(
+	                    'Leave empty to disable cache.',
+	                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
                     'default' => '',
                 ],
@@ -68,9 +76,8 @@ class Advanced
     }
 
     /**
-     * Returns the logger that should be used by the settings. If no directory
-     * for the logs has been specified in the settings, then a dummy logger with
-     * no real functionality will be returned.
+     * Resolve log handler based on supplied setting value. Returns a dummy
+     * if the setting is empty.
      *
      * @return LoggerInterface
      */
@@ -96,13 +103,12 @@ class Advanced
     }
 
     /**
-     * Returns the logger that should be used by the settings. If no directory
-     * for the logs has been specified in the settings, then a dummy logger with
-     * no real functionality will be returned.
+     * Resolve cache handler based on supplied setting value. Returns a dummy
+     * if the setting is empty.
      *
      * @return CacheInterface
      */
-    public static function getCacher(): CacheInterface
+    public static function getCache(): CacheInterface
     {
         $result = new None();
 

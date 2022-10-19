@@ -5,6 +5,8 @@
  * See LICENSE for license details.
  */
 
+declare(strict_types=1);
+
 namespace Resursbank\Woocommerce\Settings;
 
 use JsonException;
@@ -23,7 +25,9 @@ use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PaymentMethods as PaymentMethodsWidget;
 
 /**
- * Payment methods settings section and fields for WooCommerce.
+ * Payment methods section.
+ *
+ * @todo Translations should be moved to ECom. See WOO-802 & ECP-205.
  */
 class PaymentMethods
 {
@@ -31,8 +35,8 @@ class PaymentMethods
     public const SECTION_TITLE = 'Payment Methods';
 
     /**
-     * Returns a list of settings fields. This array is meant to be used by
-     * WooCommerce to convert them to HTML and render them.
+     * Returns settings provided by this section. These will be rendered by
+     * WooCommerce to a form on the config page.
      *
      * @return array[]
      */
@@ -60,6 +64,7 @@ class PaymentMethods
      * @throws ApiException
      * @throws CacheException
      * @throws FilesystemException
+     * @todo Exception handling. WOO-804.
      */
     public static function getOutput(string $storeId): string
     {

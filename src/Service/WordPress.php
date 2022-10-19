@@ -48,7 +48,7 @@ class WordPress
 
         Config::setup(
             logger: Advanced::getLogger(),
-            cache: Advanced::getCacher(),
+            cache: Advanced::getCache(),
             jwtAuth: new Jwt(
                 clientId: ClientId::getData(),
                 clientSecret: ClientSecret::getData(),

@@ -5,36 +5,22 @@
  * See LICENSE for license details.
  */
 
+declare(strict_types=1);
+
 namespace Resursbank\Woocommerce\Database\Options;
 
-use function get_option;
-use function update_option;
-
 /**
- * Database interface for log_dir in wp_options table.
+ * Database interface for cache_dir in wp_options table.
+ *
+ * @todo Add value validation before appending value to database. Validation should be done inside Ecom. See WOO-800 and ECP-202.
  */
-class LogDir
+class LogDir extends Option
 {
-    /**
-     * Name of the database table field this class touches in the wp_options
-     * table.
-     */
-    public const NAME = Option::NAME_PREFIX . 'log_dir';
-
-    /**
-     * @return string|null
-     */
-    public static function getData(): ?string
-    {
-        return get_option(option: self::NAME, default: null);
-    }
-
-    /**
-     * @param string $value
-     * @return bool
-     */
-    public static function setData(string $value): bool
-    {
-        return update_option(option: self::NAME, value: $value);
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public static function getName(): string
+	{
+		return self::NAME_PREFIX . 'log_dir';
+	}
 }
