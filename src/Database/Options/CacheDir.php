@@ -9,12 +9,14 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options;
 
+use Resursbank\Woocommerce\Database\StringOption;
+
 /**
  * Database interface for cache_dir in wp_options table.
  *
  * @todo Add value validation before appending value to database. Validation should be done inside Ecom. See WOO-798 and ECP-202.
  */
-class CacheDir extends Option
+class CacheDir extends StringOption
 {
 	/**
 	 * @inheritdoc

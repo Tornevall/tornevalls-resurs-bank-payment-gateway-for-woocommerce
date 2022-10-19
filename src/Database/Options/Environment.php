@@ -9,12 +9,14 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options;
 
+use Resursbank\Woocommerce\Database\StringOption;
+
 /**
  * Database interface for environment in wp_options table.
  *
  * @todo Add value validation against Enum inside Ecom. See WOO-799 & ECP-203
  */
-class Environment extends Option
+class Environment extends StringOption
 {
 	/**
 	 * @inheritdoc

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Environment;
@@ -75,4 +77,31 @@ class Api
             ]
         ];
     }
+
+	/**
+	 * @return Jwt|null
+	 * @todo Fix credentials validation. See WOO-805 & ECP-206.
+	 * @todo Use Enums and constants for scope / grant type. These should be declared in Ecom. Make it part of the above issues or create new ones.
+	 */
+	public static function getJwt(): Jwt|null
+	{
+		$result = null;
+		$clientId = ClientId::getData();
+		$clientSecret = ClientSecret::getData();
+
+		try {
+			if ($clientId !== '' && $clientSecret !== '') {
+				$result = new Jwt(
+					clientId: ClientId::getData(),
+					clientSecret: ClientSecret::getData(),
+					scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
+					grantType: 'client_credentials',
+				);
+			}
+		} catch (EmptyValueException $e) {
+			// @todo Consider using WC logger to output message in admin panel. See WOO-806.
+		}
+
+		return $result;
+	}
 }

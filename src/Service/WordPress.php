@@ -4,7 +4,6 @@ namespace ResursBank\Service;
 
 use Exception;
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use Resursbank\Woocommerce\Database\Options\ClientId;
@@ -13,10 +12,12 @@ use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Settings\Advanced;
+use Resursbank\Woocommerce\Settings\Api;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
 use WC_Logger;
 use WP_Post;
+
 use function count;
 use function defined;
 use function func_get_args;
@@ -49,12 +50,7 @@ class WordPress
         Config::setup(
             logger: Advanced::getLogger(),
             cache: Advanced::getCache(),
-            jwtAuth: new Jwt(
-                clientId: ClientId::getData(),
-                clientSecret: ClientSecret::getData(),
-                scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
-                grantType: 'client_credentials',
-            )
+            jwtAuth: Api::getJwt()
         );
 
         // Always initialize defaults once on plugin loaded (performance saver).

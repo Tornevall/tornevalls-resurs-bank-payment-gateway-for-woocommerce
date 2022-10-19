@@ -9,12 +9,14 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options;
 
+use Resursbank\Woocommerce\Database\StringOption;
+
 /**
  * Database interface for store_id in wp_options table.
  *
  * @todo Add validation through ECom if possible. See WOO-801.
  */
-class StoreId extends Option
+class StoreId extends StringOption
 {
 	/**
 	 * @inheritdoc

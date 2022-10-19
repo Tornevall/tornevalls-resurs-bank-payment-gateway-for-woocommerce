@@ -9,13 +9,15 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options;
 
+use Resursbank\Woocommerce\Database\StringOption;
+
 /**
  * Database interface for client_secret in wp_options table.
  *
  * NOTE: We actively avoid validating this value to avoid exploits based on
  * validation errors.
  */
-class ClientSecret extends Option
+class ClientSecret extends StringOption
 {
 	/**
 	 * @inheritdoc
