@@ -138,17 +138,6 @@ class ResursBankAPI
                 message: 'Credentials not set.'
             );
         }
-
-        Config::setup(
-            logger: $fileLogger,
-            cache: new None(),
-            jwtAuth: new Jwt(
-                clientId: $this->getClientId(),
-                clientSecret: $this->getClientSecret(),
-                scope: $scope,
-                grantType: $grantType
-            )
-        );
     }
 
     /**

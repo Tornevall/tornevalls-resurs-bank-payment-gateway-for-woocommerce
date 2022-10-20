@@ -40,9 +40,9 @@ use function is_array;
 use function is_object;
 
 /**
- * Class ResursDefault
  * Default payment method class. Handles payments and orders dynamically, with focus on less loss
  * of data during API communication.
+ *
  * @package Resursbank\Gateway
  * @since 0.0.1.0
  */
@@ -256,8 +256,12 @@ class ResursDefault extends WC_Payment_Gateway
         if (Data::getCheckoutType() === self::TYPE_RCO &&
             !(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
         ) {
-            $this->paymentMethodInformation = new ResursCheckout();
-            $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
+			// @todo The code below won't work, but it previously caused an error because paymentMethodInformation received an instance of ResursCheckout but is declared as stdClass.
+            $this->paymentMethodInformation = new stdClass();
+
+			if (isset($this->paymentMethodInformation->id)) {
+				$this->id = sprintf( '%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id );
+			}
         }
     }
 
