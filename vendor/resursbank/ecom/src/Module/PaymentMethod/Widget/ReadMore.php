@@ -15,8 +15,10 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Locale\Translator;
+use Resursbank\Ecom\Lib\Model\PaymentMethod\LegalLink;
+use Resursbank\Ecom\Lib\Order\PaymentMethod\LegalLink\Type;
 use Resursbank\Ecom\Lib\Widget\Widget;
-use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
 
 /**
  * Read more widget.
@@ -54,8 +56,9 @@ class ReadMore extends Widget
         public readonly PaymentMethod $paymentMethod,
         public readonly float $amount
     ) {
+        /** @var LegalLink $link */
         foreach ($this->paymentMethod->legalLinks as $link) {
-            if ($link->type === 'PRICE_INFO') {
+            if ($link->type === Type::PRICE_INFO) {
                 $this->url = $link->url;
             }
         }

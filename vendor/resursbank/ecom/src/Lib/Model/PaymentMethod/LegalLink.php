@@ -7,10 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethod;
+namespace Resursbank\Ecom\Lib\Model\PaymentMethod;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\Model;
+use Resursbank\Ecom\Lib\Order\PaymentMethod\LegalLink\Type;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 
 /**
@@ -20,17 +21,16 @@ class LegalLink extends Model
 {
     /**
      * @param string $url
-     * @param string $type
-     * @param bool $needToAppendPriceLast
+     * @param Type $type
+     * @param bool $appendAmount
      * @param StringValidation $stringValidation
      * @throws EmptyValueException
      * @todo $url validation could be improved to confirm string is a URL.
-     * @todo $type validation to be replaced by Enum\LegalLink\Type when supported by DataConverter.
      */
     public function __construct(
         public readonly string $url,
-        public readonly string $type,
-        public readonly bool $needToAppendPriceLast,
+        public readonly Type $type,
+        public readonly bool $appendAmount,
         private readonly StringValidation $stringValidation = new StringValidation()
     ) {
         $this->validateUrl();

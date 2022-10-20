@@ -22,6 +22,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Repository\Api\Mapi\Get;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Exception;
@@ -42,7 +44,7 @@ class Repository
      * keys.
      *
      * @param string $storeId
-     * @param string $annuityPaymentMethodId
+     * @param string $paymentMethodId
      * @return AnnuityFactors
      * @throws ApiException
      * @throws AuthException
@@ -57,12 +59,12 @@ class Repository
      */
     public static function getAnnuityFactors(
         string $storeId,
-        string $annuityPaymentMethodId
+        string $paymentMethodId
     ): AnnuityFactors {
         try {
             $cache = self::getCache(
                 storeId: $storeId,
-                annuityPaymentMethodId: $annuityPaymentMethodId
+                paymentMethodId: $paymentMethodId
             );
 
             $result = $cache->read();
@@ -70,7 +72,7 @@ class Repository
             if (!$result instanceof AnnuityFactors) {
                 $result = self::getApi(
                     storeId: $storeId,
-                    annuityPaymentMethodId: $annuityPaymentMethodId
+                    paymentMethodId: $paymentMethodId
                 )->call();
 
                 if (!$result instanceof AnnuityFactors) {
@@ -90,19 +92,58 @@ class Repository
 
     /**
      * @param string $storeId
-     * @param string $annuityPaymentMethodId
+     * @param PaymentMethodCollection $paymentMethods
+     * @return PaymentMethodCollection
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    public static function getMethods(
+        string $storeId,
+        PaymentMethodCollection $paymentMethods
+    ): PaymentMethodCollection {
+        /** @var PaymentMethod[] $arr */
+        $arr = $paymentMethods->toArray();
+
+        /** @var PaymentMethod[] $result */
+        $result = [];
+
+        foreach ($arr as $method) {
+            $factors = self::getAnnuityFactors(
+                storeId: $storeId,
+                paymentMethodId: $method->id
+            );
+
+            if ($factors->content->count() !== 0) {
+                $result[] = $method;
+            }
+        }
+
+        return new PaymentMethodCollection(data: $result);
+    }
+
+    /**
+     * @param string $storeId
+     * @param string $paymentMethodId
      * @return Cache
      * @throws IllegalValueException
      */
     public static function getCache(
         string $storeId,
-        string $annuityPaymentMethodId
+        string $paymentMethodId
     ): Cache {
         self::validateStoreId(storeId: $storeId);
 
         return new Cache(
             key: 'payment-method-annuity' . sha1(
-                string: serialize(value: compact('storeId', 'annuityPaymentMethodId'))
+                string: serialize(value: compact('storeId', 'paymentMethodId'))
             ),
             model: AnnuityFactors::class,
             ttl: 3600
@@ -111,22 +152,21 @@ class Repository
 
     /**
      * @param string $storeId
-     * @param string $annuityPaymentMethodId
+     * @param string $paymentMethodId
      * @return Get
      * @throws IllegalTypeException
      * @throws IllegalValueException
      */
     public static function getApi(
         string $storeId,
-        string $annuityPaymentMethodId
+        string $paymentMethodId
     ): Get {
         self::validateStoreId(storeId: $storeId);
 
         return new Get(
             model: AnnuityFactors::class,
-            route: "stores/$storeId/payment_methods/$annuityPaymentMethodId/annuity_factors",
-            params: compact('storeId', 'annuityPaymentMethodId'),
-            extractProperty: ''
+            route: "stores/$storeId/payment_methods/$paymentMethodId/annuity_factors",
+            params: compact('storeId', 'paymentMethodId'),
         );
     }
 

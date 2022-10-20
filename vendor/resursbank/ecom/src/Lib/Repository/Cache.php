@@ -117,7 +117,7 @@ class Cache
             Config::$instance->cache->write(
                 key: AbstractCache::getKey(key: $this->key),
                 data: json_encode(
-                    value: $data->toArray(),
+                    value: $data->toArray(full: true),
                     flags: JSON_THROW_ON_ERROR
                 ),
                 ttl: $this->ttl

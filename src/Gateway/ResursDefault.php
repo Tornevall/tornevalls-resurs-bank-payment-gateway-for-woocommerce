@@ -11,6 +11,9 @@ namespace ResursBank\Gateway;
 use Exception;
 use JsonException;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Module\Payment\Api\Create;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest;
+use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
@@ -149,10 +152,10 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private $apiDataId = '';
     /**
-     * @var array $paymentMethodInformation
+     * @var stdClass $paymentMethodInformation
      * @since 0.0.1.0
      */
-    private $paymentMethodInformation;
+    private stdClass $paymentMethodInformation;
 
     /**
      * The iframe. Rendered once. When rendered, it won't be requested again.
@@ -253,8 +256,12 @@ class ResursDefault extends WC_Payment_Gateway
         if (Data::getCheckoutType() === self::TYPE_RCO &&
             !(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
         ) {
-            $this->paymentMethodInformation = new ResursCheckout();
-            $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
+			// @todo The code below won't work, but it previously caused an error because paymentMethodInformation received an instance of ResursCheckout but is declared as stdClass.
+            $this->paymentMethodInformation = new stdClass();
+
+			if (isset($this->paymentMethodInformation->id)) {
+				$this->id = sprintf( '%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id );
+			}
         }
     }
 
@@ -1301,7 +1308,8 @@ class ResursDefault extends WC_Payment_Gateway
         // If the payment method information is missing, it is not available.
         // Usually occurs when plugin is recently installed and not synchronized with Resurs.
         // This is also very common when merchants still have old SOAP-based methods available.
-        if (!isset($this->paymentMethodInformation) || isset($this->paymentMethodInformation->id)) {
+
+        if (!$this->paymentMethodInformation instanceof stdClass || !isset($this->paymentMethodInformation->id)) {
             return false;
         }
         // Legacy methods can not be used anymore.
@@ -2528,6 +2536,10 @@ class ResursDefault extends WC_Payment_Gateway
         );
     }
 
+    private function getOrderLines() {
+
+    }
+
     /**
      * Simplified shop flow.
      * All flows should have three sections:
@@ -2545,7 +2557,6 @@ class ResursDefault extends WC_Payment_Gateway
         $this->API->setCheckoutType(CheckoutType::SIMPLIFIED_FLOW);
         $this->setOrderData();
         $this->setCreatePaymentNotice(__FUNCTION__);
-
         // Section #2: Create Order
         $this->paymentResponse = $this->API->getConnection()->createPayment(
             $this->getPaymentMethod()

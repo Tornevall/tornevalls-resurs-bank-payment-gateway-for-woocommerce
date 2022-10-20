@@ -15,6 +15,7 @@ use Countable;
 use Resursbank\Ecom\Exception\CollectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 
+use Resursbank\Ecom\Lib\Model\Model;
 use function is_object;
 
 /**
@@ -139,11 +140,22 @@ class Collection implements ArrayAccess, Iterator, Countable
     /**
      * Get data array from collection
      *
+     * @param bool $full
      * @return array
      */
-    public function toArray(): array
-    {
-        return $this->data;
+    public function toArray(
+        bool $full = false
+    ): array {
+        $data = $full ? [] : $this->data;
+
+        if ($full) {
+            /** @var Model $model */
+            foreach ($this->data as $model) {
+                $data[] = $model->toArray(full: $full);
+            }
+        }
+
+        return $data;
     }
 
     /**

@@ -7,7 +7,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:resursbankplugins/ecom2.git",
-                "reference": "b0ccda53425ba911a06e101642de667afb83255a"
+                "reference": "7ab38ba1c1c56d31a27e0af657e1463f92e4df80"
             },
             "require": {
                 "ext-curl": "*",
@@ -21,7 +21,7 @@
                 "squizlabs/php_codesniffer": "^3",
                 "vimeo/psalm": "^4"
             },
-            "time": "2022-10-12T06:02:44+00:00",
+            "time": "2022-10-14T10:49:52+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "source",
