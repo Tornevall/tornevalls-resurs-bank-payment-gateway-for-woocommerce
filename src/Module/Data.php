@@ -1559,6 +1559,10 @@ class Data
             return;
         }
 
+        // Checking whether the instance-logger exists or not is vital for instances that has unfinished
+        // configurations. For example, when the module is installed for the first time, there won't be an ecom2
+        // instance until it has been configured. As the module can log information before this happens,
+        // it is also important that we only allow logging, if the instance is ready and available.
         if (isset(Config::$instance->logger) && isset(self::$logger)) {
             self::$logger = Config::$instance->logger;
 
@@ -2578,7 +2582,7 @@ class Data
      */
     public static function isGetAddressSupported(): bool
     {
-        $return = in_array(
+        return in_array(
             self::getCustomerCountry(),
             WordPress::applyFilters(
                 'getCompatibleGetAddressCountries',
@@ -2586,8 +2590,6 @@ class Data
             ),
             true
         );
-
-        return $return;
     }
 
     /**
@@ -2596,15 +2598,19 @@ class Data
      * @return bool|mixed
      * @since 0.0.1.0
      */
-    public static function canUseGetAddressForm()
+    public static function canUseGetAddressForm(): mixed
     {
+        // Section for which merchants can decide if getAddress features should be disabled or not.
         $getAddressDisabled = (bool)WordPress::applyFilters('getAddressDisabled', false);
+
+        // @todo Prior 2.2-filter, that should be considered removed from this release.
         $getAddressFormDefault = (bool)WordPress::applyFiltersDeprecated(
             'resurs_getaddress_enabled',
             self::getResursOption('get_address_form')
         );
         if ($getAddressDisabled) {
             // Filter overrides the config settings.
+            /** @noinspection PhpConditionAlreadyCheckedInspection */
             $getAddressFormDefault = $getAddressDisabled;
         }
 
@@ -2612,24 +2618,31 @@ class Data
     }
 
     /**
+     * Get the current customer type, based on what's in the session. If the current request is based on
+     * POST/GET, this will return the customer type from the updated session.
      * @return CustomerType
      * @throws Exception
      * @since 0.0.1.0
      */
     public static function getCustomerType(): CustomerType
     {
+        // Check and set update values in the session IF they are requested in this current request.
         self::setCustomerTypeToSession();
 
+        // Get the customer type from the session.
         return self::getCustomerTypeFromSession();
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
     private static function setCustomerTypeToSession(): void
     {
         $customerTypeByGetAddress = self::getRequest('resursSsnCustomerType', true);
 
+        // If there is a post/get-request with new customerType-values, make sure the session is
+        // updated before returning it somwhere else.
         if (!empty($customerTypeByGetAddress)) {
             WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
         }
@@ -2748,8 +2761,10 @@ class Data
      */
     private static function getCustomerTypeFromSession(): CustomerType
     {
+        // Fetch customer type from session. If there is a string we will return the customer type as an ecom2-enum.
         $return = WooCommerce::getSessionValue('resursSsnCustomerType');
 
+        // This section translates the incoming above string to the proper enum.
         switch ($return) {
             case 'NATURAL':
                 $return = CustomerType::NATURAL;
@@ -2758,13 +2773,17 @@ class Data
                 $return = CustomerType::LEGAL;
                 break;
             default:
+                // If the session is empty, we will return defaults that is based on the available payment methods.
                 if (WooCommerce::hasMethodsNatural()) {
                     $return = CustomerType::NATURAL;
                 } else {
+                    // If the merchan only have legal payment methods, we will return legal as default.
                     $return = CustomerType::LEGAL;
                 }
         }
 
+        // The return value will remain as is from above, unless we discover a billing company name from the request.
+        // If this happens, the company name should override the first set values.
         $customerTypeByCompanyName = self::getRequest('billing_company', true);
 
         return empty($customerTypeByCompanyName) ? $return : CustomerType::LEGAL;

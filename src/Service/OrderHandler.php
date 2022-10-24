@@ -5,15 +5,13 @@
 namespace ResursBank\Service;
 
 use Exception;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\FormatException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLineCollection;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLine;
-use Resursbank\Ecom\Module\Rco\Models\OrderLine as RcoOrderLine;
-use ResursBank\Exception\MapiCredentialsException;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
@@ -145,7 +143,7 @@ class OrderHandler extends ResursDefault
         //
         // The fee setup was however already in place when this was decided, so instead of removing it, we made
         // this optional in cases where we want it back.
-        if (isset(WC()->cart) && WC()->cart instanceof WC_Cart && Data::isPaymentFeeAllowed()) {
+        if (isset(WC()->cart) && WC()->cart instanceof WC_Cart) {
             $fees = WC()->cart->get_fees();
             if (is_array($fees) && count($fees)) {
                 foreach ($fees as $fee) {
@@ -173,33 +171,35 @@ class OrderHandler extends ResursDefault
 
     /**
      * @return array
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws \JsonException
+     * @throws \ReflectionException
+     * @throws FilesystemException
+     * @throws TranslationException
      */
     public function getMapiShippingRows(): array
     {
-        $return= [];
-        if ($this->cart->get_shipping_total() > 0) {
-            Data::setDeveloperLog(
-                __FUNCTION__,
-                sprintf('Apply shipping fee %s', $this->cart->get_shipping_total())
-            );
+        $shipping = $this->cart->get_shipping_total();
 
-            $return[] = $this->getMapiCustomOrderLine(
+        return !is_float($shipping) || $shipping < 0.01 ? [] : [
+            $this->getMapiCustomOrderLine(
                 orderLineType: OrderLineType::SHIPPING,
                 description: WordPress::applyFilters(
                     filterName: 'getShippingDescription',
-                    value: __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                    value: Translator::translate('shipping-description')
                 ),
-                reference: WordPress::applyFilters('getShippingName', 'shipping'),
+                reference: WordPress::applyFilters(
+                    filterName: 'getShippingReference',
+                    value: Translator::translate('shipping-reference')
+                ),
                 unitAmountIncludingVat: $this->cart->get_shipping_total(),
                 vatRate: round(
-                    $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
+                    $this->cart->get_shipping_tax() / $shipping,
                     wc_get_price_decimals()
                 ) * 100
-            );
-        }
-
-        return $return;
+            )
+        ];
     }
 
     /**
@@ -228,9 +228,9 @@ class OrderHandler extends ResursDefault
 
                 // TODO: Store this information as metadata instead so each order gets handled
                 // TODO: properly in payment management mode.
-                $discardCouponVat = (bool)Data::getResursOption('discard_coupon_vat');
+                $discardCouponVat = (bool)Data::getResursOption(key: 'discard_coupon_vat');
                 $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
-                $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
+                $incTax = 0 - $this->cart->get_coupon_discount_amount($code, ex_tax: false);
                 $vatPct = (($incTax - $exTax) / $exTax) * 100;
 
                 Data::setDeveloperLog(
@@ -245,9 +245,9 @@ class OrderHandler extends ResursDefault
 
                 $return[] = $this->getMapiCustomOrderLine(
                     orderLineType: OrderLineType::DISCOUNT,
-                    description:  WordPress::applyFilters(
-                        'getCouponDescription',
-                        $couponDescription
+                    description: WordPress::applyFilters(
+                        filterName: 'getCouponDescription',
+                        value: $couponDescription
                     ),
                     reference: $coupon->get_id(),
                     unitAmountIncludingVat: 0 - $this->cart->get_coupon_discount_amount(

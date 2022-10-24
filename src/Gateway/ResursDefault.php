@@ -1614,7 +1614,7 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param int $order_id
+     * @param $order_id
      * @return array
      * @throws Exception
      * @since 0.0.1.0
@@ -1818,81 +1818,13 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array
      * @throws Exception
      */
-    private function processResursOrder($order): array
+    private function processResursOrder(WC_Order $order): array
     {
-        $return = [];
-        // By setting checkoutRequestType dynamically like this, our intentions is to make i easier
-        // to implement new checkout types in the future.
-        $checkoutRequestType = sprintf('process%s', ucfirst(Data::getCheckoutType()));
-        // Available options: simplified, hosted, rco. Methods should exists for each of them.
-        if (method_exists($this, $checkoutRequestType)) {
-            WooCommerce::setOrderNote(
-                $this->order,
-                sprintf(
-                    __('Resurs Bank processing order (%s).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    $checkoutRequestType
-                )
-            );
-            // Automatically process orders with a checkout type that is supported by this plugin.
-            // Checkout types will become available as the method starts to exist.
-
-            Data::writeLogEvent(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
-                    __(
-                        '%s: Initialize Resurs Bank process, order %s (%s) via %s.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    __FUNCTION__,
-                    $this->order->get_id(),
-                    $this->getOrderReference(),
-                    $checkoutRequestType
-                )
-            );
-
-            $return = $this->{$checkoutRequestType}($order);
+        if (Data::getCheckoutType() !== ResursDefault::TYPE_RCO) {
+            $return = $this->processSimplified();
         } else {
-            Data::writeLogError(
-                sprintf(
-                    'Merchant is trying to run this plugin with an unsupported checkout type (%s).',
-                    $checkoutRequestType
-                )
-            );
-            throw new RuntimeException(
-                __(
-                    'Chosen checkout type is currently unsupported'
-                ),
-                404
-            );
-        }
-
-        // $return should at this moment contain an array with a result and redirect-url:
-        // [result => success|failure, redirect => url]
-
-        if (is_array($return) && count($return)) {
-            Data::writeLogEvent(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
-                    __(
-                        '%s: Order %s returned "%s" to WooCommerce.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    __FUNCTION__,
-                    $order->get_id(),
-                    $return['result'] ?? 'failure'
-                )
-            );
-        } else {
-            Data::writeLogError(
-                sprintf(
-                    __(
-                        '$return is not an object as expected in function %s (Checkout request type is %s).',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    __FUNCTION__,
-                    $checkoutRequestType
-                )
-            );
+            // @todo Handle RCO.
+            //$return = $this->processRco($order);
         }
 
         if (!isset($return['result'])) {
@@ -1979,7 +1911,6 @@ class ResursDefault extends WC_Payment_Gateway
                             $finalRedirectUrl = $this->get_return_url($this->order);
                         }
                         break;
-                    case self::TYPE_HOSTED:
                     case self::TYPE_RCO:
                         // Logging for specific flow.
                         if ($this->getCheckoutType() === self::TYPE_RCO) {
@@ -2123,17 +2054,15 @@ class ResursDefault extends WC_Payment_Gateway
      * Final signing: Checks and update order if signing was required initially. Let it through on hosted but
      * keep logging the details.
      *
-     * @return bool
+     * @return bool|array
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setFinalSigning()
+    private function setFinalSigning(): bool|array
     {
         $return = false;
         try {
-            if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order)) ||
-                $this->getCheckoutType() === self::TYPE_HOSTED
-            ) {
+            if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order))) {
                 $bookSignedOrderReference = Data::getOrderMeta('resursReference', $this->wcOrderData);
                 // This part of the plugin is intended to save performance by not running bookSignedPayment if
                 // callbacks are reaching the platform before the customer landing.
@@ -2161,10 +2090,13 @@ class ResursDefault extends WC_Payment_Gateway
 
                     // Signing is only necessary for simplified flow.
                     if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
-                        $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
+                        // @todo SOAP returned an array with a status after bookSignedPayment, but MAPI
+                        // @todo differs slightly in this process. This is where we preferably handle signings which
+                        // @todo aso means that getResultByPaymentStatus can be replaced.
+                        /*$this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
                             $bookSignedOrderReference
                         );
-                        $return = $this->getResultByPaymentStatus();
+                        $return = $this->getResultByPaymentStatus();*/
                     }
                 }
             } else {
@@ -2215,11 +2147,11 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @return mixed
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function getResultByPaymentStatus()
+    private function getResultByPaymentStatus(): array
     {
         $bookPaymentStatus = $this->getBookPaymentStatus();
         Data::writeLogEvent(
@@ -2633,12 +2565,12 @@ class ResursDefault extends WC_Payment_Gateway
      * #1 Prepare order
      * #2 Create order
      * #3 Log, handle and return response
-     * @return mixed
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection PhpUnusedPrivateMethodInspection
      */
-    private function processSimplified()
+    private function processSimplified(): array
     {
         // Create order, but skip using the order reference that is used from WooCommerce.
         // This avoids order id collisions when we're on a network site where several stores may have
@@ -2649,19 +2581,6 @@ class ResursDefault extends WC_Payment_Gateway
             orderLines: $this->getOrderLinesMapi(),
         );
         $this->setCreatePaymentNotice(__FUNCTION__);
-
-        // Section #3: Log, handle and return response
-        //Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->getBookPaymentStatus());
-        Data::writeLogEvent(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                '%s: %s:bookPaymentStatus:%s, signingUrl: %s',
-                __FUNCTION__,
-                $this->getOrderReference(),
-                $this->getBookPaymentStatus(),
-                $this->getBookSigningUrl()
-            )
-        );
 
         // Return booking result.
         return $this->getResultByPaymentStatus();
