@@ -84,7 +84,7 @@
     }
   },
   {
-    "id": "default-unit",
+    "id": "default-quantity-unit",
     "translation": {
       "en": "pcs",
       "fi": "kpl",
