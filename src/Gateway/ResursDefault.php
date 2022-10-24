@@ -12,6 +12,7 @@ use Exception;
 use JsonException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Locale\Translation;
 use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Module\Payment\Api\Create;
@@ -43,6 +44,8 @@ use function function_exists;
 use function in_array;
 use function is_array;
 use function is_object;
+use function sha1;
+use function uniqid;
 
 /**
  * Default payment method class. Handles payments and orders dynamically, with focus on less loss
@@ -881,31 +884,31 @@ class ResursDefault extends WC_Payment_Gateway
         Data::setOrderMeta($order, 'checkoutType', Data::getCheckoutType());
         Data::setOrderMeta($order, 'apiDataId', $this->apiDataId);
         Data::setOrderMeta($order, 'orderSigningPayload', $this->getApiData());
-        Data::setOrderMeta($order, 'resursReference', $this->getPaymentId());
+        Data::setOrderMeta($order, 'resursReference', $this->getOrderReference());
         if (!empty(Data::getPaymentMethodBySession())) {
             Data::setOrderMeta($order, 'paymentMethod', Data::getPaymentMethodBySession());
         }
     }
 
     /**
+     * Resolve payment id to use at Resurs Bank. If the order has not yet been created, use a temporary ID
+     * which will later be replaced by the order id.
+     *
      * @param WC_Order|null $order
      * @return string
      * @since 0.0.1.0
      * @noinspection SpellCheckingInspection
      */
-    private function getPaymentId(WC_Order $order = null): string
+    private function getOrderReference(null|WC_Order $order = null): string
     {
-        // Make sure we get through this section even if the order is not yet ready from WooCommerce.
-        // TODO: Change this.
-        $return = sha1(uniqid('payment', true));
-
-        if (Data::getCheckoutType() === self::TYPE_RCO) {
-            // TODO: The prior payment id has been removed and can no longer be fetched through the session nor header.
-            // TODO: Reinstate the ability to create an order id on the fly.
-        }
+        $return = 0;
 
         if ($order instanceof WC_Order) {
             $return = $order->get_id();
+        }
+
+        if (!is_int($return) || $return === 0) {
+            $return = sha1(uniqid('payment', true));
         }
 
         return $return;
@@ -1226,7 +1229,7 @@ class ResursDefault extends WC_Payment_Gateway
         return new OrderLine(
             description: $description,
             reference: $reference,
-            quantityUnit: 'st',
+            quantityUnit: new Translation(),
             quantity: $quantity,
             vatRate: $vatRate,
             unitAmountIncludingVat: $unitAmountIncludingVat,
@@ -1725,7 +1728,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
                     WooCommerce::applyMock('updatePaymentReferenceFailure');
-                    $newPaymentId = $this->getPaymentId();
+                    $newPaymentId = $this->getOrderReference();
                     if ($idBeforeChange !== $newPaymentId) {
                         ResursBankAPI::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
                         Data::setOrderMeta(
@@ -1796,7 +1799,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function preProcessOrder(WC_Order $order): void
     {
         $this->apiData['wc_order_id'] = $order->get_id();
-        $this->apiData['preferred_id'] = $this->getPaymentId();
+        $this->apiData['preferred_id'] = $this->getOrderReference();
         Data::setDeveloperLog(
             __FUNCTION__,
             sprintf(
@@ -1840,7 +1843,7 @@ class ResursDefault extends WC_Payment_Gateway
                     ),
                     __FUNCTION__,
                     $this->order->get_id(),
-                    $this->getPaymentId(),
+                    $this->getOrderReference(),
                     $checkoutRequestType
                 )
             );
@@ -2653,7 +2656,7 @@ class ResursDefault extends WC_Payment_Gateway
             sprintf(
                 '%s: %s:bookPaymentStatus:%s, signingUrl: %s',
                 __FUNCTION__,
-                $this->getPaymentId(),
+                $this->getOrderReference(),
                 $this->getBookPaymentStatus(),
                 $this->getBookSigningUrl()
             )
