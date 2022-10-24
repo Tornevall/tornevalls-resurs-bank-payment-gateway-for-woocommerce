@@ -32,8 +32,8 @@ class Metadata extends Model
         private readonly StringValidation $stringValidation = new StringValidation(),
         private readonly ArrayValidation $arrayValidation = new ArrayValidation(),
     ) {
-        $this->validateCreator();
-        $this->validateCustom();
+        //$this->validateCreator();
+        //$this->validateCustom();
     }
 
     /**

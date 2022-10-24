@@ -40,5 +40,57 @@
       "en": "No payment methods.",
       "sv": "Inga betalningsmetoder."
     }
+  },
+  {
+    "id": "resurs-checkout",
+    "translation": {
+      "en": "Resurs Checkout",
+      "sv": "Resurs Checkout"
+    }
+  },
+  {
+    "id": "resurs-bank",
+    "translation": {
+      "en": "Resurs Bank",
+      "sv": "Resurs Bank"
+    }
+  },
+  {
+    "id": "plugin-and-account-settings",
+    "translation": {
+      "en": "Plugin and account settings",
+      "sv": "Plugin- och kontoinställningar"
+    }
+  },
+  {
+    "id": "cart-is-empty",
+    "translation": {
+      "en": "Cart is empty!",
+      "sv": "Kundvagnen är tom!"
+    }
+  },
+  {
+    "id": "could-not-complete-your-order-please-contact-support",
+    "translation": {
+      "en": "Could not complete your order. Please contact support for more information.",
+      "sv": "Kunde inte slutföra din beställning. Vänligen kontakta kundtjänst för mer information."
+    }
+  },
+  {
+    "id": "could-not-complete-order-due-to-a-signing-problem",
+    "translation": {
+      "en": "Could not complete order due to a signing problem.",
+      "sv": "Kunde inte slutföra beställningen på grund av ett signeringsproblem."
+    }
+  },
+  {
+    "id": "default-unit",
+    "translation": {
+      "en": "pcs",
+      "fi": "kpl",
+      "sv": "st",
+      "da": "st",
+      "no": "st"
+    }
   }
 ]
