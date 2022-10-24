@@ -18,6 +18,7 @@ class ComposerStaticInite5375fae031fcc6a461d9d1d2d7a4670
         ),
         'R' => 
         array (
+            'Resursbank\\Woocommerce\\' => 23,
             'Resursbank\\RBEcomPHP\\' => 21,
             'Resursbank\\Ecommerce\\' => 21,
             'Resursbank\\Ecom\\' => 16,
@@ -28,14 +29,18 @@ class ComposerStaticInite5375fae031fcc6a461d9d1d2d7a4670
     public static $prefixDirsPsr4 = array (
         'TorneLIB\\' => 
         array (
-            0 => __DIR__ . '/..' . '/tornevall/tornelib-php-errorhandler/src',
-            1 => __DIR__ . '/..' . '/tornevall/tornelib-php-version/src',
+            0 => __DIR__ . '/..' . '/tornevall/tornelib-php-crypto/src',
+            1 => __DIR__ . '/..' . '/tornevall/tornelib-php-errorhandler/src',
             2 => __DIR__ . '/..' . '/tornevall/tornelib-php-flags/src',
-            3 => __DIR__ . '/..' . '/tornevall/tornelib-php-utils/src',
-            4 => __DIR__ . '/..' . '/tornevall/tornelib-php-io/src',
-            5 => __DIR__ . '/..' . '/tornevall/tornelib-php-crypto/src',
-            6 => __DIR__ . '/..' . '/tornevall/tornelib-php-netcurl/src',
-            7 => __DIR__ . '/..' . '/tornevall/tornelib-php-network/src',
+            3 => __DIR__ . '/..' . '/tornevall/tornelib-php-io/src',
+            4 => __DIR__ . '/..' . '/tornevall/tornelib-php-netcurl/src',
+            5 => __DIR__ . '/..' . '/tornevall/tornelib-php-network/src',
+            6 => __DIR__ . '/..' . '/tornevall/tornelib-php-utils/src',
+            7 => __DIR__ . '/..' . '/tornevall/tornelib-php-version/src',
+        ),
+        'Resursbank\\Woocommerce\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
         'Resursbank\\RBEcomPHP\\' => 
         array (
