@@ -6,19 +6,25 @@ use Exception;
 use Resursbank\Ecom\Config;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use Resursbank\Woocommerce\Database\Options\ClientId;
+use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
+use Resursbank\Woocommerce\Settings\Advanced;
+use Resursbank\Woocommerce\Settings\Api;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
 use WC_Logger;
 use WP_Post;
+
 use function count;
 use function defined;
 use function func_get_args;
 use function is_array;
 
 /**
- * Class WordPress WordPress related actions.
+ * Class WordPress related actions.
  *
  * @package ResursBank
  * @since 0.0.1.0
@@ -37,18 +43,25 @@ class WordPress
 
         // Make sure Ecom2 is loaded as soon as possible.
         new ResursBankAPI();
+
         // Initialize adaptions.
         new ResursPlugin();
 
+        Config::setup(
+            logger: Advanced::getLogger(),
+            cache: Advanced::getCache(),
+            jwtAuth: Api::getJwt()
+        );
+
         // Always initialize defaults once on plugin loaded (performance saver).
-        Data::getDefaultsInit();
+//         Data::getDefaultsInit();
         self::setupAjaxActions();
         self::setupFilters();
         self::setupScripts();
         self::setupActions();
         self::setupWoocommerceAdminActions();
         self::setupWoocommerceCheckoutActions();
-        WordPress::doAction('isLoaded', true);
+        self::doAction('isLoaded', true);
     }
 
     /**

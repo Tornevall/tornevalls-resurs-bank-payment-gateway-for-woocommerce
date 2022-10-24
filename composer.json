@@ -29,7 +29,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "ResursBank\\": "src/"
+            "ResursBank\\": "src/",
+            "Resursbank\\Woocommerce\\": "src/"
         }
     }
 }
