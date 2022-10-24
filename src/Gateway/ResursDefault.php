@@ -1024,8 +1024,10 @@ class ResursDefault extends WC_Payment_Gateway
      * @return $this
      * @throws Exception
      * @since 0.0.1.0
+     * @todo This is more likely to return a string and still includes a lot of old stuff covering ecom1.
+     * @todo That must be fixed.
      */
-    private function getProperPaymentId(bool $forceNew = false)
+    private function getProperPaymentId(bool $forceNew = false): static
     {
         $paymentId = $this->API->getConnection()->getPreferredPaymentId();
 
