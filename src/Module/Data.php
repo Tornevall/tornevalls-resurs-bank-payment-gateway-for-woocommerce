@@ -760,20 +760,21 @@ class Data
     {
         global $woocommerce;
 
-        $return = '';
-
         /**
          * @var WC_Customer $wcCustomer
          */
         $wcCustomer = $woocommerce->customer;
 
+        $return = WordPress::applyFilters(
+            filterName: 'getDefaultCountry',
+            value: get_option('woocommerce_default_country')
+        );
+
         if ($wcCustomer instanceof WC_Customer) {
             $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
-            $return = !empty($woocommerceCustomerCountry) ?
-                $woocommerceCustomerCountry : WordPress::applyFilters(
-                    'getDefaultCountry',
-                    get_option('woocommerce_default_country')
-                );
+            if (!empty($woocommerceCustomerCountry)) {
+                $return = $woocommerceCustomerCountry;
+            }
         }
 
         return $return;

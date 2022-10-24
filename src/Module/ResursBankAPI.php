@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Locale\Locale;
 use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -109,6 +110,7 @@ class ResursBankAPI
      * @throws EmptyValueException
      * @throws FormatException
      * @throws MapiCredentialsException
+     * @throws Exception
      * @since 0.0.1.0
      */
     public function getConnection(): void
@@ -139,6 +141,14 @@ class ResursBankAPI
             );
         }
 
+        switch (Data::getCustomerCountry()) {
+            case 'SE':
+                $locale = Locale::sv;
+                break;
+            default:
+                $locale = Locale::en;
+        }
+
         Config::setup(
             logger: $fileLogger,
             cache: new None(),
@@ -147,7 +157,8 @@ class ResursBankAPI
                 clientSecret: $this->getClientSecret(),
                 scope: $scope,
                 grantType: $grantType
-            )
+            ),
+            locale: $locale
         );
     }
 

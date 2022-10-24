@@ -12,7 +12,7 @@ use Exception;
 use JsonException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Locale\Translation;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Module\Payment\Api\Create;
@@ -31,7 +31,6 @@ use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
 use stdClass;
-use Symfony\Component\CssSelector\XPath\Translator;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\Domain;
 use TorneLIB\Utils\Generic;
@@ -1230,8 +1229,8 @@ class ResursDefault extends WC_Payment_Gateway
         return new OrderLine(
             description: $description,
             reference: $reference,
-            quantityUnit: 'st',
-            quantity: $quantity,
+            quantityUnit: Translator::translate('default-quantity-unit'),
+            quantity: (float)$quantity,
             vatRate: $vatRate,
             unitAmountIncludingVat: $unitAmountIncludingVat,
             totalAmountIncludingVat: $totalAmountIncludingVat,
