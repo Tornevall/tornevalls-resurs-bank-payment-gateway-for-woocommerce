@@ -276,10 +276,10 @@ class WooCommerce
 
     /**
      * @param bool $returnCart
-     * @return array|bool|WC_Cart
+     * @return bool|array
      * @since 0.0.1.0
      */
-    public static function getValidCart($returnCart = false)
+    public static function getValidCart(bool $returnCart = false): bool|array
     {
         $return = false;
 
@@ -296,7 +296,7 @@ class WooCommerce
     }
 
     /**
-     * Self aware setup link.
+     * Self-aware setup link.
      *
      * @param $links
      * @param $file
@@ -1358,7 +1358,6 @@ class WooCommerce
      * Since ecom2 does not want trailing slashes in its logger, we use this method to trim away
      * all trailing slashes.
      * @return string
-     * @since 0.0.1.9
      */
     public static function getPluginLogDir(): string
     {

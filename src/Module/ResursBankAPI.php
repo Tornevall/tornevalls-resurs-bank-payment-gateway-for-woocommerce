@@ -164,7 +164,6 @@ class ResursBankAPI
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientId(): string
     {
@@ -174,7 +173,6 @@ class ResursBankAPI
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientSecret(): string
     {
@@ -251,7 +249,6 @@ class ResursBankAPI
      * @throws ReflectionException
      * @throws StoreException
      * @throws ValidationException
-     * @since 0.0.1.9
      */
     public static function getStoreUuidByNationalId(int $storeId): string
     {
@@ -284,7 +281,6 @@ class ResursBankAPI
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
-     * @since 0.0.1.9
      */
     public static function getStoreCollection(): array
     {
@@ -474,7 +470,6 @@ class ResursBankAPI
      * @throws ValidationException
      * @throws JsonException
      * @throws ReflectionException
-     * @since 0.0.1.9
      */
     public static function getRenderedStores(): array
     {
@@ -627,7 +622,6 @@ class ResursBankAPI
     /**
      * @return bool
      * @throws Exception
-     * @since 0.0.1.9
      */
     private function getResolvedCredentials(): bool
     {

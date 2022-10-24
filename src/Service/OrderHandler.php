@@ -81,7 +81,6 @@ class OrderHandler extends ResursDefault
      * @return OrderLineCollection
      * @throws IllegalTypeException
      * @throws Exception
-     * @since 0.0.1.9
      */
     public function getPreparedMapiOrderLines(): OrderLineCollection
     {
@@ -97,13 +96,12 @@ class OrderHandler extends ResursDefault
 
     /**
      * @throws Exception
-     * @since 0.0.1.9
      */
     public function getMapiArticleRows(): array
     {
         $return = [];
 
-        if (WooCommerce::getValidCart()) {
+        if (WooCommerce::getValidCart(true)) {
             /** @var WC_Cart $cartList */
             $cartList = WooCommerce::getValidCart(true);
             foreach ($cartList as $item) {
@@ -124,7 +122,7 @@ class OrderHandler extends ResursDefault
                     $return[] = $this->getMapiOrderProductRow(
                         orderLineType: OrderLineType::PHYSICAL_GOODS,
                         productData: $productData,
-                        item: $item
+                        wcProductItem: $item
                     );
                 }
             }
@@ -135,7 +133,6 @@ class OrderHandler extends ResursDefault
 
     /**
      * @throws IllegalValueException
-     * @since 0.0.1.9
      */
     public function getMapiFeeRows(): array
     {
@@ -177,7 +174,6 @@ class OrderHandler extends ResursDefault
     /**
      * @return array
      * @throws IllegalValueException
-     * @since 0.0.1.9
      */
     public function getMapiShippingRows(): array
     {
@@ -209,7 +205,6 @@ class OrderHandler extends ResursDefault
     /**
      * @return array
      * @throws IllegalValueException
-     * @since 0.0.1.9
      */
     public function getMapiCouponRows(): array
     {
@@ -419,7 +414,7 @@ class OrderHandler extends ResursDefault
                     $this->getMapiOrderProductRow(
                         orderLineType: OrderLineType::PHYSICAL_GOODS,
                         productData: $productData,
-                        item: $item
+                        wcProductItem: $item
                     );
                 }
             }

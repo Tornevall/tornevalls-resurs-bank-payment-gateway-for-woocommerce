@@ -943,8 +943,6 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @return $this
-     * @throws ResursException
-     * @throws Exception
      * @since 0.0.1.0
      */
     private function setCustomerId(): self
@@ -961,9 +959,9 @@ class ResursDefault extends WC_Payment_Gateway
             );
 
             /**
-             * @todo set meta data when meta data is available in MAPI.
+             * @todo set meta data when meta data is available in MAPI for externalCustomerId.
+             * @todo For RCO it is still CustomerId.
              */
-            //$this->API->getConnection()->setMetaData('CustomerId', $customerId);
         }
         return $this;
     }
@@ -1171,34 +1169,37 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @param OrderLineType $orderLineType
      * @param WC_Product $productData
-     * @param array $item
+     * @param array $wcProductItem Product item details from WooCommerce, contains the extended data that can't be found in WC_Product.
      * @return OrderLine
      * @throws IllegalValueException
      * @throws Exception
-     * @since 0.0.1.9
      */
-    public function getMapiOrderProductRow(OrderLineType $orderLineType, WC_Product $productData, array $item): OrderLine
+    public function getMapiOrderProductRow(OrderLineType $orderLineType, WC_Product $productData, array $wcProductItem): OrderLine
     {
         return new OrderLine(
-            description: $this->getFromProduct(getValueType: 'title', productObject: $productData, item: $item),
-            reference: $this->getFromProduct(getValueType: 'reference', productObject: $productData, item: $item),
-            quantityUnit: $this->getFromProduct(getValueType: 'quantityUnit', productObject: $productData, item: $item),
-            quantity: $item['quantity'],
-            vatRate: $this->getFromProduct(getValueType: 'vatRate', productObject: $productData, item: $item),
+            description: $this->getFromProduct(getValueType: 'title', productObject: $productData, wcProductItemData: $wcProductItem),
+            reference: $this->getFromProduct(getValueType: 'reference', productObject: $productData, wcProductItemData: $wcProductItem),
+            quantityUnit: $this->getFromProduct(
+                getValueType: 'quantityUnit',
+                productObject: $productData,
+                wcProductItemData: $wcProductItem
+            ),
+            quantity: $wcProductItem['quantity'],
+            vatRate: $this->getFromProduct(getValueType: 'vatRate', productObject: $productData, wcProductItemData: $wcProductItem),
             unitAmountIncludingVat: $this->getFromProduct(
                 getValueType: 'unitAmountWithVat',
                 productObject: $productData,
-                item: $item
+                wcProductItemData: $wcProductItem
             ),
             totalAmountIncludingVat: $this->getFromProduct(
                 getValueType: 'totalAmountWithVat',
                 productObject: $productData,
-                item: $item
+                wcProductItemData: $wcProductItem
             ),
             totalVatAmount: $this->getFromProduct(
                 getValueType: 'totalVatAmount',
                 productObject: $productData,
-                item: $item
+                wcProductItemData: $wcProductItem
             ),
             type: $orderLineType
         );
@@ -1242,13 +1243,16 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @param string $getValueType
      * @param WC_Product $productObject
-     * @param array $item
+     * @param array $wcProductItemData
      * @return float|int|string
      * @since 0.0.1.0
      */
-    protected function getFromProduct(string $getValueType, WC_Product $productObject, array $item = []): float|int|string
+    protected function getFromProduct(string $getValueType, WC_Product $productObject, array $wcProductItemData = []): float|int|string
     {
         $return = '';
+
+        // $wcProductItemData always returns same information for at product. The data here can always be expected
+        // based on the content from WC_Order_Item (see $extra_data in WC_Order_Item).
 
         // If you see multiple cases, this is mostly used for the backward compatibility of the old RCO API.
         switch ($getValueType) {
@@ -1269,16 +1273,16 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'totalAmountWithVat':
             case 'totalAmountIncludingVat':
-                $return = wc_get_price_including_tax($productObject, ['qty' => $item['quantity']]);
+                $return = wc_get_price_including_tax($productObject, ['qty' => $wcProductItemData['quantity']]);
                 break;
             case 'unitAmountWithoutVat':
                 // Special reflection of what Resurs Bank wants.
                 $return = wc_get_price_excluding_tax($productObject);
                 break;
             case 'totalVatAmount':
-                $return = wc_get_price_including_tax($productObject, ['qty' => $item['quantity']]) - wc_get_price_excluding_tax(
+                $return = wc_get_price_including_tax($productObject, ['qty' => $wcProductItemData['quantity']]) - wc_get_price_excluding_tax(
                         $productObject,
-                        ['qty' => $item['quantity']]
+                        ['qty' => $wcProductItemData['quantity']]
                     );
                 break;
             case 'vatPct':
@@ -1287,8 +1291,7 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'quantityUnit':
                 // Using default measure from ECom for now.
-                // TODO: Make this configurable.
-                $return = 'st';
+                $return = Translator::translate('default-quantity-unit');
                 break;
             default:
                 if (method_exists($productObject, sprintf('get_%s', $getValueType))) {
@@ -1593,7 +1596,6 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @param $paymentMethod
      * @return bool
-     * @since 0.0.1.9
      */
     public static function isInternalMethod($paymentMethod): bool
     {
@@ -2568,7 +2570,6 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @return OrderLineCollection
      * @throws IllegalTypeException
-     * @since 0.0.1.9
      */
     private function getOrderLinesMapi(): OrderLineCollection
     {

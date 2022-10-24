@@ -2813,7 +2813,6 @@ class Data
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientId(): string {
         return Data::getResursOption('environment') === 'test' ?
@@ -2822,7 +2821,6 @@ class Data
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientSecret(): string
     {
@@ -2977,7 +2975,6 @@ class Data
 
     /**
      * @return int
-     * @since 0.0.1.9
      */
     public static function getStoreId(): int
     {
