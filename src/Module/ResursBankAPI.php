@@ -350,7 +350,6 @@ class ResursBankAPI
                     // plugin to live without the access to Resurs Bank.
                     self::$annuityFactors = $stored;
                 } else {
-                    Data::setTimeoutStatus(self::getResurs());
                     throw $e;
                 }
             }
@@ -437,7 +436,6 @@ class ResursBankAPI
                     // plugin to live without the access to Resurs Bank.
                     self::$callbacks = (array)$stored;
                 } else {
-                    Data::setTimeoutStatus(self::getResurs(), $e);
                     // We do not want to reset on errors, right?
                     //Data::setResursOption('callbacks', null);
                     throw $e;
@@ -644,7 +642,6 @@ class ResursBankAPI
         } catch (Exception $e) {
             $return = false;
             if ($e->getCode() !== Data::UNSET_CREDENTIALS_EXCEPTION) {
-                Data::setTimeoutStatus(self::getResurs(), $e);
                 Data::writeLogException($e, __FUNCTION__);
             }
         }

@@ -1,7 +1,6 @@
 <?php
 
 /** @noinspection PhpUndefinedFieldInspection */
-
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
 namespace ResursBank\Service;
@@ -1270,13 +1269,13 @@ class WooCommerce
     }
 
     /**
-     * v3core: Checkout vs Cart Manipulation - A moment when customer is not in checkout.
+     * v3core: Checkout vs Cart Manipulation - A watchguard for that moment, when customer is not in checkout.
      *
      * @since 0.0.1.0
      */
-    public static function setAddToCart()
+    public static function setAddToCart(): void
     {
-        self::setCustomerCheckoutLocation(false);
+        self::setCustomerCheckoutLocation(customerIsInCheckout: false);
     }
 
     /**

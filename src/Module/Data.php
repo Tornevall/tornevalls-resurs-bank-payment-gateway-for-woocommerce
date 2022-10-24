@@ -5,10 +5,13 @@
 
 namespace ResursBank\Module;
 
+use Cassandra\Custom;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
@@ -1555,25 +1558,25 @@ class Data
             return;
         }
 
-        if (empty(self::$logger)) {
+        if (isset(Config::$instance->logger) && isset(self::$logger)) {
             self::$logger = Config::$instance->logger;
-        }
 
-        switch ($logLevel) {
-            case LogLevel::INFO:
-                self::$logger->info($message);
-                break;
-            case LogLevel::DEBUG:
-                self::$logger->debug($message);
-                break;
-            case LogLevel::ERROR:
-                self::$logger->error($message);
-                break;
-            case LogLevel::WARNING:
-                self::$logger->warning($message);
-                break;
-            default:
-                self::$logger->info($message);
+            switch ($logLevel) {
+                case LogLevel::INFO:
+                    self::$logger->info($message);
+                    break;
+                case LogLevel::DEBUG:
+                    self::$logger->debug($message);
+                    break;
+                case LogLevel::ERROR:
+                    self::$logger->error($message);
+                    break;
+                case LogLevel::WARNING:
+                    self::$logger->warning($message);
+                    break;
+                default:
+                    self::$logger->info($message);
+            }
         }
     }
 
@@ -1997,9 +2000,6 @@ class Data
         switch ($currentCheckoutType) {
             case 'simplified':
                 $return = ResursDefault::TYPE_SIMPLIFIED;
-                break;
-            case 'hosted':
-                $return = ResursDefault::TYPE_HOSTED;
                 break;
             case 'rco':
                 $return = ResursDefault::TYPE_RCO;
@@ -2611,11 +2611,11 @@ class Data
     }
 
     /**
-     * @return string
+     * @return CustomerType
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getCustomerType()
+    public static function getCustomerType(): CustomerType
     {
         self::setCustomerTypeToSession();
 
@@ -2625,7 +2625,7 @@ class Data
     /**
      * @since 0.0.1.0
      */
-    private static function setCustomerTypeToSession()
+    private static function setCustomerTypeToSession(): void
     {
         $customerTypeByGetAddress = self::getRequest('resursSsnCustomerType', true);
 
@@ -2741,26 +2741,32 @@ class Data
     }
 
     /**
-     * @return array|mixed|string|null
+     * @return CustomerType
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getCustomerTypeFromSession()
+    private static function getCustomerTypeFromSession(): CustomerType
     {
         $return = WooCommerce::getSessionValue('resursSsnCustomerType');
 
-        // If this is empty, it has not been pre-selected.
-        if (empty($return)) {
-            if (WooCommerce::hasMethodsNatural()) {
-                $return = 'NATURAL';
-            } else {
-                $return = 'LEGAL';
-            }
+        switch ($return) {
+            case 'NATURAL':
+                $return = CustomerType::NATURAL;
+                break;
+            case 'LEGAL':
+                $return = CustomerType::LEGAL;
+                break;
+            default:
+                if (WooCommerce::hasMethodsNatural()) {
+                    $return = CustomerType::NATURAL;
+                } else {
+                    $return = CustomerType::LEGAL;
+                }
         }
 
         $customerTypeByCompanyName = self::getRequest('billing_company', true);
 
-        return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+        return empty($customerTypeByCompanyName) ? $return : CustomerType::LEGAL;
     }
 
     /**

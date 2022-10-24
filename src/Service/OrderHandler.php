@@ -5,6 +5,15 @@
 namespace ResursBank\Service;
 
 use Exception;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\FormatException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLineCollection;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLine;
+use Resursbank\Ecom\Module\Rco\Models\OrderLine as RcoOrderLine;
+use ResursBank\Exception\MapiCredentialsException;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
@@ -28,7 +37,7 @@ class OrderHandler extends ResursDefault
      * @var array
      * @since 0.0.1.0
      */
-    private static $getAddressTranslation = [
+    private static array $getAddressTranslation = [
         'first_name' => 'firstName',
         'last_name' => 'lastName',
         'address_1' => 'addressRow1',
@@ -55,16 +64,207 @@ class OrderHandler extends ResursDefault
     public function setPreparedOrderLines(): self
     {
         // @todo WOO-764
-        // Reactivate the payload storage again.
-        return $this;
 
+        // Reactivate this when it feels all right again (RCO?).
+        /*
         $this
             ->setOrderRows()
             ->setCoupon()
             ->setShipping()
             ->setFee();
+        */
 
         return $this;
+    }
+
+    /**
+     * @return OrderLineCollection
+     * @throws IllegalTypeException
+     * @throws Exception
+     * @since 0.0.1.9
+     */
+    public function getPreparedMapiOrderLines(): OrderLineCollection
+    {
+        return new OrderLineCollection(
+            data: array_merge(
+                $this->getMapiArticleRows(),
+                $this->getMapiShippingRows(),
+                $this->getMapiCouponRows(),
+                $this->getMapiFeeRows()
+            )
+        );
+    }
+
+    /**
+     * @throws Exception
+     * @since 0.0.1.9
+     */
+    public function getMapiArticleRows(): array
+    {
+        $return = [];
+
+        if (WooCommerce::getValidCart()) {
+            /** @var WC_Cart $cartList */
+            $cartList = WooCommerce::getValidCart(true);
+            foreach ($cartList as $item) {
+                /**
+                 * Data object is of type WC_Product_Simple actually.
+                 * @var WC_Product $productData
+                 */
+                $productData = $item['data'];
+
+                if ($productData !== null) {
+                    Data::setDeveloperLog(
+                        __FUNCTION__,
+                        sprintf(
+                            'Add order line %s.',
+                            $productData->get_id()
+                        )
+                    );
+                    $return[] = $this->getMapiOrderProductRow(
+                        orderLineType: OrderLineType::PHYSICAL_GOODS,
+                        productData: $productData,
+                        item: $item
+                    );
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @throws IllegalValueException
+     * @since 0.0.1.9
+     */
+    public function getMapiFeeRows(): array
+    {
+        $return = [];
+
+        // In an initial state of this build, we decided to not in include fee's in the order lines for some
+        // reasons. One reason was that the fee's in WooCommerce potentially could conflict with future fee's
+        // set at Resurs Bank. The setup with fee's has also been considered not recommended, since they
+        // sometimes are not allowed to be in use anyway.
+        //
+        // The fee setup was however already in place when this was decided, so instead of removing it, we made
+        // this optional in cases where we want it back.
+        if (isset(WC()->cart) && WC()->cart instanceof WC_Cart && Data::isPaymentFeeAllowed()) {
+            $fees = WC()->cart->get_fees();
+            if (is_array($fees) && count($fees)) {
+                foreach ($fees as $fee) {
+                    Data::setDeveloperLog(
+                        __FUNCTION__,
+                        sprintf('Apply payment fee %s', $fee->amount)
+                    );
+
+                    $return[] = $this->getMapiCustomOrderLine(
+                        orderLineType: OrderLineType::FEE,
+                        description: $fee->name,
+                        reference: $fee->id,
+                        unitAmountIncludingVat: $fee->amount,
+                        vatRate: round(
+                            $fee->tax / $fee->total,
+                            wc_get_price_decimals()
+                        ) * 100
+                    );
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return array
+     * @throws IllegalValueException
+     * @since 0.0.1.9
+     */
+    public function getMapiShippingRows(): array
+    {
+        $return= [];
+        if ($this->cart->get_shipping_total() > 0) {
+            Data::setDeveloperLog(
+                __FUNCTION__,
+                sprintf('Apply shipping fee %s', $this->cart->get_shipping_total())
+            );
+
+            $return[] = $this->getMapiCustomOrderLine(
+                orderLineType: OrderLineType::SHIPPING,
+                description: WordPress::applyFilters(
+                    filterName: 'getShippingDescription',
+                    value: __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                ),
+                reference: WordPress::applyFilters('getShippingName', 'shipping'),
+                unitAmountIncludingVat: $this->cart->get_shipping_total(),
+                vatRate: round(
+                    $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
+                    wc_get_price_decimals()
+                ) * 100
+            );
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return array
+     * @throws IllegalValueException
+     * @since 0.0.1.9
+     */
+    public function getMapiCouponRows(): array
+    {
+        $return = [];
+
+        if (wc_coupons_enabled()) {
+            $coupons = $this->cart->get_coupons();
+
+            /**
+             * @var string $code
+             * @var WC_Coupon $coupon
+             */
+            foreach ($coupons as $code => $coupon) {
+                $couponDescription = $coupon->get_description();
+                if (empty($couponDescription)) {
+                    $couponDescription = $coupon->get_code();
+                }
+
+                // Note, there are several ways to handle coupon vat (just like Magento). This is basically
+                // driven by the option discard_coupon_vat, that decides whether to include the coupon vat or not.
+
+                // TODO: Store this information as metadata instead so each order gets handled
+                // TODO: properly in payment management mode.
+                $discardCouponVat = (bool)Data::getResursOption('discard_coupon_vat');
+                $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
+                $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
+                $vatPct = (($incTax - $exTax) / $exTax) * 100;
+
+                Data::setDeveloperLog(
+                    __FUNCTION__,
+                    sprintf(
+                        'Apply coupon %s with VAT %d. Setting "discard_coupon_vat" is %s.',
+                        $coupon->get_id(),
+                        $vatPct,
+                        $discardCouponVat ? 'true' : 'false'
+                    )
+                );
+
+                $return[] = $this->getMapiCustomOrderLine(
+                    orderLineType: OrderLineType::DISCOUNT,
+                    description:  WordPress::applyFilters(
+                        'getCouponDescription',
+                        $couponDescription
+                    ),
+                    reference: $coupon->get_id(),
+                    unitAmountIncludingVat: 0 - $this->cart->get_coupon_discount_amount(
+                        $coupon->get_code(),
+                        WordPress::applyFilters('couponsExTax', !$discardCouponVat, $coupon)
+                    ),
+                    vatRate: WordPress::applyFilters('getCouponVatPct', !$discardCouponVat ? $vatPct : 0)
+                );
+            }
+        }
+
+        return $return;
     }
 
     /**
@@ -216,7 +416,11 @@ class OrderHandler extends ResursDefault
                             $productData->get_id()
                         )
                     );
-                    $this->setOrderRow('ORDER_LINE', $productData, $item);
+                    $this->getMapiOrderProductRow(
+                        orderLineType: OrderLineType::PHYSICAL_GOODS,
+                        productData: $productData,
+                        item: $item
+                    );
                 }
             }
         }

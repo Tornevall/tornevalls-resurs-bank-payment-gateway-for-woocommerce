@@ -2,6 +2,7 @@
 
 /** @noinspection PhpUndefinedVariableInspection */
 
+use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
@@ -16,7 +17,7 @@ if ($get_address_form || $get_address_form_always) { ?>
                name="resursSsnCustomerType"
                value="NATURAL"
                <?php
-               echo $customer_type === 'NATURAL' ? 'checked=checked' : ''
+               echo $customer_type === CustomerType::NATURAL ? 'checked=checked' : ''
                ?>
         > <?php echo esc_html($customer_private); ?>
         <input type="radio"
@@ -24,7 +25,7 @@ if ($get_address_form || $get_address_form_always) { ?>
                onclick="setResursGetAddressCustomerType(this)"
                name="resursSsnCustomerType"
                value="LEGAL"
-               <?php echo $customer_type === 'LEGAL' ? 'checked=checked' : '' ?>
+               <?php echo $customer_type === CustomerType::LEGAL ? 'checked=checked' : '' ?>
         > <?php echo esc_html($customer_company); ?>
     </div>
     <div class="woocommerce-input-wrapper">
@@ -38,9 +39,10 @@ if ($get_address_form || $get_address_form_always) { ?>
         <?php
         if (Data::isExtendedTest() && Data::getCheckoutType() !== ResursDefault::TYPE_RCO) {
             $customerCountry = strtoupper(Data::getCustomerCountry());
-            $chosenCustomerType = Data::getCustomerType();
+            $chosenCustomerType = Data::getCustomerType()->value;
             $civicNumberOptions = [];
-            if ($chosenCustomerType === null) {
+            if (empty($chosenCustomerType)) {
+                // We can not rely on the CustomerType enum here.
                 $chosenCustomerType = WooCommerce::hasMethodsNatural() ? 'NATURAL' : 'LEGAL';
             }
             if (isset($liveTestData[$customerCountry]['payments']['civicNumber']) &&
@@ -48,9 +50,10 @@ if ($get_address_form || $get_address_form_always) { ?>
                 count($liveTestData[$customerCountry]['payments']['civicNumber'])
             ) {
                 $civicNumberList = $liveTestData[$customerCountry]['payments']['civicNumber'];
-                if (is_array($civicNumberList) && count($civicNumberList)) {
+                if (count($civicNumberList)) {
                     foreach ($civicNumberList as $civicType => $civicNumber) {
                         $isCompanyCivic = (bool)preg_match('/^company/i', $civicType);
+                        // We can not rely on the CustomerType enum here.
                         if (($chosenCustomerType !== 'LEGAL' && $isCompanyCivic) ||
                             ($chosenCustomerType !== 'NATURAL' && !$isCompanyCivic)) {
                             continue;

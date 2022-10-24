@@ -7,6 +7,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
@@ -88,10 +89,6 @@ class FormFields extends WC_Settings_API
                         ),
                         'simplified' => __(
                             'Integrated Checkout (simplified shopFlow)',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                        'hosted' => __(
-                            'Hosted Checkout',
                             'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                         ),
                     ],
@@ -247,31 +244,6 @@ class FormFields extends WC_Settings_API
                         'change such data you have to contact Resurs Bank support.',
                         'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                     ),
-                ],
-                'order_id_type' => [
-                    'type' => 'select',
-                    'id' => 'order_id_type',
-                    'title' => __('Order id numbering', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                    'desc' => __(
-                        'Decide which kind of order id/reference that should be used when customers are ' .
-                        'placing orders. If you let the plugin set the reference, the reference will be based on ' .
-                        'a timestamp with an ending random number to make them unique (i.e. YYYYMMDDHHMMSS-UNIQUE).',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    'default' => 'ecom',
-                    'options' => [
-                        'ecom' => __(
-                            'Let plugin set the reference',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                        'postid' => __(
-                            'Use WooCommerce internal post id as reference',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                    ],
-                    'custom_attributes' => [
-                        'size' => 1,
-                    ],
                 ],
                 'payment_method_icons' => [
                     'type' => 'select',
@@ -1373,13 +1345,13 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param WC_Checkout $wcCheckout
+     * @param WC_Checkout|null $wcCheckout
      * @param bool $returnAsHtml
      * @return mixed
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getGetAddressForm($wcCheckout, $returnAsHtml = false)
+    public static function getGetAddressForm(null|WC_Checkout$wcCheckout, bool $returnAsHtml = false)
     {
         $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
         $customerTypeByConditions = Data::getCustomerType();
@@ -1398,7 +1370,7 @@ class FormFields extends WC_Settings_API
             [
                 'customer_private' => __('Private person', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
                 'customer_company' => __('Company', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                'customer_type' => $customerTypeByConditions ?? 'NATURAL',
+                'customer_type' => $customerTypeByConditions,
                 'customer_button_text' => WordPress::applyFilters(
                     'getAddressButtonText',
                     __('Get address', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
@@ -1669,11 +1641,11 @@ class FormFields extends WC_Settings_API
 
     /**
      * @param string $key
-     * @param string $customerType
+     * @param CustomerType $customerType
      * @return array
      * @since 0.0.1.0
      */
-    public static function getSpecificTypeFields(string $key, string $customerType): array
+    public static function getSpecificTypeFields(string $key, CustomerType $customerType): array
     {
         $return = [
             'NATURAL' => [
@@ -1735,7 +1707,7 @@ class FormFields extends WC_Settings_API
             ],
         ];
 
-        $return = $return[$customerType][$key] ?? $return[$customerType]['undefined'];
+        $return = $return[$customerType->value][$key] ?? $return[$customerType->value]['undefined'];
 
         // Hand over the result to the filter on your way back.
         return WordPress::applyFilters('getSpecificTypeFields', $return, $key);
