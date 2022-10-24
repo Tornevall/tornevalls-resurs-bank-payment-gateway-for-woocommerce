@@ -12,6 +12,7 @@ use Exception;
 use JsonException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Locale\Translation;
 use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Module\Payment\Api\Create;
@@ -30,6 +31,7 @@ use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
 use stdClass;
+use Symfony\Component\CssSelector\XPath\Translator;
 use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\Domain;
 use TorneLIB\Utils\Generic;
@@ -43,11 +45,13 @@ use function function_exists;
 use function in_array;
 use function is_array;
 use function is_object;
+use function sha1;
+use function uniqid;
 
 /**
- * Class ResursDefault
  * Default payment method class. Handles payments and orders dynamically, with focus on less loss
  * of data during API communication.
+ *
  * @package Resursbank\Gateway
  * @since 0.0.1.0
  */
@@ -255,8 +259,12 @@ class ResursDefault extends WC_Payment_Gateway
         if (Data::getCheckoutType() === self::TYPE_RCO &&
             !(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
         ) {
-            $this->paymentMethodInformation = new ResursCheckout();
-            $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
+            // @todo The code below won't work, but it previously caused an error because paymentMethodInformation received an instance of ResursCheckout but is declared as stdClass.
+            $this->paymentMethodInformation = new stdClass();
+
+            if (isset($this->paymentMethodInformation->id)) {
+                $this->id = sprintf( '%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id );
+            }
         }
     }
 
@@ -877,31 +885,31 @@ class ResursDefault extends WC_Payment_Gateway
         Data::setOrderMeta($order, 'checkoutType', Data::getCheckoutType());
         Data::setOrderMeta($order, 'apiDataId', $this->apiDataId);
         Data::setOrderMeta($order, 'orderSigningPayload', $this->getApiData());
-        Data::setOrderMeta($order, 'resursReference', $this->getPaymentId());
+        Data::setOrderMeta($order, 'resursReference', $this->getOrderReference());
         if (!empty(Data::getPaymentMethodBySession())) {
             Data::setOrderMeta($order, 'paymentMethod', Data::getPaymentMethodBySession());
         }
     }
 
     /**
+     * Resolve payment id to use at Resurs Bank. If the order has not yet been created, use a temporary ID
+     * which will later be replaced by the order id.
+     *
      * @param WC_Order|null $order
      * @return string
      * @since 0.0.1.0
      * @noinspection SpellCheckingInspection
      */
-    private function getPaymentId(WC_Order $order = null): string
+    private function getOrderReference(null|WC_Order $order = null): string
     {
-        // Make sure we get through this section even if the order is not yet ready from WooCommerce.
-        // TODO: Change this.
-        $return = sha1(uniqid('payment', true));
-
-        if (Data::getCheckoutType() === self::TYPE_RCO) {
-            // TODO: The prior payment id has been removed and can no longer be fetched through the session nor header.
-            // TODO: Reinstate the ability to create an order id on the fly.
-        }
+        $return = 0;
 
         if ($order instanceof WC_Order) {
             $return = $order->get_id();
+        }
+
+        if (!is_int($return) || $return === 0) {
+            $return = sha1(uniqid('payment', true));
         }
 
         return $return;
@@ -1020,8 +1028,10 @@ class ResursDefault extends WC_Payment_Gateway
      * @return $this
      * @throws Exception
      * @since 0.0.1.0
+     * @todo This is more likely to return a string and still includes a lot of old stuff covering ecom1.
+     * @todo That must be fixed.
      */
-    private function getProperPaymentId(bool $forceNew = false)
+    private function getProperPaymentId(bool $forceNew = false): static
     {
         $paymentId = $this->API->getConnection()->getPreferredPaymentId();
 
@@ -1268,9 +1278,9 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'totalVatAmount':
                 $return = wc_get_price_including_tax($productObject, ['qty' => $item['quantity']]) - wc_get_price_excluding_tax(
-                    $productObject,
-                    ['qty' => $item['quantity']]
-                );
+                        $productObject,
+                        ['qty' => $item['quantity']]
+                    );
                 break;
             case 'vatPct':
             case 'vatRate':
@@ -1719,7 +1729,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
                     WooCommerce::applyMock('updatePaymentReferenceFailure');
-                    $newPaymentId = $this->getPaymentId();
+                    $newPaymentId = $this->getOrderReference();
                     if ($idBeforeChange !== $newPaymentId) {
                         ResursBankAPI::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
                         Data::setOrderMeta(
@@ -1790,7 +1800,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function preProcessOrder(WC_Order $order): void
     {
         $this->apiData['wc_order_id'] = $order->get_id();
-        $this->apiData['preferred_id'] = $this->getPaymentId();
+        $this->apiData['preferred_id'] = $this->getOrderReference();
         Data::setDeveloperLog(
             __FUNCTION__,
             sprintf(
@@ -1834,7 +1844,7 @@ class ResursDefault extends WC_Payment_Gateway
                     ),
                     __FUNCTION__,
                     $this->order->get_id(),
-                    $this->getPaymentId(),
+                    $this->getOrderReference(),
                     $checkoutRequestType
                 )
             );
@@ -2647,7 +2657,7 @@ class ResursDefault extends WC_Payment_Gateway
             sprintf(
                 '%s: %s:bookPaymentStatus:%s, signingUrl: %s',
                 __FUNCTION__,
-                $this->getPaymentId(),
+                $this->getOrderReference(),
                 $this->getBookPaymentStatus(),
                 $this->getBookSigningUrl()
             )
