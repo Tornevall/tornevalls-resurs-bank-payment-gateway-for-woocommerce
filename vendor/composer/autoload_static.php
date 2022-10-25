@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit68486fbe997a46e70e81399da2a71062
+class ComposerStaticInitaf8a63bec106bed17b9d2916c84158db
 {
     public static $files = array (
         'bc521b269795605ef2585a7369f0017e' => __DIR__ . '/..' . '/tornevall/tornelib-php-network/src/Network.php',
@@ -18,6 +18,7 @@ class ComposerStaticInit68486fbe997a46e70e81399da2a71062
         ),
         'R' => 
         array (
+            'Resursbank\\Woocommerce\\' => 23,
             'Resursbank\\RBEcomPHP\\' => 21,
             'Resursbank\\Ecommerce\\' => 21,
             'Resursbank\\Ecom\\' => 16,
@@ -36,6 +37,10 @@ class ComposerStaticInit68486fbe997a46e70e81399da2a71062
             5 => __DIR__ . '/..' . '/tornevall/tornelib-php-crypto/src',
             6 => __DIR__ . '/..' . '/tornevall/tornelib-php-netcurl/src',
             7 => __DIR__ . '/..' . '/tornevall/tornelib-php-network/src',
+        ),
+        'Resursbank\\Woocommerce\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
         'Resursbank\\RBEcomPHP\\' => 
         array (
@@ -66,10 +71,10 @@ class ComposerStaticInit68486fbe997a46e70e81399da2a71062
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit68486fbe997a46e70e81399da2a71062::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit68486fbe997a46e70e81399da2a71062::$prefixDirsPsr4;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit68486fbe997a46e70e81399da2a71062::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit68486fbe997a46e70e81399da2a71062::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitaf8a63bec106bed17b9d2916c84158db::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitaf8a63bec106bed17b9d2916c84158db::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitaf8a63bec106bed17b9d2916c84158db::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitaf8a63bec106bed17b9d2916c84158db::$classMap;
 
         }, null, ClassLoader::class);
     }

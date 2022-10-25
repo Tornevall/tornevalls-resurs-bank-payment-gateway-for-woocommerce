@@ -7,7 +7,6 @@ namespace ResursBank\Service;
 
 use Exception;
 use Resursbank\Ecommerce\Types\OrderStatus;
-use ResursBank\Gateway\AdminPage;
 use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
@@ -15,6 +14,7 @@ use ResursBank\Module\FormFields;
 use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderStatus as OrderStatusHandler;
+use Resursbank\Woocommerce\Settings;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -30,7 +30,7 @@ use function is_object;
 use function is_string;
 
 /**
- * Class WooCommerce WooCommerce related actions.
+ * Class WooCommerce related actions.
  *
  * @package ResursBank
  * @since 0.0.1.0
@@ -95,7 +95,7 @@ class WooCommerce
     public static function getSettingsPages($settings)
     {
         if (is_admin()) {
-            $settings[] = new AdminPage();
+            $settings[] = new Settings();
         }
 
         return $settings;
