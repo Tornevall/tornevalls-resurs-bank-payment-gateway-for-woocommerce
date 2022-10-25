@@ -1809,8 +1809,6 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->apiData['preferred_id']
             )
         );
-        // Note: In prior versions ecom1 was preparing an order id at this moment. Neither MAPI nor ECOM2 does this.
-        // but instead returning an uuid later on.
     }
 
     /**
@@ -2583,6 +2581,9 @@ class ResursDefault extends WC_Payment_Gateway
         $this->setCreatePaymentNotice(__FUNCTION__);
 
         // Return booking result.
+        // @todo SOAP returned an array with a status after bookSignedPayment, but MAPI
+        // @todo differs slightly in this process. This is where we preferably handle signings which
+        // @todo aso means that getResultByPaymentStatus can be replaced.
         return $this->getResultByPaymentStatus();
     }
 
