@@ -25,7 +25,7 @@ use Resursbank\Ecom\Lib\Network\ContentType;
 use Resursbank\Ecom\Lib\Network\Curl;
 use Resursbank\Ecom\Lib\Network\RequestMethod;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
-use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
+use Resursbank\Ecom\Lib\Order\CustomerType;
 use stdClass;
 use Symfony\Component\Config\Definition\Exception\InvalidTypeException;
 
