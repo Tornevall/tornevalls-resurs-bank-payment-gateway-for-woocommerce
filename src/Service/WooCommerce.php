@@ -1,7 +1,6 @@
 <?php
 
 /** @noinspection PhpUndefinedFieldInspection */
-
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
 namespace ResursBank\Service;
@@ -277,10 +276,10 @@ class WooCommerce
 
     /**
      * @param bool $returnCart
-     * @return array|bool|WC_Cart
+     * @return bool|array
      * @since 0.0.1.0
      */
-    public static function getValidCart($returnCart = false)
+    public static function getValidCart(bool $returnCart = false): bool|array
     {
         $return = false;
 
@@ -297,7 +296,7 @@ class WooCommerce
     }
 
     /**
-     * Self aware setup link.
+     * Self-aware setup link.
      *
      * @param $links
      * @param $file
@@ -1270,13 +1269,13 @@ class WooCommerce
     }
 
     /**
-     * v3core: Checkout vs Cart Manipulation - A moment when customer is not in checkout.
+     * v3core: Checkout vs Cart Manipulation - A watchguard for that moment, when customer is not in checkout.
      *
      * @since 0.0.1.0
      */
-    public static function setAddToCart()
+    public static function setAddToCart(): void
     {
-        self::setCustomerCheckoutLocation(false);
+        self::setCustomerCheckoutLocation(customerIsInCheckout: false);
     }
 
     /**
@@ -1359,7 +1358,6 @@ class WooCommerce
      * Since ecom2 does not want trailing slashes in its logger, we use this method to trim away
      * all trailing slashes.
      * @return string
-     * @since 0.0.1.9
      */
     public static function getPluginLogDir(): string
     {

@@ -21,7 +21,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Data\Models\Address;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
 use Resursbank\Ecom\Module\Customer\Api\GetAddress;
-use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
+use Resursbank\Ecom\Lib\Order\CustomerType;
 
 /**
  * Customer repository.

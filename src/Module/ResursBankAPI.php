@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Locale\Locale;
 use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -109,6 +110,7 @@ class ResursBankAPI
      * @throws EmptyValueException
      * @throws FormatException
      * @throws MapiCredentialsException
+     * @throws Exception
      * @since 0.0.1.0
      */
     public function getConnection(): void
@@ -138,11 +140,30 @@ class ResursBankAPI
                 message: 'Credentials not set.'
             );
         }
+
+        switch (Data::getCustomerCountry()) {
+            case 'SE':
+                $locale = Locale::sv;
+                break;
+            default:
+                $locale = Locale::en;
+        }
+
+        Config::setup(
+            logger: $fileLogger,
+            cache: new None(),
+            jwtAuth: new Jwt(
+                clientId: $this->getClientId(),
+                clientSecret: $this->getClientSecret(),
+                scope: $scope,
+                grantType: $grantType
+            ),
+            locale: $locale
+        );
     }
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientId(): string
     {
@@ -152,7 +173,6 @@ class ResursBankAPI
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientSecret(): string
     {
@@ -229,7 +249,6 @@ class ResursBankAPI
      * @throws ReflectionException
      * @throws StoreException
      * @throws ValidationException
-     * @since 0.0.1.9
      */
     public static function getStoreUuidByNationalId(int $storeId): string
     {
@@ -262,7 +281,6 @@ class ResursBankAPI
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
-     * @since 0.0.1.9
      */
     public static function getStoreCollection(): array
     {
@@ -339,7 +357,6 @@ class ResursBankAPI
                     // plugin to live without the access to Resurs Bank.
                     self::$annuityFactors = $stored;
                 } else {
-                    Data::setTimeoutStatus(self::getResurs());
                     throw $e;
                 }
             }
@@ -426,7 +443,6 @@ class ResursBankAPI
                     // plugin to live without the access to Resurs Bank.
                     self::$callbacks = (array)$stored;
                 } else {
-                    Data::setTimeoutStatus(self::getResurs(), $e);
                     // We do not want to reset on errors, right?
                     //Data::setResursOption('callbacks', null);
                     throw $e;
@@ -454,7 +470,6 @@ class ResursBankAPI
      * @throws ValidationException
      * @throws JsonException
      * @throws ReflectionException
-     * @since 0.0.1.9
      */
     public static function getRenderedStores(): array
     {
@@ -607,7 +622,6 @@ class ResursBankAPI
     /**
      * @return bool
      * @throws Exception
-     * @since 0.0.1.9
      */
     private function getResolvedCredentials(): bool
     {
@@ -633,7 +647,6 @@ class ResursBankAPI
         } catch (Exception $e) {
             $return = false;
             if ($e->getCode() !== Data::UNSET_CREDENTIALS_EXCEPTION) {
-                Data::setTimeoutStatus(self::getResurs(), $e);
                 Data::writeLogException($e, __FUNCTION__);
             }
         }

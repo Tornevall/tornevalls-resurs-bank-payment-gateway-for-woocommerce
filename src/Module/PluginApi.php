@@ -7,6 +7,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use Resursbank\Ecom\Module\Customer\Repository as CustomerRepoitory;
 use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursCheckout;
@@ -170,7 +171,6 @@ class PluginApi
             'resursAnnuityDuration' => 'currentAnnuityDuration',
             'resursAnnuityMethod' => 'currentAnnuityFactor',
             'partPayWidgetPage' => 'part_payment_template',
-            'postidreference' => 'order_id_type',
             'login' => 'jwt_client_id',
             'password' => 'jwt_client_secret',
             'checkout_type' => 'checkout_type',
@@ -1017,7 +1017,6 @@ class PluginApi
                 Data::clearCredentialNotice();
             } catch (Exception $e) {
                 $hasErrors = true;
-                Data::setTimeoutStatus($resursApi, $e);
 
                 $errorMessage = $e->getMessage();
                 if ($e->getCode() === 401) {
@@ -1099,7 +1098,6 @@ class PluginApi
                 ResursBankAPI::getPaymentMethods(false);
                 ResursBankAPI::getAnnuityFactors(false);
             } catch (Exception $e) {
-                Data::setTimeoutStatus(ResursBankAPI::getResurs(), $e);
                 $return['errorstring'] = $e->getMessage();
                 $return['errorcode'] = $e->getCode();
             }
@@ -1398,14 +1396,18 @@ class PluginApi
     /**
      * Log an event of getAddress.
      *
-     * @param $customerCountry
-     * @param $customerType
-     * @param $identification
-     * @param $runFunctionInfo
+     * @param string $customerCountry
+     * @param CustomerType $customerType
+     * @param string $identification
+     * @param string $runFunctionInfo
      * @since 0.0.1.0
      */
-    private static function getAddressLog($customerCountry, $customerType, $identification, $runFunctionInfo)
-    {
+    private static function getAddressLog(
+        string $customerCountry,
+        CustomerType $customerType,
+        string $identification,
+        string $runFunctionInfo
+    ): void {
         Data::writeLogEvent(
             Data::CAN_LOG_ORDER_EVENTS,
             sprintf(
@@ -1414,7 +1416,7 @@ class PluginApi
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 ),
                 $customerCountry,
-                $customerType,
+                $customerType->value,
                 $identification,
                 $runFunctionInfo
             )

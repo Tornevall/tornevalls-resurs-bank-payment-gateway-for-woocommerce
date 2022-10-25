@@ -5,10 +5,13 @@
 
 namespace ResursBank\Module;
 
+use Cassandra\Custom;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
@@ -757,20 +760,21 @@ class Data
     {
         global $woocommerce;
 
-        $return = '';
-
         /**
          * @var WC_Customer $wcCustomer
          */
         $wcCustomer = $woocommerce->customer;
 
+        $return = WordPress::applyFilters(
+            filterName: 'getDefaultCountry',
+            value: get_option('woocommerce_default_country')
+        );
+
         if ($wcCustomer instanceof WC_Customer) {
             $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
-            $return = !empty($woocommerceCustomerCountry) ?
-                $woocommerceCustomerCountry : WordPress::applyFilters(
-                    'getDefaultCountry',
-                    get_option('woocommerce_default_country')
-                );
+            if (!empty($woocommerceCustomerCountry)) {
+                $return = $woocommerceCustomerCountry;
+            }
         }
 
         return $return;
@@ -1555,25 +1559,29 @@ class Data
             return;
         }
 
-        if (empty(self::$logger)) {
+        // Checking whether the instance-logger exists or not is vital for instances that has unfinished
+        // configurations. For example, when the module is installed for the first time, there won't be an ecom2
+        // instance until it has been configured. As the module can log information before this happens,
+        // it is also important that we only allow logging, if the instance is ready and available.
+        if (isset(Config::$instance->logger) && isset(self::$logger)) {
             self::$logger = Config::$instance->logger;
-        }
 
-        switch ($logLevel) {
-            case LogLevel::INFO:
-                self::$logger->info($message);
-                break;
-            case LogLevel::DEBUG:
-                self::$logger->debug($message);
-                break;
-            case LogLevel::ERROR:
-                self::$logger->error($message);
-                break;
-            case LogLevel::WARNING:
-                self::$logger->warning($message);
-                break;
-            default:
-                self::$logger->info($message);
+            switch ($logLevel) {
+                case LogLevel::INFO:
+                    self::$logger->info($message);
+                    break;
+                case LogLevel::DEBUG:
+                    self::$logger->debug($message);
+                    break;
+                case LogLevel::ERROR:
+                    self::$logger->error($message);
+                    break;
+                case LogLevel::WARNING:
+                    self::$logger->warning($message);
+                    break;
+                default:
+                    self::$logger->info($message);
+            }
         }
     }
 
@@ -1997,9 +2005,6 @@ class Data
         switch ($currentCheckoutType) {
             case 'simplified':
                 $return = ResursDefault::TYPE_SIMPLIFIED;
-                break;
-            case 'hosted':
-                $return = ResursDefault::TYPE_HOSTED;
                 break;
             case 'rco':
                 $return = ResursDefault::TYPE_RCO;
@@ -2577,7 +2582,7 @@ class Data
      */
     public static function isGetAddressSupported(): bool
     {
-        $return = in_array(
+        return in_array(
             self::getCustomerCountry(),
             WordPress::applyFilters(
                 'getCompatibleGetAddressCountries',
@@ -2585,8 +2590,6 @@ class Data
             ),
             true
         );
-
-        return $return;
     }
 
     /**
@@ -2595,15 +2598,19 @@ class Data
      * @return bool|mixed
      * @since 0.0.1.0
      */
-    public static function canUseGetAddressForm()
+    public static function canUseGetAddressForm(): mixed
     {
+        // Section for which merchants can decide if getAddress features should be disabled or not.
         $getAddressDisabled = (bool)WordPress::applyFilters('getAddressDisabled', false);
+
+        // @todo Prior 2.2-filter, that should be considered removed from this release.
         $getAddressFormDefault = (bool)WordPress::applyFiltersDeprecated(
             'resurs_getaddress_enabled',
             self::getResursOption('get_address_form')
         );
         if ($getAddressDisabled) {
             // Filter overrides the config settings.
+            /** @noinspection PhpConditionAlreadyCheckedInspection */
             $getAddressFormDefault = $getAddressDisabled;
         }
 
@@ -2611,24 +2618,31 @@ class Data
     }
 
     /**
-     * @return string
+     * Get the current customer type, based on what's in the session. If the current request is based on
+     * POST/GET, this will return the customer type from the updated session.
+     * @return CustomerType
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getCustomerType()
+    public static function getCustomerType(): CustomerType
     {
+        // Check and set update values in the session IF they are requested in this current request.
         self::setCustomerTypeToSession();
 
+        // Get the customer type from the session.
         return self::getCustomerTypeFromSession();
     }
 
     /**
+     * @throws Exception
      * @since 0.0.1.0
      */
-    private static function setCustomerTypeToSession()
+    private static function setCustomerTypeToSession(): void
     {
         $customerTypeByGetAddress = self::getRequest('resursSsnCustomerType', true);
 
+        // If there is a post/get-request with new customerType-values, make sure the session is
+        // updated before returning it somwhere else.
         if (!empty($customerTypeByGetAddress)) {
             WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
         }
@@ -2741,26 +2755,38 @@ class Data
     }
 
     /**
-     * @return array|mixed|string|null
+     * @return CustomerType
      * @throws Exception
      * @since 0.0.1.0
      */
-    private static function getCustomerTypeFromSession()
+    private static function getCustomerTypeFromSession(): CustomerType
     {
+        // Fetch customer type from session. If there is a string we will return the customer type as an ecom2-enum.
         $return = WooCommerce::getSessionValue('resursSsnCustomerType');
 
-        // If this is empty, it has not been pre-selected.
-        if (empty($return)) {
-            if (WooCommerce::hasMethodsNatural()) {
-                $return = 'NATURAL';
-            } else {
-                $return = 'LEGAL';
-            }
+        // This section translates the incoming above string to the proper enum.
+        switch ($return) {
+            case 'NATURAL':
+                $return = CustomerType::NATURAL;
+                break;
+            case 'LEGAL':
+                $return = CustomerType::LEGAL;
+                break;
+            default:
+                // If the session is empty, we will return defaults that is based on the available payment methods.
+                if (WooCommerce::hasMethodsNatural()) {
+                    $return = CustomerType::NATURAL;
+                } else {
+                    // If the merchan only have legal payment methods, we will return legal as default.
+                    $return = CustomerType::LEGAL;
+                }
         }
 
+        // The return value will remain as is from above, unless we discover a billing company name from the request.
+        // If this happens, the company name should override the first set values.
         $customerTypeByCompanyName = self::getRequest('billing_company', true);
 
-        return empty($customerTypeByCompanyName) ? $return : 'LEGAL';
+        return empty($customerTypeByCompanyName) ? $return : CustomerType::LEGAL;
     }
 
     /**
@@ -2806,7 +2832,6 @@ class Data
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientId(): string {
         return Data::getResursOption('environment') === 'test' ?
@@ -2815,7 +2840,6 @@ class Data
 
     /**
      * @return string
-     * @since 0.0.1.9
      */
     private function getClientSecret(): string
     {
@@ -2970,7 +2994,6 @@ class Data
 
     /**
      * @return int
-     * @since 0.0.1.9
      */
     public static function getStoreId(): int
     {

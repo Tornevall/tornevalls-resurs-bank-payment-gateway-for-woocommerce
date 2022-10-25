@@ -10,9 +10,15 @@ namespace ResursBank\Gateway;
 
 use Exception;
 use JsonException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Module\Payment\Api\Create;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLine;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLineCollection;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Module\Data;
@@ -38,6 +44,8 @@ use function function_exists;
 use function in_array;
 use function is_array;
 use function is_object;
+use function sha1;
+use function uniqid;
 
 /**
  * Default payment method class. Handles payments and orders dynamically, with focus on less loss
@@ -94,12 +102,6 @@ class ResursDefault extends WC_Payment_Gateway
      * @var string
      * @since 0.0.1.0
      */
-    const TYPE_HOSTED = 'hosted';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
     const TYPE_SIMPLIFIED = 'simplified';
 
     /**
@@ -112,7 +114,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @var WC_Order $order
      * @since 0.0.1.0
      */
-    protected $order;
+    protected WC_Order $order;
 
     /**
      * Main API. Use as primary communicator. Acts like a bridge between the real API.
@@ -256,12 +258,12 @@ class ResursDefault extends WC_Payment_Gateway
         if (Data::getCheckoutType() === self::TYPE_RCO &&
             !(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
         ) {
-			// @todo The code below won't work, but it previously caused an error because paymentMethodInformation received an instance of ResursCheckout but is declared as stdClass.
+            // @todo The code below won't work, but it previously caused an error because paymentMethodInformation received an instance of ResursCheckout but is declared as stdClass.
             $this->paymentMethodInformation = new stdClass();
 
-			if (isset($this->paymentMethodInformation->id)) {
-				$this->id = sprintf( '%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id );
-			}
+            if (isset($this->paymentMethodInformation->id)) {
+                $this->id = sprintf( '%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id );
+            }
         }
     }
 
@@ -590,7 +592,6 @@ class ResursDefault extends WC_Payment_Gateway
         // This could crash the order completion (at the successUrl).
         if (WooCommerce::getValidCart() && WooCommerce::getSessionValue(WooCommerce::$inCheckoutKey)) {
             $this->setOrderData();
-            $this->setCreatePaymentNotice(__FUNCTION__);
 
             $paymentId = $this->getProperPaymentId();
             try {
@@ -598,7 +599,6 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
                 $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
             } catch (Exception $e) {
-                Data::setTimeoutStatus($this->API->getConnection());
                 Data::writeLogEvent(
                     Data::CAN_LOG_ORDER_EVENTS,
                     sprintf(
@@ -616,7 +616,6 @@ class ResursDefault extends WC_Payment_Gateway
                     $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
                     $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
                 } catch (Exception $e) {
-                    Data::setTimeoutStatus($this->API->getConnection());
                     $this->rcoFrameData = new stdClass();
                     $this->rcoFrameData->script = '';
                     $this->rcoFrameData->exception = [
@@ -657,7 +656,7 @@ class ResursDefault extends WC_Payment_Gateway
         $this
             ->setCustomerId()
             ->setStoreId()
-            ->setOrderLines()
+            ->getOrderLinesRco()
             ->setSigning();
         Data::setDeveloperLog(__FUNCTION__, 'Done.');
 
@@ -884,93 +883,34 @@ class ResursDefault extends WC_Payment_Gateway
         Data::setOrderMeta($order, 'checkoutType', Data::getCheckoutType());
         Data::setOrderMeta($order, 'apiDataId', $this->apiDataId);
         Data::setOrderMeta($order, 'orderSigningPayload', $this->getApiData());
-        Data::setOrderMeta($order, 'resursReference', $this->getPaymentId());
-        Data::setOrderMeta($order, 'resursDefaultReference', $this->getPaymentIdBySession());
+        Data::setOrderMeta($order, 'resursReference', $this->getOrderReference());
         if (!empty(Data::getPaymentMethodBySession())) {
             Data::setOrderMeta($order, 'paymentMethod', Data::getPaymentMethodBySession());
         }
     }
 
     /**
-     * @return string
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection SpellCheckingInspection
-     */
-    private function getPaymentId(): string
-    {
-        switch (Data::getResursOption('order_id_type')) {
-            case 'postid':
-                $return = $this->order->get_id();
-                break;
-            case 'ecom':
-                $return = $this->getPaymentIdBySession();
-                break;
-            default:
-                $return = '';
-                break;
-        }
-
-        return (string)$return;
-    }
-
-    /**
-     * Retrieve the default Resurs order reference regardless of the rco order id type.
-     * This is used for tracking failures.
+     * Resolve payment id to use at Resurs Bank. If the order has not yet been created, use a temporary ID
+     * which will later be replaced by the order id.
      *
-     * @return array|mixed|string|null
-     * @throws Exception
+     * @param WC_Order|null $order
+     * @return string
      * @since 0.0.1.0
      * @noinspection SpellCheckingInspection
      */
-    public function getPaymentIdBySession()
+    private function getOrderReference(null|WC_Order $order = null): string
     {
-        // It is necessary to fetch payment id from session if exists, so we can keep it both in frontend
-        // and the backend API. If not set, we'll let "ecom" fetch a new.
-        $sessionPaymentId = WooCommerce::getSessionValue('rco_order_id');
-        return !empty($sessionPaymentId) ? $sessionPaymentId : ResursBankAPI::getResurs()->getPreferredPaymentId();
-    }
+        $return = 0;
 
-    /**
-     * @return ResursDefault
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setOrderLines(): ResursDefault
-    {
-        if (WooCommerce::getValidCart()) {
-            // This is the first point we store the cart total for the current session.
-            /** @noinspection PhpUndefinedFieldInspection */
-            WooCommerce::setSessionValue('customerCartTotal', WC()->cart->total);
-            $orderHandler = new OrderHandler();
-            $orderHandler->setCart($this->cart);
-            $orderHandler->setApi($this->API);
-            $orderHandler->setPreparedOrderLines();
-            $this->API = $orderHandler->getApi();
-
-            Data::writeLogEvent(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
-                    '%s',
-                    __FUNCTION__
-                )
-            );
-        } else {
-            Data::writeLogError(
-                sprintf(
-                    __(
-                        '%s: Could not create order from an empty cart.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    __FUNCTION__
-                )
-            );
-            throw new RuntimeException(
-                __('Cart is empty!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
-            );
+        if ($order instanceof WC_Order) {
+            $return = $order->get_id();
         }
 
-        return $this;
+        if (!is_int($return) || $return === 0) {
+            $return = sha1(uniqid('payment', true));
+        }
+
+        return $return;
     }
 
     /**
@@ -1002,8 +942,6 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @return $this
-     * @throws ResursException
-     * @throws Exception
      * @since 0.0.1.0
      */
     private function setCustomerId(): self
@@ -1019,7 +957,10 @@ class ResursDefault extends WC_Payment_Gateway
                 )
             );
 
-            $this->API->getConnection()->setMetaData('CustomerId', $customerId);
+            /**
+             * @todo set meta data when meta data is available in MAPI for externalCustomerId.
+             * @todo For RCO it is still CustomerId.
+             */
         }
         return $this;
     }
@@ -1052,19 +993,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param $fromFunction
-     * @since 0.0.1.0
-     */
-    private function setCreatePaymentNotice($fromFunction)
-    {
-        // Create payment for simplified (log in all flows).
-        Data::setDeveloperLog(
-            $fromFunction,
-            sprintf('createPayment %s init', $this->getPaymentMethod())
-        );
-    }
-
-    /**
      * Get payment method from ecom data.
      *
      * @return string
@@ -1083,8 +1011,10 @@ class ResursDefault extends WC_Payment_Gateway
      * @return $this
      * @throws Exception
      * @since 0.0.1.0
+     * @todo This is more likely to return a string and still includes a lot of old stuff covering ecom1.
+     * @todo That must be fixed.
      */
-    private function getProperPaymentId($forceNew = null)
+    private function getProperPaymentId(bool $forceNew = false): static
     {
         $paymentId = $this->API->getConnection()->getPreferredPaymentId();
 
@@ -1223,36 +1153,131 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @param OrderLineType $orderLineType
+     * @param WC_Product $productData
+     * @param array $wcProductItem Product item details from WooCommerce, contains the extended data that can't be found in WC_Product.
+     * @return OrderLine
+     * @throws IllegalValueException
+     * @throws Exception
+     */
+    public function getMapiOrderProductRow(OrderLineType $orderLineType, WC_Product $productData, array $wcProductItem): OrderLine
+    {
+        return new OrderLine(
+            description: $this->getFromProduct(getValueType: 'title', productObject: $productData, wcProductItemData: $wcProductItem),
+            reference: $this->getFromProduct(getValueType: 'reference', productObject: $productData, wcProductItemData: $wcProductItem),
+            quantityUnit: $this->getFromProduct(
+                getValueType: 'quantityUnit',
+                productObject: $productData,
+                wcProductItemData: $wcProductItem
+            ),
+            quantity: $wcProductItem['quantity'],
+            vatRate: $this->getFromProduct(getValueType: 'vatRate', productObject: $productData, wcProductItemData: $wcProductItem),
+            unitAmountIncludingVat: $this->getFromProduct(
+                getValueType: 'unitAmountWithVat',
+                productObject: $productData,
+                wcProductItemData: $wcProductItem
+            ),
+            totalAmountIncludingVat: $this->getFromProduct(
+                getValueType: 'totalAmountWithVat',
+                productObject: $productData,
+                wcProductItemData: $wcProductItem
+            ),
+            totalVatAmount: $this->getFromProduct(
+                getValueType: 'totalVatAmount',
+                productObject: $productData,
+                wcProductItemData: $wcProductItem
+            ),
+            type: $orderLineType
+        );
+    }
+
+    /**
+     * Add an order line that is not based on pre-defined product data.
+     *
+     * @param OrderLineType $orderLineType
+     * @param string $description
+     * @param string $reference
+     * @param float $unitAmountIncludingVat
+     * @param float $vatRate
+     * @param int $quantity
+     * @return OrderLine
+     * @throws IllegalValueException
+     */
+    public function getMapiCustomOrderLine(
+        OrderLineType $orderLineType,
+        string $description,
+        string $reference,
+        float $unitAmountIncludingVat,
+        float $vatRate,
+        int $quantity = 1
+    ): OrderLine {
+        $totalAmountIncludingVat = $unitAmountIncludingVat * $quantity;
+        $totalVatAmount = $totalAmountIncludingVat - ($totalAmountIncludingVat / (1 + ($vatRate / 100)));
+        return new OrderLine(
+            description: $description,
+            reference: $reference,
+            quantityUnit: Translator::translate('default-quantity-unit'),
+            quantity: (float)$quantity,
+            vatRate: $vatRate,
+            unitAmountIncludingVat: $unitAmountIncludingVat,
+            totalAmountIncludingVat: $totalAmountIncludingVat,
+            totalVatAmount: $totalVatAmount,
+            type: $orderLineType
+        );
+    }
+
+    /**
      * @param string $getValueType
      * @param WC_Product $productObject
-     * @return string
-     * @throws Exception
+     * @param array $wcProductItemData
+     * @return float|int|string
      * @since 0.0.1.0
      */
-    protected function getFromProduct($getValueType, $productObject)
+    protected function getFromProduct(string $getValueType, WC_Product $productObject, array $wcProductItemData = []): float|int|string
     {
         $return = '';
 
+        // $wcProductItemData always returns same information for at product. The data here can always be expected
+        // based on the content from WC_Order_Item (see $extra_data in WC_Order_Item).
+
+        // If you see multiple cases, this is mostly used for the backward compatibility of the old RCO API.
         switch ($getValueType) {
             case 'artNo':
+            case 'reference':
                 $return = $this->getProperArticleNumber($productObject);
                 break;
+            case 'description':
             case 'title':
                 $return = !empty($useTitle = $productObject->get_title()) ? $useTitle : __(
                     'Article description is missing.',
                     'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
                 );
                 break;
+            case 'unitAmountWithVat':
+            case 'unitAmountIncludingVat':
+                $return = wc_get_price_including_tax($productObject);
+                break;
+            case 'totalAmountWithVat':
+            case 'totalAmountIncludingVat':
+                $return = wc_get_price_including_tax($productObject, ['qty' => $wcProductItemData['quantity']]);
+                break;
             case 'unitAmountWithoutVat':
                 // Special reflection of what Resurs Bank wants.
                 $return = wc_get_price_excluding_tax($productObject);
                 break;
+            case 'totalVatAmount':
+                $return = wc_get_price_including_tax($productObject, ['qty' => $wcProductItemData['quantity']]) - wc_get_price_excluding_tax(
+                        $productObject,
+                        ['qty' => $wcProductItemData['quantity']]
+                    );
+                break;
             case 'vatPct':
+            case 'vatRate':
                 $return = $this->getProductVat($productObject);
                 break;
-            case 'unit':
+            case 'quantityUnit':
                 // Using default measure from ECom for now.
-                $return = $this->API->getConnection()->getDefaultUnitMeasure();
+                $return = Translator::translate('default-quantity-unit');
                 break;
             default:
                 if (method_exists($productObject, sprintf('get_%s', $getValueType))) {
@@ -1309,7 +1334,10 @@ class ResursDefault extends WC_Payment_Gateway
         // Usually occurs when plugin is recently installed and not synchronized with Resurs.
         // This is also very common when merchants still have old SOAP-based methods available.
 
-        if (!$this->paymentMethodInformation instanceof stdClass || !isset($this->paymentMethodInformation->id)) {
+        if (!isset($this->paymentMethodInformation) ||
+            !$this->paymentMethodInformation instanceof stdClass ||
+            !isset($this->paymentMethodInformation->id)
+        ) {
             return false;
         }
         // Legacy methods can not be used anymore.
@@ -1554,7 +1582,6 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @param $paymentMethod
      * @return bool
-     * @since 0.0.1.9
      */
     public static function isInternalMethod($paymentMethod): bool
     {
@@ -1573,12 +1600,12 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param int $order_id
-     * @return array|void
+     * @param $order_id
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
-    public function process_payment($order_id)
+    public function process_payment($order_id): array
     {
         $order = new WC_Order($order_id);
         $this->order = $order;
@@ -1614,8 +1641,9 @@ class ResursDefault extends WC_Payment_Gateway
                     Data::getCheckoutType()
                 )
             );
+            // Used with RCO. Need to be here, at least for a while longer.
             $order->set_payment_method(Data::getPaymentMethodBySession());
-            $this->setProperPaymentReference($order);
+            //$this->setProperPaymentReference($order);
             // From here, we can handle the order at regular basis.
         }
 
@@ -1688,7 +1716,7 @@ class ResursDefault extends WC_Payment_Gateway
                 $idBeforeChange = $this->getPaymentIdBySession();
                 try {
                     WooCommerce::applyMock('updatePaymentReferenceFailure');
-                    $newPaymentId = $this->getPaymentId();
+                    $newPaymentId = $this->getOrderReference();
                     if ($idBeforeChange !== $newPaymentId) {
                         ResursBankAPI::getResurs()->updatePaymentReference($idBeforeChange, $newPaymentId);
                         Data::setOrderMeta(
@@ -1721,7 +1749,6 @@ class ResursDefault extends WC_Payment_Gateway
                         );
                     }
                 } catch (Exception $e) {
-                    Data::setTimeoutStatus(ResursBankAPI::getResurs());
                     Data::writeLogNotice(
                         sprintf(
                             'updatePaymentReference failed: %s (code %s).',
@@ -1757,10 +1784,10 @@ class ResursDefault extends WC_Payment_Gateway
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function preProcessOrder($order)
+    private function preProcessOrder(WC_Order $order): void
     {
         $this->apiData['wc_order_id'] = $order->get_id();
-        $this->apiData['preferred_id'] = $this->getPaymentId();
+        $this->apiData['preferred_id'] = $this->getOrderReference();
         Data::setDeveloperLog(
             __FUNCTION__,
             sprintf(
@@ -1768,7 +1795,6 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->apiData['preferred_id']
             )
         );
-        $this->API->getConnection()->setPreferredId($this->apiData['preferred_id']);
     }
 
     /**
@@ -1776,91 +1802,13 @@ class ResursDefault extends WC_Payment_Gateway
      * @return array
      * @throws Exception
      */
-    private function processResursOrder($order): array
+    private function processResursOrder(WC_Order $order): array
     {
-        $return = [];
-        $checkoutRequestType = sprintf('process%s', ucfirst(Data::getCheckoutType()));
-        if ($this->paymentMethodInformation->apiType === 'SOAP') {
-            // Available options: simplified, hosted, rco. Methods should exists for each of them.
-            if (method_exists($this, $checkoutRequestType)) {
-                WooCommerce::setOrderNote(
-                    $this->order,
-                    sprintf(
-                        __('Resurs Bank processing order (%s).', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-                        $checkoutRequestType
-                    )
-                );
-                // Automatically process orders with a checkout type that is supported by this plugin.
-                // Checkout types will become available as the method starts to exist.
-
-                Data::writeLogEvent(
-                    Data::CAN_LOG_ORDER_EVENTS,
-                    sprintf(
-                        __(
-                            '%s: Initialize Resurs Bank process, order %s (%s) via %s.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                        ),
-                        __FUNCTION__,
-                        $this->order->get_id(),
-                        $this->getPaymentId(),
-                        $checkoutRequestType
-                    )
-                );
-
-                $return = $this->{$checkoutRequestType}($order);
-            } else {
-                Data::writeLogError(
-                    sprintf(
-                        'Merchant is trying to run this plugin with an unsupported checkout type (%s).',
-                        $checkoutRequestType
-                    )
-                );
-                throw new RuntimeException(
-                    __(
-                        'Chosen checkout type is currently unsupported'
-                    ),
-                    404
-                );
-            }
+        if (Data::getCheckoutType() !== ResursDefault::TYPE_RCO) {
+            $return = $this->processSimplified();
         } else {
-            // Passing the order to third party scripts. Using a format in this filter that in the end supports
-            // WordPress standards with snake_cases.
-            $return = WordPress::applyFilters(
-                sprintf('processOrder%s', ucfirst($this->paymentMethodInformation->apiType ?? '')),
-                [],
-                $order,
-                $this->paymentMethodInformation,
-                $this
-            );
-        }
-
-        // $return should at this moment contain an array with a result and redirect-url:
-        // [result => success|failure, redirect => url]
-
-        if (is_array($return) && count($return)) {
-            Data::writeLogEvent(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
-                    __(
-                        '%s: Order %s returned "%s" to WooCommerce.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    __FUNCTION__,
-                    $order->get_id(),
-                    $return['result'] ?? 'failure'
-                )
-            );
-        } else {
-            Data::writeLogError(
-                sprintf(
-                    __(
-                        '$return is not an object as expected in function %s (Checkout request type is %s).',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    ),
-                    __FUNCTION__,
-                    $checkoutRequestType
-                )
-            );
+            // @todo Handle RCO.
+            //$return = $this->processRco($order);
         }
 
         if (!isset($return['result'])) {
@@ -1947,7 +1895,6 @@ class ResursDefault extends WC_Payment_Gateway
                             $finalRedirectUrl = $this->get_return_url($this->order);
                         }
                         break;
-                    case self::TYPE_HOSTED:
                     case self::TYPE_RCO:
                         // Logging for specific flow.
                         if ($this->getCheckoutType() === self::TYPE_RCO) {
@@ -2091,17 +2038,15 @@ class ResursDefault extends WC_Payment_Gateway
      * Final signing: Checks and update order if signing was required initially. Let it through on hosted but
      * keep logging the details.
      *
-     * @return bool
+     * @return bool|array
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setFinalSigning()
+    private function setFinalSigning(): bool|array
     {
         $return = false;
         try {
-            if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order)) ||
-                $this->getCheckoutType() === self::TYPE_HOSTED
-            ) {
+            if (!($lastExceptionCode = Data::getOrderMeta('bookSignedPaymentExceptionCode', $this->order))) {
                 $bookSignedOrderReference = Data::getOrderMeta('resursReference', $this->wcOrderData);
                 // This part of the plugin is intended to save performance by not running bookSignedPayment if
                 // callbacks are reaching the platform before the customer landing.
@@ -2129,10 +2074,13 @@ class ResursDefault extends WC_Payment_Gateway
 
                     // Signing is only necessary for simplified flow.
                     if ($this->getCheckoutType() === self::TYPE_SIMPLIFIED) {
-                        $this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
+                        // @todo SOAP returned an array with a status after bookSignedPayment, but MAPI
+                        // @todo differs slightly in this process. This is where we preferably handle signings which
+                        // @todo aso means that getResultByPaymentStatus can be replaced.
+                        /*$this->paymentResponse = $this->API->getConnection()->bookSignedPayment(
                             $bookSignedOrderReference
                         );
-                        $return = $this->getResultByPaymentStatus();
+                        $return = $this->getResultByPaymentStatus();*/
                     }
                 }
             } else {
@@ -2140,7 +2088,6 @@ class ResursDefault extends WC_Payment_Gateway
             }
         } catch (Exception $bookSignedException) {
             Data::writeLogException($bookSignedException, __FUNCTION__);
-            Data::setTimeoutStatus($this->API->getConnection());
             $this->setFinalSigningExceptionNotes($bookSignedException);
         }
 
@@ -2184,11 +2131,11 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @return mixed
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function getResultByPaymentStatus()
+    private function getResultByPaymentStatus(): array
     {
         $bookPaymentStatus = $this->getBookPaymentStatus();
         Data::writeLogEvent(
@@ -2536,8 +2483,64 @@ class ResursDefault extends WC_Payment_Gateway
         );
     }
 
-    private function getOrderLines() {
+    /**
+     * @return OrderLineCollection
+     * @throws IllegalTypeException
+     */
+    private function getOrderLinesMapi(): OrderLineCollection
+    {
+        if (WooCommerce::getValidCart()) {
+            $orderHandler = new OrderHandler();
+            return $orderHandler->getPreparedMapiOrderLines();
+        }
 
+        // todo: Translate this via ecom2.
+        throw new RuntimeException(
+            __('Cart is empty!')
+        );
+    }
+
+    /**
+     * @return ResursDefault
+     * @throws Exception
+     * @since 0.0.1.0
+     * @noinspection PhpUndefinedFieldInspection
+     */
+    private function getOrderLinesRco(): ResursDefault
+    {
+        // TODO: Leaving this as is until we work with RCO. Must be fixed, but the orderLines are different to MAPI.
+        if (WooCommerce::getValidCart()) {
+            // This is the first point we store the cart total for the current session.
+            WooCommerce::setSessionValue('customerCartTotal', WC()->cart->total);
+            //$orderHandler = new OrderHandler();
+            //$orderHandler->setCart($this->cart);
+            //$orderHandler->setApi($this->API);
+            //$orderHandler->setPreparedOrderLines();
+            //$this->API = $orderHandler->getApi();
+
+            Data::writeLogEvent(
+                Data::CAN_LOG_ORDER_EVENTS,
+                sprintf(
+                    '%s',
+                    __FUNCTION__
+                )
+            );
+        } else {
+            Data::writeLogError(
+                sprintf(
+                    __(
+                        '%s: Could not create order from an empty cart.',
+                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    ),
+                    __FUNCTION__
+                )
+            );
+            throw new RuntimeException(
+                __('Cart is empty!', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+            );
+        }
+
+        return $this;
     }
 
     /**
@@ -2546,82 +2549,27 @@ class ResursDefault extends WC_Payment_Gateway
      * #1 Prepare order
      * #2 Create order
      * #3 Log, handle and return response
-     * @return mixed
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection PhpUnusedPrivateMethodInspection
      */
-    private function processSimplified()
+    private function processSimplified(): array
     {
-        // Section #1: Prepare order.
-        $this->API->setCheckoutType(CheckoutType::SIMPLIFIED_FLOW);
-        $this->setOrderData();
-        $this->setCreatePaymentNotice(__FUNCTION__);
-        // Section #2: Create Order
-        $this->paymentResponse = $this->API->getConnection()->createPayment(
-            $this->getPaymentMethod()
-        );
-
-        // Section #3: Log, handle and return response
-        Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->getBookPaymentStatus());
-        Data::writeLogEvent(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                '%s: %s:bookPaymentStatus:%s, signingUrl: %s',
-                __FUNCTION__,
-                $this->getPaymentId(),
-                $this->getBookPaymentStatus(),
-                $this->getBookSigningUrl()
-            )
+        // Create order, but skip using the order reference that is used from WooCommerce.
+        // This avoids order id collisions when we're on a network site where several stores may have
+        // multiple tables with the same id.
+        $payment = Repository::create(
+            storeId: ResursBankAPI::getStoreUuidByNationalId(Data::getStoreId()),
+            paymentMethodId: $this->getPaymentMethod(),
+            orderLines: $this->getOrderLinesMapi(),
         );
 
         // Return booking result.
+        // @todo SOAP returned an array with a status after bookSignedPayment, but MAPI
+        // @todo differs slightly in this process. This is where we preferably handle signings which
+        // @todo aso means that getResultByPaymentStatus can be replaced.
         return $this->getResultByPaymentStatus();
-    }
-
-    /**
-     * Hosted checkout flow. Like simplified, but less data.
-     * All flows should have three sections:
-     * #1 Prepare order
-     * #2 Create order
-     * #3 Log, handle and return response
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection PhpUnusedPrivateMethodInspection
-     */
-    private function processHosted()
-    {
-        $this->API->setCheckoutType(CheckoutType::HOSTED_FLOW);
-        $this->setOrderData();
-        $this->setCreatePaymentNotice(__FUNCTION__);
-
-        // Section #2: Create Order
-        $this->paymentResponse = $this->API->getConnection()->createPayment(
-            $this->getPaymentMethod()
-        );
-
-        // Section #3: Log, handle and return response
-
-        // Make sure the response contains an url (not necessarily a https-based URL in staging, so compare with http).
-        if (strncmp($this->paymentResponse, 'http', 4) === 0) {
-            $return = $this->getResult('success', $this->paymentResponse);
-        } else {
-            $return = $this->getResult('failed');
-        }
-
-        Data::setOrderMeta($this->order, 'bookPaymentStatus', $this->paymentResponse);
-        Data::writeLogEvent(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                '%s: %s:bookPaymentStatus:hosted:%s',
-                __FUNCTION__,
-                $this->getPaymentId(),
-                $this->paymentResponse
-            )
-        );
-
-        return $return;
     }
 
     /**
