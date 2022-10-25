@@ -592,7 +592,6 @@ class ResursDefault extends WC_Payment_Gateway
         // This could crash the order completion (at the successUrl).
         if (WooCommerce::getValidCart() && WooCommerce::getSessionValue(WooCommerce::$inCheckoutKey)) {
             $this->setOrderData();
-            $this->setCreatePaymentNotice(__FUNCTION__);
 
             $paymentId = $this->getProperPaymentId();
             try {
@@ -991,19 +990,6 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         return $return;
-    }
-
-    /**
-     * @param $fromFunction
-     * @since 0.0.1.0
-     */
-    private function setCreatePaymentNotice($fromFunction)
-    {
-        // Create payment for simplified (log in all flows).
-        Data::setDeveloperLog(
-            $fromFunction,
-            sprintf('createPayment %s init', $this->getPaymentMethod())
-        );
     }
 
     /**
@@ -2578,7 +2564,6 @@ class ResursDefault extends WC_Payment_Gateway
             paymentMethodId: $this->getPaymentMethod(),
             orderLines: $this->getOrderLinesMapi(),
         );
-        $this->setCreatePaymentNotice(__FUNCTION__);
 
         // Return booking result.
         // @todo SOAP returned an array with a status after bookSignedPayment, but MAPI
