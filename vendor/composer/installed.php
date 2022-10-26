@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '4ee21ffc5451ea7a91fad1ec334c7a6989f0813a',
+        'reference' => '7f88d9be8d14539ba7ed6ffcb3b1a4851ba50a49',
         'name' => 'tornevall/resurs-bank-payment-gateway-for-woocommerce',
         'dev' => true,
     ),
@@ -18,7 +18,7 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
-            'reference' => 'afde0b0aa99be80b8fcbbdb698c3b71c2e948681',
+            'reference' => '6eaf9722cf44d22d449aa6d345af71c4362082ed',
             'dev_requirement' => false,
         ),
         'resursbank/ecomphp' => array(
@@ -45,7 +45,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '4ee21ffc5451ea7a91fad1ec334c7a6989f0813a',
+            'reference' => '7f88d9be8d14539ba7ed6ffcb3b1a4851ba50a49',
             'dev_requirement' => false,
         ),
         'tornevall/tornelib-php-crypto' => array(

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Ecom\Module\PaymentMethod;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -22,12 +23,12 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
-use Resursbank\Ecom\Lib\Repository\Api\Mapi\Get;
-use Resursbank\Ecom\Lib\Validation\StringValidation;
-use Exception;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\Repository\Api\Mapi\Get;
 use Resursbank\Ecom\Lib\Repository\Cache;
+use Resursbank\Ecom\Lib\Validation\StringValidation;
+use Resursbank\Ecom\Module\PaymentMethod\Api\ApplicationDataSpecification;
 
 /**
  * Interaction with Payment Method entities and related functionality.
@@ -178,6 +179,30 @@ class Repository
         }
 
         return $result;
+    }
+
+    /**
+     * @param string $storeId
+     * @param string $paymentMethodId
+     * @param int $amount
+     * @return PaymentMethod\ApplicationFormSpecResponse
+     * @throws Exception
+     */
+    public static function getApplicationDataSpecification(
+        string $storeId,
+        string $paymentMethodId,
+        int $amount
+    ): PaymentMethod\ApplicationFormSpecResponse {
+        try {
+            return (new ApplicationDataSpecification())->call(
+                storeId: $storeId,
+                paymentMethodId: $paymentMethodId,
+                amount: $amount
+            );
+        } catch (Exception $e) {
+            self::logException(exception: $e);
+            throw $e;
+        }
     }
 
     /**

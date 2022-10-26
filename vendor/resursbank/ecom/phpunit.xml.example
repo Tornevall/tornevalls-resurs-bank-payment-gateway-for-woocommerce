@@ -21,6 +21,7 @@
         <env name="JWT_AUTH_GRANT_TYPE" value="client_credentials" force="true" />
         <env name="REDIS_HOST" value="redis" force="true" />
         <env name="PAYMENT_METHOD_ID" value="REPLACEME" force="true" />
+        <env name="APPLICATION_DATA_SPEC_PAYMENT_METHOD_ID" value="REPLACEME" force="true" />
         <env name="GOVERNMENT_ID_HAPPY_NATURAL" value="REPLACEME" force="true" />
         <env name="ANNUITY_PAYMENT_METHOD_ID" value="REPLACEME" force="true" />
     </php>

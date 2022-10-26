@@ -98,7 +98,7 @@
     "translation": {
       "en": "Shipping",
       "fi": "Laivaus",
-      "sv": "Frakt",
+      "sv": "Frakt"
     }
   },
   {
@@ -106,7 +106,7 @@
     "translation": {
       "en": "shipping",
       "fi": "laivaus",
-      "sv": "frakt",
+      "sv": "frakt"
     }
   }
 ]
