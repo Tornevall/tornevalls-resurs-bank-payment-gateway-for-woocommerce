@@ -92,5 +92,21 @@
       "da": "st",
       "no": "st"
     }
+  },
+  {
+    "id": "shipping-description",
+    "translation": {
+      "en": "Shipping",
+      "fi": "Laivaus",
+      "sv": "Frakt",
+    }
+  },
+  {
+    "id": "shipping-reference",
+    "translation": {
+      "en": "shipping",
+      "fi": "laivaus",
+      "sv": "frakt",
+    }
   }
 ]
