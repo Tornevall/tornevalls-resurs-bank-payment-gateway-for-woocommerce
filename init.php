@@ -36,7 +36,6 @@ Config::setup(
     cache: Advanced::getCache(),
     jwtAuth: Api::getJwt()
 );
-Config::$instance->logger->debug('Plugin loaded.');
 
 // Note: The prefix below is used by this plugin only and should not be changed. Instead
 // you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.
