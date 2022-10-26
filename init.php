@@ -15,17 +15,28 @@
  * @noinspection PhpDefineCanBeReplacedWithConstInspection
  */
 
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Lib\Log\NoneLogger;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Settings\Advanced;
+use Resursbank\Woocommerce\Settings\Api;
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
 require_once(__DIR__ . '/vendor/autoload.php');
+// Early initiation.
+Config::setup(
+    logger: Advanced::getLogger(),
+    cache: Advanced::getCache(),
+    jwtAuth: Api::getJwt()
+);
+Config::$instance->logger->debug('Plugin loaded.');
 
 // Note: The prefix below is used by this plugin only and should not be changed. Instead
 // you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.

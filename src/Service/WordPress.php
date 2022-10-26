@@ -47,12 +47,6 @@ class WordPress
         // Initialize adaptions.
         new ResursPlugin();
 
-        Config::setup(
-            logger: Advanced::getLogger(),
-            cache: Advanced::getCache(),
-            jwtAuth: Api::getJwt()
-        );
-
         // Always initialize defaults once on plugin loaded (performance saver).
 //         Data::getDefaultsInit();
         self::setupAjaxActions();
@@ -396,12 +390,6 @@ class WordPress
      */
     public static function setGenericError($exception)
     {
-        if (!isset(Config::$instance)) {
-            // Critical errors where ecom can not log must be logged somewhere.
-            (new WC_Logger())->critical(
-                'Resurs Bank Critical: ' . $exception->getMessage()
-            );
-        }
         if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
             $_SESSION[Data::getPrefix()]['exception'] = [];
         }
