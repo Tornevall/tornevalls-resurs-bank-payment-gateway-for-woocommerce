@@ -30,6 +30,10 @@ enum LogLevel: int
      */
     public static function loggable(self $level): bool
     {
+        if (!Config::hasInstance()) {
+            return true; // If there's no Config instance there's no logLevel restriction to apply
+        }
+
         return Config::$instance->logLevel->value <= $level->value;
     }
 }

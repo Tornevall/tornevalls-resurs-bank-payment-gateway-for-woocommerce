@@ -30,12 +30,12 @@ class Metadata extends Model
      * @throws IllegalValueException
      */
     public function __construct(
-        public readonly string $creator,
-        public readonly ?array $custom = null,
+        public readonly ?string $creator = null,
+        public readonly array $custom = [],
         private readonly StringValidation $stringValidation = new StringValidation(),
         private readonly ArrayValidation $arrayValidation = new ArrayValidation(),
     ) {
-        $this->validateCreator();
+        //$this->validateCreator();
         $this->validateCustom();
     }
 
