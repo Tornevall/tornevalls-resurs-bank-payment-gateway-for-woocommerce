@@ -21,6 +21,9 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use ResursBank\Module\Data;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
@@ -118,7 +121,8 @@ class Settings extends WC_Settings_Page
         global $current_section;
 
         if ($current_section === 'payment_methods') {
-            echo PaymentMethods::getOutput(storeId: StoreId::getData());
+            // As WordPress requires html to be escaped at the echo, we do a late execute on this.
+            echo Data::getEscapedHtml(PaymentMethods::getOutput(storeId:  StoreId::getData()));
         } else {
             // Echo table element to get Woocommerce to properly render our
             // settings within the right elements and styling. If you include

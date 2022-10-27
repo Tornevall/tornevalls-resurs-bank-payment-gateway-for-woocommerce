@@ -16,33 +16,41 @@
  */
 
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Lib\Log\NoneLogger;
 use ResursBank\Module\Data;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 
-if (!defined('ABSPATH')) {
+if (!defined(constant_name: 'ABSPATH')) {
     exit;
 }
 
-define('RESURSBANK_GATEWAY_PATH', plugin_dir_path(__FILE__));
+// Using same path identifier as the rest of the plugin-verse.
+define(constant_name: 'RESURSBANK_GATEWAY_PATH', value: plugin_dir_path(__FILE__));
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
 // Note: The prefix below is used by this plugin only and should not be changed. Instead
 // you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.
+// @todo Build us out of this prefix.
 if (Data::isOriginalCodeBase()) {
-    define('RESURSBANK_PREFIX', 'trbwc');
+    define(constant_name: 'RESURSBANK_PREFIX', value: 'trbwc');
 } elseif (ResursPlugin::isResursCodeBase()) {
     // Look for an alternative origin.
-    define('RESURSBANK_PREFIX', ResursPlugin::RESURS_BANK_PREFIX);
+    define(constant_name: 'RESURSBANK_PREFIX', value: ResursPlugin::RESURS_BANK_PREFIX);
 }
-define('RESURSBANK_SNAKE_CASE_FILTERS', true);
-define('RESURSBANK_ALLOW_PAYMENT_FEE', WordPress::applyFilters('allowPaymentFee', false));
+
+// Do not touch this just yet. Converting filters to something else than snake_cases has to be done
+// in one sweep - if necessary.
+define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
+
+//@todo According to WOO-817, this feature may be misconfigured.
+define(constant_name: 'RESURSBANK_ALLOW_PAYMENT_FEE',
+    value: WordPress::applyFilters(filterName: 'allowPaymentFee', value: false)
+);
+
 // Early initiation.
 Config::setup(
     logger: Advanced::getLogger(),
@@ -50,16 +58,19 @@ Config::setup(
     jwtAuth: Api::getJwt()
 );
 
+// @todo In a near future, this text domain should be changed to the proper slug or removed.
+// @todo If *all* translations moves to ecom2 translator class, it can be entirely removed.
+// @todo This avoids a lot of slug problems.
 load_plugin_textdomain(
-    'tornevalls-resurs-bank-payment-gateway-for-woocommerce',
-    false,
-    dirname(plugin_basename(__FILE__)) . '/language/'
+    domain: 'tornevalls-resurs-bank-payment-gateway-for-woocommerce',
+    plugin_rel_path: dirname(plugin_basename(__FILE__)) . '/language/'
 );
+
+// Make sure there is an instance of WooCommerce among active plugins. If not, we don't
+// have to run any of our code, since we're depending on WooCommerce.
 if (!WooCommerce::getActiveState()) {
     return;
 }
-// Check and generate admin message if necessary.
-Data::getExpectations();
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "wordpress mode" with if (function_exists('add_action')) {}.

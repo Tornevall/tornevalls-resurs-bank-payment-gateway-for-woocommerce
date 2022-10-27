@@ -12,7 +12,12 @@ namespace Resursbank\Woocommerce\Settings;
 use Exception;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
+use Resursbank\Ecom\Module\Store\Models\Store;
+use Resursbank\Ecom\Module\Store\Models\StoreCollection;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use ResursBank\Module\Data;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Environment;
@@ -42,8 +47,9 @@ class Api
                 'store_id' => [
                     'id' => StoreId::getName(),
                     'title' => 'Store ID',
-                    'type' => 'text',
+                    'type' => 'select',
                     'default' => '',
+                    'options' => self::getStoreSelector()
                 ],
                 'client_id' => [
                     'id' => ClientId::getName(),
@@ -78,6 +84,49 @@ class Api
                 ],
             ]
         ];
+    }
+
+    /**
+     * Render an array with available stores for a merchant, based on their national store id as this is shorter
+     * than the full store uuid. The national id is a human-readable variant of the uuid.
+     * @return array
+     * @noinspection DuplicatedCode
+     */
+    private static function getStoreSelector() {
+        $clientId = ClientId::getData();
+        $clientSecret = ClientSecret::getData();
+
+        // Default for multiple stores: Never putting merchants on the first available choice.
+        $return = [
+            '' => 'Select Store'
+        ];
+
+        if ($clientId !== '' && $clientSecret !== '') {
+            try {
+                $storeList = StoreRepository::getStores();
+                if ($storeList->count() > 1) {
+                    /** @var Store $store */
+                    foreach ($storeList as $store) {
+                        $return[$store->id] = sprintf('%s: %s', $store->nationalStoreId, $store->name);
+                    }
+                } elseif ($storeList->count() === 1) {
+                    /** @var Store $store */
+                    $store = $storeList->current();
+
+                    $return = [sprintf('%s: %s', $store->nationalStoreId, $store->name)];
+
+                    // If only one store is available, we can set it as the stored value.
+                    StoreId::setData($store->id);
+                }
+            } catch (Exception $e) {
+                // @todo Consider using WC logger to output message in admin panel, regardless of the exception type.
+                // @todo We're always landing here, when the client ID and secret are not valid for sure, but other
+                // @todo errors may occur here too. As an error, they should be ignored.
+                WordPress::setGenericError($e);
+            }
+        }
+
+        return $return;
     }
 
     /**
