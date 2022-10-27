@@ -18,6 +18,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Collection\Collection;
 
 use Resursbank\Ecom\Lib\Model\Model;
+use stdClass;
+
 use function call_user_func;
 use function is_object;
 
@@ -77,6 +79,12 @@ class DataConverter
                     }
                     $dummyCollection->setData(data: $converted);
                     $arguments[$name] = $dummyCollection;
+                } elseif (
+                    $propertyType === 'array' &&
+                    $value instanceof stdClass &&
+                    empty((array)$value)
+                ) {
+                    $arguments[$name] = [];
                 } elseif (enum_exists($propertyType)) {
                     // If our property is an enum we need to convert the value
                     // to the enum value it represents.

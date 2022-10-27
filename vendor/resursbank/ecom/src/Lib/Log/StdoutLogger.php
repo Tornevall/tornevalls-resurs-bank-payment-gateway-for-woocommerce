@@ -13,6 +13,7 @@ use Datetime;
 use Error;
 use Exception;
 use Resursbank\Ecom\Exception\IOException;
+
 use function get_class;
 use function is_object;
 
@@ -66,6 +67,7 @@ class StdoutLogger implements LoggerInterface
      * @param string|Exception|Error $message
      * @return void
      * @throws IOException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function log(LogLevel $level, string|Exception|Error $message): void
     {

@@ -117,4 +117,14 @@ final class Config
     {
         return isset(self::$instance->jwtAuth);
     }
+
+    /**
+     * Checks if there is a Config instance
+     *
+     * @return bool
+     */
+    public static function hasInstance(): bool
+    {
+        return isset(self::$instance);
+    }
 }

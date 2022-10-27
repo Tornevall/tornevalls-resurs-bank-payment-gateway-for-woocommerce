@@ -101,6 +101,7 @@ class FileLogger implements LoggerInterface
      * @param string|Exception|Error $message
      * @return void
      * @throws FilesystemException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function log(LogLevel $level, string|Exception|Error $message): void
     {
