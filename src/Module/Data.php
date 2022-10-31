@@ -940,7 +940,7 @@ class Data
      * @return string
      * @since 0.0.1.1
      */
-    public static function getEscapedHtml($content)
+    public static function getEscapedHtml($content): string
     {
         return wp_kses(
             $content,
@@ -949,13 +949,12 @@ class Data
     }
 
     /**
-     * Get safe escape tags for html. Observe that we pass some of the elements through a purger, as
-     * some of the script based "on"-elements are limited to admin.
+     * Centralized list of safe escape tags for html. Returned to WordPress method wp_kses for the proper escaping.
      *
      * @return array
      * @since 0.0.1.1
      */
-    private static function getSafeTags()
+    private static function getSafeTags(): array
     {
         // Many of the html tags is depending on clickable elements, but we're limiting them here
         // to only apply in the most important elements.

@@ -10,7 +10,17 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Exception;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\CollectionException;
+use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Models\StoreCollection;
@@ -41,16 +51,30 @@ class Api
      */
     public static function getSettings(): array
     {
+        try {
+            $currentStoreOptions = self::getStoreSelector();
+            $storeIdSetting = [
+                'id' => StoreId::getName(),
+                'title' => 'Store ID',
+                'type' => 'select',
+                'default' => '',
+                'options' => $currentStoreOptions
+            ];
+        } catch (Exception $e) {
+            $storeIdSetting = [
+                'id' => StoreId::getName(),
+                'title' => 'Store ID',
+                'type' => 'title',
+                'default' => '',
+                'desc_tip' => true,
+                'desc' => sprintf('Could not fetch stores from Resurs Bank: %s.', $e->getMessage())
+            ];
+        }
+
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
-                'store_id' => [
-                    'id' => StoreId::getName(),
-                    'title' => 'Store ID',
-                    'type' => 'select',
-                    'default' => '',
-                    'options' => self::getStoreSelector()
-                ],
+                'store_id' => $storeIdSetting,
                 'client_id' => [
                     'id' => ClientId::getName(),
                     'title' => 'Client ID',
@@ -90,9 +114,21 @@ class Api
      * Render an array with available stores for a merchant, based on their national store id as this is shorter
      * than the full store uuid. The national id is a human-readable variant of the uuid.
      * @return array
+     * @throws EmptyValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CollectionException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @noinspection DuplicatedCode
      */
-    private static function getStoreSelector() {
+    private static function getStoreSelector(): array
+    {
         $clientId = ClientId::getData();
         $clientSecret = ClientSecret::getData();
 
@@ -119,10 +155,11 @@ class Api
                     StoreId::setData($store->id);
                 }
             } catch (Exception $e) {
-                // @todo Consider using WC logger to output message in admin panel, regardless of the exception type.
-                // @todo We're always landing here, when the client ID and secret are not valid for sure, but other
-                // @todo errors may occur here too. As an error, they should be ignored.
+                // Log all errors in the admin panel regardless of where the exception comes from.
                 WordPress::setGenericError($e);
+                // Make sure we give the options array a chance to render an error instead of the fields so ensure
+                // the setting won't be saved by mistake when APIs are down.
+                throw $e;
             }
         }
 

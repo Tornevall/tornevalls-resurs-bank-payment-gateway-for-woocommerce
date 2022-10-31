@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Module\Payment\Api\Create;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest;
@@ -136,35 +137,35 @@ class ResursDefault extends WC_Payment_Gateway
      * @var stdClass $paymentResponse
      * @since 0.0.1.0
      */
-    private $paymentResponse;
+    private stdClass $paymentResponse;
     /**
      * @var array
      * @since 0.0.1.0
      */
-    private $wcOrderData;
+    private array $wcOrderData;
     /**
      * Data that will be sent between Resurs Bank and ourselves.
      * @var array $apiData
      * @since 0.0.1.0
      */
-    private $apiData = [];
+    private array $apiData = [];
     /**
      * @var string $apiDataId
      * @since 0.0.1.0
      */
-    private $apiDataId = '';
+    private string $apiDataId = '';
     /**
-     * @var stdClass $paymentMethodInformation
+     * @var PaymentMethod $paymentMethodInformation
      * @since 0.0.1.0
      */
-    private stdClass $paymentMethodInformation;
+    private PaymentMethod $paymentMethodInformation;
 
     /**
      * The iframe. Rendered once. When rendered, it won't be requested again.
      * @var string
      * @since 0.0.1.0
      */
-    private $rcoFrame;
+    private string $rcoFrame;
 
     /**
      * The iframe container from Resurs Bank.
@@ -181,54 +182,70 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * ResursDefault constructor.
-     * @param array $resursPaymentMethodObject
+     *
+     * @param PaymentMethod|null $resursPaymentMethod Making sure the gateway is reachable even if initialization has failed.
      * @throws Exception
      * @noinspection ParameterDefaultValueIsNotNullInspection
      * @since 0.0.1.0
      */
-    public function __construct($resursPaymentMethodObject = [])
-    {
-        global $woocommerce;
+    public function __construct(
+        public readonly ?PaymentMethod $resursPaymentMethod = null
+    ) {
+        $this->initializePaymentMethod($resursPaymentMethod);
+    }
 
+    /**
+     * Initialize the gateway with the current Resurs payment method model.
+     * Things initialized here is mostly defaults, since we are depending on features that can work independently
+     * without spontaneous crashes.
+     *
+     * @param PaymentMethod|null $paymentMethod
+     * @return void
+     * @throws Exception
+     */
+    private function initializePaymentMethod(?PaymentMethod $paymentMethod = null): void {
+        // Make sure the cart can be reached if it is present.
         $this->cart = $woocommerce->cart ?? null;
-        $this->generic = Data::getGenericClass();
-        $this->id = Data::getPrefix('default');
-        $this->method_title = __(
-            'Resurs Bank',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
-        $this->method_description = __(
-            'Resurs Bank Payment Gateway with dynamic payment methods.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-        );
-        $this->title = __('Resurs Bank AB', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
-        $this->setPaymentMethodInformation($resursPaymentMethodObject);
-        $this->has_fields = (
-            Data::getCheckoutType() === self::TYPE_SIMPLIFIED ||
-            Data::getCheckoutType() === self::TYPE_HOSTED
-        );
 
-        if ((bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)) {
-            $this->has_fields = true;
-        }
+        // @todo Switch this class to something else. This is mostly used for displaying templates in phtml-format.
+        $this->generic = Data::getGenericClass();
+
+        // Below is initial default preparations for the payment method, if we are unable to fetch it from the
+        // real payment method information (via setPaymentMethodInformation). This id should preferably be
+        // the UUID given by Resurs Bank (see below for that part).
+        $this->id = 'resursbank_default';
+        $this->method_title = 'Resurs Bank AB';
+        $this->method_description = 'Resurs Bank Gateway';
+        $this->title = 'Resurs Bank AB';
+
+        // @todo Has fields should be false when implementing RCO.
+        $this->has_fields = true;
+
+        // This is where we initialize each payment method details, like if it is active, etc.
+        // Most of the payment method information has to be initialized at or via the constructor due to
+        // how WooCommerce start working with them as soon as they are loaded.
+        $this->setPaymentMethodInformation($paymentMethod);
+
         $this->setFilters();
         $this->setActions();
     }
 
     /**
      * Initializer. It is not until we have payment method information we can start using this class for real.
-     * @param $paymentMethodInformation
+     * @param PaymentMethod|null $paymentMethod
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
+     * @todo Eventually make this part compatible with RCO+ when time comes.
      */
-    private function setPaymentMethodInformation($paymentMethodInformation)
+    private function setPaymentMethodInformation(PaymentMethod $paymentMethod = null)
     {
         // Generic setup regardless of payment method.
         $this->setPaymentApiData();
 
-        if (is_object($paymentMethodInformation)) {
-            $this->paymentMethodInformation = $paymentMethodInformation;
+        if ($paymentMethod instanceof PaymentMethod) {
+            // Collect the entire payment method information.
+            $this->paymentMethodInformation = $paymentMethod;
             $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
             $this->title = $this->paymentMethodInformation->name ?? '';
             $this->method_description = '';
@@ -252,18 +269,6 @@ class ResursDefault extends WC_Payment_Gateway
 
             // Applicant post data should be the final request.
             $this->applicantPostData = $this->getApplicantPostData();
-        }
-        // Running in RCO mode, we will only have one method available and therefore we change the current id to
-        // that method.
-        if (Data::getCheckoutType() === self::TYPE_RCO &&
-            !(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
-        ) {
-            // @todo The code below won't work, but it previously caused an error because paymentMethodInformation received an instance of ResursCheckout but is declared as stdClass.
-            $this->paymentMethodInformation = new stdClass();
-
-            if (isset($this->paymentMethodInformation->id)) {
-                $this->id = sprintf( '%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id );
-            }
         }
     }
 
@@ -1321,6 +1326,8 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Decide if the payment gateway is available or not. Work both in admin and checkouts, so this is where
+     * we also need to check out conditions from the early instantiated cart.
      * @return bool
      * @throws Exception
      * @since 0.0.1.0
@@ -1330,39 +1337,31 @@ class ResursDefault extends WC_Payment_Gateway
     {
         global $woocommerce;
 
-        // If the payment method information is missing, it is not available.
-        // Usually occurs when plugin is recently installed and not synchronized with Resurs.
-        // This is also very common when merchants still have old SOAP-based methods available.
-
-        if (!isset($this->paymentMethodInformation) ||
-            !$this->paymentMethodInformation instanceof stdClass ||
-            !isset($this->paymentMethodInformation->id)
-        ) {
-            return false;
-        }
-        // Legacy methods can not be used anymore.
-        if (isset($this->paymentMethodInformation->description)) {
+        // If the payment method information is not initialized properly, it should be not in use.
+        if (!isset($this->paymentMethodInformation) || !$this->paymentMethodInformation instanceof PaymentMethod) {
             return false;
         }
 
         // This feature is primarily for the storefront.
         $return = parent::is_available();
 
-        // @link https://wordpress.org/support/topic/php-notice-trying-to-get-property-total-of-non-object-2/
+        /**
+         * The cart check has a known issue.
+         * @link https://wordpress.org/support/topic/php-notice-trying-to-get-property-total-of-non-object-2/
+         */
+
+        // If there's no cart, and we miss get_order_total in this gateway this instance probably do not belong
+        // to the storefront.
         if (!isset($woocommerce->cart) ||
-            !method_exists($this, 'get_order_total') ||
+            !method_exists($this, method: 'get_order_total') ||
             !isset($this->paymentMethodInformation->id)
         ) {
-            return Data::isEnabled();
+            // @todo Return false if woocommerce internally has this gateway disabled.
+            // @todo Also eventually check if the payment method is enabled in the admin (if want to go that way).
         }
         $customerType = Data::getCustomerType();
-        $isEnabled = Data::getPaymentMethodSetting('enabled', $this->paymentMethodInformation->id);
 
-        $pses = Data::getPaymentMethodBySession();
-        // Nulled enabled states are always considered enabled as noone has edited them yet.
-        if (!$isEnabled && $isEnabled !== null) {
-            $return = false;
-        }
+        Data::getPaymentMethodBySession();
 
         // If this feature is not missing the method, we now know that there is chance that we're
         // located in a checkout. We will in this moment run through the min-max amount that resides

@@ -388,12 +388,15 @@ class WordPress
      * @param Exception $exception
      * @since 0.0.1.4
      */
-    public static function setGenericError($exception)
+    public static function setGenericError(Exception $exception)
     {
         if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
             $_SESSION[Data::getPrefix()]['exception'] = [];
         }
-        if ($exception instanceof Exception && self::canAddException($exception)) {
+        // Make sure the errors are not duplicated.
+        if (self::canAddException($exception)) {
+            // Add the exception to the session variable since that's where we can give it to WordPress in
+            // the easiest way on page reloads/changes.
             $_SESSION[Data::getPrefix()]['exception'][] = $exception;
         }
     }
@@ -402,17 +405,18 @@ class WordPress
      * Look for duplicate messages in session exceptions.
      *
      * @param Exception $exception
+     * @return bool
      * @since 0.0.1.4
      */
-    private static function canAddException($exception): bool
+    private static function canAddException(Exception $exception): bool
     {
         $return = true;
 
-        if (isset($_SESSION[Data::getPrefix()]['exception']) && $exception instanceof Exception) {
+        if (isset($_SESSION[Data::getPrefix()]['exception'])) {
             /** @var Exception $item */
-            foreach ($_SESSION[Data::getPrefix()]['exception'] as $item) {
-                if ($item instanceof Exception) {
-                    $message = $item->getMessage();
+            foreach ($_SESSION[Data::getPrefix()]['exception'] as $exceptionItem) {
+                if ($exceptionItem instanceof Exception) {
+                    $message = $exceptionItem->getMessage();
                     if ($exception->getMessage() === $message) {
                         $return = false;
                         break;

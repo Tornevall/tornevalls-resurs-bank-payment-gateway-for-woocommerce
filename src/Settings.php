@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -122,7 +123,14 @@ class Settings extends WC_Settings_Page
 
         if ($current_section === 'payment_methods') {
             // As WordPress requires html to be escaped at the echo, we do a late execute on this.
-            echo Data::getEscapedHtml(PaymentMethods::getOutput(storeId:  StoreId::getData()));
+            try {
+                echo Data::getEscapedHtml(PaymentMethods::getOutput(storeId: StoreId::getData()));
+            } catch (Exception $e) {
+                // @todo Add proper translation via ecom2.
+                echo '<div style="border: 1px solid black !important; padding: 5px !important;">' . Data::getEscapedHtml(
+                    __('Unable to request payment methods from Resurs Bank: ') . $e->getMessage()
+                ) . '</div>';
+            }
         } else {
             // Echo table element to get Woocommerce to properly render our
             // settings within the right elements and styling. If you include
@@ -130,8 +138,9 @@ class Settings extends WC_Settings_Page
             // be altered by Woocommerce.
             echo '<table class="form-table">';
 
+            // Always default to first "tab" if no section has been selected.
             WC_Admin_Settings::output_fields(
-                $this->get_settings(section: $current_section)
+                $this->get_settings(section: empty($current_section) ? 'api_settings' : $current_section)
             );
 
             echo '</table>';
