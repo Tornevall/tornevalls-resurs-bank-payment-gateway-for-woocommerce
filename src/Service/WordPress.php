@@ -394,7 +394,7 @@ class WordPress
             $_SESSION[Data::getPrefix()]['exception'] = [];
         }
         // Make sure the errors are not duplicated.
-        if (self::canAddException($exception)) {
+        if (self::canAddException(exception: $exception)) {
             // Add the exception to the session variable since that's where we can give it to WordPress in
             // the easiest way on page reloads/changes.
             $_SESSION[Data::getPrefix()]['exception'][] = $exception;

@@ -20,6 +20,7 @@ class OrderMetaBox
     /**
      * @param WP_Post $post
      * @throws ResursException
+     * @throws Exception
      * @since 0.0.1.7
      */
     public static function output_order($post)
@@ -54,22 +55,22 @@ class OrderMetaBox
             }
 
             echo Data::getEscapedHtml(
-                Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
+                content: Data::getGenericClass()->getTemplate(
+                    templateName: 'adminpage_details.phtml',
+                    assignedVariables: $orderData
+                )
             );
-            WordPress::doAction('showOrderDetails', $orderData);
+            WordPress::doAction(actionName: 'showOrderDetails', value: $orderData);
         }
     }
 
     /**
      * @param WP_Post $post
+     * @return void
      * @throws ResursException
-     * @since 0.0.1.7
      */
-    public static function output_meta_details($post)
+    public static function output_meta_details(WP_Post $post): void
     {
-        if (!$post instanceof WP_Post && $post->post_type !== 'shop_order') {
-            return;
-        }
         $order = new WC_Order($post->ID);
         $paymentMethod = $order->get_payment_method();
 

@@ -191,7 +191,7 @@ class ResursDefault extends WC_Payment_Gateway
     public function __construct(
         public readonly ?PaymentMethod $resursPaymentMethod = null
     ) {
-        $this->initializePaymentMethod($resursPaymentMethod);
+        $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
     }
 
     /**
@@ -224,7 +224,7 @@ class ResursDefault extends WC_Payment_Gateway
         // This is where we initialize each payment method details, like if it is active, etc.
         // Most of the payment method information has to be initialized at or via the constructor due to
         // how WooCommerce start working with them as soon as they are loaded.
-        $this->setPaymentMethodInformation($paymentMethod);
+        $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
 
         $this->setFilters();
         $this->setActions();
@@ -274,11 +274,11 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Generic setup regardless of payment method.
-     * @return $this
+     * @return void
      * @throws Exception
      * @since 0.0.1.0
      */
-    private function setPaymentApiData(): self
+    private function setPaymentApiData(): void
     {
         $this->apiData['checkoutType'] = Data::getCheckoutType();
         if (!empty(Data::getPaymentMethodBySession())) {
@@ -287,7 +287,6 @@ class ResursDefault extends WC_Payment_Gateway
         $this->apiDataId = sha1(uniqid('wc-api', true));
         $this->API = new ResursBankAPI();
 
-        return $this;
     }
 
     /**

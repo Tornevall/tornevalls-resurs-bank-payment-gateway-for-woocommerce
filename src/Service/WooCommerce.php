@@ -139,12 +139,10 @@ class WooCommerce
             // @todo Currently we are no longer handling RCO as a gateway. However, when we start using RCO again
             // @todo this is where we should handle that port, as a separate single gateway.
             $paymentMethodList = PaymentMethodRepository::getPaymentMethods(StoreId::getData());
-            if ($paymentMethodList->count()) {
-                foreach ($paymentMethodList as $paymentMethod) {
-                    $gateway = new ResursDefault($paymentMethod);
-                    if ($gateway->is_available()) {
-                        $gateways[] = $gateway;
-                    }
+            foreach ($paymentMethodList as $paymentMethod) {
+                $gateway = new ResursDefault(resursPaymentMethod: $paymentMethod);
+                if ($gateway->is_available()) {
+                    $gateways[] = $gateway;
                 }
             }
         } catch (Exception $e) {
@@ -169,7 +167,7 @@ class WooCommerce
     }
 
     /**
-     * Returns true if private/naturali methods is present.
+     * Returns true if private/natural methods is present.
      *
      * @return bool
      * @throws Exception
