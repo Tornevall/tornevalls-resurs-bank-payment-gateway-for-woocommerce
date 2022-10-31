@@ -1,7 +1,7 @@
 <h3>
     <?php use ResursBank\Module\Data;
 
-    _e('Available callbacks', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce');
+    _e('Available callbacks', 'resurs-bank-payments-for-woocommerce');
     ?>
 </h3>
 <?php if (!($exception instanceof Exception)) { ?>
@@ -10,32 +10,32 @@
                 'Callbacks last update: %s',
                 $lastCallbackUpdate
             ),
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            'resurs-bank-payments-for-woocommerce'
         ); ?></div>
     <div style="font-size: 14px; font-weight: bold !important; color: #000099 !important;"><?php _e(
             sprintf(
                 'Callbacks tested and received: %s',
                 $lastCallbackTrigger
             ),
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            'resurs-bank-payments-for-woocommerce'
         ); ?></div>
 
     <table width="100%" style="border: none;">
         <tr>
             <td width="20%" class="resursMethodHead"><?php _e(
                     'Callback',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) ?></td>
             <td width="80%" class="resursMethodHead"><?php _e(
                     'Callback URL',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) ?></td>
             <?php
             if ((bool)Data::getResursOption('show_developer')) {
                 ?>
                 <td width="80%" class="resursMethodHead"><?php _e(
                         'Remove',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ) ?>
                 </td>
                 <?php

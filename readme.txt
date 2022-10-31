@@ -1,4 +1,4 @@
-=== Resurs Bank Plus Payment Gateway for WooCommerce ===
+=== Resurs Bank Payments for WooCommerce ===
 Contributors: Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, resurs checkout, checkout, RCO, hosted, simplified, hosted flow, simplified flow
 Requires at least: 5.5

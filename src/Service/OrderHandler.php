@@ -315,7 +315,7 @@ class OrderHandler extends ResursDefault
                 WordPress::applyFilters('getShippingName', 'shipping'),
                 WordPress::applyFilters(
                     'getShippingDescription',
-                    __('Shipping', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                    __('Shipping', 'resurs-bank-payments-for-woocommerce')
                 ),
                 $this->cart->get_shipping_total(),
                 round(
@@ -456,7 +456,7 @@ class OrderHandler extends ResursDefault
             $syncNotice = __(
                 'Resurs Bank billing address mismatch with current address in order. ' .
                 'Data has synchronized with Resurs Bank billing data.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
             $order->add_order_note($syncNotice);
             Data::setOrderMeta($order, 'customerSynchronization', date('Y-m-d H:i:s', time()));

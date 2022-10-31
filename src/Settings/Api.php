@@ -89,16 +89,16 @@ class Api
                 ],
                 'environment' => [
                     'id' => Environment::getName(),
-                    'title' => __('Environment', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    'title' => __('Environment', 'resurs-bank-payments-for-woocommerce'),
                     'type' => 'select',
                     'options' => [
                         'test' => __(
                             'Test',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                         'prod' => __(
                             'Production',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                     ],
                     'custom_attributes' => [

@@ -140,7 +140,7 @@ class ResursCheckout
                 throw new Exception(
                     __(
                         'Address block from Resurs Checkout is empty!',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     )
                 );
             }

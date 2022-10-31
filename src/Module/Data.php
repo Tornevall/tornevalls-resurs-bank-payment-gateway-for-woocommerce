@@ -514,7 +514,7 @@ class Data
      */
     public static function isOriginalCodeBase(): bool
     {
-        return WooCommerce::getBaseName() === 'tornevalls-resurs-bank-payment-gateway-for-woocommerce';
+        return WooCommerce::getBaseName() === 'resurs-bank-payments-for-woocommerce';
     }
 
     /**
@@ -711,7 +711,7 @@ class Data
                     sprintf(
                         __(
                             'Part pay from %s per month. | %s',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                         self::getWcPriceSpan($monthlyPrice),
                         self::getReadMoreString($annuityPaymentMethod, $monthlyPrice)
@@ -927,7 +927,7 @@ class Data
             esc_html(
                 WordPress::applyFilters(
                     'partPaymentReadMoreString',
-                    __('Read more.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                    __('Read more.', 'resurs-bank-payments-for-woocommerce')
                 )
             )
         );
@@ -1451,7 +1451,7 @@ class Data
         $return['errorString'] = __(
             'An error occurred during the payment information retrieval from Resurs Bank so we can ' .
             'not show the current order status for the moment.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            'resurs-bank-payments-for-woocommerce'
         );
         $return['ecomException'] = [
             'message' => null,
@@ -1500,7 +1500,7 @@ class Data
         if (!empty($fromFunction)) {
             $logMessage = __(
                 '%s internal generic exception %s from function %s: %s --- File %s, line %s.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
             self::writeLogError(
                 sprintf(
@@ -1516,7 +1516,7 @@ class Data
         } else {
             $logMessage = __(
                 '%s internal generic exception %s: %s --- File %s, line %s.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
             self::writeLogError(
                 sprintf(
@@ -2095,11 +2095,11 @@ class Data
             $urls = [
                 __(
                     'Original Plugin Documentation',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) => 'https://docs.tornevall.net/x/CoC4Aw',
             ];
             if (self::isOriginalCodeBase()) {
-                $urls[__('Github', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')] =
+                $urls[__('Github', 'resurs-bank-payments-for-woocommerce')] =
                     'https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce';
             }
 
@@ -2135,59 +2135,59 @@ class Data
                 $cryptoLibType = __(
                     'Your system has crypto support but currently you are using the deprecated module mcrypt for it. ' .
                     'It is strongly recommended to upgrade to a modern package as soon as possible.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 );
                 break;
             default:
                 $cryptoLibType = __(
                     'Your system is missing support for crypto. This module may not work properly without it!',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 );
         }
 
         $renderData = [
             __(
                 'Plugin version',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => esc_html(self::getCurrentVersion()),
             __(
                 'Internal Release Prefix',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => esc_html(self::getPrefix()),
             __(
                 'WooCommerce',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => sprintf(
                 __(
                     '%s, at least %s are required.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 esc_html(WooCommerce::getWooCommerceVersion()),
                 esc_html(WooCommerce::getRequiredVersion())
             ),
             __(
                 'PHP Version',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => PHP_VERSION,
             __(
                 'Webservice Library',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => defined('ECOMPHP_VERSION') ? 'ecomphp-' . ECOMPHP_VERSION : '',
             __(
                 'Communication Library',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => esc_html('netcurl-' . $netWrapper->getVersion()),
             __(
                 'Communication Drivers',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => nl2br(Data::getEscapedHtml(implode("\n", self::getWrapperList($netWrapper)))),
             __(
                 'Crypto Library',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => $cryptoLibType,
             __(
                 'Network Lookup',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) => '<div id="rbwcNetworkLookup">&nbsp;</div>',
         ];
 
@@ -2236,14 +2236,14 @@ class Data
                 'drivers. Wrappers that must be available for this plugin to fully work, is either the ' .
                 'CurlWrapper or SimpleStreamWrapper -and- the SoapClientWrapper. Resurs Bank offers ' .
                 'multiple services over both Soap/XML and REST so they have to be present.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ),
             'support_string' => __(
                 'If you ever need support with this plugin, you should primarily check this ' .
                 'page before sending support requests. When you send the requests, make sure you do ' .
                 'include the information below in your message. Doing this, it will be easier ' .
                 'in the end to help you out.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ),
         ];
 
@@ -2283,7 +2283,7 @@ class Data
                 sprintf(
                     __(
                         '%s failed encryption (%d): %s. Failover to base64.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     __FUNCTION__,
                     $dataEncryptionState->getCode(),
@@ -2389,7 +2389,7 @@ class Data
             sprintf(
                 __(
                     'DevLog Method "%s" message: %s.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $fromFunction,
                 $message
@@ -2470,7 +2470,7 @@ class Data
                 sprintf(
                     __(
                         'Unable to update order meta in %s - object $order is of wrong type or not an integer.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     __FUNCTION__
                 ),
@@ -2495,7 +2495,7 @@ class Data
                     $settings[] = [
                         'title' => __(
                             'Number of decimals headsup message',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                         'type' => 'decimal_warning',
                         'desc' => 'Description',
@@ -2847,7 +2847,7 @@ class Data
                     'code' => 401,
                     'message' => __(
                         'Received an error message from Resurs Bank that indicates that you credentials are incorrect.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                 ]
             )

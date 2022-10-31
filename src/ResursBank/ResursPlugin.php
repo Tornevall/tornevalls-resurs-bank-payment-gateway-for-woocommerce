@@ -82,7 +82,7 @@ class ResursPlugin
      */
     public static function isResursCodeBase(): bool
     {
-        return WooCommerce::getBaseName() !== 'tornevalls-resurs-bank-payment-gateway-for-woocommerce';
+        return WooCommerce::getBaseName() !== 'resurs-bank-payments-for-woocommerce';
     }
 
     /**
