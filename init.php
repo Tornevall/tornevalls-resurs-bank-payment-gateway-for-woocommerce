@@ -39,7 +39,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 if (Data::isOriginalCodeBase()) {
     // @todo Get prefix from Settings::PREFIX instead?
     // @todo Warning: Do NOT alone change this value, make sure all filters has the proper call too.
-    define(constant_name: 'RESURSBANK_PREFIX', value: 'rbwc');
+    define(constant_name: 'RESURSBANK_PREFIX', value: 'trbwc');
 } elseif (ResursPlugin::isResursCodeBase()) {
     // Look for an alternative origin.
     define(constant_name: 'RESURSBANK_PREFIX', value: ResursPlugin::RESURS_BANK_PREFIX);
