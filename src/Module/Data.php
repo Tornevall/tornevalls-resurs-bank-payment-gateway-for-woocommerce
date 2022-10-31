@@ -959,11 +959,18 @@ class Data
         // Many of the html tags is depending on clickable elements, but we're limiting them here
         // to only apply in the most important elements.
         $return = [
+            'br' => [],
+            'style' => [],
+            'h1' => [],
+            'h2' => [],
+            'h3' => [
+                'style' => [],
+                'class' => [],
+            ],
             'a' => [
                 'href' => [],
                 'target' => [],
             ],
-            'br' => [],
             'table' => [
                 'id' => [],
                 'name' => [],
@@ -1058,12 +1065,6 @@ class Data
                 'onblur' => [],
                 'onchange' => [],
                 'checked' => [],
-            ],
-            'h1' => [],
-            'h2' => [],
-            'h3' => [
-                'style' => [],
-                'class' => [],
             ],
         ];
 
