@@ -129,7 +129,7 @@ class OrderMetaBox
                     sprintf(
                         __(
                             'EComPHP data present. Saving metadata for order %s.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                         $orderData['order']->get_id()
                     )

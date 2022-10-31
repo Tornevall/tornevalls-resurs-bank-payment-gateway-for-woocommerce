@@ -11,7 +11,7 @@
             'Available payment methods (Environment %s)',
             esc_html($environment)
         ),
-        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+        'resurs-bank-payments-for-woocommerce'
     ); ?></h3>
 
 <?php
@@ -24,7 +24,7 @@
                 'Payment Methods last update: %s',
                 $lastMethodUpdate
             ),
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            'resurs-bank-payments-for-woocommerce'
         ); ?></div>
 
     <div class="paymentMethodsInfoBox">
@@ -32,14 +32,14 @@
             <?php
             _e(
                 'Amount limits: Defines from-to which order amount a payment method will be displayed in the checkout.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             )
             ?><br>
             <?php
             _e(
                 'Customer types: Which customers that can take advantage of a specific payment method (NATURAL: ' .
                 'Private customers, LEGAL: Company based customers).',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             )
             ?>
         </div>
@@ -49,35 +49,35 @@
             <td width="5%" class="resursMethodHead">
                 <?php _e(
                     'Enabled Status',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) ?></td>
             <?php if ($extendView) { ?>
                 <td width="10%" class="resursMethodHead"><?php _e(
                         'Method ID',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ) ?></td>
             <?php } ?>
             <td width="35%" class="resursMethodHead"><?php _e(
                     'Name (No HTML)',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) ?></td>
             <?php if ($canUseFee) { ?>
                 <td width="5%" class="resursMethodHead"><?php _e(
                         'Payment Fee',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ) ?></td>
             <?php } ?>
             <td width="10%" class="resursMethodHead"><?php _e(
                     'Amount Limits',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) ?></td>
             <td width="10%" class="resursMethodHead"><?php _e(
                     'Customer types',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) ?></td>
             <td width="20%" class="resursMethodHead"><?php _e(
                     'Part payment options',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ) ?></td>
         </tr>
         <?php
@@ -99,7 +99,7 @@
                                 echo 'checked="checked"';
                             } ?>
                         >
-                        <?php _e('Yes', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') ?>
+                        <?php _e('Yes', 'resurs-bank-payments-for-woocommerce') ?>
                     </td>
 
                     <?php if ($extendView) { ?>
@@ -129,7 +129,7 @@
                     <td class="resursMethodBody">
                         <div title="<?php _e(
                             'Amount limits (min - max).',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ); ?>" style="font-style: italic;">
                             <?php echo (float)$methodObject->minPurchaseLimit ?> - <?php echo (float)$methodObject->maxPurchaseLimit ?>
                         </div>
@@ -164,7 +164,7 @@
                                 printf(
                                     __(
                                         'Received error from annuity factors request: %s (%d)',
-                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                        'resurs-bank-payments-for-woocommerce'
                                     ),
                                     esc_html($annuityException->getMessage()),
                                     esc_html($annuityException->getCode())
@@ -184,7 +184,7 @@
             _e(
                 'To be able to use fee settings, you have to change the plugin to work with ' .
                 'the simplified or hosted shopflow.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
             echo '</div>';
         }
@@ -192,7 +192,7 @@
         echo '<div style="color: #009900; font-weight: bold;">';
         _e(
             'Fee settings: Allowed.',
-            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+            'resurs-bank-payments-for-woocommerce'
         );
         echo '</div>';
     }

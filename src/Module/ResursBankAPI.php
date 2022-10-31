@@ -550,7 +550,7 @@ class ResursBankAPI
             sprintf(
                 __(
                     'Ecom request %s for %s with different credentials (%s, in environment %s).',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 __FUNCTION__,
                 $orderId,
@@ -593,7 +593,7 @@ class ResursBankAPI
             sprintf(
                 __(
                     'Got exception %d in %s, will retry with REST.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $e->getCode(),
                 __FUNCTION__

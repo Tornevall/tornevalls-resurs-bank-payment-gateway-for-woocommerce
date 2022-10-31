@@ -383,7 +383,7 @@ class WooCommerce
                     [
                         'wooPlug22VersionInfo' => __(
                             'Order has not been created by this plugin and the original plugin is currently unavailable.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                     ]
                 )
@@ -664,7 +664,7 @@ class WooCommerce
             sprintf(
                 __(
                     'Session value %s set to %s.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 self::$inCheckoutKey,
                 $customerIsInCheckout ? 'true' : 'false'
@@ -860,7 +860,7 @@ class WooCommerce
                         sprintf(
                             __(
                                 'Callback received for order "%s" but something went wrong: %s',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                'resurs-bank-payments-for-woocommerce'
                             ),
                             $orderId,
                             $responseString
@@ -892,7 +892,7 @@ class WooCommerce
             sprintf(
                 __(
                     'Callback %s for %s received.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $callbackType,
                 $pRequest
@@ -941,16 +941,16 @@ class WooCommerce
         return sprintf(
             __(
                 'Callback received from Resurs Bank (%s): %s (Digest Status: %s, External ID: %s, Internal ID: %d).',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ),
             $_SERVER['REMOTE_ADDR'] ?? 'NO IP FOUND',
             Data::getRequest('c'),
             $getConfirmedSalt ? __(
                 'Valid',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) : __(
                 'Invalid',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ),
             Data::getRequest('p'),
             Data::getOrderByEcomRef(Data::getRequest('p'))
@@ -1025,7 +1025,7 @@ class WooCommerce
                 sprintf(
                     __(
                         'getProperOrder for %s (as %s).',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $orderId,
                     $returnAs
@@ -1065,7 +1065,7 @@ class WooCommerce
                     __(
                         'Callback with parameter %s received, but failed because $order could not ' .
                         'instantiate and remained null.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $pRequest
                 )
@@ -1281,7 +1281,7 @@ class WooCommerce
                                 sprintf(
                                     __(
                                         'Exception (%s) from %s: %s.',
-                                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                        'resurs-bank-payments-for-woocommerce'
                                     ),
                                     $e->getCode(),
                                     __FUNCTION__,
@@ -1295,7 +1295,7 @@ class WooCommerce
         } catch (Exception $e) {
             Data::writeLogError(
                 sprintf(
-                    __('Exception (%s) from %s: %s.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                    __('Exception (%s) from %s: %s.', 'resurs-bank-payments-for-woocommerce'),
                     $e->getCode(),
                     __FUNCTION__,
                     $e->getMessage()
@@ -1422,7 +1422,7 @@ class WooCommerce
             WC()->cart->add_fee(
                 WordPress::applyFilters(
                     'getFeeDescription',
-                    __('Payment fee', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                    __('Payment fee', 'resurs-bank-payments-for-woocommerce')
                 ),
                 $customFee,
                 true,
@@ -1503,12 +1503,12 @@ class WooCommerce
                     'This payment is marked with reference problems. This means that there might have been ' .
                     'problems when the payment was executed and tried to update the payment reference (%s) to a new ' .
                     'id (%s). You can check the UpdatePaymentReference values for errors.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $orderData['resurs_secondary'] ??
                 __(
                     '[missing reference]',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $orderData['resurs']
             );

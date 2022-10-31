@@ -50,11 +50,11 @@ class Advanced
                     'type' => 'text',
                     'title' => __(
                         'Log path',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     'desc' => __(
                         'Leave empty to disable logging.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     'default' => '',
                 ],
@@ -63,11 +63,11 @@ class Advanced
                     'type' => 'text',
                     'title' => __(
                         'Cache path',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     'desc' => __(
 	                    'Leave empty to disable cache.',
-	                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+	                    'resurs-bank-payments-for-woocommerce'
                     ),
                     'default' => '',
                 ],

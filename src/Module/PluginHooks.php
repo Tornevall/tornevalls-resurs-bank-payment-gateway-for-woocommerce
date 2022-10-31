@@ -110,7 +110,7 @@ class PluginHooks
             sprintf(
                 __(
                     'Passed %d through function %s with order status "%s" for extra handling.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $orderId,
                 __FUNCTION__,
@@ -140,10 +140,10 @@ class PluginHooks
         if (empty($switchString)) {
             $switchString = $currentCustomerType === 'NATURAL' ? __(
                 'Switch to company',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             ) : __(
                 'Switch to private customer',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
         }
 
@@ -220,7 +220,7 @@ class PluginHooks
                 'test',
                 __(
                     '(Selected Environment: Test - Suggested contact method)',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 )
             );
             $addressList['Resurs Bank (Production Support)'] = $this->getContactEnvironmentString('production', '');
@@ -229,7 +229,7 @@ class PluginHooks
                 'production',
                 __(
                     '(Selected Environment: Production - Suggested contact method)',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 )
             );
             $addressList['Resurs Bank (Staging Support)'] = $this->getContactEnvironmentString('test', '');
@@ -238,7 +238,7 @@ class PluginHooks
             $addressList['Tornevall Plugin Issues'] = [
                 'info' => __(
                     'Plugin related questions and things that is not related to Resurs Bank.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 'mail' => 'support@tornevall.net',
             ];
@@ -260,7 +260,7 @@ class PluginHooks
                 'info' => sprintf(
                     __(
                         'Matters related to Resurs Bank in staging and test environments %s',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $preferredString
                 ),
@@ -271,7 +271,7 @@ class PluginHooks
                 'info' => sprintf(
                     __(
                         'Matters related to Resurs Bank in live production environments %s',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $preferredString
                 ),
@@ -349,7 +349,7 @@ class PluginHooks
                         __(
                             'Emergency Mode: Order status is set to be allowed to be changed, via ignore_frozen ' .
                             'meta data, despite the frozen state.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         )
                     )
                 );
@@ -466,7 +466,7 @@ class PluginHooks
                     $wcOrder->add_order_note(
                         __(
                             'Unable to finalize: Payment is in frozen state.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         )
                     );
                     // WooCommerce tend to set the order status as completed even if we throw an exception.
@@ -491,10 +491,10 @@ class PluginHooks
                         $afterShopResponseString = $finalizeResponse ?
                             __(
                                 'Success.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                'resurs-bank-payments-for-woocommerce'
                             ) : __(
                                 'Failed without receiving any exception.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                'resurs-bank-payments-for-woocommerce'
                             );
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
@@ -523,10 +523,10 @@ class PluginHooks
                         $afterShopResponseString = $cancelResponse ?
                             __(
                                 'Success.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                'resurs-bank-payments-for-woocommerce'
                             ) : __(
                                 'Failed without receiving any exception.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                'resurs-bank-payments-for-woocommerce'
                             );
                     } catch (Exception $e) {
                         $afterShopResponseString = $e->getMessage();
@@ -546,7 +546,7 @@ class PluginHooks
                         $newSlug,
                         $afterShopResponseString
                     ),
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 )
             );
         }
@@ -717,7 +717,7 @@ class PluginHooks
                 'getShippingDescription',
                 __(
                     'Shipping',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 )
             ),
             preg_replace('/^-/', '', $shippingTotal),
@@ -888,7 +888,7 @@ class PluginHooks
                 sprintf(
                     __(
                         'Resurs Bank refunding error: %s (%s).',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $e->getMessage(),
                     $e->getCode()
@@ -931,7 +931,7 @@ class PluginHooks
                 sprintf(
                     __(
                         'Update order %s from queue requested: %s -> %s',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $order,
                     $currentStatus,
@@ -953,7 +953,7 @@ class PluginHooks
                     sprintf(
                         __(
                             'Queued Status Handler: Updated status for %s to %s.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                         $order,
                         $status
@@ -966,7 +966,7 @@ class PluginHooks
                         __(
                             'Queued Status Handler: Status for %s not updated to %s, because that ' .
                             'status was already set.',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                         $properOrder->get_id(),
                         $status
@@ -978,7 +978,7 @@ class PluginHooks
                 sprintf(
                     __(
                         'Queued Status Handler: Order %s was not properly queued.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $order
                 )
@@ -1017,14 +1017,14 @@ class PluginHooks
                 $return = [
                     'default' => __(
                         'Payment Methods are currently unavailable!',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                 ];
             }
             if (isset($paymentMethodList) && is_array($paymentMethodList)) {
                 $return['default'] = __(
                     'Default (Choice made by plugin)',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 );
                 foreach ($paymentMethodList as $method) {
                     if ($method->type === 'PAYMENT_PROVIDER') {
@@ -1204,7 +1204,7 @@ class PluginHooks
                         'setting is deprecated and no longer fully supported. It is highly recommended to disable ' .
                         'or remove the filter entirely and solve the problem that required this from start somehow ' .
                         'else.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     'resursbank_temporary_disable_checkout'
                 )

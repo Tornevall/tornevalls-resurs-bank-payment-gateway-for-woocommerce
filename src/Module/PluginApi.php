@@ -161,7 +161,7 @@ class PluginApi
     public static function importCredentials($force = null)
     {
         Data::writeLogInfo(
-            __('Import of old credentials initiated.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+            __('Import of old credentials initiated.', 'resurs-bank-payments-for-woocommerce')
         );
         if (!(bool)$force) {
             self::getValidatedNonce();
@@ -208,7 +208,7 @@ class PluginApi
 
         Data::setResursOption('resursImportCredentials', time());
         Data::writeLogInfo(
-            __('Import of old credentials finished.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+            __('Import of old credentials finished.', 'resurs-bank-payments-for-woocommerce')
         );
 
         if (!$force) {
@@ -273,7 +273,7 @@ class PluginApi
             sprintf(
                 __(
                     'Nonce validation accepted (from function: %s): %s.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $fromFunction,
                 $return ? 'true' : 'false'
@@ -365,7 +365,7 @@ class PluginApi
         if (empty($priceInfoHtml)) {
             $priceInfoHtml = __(
                 'Price information request retrieved no content from Resurs Bank.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
         }
 
@@ -445,7 +445,7 @@ class PluginApi
                 'While you were in the checkout, the cart has been updated somewhere else. If you have more tabs ' .
                 'open in your browser, make sure you only use one of them during the payment. You may want to ' .
                 'reload this page to make it right.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
             $return = [
                 'success' => false,
@@ -574,7 +574,7 @@ class PluginApi
             sprintf(
                 __(
                     'Credentials validation from wp-admin initiated for environment %s, username request %s.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 Data::getRequest('e'),
                 Data::getRequest('u')
@@ -595,7 +595,7 @@ class PluginApi
                     sprintf(
                         __(
                             'An error occured during credential checking: %s (%d).',
-                            'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                            'resurs-bank-payments-for-woocommerce'
                         ),
                         $e->getMessage(),
                         $e->getCode()
@@ -609,7 +609,7 @@ class PluginApi
             Data::writeLogInfo(
                 __(
                     'Credential validation was successful and therefore saved.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 )
             );
 
@@ -640,7 +640,7 @@ class PluginApi
             sprintf(
                 __(
                     'Resurs Bank credential validation for environment %s executed, response was %s.',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 Data::getRequest('e'),
                 is_bool($validationResponse) && $validationResponse ? 'true' : 'false'
@@ -842,11 +842,11 @@ class PluginApi
                 sprintf(
                     __(
                         'Payment method %s has been %s.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     $id,
-                    $newSetting ? __('enabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce') :
-                        __('disabled', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                    $newSetting ? __('enabled', 'resurs-bank-payments-for-woocommerce') :
+                        __('disabled', 'resurs-bank-payments-for-woocommerce')
                 )
             );
 
@@ -900,7 +900,7 @@ class PluginApi
                 if (preg_match('/<?xml/i', $soapRequestBody)) {
                     $noSoapRequestResponse = __(
                         'Resurs Bank SOAP-services is currently returning a valid XML-response.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     );
                 }
             } catch (Exception $e) {
@@ -1026,7 +1026,7 @@ class PluginApi
                         $errorMessage .= ' ' .
                             __(
                                 'Connectivity may be a bit slower than normal.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                'resurs-bank-payments-for-woocommerce'
                             );
                     }
 
@@ -1127,7 +1127,7 @@ class PluginApi
         } else {
             $message = __(
                 'Advanced mode is disabled. You can not make this change.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
         }
 
@@ -1192,8 +1192,8 @@ class PluginApi
             '<div>%s</div><div id="resursWaitingForTest"></div>',
             $return['api'] ? __(
                 'Test activated.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-            ) : __('Test failed to activate.', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce')
+                'resurs-bank-payments-for-woocommerce'
+            ) : __('Test failed to activate.', 'resurs-bank-payments-for-woocommerce')
         );
         $return = WordPress::applyFilters('triggerCallback', $return);
         return $return;
@@ -1311,12 +1311,12 @@ class PluginApi
         if ((int)$lastTestResponseString === 1) {
             return __(
                 'Waiting.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
             );
         }
         return $int ? (int)$lastTestResponseString : sprintf(
             '%s %s',
-            __('Received', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            __('Received', 'resurs-bank-payments-for-woocommerce'),
             date('Y-m-d H:i:s', (int)$lastTestResponseString)
         );
     }
@@ -1341,7 +1341,7 @@ class PluginApi
         if (!Data::hasCredentials()) {
             $return['api_error'] = __(
                 'Service is currently not active.',
-                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                'resurs-bank-payments-for-woocommerce'
              );
             self::reply($return);
         }
@@ -1361,7 +1361,7 @@ class PluginApi
                     )->toArray();
                     self::getAddressLog($customerCountry, $customerType, $identification, __(
                         'By government id/company id (See customer type).',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     ));
                 } catch (Exception $e) {
                     self::getAddressLog(
@@ -1371,7 +1371,7 @@ class PluginApi
                         sprintf(
                             __(
                                 'By government id/company id (See customer type), but failed: (%d) %s.',
-                                'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                                'resurs-bank-payments-for-woocommerce'
                             ),
                             $e->getCode(),
                             $e->getMessage()
@@ -1413,7 +1413,7 @@ class PluginApi
             sprintf(
                 __(
                     'getAddress request (country %s, type %s) for %s: %s',
-                    'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                    'resurs-bank-payments-for-woocommerce'
                 ),
                 $customerCountry,
                 $customerType->value,
@@ -1475,8 +1475,8 @@ class PluginApi
         $wooOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
 
         $transReject = [
-            'fail' => __('Failed', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
-            'deny' => __('Denied', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+            'fail' => __('Failed', 'resurs-bank-payments-for-woocommerce'),
+            'deny' => __('Denied', 'resurs-bank-payments-for-woocommerce'),
         ];
 
         // Fallback to the standard reject reason if nothing is found.
@@ -1485,7 +1485,7 @@ class PluginApi
         if ($wooOrderId) {
             $currentOrder = new WC_Order($wooOrderId);
             $failNote = sprintf(
-                __('Order was rejected with status "%s".', 'tornevalls-resurs-bank-payment-gateway-for-woocommerce'),
+                __('Order was rejected with status "%s".', 'resurs-bank-payments-for-woocommerce'),
                 $transRejectMessage
             );
             $updateStatus = WooCommerce::setOrderStatusUpdate(
@@ -1517,7 +1517,7 @@ class PluginApi
                     'purchaseRejectCustomerMessage',
                     __(
                         'Please contact customer service for more information.',
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
+                        'resurs-bank-payments-for-woocommerce'
                     )
                 );
 
