@@ -140,19 +140,8 @@ class Api
         if ($clientId !== '' && $clientSecret !== '') {
             try {
                 $storeList = StoreRepository::getStores();
-                if ($storeList->count() > 1) {
-                    /** @var Store $store */
-                    foreach ($storeList as $store) {
-                        $return[$store->id] = sprintf('%s: %s', $store->nationalStoreId, $store->name);
-                    }
-                } elseif ($storeList->count() === 1) {
-                    /** @var Store $store */
-                    $store = $storeList->current();
-
-                    $return = [sprintf('%s: %s', $store->nationalStoreId, $store->name)];
-
-                    // If only one store is available, we can set it as the stored value.
-                    StoreId::setData($store->id);
+                foreach ($storeList as $store) {
+                    $return[$store->id] = sprintf('%s: %s', $store->nationalStoreId, $store->name);
                 }
             } catch (Exception $e) {
                 // Log all errors in the admin panel regardless of where the exception comes from.
