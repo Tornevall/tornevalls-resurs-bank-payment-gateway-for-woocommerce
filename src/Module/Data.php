@@ -5,22 +5,18 @@
 
 namespace ResursBank\Module;
 
-use Cassandra\Custom;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
-use Resursbank\Ecom\Lib\Model\Payment\Customer;
-use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
+use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
-use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use ResursException;
 use RuntimeException;
 use stdClass;
 use TorneLIB\Data\Aes;
-use TorneLIB\Exception\Constants;
 use TorneLIB\Exception\ExceptionHandler;
 use TorneLIB\IO\Data\Arrays;
 use TorneLIB\IO\Data\Strings;
@@ -28,7 +24,6 @@ use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\WordPress as WPUtils;
 use WC_Customer;
-use WC_Logger;
 use WC_Order;
 use function count;
 use function defined;
@@ -945,7 +940,7 @@ class Data
      * @return string
      * @since 0.0.1.1
      */
-    public static function getEscapedHtml($content)
+    public static function getEscapedHtml($content): string
     {
         return wp_kses(
             $content,
@@ -954,13 +949,12 @@ class Data
     }
 
     /**
-     * Get safe escape tags for html. Observe that we pass some of the elements through a purger, as
-     * some of the script based "on"-elements are limited to admin.
+     * Centralized list of safe escape tags for html. Returned to WordPress method wp_kses for the proper escaping.
      *
      * @return array
      * @since 0.0.1.1
      */
-    private static function getSafeTags()
+    private static function getSafeTags(): array
     {
         // Many of the html tags is depending on clickable elements, but we're limiting them here
         // to only apply in the most important elements.
@@ -1415,7 +1409,10 @@ class Data
             if (!$prefetchObject['ecomException']['code']) {
                 $prefetchObject['apiType'] = self::getMethodApiTypeByPreFetch($prefetchObject);
                 try {
-                    $prefetchObject['ecom'] = ResursBankAPI::getPayment($prefetchObject['resurs'], null, $prefetchObject);
+                    $prefetchObject['ecom'] = ResursBankAPI::getPayment(
+                        $prefetchObject['resurs'], null,
+                        $prefetchObject
+                    );
                     $prefetchObject['ecom_had_reference_problems'] = false;
                 } catch (Exception $e) {
                     if (!empty($prefetchObject['resurs_secondary']) && $prefetchObject['resurs_secondary'] !== $prefetchObject['resurs']) {
@@ -1714,7 +1711,7 @@ class Data
     public static function writeLogInfo(string $logMessage): void
     {
         self::writeLogByLogLevel(
-            logLevel:LogLevel::INFO,
+            logLevel: LogLevel::INFO,
             message: $logMessage
         );
     }
@@ -2339,58 +2336,6 @@ class Data
     }
 
     /**
-     * Make sure we have what we need before proceeding with the plugin.
-     *
-     * @return bool
-     * @since 0.0.1.4
-     */
-    public static function getExpectations(): bool
-    {
-        $return = true;
-
-        // Making sure this default is saved.
-        $current = get_option('woocommerce_resurs-bank_settings');
-        if (isset($current['instant_migrations']) &&
-            self::getTruth($current['instant_migrations']) &&
-            !Data::getResursOption('resursImportCredentials')
-        ) {
-            PluginApi::importCredentials(true);
-        }
-
-        $genericController = new Generic();
-        $genericController->setExpectedVersions(
-            [
-                ResursBank::class => '1.3.76',
-                NetWrapper::class => '6.1.5',
-            ]
-        );
-
-        try {
-            $expectedVersions = $genericController->getExpectedVersions();
-            if (!$expectedVersions) {
-                $return = false;
-                $expectationList = [];
-                foreach ($genericController->getExpectationList() as $item => $value) {
-                    $expectationList[] = sprintf('%s: %s', $item, $value);
-                }
-                throw new Exception(
-                    __(
-                        sprintf(
-                            'Can not continue - required libraries is not matching the expectations: %s.',
-                            implode("\n", $expectationList)
-                        ),
-                        'tornevalls-resurs-bank-payment-gateway-for-woocommerce'
-                    )
-                );
-            }
-        } catch (Exception $e) {
-            WordPress::setGenericError($e);
-        }
-
-        return $return;
-    }
-
-    /**
      * @param string $data
      * @param bool $base64
      * @return mixed
@@ -2833,7 +2778,8 @@ class Data
     /**
      * @return string
      */
-    private function getClientId(): string {
+    private function getClientId(): string
+    {
         return Data::getResursOption('environment') === 'test' ?
             Data::getResursOption('jwt_client_id') : Data::getResursOption('jwt_client_id_production');
     }

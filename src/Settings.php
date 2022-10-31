@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -21,6 +22,9 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use ResursBank\Module\Data;
+use ResursBank\Service\WooCommerce;
+use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
@@ -118,7 +122,15 @@ class Settings extends WC_Settings_Page
         global $current_section;
 
         if ($current_section === 'payment_methods') {
-            echo PaymentMethods::getOutput(storeId: StoreId::getData());
+            // As WordPress requires html to be escaped at the echo, we do a late execute on this.
+            try {
+                echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
+            } catch (Exception $e) {
+                // @todo Add proper translation via ecom2.
+                echo '<div style="border: 1px solid black !important; padding: 5px !important;">' . Data::getEscapedHtml(
+                    __('Unable to request payment methods from Resurs Bank: ') . $e->getMessage()
+                ) . '</div>';
+            }
         } else {
             // Echo table element to get Woocommerce to properly render our
             // settings within the right elements and styling. If you include
@@ -126,8 +138,9 @@ class Settings extends WC_Settings_Page
             // be altered by Woocommerce.
             echo '<table class="form-table">';
 
+            // Always default to first "tab" if no section has been selected.
             WC_Admin_Settings::output_fields(
-                $this->get_settings(section: $current_section)
+                $this->get_settings(section: empty($current_section) ? 'api_settings' : $current_section)
             );
 
             echo '</table>';
