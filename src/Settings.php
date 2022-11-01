@@ -10,21 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Exception;
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use ResursBank\Module\Data;
-use ResursBank\Service\WooCommerce;
-use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
@@ -73,8 +59,8 @@ class Settings extends WC_Settings_Page
      *
      * This method is called by WordPress actions registered in our constructor.
      *
-     * @see self::__construct()
      * @return void
+     * @see self::__construct()
      */
     public function save(): void
     {
@@ -88,8 +74,8 @@ class Settings extends WC_Settings_Page
     /**
      * Method is required by Woocommerce to render tab sections.
      *
-     * @see parent::output_sections()
      * @return array - Parent returns mixed but documents array.
+     * @see parent::output_sections()
      */
     public function get_sections(): array
     {
@@ -116,12 +102,19 @@ class Settings extends WC_Settings_Page
         if ($current_section === 'payment_methods') {
             // As WordPress requires html to be escaped at the echo, we do a late execute on this.
             try {
+                if (StoreId::getData() === '') {
+                    // The lazy handler.
+                    throw new Exception(
+                        __('Please select a store in the API settings tab.')
+                    );
+                }
+
                 echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
             } catch (Exception $e) {
                 // @todo Add proper translation via ecom2.
                 echo '<div style="border: 1px solid black !important; padding: 5px !important;">' . Data::getEscapedHtml(
-                    __('Unable to request payment methods from Resurs Bank: ') . $e->getMessage()
-                ) . '</div>';
+                        $e->getMessage()
+                    ) . '</div>';
             }
         } else {
             // Echo table element to get Woocommerce to properly render our
