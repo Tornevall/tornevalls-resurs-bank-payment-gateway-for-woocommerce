@@ -116,13 +116,13 @@ class Settings extends WC_Settings_Page
         if ($current_section === 'payment_methods') {
             // As WordPress requires html to be escaped at the echo, we do a late execute on this.
             try {
-                if (StoreId::getData() !== '') {
-                    echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
-                } else {
+                if (StoreId::getData() === '') {
                     // The lazy handler.
                     throw new Exception(
                         __('Please select a store in the API settings tab.')
                     );
+                } else {
+                    echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
                 }
             } catch (Exception $e) {
                 // @todo Add proper translation via ecom2.
