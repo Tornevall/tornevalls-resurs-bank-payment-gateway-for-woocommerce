@@ -104,22 +104,14 @@ class Settings extends WC_Settings_Page
      * Outputs the HTML for the current tab section.
      *
      * @return void
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws CurlException
-     * @throws FilesystemException
-     * @throws TranslationException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
      */
     public function output(): void
     {
         global $current_section;
+
+        if ($current_section === '') {
+            $current_section = 'api_settings';
+        }
 
         if ($current_section === 'payment_methods') {
             // As WordPress requires html to be escaped at the echo, we do a late execute on this.
@@ -158,6 +150,11 @@ class Settings extends WC_Settings_Page
      */
     public function get_settings(string $section = ''): array
     {
+        // Section must always be set, so if it is empty, this indicates that we're in the primary sub-tab!
+        if ($section === '') {
+            $section = 'api_settings';
+        }
+
         $result = array_merge(
             Api::getSettings(),
             PaymentMethods::getSettings(),
