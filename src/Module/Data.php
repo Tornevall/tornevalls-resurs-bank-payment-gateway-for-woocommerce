@@ -956,14 +956,21 @@ class Data
      */
     private static function getSafeTags(): array
     {
-        // Many of the html tags is depending on clickable elements, but we're limiting them here
-        // to only apply in the most important elements.
+        // Many of the html tags is depending on clickable elements both in storefront and wp-admin,
+        // but we're mostly limiting them here to only apply in the most important elements.
         $return = [
+            'br' => [],
+            'style' => [],
+            'h1' => [],
+            'h2' => [],
+            'h3' => [
+                'style' => [],
+                'class' => [],
+            ],
             'a' => [
                 'href' => [],
                 'target' => [],
             ],
-            'br' => [],
             'table' => [
                 'id' => [],
                 'name' => [],
@@ -1059,19 +1066,15 @@ class Data
                 'onchange' => [],
                 'checked' => [],
             ],
-            'h1' => [],
-            'h2' => [],
-            'h3' => [
-                'style' => [],
-                'class' => [],
-            ],
         ];
 
+        // Run the purger, to limit clickable elements outside wp-admin.
         return self::purgeSafeAdminTags($return);
     }
 
     /**
-     * Purge some html sanitizer elements before returning them to wp_kses.
+     * Purge some html sanitizer elements before returning them to wp_kses, to make storefront more protective
+     * against clicks than in wp-admin.
      * @since 0.0.1.1
      */
     private static function purgeSafeAdminTags($return)
