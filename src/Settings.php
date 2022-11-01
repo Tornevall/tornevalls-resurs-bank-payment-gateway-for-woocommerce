@@ -116,11 +116,18 @@ class Settings extends WC_Settings_Page
         if ($current_section === 'payment_methods') {
             // As WordPress requires html to be escaped at the echo, we do a late execute on this.
             try {
-                echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
+                if (StoreId::getData() !== '') {
+                    echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
+                } else {
+                    // The lazy handler.
+                    throw new Exception(
+                        __('Please select a store in the API settings tab.')
+                    );
+                }
             } catch (Exception $e) {
                 // @todo Add proper translation via ecom2.
                 echo '<div style="border: 1px solid black !important; padding: 5px !important;">' . Data::getEscapedHtml(
-                    __('Unable to request payment methods from Resurs Bank: ') . $e->getMessage()
+                    $e->getMessage()
                 ) . '</div>';
             }
         } else {
