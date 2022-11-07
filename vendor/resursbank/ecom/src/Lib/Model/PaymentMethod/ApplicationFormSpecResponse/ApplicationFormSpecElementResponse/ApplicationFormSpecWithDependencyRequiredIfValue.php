@@ -12,6 +12,8 @@ namespace Resursbank\Ecom\Lib\Model\PaymentMethod\ApplicationFormSpecResponse\Ap
 use Resursbank\Ecom\Lib\Model\Model;
 
 /**
+ * Defines a field dependency.
+ *
  * @SuppressWarnings(PHPMD.LongClassName)
  */
 class ApplicationFormSpecWithDependencyRequiredIfValue extends Model

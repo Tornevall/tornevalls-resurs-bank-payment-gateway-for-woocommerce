@@ -12,6 +12,7 @@ namespace Resursbank\Ecom\Lib\Locale;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\TranslationException;
@@ -24,6 +25,8 @@ use function is_string;
 /**
  * Methods to extract locale specific phrases. The intention is to maintain
  * consistent terminology between implementations.
+ *
+ * @todo Check if ConfigException require test.
  */
 class Translator
 {
@@ -57,10 +60,11 @@ class Translator
      * @throws IllegalTypeException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws ConfigException
      */
     public static function load(): PhraseCollection
     {
-        if (!file_exists(self::$translationsFilePath)) {
+        if (!file_exists(filename: self::$translationsFilePath)) {
             throw new FilesystemException(
                 message: 'Translations file could not be found on path: ' .
                     self::$translationsFilePath,
@@ -70,7 +74,7 @@ class Translator
 
         $content = file_get_contents(filename: self::$translationsFilePath);
 
-        if (!is_string($content) || $content === '') {
+        if (!is_string(value: $content) || $content === '') {
             throw new FilesystemException(
                 message: 'Translation file ' . self::$translationsFilePath .
                     ' is empty.',
@@ -80,7 +84,7 @@ class Translator
 
         $result = self::decodeData(data: $content);
 
-        Config::$instance->cache->write(
+        Config::getCache()->write(
             key: self::$cacheKey,
             data: json_encode(
                 value: $result->toArray(),
@@ -103,6 +107,7 @@ class Translator
      * @throws JsonException
      * @throws ReflectionException
      * @throws TranslationException
+     * @throws ConfigException
      * @see Config::$locale
      */
     public static function translate(string $phraseId): string
@@ -114,7 +119,7 @@ class Translator
         foreach ($phrases as $item) {
             if ($item->id === $phraseId) {
                 /** @var string $result */
-                $result = $item->translation->{Config::$instance->locale->value};
+                $result = $item->translation->{Config::getLocale()->value};
             }
         }
 
@@ -133,18 +138,15 @@ class Translator
      * @throws IllegalTypeException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws ConfigException
      */
     public static function getData(): PhraseCollection
     {
-        $cachedData = Config::$instance->cache->read(key: self::$cacheKey);
+        $cachedData = Config::getCache()->read(key: self::$cacheKey);
 
-        if ($cachedData === null) {
-            $phrases = self::load();
-        } else {
-            $phrases = self::decodeData(data: $cachedData);
-        }
-
-        return $phrases;
+        return $cachedData === null
+            ? self::load()
+            : self::decodeData(data: $cachedData);
     }
 
     /**

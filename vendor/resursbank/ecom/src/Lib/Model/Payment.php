@@ -18,6 +18,7 @@ use Resursbank\Ecom\Lib\Model\Payment\Customer;
 use Resursbank\Ecom\Lib\Model\Payment\Information;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata;
 use Resursbank\Ecom\Lib\Model\Payment\Order;
+use Resursbank\Ecom\Lib\Model\Payment\Order\PossibleAction as PossibleActionModel;
 use Resursbank\Ecom\Lib\Model\Payment\TaskRedirectionUrls;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
@@ -83,18 +84,16 @@ class Payment extends Model
     /**
      * Validate country.
      *
-     * @todo Solve problems with empty country code when using Search.
-     * @throws EmptyValueException|IllegalCharsetException
+     * @throws IllegalCharsetException
+     * @todo Solve problems with empty country code when using Search. Remove error suppression.
      * @noinspection PhpUnusedPrivateMethodInspection
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     * @phpstan-ignore-next-line
      */
     private function validateCountryCode(): void
     {
         if ($this->countryCode !== null) {
-            $this->stringValidation->notEmpty(value: $this->countryCode);
             $this->stringValidation->matchRegex(
-                value: $this->countryCode,
+                value: $this->countryCode->value,
                 pattern: '/^[A-Z]{2}$/'
             );
         }
@@ -164,6 +163,7 @@ class Payment extends Model
     private function canPerformAction(PossibleAction $actionType): bool
     {
         if ($this->order) {
+            /** @var PossibleActionModel $action */
             foreach ($this->order->possibleActions as $action) {
                 if ($action->action === $actionType) {
                     return true;

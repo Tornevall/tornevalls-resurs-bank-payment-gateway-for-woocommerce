@@ -199,7 +199,7 @@ class StringValidation
      */
     public function length(string $value, int $min, int $max): bool
     {
-        $len = strlen($value);
+        $len = strlen(string: $value);
 
         if ($max < $min) {
             throw new IllegalValueException(

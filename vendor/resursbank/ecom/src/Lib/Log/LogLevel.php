@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpCSValidationInspection */
+<?php
 
 /**
  * Copyright © Resurs Bank AB. All rights reserved.
@@ -10,9 +10,10 @@ declare(strict_types=1);
 namespace Resursbank\Ecom\Lib\Log;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 
 /**
- * Defines log levels used by loggers
+ * Defines log levels used by loggers.
  */
 enum LogLevel: int
 {
@@ -23,17 +24,19 @@ enum LogLevel: int
     case EXCEPTION = 4;
 
     /**
-     * Checks if supplied log level should be logged according to current configured logLevel
+     * Checks if supplied log level should be logged according to current configured logLevel.
      *
      * @param LogLevel $level
      * @return bool
+     * @throws ConfigException
+     * @todo Check if ConfigException validation needs a test.
      */
     public static function loggable(self $level): bool
     {
         if (!Config::hasInstance()) {
-            return true; // If there's no Config instance there's no logLevel restriction to apply
+            return true; // If there's no Config instance there's no logLevel restriction to apply.
         }
 
-        return Config::$instance->logLevel->value <= $level->value;
+        return Config::getLogLevel()->value <= $level->value;
     }
 }

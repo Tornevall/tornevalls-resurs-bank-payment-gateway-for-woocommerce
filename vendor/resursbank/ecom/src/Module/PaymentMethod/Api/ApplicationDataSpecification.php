@@ -13,6 +13,7 @@ use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
@@ -28,9 +29,7 @@ use Resursbank\Ecom\Lib\Utilities\DataConverter;
 use stdClass;
 
 /**
- * Application data specification
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * Application data specification.
  */
 class ApplicationDataSpecification
 {
@@ -48,14 +47,15 @@ class ApplicationDataSpecification
      * @param int $amount
      * @return ApplicationFormSpecResponse
      * @throws ApiException
+     * @throws AuthException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws AuthException
-     * @throws CurlException
      * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
+     * @throws ConfigException
      */
     public function call(
         string $storeId,
@@ -64,7 +64,7 @@ class ApplicationDataSpecification
     ): ApplicationFormSpecResponse {
         $curl = new Curl(
             url: $this->mapi->getUrl(
-                route: Mapi::COMMON_ROUTE . '/stores/' . $storeId . '/payment_methods/' . $paymentMethodId .
+                route: Mapi::STORE_ROUTE . '/' . $storeId . '/payment_methods/' . $paymentMethodId .
                 '/application_data_specification'
             ),
             requestMethod: RequestMethod::GET,

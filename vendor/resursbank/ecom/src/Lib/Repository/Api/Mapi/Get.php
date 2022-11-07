@@ -15,6 +15,7 @@ use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
@@ -26,12 +27,9 @@ use Resursbank\Ecom\Lib\Network\AuthType;
 use Resursbank\Ecom\Lib\Network\ContentType;
 use Resursbank\Ecom\Lib\Network\Curl;
 use Resursbank\Ecom\Lib\Network\RequestMethod;
+use Resursbank\Ecom\Lib\Repository\Traits\DataResolver;
 use Resursbank\Ecom\Lib\Repository\Traits\ModelConverter;
-use stdClass;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
-
-use function is_array;
-use function is_string;
 
 /**
  * Generic functionality to perform a GET call against the Merchant API and
@@ -41,6 +39,7 @@ class Get
 {
     use ExceptionLog;
     use ModelConverter;
+    use DataResolver;
 
     /**
      * @param class-string $model | Convert cached data to model instance(s).
@@ -70,12 +69,13 @@ class Get
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public function call(): Collection|Model
     {
         $curl = new Curl(
             url: $this->mapi->getUrl(
-                route: Mapi::COMMON_ROUTE . "/$this->route"
+                route: $this->route
             ),
             requestMethod: RequestMethod::GET,
             payload: $this->params,
@@ -86,44 +86,11 @@ class Get
 
         $data = $curl->exec()->body;
 
-        if (!$data instanceof stdClass) {
-            throw new ApiException(
-                message: 'Invalid response from API. Not an stdClass.',
-                code: 500,
-            );
-        }
-
-        if ($this->extractProperty !== '') {
-            if (
-                !property_exists(
-                    object_or_class: $data,
-                    property:  $this->extractProperty
-                )
-            ) {
-                throw new ApiException(
-                    message: 'Invalid response from API. Missing property ' .
-                        $this->extractProperty,
-                    code: 500,
-                );
-            }
-
-            /** @psalm-suppress MixedAssignment */
-            $data = $data->{$this->extractProperty};
-        }
-
-        if (
-            !$data instanceof stdClass &&
-            !is_string(value: $data) &&
-            !is_array(value: $data)
-        ) {
-            throw new ApiException(
-                message: 'Invalid response from API. Not an stdClass or array.',
-                code: 500,
-            );
-        }
-
         return $this->convertToModel(
-            data: $data,
+            data: $this->resolveResponseData(
+                data: $data,
+                extractProperty: $this->extractProperty
+            ),
             model: $this->model
         );
     }

@@ -20,6 +20,8 @@ use function is_string;
 
 /**
  * Defines a product in an order.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class OrderLine extends Model
 {
@@ -38,6 +40,7 @@ class OrderLine extends Model
      * @throws IllegalValueException
      * @todo $quantity could be a float, or shift between float and int.
      *      We have no idea at the moment.
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         public readonly ?string $description,

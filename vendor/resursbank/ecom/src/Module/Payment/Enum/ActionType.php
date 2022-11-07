@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Ecom\Module\Payment\Enum;
 
+/**
+ * Defines the possible actions for a payment.
+ */
 enum ActionType: string
 {
     case CREATE = 'CREATE';

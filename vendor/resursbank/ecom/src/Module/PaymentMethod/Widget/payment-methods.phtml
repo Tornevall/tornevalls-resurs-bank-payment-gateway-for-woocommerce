@@ -92,8 +92,8 @@ $paymentMethods = $this->paymentMethods;
                 <?php foreach ($paymentMethods as $method) : ?>
                     <tr id="rb-pm-<?= $method->id ?>">
                         <td><?= $method->name ?></td>
-                        <td><?= $method->minPurchaseLimit ?></td>
-                        <td><?= $method->maxPurchaseLimit ?></td>
+                        <td><?= number_format(num: $method->minPurchaseLimit, decimals: 2) ?></td>
+                        <td><?= number_format(num: $method->maxPurchaseLimit, decimals: 2) ?></td>
                         <td><?= $method->sortOrder ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -102,6 +102,6 @@ $paymentMethods = $this->paymentMethods;
     </div>
 <?php else : ?>
     <p class="rb-payment-methods-warning">
-        <?= $this->missingMethodsWarning ?>
+        <?= $this->missingWarning ?>
     </p>
 <?php endif; ?>

@@ -13,41 +13,28 @@ use Exception;
 use Throwable;
 
 /**
- * Exceptions thrown from the curl library.
+ * Exceptions thrown from CURL requests.
  */
 class CurlException extends Exception
 {
     /**
-     * @var string|null The curl error message.
-     */
-    private ?string $requestBody;
-
-    /**
      * @param string $message
      * @param int $code
+     * @param string|bool $body
+     * @param int $httpCode
      * @param Throwable|null $previous
-     * @param string|null $requestBody
      */
     public function __construct(
-        string $message = '',
-        int $code = 0,
-        ?Throwable $previous = null,
-        ?string $requestBody = null
+        string $message,
+        int $code,
+        public readonly string|bool $body,
+        public readonly int $httpCode = 0,
+        ?Throwable $previous = null
     ) {
-        $this->requestBody = $requestBody;
-        
         parent::__construct(
             message: $message,
             code: $code,
             previous: $previous
         );
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getRequestBody(): ?string
-    {
-        return $this->requestBody;
     }
 }

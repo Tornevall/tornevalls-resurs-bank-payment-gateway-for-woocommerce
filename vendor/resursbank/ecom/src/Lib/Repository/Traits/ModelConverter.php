@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Collection\Collection;
 use Resursbank\Ecom\Lib\Model\Model;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
@@ -37,6 +38,7 @@ trait ModelConverter
      * @throws JsonException
      * @throws ReflectionException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      */
     public function convertToModel(
         string|array|stdClass $data,
@@ -67,6 +69,12 @@ trait ModelConverter
             $result = DataConverter::stdClassToType(
                 object: $data,
                 type: $model
+            );
+        }
+
+        if (!$result instanceof Model && !$result instanceof Collection) {
+            throw new IllegalValueException(
+                message: 'Invalid data type'
             );
         }
 

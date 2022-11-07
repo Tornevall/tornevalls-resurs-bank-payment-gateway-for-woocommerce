@@ -16,6 +16,10 @@ use Resursbank\Ecom\Lib\Model\Model;
  */
 class Callback extends Model
 {
+    /**
+     * @param string $eventType
+     * @param string $uriTemplate
+     */
     public function __construct(
         public string $eventType,
         public string $uriTemplate

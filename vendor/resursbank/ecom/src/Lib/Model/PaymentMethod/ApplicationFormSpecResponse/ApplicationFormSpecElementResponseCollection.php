@@ -13,6 +13,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Collection\Collection;
 
 /**
+ * Collection of ApplicationFormSpecElementResponse objects.
+ *
  * @SuppressWarnings(PHPMD.LongClassName)
  */
 class ApplicationFormSpecElementResponseCollection extends Collection

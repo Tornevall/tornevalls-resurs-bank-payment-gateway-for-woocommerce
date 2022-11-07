@@ -7,15 +7,16 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Lib\Network\Model\Auth;
+namespace Resursbank\Ecom\Lib\Model\Network\Auth;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Lib\Model\Model;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 
 /**
  * Defines basic API authentication.
  */
-class Basic
+class Basic extends Model
 {
     /**
      * @param string $username
@@ -29,7 +30,25 @@ class Basic
         public readonly string $password,
         private readonly StringValidation $stringValidation = new StringValidation()
     ) {
+        $this->validateUsername();
+        $this->validatePassword();
+    }
+
+    /**
+     * @return void
+     * @throws EmptyValueException
+     */
+    public function validateUsername(): void
+    {
         $this->stringValidation->notEmpty(value: $this->username);
+    }
+
+    /**
+     * @return void
+     * @throws EmptyValueException
+     */
+    public function validatePassword(): void
+    {
         $this->stringValidation->notEmpty(value: $this->password);
     }
 }

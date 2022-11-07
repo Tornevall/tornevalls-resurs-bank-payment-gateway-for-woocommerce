@@ -15,7 +15,7 @@ use Resursbank\Ecom\Lib\Model\Payment\Order;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Application;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Customer;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Metadata;
+use Resursbank\Ecom\Lib\Model\Payment\Metadata;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 
 /**

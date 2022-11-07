@@ -14,10 +14,20 @@ use JsonException;
 use ReflectionClass;
 use ReflectionException;
 use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+
+use function dirname;
+use function is_object;
+use function is_string;
 
 /**
  * Generic Utils Class for things that is good to have.
  * @version 1.0.0
+ *
+ * @todo Add constructor with property promotion. PropertyNotSetInConstructor currently suppressed by psalm config.
+ * @todo This class is overall very complex and should be refactored.
+ * @SuppressWarnings(PHPMD.LongVariable)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class Generic
 {
@@ -41,6 +51,7 @@ class Generic
     /**
      * If open_basedir-warnings has been triggered once, we store that here.
      * @var bool
+     * @todo We should use our FS classes instead to check for readability.
      */
     private bool $openBaseDirExceptionTriggered = false;
 
@@ -72,6 +83,7 @@ class Generic
      * @param string $composerLocation Where composer.json are stored.
      * @return string
      * @throws Exception
+     * @noinspection PhpSameParameterValueInspection
      */
     private function getNameEntry(string $part, string $composerLocation): string
     {
@@ -111,12 +123,17 @@ class Generic
     {
         $return = '';
 
+        // @todo Object should be defined as stdClass or mor specific object.
+        /** @psalm-suppress TypeDoesNotContainType */
         if (empty($this->composerData)) {
             $this->getComposerConfig(location: $location);
         }
 
-        if (isset($this->composerData->{$tag})) {
-            $return = $this->composerData->{$tag};
+        if (
+            isset($this->composerData->{$tag}) &&
+            is_string(value: $this->composerData->{$tag})
+        ) {
+            $return = (string) $this->composerData->{$tag};
         } elseif ($this->isOpenBaseDirException()) {
             $return = $this->getOpenBaseDirExceptionString();
         }
@@ -129,6 +146,10 @@ class Generic
      * @param int $maxDepth How deep the search for a composer.json will be. Usually you should not need more than 3.
      * @return string
      * @throws Exception
+     *
+     * @todo This method is too complex. Refactor it.
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function getComposerConfig(string $location, int $maxDepth = 3): string
     {
@@ -151,19 +172,24 @@ class Generic
         if ($this->isOpenBaseDirException()) {
             return $this->getOpenBaseDirExceptionString();
         }
-        $startAt = dirname($location);
-        if ($this->hasComposerFile($startAt)) {
-            $this->getComposerConfigData($startAt);
+        $startAt = dirname(path: $location);
+        if ($this->hasComposerFile(location: $startAt)) {
+            $this->getComposerConfigData(location: $startAt);
             return $startAt;
         }
 
         $composerLocation = null;
+
         while ($maxDepth--) {
             $startAt .= '/..';
             if ($this->hasComposerFile(location: $startAt)) {
                 $composerLocation = $startAt;
                 break;
             }
+        }
+
+        if ($composerLocation === null) {
+            throw new IllegalValueException(message: 'No composer.json found');
         }
 
         $this->getComposerConfigData(location: $composerLocation);
@@ -176,7 +202,7 @@ class Generic
      */
     private function setTemporaryInternalErrorHandler(): void
     {
-        if (!is_null($this->internalErrorHandler)) {
+        if ($this->internalErrorHandler !== null) {
             restore_error_handler();
         }
 
@@ -187,7 +213,7 @@ class Generic
                     $this->internalExceptionMessage = $errStr;
                 }
                 restore_error_handler();
-                return $errNo === 2 && str_contains($errStr, 'open_basedir');
+                return $errNo === 2 && str_contains(haystack: $errStr, needle: 'open_basedir');
             },
             error_levels: E_WARNING
         );
@@ -206,7 +232,10 @@ class Generic
 
         $return = $this->hasInternalException() &&
             $this->internalExceptionCode === 2 &&
-            str_contains($this->internalExceptionMessage, 'open_basedir');
+            str_contains(
+                haystack: $this->internalExceptionMessage,
+                needle: 'open_basedir'
+            );
 
         if ($return) {
             $this->openBaseDirExceptionTriggered = true;
@@ -241,7 +270,7 @@ class Generic
     {
         $return = false;
 
-        if (file_exists(sprintf('%s/composer.json', $location))) {
+        if (file_exists(filename: sprintf('%s/composer.json', $location))) {
             $return = true;
         }
 
@@ -258,15 +287,25 @@ class Generic
         $this->composerLocation = $location;
 
         $getFrom = sprintf('%s/composer.json', $location);
-        if (file_exists($getFrom)) {
-            $this->composerData = json_decode(
-                json: file_get_contents(
-                    $getFrom
-                ),
-                associative: false,
-                depth: 768,
-                flags: JSON_THROW_ON_ERROR
+        if (file_exists(filename: $getFrom)) {
+            $data = null;
+            $json = file_get_contents(
+                filename: $getFrom
             );
+
+            if ($json !== false && $json !== '') {
+                /** @psalm-suppress MixedAssignment */
+                $data = json_decode(
+                    json: $json,
+                    associative: false,
+                    depth: 768,
+                    flags: JSON_THROW_ON_ERROR
+                );
+            }
+
+            if (is_object(value: $data)) {
+                $this->composerData = $data;
+            }
         }
     }
 
@@ -329,6 +368,7 @@ class Generic
      * @param string $className
      * @return string
      * @throws ReflectionException
+     * @throws IllegalValueException
      */
     public function getVersionByClassDoc(string $className = ''): string
     {
@@ -344,6 +384,7 @@ class Generic
      * @param string $className
      * @return string
      * @throws ReflectionException
+     * @throws IllegalValueException
      */
     public function getDocBlockItem(string $item, string $functionName = '', string $className = ''): string
     {
@@ -366,6 +407,8 @@ class Generic
         $return = '';
 
         if (!empty($doc)) {
+            $docBlock = [];
+
             preg_match_all(
                 pattern: sprintf('/%s\s(\w.+)\n/s', $item),
                 subject: $doc,
@@ -378,12 +421,15 @@ class Generic
                 // Strip stuff after line breaks
                 if (preg_match(pattern: '/[\n\r]/', subject: $return)) {
                     $multiRowData = preg_split(pattern: '/[\n\r]/', subject: $return);
-                    $return = $multiRowData[0] ?? '';
+
+                    if ($multiRowData !== false) {
+                        $return = $multiRowData[0] ?? '';
+                    }
                 }
             }
         }
 
-        return (string)$return;
+        return $return;
     }
 
     /**
@@ -391,26 +437,27 @@ class Generic
      * @param string $className
      * @return string
      * @throws ReflectionException
+     * @throws IllegalValueException
      */
     private function getExtractedDocBlock(
         string $functionName,
         string $className = ''
     ): string {
-        if (empty($className)) {
+        if ($className === '') {
             $className = __CLASS__;
         }
+
         if (!class_exists(class: $className)) {
-            return '';
+            throw new IllegalValueException(
+                message: "Class $className does not exist"
+            );
         }
 
+        /** @psalm-suppress InvalidNamedArgument */
         $doc = new ReflectionClass(objectOrClass: $className);
 
-        if (empty($functionName)) {
-            $return = $doc->getDocComment();
-        } else {
-            $return = $doc->getMethod(name: $functionName)->getDocComment();
-        }
-
-        return (string)$return;
+        return $functionName === '' ?
+            (string) $doc->getDocComment() :
+            (string) $doc->getMethod(name: $functionName)->getDocComment();
     }
 }

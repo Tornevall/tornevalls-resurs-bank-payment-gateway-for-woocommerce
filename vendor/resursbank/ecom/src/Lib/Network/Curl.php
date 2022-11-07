@@ -5,15 +5,20 @@
  * See LICENSE for license details.
  */
 
-/** @noinspection PhpMultipleClassDeclarationsInspection */
-
 declare(strict_types=1);
 
 namespace Resursbank\Ecom\Lib\Network;
 
 use Exception;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
+use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt\Token;
+use Resursbank\Ecom\Lib\Repository\Api\Mapi\GenerateToken;
 use stdClass;
 use CurlHandle;
 use JsonException;
@@ -21,9 +26,10 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Network\Model\Response;
+use Resursbank\Ecom\Lib\Model\Network\Response;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Lib\Network\Curl\Header;
+use Resursbank\Ecom\Lib\Network\Curl\ErrorHandler;
 
 use function is_array;
 use function is_string;
@@ -31,9 +37,9 @@ use function is_string;
 /**
  * Curl wrapper.
  *
- * @SuppressWarnings(PHPMD.TooManyPublicMethods)
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @noinspection PhpClassHasTooManyDeclaredMembersInspection
+ * @noinspection EfferentObjectCouplingInspection
+ * @todo Check if ConfigException validation need testing in class methods.
  */
 class Curl
 {
@@ -41,6 +47,11 @@ class Curl
      * @var CurlHandle
      */
     public readonly CurlHandle $ch;
+
+    /**
+     * @var ContentType
+     */
+    public readonly ContentType $responseContentType;
 
     /**
      * @param string $url
@@ -53,13 +64,18 @@ class Curl
      * @param StringValidation $stringValidation
      * @param ContentType|null $responseContentType
      * @param bool $forceObject Enforces the JSON_FORCE_OBJECT flag on json_encode of payload
+     * @throws ApiException
      * @throws AuthException
      * @throws CurlException
-     * @throws JsonException
-     * @throws ValidationException
+     * @throws EmptyValueException
      * @throws IllegalTypeException
-     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws ConfigException
      * @todo $headers and associated methods should be moved to a collection model / service layer.
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         string $url,
@@ -70,12 +86,10 @@ class Curl
         public readonly AuthType $authType = AuthType::JWT,
         public readonly ApiType $apiType = ApiType::MERCHANT,
         private readonly StringValidation $stringValidation = new StringValidation(),
-        public ?ContentType $responseContentType = null,
+        ContentType|null $responseContentType = null,
         private readonly bool $forceObject = false
     ) {
-        if ($this->responseContentType === null) {
-            $this->responseContentType = $this->contentType;
-        }
+        $this->responseContentType = $responseContentType ?? $contentType;
 
         // Initialize Curl.
         $ch = $this->init(url: $url, headers: $headers, payload: $payload);
@@ -88,17 +102,26 @@ class Curl
 
     /**
      * @return Response
+     * @throws AuthException
      * @throws CurlException
-     * @throws JsonException
-     * @throws IllegalTypeException
      * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws IllegalValueException
      */
     public function exec(): Response
     {
         /** @noinspection DuplicatedCode */
         $body = curl_exec(handle: $this->ch);
 
-        $this->handleError(body: $body); // We want to check for errors immediately after running curl_exec
+        // We want to check for errors immediately after running curl_exec
+        $errorHandler = new ErrorHandler(
+            body: $body,
+            ch: $this->ch,
+            contentType: $this->responseContentType
+        );
+
+        $errorHandler->validate();
 
         if (!is_string(value: $body)) {
             throw new IllegalTypeException(
@@ -132,8 +155,6 @@ class Curl
             );
         }
 
-        $this->handleError();
-
         curl_close(handle: $this->ch);
 
         return new Response(body: $body, code: $code);
@@ -157,12 +178,16 @@ class Curl
      * @param array $payload
      * @param AuthType $authType
      * @return Response
+     * @throws ApiException
      * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
+     * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public static function get(
         string $url,
@@ -185,12 +210,16 @@ class Curl
      * @param array $payload
      * @param AuthType $authType
      * @return Response
+     * @throws ApiException
      * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
+     * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public static function post(
         string $url,
@@ -211,12 +240,16 @@ class Curl
      * @param string $url
      * @param AuthType $authType
      * @return Response
+     * @throws ApiException
      * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
+     * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public static function delete(
         string $url,
@@ -238,12 +271,16 @@ class Curl
      * @param ContentType $contentType
      * @param ContentType|null $responseContentType
      * @return Response
+     * @throws ApiException
      * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
+     * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public static function put(
         string $url,
@@ -304,13 +341,15 @@ class Curl
             CURLOPT_URL => $this->generateUrl(url: $url, payload: $payload),
             CURLOPT_SSLVERSION => CURL_SSLVERSION_DEFAULT,
         ];
-        if (!empty(Config::$instance->proxy)) {
-            $options[CURLOPT_PROXY] = Config::$instance->proxy;
-            $options[CURLOPT_PROXYTYPE] = Config::$instance->proxyType;
+
+        if (!empty(Config::getProxy())) {
+            $options[CURLOPT_PROXY] = Config::getProxy();
+            $options[CURLOPT_PROXYTYPE] = Config::getProxyType();
         }
-        if (Config::$instance->timeout) {
-            $options[CURLOPT_CONNECTTIMEOUT] = ceil(num: Config::$instance->timeout) / 2;
-            $options[CURLOPT_TIMEOUT] = ceil(num: Config::$instance->timeout);
+
+        if (Config::getTimeout()) {
+            $options[CURLOPT_CONNECTTIMEOUT] = ceil(num: Config::getTimeout()) / 2;
+            $options[CURLOPT_TIMEOUT] = ceil(num: Config::getTimeout());
         }
 
         curl_setopt_array(handle: $ch, options: $options);
@@ -410,12 +449,17 @@ class Curl
         array $payload
     ): string {
         $flags = JSON_THROW_ON_ERROR;
+
         if ($this->forceObject) {
             $flags = JSON_THROW_ON_ERROR | JSON_FORCE_OBJECT;
         }
+
         return match ($this->contentType) {
             ContentType::EMPTY, ContentType::RAW => '',
-            ContentType::JSON => json_encode($payload, JSON_THROW_ON_ERROR | $flags),
+            ContentType::JSON => json_encode(
+                value: $payload,
+                flags: JSON_THROW_ON_ERROR | $flags
+            ),
             ContentType::URL => http_build_query(data: $payload)
         };
     }
@@ -423,9 +467,15 @@ class Curl
     /**
      * @param CurlHandle $ch
      * @return void
-     * @throws CurlException
+     * @throws ApiException
      * @throws AuthException
+     * @throws CurlException
+     * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws ConfigException
      */
     private function setAuth(CurlHandle $ch): void
     {
@@ -444,14 +494,14 @@ class Curl
     /**
      * @param CurlHandle $ch
      * @return void
-     * @throws CurlException
+     * @throws ConfigException
      */
     private function setBasicAuth(CurlHandle $ch): void
     {
-        $auth = Config::$instance->basicAuth;
+        $auth = Config::getBasicAuth();
 
         if ($auth === null) {
-            throw new CurlException(message: 'Basic auth not configured.');
+            throw new ConfigException(message: 'Basic auth is not configured.');
         }
 
         curl_setopt(
@@ -464,16 +514,22 @@ class Curl
     /**
      * @param CurlHandle $ch
      * @return void
-     * @throws CurlException
      * @throws AuthException
+     * @throws CurlException
+     * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ValidationException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws ConfigException
      */
     private function setJwtAuth(CurlHandle $ch): void
     {
-        $auth = Config::$instance->jwtAuth;
+        $auth = Config::getJwtAuth();
 
         if ($auth === null) {
-            throw new CurlException(message: 'JWT auth not configured.');
+            throw new ConfigException(message: 'JWT auth is not configured.');
         }
 
         curl_setopt(
@@ -485,77 +541,32 @@ class Curl
         curl_setopt(
             handle: $ch,
             option: CURLOPT_XOAUTH2_BEARER,
-            value: $auth->getToken()->accessToken
+            value: $this->getJwtToken(auth: $auth)->access_token
         );
     }
 
     /**
-     * @param mixed $body
-     * @return void
+     * @param Jwt $auth
+     * @return Token
+     * @throws ApiException
+     * @throws AuthException
      * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws ConfigException
      */
-    private function handleError(mixed $body = null): void
-    {
-        /** @noinspection DuplicatedCode */
-        $msg = curl_error(handle: $this->ch);
-        $code = curl_errno(handle: $this->ch);
-        $httpCode = curl_getinfo(handle: $this->ch, option: CURLINFO_HTTP_CODE);
-        $connectCode = curl_getinfo(handle: $this->ch, option: CURLINFO_HTTP_CONNECTCODE);
+    private function getJwtToken(
+        Jwt $auth
+    ): Token {
+        $result = $auth->getToken();
 
-        if ($this->responseContentType === ContentType::JSON && !empty($body)) {
-            /** @psalm-suppress MixedAssignment */
-            try {
-                $jsonMessage = json_decode(
-                    json: $body,
-                    associative: false,
-                    depth: 768,
-                    flags: JSON_THROW_ON_ERROR
-                );
-                if ($jsonMessage && isset($jsonMessage->message)) {
-                    $msg = $jsonMessage->message . '.';
-                    if (property_exists($jsonMessage, 'parameters') && is_object($jsonMessage->parameters)) {
-                        foreach ($jsonMessage->parameters as $key => $value) {
-                            $msg .= " $key: $value";
-                        }
-                    }
-                }
-            } catch (Exception) {
-                // Ignore.
-            }
+        if ($result === null || $result->isExpired()) {
+            $result = (new GenerateToken(auth: $auth))->call();
         }
 
-        if ($code !== 0 || $httpCode >= 400) {
-            // Some exceptions that curl are throwing as CURLE_RECV_ERROR may falsely state that data could
-            // not be received from the remote. However, in some cases, the remote server is actually telling
-            // why curl can not receive data. Those errors are based on HTTP >= 400 responses and should, in
-            // cases where the remote end actually have a proper answer, be returned correctly instead of the generic
-            // CURLE_RECV_ERROR. Among a few examples, this could happen when integrations are using proxy layers
-            // for which the proxy remote end won't allow. Usually the remote proxy may throw 400 or permission
-            // denied errors, which should be used instead of CURLE_RECV_ERROR.
-            $throwCode = $code !== 0 ? $code : $httpCode;
-            if ($connectCode >= 400 && $code === CURLE_RECV_ERROR) {
-                $throwCode = $connectCode;
-            }
-
-            throw new CurlException(
-                message: 'CURL error (' . $throwCode . "): $msg",
-                code: ($code !== 0 ? $throwCode : $httpCode),
-                requestBody: is_string($body) ? $body : null
-            );
-        }
-    }
-
-    /**
-     * Returns configured auth credentials as array
-     *
-     * @return array
-     */
-    public function getAuthentication(): array
-    {
-        return match ($this->authType) {
-            AuthType::BASIC => (array)Config::$instance->basicAuth,
-            AuthType::JWT => (array)Config::$instance->jwtAuth,
-            default => [],
-        };
+        return $result;
     }
 }
