@@ -17,13 +17,13 @@ use Resursbank\Ecom\Lib\Model\Model;
 class PriceSignage extends Model
 {
     /**
-     * @param UriLinkCollection $sekkiLinks
+     * @param UriLinkCollection $secciLinks
      * @param UriLinkCollection $generalTermsLinks
      * @param CostCollection $costList
      * @todo These are all specified as required properties, but it does not state whether they can be empty?
      */
     public function __construct(
-        public readonly UriLinkCollection $sekkiLinks,
+        public readonly UriLinkCollection $secciLinks,
         public readonly UriLinkCollection $generalTermsLinks,
         public readonly CostCollection $costList,
     ) {

@@ -13,8 +13,7 @@ use Error;
 use Exception;
 
 /**
- * Logs nothing
- * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+ * Logs nothing.
  */
 class NoneLogger implements LoggerInterface
 {

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Ecom\Lib\Cache;
 
 use Redis as Server;
+use RedisException;
 use Resursbank\Ecom\Exception\ValidationException;
 
 use function is_string;
@@ -33,6 +34,8 @@ class Redis extends AbstractCache implements CacheInterface
 
     /**
      * @return Server
+     * @throws RedisException
+     * @SuppressWarnings(PHPMD.MissingImport)
      */
     private function connect(): Server
     {
@@ -50,6 +53,7 @@ class Redis extends AbstractCache implements CacheInterface
     /**
      * @inheritdoc
      * @throws ValidationException
+     * @throws RedisException
      */
     public function read(string $key): ?string
     {
@@ -63,6 +67,7 @@ class Redis extends AbstractCache implements CacheInterface
     /**
      * @inheritdoc
      * @throws ValidationException
+     * @throws RedisException
      */
     public function write(string $key, string $data, int $ttl): void
     {
@@ -73,6 +78,7 @@ class Redis extends AbstractCache implements CacheInterface
     /**
      * @inheritdoc
      * @throws ValidationException
+     * @throws RedisException
      */
     public function clear(string $key): void
     {

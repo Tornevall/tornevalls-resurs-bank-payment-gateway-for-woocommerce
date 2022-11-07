@@ -22,6 +22,8 @@ use function is_string;
 
 /**
  * Defines a product in an order.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class OrderLine extends Model
 {

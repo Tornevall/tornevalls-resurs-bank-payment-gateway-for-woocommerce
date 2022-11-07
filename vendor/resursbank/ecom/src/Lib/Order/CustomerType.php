@@ -5,8 +5,6 @@
  * See LICENSE for license details.
  */
 
-/** @noinspection PhpCSValidationInspection */
-
 declare(strict_types=1);
 
 namespace Resursbank\Ecom\Lib\Order;

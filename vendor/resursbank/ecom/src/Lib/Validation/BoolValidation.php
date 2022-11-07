@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection MessDetectorValidationInspection */
-
 /**
  * Copyright © Resurs Bank AB. All rights reserved.
  * See LICENSE for license details.
@@ -30,6 +28,7 @@ class BoolValidation
      * @return bool
      * @throws MissingKeyException
      * @throws IllegalTypeException
+     * @SuppressWarnings(PHPMD.BooleanGetMethodName)
      */
     public function getKey(array $data, string $key): bool
     {

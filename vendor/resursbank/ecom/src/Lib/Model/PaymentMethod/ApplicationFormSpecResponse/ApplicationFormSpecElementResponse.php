@@ -18,6 +18,8 @@ use Resursbank\Ecom\Lib\Validation\StringValidation;
 
 /**
  * Individual application data specification response item (represents a single input field or label)
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class ApplicationFormSpecElementResponse extends Model
 {
@@ -37,7 +39,6 @@ class ApplicationFormSpecElementResponse extends Model
      * @param ApplicationFormSpecWithDependencyRequiredIfValue|null $requiredIfValue
      * @param StringValidation $stringValidation
      * @throws EmptyValueException
-     * @SuppressWarnings(PHPMD.LongVariable)
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(

@@ -13,6 +13,7 @@ use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
@@ -27,15 +28,13 @@ use Resursbank\Ecom\Lib\Network\RequestMethod;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Application;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Customer;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Metadata;
+use Resursbank\Ecom\Lib\Model\Payment\Metadata;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLineCollection;
 use stdClass;
 
 /**
  * POST /payments/{payment_id}/create
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Create
 {
@@ -66,6 +65,7 @@ class Create
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      * @noinspection PhpTooManyParametersInspection
      */
     public function call(
@@ -103,7 +103,7 @@ class Create
 
         $curl = new Curl(
             url: $this->mapi->getUrl(
-                route: Mapi::PAYMENT_ROUTE . '/payments'
+                route: Mapi::PAYMENT_ROUTE
             ),
             requestMethod: RequestMethod::POST,
             payload: $params,

@@ -14,12 +14,14 @@ namespace Resursbank\Ecom\Module\Rco;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\Module as CoreModule;
 use Resursbank\Ecom\Module\Rco\Api\GetPayment;
 use Resursbank\Ecom\Module\Rco\Api\InitPayment;
 use Resursbank\Ecom\Module\Rco\Api\UpdatePayment;
@@ -34,10 +36,8 @@ use Resursbank\Ecom\Module\Rco\Models\UpdatePaymentReference\Response as UpdateP
 
 /**
  * Main entrypoint for interfacing with the RCO API programmatically.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class Repository extends CoreModule
+class Repository
 {
     public const HOSTNAME_PROD = 'checkout.resurs.com';
     public const HOSTNAME_TEST = 'omnitest.resurs.com';
@@ -48,13 +48,16 @@ class Repository extends CoreModule
      * @param InitPaymentRequest $request
      * @param string $orderReference
      * @return InitPaymentResponse
-     * @throws CurlException
-     * @throws ReflectionException
-     * @throws JsonException
      * @throws AuthException
-     * @throws IllegalTypeException
-     * @throws ValidationException
+     * @throws ConfigException
+     * @throws CurlException
      * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws ApiException
+     * @throws IllegalValueException
      */
     public static function initPayment(InitPaymentRequest $request, string $orderReference): InitPaymentResponse
     {
@@ -68,10 +71,13 @@ class Repository extends CoreModule
      * @param UpdatePaymentRequest $request
      * @param string $orderReference
      * @return UpdatePaymentResponse
+     * @throws ApiException
      * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
@@ -88,10 +94,13 @@ class Repository extends CoreModule
      * @param UpdatePaymentReferenceRequest $request
      * @param string $orderReference
      * @return UpdatePaymentReferenceResponse
+     * @throws ApiException
      * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
@@ -109,10 +118,13 @@ class Repository extends CoreModule
      *
      * @param string $orderReference
      * @return Response
+     * @throws ApiException
      * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
@@ -128,10 +140,12 @@ class Repository extends CoreModule
      * Gets API hostname.
      *
      * @return string
+     * @throws ConfigException
+     * @todo Check if ConfigException validation needs a test.
      */
     public static function getApiHostname(): string
     {
-        if (Config::$instance->isProduction) {
+        if (Config::isProduction()) {
             return self::HOSTNAME_PROD;
         }
 

@@ -60,7 +60,7 @@ class DeliveryAddress extends Model
      */
     private function validateFullName(): void
     {
-        if (is_string($this->fullName)) {
+        if (is_string(value: $this->fullName)) {
             $this->stringValidation->length(
                 value: $this->fullName,
                 min: 0,
@@ -74,7 +74,7 @@ class DeliveryAddress extends Model
      */
     private function validateFirstName(): void
     {
-        if (is_string($this->firstName)) {
+        if (is_string(value: $this->firstName)) {
             $this->stringValidation->length(
                 value: $this->firstName,
                 min: 0,
@@ -88,7 +88,7 @@ class DeliveryAddress extends Model
      */
     private function validateLastName(): void
     {
-        if (is_string($this->lastName)) {
+        if (is_string(value: $this->lastName)) {
             $this->stringValidation->length(
                 value: $this->lastName,
                 min: 0,
@@ -114,7 +114,7 @@ class DeliveryAddress extends Model
      */
     private function validateAddressRow2(): void
     {
-        if (is_string($this->addressRow2)) {
+        if (is_string(value: $this->addressRow2)) {
             $this->stringValidation->length(
                 value: $this->addressRow2,
                 min: 0,

@@ -16,7 +16,6 @@ use ReflectionNamedType;
 use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Collection\Collection;
-
 use Resursbank\Ecom\Lib\Model\Model;
 use stdClass;
 
@@ -40,10 +39,10 @@ class DataConverter
      * @throws ReflectionException
      * @throws ArgumentCountError
      * @throws IllegalTypeException
-     * @psalm-suppress MixedAssignment
-     * @psalm-suppress InvalidNamedArgument
-     * @psalm-suppress ArgumentTypeCoercion
-     * @psalm-suppress MixedMethodCall
+     * @todo This file is ignored by psalm configuration but shouldn't be. We should fix all errors we can instead.
+     * @todo This is starting to become a bit too complex, consider refactoring.
+     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public static function stdClassToType(object $object, string $type): Model
     {
@@ -70,11 +69,11 @@ class DataConverter
                 if (is_subclass_of(object_or_class: $propertyType, class: Collection::class)) {
                     $converted = [];
                     $dummyCollection = new $propertyType(data: []);
-                    $dummyCollectionMemberType = $dummyCollection->getType();
+                    $dummyCollectionType = $dummyCollection->getType();
                     foreach ($value as $item) {
                         $converted[] = self::stdClassToType(
                             object: $item,
-                            type: $dummyCollectionMemberType
+                            type: $dummyCollectionType
                         );
                     }
                     $dummyCollection->setData(data: $converted);
@@ -85,13 +84,12 @@ class DataConverter
                     empty((array)$value)
                 ) {
                     $arguments[$name] = [];
-                } elseif (enum_exists($propertyType)) {
+                } elseif (enum_exists(enum: $propertyType)) {
                     // If our property is an enum we need to convert the value
                     // to the enum value it represents.
                     $arguments[$name] = call_user_func(
                         $propertyType . '::from',
-                        /** @psalm-suppress MixedPropertyFetch */
-                        is_object($value) ? $value->value : $value
+                        is_object(value: $value) ? $value->value : $value
                     );
                 } elseif (is_object(value: $value)) {
                     $arguments[$name] = self::stdClassToType(
@@ -123,6 +121,15 @@ class DataConverter
                 type: $targetType
             );
         }
-        return new ($targetType . 'Collection')(data: $convertedData);
+
+        $class = $targetType . 'Collection';
+
+        if (!class_exists(class: $class)) {
+            throw new IllegalTypeException(
+                message: 'Collection class ' . $class . ' does not exist.'
+            );
+        }
+
+        return new $class(data: $convertedData);
     }
 }

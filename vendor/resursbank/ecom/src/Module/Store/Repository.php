@@ -21,6 +21,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Api\Mapi;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
 use Resursbank\Ecom\Lib\Repository\Api\Mapi\Get;
 use Exception;
@@ -30,8 +31,6 @@ use Resursbank\Ecom\Module\Store\Models\StoreCollection;
 
 /**
  * Interaction with Store entities and related functionality.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Repository
 {
@@ -114,7 +113,7 @@ class Repository
     ): Get {
         return new Get(
             model: Store::class,
-            route: 'stores',
+            route: Mapi::STORE_ROUTE,
             params: compact('size', 'page', 'sort'),
             extractProperty: 'content'
         );

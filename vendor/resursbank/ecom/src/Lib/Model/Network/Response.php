@@ -7,14 +7,15 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Lib\Network\Model;
+namespace Resursbank\Ecom\Lib\Model\Network;
 
+use Resursbank\Ecom\Lib\Model\Model;
 use stdClass;
 
 /**
  * Curl response.
  */
-class Response
+class Response extends Model
 {
     /**
      * @param stdClass|array $body

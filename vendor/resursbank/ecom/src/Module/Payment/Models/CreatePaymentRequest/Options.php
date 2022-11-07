@@ -17,6 +17,8 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Redirecti
 
 /**
  * Application data for a payment.
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class Options extends Model
 {
