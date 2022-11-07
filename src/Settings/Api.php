@@ -30,6 +30,7 @@ use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\Environment;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 
@@ -71,9 +72,17 @@ class Api
             ];
         }
 
+        // Note: The yes/no values are used as booleans in woocommerce.
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
+                'enabled' => [
+                    'id' => Enabled::getName(),
+                    'title' => 'Gateway Enabled',
+                    'type' => 'checkbox',
+                    'default' => 'yes',
+                    'desc' => 'Enabled',
+                ],
                 'store_id' => $storeIdSetting,
                 'client_id' => [
                     'id' => ClientId::getName(),

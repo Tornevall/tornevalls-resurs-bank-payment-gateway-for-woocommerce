@@ -14,13 +14,13 @@ namespace Resursbank\Woocommerce\Database;
  */
 class StringOption extends Option
 {
-	/**
-	 * @return string
-	 */
-	public static function getData(): string
-	{
-		$result = parent::getData();
+    /**
+     * @return string
+     */
+    public static function getData(): string
+    {
+        $result = parent::getData();
 
-		return is_string($result) ? $result : '';
-	}
+        return is_string($result) ? $result : '';
+    }
 }

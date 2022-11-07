@@ -29,6 +29,7 @@ use ResursBank\Service\OrderHandler;
 use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Options\Enabled;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -213,10 +214,17 @@ class ResursDefault extends WC_Payment_Gateway
         // Below is initial default preparations for the payment method, if we are unable to fetch it from the
         // real payment method information (via setPaymentMethodInformation). This id should preferably be
         // the UUID given by Resurs Bank (see below for that part).
-        $this->id = 'resursbank_default';
+
+        // Id must be defined as the tab where the configuration is handled.
+        $this->id = 'resursbank';
         $this->method_title = 'Resurs Bank AB';
         $this->method_description = 'Resurs Bank Gateway';
         $this->title = 'Resurs Bank AB';
+
+        // Default enabled state for the payment method, is based on the gateway state.
+        // To handle payment methods specifically, this has to be changed through Resurs support,
+        // not the plugin.
+        $this->enabled = Enabled::isEnabled();
 
         // @todo Has fields should be false when implementing RCO.
         $this->has_fields = true;
@@ -228,6 +236,27 @@ class ResursDefault extends WC_Payment_Gateway
 
         $this->setFilters();
         $this->setActions();
+    }
+
+    /**
+     * This section is used by the WC Payment Gateway-toggler. If we decide to support "gateway toggling", this
+     * section has to be used. See @todo's below.
+     *
+     * @param $key
+     * @param $value
+     * @return bool
+     * @todo Due to the way we handle our configuration, this method has no actual effect when executed.
+     * @todo Eventually, we need to adjust the way woocommerce arrays are updating the values by keys.
+     */
+    public function update_option($key, $value = '')
+    {
+        // @todo Using this setup to toggle gateway on/off in the woo-admin panel, will remove
+        // @todo the gateway entirely from the list of gateways. That is not what we want, so this is
+        // @todo temporarily disabled.
+        //if ($key === 'enabled') {
+        //    return Enabled::setData($value);
+        //}
+        return parent::update_option($key, $value);
     }
 
     /**
@@ -408,7 +437,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setFilters()
     {
-        if (Data::isEnabled()) {
+        if (Enabled::isEnabled()) {
             add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
             add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
@@ -423,7 +452,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function setActions()
     {
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
-        if (Data::isEnabled()) {
+        if (Enabled::isEnabled()) {
             add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
             if (Data::getCheckoutType() === self::TYPE_RCO) {
                 add_action(
