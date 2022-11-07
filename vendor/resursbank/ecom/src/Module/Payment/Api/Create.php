@@ -95,7 +95,13 @@ class Create
             $params['customer'] = $customer;
         }
         if ($metadata) {
-            $params['metadata'] = $metadata;
+            //$params['metadata'] = $metadata;
+            // @todo Find a prettier solution to the issue of Metadata::custom being turned into an empty object
+            //   when passed through json_encode.
+            $params['metadata'] = new stdClass();
+            if (isset($metadata->custom)) {
+                $params['metadata']->custom = $metadata->custom->toArray();
+            }
         }
         if ($options) {
             $params['options'] = $options;
