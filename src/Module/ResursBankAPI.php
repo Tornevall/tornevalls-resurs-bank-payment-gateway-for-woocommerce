@@ -146,6 +146,7 @@ class ResursBankAPI
         }
 
         // @todo Add support for other locales (this is why we use switches here).
+        // @todo ECP-251 + WOO-842
         switch (Data::getCustomerCountry()) {
             case 'SE':
                 $locale = Locale::sv;
