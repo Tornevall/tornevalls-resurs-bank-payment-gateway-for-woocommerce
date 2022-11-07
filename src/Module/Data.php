@@ -2769,7 +2769,7 @@ class Data
 
         return true;
     }
-    
+
     /**
      * @return array
      * @since 0.0.1.8

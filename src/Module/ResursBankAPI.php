@@ -158,31 +158,13 @@ class ResursBankAPI
             logger: $fileLogger,
             cache: new None(),
             jwtAuth: new Jwt(
-                clientId: $this->getClientId(),
-                clientSecret: $this->getClientSecret(),
+                clientId: ClientId::getData(),
+                clientSecret: ClientSecret::getData(),
                 scope: $scope,
                 grantType: $grantType
             ),
             locale: $locale
         );
-    }
-
-    /**
-     * @return string
-     */
-    private function getClientId(): string
-    {
-        return Data::getResursOption('environment') === 'test' ?
-            Data::getResursOption('jwt_client_id') : Data::getResursOption('jwt_client_id_production');
-    }
-
-    /**
-     * @return string
-     */
-    private function getClientSecret(): string
-    {
-        return Data::getResursOption('environment') === 'test' ?
-            Data::getResursOption('jwt_client_secret') : Data::getResursOption('jwt_client_secret_production');
     }
 
     /**
