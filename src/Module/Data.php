@@ -1559,23 +1559,21 @@ class Data
         // configurations. For example, when the module is installed for the first time, there won't be an ecom2
         // instance until it has been configured. As the module can log information before this happens,
         // it is also important that we only allow logging, if the instance is ready and available.
-        if (isset(self::$logger)) {
-            switch ($logLevel) {
-                case LogLevel::INFO:
-                    Config::getLogger()->info($message);
-                    break;
-                case LogLevel::DEBUG:
-                    Config::getLogger()->debug($message);
-                    break;
-                case LogLevel::ERROR:
-                    Config::getLogger()->error($message);
-                    break;
-                case LogLevel::WARNING:
-                    Config::getLogger()->warning($message);
-                    break;
-                default:
-                    self::$logger->info($message);
-            }
+        switch ($logLevel) {
+            case LogLevel::INFO:
+                Config::getLogger()->info($message);
+                break;
+            case LogLevel::DEBUG:
+                Config::getLogger()->debug($message);
+                break;
+            case LogLevel::ERROR:
+                Config::getLogger()->error($message);
+                break;
+            case LogLevel::WARNING:
+                Config::getLogger()->warning($message);
+                break;
+            default:
+                Config::getLogger()->info($message);
         }
     }
 
