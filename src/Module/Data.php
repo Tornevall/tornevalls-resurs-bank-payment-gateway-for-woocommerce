@@ -2769,25 +2769,7 @@ class Data
 
         return true;
     }
-
-    /**
-     * @return string
-     */
-    private function getClientId(): string
-    {
-        return Data::getResursOption('environment') === 'test' ?
-            Data::getResursOption('jwt_client_id') : Data::getResursOption('jwt_client_id_production');
-    }
-
-    /**
-     * @return string
-     */
-    private function getClientSecret(): string
-    {
-        return Data::getResursOption('environment') === 'test' ?
-            Data::getResursOption('jwt_client_secret') : Data::getResursOption('jwt_client_secret_production');
-    }
-
+    
     /**
      * @return array
      * @since 0.0.1.8
