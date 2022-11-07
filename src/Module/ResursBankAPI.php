@@ -9,6 +9,8 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\CollectionException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
@@ -20,8 +22,8 @@ use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Locale\Locale;
 use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
+use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
@@ -33,6 +35,9 @@ use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Options\ClientId;
+use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Settings;
 use ResursException;
 use stdClass;
 use function count;
@@ -118,7 +123,7 @@ class ResursBankAPI
         $scope = Data::getResursOption('environment') === 'test' ? 'mock-merchant-api' : 'merchant-api';
         $grantType = 'client_credentials';
 
-        if (isset(Config::$instance)) {
+        if (!Config::hasInstance()) {
             return;
         }
 
@@ -134,12 +139,13 @@ class ResursBankAPI
             }
         }
 
-        if (empty(self::getClientId()) || empty(self::getClientSecret())) {
+        if (empty(ClientId::getData()) || empty(ClientSecret::getData())) {
             throw new MapiCredentialsException(
                 message: 'Credentials not set.'
             );
         }
 
+        // @todo Add support for other locales (this is why we use switches here).
         switch (Data::getCustomerCountry()) {
             case 'SE':
                 $locale = Locale::sv;
@@ -190,7 +196,7 @@ class ResursBankAPI
 
     /**
      * Get payment properly by testing two API's before giving up.
-     * @param $paymentId
+     * @param string $paymentId
      * @return mixed
      * @throws ApiException
      * @throws AuthException
@@ -203,6 +209,8 @@ class ResursBankAPI
      * @throws ReflectionException
      * @throws StoreException
      * @throws ValidationException
+     * @throws CollectionException
+     * @throws ConfigException
      * @since 0.0.1.0
      * @todo Return data as ecom2 Payment object. Also look at the validation issues in ecom2 DataConverter.
      */
