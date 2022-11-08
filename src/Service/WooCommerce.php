@@ -128,6 +128,8 @@ class WooCommerce
      * @param array $gateways
      * @return array
      * @since 0.0.1.0
+     * @todo As we changed the way we handle gateways, this method is considered unused. However, this method
+     * @todo is not removed, since we still need it to generate payment methods in the checkout.
      */
     private static function getGatewaysFromPaymentMethods(array $gateways = []): array
     {
