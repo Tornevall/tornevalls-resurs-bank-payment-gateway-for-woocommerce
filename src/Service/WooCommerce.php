@@ -113,7 +113,9 @@ class WooCommerce
      */
     public static function getGateways($gateways): mixed
     {
-        $gateways[] = ResursDefault::class;
+        if (is_array($gateways)) {
+            $gateways[] = ResursDefault::class;
+        }
 
         return $gateways;
     }
