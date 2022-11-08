@@ -15,6 +15,8 @@ use ResursBank\Module\FormFields;
 use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderStatus as OrderStatusHandler;
+use Resursbank\Woocommerce\Database\Options\ClientId;
+use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings;
 use ResursException;
@@ -107,18 +109,14 @@ class WooCommerce
      * @param $gateways
      * @return mixed
      * @throws Exception
-     * @since 0.0.1.0
+     * @see https://rudrastyh.com/woocommerce/get-and-hook-payment-gateways.html
      */
-    public static function getGateways($gateways)
+    public static function getGateways($gateways): mixed
     {
-        if (is_admin()) {
+        if (is_array($gateways)) {
             $gateways[] = ResursDefault::class;
-        } else {
-            // Make sure there are credentials before generating gateways.
-            if (Data::hasCredentials()) {
-                $gateways = self::getGatewaysFromPaymentMethods($gateways);
-            }
         }
+
         return $gateways;
     }
 
@@ -127,12 +125,13 @@ class WooCommerce
      * This method fetches payment methods from Resurs Bank and generates a gateway for each of them
      * by the ResursDefault-class.
      *
-     * @param $gateways
-     * @return mixed
-     * @throws Exception
+     * @param array $gateways
+     * @return array
      * @since 0.0.1.0
+     * @todo As we changed the way we handle gateways, this method is considered unused. However, this method
+     * @todo is not removed, since we still need it to generate payment methods in the checkout.
      */
-    private static function getGatewaysFromPaymentMethods(array $gateways = [])
+    private static function getGatewaysFromPaymentMethods(array $gateways = []): array
     {
         // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
         try {
@@ -1477,16 +1476,6 @@ class WooCommerce
     public static function getCustomerCheckoutLocation()
     {
         return self::getSessionValue(self::$inCheckoutKey);
-    }
-
-    /**
-     * @param $return
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getAllowResursRun($return)
-    {
-        return $return;
     }
 
     /**

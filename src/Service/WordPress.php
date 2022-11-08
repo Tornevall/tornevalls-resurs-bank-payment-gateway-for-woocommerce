@@ -4,10 +4,12 @@ namespace ResursBank\Service;
 
 use Exception;
 use Resursbank\Ecom\Config;
+use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
@@ -49,6 +51,7 @@ class WordPress
 
         // Always initialize defaults once on plugin loaded (performance saver).
 //         Data::getDefaultsInit();
+        self::adminGatewayRedirect();
         self::setupAjaxActions();
         self::setupFilters();
         self::setupScripts();
@@ -56,6 +59,29 @@ class WordPress
         self::setupWoocommerceAdminActions();
         self::setupWoocommerceCheckoutActions();
         self::doAction('isLoaded', true);
+    }
+
+    /**
+     * Make sure redirects from WooCommerce-tab payments goes the right way, when button is clicked.
+     * Currently, this plugin is not located (due to how we want to configure it) in regular WooCommerce-tabs
+     * so this redirect must be handled this way.
+     *
+     * @return void
+     */
+    private static function adminGatewayRedirect(): void
+    {
+        // No action on wrong request variables.
+        if (!isset($_REQUEST['page']) || !isset($_REQUEST['tab']) || !isset($_REQUEST['section'])) {
+            return;
+        }
+
+        if ($_REQUEST['page'] === 'wc-settings' &&
+            $_REQUEST['tab'] === 'checkout' &&
+            $_REQUEST['section'] === (new ResursDefault())->id
+        ) {
+            wp_redirect(admin_url('admin.php?page=wc-settings&tab=resursbank&section=api_settings'));
+            exit;
+        }
     }
 
     /**
@@ -121,14 +147,18 @@ class WordPress
         add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
         add_filter('rbwc_get_part_payment_page', 'ResursBank\Service\WordPress::getPartPaymentPage');
 
-        if (Data::isEnabled()) {
+        if (Enabled::isEnabled()) {
+            // Get list of current payment gateways (for admin parts).
+            // @see https://rudrastyh.com/woocommerce/get-and-hook-payment-gateways.html
             add_filter('woocommerce_payment_gateways', 'ResursBank\Service\WooCommerce::getGateways');
+
+            // Get list of available gateways (for checkout).
+            // @see https://rudrastyh.com/woocommerce/get-and-hook-payment-gateways.html
             add_filter(
                 'woocommerce_available_payment_gateways',
                 'ResursBank\Service\WooCommerce::getAvailableGateways'
             );
             add_filter('rbwc_get_address_field_controller', 'ResursBank\Service\WordPress::getAddressFieldController');
-            add_filter('allow_resurs_run', 'ResursBank\Service\WooCommerce::getAllowResursRun');
         }
     }
 
