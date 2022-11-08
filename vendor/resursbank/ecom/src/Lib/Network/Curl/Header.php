@@ -32,6 +32,7 @@ class Header
      * @param bool $hasBodyData
      * @return array<array-key,HeaderModel>
      * @throws EmptyValueException
+     * @throws ConfigException
      * @todo See constructor todo. If kept we should maybe change its visibility.
      * @psalm-suppress MixedReturnTypeCoercion
      */
@@ -71,6 +72,7 @@ class Header
      * @param array $headers
      * @param string $key
      * @return bool
+     * @throws ConfigException
      * @todo See constructor todo. If kept we should maybe change its visibility.
      */
     public static function hasHeader(
@@ -89,6 +91,7 @@ class Header
      * @param array $headers
      * @param string $key
      * @return array
+     * @throws ConfigException
      * @todo See constructor todo. If kept we should maybe change its visibility.
      * @psalm-suppress MixedArgument
      * @psalm-suppress MixedPropertyFetch
@@ -117,6 +120,7 @@ class Header
      * @return array
      * @psalm-suppress MixedOperand
      * @psalm-suppress MixedPropertyFetch
+     * @throws ConfigException
      */
     public static function getHeadersData(
         array $headers
@@ -170,15 +174,19 @@ class Header
     /**
      * @param array $headers
      * @return void
+     * @throws ConfigException
      */
     private static function validateHeaderArray(
         array $headers
     ): void {
         foreach ($headers as $header) {
             if (!$header instanceof HeaderModel) {
-                throw new InvalidArgumentException(
+                $exception = new InvalidArgumentException(
                     message: 'Header must be an instance of Header.'
                 );
+                Config::getLogger()->error(message: $exception->getMessage());
+                Config::getLogger()->error(message: $exception);
+                throw $exception;
             }
         }
     }

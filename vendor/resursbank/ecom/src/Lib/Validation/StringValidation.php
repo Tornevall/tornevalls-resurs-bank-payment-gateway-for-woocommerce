@@ -5,13 +5,12 @@
  * See LICENSE for license details.
  */
 
-/** @noinspection DuplicatedCode */
-
 declare(strict_types=1);
 
 namespace Resursbank\Ecom\Lib\Validation;
 
 use DateTime;
+use DateTimeInterface;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
@@ -136,55 +135,14 @@ class StringValidation
      * @return bool
      * @throws IllegalValueException
      */
-    public function isDate(string $value): bool
+    public function isTimestampDate(string $value): bool
     {
-        /**
-         * @psalm-suppress TooFewArguments
-         * @psalm-suppress InvalidNamedArgument
-         * @noinspection PhpNamedArgumentMightBeUnresolvedInspection
-         */
-        $date = DateTime::createFromFormat(format: 'Y-m-d', datetime: $value);
+        $time = strtotime(datetime: $value);
 
-        if (!$date || $date->format(format: 'Y-m-d') !== $value) {
-            throw new IllegalValueException(message: "$value is not a date.");
-        }
-
-        return true;
-    }
-
-    /**
-     * @param string $value
-     * @return bool
-     * @throws IllegalValueException
-     * @psalm-suppress TooFewArguments
-     * @psalm-suppress InvalidNamedArgument
-     * @noinspection PhpNamedArgumentMightBeUnresolvedInspection
-     */
-    public function isIso8601DateTime(string $value): bool
-    {
-        $sanitizedValue = preg_replace(
-            pattern: '/Z$/',
-            replacement: '+00:00',
-            subject: $value
-        );
-        $date = DateTime::createFromFormat(format: DATE_ATOM, datetime: $value);
-        if (
-            !$date ||
-            preg_replace(
-                pattern: '/Z$/',
-                replacement: '+00:00',
-                subject: $date->format(format: DATE_ATOM)
-            ) !== $sanitizedValue
-        ) {
-            // Ugly hack because PHP's ISO 8601 parsing has been broken since forever and is still "not a bug"
-            $noNanoseconds = substr(string: $value, offset: 0, length: 23);
-            $remainder = substr(string: $value, offset: 23);
-            if (
-                !DateTime::createFromFormat(format: 'Y-m-d\TH:i:s.v', datetime: $noNanoseconds)
-                || (!empty($remainder) && !ctype_digit(text: $remainder))
-            ) {
-                throw new IllegalValueException(message: "$value is not a valid ISO 8601 date.");
-            }
+        if ($time === false) {
+            throw new IllegalValueException(
+                message: "$value could not be converted to a timestamp."
+            );
         }
 
         return true;

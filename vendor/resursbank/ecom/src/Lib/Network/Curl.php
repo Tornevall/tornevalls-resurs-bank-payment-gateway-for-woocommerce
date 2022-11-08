@@ -101,6 +101,64 @@ class Curl
     }
 
     /**
+     * @param string $url
+     * @param array $headers
+     * @param array $payload
+     * @return CurlHandle
+     * @throws JsonException
+     * @throws ValidationException
+     * @throws Exception
+     * @todo Check if CURLOPT_ENCODING should be included and what value it should be assigned.
+     */
+    private function init(
+        string $url,
+        array $headers,
+        array $payload
+    ): CurlHandle {
+        /** @noinspection DuplicatedCode */
+        $ch = curl_init();
+
+        $options = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_FAILONERROR => false, // Don't treat HTTP code 400+ as error.
+            CURLOPT_AUTOREFERER => true, // Follow redirects.
+            CURLINFO_HEADER_OUT => true, // Track outgoing headers for debugging.
+            CURLOPT_HEADER => false, // Do not include header in output.
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_USERAGENT => Header::getUserAgent(),
+            CURLOPT_HTTPHEADER => Header::getHeadersData(
+                headers: Header::generateHeaders(
+                    headers: $headers,
+                    payloadData: $this->getPayloadData(payload: $payload),
+                    contentType: $this->contentType,
+                    hasBodyData: $this->hasBodyData()
+                )
+            ),
+            CURLOPT_CUSTOMREQUEST => $this->getCustomRequestValue(),
+            CURLOPT_URL => $this->generateUrl(url: $url, payload: $payload),
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_DEFAULT,
+        ];
+
+        if (!empty(Config::getProxy())) {
+            $options[CURLOPT_PROXY] = Config::getProxy();
+            $options[CURLOPT_PROXYTYPE] = Config::getProxyType();
+        }
+
+        if (Config::getTimeout()) {
+            $options[CURLOPT_CONNECTTIMEOUT] = ceil(num: Config::getTimeout()) / 2;
+            $options[CURLOPT_TIMEOUT] = ceil(num: Config::getTimeout());
+        }
+
+        curl_setopt_array(handle: $ch, options: $options);
+
+        $this->setContent(ch: $ch, payload: $payload);
+
+        return $ch;
+    }
+
+    /**
      * @return Response
      * @throws AuthException
      * @throws CurlException
@@ -108,6 +166,7 @@ class Curl
      * @throws IllegalTypeException
      * @throws JsonException
      * @throws IllegalValueException
+     * @throws ConfigException
      */
     public function exec(): Response
     {
@@ -124,9 +183,12 @@ class Curl
         $errorHandler->validate();
 
         if (!is_string(value: $body)) {
-            throw new IllegalTypeException(
-                message: 'Curl response type is ' . gettype($body) . ', expected string.'
+            $exception = new IllegalTypeException(
+                message: 'Curl response type is ' . gettype($body) . ', expected string'
             );
+            Config::getLogger()->error(message: $exception->getMessage());
+            Config::getLogger()->error(message: $exception);
+            throw $exception;
         }
 
         $code = (int)curl_getinfo(
@@ -150,9 +212,12 @@ class Curl
         }
 
         if (!($body instanceof stdClass) && !is_array(value: $body)) {
-            throw new IllegalTypeException(
+            $exception = new IllegalTypeException(
                 message: 'Curl response body is not an object or an array.'
             );
+            Config::getLogger()->error(message: $exception->getMessage());
+            Config::getLogger()->error(message: $exception);
+            throw $exception;
         }
 
         curl_close(handle: $this->ch);
@@ -302,64 +367,6 @@ class Curl
     }
 
     /**
-     * @param string $url
-     * @param array $headers
-     * @param array $payload
-     * @return CurlHandle
-     * @throws JsonException
-     * @throws ValidationException
-     * @throws Exception
-     * @todo Check if CURLOPT_ENCODING should be included and what value it should be assigned.
-     */
-    private function init(
-        string $url,
-        array $headers,
-        array $payload
-    ): CurlHandle {
-        /** @noinspection DuplicatedCode */
-        $ch = curl_init();
-
-        $options = [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_FAILONERROR => false, // Don't treat HTTP code 400+ as error.
-            CURLOPT_AUTOREFERER => true, // Follow redirects.
-            CURLINFO_HEADER_OUT => true, // Track outgoing headers for debugging.
-            CURLOPT_HEADER => false, // Do not include header in output.
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_USERAGENT => Header::getUserAgent(),
-            CURLOPT_HTTPHEADER => Header::getHeadersData(
-                headers: Header::generateHeaders(
-                    headers: $headers,
-                    payloadData: $this->getPayloadData(payload: $payload),
-                    contentType: $this->contentType,
-                    hasBodyData: $this->hasBodyData()
-                )
-            ),
-            CURLOPT_CUSTOMREQUEST => $this->getCustomRequestValue(),
-            CURLOPT_URL => $this->generateUrl(url: $url, payload: $payload),
-            CURLOPT_SSLVERSION => CURL_SSLVERSION_DEFAULT,
-        ];
-
-        if (!empty(Config::getProxy())) {
-            $options[CURLOPT_PROXY] = Config::getProxy();
-            $options[CURLOPT_PROXYTYPE] = Config::getProxyType();
-        }
-
-        if (Config::getTimeout()) {
-            $options[CURLOPT_CONNECTTIMEOUT] = ceil(num: Config::getTimeout()) / 2;
-            $options[CURLOPT_TIMEOUT] = ceil(num: Config::getTimeout());
-        }
-
-        curl_setopt_array(handle: $ch, options: $options);
-
-        $this->setContent(ch: $ch, payload: $payload);
-
-        return $ch;
-    }
-
-    /**
      * @return bool
      */
     public function hasBodyData(): bool
@@ -377,6 +384,7 @@ class Curl
      * @return string
      * @throws JsonException
      * @throws ValidationException
+     * @throws ConfigException
      * @todo Add URL prefix based on $this->authType?
      */
     public function generateUrl(string $url, array $payload): string
@@ -386,7 +394,10 @@ class Curl
             '?' . $this->getPayloadData(payload: $payload);
 
         if (!filter_var(value: $url, filter: FILTER_VALIDATE_URL)) {
-            throw new ValidationException(message: 'Invalid URL requested (' . $url . ').');
+            $exception = new ValidationException(message: 'Invalid URL requested (' . $url . ').');
+            Config::getLogger()->error(message: $exception->getMessage());
+            Config::getLogger()->error(message: $exception);
+            throw $exception;
         }
 
         return $url;
@@ -501,7 +512,10 @@ class Curl
         $auth = Config::getBasicAuth();
 
         if ($auth === null) {
-            throw new ConfigException(message: 'Basic auth is not configured.');
+            $exception = new ConfigException(message: 'Basic auth is not configured.');
+            Config::getLogger()->error(message: $exception->getMessage());
+            Config::getLogger()->error(message: $exception);
+            throw $exception;
         }
 
         curl_setopt(
@@ -529,7 +543,10 @@ class Curl
         $auth = Config::getJwtAuth();
 
         if ($auth === null) {
-            throw new ConfigException(message: 'JWT auth is not configured.');
+            $exception = new ConfigException(message: 'JWT auth is not configured.');
+            Config::getLogger()->error(message: $exception->getMessage());
+            Config::getLogger()->error(message: $exception);
+            throw $exception;
         }
 
         curl_setopt(

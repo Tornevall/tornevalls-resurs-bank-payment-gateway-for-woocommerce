@@ -11,7 +11,9 @@ namespace Resursbank\Ecom\Lib\Network\Curl;
 
 use CurlHandle;
 use JsonException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
@@ -40,6 +42,7 @@ class ErrorHandler
      * @param ContentType $contentType
      * @param StringValidation $stringValidation
      * @throws IllegalTypeException
+     * @throws ConfigException
      */
     public function __construct(
         public readonly string|bool $body,
@@ -58,6 +61,7 @@ class ErrorHandler
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws ConfigException
      */
     public function validate(): void
     {
@@ -72,6 +76,7 @@ class ErrorHandler
     /**
      * @return int
      * @throws IllegalTypeException
+     * @throws ConfigException
      */
     private function getHttpCode(): int
     {
@@ -82,9 +87,12 @@ class ErrorHandler
         }
 
         if (!is_int(value: $code)) {
-            throw new IllegalTypeException(
+            $exception = new IllegalTypeException(
                 message: 'Curl http code is not an integer'
             );
+            Config::getLogger()->error(message: $exception->getMessage());
+            Config::getLogger()->error(message: $exception);
+            throw $exception;
         }
 
         return $code;
@@ -95,6 +103,7 @@ class ErrorHandler
      * @return void
      * @throws AuthException
      * @throws CurlException
+     * @throws ConfigException
      */
     private function throwCurlException(string $jsonError = ''): void
     {
@@ -102,17 +111,23 @@ class ErrorHandler
             $this->httpCode === 401 ||
             ($this->httpCode === 400 && $jsonError === 'invalid_client')
         ) {
-            throw new AuthException(
+            $exception = new AuthException(
                 message: 'Access denied. Please verify user credentials.'
             );
+            Config::getLogger()->error(message: $exception->getMessage());
+            Config::getLogger()->error(message: $exception);
+            throw $exception;
         }
 
-        throw new CurlException(
+        $exception = new CurlException(
             message: curl_error(handle: $this->ch),
             code: curl_errno(handle: $this->ch),
             body: $this->body,
             httpCode: $this->httpCode
         );
+        Config::getLogger()->error(message: $exception->getMessage());
+        Config::getLogger()->error(message: $exception);
+        throw $exception;
     }
 
     /**
@@ -123,14 +138,17 @@ class ErrorHandler
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws ConfigException
      */
     private function validateBody(): void
     {
         if ($this->contentType === ContentType::JSON) {
             if (!is_string(value: $this->body)) {
-                throw new IllegalTypeException(
+                $exception = new IllegalTypeException(
                     message: 'Body is not a string, but should be for JSON content type.'
                 );
+                Config::getLogger()->error(message: $exception->getMessage());
+                throw $exception;
             }
 
             $this->stringValidation->notEmpty(value: $this->body);
@@ -143,9 +161,12 @@ class ErrorHandler
             );
 
             if (!is_array(value: $content) && !$content instanceof stdClass) {
-                throw new IllegalValueException(
+                $exception = new IllegalValueException(
                     message: 'Decoded JSON body is not an object.'
                 );
+                Config::getLogger()->error(message: $exception->getMessage());
+                Config::getLogger()->error(message: $exception);
+                throw $exception;
             }
 
             /** @psalm-suppress PossiblyInvalidPropertyFetch, MixedAssignment */
@@ -161,10 +182,11 @@ class ErrorHandler
      * @return void
      * @throws AuthException
      * @throws CurlException
+     * @throws ConfigException
      */
     private function validateHttpCode(): void
     {
-        if (curl_getinfo(handle: $this->ch, option: CURLINFO_HTTP_CODE) >= 400) {
+        if ($this->httpCode >= 400 || $this->httpCode < 100) {
             $this->throwCurlException();
         }
     }

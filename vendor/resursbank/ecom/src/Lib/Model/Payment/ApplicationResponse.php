@@ -10,15 +10,16 @@ declare(strict_types=1);
 namespace Resursbank\Ecom\Lib\Model\Payment;
 
 use Resursbank\Ecom\Lib\Model\Model;
+use Resursbank\Ecom\Lib\Model\Payment\Application\CoApplicant;
 
 /**
  * Application data for a payment.
  */
-class Application extends Model
+class ApplicationResponse extends Model
 {
     /**
      * @param float $requestedCreditLimit
-     * @param int $approvedCreditLimit
+     * @param int|null $approvedCreditLimit
      * @param int|null $reference Credit application reference (int64).
      * @param CoApplicant|null $coApplicant
      */

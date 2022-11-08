@@ -28,15 +28,15 @@ use function is_string;
 class OrderLine extends Model
 {
     /**
+     * @param float $quantity
+     * @param string $quantityUnit
+     * @param float $vatRate
+     * @param float $totalAmountIncludingVat
      * @param string|null $description
      * @param string|null $reference
-     * @param string|null $quantityUnit
-     * @param float $quantity
-     * @param float $vatRate
-     * @param float|null $unitAmountIncludingVat
-     * @param float $totalAmountIncludingVat
-     * @param float $totalVatAmount
      * @param OrderLineType|null $type
+     * @param float|null $unitAmountIncludingVat
+     * @param float|null $totalVatAmount
      * @param StringValidation $stringValidation
      * @param FloatValidation $floatValidation
      * @throws IllegalValueException
@@ -44,14 +44,14 @@ class OrderLine extends Model
      */
     public function __construct(
         public readonly float $quantity,
+        public readonly string $quantityUnit,
         public readonly float $vatRate,
         public readonly float $totalAmountIncludingVat,
-        public readonly float $totalVatAmount,
-        public readonly ?float $unitAmountIncludingVat = null,
         public readonly ?string $description = null,
         public readonly ?string $reference = null,
-        public readonly ?string $quantityUnit = null,
         public readonly ?OrderLineType $type = null,
+        public readonly ?float $unitAmountIncludingVat = null,
+        public readonly ?float $totalVatAmount = null,
         private readonly StringValidation $stringValidation = new StringValidation(),
         private readonly FloatValidation $floatValidation = new FloatValidation(),
     ) {
@@ -101,13 +101,11 @@ class OrderLine extends Model
      */
     private function validateQuantityUnit(): void
     {
-        if (is_string(value: $this->quantityUnit)) {
-            $this->stringValidation->length(
-                value: $this->quantityUnit,
-                min: 0,
-                max: 50
-            );
-        }
+        $this->stringValidation->length(
+            value: $this->quantityUnit,
+            min: 0,
+            max: 50
+        );
     }
 
     /**
@@ -192,16 +190,18 @@ class OrderLine extends Model
      */
     private function validateTotalVatAmount(): void
     {
-        $this->floatValidation->length(
-            value: $this->totalVatAmount,
-            min: 0,
-            max: 2
-        );
+        if (is_float(value: $this->totalVatAmount)) {
+            $this->floatValidation->length(
+                value: $this->totalVatAmount,
+                min: 0,
+                max: 2
+            );
 
-        $this->floatValidation->inRange(
-            value: $this->totalVatAmount,
-            min: 0,
-            max: 9999999999.99
-        );
+            $this->floatValidation->inRange(
+                value: $this->totalVatAmount,
+                min: 0,
+                max: 9999999999.99
+            );
+        }
     }
 }
