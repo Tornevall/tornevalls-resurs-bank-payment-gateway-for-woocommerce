@@ -16,11 +16,13 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Api\Mapi;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
@@ -32,8 +34,6 @@ use Resursbank\Ecom\Lib\Repository\Cache;
 
 /**
  * Interaction with Annuity factor entities and related functionality.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Repository
 {
@@ -56,6 +56,7 @@ class Repository
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public static function getAnnuityFactors(
         string $storeId,
@@ -104,6 +105,7 @@ class Repository
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public static function getMethods(
         string $storeId,
@@ -126,6 +128,7 @@ class Repository
             }
         }
 
+        /** @psalm-suppress MixedArgumentTypeCoercion */
         return new PaymentMethodCollection(data: $result);
     }
 
@@ -165,7 +168,7 @@ class Repository
 
         return new Get(
             model: AnnuityFactors::class,
-            route: "stores/$storeId/payment_methods/$paymentMethodId/annuity_factors",
+            route: Mapi::STORE_ROUTE . "/$storeId/payment_methods/$paymentMethodId/annuity_factors",
             params: compact('storeId', 'paymentMethodId'),
         );
     }

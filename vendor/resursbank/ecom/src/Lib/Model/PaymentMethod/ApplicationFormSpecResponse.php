@@ -11,8 +11,10 @@ namespace Resursbank\Ecom\Lib\Model\PaymentMethod;
 
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Model;
+use Resursbank\Ecom\Lib\Model\PaymentMethod\ApplicationFormSpecResponse\ApplicationFormSpecElementResponse;
 use Resursbank\Ecom\Lib\Model\PaymentMethod\ApplicationFormSpecResponse\ApplicationFormSpecElementResponse\Type;
 use Resursbank\Ecom\Lib\Model\PaymentMethod\ApplicationFormSpecResponse\ApplicationFormSpecElementResponseCollection;
+
 use function array_filter;
 use function in_array;
 
@@ -40,11 +42,14 @@ class ApplicationFormSpecResponse extends Model
         if (!isset($this->elements)) {
             return false;
         }
+
+        /** @var ApplicationFormSpecElementResponse $element */
         foreach ($this->elements as $element) {
             if ($element->fieldName === $fieldName) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -60,8 +65,8 @@ class ApplicationFormSpecResponse extends Model
 
         $fields = array_filter(
             array: $this->elements->toArray(),
-            callback: static function ($element) use ($type) {
-                return $element->type === $type->value;
+            callback: static function (ApplicationFormSpecElementResponse $element) use ($type) {
+                return $element->type === $type;
             }
         );
 
@@ -84,7 +89,7 @@ class ApplicationFormSpecResponse extends Model
 
         $filtered = array_filter(
             array: $this->elements->toArray(),
-            callback: static function ($element) use ($fields, $property) {
+            callback: static function (ApplicationFormSpecElementResponse $element) use ($fields, $property) {
                 return !in_array(
                     needle: $element->{$property},
                     haystack: $fields,

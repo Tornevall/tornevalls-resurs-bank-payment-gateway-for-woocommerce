@@ -11,7 +11,6 @@ namespace Resursbank\Ecom\Lib\Locale;
 
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Collection\Collection;
-use Resursbank\Ecom\Lib\Locale\Phrase;
 
 /**
  * Defines a PaymentMethod collection.

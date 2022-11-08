@@ -27,7 +27,6 @@ class SpecLine extends Model
      * @param float $vatPct
      * @param float $totalVatAmount
      * @param float $totalAmount
-     * @noinspection MessDetectorValidationInspection
      */
     public function __construct(
         public string $id,

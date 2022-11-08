@@ -12,13 +12,15 @@ namespace Resursbank\Ecom\Module\Customer;
 use Exception;
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Data\Models\Address;
+use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
 use Resursbank\Ecom\Module\Customer\Api\GetAddress;
 use Resursbank\Ecom\Lib\Order\CustomerType;
@@ -44,6 +46,8 @@ class Repository
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ApiException
+     * @throws ConfigException
      */
     public static function getAddress(
         string $storeId,

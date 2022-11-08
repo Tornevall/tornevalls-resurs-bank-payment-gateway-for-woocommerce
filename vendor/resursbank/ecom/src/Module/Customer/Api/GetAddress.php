@@ -12,14 +12,16 @@ namespace Resursbank\Ecom\Module\Customer\Api;
 use Exception;
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Mapi;
-use Resursbank\Ecom\Lib\Data\Models\Address;
+use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Network\AuthType;
 use Resursbank\Ecom\Lib\Network\ContentType;
 use Resursbank\Ecom\Lib\Network\Curl;
@@ -48,6 +50,7 @@ class GetAddress
      * @param CustomerType $customerType
      * @return Address
      * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws GetAddressException
@@ -55,6 +58,8 @@ class GetAddress
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ApiException
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public function call(
         string $storeId,
@@ -72,7 +77,7 @@ class GetAddress
 
         $curl = new Curl(
             url: $this->mapi->getUrl(
-                route: sprintf('%s/customers/address/by_government_id', Mapi::CUSTOMER_ROUTE)
+                route: Mapi::CUSTOMER_ROUTE . '/address/by_government_id'
             ),
             requestMethod: RequestMethod::POST,
             payload: $payload,

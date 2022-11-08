@@ -16,4 +16,7 @@ enum Locale: string
 {
     case en = 'en';
     case sv = 'sv';
+    case da = 'da';
+    case no = 'no';
+    case fi = 'fi';
 }

@@ -12,7 +12,7 @@ namespace Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Model;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
-use Resursbank\Ecom\Lib\Validation\IntValidation;
+use Resursbank\Ecom\Lib\Validation\FloatValidation;
 
 /**
  * Application data for a payment.
@@ -20,16 +20,16 @@ use Resursbank\Ecom\Lib\Validation\IntValidation;
 class Application extends Model
 {
     /**
-     * @param int|null $requestedCreditLimit
+     * @param float|null $requestedCreditLimit
      * @param array|null $applicationData
-     * @param IntValidation $intValidation
+     * @param FloatValidation $floatValidation
      * @param ArrayValidation $arrayValidation
      * @throws IllegalValueException
      */
     public function __construct(
-        public readonly ?int $requestedCreditLimit,
+        public readonly ?float $requestedCreditLimit,
         public readonly ?array $applicationData,
-        private readonly IntValidation $intValidation = new IntValidation(),
+        private readonly FloatValidation $floatValidation = new FloatValidation(),
         private readonly ArrayValidation $arrayValidation = new ArrayValidation()
     ) {
         $this->validateRequestedCreditLimit();
@@ -43,7 +43,7 @@ class Application extends Model
     private function validateRequestedCreditLimit(): void
     {
         if ($this->requestedCreditLimit !== null) {
-            $this->intValidation->inRange(
+            $this->floatValidation->inRange(
                 value: $this->requestedCreditLimit,
                 min: 1,
                 max: 9999999999

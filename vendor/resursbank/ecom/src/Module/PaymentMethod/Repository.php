@@ -17,11 +17,13 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Api\Mapi;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
@@ -32,8 +34,6 @@ use Resursbank\Ecom\Module\PaymentMethod\Api\ApplicationDataSpecification;
 
 /**
  * Interaction with Payment Method entities and related functionality.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Repository
 {
@@ -47,15 +47,16 @@ class Repository
      * @param float|null $amount
      * @return PaymentMethodCollection
      * @throws ApiException
+     * @throws AuthException
      * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws AuthException
-     * @throws CurlException
      * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
+     * @throws ConfigException
      */
     public static function getPaymentMethods(
         string $storeId,
@@ -137,7 +138,7 @@ class Repository
 
         return new Get(
             model: PaymentMethod::class,
-            route: "stores/$storeId/payment_methods",
+            route: Mapi::STORE_ROUTE . '/' . $storeId . '/payment_methods',
             params: compact('storeId', 'amount'),
             extractProperty: 'content'
         );
@@ -151,6 +152,7 @@ class Repository
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException

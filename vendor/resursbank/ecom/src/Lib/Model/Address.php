@@ -7,11 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest;
+namespace Resursbank\Ecom\Lib\Model;
 
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Model\Model;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 
@@ -20,13 +19,13 @@ use function is_string;
 /**
  * Address information block about a payment.
  */
-class DeliveryAddress extends Model
+class Address extends Model
 {
     /**
      * @param string $addressRow1
      * @param string $postalArea
      * @param string $postalCode
-     * @param CountryCode $countryCode
+     * @param CountryCode|null $countryCode
      * @param string|null $fullName
      * @param string|null $firstName
      * @param string|null $lastName
@@ -39,7 +38,7 @@ class DeliveryAddress extends Model
         public readonly string $addressRow1,
         public readonly string $postalArea,
         public readonly string $postalCode,
-        public readonly CountryCode $countryCode,
+        public readonly ?CountryCode $countryCode = null,
         public readonly ?string $fullName = null,
         public readonly ?string $firstName = null,
         public readonly ?string $lastName = null,
@@ -60,7 +59,7 @@ class DeliveryAddress extends Model
      */
     private function validateFullName(): void
     {
-        if (is_string($this->fullName)) {
+        if (is_string(value: $this->fullName)) {
             $this->stringValidation->length(
                 value: $this->fullName,
                 min: 0,
@@ -74,7 +73,7 @@ class DeliveryAddress extends Model
      */
     private function validateFirstName(): void
     {
-        if (is_string($this->firstName)) {
+        if (is_string(value: $this->firstName)) {
             $this->stringValidation->length(
                 value: $this->firstName,
                 min: 0,
@@ -88,7 +87,7 @@ class DeliveryAddress extends Model
      */
     private function validateLastName(): void
     {
-        if (is_string($this->lastName)) {
+        if (is_string(value: $this->lastName)) {
             $this->stringValidation->length(
                 value: $this->lastName,
                 min: 0,
@@ -114,7 +113,7 @@ class DeliveryAddress extends Model
      */
     private function validateAddressRow2(): void
     {
-        if (is_string($this->addressRow2)) {
+        if (is_string(value: $this->addressRow2)) {
             $this->stringValidation->length(
                 value: $this->addressRow2,
                 min: 0,

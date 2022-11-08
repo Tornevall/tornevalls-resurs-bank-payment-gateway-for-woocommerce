@@ -16,11 +16,13 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Api\Mapi;
 use Resursbank\Ecom\Lib\Log\Traits\ExceptionLog;
 use Resursbank\Ecom\Lib\Repository\Api\Mapi\Get;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
@@ -32,8 +34,6 @@ use Resursbank\Ecom\Lib\Repository\Cache;
 
 /**
  * Interaction with Payment Method entities and related functionality.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Repository
 {
@@ -58,6 +58,7 @@ class Repository
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ConfigException
      */
     public static function getPriceSignage(
         string $storeId,
@@ -155,7 +156,7 @@ class Repository
 
         return new Get(
             model: PriceSignage::class,
-            route: "stores/$storeId/payment_methods/$paymentMethodId/price_signage",
+            route: Mapi::STORE_ROUTE . '/' . $storeId . '/payment_methods/' . $paymentMethodId . '/price_signage',
             params: ['amount' => $amount]
         );
     }
@@ -176,7 +177,7 @@ class Repository
         );
 
         return new PriceSignage(
-            sekkiLinks: $result->sekkiLinks,
+            secciLinks: $result->secciLinks,
             generalTermsLinks: $result->generalTermsLinks,
             costList: new CostCollection(data: $costs)
         );

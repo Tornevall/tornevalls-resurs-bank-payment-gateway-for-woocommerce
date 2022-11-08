@@ -12,6 +12,7 @@ namespace Resursbank\Ecom\Lib\Model\Payment\Order;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Model;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
+use Resursbank\Ecom\Lib\Utilities\Date;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
@@ -57,12 +58,16 @@ class ActionLog extends Model
     }
 
     /**
+     * NOTE: We cannot test date format because Resurs Bank will return
+     * inconsistent values for the same properties (sometimes ATOM compatible,
+     * sometimes containing a up to 9 digit microsecond suffix).
+     *
      * @return void
      * @throws IllegalValueException
      */
     private function validateCreated(): void
     {
-        $this->stringValidation->isIso8601DateTime(value: $this->created);
+        $this->stringValidation->isTimestampDate(value: $this->created);
     }
 
     /**

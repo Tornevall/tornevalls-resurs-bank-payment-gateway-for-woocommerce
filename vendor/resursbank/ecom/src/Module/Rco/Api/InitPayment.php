@@ -13,9 +13,12 @@ namespace Resursbank\Ecom\Module\Rco\Api;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Network\AuthType;
 use Resursbank\Ecom\Module\Rco\Repository;
@@ -27,9 +30,7 @@ use Resursbank\Ecom\Module\Rco\Models\InitPayment\Request;
 use Resursbank\Ecom\Module\Rco\Models\InitPayment\Response;
 
 /**
- * Handles creation of RCO payment sessions
- *
- * @SuppressWarnings (PHPMD.CouplingBetweenObjects)
+ * Handles creation of RCO payment sessions.
  */
 class InitPayment
 {
@@ -39,14 +40,20 @@ class InitPayment
      * @param Request $request
      * @param string $orderReference
      * @return Response
+     * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
-     * @throws AuthException
-     * @psalm-suppress MixedInferredReturnType
+     * @throws ApiException
+     * @throws ConfigException
+     * @throws IllegalValueException
+     * @psalm-suppress MixedInferredReturnType, MoreSpecificReturnType
+     * @todo Check if ConfigException validation needs a test.
+     * @todo Consider using LogException trait instead.
+     * @todo Fix all psalm errors. Suppressed now since class has been discussed for refactoring.
      */
     public function call(Request $request, string $orderReference): Response
     {
@@ -57,11 +64,11 @@ class InitPayment
                 authType: AuthType::BASIC
             );
         } catch (CurlException $exception) {
-            Config::$instance->logger->error(message: $exception);
+            Config::getLogger()->error(message: $exception);
             throw $exception;
         }
 
-        /** @psalm-suppress MixedReturnStatement */
+        /** @psalm-suppress MixedReturnStatement, PossiblyInvalidArgument, LessSpecificReturnStatement */
         return DataConverter::stdClassToType(
             object: $response->body,
             type: Response::class
@@ -73,6 +80,8 @@ class InitPayment
      *
      * @param string $orderReference
      * @return string
+     * @throws ConfigException
+     * @todo Check if ConfigException validation needs a test.
      */
     private function getApiUrl(string $orderReference): string
     {

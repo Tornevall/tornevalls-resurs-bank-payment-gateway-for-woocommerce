@@ -35,6 +35,7 @@ class Response extends Model
      * @param ?string $finalized
      * @param ?MetaDataCollection $metadata
      * @param ?PaymentDiffCollection $paymentDiffs
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         public string $id,

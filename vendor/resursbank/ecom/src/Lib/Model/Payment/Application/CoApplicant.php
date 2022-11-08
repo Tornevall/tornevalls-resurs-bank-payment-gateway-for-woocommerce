@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Lib\Model\Payment;
+namespace Resursbank\Ecom\Lib\Model\Payment\Application;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -24,7 +24,6 @@ class CoApplicant extends Model
      * @param string|null $mobilePhone
      * @param string|null $phone
      * @param string|null $email
-     * @param Identification|null $identification
      * @param StringValidation $stringValidation
      * @throws IllegalValueException
      * @throws EmptyValueException
@@ -43,7 +42,6 @@ class CoApplicant extends Model
          */
         public readonly ?string $phone = null,
         public readonly ?string $email = null,
-        public readonly ?Identification $identification = null,
         private readonly StringValidation $stringValidation = new StringValidation()
     ) {
         $this->validateGovernmentId();

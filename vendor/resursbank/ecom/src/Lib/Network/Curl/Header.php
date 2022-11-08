@@ -12,8 +12,10 @@ namespace Resursbank\Ecom\Lib\Network\Curl;
 use Exception;
 use InvalidArgumentException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Network\ContentType;
-use Resursbank\Ecom\Lib\Network\Model\Header as HeaderModel;
+use Resursbank\Ecom\Lib\Model\Network\Header as HeaderModel;
 use Resursbank\Ecom\Lib\Utilities\Generic;
 
 use function strlen;
@@ -29,6 +31,8 @@ class Header
      * @param ContentType $contentType
      * @param bool $hasBodyData
      * @return array<array-key,HeaderModel>
+     * @throws EmptyValueException
+     * @throws ConfigException
      * @todo See constructor todo. If kept we should maybe change its visibility.
      * @psalm-suppress MixedReturnTypeCoercion
      */
@@ -68,6 +72,7 @@ class Header
      * @param array $headers
      * @param string $key
      * @return bool
+     * @throws ConfigException
      * @todo See constructor todo. If kept we should maybe change its visibility.
      */
     public static function hasHeader(
@@ -86,6 +91,7 @@ class Header
      * @param array $headers
      * @param string $key
      * @return array
+     * @throws ConfigException
      * @todo See constructor todo. If kept we should maybe change its visibility.
      * @psalm-suppress MixedArgument
      * @psalm-suppress MixedPropertyFetch
@@ -114,6 +120,7 @@ class Header
      * @return array
      * @psalm-suppress MixedOperand
      * @psalm-suppress MixedPropertyFetch
+     * @throws ConfigException
      */
     public static function getHeadersData(
         array $headers
@@ -145,8 +152,9 @@ class Header
 
     /**
      * @return string
-     * @throws Exception
+     * @throws ConfigException
      * @todo Add back what module class called Curl.
+     * @todo Check if ConfigException validation needs a test.
      */
     public static function getUserAgent(): string
     {
@@ -157,7 +165,7 @@ class Header
         }
 
         return implode(separator: ' +', array: array_filter(array: [
-            Config::$instance->userAgent,
+            Config::getUserAgent(),
             sprintf('ECom2-%s', $version),
             sprintf('PHP-%s', PHP_VERSION),
         ]));
@@ -166,15 +174,19 @@ class Header
     /**
      * @param array $headers
      * @return void
+     * @throws ConfigException
      */
     private static function validateHeaderArray(
         array $headers
     ): void {
         foreach ($headers as $header) {
             if (!$header instanceof HeaderModel) {
-                throw new InvalidArgumentException(
+                $exception = new InvalidArgumentException(
                     message: 'Header must be an instance of Header.'
                 );
+                Config::getLogger()->error(message: $exception->getMessage());
+                Config::getLogger()->error(message: $exception);
+                throw $exception;
             }
         }
     }

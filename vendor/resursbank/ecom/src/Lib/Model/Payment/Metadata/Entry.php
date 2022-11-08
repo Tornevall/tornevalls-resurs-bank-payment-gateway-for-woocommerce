@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright © Resurs Bank AB. All rights reserved.
  * See LICENSE for license details.
@@ -6,20 +7,22 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Lib\Model\Payment;
+namespace Resursbank\Ecom\Lib\Model\Payment\Metadata;
 
 use Resursbank\Ecom\Lib\Model\Model;
 
 /**
- * Information and details about a payment.
+ * Single Metadata custom Entry
  */
-class Information extends Model
+class Entry extends Model
 {
     /**
-     * @param string $creator
+     * @param string $key
+     * @param string $value
      */
     public function __construct(
-        public readonly string $creator,
+        public readonly string $key,
+        public readonly string $value
     ) {
     }
 }

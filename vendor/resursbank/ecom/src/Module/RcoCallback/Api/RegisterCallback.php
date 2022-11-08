@@ -12,11 +12,15 @@ declare(strict_types=1);
 namespace Resursbank\Ecom\Module\RcoCallback\Api;
 
 use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Network\AuthType;
 use Resursbank\Ecom\Lib\Network\ContentType;
@@ -27,8 +31,6 @@ use Resursbank\Ecom\Module\RcoCallback\Models\RegisterCallback\Request;
 
 /**
  * Handles callback registration.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class RegisterCallback
 {
@@ -36,19 +38,22 @@ class RegisterCallback
      * @param string $eventName
      * @param Request $request
      * @return void
+     * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @throws JsonException
      * @throws ValidationException
-     * @throws AuthException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws ConfigException
+     * @throws IllegalValueException
+     * @todo Check if ConfigException validation needs a test.
+     * @todo Consider using LogException trait instead.
+     * @todo I dropped an EmptyValueException, ensure tests are fine.
      */
     public function call(string $eventName, Request $request): void
     {
-        if (!isset(Config::$instance->basicAuth)) {
-            throw new EmptyValueException(message: 'Basic auth credentials not set in Config');
-        }
-
         $curl = new Curl(
             url: $this->getApiUrl(eventName: $eventName),
             requestMethod: RequestMethod::POST,
@@ -60,7 +65,7 @@ class RegisterCallback
         try {
             $curl->exec();
         } catch (CurlException $exception) {
-            Config::$instance->logger->error(message: $exception);
+            Config::getLogger()->error(message: $exception);
             throw $exception;
         }
     }
@@ -70,6 +75,7 @@ class RegisterCallback
      *
      * @param string $eventName
      * @return string
+     * @throws ConfigException
      */
     private function getApiUrl(string $eventName): string
     {

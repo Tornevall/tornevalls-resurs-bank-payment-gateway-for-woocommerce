@@ -20,7 +20,8 @@ use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
  * Defines payment method entity.
  *
  * NOTE: All Exceptions from namespace Validation extends ValidationException.
- * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 class PaymentMethod extends Model
 {

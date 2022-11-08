@@ -16,16 +16,20 @@ use function is_object;
 use function is_array;
 
 /**
- * Defines the basic structure of an Ecom model
+ * Defines the basic structure of an Ecom model.
+ *
+ * @SuppressWarnings(PHPMD.NumberOfChildren)
  */
 class Model
 {
     /**
-     * Converts the object to an array suitable for use with the Curl library
+     * Converts the object to an array suitable for use with the Curl library.
      *
      * @param bool $full
      * @param array $raw
      * @return array
+     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function toArray(
         bool $full = false,
@@ -35,7 +39,6 @@ class Model
 
         $raw = $raw ?: get_object_vars(object: $this);
 
-        /** phpstan-ignore-next-line */
         foreach ($raw as $name => $value) {
             if (is_object(value: $value)) {
                 // Skip DI.

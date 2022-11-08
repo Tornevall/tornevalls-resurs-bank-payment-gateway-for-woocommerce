@@ -19,6 +19,7 @@ class PagedPaymentMethod extends Model
     /**
      * @param PaymentMethodCollection $content
      * @param Pagination $page
+     * @todo Properties do not seem to be read?
      */
     public function __construct(
         private readonly PaymentMethodCollection $content,

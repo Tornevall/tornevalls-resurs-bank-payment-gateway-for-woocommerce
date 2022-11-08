@@ -7,22 +7,22 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order;
+namespace Resursbank\Ecom\Lib\Model\Payment\Metadata;
 
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Collection\Collection;
 
 /**
- * Defines order line (product) collection.
+ * Defines an custom Entry collection.
  */
-class OrderLineCollection extends Collection
+class EntryCollection extends Collection
 {
     /**
-     * @param array<int, OrderLine> $data
+     * @param array<int, Entry> $data
      * @throws IllegalTypeException
      */
     public function __construct(array $data)
     {
-        parent::__construct(data: $data, type: OrderLine::class);
+        parent::__construct(data: $data, type: Entry::class);
     }
 }

@@ -16,15 +16,15 @@
   {
     "id": "min-total",
     "translation": {
-      "en": "Min. total",
-      "sv": "Min. total"
+      "en": "Min. Purchase Limit",
+      "sv": "Minsta totalbelopp"
     }
   },
   {
     "id": "max-total",
     "translation": {
-      "en": "Max. total",
-      "sv": "Max. total"
+      "en": "Max. Purchase Limit",
+      "sv": "Högsta totalbelopp"
     }
   },
   {
