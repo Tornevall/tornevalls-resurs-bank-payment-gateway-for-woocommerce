@@ -7,20 +7,22 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Ecom\Lib\Network\Model;
+namespace Resursbank\Ecom\Lib\Model\Payment\Metadata;
+
+use Resursbank\Ecom\Lib\Model\Model;
 
 /**
- * Defines basic request header.
+ * Single Metadata custom Entry
  */
-class Header
+class Entry extends Model
 {
     /**
      * @param string $key
-     * @param string|int $value
+     * @param string $value
      */
     public function __construct(
         public readonly string $key,
-        public readonly string|int $value
+        public readonly string $value
     ) {
     }
 }

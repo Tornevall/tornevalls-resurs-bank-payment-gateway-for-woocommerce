@@ -13,6 +13,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Collection\Collection;
 
 /**
+ * Defines application form spec element option collection.
+ *
  * @SuppressWarnings(PHPMD.LongClassName)
  */
 class ApplicationFormSpecElementOptionResponseCollection extends Collection

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Ecom\Lib\Api;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
@@ -22,27 +23,27 @@ class Mapi
     /**
      * Production endpoint.
      */
-    public const URL_PROD = 'https://apigw.resurs.com/api/';
+    public const URL_PROD = 'https://merchant-api.resurs.com/';
 
     /**
      * Test endpoint.
      */
-    public const URL_TEST = 'https://apigw.integration.resurs.com/api/';
+    public const URL_TEST = 'https://web-integration-mock-merchant-api-portal.integration.resurs.com/';
 
     /**
      * Common prefix route name for all API calls.
      */
-    public const COMMON_ROUTE = 'mock_merchant_stores_v2';
+    public const STORE_ROUTE = 'v2/stores';
 
     /**
      * Prefix route name for payment based API calls.
      */
-    public const PAYMENT_ROUTE = 'mock_merchant_payments_v2';
+    public const PAYMENT_ROUTE = 'v2/payments';
 
     /**
      * Prefix route name for payment based API calls.
      */
-    public const CUSTOMER_ROUTE = 'mock_merchant_customers_v2';
+    public const CUSTOMER_ROUTE = 'v2/customers';
 
     /**
      * @param StringValidation $stringValidation
@@ -57,6 +58,8 @@ class Mapi
      * @return string
      * @throws ValidationException
      * @throws EmptyValueException
+     * @throws ConfigException
+     * @todo Check if ConfigException validation needs a test.
      */
     public function getUrl(
         string $route
@@ -64,7 +67,7 @@ class Mapi
         $this->stringValidation->notEmpty(value: $route);
 
         return (
-            (Config::$instance->isProduction ? self::URL_PROD : self::URL_TEST) .
+            (Config::isProduction() ? self::URL_PROD : self::URL_TEST) .
             $route
         );
     }

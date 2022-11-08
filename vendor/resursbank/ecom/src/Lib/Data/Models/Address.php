@@ -38,4 +38,3 @@ class Address extends Model
     ) {
     }
 }
-

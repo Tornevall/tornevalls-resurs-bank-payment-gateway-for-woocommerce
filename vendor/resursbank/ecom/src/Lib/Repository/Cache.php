@@ -14,6 +14,7 @@ namespace Resursbank\Ecom\Lib\Repository;
 use InvalidArgumentException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Cache\AbstractCache;
 use Resursbank\Ecom\Lib\Collection\Collection;
 use Resursbank\Ecom\Lib\Model\Model;
@@ -45,12 +46,14 @@ class Cache
     /**
      * @return null|Collection|Model
      * @throws CacheException
+     * @throws ConfigException
+     * @todo Check if ConfigException validation needs a test.
      */
     public function read(): null|Collection|Model
     {
         $result = null;
 
-        $data = Config::$instance->cache->read(
+        $data = Config::getCache()->read(
             key: AbstractCache::getKey(key: $this->key)
         );
 
@@ -77,10 +80,11 @@ class Cache
 
     /**
      * @return void
+     * @throws ConfigException
      */
     public function clear(): void
     {
-        Config::$instance->cache->clear(
+        Config::getCache()->clear(
             key: AbstractCache::getKey(key: $this->key)
         );
     }
@@ -114,7 +118,7 @@ class Cache
             }
 
             // Write cache.
-            Config::$instance->cache->write(
+            Config::getCache()->write(
                 key: AbstractCache::getKey(key: $this->key),
                 data: json_encode(
                     value: $data->toArray(full: true),

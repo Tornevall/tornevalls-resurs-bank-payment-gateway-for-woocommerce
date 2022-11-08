@@ -12,6 +12,7 @@ namespace Resursbank\Ecom\Lib\Log;
 use DateTime;
 use Error;
 use Exception;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\FormatException;
@@ -52,6 +53,7 @@ class FileLogger implements LoggerInterface
      * @param string|Exception|Error $message
      * @return void
      * @throws FilesystemException
+     * @throws ConfigException
      */
     public function debug(string|Exception|Error $message): void
     {
@@ -64,6 +66,7 @@ class FileLogger implements LoggerInterface
      * @param string|Exception $message
      * @return void
      * @throws FilesystemException
+     * @throws ConfigException
      */
     public function info(string|Exception $message): void
     {
@@ -76,6 +79,7 @@ class FileLogger implements LoggerInterface
      * @param string|Exception $message
      * @return void
      * @throws FilesystemException
+     * @throws ConfigException
      */
     public function warning(string|Exception $message): void
     {
@@ -88,6 +92,7 @@ class FileLogger implements LoggerInterface
      * @param string|Exception $message
      * @return void
      * @throws FilesystemException
+     * @throws ConfigException
      */
     public function error(string|Exception $message): void
     {
@@ -101,6 +106,7 @@ class FileLogger implements LoggerInterface
      * @param string|Exception|Error $message
      * @return void
      * @throws FilesystemException
+     * @throws ConfigException
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function log(LogLevel $level, string|Exception|Error $message): void
@@ -128,18 +134,18 @@ class FileLogger implements LoggerInterface
             $timestamp = new DateTime();
             $formattedMessage = $timestamp->format(format: 'c') . ' ' . $level->name . ': ' . $message;
 
-            if ($this->logIsWritable()) {
-                if (
-                    !file_put_contents(
-                        filename: $this->getFilename(),
-                        data: $formattedMessage . PHP_EOL,
-                        flags: FILE_APPEND | LOCK_EX
-                    )
-                ) {
-                    throw new FilesystemException(message: self::WRITE_ERROR);
-                }
-            } else {
+            if (!$this->logIsWritable()) {
                 throw new FilesystemException(message: self::ERR_UNWRITABLE);
+            }
+
+            if (
+                !file_put_contents(
+                    filename: $this->getFilename(),
+                    data: $formattedMessage . PHP_EOL,
+                    flags: FILE_APPEND | LOCK_EX
+                )
+            ) {
+                throw new FilesystemException(message: self::WRITE_ERROR);
             }
         }
     }
@@ -150,6 +156,7 @@ class FileLogger implements LoggerInterface
      * @param Exception $exception
      * @return void
      * @throws FilesystemException
+     * @throws ConfigException
      */
     private function logException(Exception $exception): void
     {
@@ -162,6 +169,7 @@ class FileLogger implements LoggerInterface
      * @param Error $error
      * @return void
      * @throws FilesystemException
+     * @throws ConfigException
      */
     private function logError(Error $error): void
     {

@@ -34,6 +34,7 @@ class FloatValidation
      * @return float
      * @throws IllegalTypeException
      * @throws MissingKeyException
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public function getKey(
         array $data,

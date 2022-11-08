@@ -13,6 +13,7 @@ namespace Resursbank\Ecom\Module\Store\Enum;
  * Country codes supported by Store entity.
  *
  * @codingStandardsIgnoreStart
+ * @todo Consider using the complete Country Code enum instead for consistency.
  */
 enum Country: string
 {

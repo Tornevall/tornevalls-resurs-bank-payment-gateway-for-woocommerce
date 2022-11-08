@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpCSValidationInspection */
+<?php
 
 /**
  * Copyright © Resurs Bank AB. All rights reserved.

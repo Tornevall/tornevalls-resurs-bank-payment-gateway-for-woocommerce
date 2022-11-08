@@ -21,4 +21,3 @@ enum RequestMethod
     case PUT;
     case DELETE;
 }
-

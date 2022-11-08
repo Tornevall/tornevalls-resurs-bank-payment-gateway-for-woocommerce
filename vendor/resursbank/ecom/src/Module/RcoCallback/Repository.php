@@ -14,12 +14,14 @@ namespace Resursbank\Ecom\Module\RcoCallback;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\Module as CoreModule;
 use Resursbank\Ecom\Module\RcoCallback\Models\Callback;
 use Resursbank\Ecom\Module\RcoCallback\Models\CallbackCollection;
 use Resursbank\Ecom\Module\RcoCallback\Api\GetCallback;
@@ -31,7 +33,7 @@ use Resursbank\Ecom\Module\RcoCallback\Models\RegisterCallback\Request;
 /**
  * Main entrypoint for interfacing with the RCO callback API programmatically
  */
-class Repository extends CoreModule
+class Repository
 {
     public const HOSTNAME_PROD = 'checkout.resurs.com';
     public const HOSTNAME_TEST = 'omnitest.resurs.com';
@@ -42,12 +44,16 @@ class Repository extends CoreModule
      * @param string $eventName
      * @param Request $request
      * @return void
+     * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
-     * @throws JsonException
-     * @throws ValidationException
-     * @throws AuthException
      * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws ApiException
+     * @throws IllegalValueException
      */
     public static function registerCallback(string $eventName, Request $request): void
     {
@@ -60,12 +66,15 @@ class Repository extends CoreModule
      *
      * @param string $eventName
      * @return Callback
+     * @throws ApiException
      * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws IllegalTypeException
      * @throws ValidationException
      */
     public static function getCallback(string $eventName): Callback
@@ -78,12 +87,15 @@ class Repository extends CoreModule
      * Gets all registered callbacks
      *
      * @return CallbackCollection
+     * @throws ApiException
      * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws IllegalTypeException
      * @throws ValidationException
      */
     public static function getCallbacks(): CallbackCollection
@@ -97,11 +109,15 @@ class Repository extends CoreModule
      *
      * @param string $eventName
      * @return int
+     * @throws ApiException
      * @throws AuthException
+     * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
-     * @throws JsonException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
      * @throws ValidationException
      */
     public static function deleteCallback(string $eventName): int
@@ -114,10 +130,12 @@ class Repository extends CoreModule
      * Gets API hostname
      *
      * @return string
+     * @throws ConfigException
+     * @todo Check if ConfigException validation needs a test.
      */
     public static function getApiHostname(): string
     {
-        if (Config::$instance->isProduction) {
+        if (Config::isProduction()) {
             return self::HOSTNAME_PROD;
         }
 

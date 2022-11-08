@@ -21,7 +21,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Network\Model\Auth\Jwt;
+use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Models\StoreCollection;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;

@@ -5,15 +5,14 @@
  * See LICENSE for license details.
  */
 
-/** @noinspection PhpCSValidationInspection */
-/** @noinspection DuplicatedCode */
-
 declare(strict_types=1);
 
 namespace Resursbank\Ecom\Lib\Order;
 
 /**
  * Defines the ISO country codes an order can be specified with.
+ *
+ * @SuppressWarnings (PHPMD)
  */
 enum CountryCode: string
 {

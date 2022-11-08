@@ -11,10 +11,13 @@ namespace Resursbank\Ecom\Module\Payment\Api;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Mapi;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -28,8 +31,6 @@ use stdClass;
 
 /**
  * POST /payments/{payment_id}/capture
- *
- * @SuppressWarnings (PHPMD.CouplingBetweenObjects)
  */
 class Capture
 {
@@ -57,6 +58,9 @@ class Capture
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @throws ApiException
+     * @throws ConfigException
+     * @throws IllegalValueException
      */
     public function call(
         string $paymentId,
@@ -81,7 +85,7 @@ class Capture
 
         $curl = new Curl(
             url: $this->mapi->getUrl(
-                route: sprintf('%s/payments/%s/capture', Mapi::PAYMENT_ROUTE, $paymentId)
+                route: Mapi::PAYMENT_ROUTE . '/' . $paymentId . '/capture'
             ),
             requestMethod: RequestMethod::POST,
             payload: $payload,

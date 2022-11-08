@@ -9,9 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Ecom\Lib\Log;
 
-use Datetime;
+use DateTime;
 use Error;
 use Exception;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\IOException;
 
 use function get_class;
@@ -27,6 +28,7 @@ class StdoutLogger implements LoggerInterface
     /**
      * @inheritDoc
      * @throws IOException
+     * @throws ConfigException
      */
     public function debug(Exception|string|Error $message): void
     {
@@ -36,6 +38,7 @@ class StdoutLogger implements LoggerInterface
     /**
      * @inheritDoc
      * @throws IOException
+     * @throws ConfigException
      */
     public function info(Exception|string $message): void
     {
@@ -45,6 +48,7 @@ class StdoutLogger implements LoggerInterface
     /**
      * @inheritDoc
      * @throws IOException
+     * @throws ConfigException
      */
     public function warning(Exception|string $message): void
     {
@@ -54,6 +58,7 @@ class StdoutLogger implements LoggerInterface
     /**
      * @inheritDoc
      * @throws IOException
+     * @throws ConfigException
      */
     public function error(Exception|string $message): void
     {
@@ -67,7 +72,7 @@ class StdoutLogger implements LoggerInterface
      * @param string|Exception|Error $message
      * @return void
      * @throws IOException
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @throws ConfigException
      */
     private function log(LogLevel $level, string|Exception|Error $message): void
     {
@@ -91,29 +96,20 @@ class StdoutLogger implements LoggerInterface
         ) {
             $this->logError(error: $message);
         } elseif (LogLevel::loggable(level: $level)) {
-            if ($fileHandle = $this->getFileHandle(level: $level)) {
-                $timestamp = new DateTime();
-                $formattedMessage = $timestamp->format(format: 'c') . ' ' . $level->name . ': ' . $message;
-                fwrite(stream: $fileHandle, data: $formattedMessage);
-                fclose(stream: $fileHandle);
-            } else {
+            $fileHandle = match ($level) {
+                LogLevel::EXCEPTION, LogLevel::ERROR => fopen(filename: 'php://stderr', mode: 'ab'),
+                LogLevel::DEBUG, LogLevel::INFO, LogLevel::WARNING => fopen(filename: 'php://stdout', mode: 'ab')
+            };
+
+            if ($fileHandle === false) {
                 throw new IOException(message: self::ERR_GENERAL_WRITE);
             }
-        }
-    }
 
-    /**
-     * Fetches a file handle for the correct output target based on specified log level
-     *
-     * @param LogLevel $level
-     * @return mixed
-     */
-    private function getFileHandle(LogLevel $level): mixed
-    {
-        return match ($level) {
-            LogLevel::EXCEPTION, LogLevel::ERROR => fopen(filename: 'php://stderr', mode: 'ab'),
-            LogLevel::DEBUG, LogLevel::INFO, LogLevel::WARNING => fopen(filename: 'php://stdout', mode: 'ab')
-        };
+            $timestamp = new DateTime();
+            $formattedMessage = $timestamp->format(format: 'c') . ' ' . $level->name . ': ' . $message;
+            fwrite(stream: $fileHandle, data: $formattedMessage);
+            fclose(stream: $fileHandle);
+        }
     }
 
     /**
@@ -122,6 +118,7 @@ class StdoutLogger implements LoggerInterface
      * @param Exception $exception
      * @return void
      * @throws IOException
+     * @throws ConfigException
      */
     private function logException(Exception $exception): void
     {
@@ -134,6 +131,7 @@ class StdoutLogger implements LoggerInterface
      * @param Error $error
      * @return void
      * @throws IOException
+     * @throws ConfigException
      */
     private function logError(Error $error): void
     {

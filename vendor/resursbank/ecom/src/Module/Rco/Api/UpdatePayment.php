@@ -13,9 +13,12 @@ namespace Resursbank\Ecom\Module\Rco\Api;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Network\AuthType;
 use Resursbank\Ecom\Lib\Network\ContentType;
@@ -30,8 +33,6 @@ use Resursbank\Ecom\Module\Rco\Models\UpdatePayment\Response;
 
 /**
  * Handles updates of RCO payment sessions.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class UpdatePayment
 {
@@ -41,14 +42,20 @@ class UpdatePayment
      * @param Request $request
      * @param string $orderReference
      * @return Response
+     * @throws AuthException
      * @throws CurlException
      * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
-     * @throws AuthException
-     * @throws IllegalTypeException
-     * @psalm-suppress MixedInferredReturnType
+     * @throws ApiException
+     * @throws ConfigException
+     * @throws IllegalValueException
+     * @psalm-suppress MixedInferredReturnType, MoreSpecificReturnType
+     * @todo Check if ConfigException validation needs a test.
+     * @todo Consider using the LogException trait instead.
+     * @todo Fix all psalm errors. Suppressed now since class has been discussed for refactoring.
      */
     public function call(Request $request, string $orderReference): Response
     {
@@ -60,15 +67,17 @@ class UpdatePayment
                 responseContentType: ContentType::RAW
             );
         } catch (CurlException $exception) {
-            Config::$instance->logger->error(message: $exception);
+            Config::getLogger()->error(message: $exception);
             throw $exception;
         }
 
         $responseObj = new stdClass();
+
+        /** @psalm-suppress PossiblyInvalidPropertyFetch */
         $responseObj->message = $response->body->message;
         $responseObj->code = $response->code;
 
-        /** @psalm-suppress MixedReturnStatement */
+        /** @psalm-suppress MixedReturnStatement, LessSpecificReturnStatement */
         return DataConverter::stdClassToType(
             object: $responseObj,
             type: Response::class
@@ -78,6 +87,8 @@ class UpdatePayment
     /**
      * @param string $orderReference
      * @return string
+     * @throws ConfigException
+     * @todo Check if ConfigException validation needs a test.
      */
     private function getApiUrl(string $orderReference): string
     {

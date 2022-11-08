@@ -9,14 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Ecom\Module\AnnuityFactor\Models;
 
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Model;
-use Resursbank\Ecom\Lib\Model\Payment\Order;
-use Resursbank\Ecom\Lib\Validation\StringValidation;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Application;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Customer;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Metadata;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 
 /**
  * Describes an annuity factor.
