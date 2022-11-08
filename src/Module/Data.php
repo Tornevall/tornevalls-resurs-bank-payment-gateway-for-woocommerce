@@ -7,6 +7,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Order\CustomerType;
@@ -93,12 +94,6 @@ class Data
         'paymentId',
         'paymentIdLast',
     ];
-
-    /**
-     * @var LoggerInterface $logger
-     * @since 0.0.1.0
-     */
-    private static LoggerInterface $logger;
 
     /**
      * @var array $payments
@@ -1548,7 +1543,8 @@ class Data
 
     /**
      * @param LogLevel $logLevel
-     * @param string $logMessage
+     * @param string $message
+     * @throws ConfigException
      * @since 0.0.1.0
      */
     public static function writeLogByLogLevel(LogLevel $logLevel, string $message): void
@@ -1563,25 +1559,21 @@ class Data
         // configurations. For example, when the module is installed for the first time, there won't be an ecom2
         // instance until it has been configured. As the module can log information before this happens,
         // it is also important that we only allow logging, if the instance is ready and available.
-        if (isset(Config::$instance->logger) && isset(self::$logger)) {
-            self::$logger = Config::$instance->logger;
-
-            switch ($logLevel) {
-                case LogLevel::INFO:
-                    self::$logger->info($message);
-                    break;
-                case LogLevel::DEBUG:
-                    self::$logger->debug($message);
-                    break;
-                case LogLevel::ERROR:
-                    self::$logger->error($message);
-                    break;
-                case LogLevel::WARNING:
-                    self::$logger->warning($message);
-                    break;
-                default:
-                    self::$logger->info($message);
-            }
+        switch ($logLevel) {
+            case LogLevel::INFO:
+                Config::getLogger()->info($message);
+                break;
+            case LogLevel::DEBUG:
+                Config::getLogger()->debug($message);
+                break;
+            case LogLevel::ERROR:
+                Config::getLogger()->error($message);
+                break;
+            case LogLevel::WARNING:
+                Config::getLogger()->warning($message);
+                break;
+            default:
+                Config::getLogger()->info($message);
         }
     }
 
@@ -2776,24 +2768,6 @@ class Data
         }
 
         return true;
-    }
-
-    /**
-     * @return string
-     */
-    private function getClientId(): string
-    {
-        return Data::getResursOption('environment') === 'test' ?
-            Data::getResursOption('jwt_client_id') : Data::getResursOption('jwt_client_id_production');
-    }
-
-    /**
-     * @return string
-     */
-    private function getClientSecret(): string
-    {
-        return Data::getResursOption('environment') === 'test' ?
-            Data::getResursOption('jwt_client_secret') : Data::getResursOption('jwt_client_secret_production');
     }
 
     /**
