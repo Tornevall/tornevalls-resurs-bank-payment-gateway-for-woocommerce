@@ -1,28 +1,31 @@
 <?php
 
 /** @noinspection PhpUndefinedFieldInspection */
+
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
 namespace ResursBank\Service;
 
 use Exception;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Cache\Filesystem;
+use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecommerce\Types\OrderStatus;
-use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderStatus as OrderStatusHandler;
-use Resursbank\Woocommerce\Database\Options\ClientId;
-use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings;
 use ResursException;
 use RuntimeException;
 use stdClass;
-use WC_Cart;
 use WC_Order;
 use WC_Product;
 use WC_Tax;
@@ -106,56 +109,6 @@ class WooCommerce
     }
 
     /**
-     * @param $gateways
-     * @return mixed
-     * @throws Exception
-     * @see https://rudrastyh.com/woocommerce/get-and-hook-payment-gateways.html
-     */
-    public static function getGateways($gateways): mixed
-    {
-        if (is_array($gateways)) {
-            $gateways[] = ResursDefault::class;
-        }
-
-        return $gateways;
-    }
-
-    /**
-     * Handle payment methods as a gateway.
-     * This method fetches payment methods from Resurs Bank and generates a gateway for each of them
-     * by the ResursDefault-class.
-     *
-     * @param array $gateways
-     * @return array
-     * @since 0.0.1.0
-     * @todo As we changed the way we handle gateways, this method is considered unused. However, this method
-     * @todo is not removed, since we still need it to generate payment methods in the checkout.
-     */
-    private static function getGatewaysFromPaymentMethods(array $gateways = []): array
-    {
-        // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
-        try {
-            // @todo Currently we are no longer handling RCO as a gateway. However, when we start using RCO again
-            // @todo this is where we should handle that port, as a separate single gateway.
-            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(StoreId::getData());
-            foreach ($paymentMethodList as $paymentMethod) {
-                $gateway = new ResursDefault(resursPaymentMethod: $paymentMethod);
-                if ($gateway->is_available()) {
-                    $gateways[] = $gateway;
-                }
-            }
-        } catch (Exception $e) {
-            // If we run the above request live, when the APIs are down, we want to catch the exception silently
-            // or the site will break. If we are located in admin, we also want to visualize the exception as
-            // a message not a crash.
-            WordPress::setGenericError($e);
-            Data::writeLogException($e, __FUNCTION__);
-        }
-
-        return $gateways;
-    }
-
-    /**
      * @return bool
      * @throws Exception
      * @since 0.0.1.6
@@ -233,16 +186,105 @@ class WooCommerce
      */
     public static function getAvailableGateways($gateways)
     {
-        // Gateways for non-admin sections.
-        // Make sure we give WooCommerce something to work with.
-        // @todo Remove all payment method gateways that is not a credit card/PSP when customer country is not
-        // @todo matching with the store.
-        if (!is_admin()) {
-            $customerCountry = Data::getCustomerCountry();
-            //if ($customerCountry !== get_option('woocommerce_default_country')) {}
+        if (is_admin()) {
+            return $gateways;
+        }
+
+        // Payment methods here are listed for non-admin-pages only. In admin, the only gateway visible
+        // should be ResursDefault in its default state.
+
+        $existingPaymentMethodGateways = WooCommerce::getGatewaysFromPaymentMethods($gateways);
+        $customerCountry = Data::getCustomerCountry();
+
+        // When customer country is different from store country, we want to remove all payment methods
+        // except the credit cards that can operate outside borders.
+        if ($customerCountry !== get_option('woocommerce_default_country')) {
+            foreach ($existingPaymentMethodGateways as $gateway) {
+                if ($gateway instanceof ResursDefault) {
+                    if ($gateway->isAvailableOutsideBorders()) {
+                        $gateways[] = $gateway;
+                    }
+                }
+            }
+        } else {
+            $gateways += $existingPaymentMethodGateways;
         }
 
         return $gateways;
+    }
+
+    /**
+     * @param $gateways
+     * @return mixed
+     * @throws Exception
+     * @see https://rudrastyh.com/woocommerce/get-and-hook-payment-gateways.html
+     */
+    public static function getGateways($gateways): mixed
+    {
+        if (is_array($gateways)) {
+            $gateways[] = ResursDefault::class;
+        }
+
+        return $gateways;
+    }
+
+    /**
+     * Handle payment methods as separate gateways without the necessary steps to have separate classes on disk
+     * or written in database.
+     *
+     * This method fetches payment methods live from Resurs Bank and generates a gateway for each of them
+     * by the ResursDefault-class. In case there are a file cache available, the methods will be stored temporarily
+     * there, instead, for the performance. We could however use transients for local storage too, if there is no
+     * file cache available in ecom2.
+     *
+     * @param array $gateways
+     * @return array
+     * @throws ConfigException
+     * @since 0.0.1.0
+     */
+    private static function getGatewaysFromPaymentMethods(array $gateways = []): array
+    {
+        // Local fail-over if ecom2 has no initial file cache available.
+        $canUseTransientCache = Config::getCache() instanceof None;
+        $transientMethodList = null;
+
+        // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
+        try {
+            if ($canUseTransientCache) {
+                $transientMethodList = get_transient(Settings::PREFIX . 'payment_methods');
+            }
+
+            $paymentMethodList = !$transientMethodList instanceof PaymentMethodCollection ?
+                PaymentMethodRepository::getPaymentMethods(StoreId::getData()) : $transientMethodList;
+
+            // Save short term cache in case of problems that may disable sections of WooCommerce that is supposed
+            // to be alive during network errors. In case of changes Resurs side, the transient ttl should be as
+            // short as possible. However, this only applies to cases when no local ecom-cache is available.
+            if ($canUseTransientCache) {
+                set_transient(
+                    Settings::PREFIX . 'payment_methods',
+                    $paymentMethodList,
+                    expiration: 600
+                );
+            }
+
+            foreach ($paymentMethodList as $paymentMethod) {
+                $gateway = new ResursDefault(resursPaymentMethod: $paymentMethod);
+                if ($gateway->is_available()) {
+                    $gateways[] = $gateway;
+                }
+            }
+        } catch (Exception $e) {
+            // If we run the above request live, when the APIs are down, we want to catch the exception silently
+            // or the site will break. If we are located in admin, we also want to visualize the exception as
+            // a message not a crash.
+            WordPress::setGenericError($e);
+            Data::writeLogException($e, __FUNCTION__);
+        }
+
+        // If request failed or something caused an empty result, we should still return the list of gateways as
+        // gateways. Have in mind that this array may already have content from other plugins.
+        return $gateways ?? [];
     }
 
     /**

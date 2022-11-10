@@ -22,6 +22,7 @@ use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Module\Data;
@@ -132,15 +133,16 @@ class ResursDefault extends WC_Payment_Gateway
      */
     protected $API;
     /**
+     * WooCommerce cart. On WooCommerce-side, this is nullable, so it should only be set if available.
      * @var WC_Cart $cart
      * @since 0.0.1.0
      */
-    protected $cart;
+    protected WC_Cart $cart;
     /**
      * @var array $applicantPostData Applicant request.
      * @since 0.0.1.0
      */
-    private $applicantPostData = [];
+    private array $applicantPostData = [];
     /**
      * Responses from the SOAP-API, so that different segments of this class can utilize it.
      * @var stdClass $paymentResponse
@@ -176,21 +178,6 @@ class ResursDefault extends WC_Payment_Gateway
     private PaymentMethod $paymentMethodInformation;
 
     /**
-     * The iframe. Rendered once. When rendered, it won't be requested again.
-     * @var string
-     * @since 0.0.1.0
-     * @todo This is not used anymore and probably won't be in this format either.
-     */
-    private string $rcoFrame;
-
-    /**
-     * The iframe container from Resurs Bank.
-     * @var object
-     * @since 0.0.1.0
-     */
-    private $rcoFrameData;
-
-    /**
      * Generic library, mainly used for automatically handling templates.
      *
      * @var Generic $generic
@@ -224,33 +211,47 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function initializePaymentMethod(?PaymentMethod $paymentMethod = null): void
     {
-        // Make sure the cart can be reached if it is present.
-        $this->cart = $woocommerce->cart ?? null;
+        // Required: Making sure that woocommerce content is available. Like the cart.
+        global $woocommerce;
+
+        // Validate a cart if present and put it in the class, so that it can be used for the payment
+        // later on. If there is no customer cart, it exists as a nullable in $woocommerce.
+        if ($woocommerce->cart instanceof WC_Cart) {
+            $this->cart = $woocommerce->cart;
+        }
 
         // @todo Switch this class to something else. This is mostly used for displaying templates in phtml-format.
         $this->generic = Data::getGenericClass();
 
-        // Below is initial default preparations for the payment method, if we are unable to fetch it from the
-        // real payment method information (via setPaymentMethodInformation). This id should preferably be
-        // the UUID given by Resurs Bank (see below for that part).
-
-        // Id must be defined as the tab where the configuration is handled.
+        // Below is initial default preparations for the gateway, which is normally used to show up in wp-admin
+        // When this class is initialized with a proper $paymentMethod, we can instead use it to set up the gateway
+        // as a checkout method. The used id below is in such cases instead transformed into UUID's (MAPI).
         $this->id = 'resursbank';
+
+        // The values for title and description is also changed when payment-methods from Resurs is used.
         $this->method_title = 'Resurs Bank AB';
         $this->method_description = 'Resurs Bank Gateway';
         $this->title = 'Resurs Bank AB';
 
-        // Default enabled state for the payment method, is based on the gateway state.
-        // To handle payment methods specifically, this has to be changed through Resurs support,
-        // not the plugin.
-        $this->enabled = Enabled::isEnabled();
+        // Default state for the gateway. If this is disabled, the payment method will be disabled as well.
+        // This setting no longer controls the payment method state since the payment methods are normally
+        // handled from Merchant/Store-Admin. This also makes it possible to not display single payment methods
+        // in the payments tab at wp-admin. In future releases this also makes it a bit easier to move
+        // configuration arrays around in the platform.
+        //
+        // WooCommerce validates this value internally with a "yes" as true, so at this stage we can't give the boolean
+        // to the gateway.
+        $this->enabled = Enabled::getData();
 
-        // @todo Has fields should be false when implementing RCO.
+        // The has-fields setup is normally used in the checkout page, when extra fields are needed by the
+        // gateway, for which WooCommerce normally has no support for (for example government id's). If this
+        // is set to false, no further fields will be shown by the gateway. This setting should always be
+        // false, if a RCO integration is used.
         $this->has_fields = true;
 
-        // This is where we initialize each payment method details, like if it is active, etc.
-        // Most of the payment method information has to be initialized at or via the constructor due to
-        // how WooCommerce start working with them as soon as they are loaded.
+        // Since this gateway is built to handle many payment methods from one class, we need to make sure that
+        // the specific payment method has their own properties that is not based on the gateway setup.
+        // This is built up from "getPaymentMethods".
         $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
 
         $this->setFilters();
@@ -279,6 +280,24 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @return bool
+     */
+    public function isAvailableOutsideBorders(): bool
+    {
+        return in_array(
+            $this->paymentMethodInformation->type,
+            haystack: [
+                Type::CREDIT_CARD,
+                Type::DEBIT_CARD,
+                Type::MASTERPASS,
+                Type::PAYPAL,
+                Type::CARD
+            ],
+            strict: true
+        );
+    }
+
+    /**
      * Initializer. It is not until we have payment method information we can start using this class for real.
      * @param PaymentMethod|null $paymentMethod
      * @throws Exception
@@ -298,9 +317,19 @@ class ResursDefault extends WC_Payment_Gateway
             $this->title = $this->paymentMethodInformation->name ?? '';
             $this->method_description = '';
 
-            // Separated this setting to make it easier to expand for future.
-            $iconType = Data::getResursOption('payment_method_icons');
+            // How icons (cards, etc) are displayed in the checkout.
+            // @todo Handle this option elsewhere and decide how this should work. Currently
+            // @todo there are several options of how the icons are handled from the checkout and.
+            // @todo they are mostly automated by their names/types (see images).
+            //$iconType = Data::getResursOption('payment_method_icons');
+
+            // @todo $iconType is based on what the old configuration array offered. Since this may be changed
+            // @todo this value is set here to a default value until fixed.
+            $iconType = 'woocommerce_icon';
             $specificIcon = $this->getMethodIconUrl();
+
+            // Internal rules of which icons that should be visible. This is mostly used to
+            // limit the spammy look of the checkout page.
             $useSpecificRule = (
                 $iconType === 'only_specifics' ||
                 $iconType === 'specifics_and_resurs'
@@ -315,7 +344,9 @@ class ResursDefault extends WC_Payment_Gateway
                 $this->icon = $specificIcon;
             }
 
-            // Applicant post data should be the final request.
+            // Applicant post data should also be collected, so we can re-use it later.
+            // The post data arrives in a way that is not always a _REQUEST/_POST/_GET, so this is centralized here.
+            // Besides, this is also an escaper.
             $this->applicantPostData = $this->getApplicantPostData();
         }
     }
@@ -348,39 +379,16 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $return = null;
 
+        // Make sure that the payment method is properly instantiated before using it.
         if (!empty($this->paymentMethodInformation)) {
-            foreach (['type', 'specificType'] as $typeCheck) {
-                if (($deprecatedIcon = $this->getMethodIconDeprecated($typeCheck))) {
-                    $return = $deprecatedIcon;
-                }
-                if (($icon = $this->getIconByFilter())) {
-                    $return = $icon;
-                    break;
-                }
+            // The filter we're calling is used internally from PluginHooks (method getMethodIconByContent).
+            // Urls to a proper image is built from there if the images are properly included in this package.
+            if (($icon = $this->getIconByFilter())) {
+                $return = $icon;
             }
         }
 
         return $return;
-    }
-
-    /**
-     * Payment method icon (deprecated filter).
-     *
-     * @param $typeCheck
-     * @return string
-     * @since 0.0.1.0
-     */
-    private function getMethodIconDeprecated($typeCheck): string
-    {
-        // @todo The typeCheck part is currently failing as MAPI has taken over the content.
-        // @todo Since we're leaving v2.2 entirely, this filter may no longer be necessary.
-        return !isset($this->paymentMethodInformation->{$typeCheck}) ? WordPress::applyFiltersDeprecated(
-            sprintf(
-                'woocommerce_resurs_bank_%s_checkout_icon',
-                $this->paymentMethodInformation->{$typeCheck} ?? ''
-            ),
-            ''
-        ) : '';
     }
 
     /**
@@ -389,6 +397,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @return mixed
      * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
+     * @todo Decide whether filter for extra icons/logos should be allowed or not.
      */
     private function getIconByFilter()
     {
@@ -471,7 +480,6 @@ class ResursDefault extends WC_Payment_Gateway
             add_filter('woocommerce_order_button_html', [$this, 'getOrderButtonHtml']);
             add_filter('woocommerce_checkout_fields', [$this, 'getCheckoutFields']);
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
-            add_filter('woocommerce_get_terms_page_id', [$this, 'getTermsByRco'], 1);
             add_filter('woocommerce_order_get_payment_method_title', [$this, 'getPaymentMethodTitle'], 10, 2);
         }
     }
@@ -517,17 +525,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Get payment method specific type from current payment method.
-     * @return null
-     * @since 0.0.1.0
-     * @todo Not in use. Can be removed, but make sure it is removed after removing all other usages.
-     */
-    public function getSpecificType()
-    {
-        return $this->getMethodInformation('specificType');
-    }
-
-    /**
      * Get current order.
      *
      * @return WC_Order
@@ -536,21 +533,6 @@ class ResursDefault extends WC_Payment_Gateway
     public function getOrder(): WC_Order
     {
         return $this->order;
-    }
-
-    /**
-     * Accept terms and conditions page should be disabled when using RCO or customers has to accept them twice.
-     *
-     * @param $pageId
-     * @return int|mixed
-     * @since 0.0.1.0
-     */
-    public function getTermsByRco($pageId): mixed
-    {
-        if (Data::getCheckoutType() === self::TYPE_RCO) {
-            $pageId = 0;
-        }
-        return $pageId;
     }
 
     /**
@@ -1245,7 +1227,13 @@ class ResursDefault extends WC_Payment_Gateway
      * @param WC_Product $productData
      * @param array $wcProductItem Product item details from WooCommerce, contains the extended data that can't be found in WC_Product.
      * @return OrderLine
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
      */
     public function getMapiOrderProductRow(
         OrderLineType $orderLineType,
@@ -1471,15 +1459,18 @@ class ResursDefault extends WC_Payment_Gateway
             !method_exists($this, method: 'get_order_total') ||
             !isset($this->paymentMethodInformation->id)
         ) {
-            // @todo Return false if woocommerce internally has this gateway disabled.
-            // @todo Also eventually check if the payment method is enabled in the admin (if want to go that way).
+            // Return false if gateway in Resurs-admin is disabled and stop running the full process here.
+            if (Enabled::isEnabled()) {
+                return false;
+            }
         }
         $customerType = Data::getCustomerType();
 
-        Data::getPaymentMethodBySession();
+        // Get the payment method from session.
+        //Data::getPaymentMethodBySession();
 
         // If this feature is not missing the method, we now know that there is chance that we're
-        // located in a checkout. We will in this moment run through the min-max amount that resides
+        // located in a checkout. We will at this moment run through the min-max amount that resides
         // in each payment method that is requested here. If the payment method is not present,
         // this one will be skipped and the rest of the function will fail over to the parent value.
         if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
@@ -1622,11 +1613,11 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function payment_fields()
     {
-        $fieldHtml = null;
+        $fieldHtml = 'Display fields for method here.';
 
-        if (Data::getCheckoutType() === self::TYPE_RCO) {
-            return;
-        }
+
+        return $fieldHtml;
+        // @todo All code below is deprecated and should be replaced.
 
         // If not here, no fields are required.
         /** @noinspection PhpUndefinedFieldInspection */

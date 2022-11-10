@@ -9,6 +9,7 @@ namespace ResursBank\Module;
 use Automattic\WooCommerce\Admin\Overrides\Order;
 use Exception;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Gateway\ResursDefault;
@@ -1156,13 +1157,13 @@ class PluginHooks
     }
 
     /**
-     * @param $url
+     * Build an icon url for a payment method.
+     * @param string|null $url This parameter can be nullable, if the requested filter has no prepared url available.
      * @param PaymentMethod $paymentMethod
-     * @return mixed|string|null
+     * @return string
      * @since 0.0.1.0
-     * @noinspection NotOptimalRegularExpressionsInspection
      */
-    public function getMethodIconByContent($url, $paymentMethod)
+    public function getMethodIconByContent(string|null $url, PaymentMethod $paymentMethod): string
     {
         $iconSetting = Data::getResursOption('payment_method_icons');
         switch ($paymentMethod->type) {
@@ -1173,7 +1174,8 @@ class PluginHooks
                 $itemName = 'pspcard';
                 break;
             default:
-                $itemName = $paymentMethod->type;
+                // Must be treated as a string from the enums in ecom2, since it is transforming into an image name.
+                $itemName = $paymentMethod->type->value;
         }
         $byItem = sprintf('method_%s', $itemName);
         $imageByMethodContent = Data::getImage($byItem);
@@ -1181,13 +1183,15 @@ class PluginHooks
             $url = $imageByMethodContent;
         }
 
+        // Take height for internal methods.
         if (empty($url) &&
-            $iconSetting === 'specifics_and_resurs' && str_starts_with($paymentMethod->type, 'RESURS')
+            $iconSetting === 'specifics_and_resurs' && str_starts_with($paymentMethod->type->value, 'RESURS')
         ) {
             $url = Data::getImage('resurs-logo.png');
         }
 
-        return $url;
+        // Should always be treated as a string in the end. If no criteria above matched, we can't return a value.
+        return (string)$url;
     }
 
     /**
