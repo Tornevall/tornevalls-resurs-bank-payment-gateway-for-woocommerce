@@ -284,7 +284,7 @@ class WooCommerce
 
         // If request failed or something caused an empty result, we should still return the list of gateways as
         // gateways. Have in mind that this array may already have content from other plugins.
-        return $gateways ?? [];
+        return $gateways;
     }
 
     /**
