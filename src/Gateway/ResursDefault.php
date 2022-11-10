@@ -1920,26 +1920,29 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * This is where we used to handle separate flows. As we will only have two in the future,
-     * this will be more easier.
+     * this will be easier.
      * @param WC_Order $order
      * @return array
      * @throws Exception
      */
     private function processResursOrder(WC_Order $order): array
     {
-        if (Data::getCheckoutType() !== ResursDefault::TYPE_RCO) {
-            $return = $this->processSimplified();
-        } else {
-            // @todo Handle RCO.
-            //$return = $this->processRco($order);
-        }
+        // Defaults.
+        $return = [
+            'result' => 'failure',
+            'redirect' => $this->getReturnUrl($order, 'failure')
+        ];
 
-        if (!isset($return['result'])) {
-            $return = [
-                'result' => 'failure',
-                'redirect' => $this->getReturnUrl($order, 'failure')
-            ];
-        }
+        // Create order, but skip using the order reference that is used from WooCommerce.
+        // This avoids order id collisions when we're on a network site where several stores may have
+        // multiple tables with the same id.
+        $payment = Repository::create(
+            storeId: ResursBankAPI::getStoreUuidByNationalId(Data::getStoreId()),
+            paymentMethodId: $this->getPaymentMethod(),
+            orderLines: $this->getOrderLinesMapi(),
+        );
+
+        // @todo Handle result from create.
 
         return $return;
     }
@@ -2708,35 +2711,6 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         return $this;
-    }
-
-    /**
-     * Simplified shop flow, MAPI based.
-     * All flows should have three sections:
-     * #1 Prepare order
-     * #2 Create order
-     * #3 Log, handle and return response
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection PhpUnusedPrivateMethodInspection
-     */
-    private function processSimplified(): array
-    {
-        // Create order, but skip using the order reference that is used from WooCommerce.
-        // This avoids order id collisions when we're on a network site where several stores may have
-        // multiple tables with the same id.
-        $payment = Repository::create(
-            storeId: ResursBankAPI::getStoreUuidByNationalId(Data::getStoreId()),
-            paymentMethodId: $this->getPaymentMethod(),
-            orderLines: $this->getOrderLinesMapi(),
-        );
-
-        // Return booking result.
-        // @todo SOAP returned an array with a status after bookSignedPayment, but MAPI
-        // @todo differs slightly in this process. This is where we preferably handle signings which
-        // @todo aso means that getResultByPaymentStatus can be replaced.
-        return $this->getResultByPaymentStatus();
     }
 
     /**
