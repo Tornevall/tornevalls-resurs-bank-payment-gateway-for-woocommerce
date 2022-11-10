@@ -1773,7 +1773,7 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         // We will most likely land here if order_awaiting_payment was null at first init and checkout was of type RCO.
-        // As RCO is very much backwards handled, we have to update meta data on order succession so that
+        // As RCO is backwards handled, we have to update meta data on order succession so that
         // we can match the correct order on successUrl later on.
         $metaCheckoutType = Data::getOrderMeta('checkoutType', $order_id);
         if (empty($metaCheckoutType)) {
@@ -1784,6 +1784,7 @@ class ResursDefault extends WC_Payment_Gateway
             }
         }
 
+        // Prepare API data and metas that applies to all orders and all flows.
         $this->preProcessOrder($order);
         if (Data::getCheckoutType() !== self::TYPE_RCO) {
             $return = $this->processResursOrder($order);
