@@ -25,6 +25,8 @@ class Enabled extends StringOption
     }
 
     /**
+     * Get a boolean value of the setting. Used internally, and not by WooCommerce that still struggles
+     * with getting the values as yes/no.
      * @return bool
      */
     public static function isEnabled(): bool
