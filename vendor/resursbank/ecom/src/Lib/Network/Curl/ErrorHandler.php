@@ -25,6 +25,7 @@ use stdClass;
 use function is_array;
 use function is_int;
 use function is_string;
+use function is_object;
 
 /**
  * Error handling of curl requests.
@@ -104,6 +105,7 @@ class ErrorHandler
      * @throws AuthException
      * @throws CurlException
      * @throws ConfigException
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function throwCurlException(string $jsonError = ''): void
     {
@@ -119,8 +121,9 @@ class ErrorHandler
             throw $exception;
         }
 
+        $message = $this->getMessageFromErrorBody();
         $exception = new CurlException(
-            message: curl_error(handle: $this->ch),
+            message: !empty($message) ? $message : curl_error(handle: $this->ch),
             code: curl_errno(handle: $this->ch),
             body: $this->body,
             httpCode: $this->httpCode
@@ -128,6 +131,45 @@ class ErrorHandler
         Config::getLogger()->error(message: $exception->getMessage());
         Config::getLogger()->error(message: $exception);
         throw $exception;
+    }
+
+    /**
+     * Attempts to parse an error message from $this->body if the HTTP response code is >= 400.
+     *
+     * @return string
+     * @throws ConfigException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
+    private function getMessageFromErrorBody(): string
+    {
+        if ($this->httpCode >= 400 && is_string(value: $this->body)) {
+            try {
+                $decoded = json_decode(
+                    json: $this->body,
+                    associative: false,
+                    depth: 768,
+                    flags: JSON_THROW_ON_ERROR
+                );
+                if (!is_object(value: $decoded)) {
+                    throw new JsonException(message: 'json_decode did not produce an object');
+                }
+            } catch (JsonException $jsonException) {
+                Config::getLogger()->error(message: $jsonException->getMessage());
+                Config::getLogger()->error(message: $jsonException);
+            }
+        }
+
+        $message = '';
+        if (isset($decoded) && is_object(value: $decoded)) {
+            if (isset($decoded->code) && (is_string(value: $decoded->code) || is_numeric(value: $decoded->code))) {
+                $message .= $decoded->code;
+            }
+            if (isset($decoded->message) && is_string(value: $decoded->message)) {
+                $message .= (!empty($message) ? ', ' : '') . $decoded->message . ' ';
+            }
+        }
+
+        return $message;
     }
 
     /**

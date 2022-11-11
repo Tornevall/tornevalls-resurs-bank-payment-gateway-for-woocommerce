@@ -28,7 +28,7 @@ class Mapi
     /**
      * Test endpoint.
      */
-    public const URL_TEST = 'https://web-integration-mock-merchant-api-portal.integration.resurs.com/';
+    public const URL_TEST = 'https://merchant-api.integration.resurs.com/';
 
     /**
      * Common prefix route name for all API calls.
