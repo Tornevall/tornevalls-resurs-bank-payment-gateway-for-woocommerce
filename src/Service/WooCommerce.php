@@ -190,9 +190,11 @@ class WooCommerce
             return $gateways;
         }
 
-        // Payment methods here are listed for non-admin-pages only. In admin, the only gateway visible
-        // should be ResursDefault in its default state.
-        $gateways += WooCommerce::getGatewaysFromPaymentMethods($gateways);
+        if (is_array($gateways)) {
+            // Payment methods here are listed for non-admin-pages only. In admin, the only gateway visible
+            // should be ResursDefault in its default state.
+            $gateways += WooCommerce::getGatewaysFromPaymentMethods($gateways);
+        }
 
         return $gateways;
     }
