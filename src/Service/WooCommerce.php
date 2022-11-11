@@ -192,8 +192,6 @@ class WooCommerce
 
         // Payment methods here are listed for non-admin-pages only. In admin, the only gateway visible
         // should be ResursDefault in its default state.
-        //
-        // @todo Investigate whether we can centralize country checks via ecom2.
         $gateways += WooCommerce::getGatewaysFromPaymentMethods($gateways);
 
         return $gateways;
