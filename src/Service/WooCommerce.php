@@ -239,6 +239,7 @@ class WooCommerce
                 $transientMethodList = get_transient(transient: 'resursbank_payment_methods');
             }
 
+            // @todo Build cache-driver for transients.
             $paymentMethodList = !$transientMethodList instanceof PaymentMethodCollection ?
                 PaymentMethodRepository::getPaymentMethods(StoreId::getData()) : $transientMethodList;
 
