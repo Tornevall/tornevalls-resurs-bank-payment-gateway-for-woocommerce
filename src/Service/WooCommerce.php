@@ -179,12 +179,12 @@ class WooCommerce
     }
 
     /**
-     * @param $gateways
+     * @param mixed $gateways
      * @return mixed
-     * @throws Exception
+     * @throws ConfigException
      * @since 0.0.1.0
      */
-    public static function getAvailableGateways($gateways)
+    public static function getAvailableGateways(mixed $gateways): mixed
     {
         if (is_admin()) {
             return $gateways;
@@ -200,10 +200,8 @@ class WooCommerce
         // except the credit cards that can operate outside borders.
         if ($customerCountry !== get_option('woocommerce_default_country')) {
             foreach ($existingPaymentMethodGateways as $gateway) {
-                if ($gateway instanceof ResursDefault) {
-                    if ($gateway->isAvailableOutsideBorders()) {
-                        $gateways[] = $gateway;
-                    }
+                if ($gateway instanceof ResursDefault && $gateway->isAvailableOutsideBorders()) {
+                    $gateways[] = $gateway;
                 }
             }
         } else {
@@ -251,7 +249,7 @@ class WooCommerce
         // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
         try {
             if ($canUseTransientCache) {
-                $transientMethodList = get_transient(Settings::PREFIX . 'payment_methods');
+                $transientMethodList = get_transient(Settings::PREFIX . '_payment_methods');
             }
 
             $paymentMethodList = !$transientMethodList instanceof PaymentMethodCollection ?
@@ -262,7 +260,7 @@ class WooCommerce
             // short as possible. However, this only applies to cases when no local ecom-cache is available.
             if ($canUseTransientCache) {
                 set_transient(
-                    Settings::PREFIX . 'payment_methods',
+                    Settings::PREFIX . '_payment_methods',
                     $paymentMethodList,
                     expiration: 600
                 );
