@@ -212,12 +212,11 @@ class WooCommerce
     }
 
     /**
-     * @param $gateways
+     * @param mixed $gateways
      * @return mixed
-     * @throws Exception
      * @see https://rudrastyh.com/woocommerce/get-and-hook-payment-gateways.html
      */
-    public static function getGateways($gateways): mixed
+    public static function getGateways(mixed $gateways): mixed
     {
         if (is_array($gateways)) {
             $gateways[] = ResursDefault::class;
