@@ -249,7 +249,9 @@ class WooCommerce
         // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
         try {
             if ($canUseTransientCache) {
-                $transientMethodList = get_transient(Settings::PREFIX . '_payment_methods');
+                // @todo Centralize Settings::Prefix to use with the key payment_methods as WC_Settings_Page is not
+                // @todo available from checkout pages..
+                $transientMethodList = get_transient(transient: 'resursbank_payment_methods');
             }
 
             $paymentMethodList = !$transientMethodList instanceof PaymentMethodCollection ?
@@ -260,8 +262,8 @@ class WooCommerce
             // short as possible. However, this only applies to cases when no local ecom-cache is available.
             if ($canUseTransientCache) {
                 set_transient(
-                    Settings::PREFIX . '_payment_methods',
-                    $paymentMethodList,
+                    transient: 'resursbank_payment_methods',
+                    value: $paymentMethodList,
                     expiration: 600
                 );
             }
