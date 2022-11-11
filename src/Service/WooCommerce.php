@@ -200,6 +200,7 @@ class WooCommerce
         // except the credit cards that can operate outside borders.
         if ($customerCountry !== get_option('woocommerce_default_country')) {
             foreach ($existingPaymentMethodGateways as $gateway) {
+                // @todo Investigate if ecom2 can handle this kind of check.
                 if ($gateway instanceof ResursDefault && $gateway->isAvailableOutsideBorders()) {
                     $gateways[] = $gateway;
                 }
