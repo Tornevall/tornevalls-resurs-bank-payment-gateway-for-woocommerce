@@ -167,8 +167,10 @@ class ResursPlugin
             ]);
 
             $extraFormFields = WordPress::getAddressFieldController();
-            foreach ($extraFormFields as $fieldKey => $fieldValue) {
-                $currentObfuscateArray[] = $fieldKey;
+            if (is_array($extraFormFields)) {
+                foreach ($extraFormFields as $fieldKey => $fieldValue) {
+                    $currentObfuscateArray[] = $fieldKey;
+                }
             }
         }
 
