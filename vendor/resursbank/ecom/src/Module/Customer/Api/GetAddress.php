@@ -93,7 +93,8 @@ class GetAddress
                     'Customer address request error: %s (%d).',
                     $e->getMessage(),
                     $e->getCode()
-                )
+                ),
+                previous: $e
             );
         }
 
