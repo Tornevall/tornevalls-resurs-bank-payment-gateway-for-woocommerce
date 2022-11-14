@@ -1969,7 +1969,8 @@ class Data
         // script so that the front-end script can see which payment method that is currently selected
         // and hide RCO if something else is active.
 
-        // This method are sometimes executed with a payment method in its post-request.
+        // This method are sometimes executed with a payment method in its post-request, and therefore must
+        // be processed before returning the value, since another value can be stored prior to this change.
         if (isset($_REQUEST['payment_method'])) {
             WooCommerce::setSessionValue('fragment_update_payment_method', $_REQUEST['payment_method']);
         }
