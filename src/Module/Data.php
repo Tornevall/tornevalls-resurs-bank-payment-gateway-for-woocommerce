@@ -1982,6 +1982,7 @@ class Data
      * Get the name of current checkout in use.
      * @return string
      * @since 0.0.1.0
+     * @todo We no longer use RCO. Can be removed. Do it safely.
      */
     public static function getCheckoutType(): string
     {
