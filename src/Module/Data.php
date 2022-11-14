@@ -14,6 +14,10 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Options\ClientId;
+use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Enabled;
+use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -362,20 +366,11 @@ class Data
 
     /**
      * @return bool
-     * @since 0.0.1.2
-     */
-    public static function isExtendedTest(): bool
-    {
-        return (self::isTest() && self::getResursOption('extended_test_mode'));
-    }
-
-    /**
-     * @return bool
      * @since 0.0.1.0
      */
     public static function isTest(): bool
     {
-        return (self::getResursOption('environment', null, false) === 'test');
+        return Environment::getData() === 'test';
     }
 
     /**
@@ -1951,7 +1946,7 @@ class Data
     }
 
     /**
-     * Get current payment method from session.
+     * Get the current proper payment method from session. This is vital information for the checkout.
      *
      * @return string
      * @throws Exception
@@ -1973,6 +1968,8 @@ class Data
         // update. This value should be pushed out through the fragment update section to the front end
         // script so that the front-end script can see which payment method that is currently selected
         // and hide RCO if something else is active.
+
+        // This method are sometimes executed with a payment method in its post-request.
         if (isset($_REQUEST['payment_method'])) {
             WooCommerce::setSessionValue('fragment_update_payment_method', $_REQUEST['payment_method']);
         }
@@ -2365,10 +2362,12 @@ class Data
      *
      * @return bool
      * @since 0.0.1.0
+     * @todo There are several places that is still using this method instead of askign Enable:: directly.
+     * @todo Remove this method and use Enable:: instead, where it still is in use.
      */
     public static function isEnabled()
     {
-        return (bool)self::getResursOption('enabled');
+        return Enabled::isEnabled();
     }
 
     /**
@@ -2535,26 +2534,30 @@ class Data
     /**
      * Complex settings for getAddress forms.
      *
-     * @return bool|mixed
+     * @return bool
      * @since 0.0.1.0
+     * @todo Rewrite this code to be compatible with MAPI conditions and configuration.
+     * @todo Currently, this is mostly return as a true value for the moment.
      */
-    public static function canUseGetAddressForm(): mixed
+    public static function canUseGetAddressForm(): bool
     {
         // Section for which merchants can decide if getAddress features should be disabled or not.
         $getAddressDisabled = (bool)WordPress::applyFilters('getAddressDisabled', false);
 
-        // @todo Prior 2.2-filter, that should be considered removed from this release.
-        $getAddressFormDefault = (bool)WordPress::applyFiltersDeprecated(
-            'resurs_getaddress_enabled',
-            self::getResursOption('get_address_form')
-        );
+        // @todo Make sure we check country code here before using it.
+        // @todo The boolean value should be inherited from the MAPI configuration in wp-admin as there's been
+        // @todo options before to have it entirely disabled on merchant levels as this has often been requested.
+        $return = true;
         if ($getAddressDisabled) {
             // Filter overrides the config settings.
             /** @noinspection PhpConditionAlreadyCheckedInspection */
-            $getAddressFormDefault = $getAddressDisabled;
+            $return = $getAddressDisabled;
         }
 
-        return $getAddressFormDefault;
+        // @todo Inspections suggested to set this to true instantly, but it should be fetched from configuration,
+        // @todo so it has to be changed.
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
+        return $return;
     }
 
     /**
@@ -2745,19 +2748,13 @@ class Data
      */
     public static function hasCredentials(): bool
     {
-        try {
-            self::getResolvedCredentials();
-            $return = true;
-        } catch (RuntimeException $e) {
-            $return = false;
-        }
-
-        return $return;
+        return (ClientSecret::getData() !== '' && ClientId::getData() !== '');
     }
 
     /**
      * @throws Exception
      * @since 0.0.1.0
+     * @todo Can probably be removed. Make sure it's done safely, when switching code to MAPI.
      */
     public static function getResolvedCredentials(): bool
     {

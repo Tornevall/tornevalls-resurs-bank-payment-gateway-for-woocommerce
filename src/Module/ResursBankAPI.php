@@ -37,6 +37,7 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings;
 use ResursException;
 use stdClass;
@@ -206,7 +207,7 @@ class ResursBankAPI
 
             // Only look for legacy payments if the initial get fails.
             $searchPayment = PaymentRepository::search(
-                self::getStoreUuidByNationalId(Data::getStoreId()),
+                StoreId::getData(),
                 $paymentId
             );
 
@@ -223,40 +224,6 @@ class ResursBankAPI
         }
 
         return isset($return) && !empty($return) ? $return : new stdClass();
-    }
-
-    /**
-     * @param int $storeId
-     * @return string
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws StoreException
-     * @throws ValidationException
-     */
-    public static function getStoreUuidByNationalId(int $storeId): string
-    {
-        $return = '';
-        /** @var Store $store */
-        $storeCollection = self::getStoreCollection();
-        foreach ($storeCollection as $store) {
-            if ($store->nationalStoreId === $storeId) {
-                $return = $store->id;
-                break;
-            }
-        }
-
-        if (empty($return)) {
-            throw new StoreException('Store could not be found.');
-        }
-
-        return $return;
     }
 
     /**
@@ -381,7 +348,7 @@ class ResursBankAPI
         }
 
         if (Data::getStoreId() > 0 && (!$fromStorage || empty($return))) {
-            self::$paymentMethods = Repository::getPaymentMethods(self::getStoreUuidByNationalId(Data::getStoreId()))->toArray();
+            self::$paymentMethods = Repository::getPaymentMethods(Data::getStoreId())->toArray();
             Data::setResursOption('lastMethodUpdate', time());
             WooCommerce::setSessionValue('silentGetPaymentMethodsException', null);
             $return = self::$paymentMethods;
@@ -612,6 +579,7 @@ class ResursBankAPI
     /**
      * @return bool
      * @throws Exception
+     * @todo Can probably be removed. Make sure it's done safely, when switching code to MAPI.
      */
     private function getResolvedCredentials(): bool
     {

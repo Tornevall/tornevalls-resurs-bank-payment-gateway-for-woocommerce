@@ -4,6 +4,7 @@ namespace ResursBank\Service;
 
 use Exception;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
@@ -888,11 +889,8 @@ class WordPress
             'resurs-bank-payments-for-woocommerce'
         );
         $return['checkout_fields'] = FormFields::getFieldString();
-        try {
-            if (!is_admin()) {
-                $return['getAddressFieldController'] = !is_admin() && Data::hasCredentials() ? WordPress::getAddressFieldController() : [];
-            }
-        } catch (Exception) {
+        if (Data::hasCredentials() && !is_admin()) {
+            $return['getAddressFieldController'] = WordPress::getAddressFieldController();
         }
         $return['checkoutType'] = Data::getCheckoutType();
 
@@ -927,11 +925,11 @@ class WordPress
     }
 
     /**
-     * @return mixed
+     * @return array
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getAddressFieldController()
+    public static function getAddressFieldController(): array
     {
         $return = [
             'billing_first_name' => 'firstName',
@@ -943,7 +941,7 @@ class WordPress
             'billing_city' => 'postalArea',
         ];
 
-        if (Data::getCustomerType() === 'LEGAL') {
+        if (Data::getCustomerType() === CustomerType::LEGAL) {
             $return['billing_company'] = 'fullName';
         }
 

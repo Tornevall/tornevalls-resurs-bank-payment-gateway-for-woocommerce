@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Exception;
+use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
@@ -24,19 +25,12 @@ use WC_Settings_Page;
 class Settings extends WC_Settings_Page
 {
     /**
-     * This prefix is used for various parts of the settings by WooCommerce,
-     * for example, as an ID for these settings, and as a prefix for the values
-     * in the database.
-     */
-    public const PREFIX = 'resursbank';
-
-    /**
      * Initializes settings properties and registers WordPress actions for
      * rendering content and saving settings.
      */
     public function __construct()
     {
-        $this->id = self::PREFIX;
+        $this->id = ResursDefault::PREFIX;
         $this->label = 'Resurs Bank';
 
         // Adds the Resurs Bank tab.

@@ -33,6 +33,7 @@ use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
+use Resursbank\Woocommerce\Database\Options\StoreId;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -62,7 +63,6 @@ use function uniqid;
  *
  * @package Resursbank\Gateway
  * @since 0.0.1.0
- * @todo Rebuild class to better utilize the "Payment"-tab: WOO-845
  */
 class ResursDefault extends WC_Payment_Gateway
 {
@@ -119,6 +119,12 @@ class ResursDefault extends WC_Payment_Gateway
      * @since 0.0.1.0
      */
     const TYPE_RCO = 'rco';
+    /**
+     * This prefix is used for various parts of the settings by WooCommerce,
+     * for example, as an ID for these settings, and as a prefix for the values
+     * in the database.
+     */
+    public const PREFIX = 'resursbank';
 
     /**
      * @var WC_Order $order
@@ -313,7 +319,8 @@ class ResursDefault extends WC_Payment_Gateway
         if ($paymentMethod instanceof PaymentMethod) {
             // Collect the entire payment method information.
             $this->paymentMethodInformation = $paymentMethod;
-            $this->id = sprintf('%s_%s', Data::getPrefix(), $this->paymentMethodInformation->id);
+            $this->id = self::PREFIX . '_' . $this->paymentMethodInformation->id;
+            $this->payment_method = $this->id;
             $this->title = $this->paymentMethodInformation->name ?? '';
             $this->method_description = '';
 
@@ -361,8 +368,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function setPaymentApiData(): void
     {
-        $this->apiData['checkoutType'] = Data::getCheckoutType();
         if (!empty(Data::getPaymentMethodBySession())) {
+            // Store this for later use, when the primary processing is done.
             $this->apiData['paymentMethod'] = Data::getPaymentMethodBySession();
         }
         $this->apiDataId = sha1(uniqid('wc-api', true));
@@ -425,8 +432,6 @@ class ResursDefault extends WC_Payment_Gateway
         if ($this->isPaymentReady()) {
             $saneRequest = Data::getSanitizedRequest($_REQUEST ?? []);
             foreach ($saneRequest as $requestKey => $requestValue) {
-                // Note: When we pass through here, via the OrderHandler, this matching is not really
-                // necessary.
                 if (preg_match(sprintf('/%s$/', $realMethodId), $requestKey)) {
                     $applicantDataKey = sanitize_text_field(
                         (string)preg_replace(
@@ -450,13 +455,13 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * The payment method id. The real ID, used for checkout, for which we also tell WooCommerce which gateway
      * to use.
-     * @return string|string[]|null
-     * @since 0.0.1.0
-     * @todo Since this id has been based on SOAP and therefore a name, this will reflect an UUID in MAPI.
+     * @return string
      */
-    private function getRealMethodId()
+    private function getRealMethodId(): string
     {
-        return preg_replace(sprintf('/^%s_/', Data::getPrefix()), '', $this->id);
+        // Return the real id for MAPI if MAPI method is initialized, without woocommerce based extra strings
+        // added to it.
+        return $this->paymentMethodInformation->id ?? $this->id;
     }
 
     /**
@@ -493,12 +498,6 @@ class ResursDefault extends WC_Payment_Gateway
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
         if (Enabled::isEnabled()) {
             add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
-            if (Data::getCheckoutType() === self::TYPE_RCO) {
-                add_action(
-                    sprintf('woocommerce_%s', Data::getResursOption('rco_iframe_position')),
-                    [$this, 'getRcoIframe']
-                );
-            }
         }
     }
 
@@ -1727,43 +1726,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $order = new WC_Order($order_id);
         $this->order = $order;
-        // Return template.
-        $return = [
-            'ajax_success' => true,
-            'result' => 'failure',
-            'redirect' => $this->getReturnUrl($order),
-        ];
-
-        if (empty(Data::getOrderMeta($order_id, 'checkoutType')) &&
-            WooCommerce::getSessionValue('resursCheckoutType') &&
-            Data::getCheckoutType() === self::TYPE_RCO
-        ) {
-            // Updating missing order information on fly during RCO session as it is missing when we're
-            // still in the API call. This data becomes reachable as soon as WooCommerce gives us this
-            // through here.
-            $sessionCheckoutType = WooCommerce::getSessionValue('resursCheckoutType');
-            Data::writeLogNotice(
-                __(
-                    sprintf(
-                        'Checkout type in order meta is empty, but found in session as %s. This usually ' .
-                        'occurs in RCO mode. Order meta data will update.',
-                        $sessionCheckoutType
-                    )
-                )
-            );
-            $this->setOrderCheckoutMeta($order_id);
-            WooCommerce::setOrderNote(
-                $order_id,
-                sprintf(
-                    __('Order process initialized by customer with checkout %s.'),
-                    Data::getCheckoutType()
-                )
-            );
-            // Used with RCO. Need to be here, at least for a while longer.
-            $order->set_payment_method(Data::getPaymentMethodBySession());
-            //$this->setProperPaymentReference($order);
-            // From here, we can handle the order at regular basis.
-        }
 
         if (empty(Data::getOrderMeta('paymentMethodInformation', $order))) {
             $paymentMethodInformation = Data::getPaymentMethodById(Data::getPaymentMethodBySession());
@@ -1771,31 +1733,13 @@ class ResursDefault extends WC_Payment_Gateway
                 Data::setOrderMeta($order, 'paymentMethodInformation', json_encode($paymentMethodInformation));
             }
         }
-
-        // We will most likely land here if order_awaiting_payment was null at first init and checkout was of type RCO.
-        // As RCO is backwards handled, we have to update meta data on order succession so that
-        // we can match the correct order on successUrl later on.
-        $metaCheckoutType = Data::getOrderMeta('checkoutType', $order_id);
-        if (empty($metaCheckoutType)) {
-            $this->setOrderCheckoutMeta($order_id);
-            $paymentMethodBySession = Data::getPaymentMethodBySession();
-            if ($metaCheckoutType === self::TYPE_RCO && !empty($paymentMethodBySession)) {
-                $order->set_payment_method(Data::getPaymentMethodBySession());
-            }
-        }
+        $this->setOrderCheckoutMeta($order_id);
+        // Used by WooCommerce from class-wc-checkout.php to identify the payment method.
+        $order->set_payment_method(Data::getPaymentMethodBySession());
 
         // Prepare API data and metas that applies to all orders and all flows.
         $this->preProcessOrder($order);
-        if (Data::getCheckoutType() !== self::TYPE_RCO) {
-            $return = $this->processResursOrder($order);
-        } elseif (Data::getCheckoutType() === self::TYPE_RCO) {
-            // Rules applicable on RCO only.
-            $return['result'] = 'success';
-            $return['total'] = (float)$this->cart->total;
-            $return['redirect'] = $this->get_return_url($order);
-        }
-
-        return $return;
+        return $this->processResursOrder($order);
     }
 
     /**
@@ -1938,7 +1882,7 @@ class ResursDefault extends WC_Payment_Gateway
         // This avoids order id collisions when we're on a network site where several stores may have
         // multiple tables with the same id.
         $payment = Repository::create(
-            storeId: ResursBankAPI::getStoreUuidByNationalId(Data::getStoreId()),
+            storeId: StoreId::getData(),
             paymentMethodId: $this->getPaymentMethod(),
             orderLines: $this->getOrderLinesMapi(),
         );

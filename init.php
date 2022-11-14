@@ -37,9 +37,12 @@ require_once(__DIR__ . '/vendor/autoload.php');
 // you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.
 // @todo Build us out of this prefix.
 if (Data::isOriginalCodeBase()) {
-    // @todo Get prefix from Settings::PREFIX instead?
-    // @todo Warning: Do NOT alone change this value, make sure all filters has the proper call too.
-    define(constant_name: 'RESURSBANK_PREFIX', value: 'trbwc');
+    // @todo Warning
+    // @todo We are still partially depending on this due to the characteristics of the original
+    // @todo behaviour from Data::getPrefix, where we partially can add more data to it.
+    // @todo Do NOT alone change this value, make sure all filters has the proper call too.
+    // @todo The new way of calling for a correct prefix is to use ResursDefault::PREFIX.
+    define(constant_name: 'RESURSBANK_PREFIX', value: 'resursbank');
 } elseif (ResursPlugin::isResursCodeBase()) {
     // Look for an alternative origin.
     define(constant_name: 'RESURSBANK_PREFIX', value: ResursPlugin::RESURS_BANK_PREFIX);
