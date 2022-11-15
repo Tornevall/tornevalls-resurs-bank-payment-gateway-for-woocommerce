@@ -11,6 +11,7 @@ namespace ResursBank\Gateway;
 use Exception;
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
@@ -179,7 +180,6 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * This instance payment method from Resurs Bank.
      * @var PaymentMethod $paymentMethodInformation
-     * @since 0.0.1.0
      */
     private PaymentMethod $paymentMethodInformation;
 
@@ -1878,14 +1878,25 @@ class ResursDefault extends WC_Payment_Gateway
             'redirect' => $this->getReturnUrl($order, 'failure')
         ];
 
-        // Create order, but skip using the order reference that is used from WooCommerce.
-        // This avoids order id collisions when we're on a network site where several stores may have
-        // multiple tables with the same id.
-        return Repository::create(
-            storeId: StoreId::getData(),
-            paymentMethodId: $this->getPaymentMethod(),
-            orderLines: $this->getOrderLinesMapi(),
-        );
+        try {
+            // Create order, but skip using the order reference that is used from WooCommerce.
+            // This avoids order id collisions when we're on a network site where several stores may have
+            // multiple tables with the same id.
+            $createPaymentResponse = Repository::create(
+                storeId: StoreId::getData(),
+                paymentMethodId: $this->getPaymentMethod(),
+                orderLines: $this->getOrderLinesMapi(),
+            );
+            //new OrderHandler();
+        } catch (Exception $createPaymentException) {
+            // Add note to notices and write to log.
+            $order->add_order_note(
+                $createPaymentException->getMessage()
+            );
+            Config::getLogger()->error($createPaymentException);
+        }
+
+        return $return;
     }
 
     /**
