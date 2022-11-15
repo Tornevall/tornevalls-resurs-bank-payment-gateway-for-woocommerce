@@ -19,12 +19,14 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
-use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
+use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
@@ -1872,22 +1874,26 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function processResursOrder(WC_Order $order): array
     {
-        // Defaults.
+        // Defaults returning to WooCommerce if not successful.
         $return = [
             'result' => 'failure',
-            'redirect' => $this->getReturnUrl($order, 'failure')
+            'redirect' => $this->getReturnUrl($order)
         ];
 
         try {
-            // Create order, but skip using the order reference that is used from WooCommerce.
-            // This avoids order id collisions when we're on a network site where several stores may have
-            // multiple tables with the same id.
-            $createPaymentResponse = Repository::create(
-                storeId: StoreId::getData(),
-                paymentMethodId: $this->getPaymentMethod(),
-                orderLines: $this->getOrderLinesMapi(),
+            // Order Creation.
+            // No order reference is passed to ecom at this point, to avoid order id collisions in both ends.
+            // If we're on a WordPress Network site where several stores may have multiple tables with same
+            // order id-collection, this way of handling orders helps a lot.
+            $return = $this->getReturnResponse(
+                PaymentRepository::create(
+                    storeId: StoreId::getData(),
+                    paymentMethodId: $this->getPaymentMethod(),
+                    orderLines: $this->getOrderLinesMapi(),
+                ),
+                return: $return,
+                order: $order
             );
-            //new OrderHandler();
         } catch (Exception $createPaymentException) {
             // Add note to notices and write to log.
             $order->add_order_note(
@@ -1900,11 +1906,40 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Convert createPaymentResponse to a WooCommerce reply.
+     * @param Payment $createPaymentResponse
+     * @param array $return
+     * @param WC_Order $order
+     * @return array
+     */
+    private function getReturnResponse(Payment $createPaymentResponse, array $return, WC_Order $order): array
+    {
+        // At this point, the return array is set to failure, so if the response is not a success, we can just return.
+        // Frozen orders are normally accepted as successful responses.
+        switch ($createPaymentResponse->status) {
+            case Status::FROZEN:
+            case Status::ACCEPTED:
+                $return['result'] = 'success';
+                $return['redirect'] = $this->getReturnUrl($order, 'success');
+                break;
+            case Status::TASK_REDIRECTION_REQUIRED:
+                $return['result'] = 'success';
+                $return['redirect'] = $createPaymentResponse->taskRedirectionUrls->customerUrl;
+                break;
+            default:
+        }
+
+        return $return;
+    }
+
+
+    /**
      * This is where we handle all API calls from the outside, with discreet request variables.
      *
      * @throws Exception
      * @since 0.0.1.0
      * @noinspection IssetConstructsCanBeMergedInspection
+     * @todo Break this request handler into smaller pieces.
      */
     public function getApiRequest()
     {
@@ -2604,18 +2639,17 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @return OrderLineCollection
      * @throws IllegalTypeException
-     * @todo We've got a few return notices in PHPstorm about this. Make sure it's correct.
      */
     private function getOrderLinesMapi(): OrderLineCollection
     {
         if (WooCommerce::getValidCart()) {
             $orderHandler = new OrderHandler();
-            return $orderHandler->getPreparedMapiOrderLines();
+            return $orderHandler->getOrderLines();
         }
 
         // todo: Translate this via ecom2.
         throw new RuntimeException(
-            __('Cart is empty!')
+            __('Cart is currently unavailable.')
         );
     }
 

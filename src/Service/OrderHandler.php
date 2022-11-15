@@ -62,14 +62,14 @@ class OrderHandler extends ResursDefault
      * @throws IllegalTypeException
      * @throws Exception
      */
-    public function getPreparedMapiOrderLines(): OrderLineCollection
+    public function getOrderLines(): OrderLineCollection
     {
         return new OrderLineCollection(
             data: array_merge(
-                $this->getMapiArticleRows(),
-                $this->getMapiShippingRows(),
-                $this->getMapiCouponRows(),
-                $this->getMapiFeeRows()
+                $this->getArticleRows(),
+                $this->getShipping(),
+                $this->getCoupons(),
+                $this->getFees()
             )
         );
     }
@@ -86,7 +86,7 @@ class OrderHandler extends ResursDefault
      * @throws ReflectionException
      * @throws TranslationException
      */
-    public function getMapiArticleRows(): array
+    public function getArticleRows(): array
     {
         $return = [];
 
@@ -132,7 +132,7 @@ class OrderHandler extends ResursDefault
      * @throws ReflectionException
      * @throws ConfigException
      */
-    public function getMapiFeeRows(): array
+    public function getFees(): array
     {
         $return = [];
 
@@ -175,7 +175,7 @@ class OrderHandler extends ResursDefault
      * @throws ReflectionException
      * @throws TranslationException
      */
-    public function getMapiShippingRows(): array
+    public function getShipping(): array
     {
         $shipping = $this->cart->get_shipping_total();
 
@@ -211,7 +211,7 @@ class OrderHandler extends ResursDefault
      * @throws ReflectionException
      * @throws TranslationException
      */
-    public function getMapiCouponRows(): array
+    public function getCoupons(): array
     {
         $return = [];
 
