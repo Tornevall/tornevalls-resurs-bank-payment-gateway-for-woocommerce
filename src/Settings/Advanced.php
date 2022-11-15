@@ -18,10 +18,9 @@ use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Woocommerce\Database\Options\CacheDir;
 use Resursbank\Woocommerce\Database\Options\LogDir;
-
 use WC_Logger;
-use function is_string;
 use function is_dir;
+use function is_string;
 
 /**
  * Advanced settings section.
@@ -66,8 +65,8 @@ class Advanced
                         'resurs-bank-payments-for-woocommerce'
                     ),
                     'desc' => __(
-	                    'Leave empty to disable cache.',
-	                    'resurs-bank-payments-for-woocommerce'
+                        'Leave empty to disable cache.',
+                        'resurs-bank-payments-for-woocommerce'
                     ),
                     'default' => '',
                 ],
@@ -87,6 +86,14 @@ class Advanced
 
         try {
             $path = LogDir::getData();
+
+            // Path-helper for complex instances.
+            if ($path === 'wc-logs') {
+                // If wc-logs are defined, we use the same log directory that WooCommerce sets up to be WC_LOG_PATH.
+                // This is used to simplify the setup for some instances that do not know about their log path.
+                $upload_dir = wp_upload_dir(create_dir: false);
+                $path = preg_replace(pattern: '/\/$/', replacement: '', subject: $upload_dir['basedir'] . '/wc-logs/');
+            }
 
             if (is_string(value: $path) &&
                 is_dir(filename: LogDir::getData())
