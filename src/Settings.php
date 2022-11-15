@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Exception;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
@@ -84,6 +86,7 @@ class Settings extends WC_Settings_Page
      * Outputs the HTML for the current tab section.
      *
      * @return void
+     * @throws ConfigException
      */
     public function output(): void
     {
@@ -105,8 +108,13 @@ class Settings extends WC_Settings_Page
 
                 echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
             } catch (Exception $e) {
+                Config::getLogger()->error(
+                    message: 'Failed to render payment methods: ' . $e->getMessage(),
+                );
                 // @todo Add proper translation via ecom2.
-                echo '<div style="border: 1px solid black !important; padding: 5px !important;">' . Data::getEscapedHtml(
+                echo '<div style="border: 1px solid black !important; padding: 5px !important;">
+                    Failed to render payment methods:  ' .
+                    Data::getEscapedHtml(
                         $e->getMessage()
                     ) . '</div>';
             }
