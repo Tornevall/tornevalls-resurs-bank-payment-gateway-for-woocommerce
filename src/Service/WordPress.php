@@ -231,24 +231,6 @@ class WordPress
     private static function setupWoocommerceCheckoutActions()
     {
         // Customer is in checkout.
-        add_action(
-            'woocommerce_before_checkout_form',
-            'ResursBank\Service\WooCommerce::setIsInCheckout'
-        );
-        add_action(
-            'woocommerce_is_checkout',
-            'ResursBank\Service\WooCommerce::setIsInCheckout'
-        );
-        // Customer is not in checkout.
-        add_action(
-            'woocommerce_add_to_cart',
-            'ResursBank\Service\WooCommerce::setAddToCart'
-        );
-        // Customer is not in checkout. RCO helper, updating order rows on fly in this section.
-        add_action(
-            'woocommerce_cart_updated',
-            'ResursBank\Service\WooCommerce::setUpdatedCart'
-        );
         // Customer is not in checkout.
         add_filter(
             'woocommerce_update_order_review_fragments',

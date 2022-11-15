@@ -675,38 +675,6 @@ class WooCommerce
     }
 
     /**
-     * v3core: Checkout vs Cart Manipulation - A moment when customer is in checkout.
-     *
-     * @since 0.0.1.0
-     */
-    public static function setIsInCheckout(): void
-    {
-        self::setCustomerCheckoutLocation(customerIsInCheckout: true);
-    }
-
-    /**
-     * Checkout vs Cart Manipulation. Makes sure that the customer is marked in as located in checkout and vice versa.
-     * This is for security reasons, where we prevent that cart is manipulated over several windows/tabs.
-     *
-     * @param $customerIsInCheckout
-     * @since 0.0.1.0
-     */
-    private static function setCustomerCheckoutLocation($customerIsInCheckout): void
-    {
-        self::setSessionValue(key: self::$inCheckoutKey, value: $customerIsInCheckout);
-    }
-
-    /**
-     * The proper way to find out whether the customer is currently located in the checkout or not.
-     * @return mixed
-     * @throws Exception
-     */
-    public static function customerIsInCheckout(): mixed
-    {
-        return self::getSessionValue(key: self::$inCheckoutKey);
-    }
-
-    /**
      * Set up a session based on how WooCommerce has it initiated. Value types are several.
      * @param string $key
      * @param array|string|stdClass $value
@@ -1266,72 +1234,6 @@ class WooCommerce
     }
 
     /**
-     * v3core: Checkout vs Cart Manipulation - A watchguard for that moment, when customer is not in checkout.
-     *
-     * @since 0.0.1.0
-     */
-    public static function setAddToCart(): void
-    {
-        self::setCustomerCheckoutLocation(customerIsInCheckout: false);
-    }
-
-    /**
-     * @since 0.0.1.0
-     */
-    public static function setUpdatedCart()
-    {
-        $isCheckout = is_checkout();
-
-        try {
-            // No need to update cart if not in checkout (and in admin).
-            if ($isCheckout && !is_admin() && self::getValidCart()) {
-                $currentTotal = WC()->cart->total;
-                self::setSessionValue('customerCartTotal', WC()->cart->total);
-                if ((float)$currentTotal) {
-                    $orderHandler = new OrderHandler();
-                    $orderHandler->setCart(WC()->cart);
-                    $orderHandler->setPreparedOrderLines();
-                    // Only update payment session if in RCO mode.
-                    if (Data::getCheckoutType() === ResursDefault::TYPE_RCO &&
-                        !empty(self::getSessionValue('rco_order_id')) &&
-                        (float)$currentTotal > 0.00
-                    ) {
-                        try {
-                            ResursBankAPI::getResurs()->updateCheckoutOrderLines(
-                                self::getSessionValue('rco_order_id'),
-                                $orderHandler->getOrderLines()
-                            );
-                        } catch (Exception $e) {
-                            Data::writeLogError(
-                                sprintf(
-                                    __(
-                                        'Exception (%s) from %s: %s.',
-                                        'resurs-bank-payments-for-woocommerce'
-                                    ),
-                                    $e->getCode(),
-                                    __FUNCTION__,
-                                    $e->getMessage()
-                                )
-                            );
-                        }
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            Data::writeLogError(
-                sprintf(
-                    __('Exception (%s) from %s: %s.', 'resurs-bank-payments-for-woocommerce'),
-                    $e->getCode(),
-                    __FUNCTION__,
-                    $e->getMessage()
-                )
-            );
-        }
-
-        self::setCustomerCheckoutLocation($isCheckout);
-    }
-
-    /**
      * @param $key
      * @return mixed
      * @throws Exception
@@ -1374,16 +1276,13 @@ class WooCommerce
     public static function getReviewFragments($fragments): array
     {
         $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
-        $fragments['rbwc_cart_total'] = (float)(self::getValidCart() ? WC()->cart->total : 0.00);
         $fragments['fragmethod'] = Data::getMethodFromFragmentOrSession();
-        self::setCustomerCheckoutLocation(true);
 
         return $fragments;
     }
 
     /**
      * @since 0.0.1.0
-     * @noinspection PhpUnusedParameterInspection
      */
     public static function getOrderReviewSettings()
     {
@@ -1398,7 +1297,6 @@ class WooCommerce
             }
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
         }
-        self::setCustomerCheckoutLocation(true);
     }
 
     /**

@@ -5,13 +5,16 @@
 namespace ResursBank\Service;
 
 use Exception;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Order\OrderLineCollection;
+use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
@@ -55,47 +58,35 @@ class OrderHandler extends ResursDefault
     }
 
     /**
-     * @return $this
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function setPreparedOrderLines(): self
-    {
-        // @todo WOO-764
-
-        // Reactivate this when it feels all right again (RCO?).
-        /*
-        $this
-            ->setOrderRows()
-            ->setCoupon()
-            ->setShipping()
-            ->setFee();
-        */
-
-        return $this;
-    }
-
-    /**
      * @return OrderLineCollection
      * @throws IllegalTypeException
      * @throws Exception
      */
-    public function getPreparedMapiOrderLines(): OrderLineCollection
+    public function getOrderLines(): OrderLineCollection
     {
         return new OrderLineCollection(
             data: array_merge(
-                $this->getMapiArticleRows(),
-                $this->getMapiShippingRows(),
-                $this->getMapiCouponRows(),
-                $this->getMapiFeeRows()
+                $this->getArticleRows(),
+                $this->getShipping(),
+                $this->getCoupons(),
+                $this->getFees()
             )
         );
     }
 
     /**
-     * @throws Exception
+     * Create collection of orderLines from a valid WooCommerce cart (default handler of products).
+     *
+     * @return array
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
      */
-    public function getMapiArticleRows(): array
+    public function getArticleRows(): array
     {
         $return = [];
 
@@ -130,19 +121,22 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * Apply fee's to the order (this is not necessarily Resurs fee's but also wooCommerce based fee's.
+     *
+     * @return array
+     * @throws FilesystemException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws TranslationException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ConfigException
      */
-    public function getMapiFeeRows(): array
+    public function getFees(): array
     {
         $return = [];
 
-        // In an initial state of this build, we decided to not in include fee's in the order lines for some
-        // reasons. One reason was that the fee's in WooCommerce potentially could conflict with future fee's
-        // set at Resurs Bank. The setup with fee's has also been considered not recommended, since they
-        // sometimes are not allowed to be in use anyway.
-        //
-        // The fee setup was however already in place when this was decided, so instead of removing it, we made
-        // this optional in cases where we want it back.
+        // Since Resurs don't add any fee's plugin-side, we only handle other built in fee's here.
         if (isset(WC()->cart) && WC()->cart instanceof WC_Cart) {
             $fees = WC()->cart->get_fees();
             if (is_array($fees) && count($fees)) {
@@ -170,15 +164,18 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * Create MAPI orderLine from WooCommerce shipping.
+     *
      * @return array
+     * @throws ConfigException
+     * @throws FilesystemException
      * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @throws \JsonException
-     * @throws \ReflectionException
-     * @throws FilesystemException
+     * @throws JsonException
+     * @throws ReflectionException
      * @throws TranslationException
      */
-    public function getMapiShippingRows(): array
+    public function getShipping(): array
     {
         $shipping = $this->cart->get_shipping_total();
 
@@ -203,10 +200,18 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * Get MAPI orderLine from WooCommerce coupons.
+     *
      * @return array
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
      */
-    public function getMapiCouponRows(): array
+    public function getCoupons(): array
     {
         $return = [];
 
@@ -263,167 +268,6 @@ class OrderHandler extends ResursDefault
     }
 
     /**
-     * Apply Resurs internal payment fee naturally.
-     *
-     * @return $this
-     * @throws Exception
-     * @since 0.0.1.5
-     */
-    private function setFee(): self
-    {
-        if (isset(WC()->cart) && WC()->cart instanceof WC_Cart && Data::isPaymentFeeAllowed()) {
-            $fees = WC()->cart->get_fees();
-            if (is_array($fees) && count($fees)) {
-                foreach ($fees as $fee) {
-                    Data::setDeveloperLog(
-                        __FUNCTION__,
-                        sprintf('Apply payment fee %s', $fee->amount)
-                    );
-
-                    $this->API->getConnection()->addOrderLine(
-                        $fee->id,
-                        $fee->name,
-                        $fee->amount,
-                        round(
-                            $fee->tax / $fee->total,
-                            wc_get_price_decimals()
-                        ) * 100
-                    );
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setShipping(): self
-    {
-        // Add when not free.
-        if ($this->cart->get_shipping_total() > 0) {
-            Data::setDeveloperLog(
-                __FUNCTION__,
-                sprintf('Apply shipping fee %s', $this->cart->get_shipping_total())
-            );
-
-            // Rounding is ironically used with wc settings.
-            $this->API->getConnection()->addOrderLine(
-                WordPress::applyFilters('getShippingName', 'shipping'),
-                WordPress::applyFilters(
-                    'getShippingDescription',
-                    __('Shipping', 'resurs-bank-payments-for-woocommerce')
-                ),
-                $this->cart->get_shipping_total(),
-                round(
-                    $this->cart->get_shipping_tax() / $this->cart->get_shipping_total(),
-                    wc_get_price_decimals()
-                ) * 100,
-                $this->getFromProduct('unit', null),
-                'SHIPPING_FEE'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setCoupon(): self
-    {
-        if (wc_coupons_enabled()) {
-            $coupons = $this->cart->get_coupons();
-
-            /**
-             * @var string $code
-             * @var WC_Coupon $coupon
-             */
-            foreach ($coupons as $code => $coupon) {
-                $couponDescription = $coupon->get_description();
-                if (empty($couponDescription)) {
-                    $couponDescription = $coupon->get_code();
-                }
-
-                // TODO: Store this information as metadata instead so each order gets handled
-                // TODO: properly in aftershop mode.
-                $discardCouponVat = (bool)Data::getResursOption('discard_coupon_vat');
-                $exTax = 0 - $this->cart->get_coupon_discount_amount($code);
-                $incTax = 0 - $this->cart->get_coupon_discount_amount($code, false);
-                $vatPct = (($incTax - $exTax) / $exTax) * 100;
-
-                Data::setDeveloperLog(
-                    __FUNCTION__,
-                    sprintf(
-                        'Apply coupon %s with VAT %d. Setting "discard_coupon_vat" is %s.',
-                        $coupon->get_id(),
-                        $vatPct,
-                        $discardCouponVat ? 'true' : 'false'
-                    )
-                );
-
-                $this->API->getConnection()->addOrderLine(
-                    $coupon->get_id(),
-                    WordPress::applyFilters(
-                        'getCouponDescription',
-                        $couponDescription
-                    ),
-                    0 - $this->cart->get_coupon_discount_amount(
-                        $coupon->get_code(),
-                        WordPress::applyFilters('couponsExTax', !$discardCouponVat, $coupon)
-                    ),
-                    WordPress::applyFilters('getCouponVatPct', !$discardCouponVat ? $vatPct : 0),
-                    $this->getFromProduct('unit', null),
-                    'DISCOUNT'
-                );
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setOrderRows(): OrderHandler
-    {
-        if (WooCommerce::getValidCart()) {
-            /** @var WC_Cart $cartList */
-            $cartList = WooCommerce::getValidCart(true);
-            foreach ($cartList as $item) {
-                /**
-                 * Data object is of type WC_Product_Simple actually.
-                 * @var WC_Product $productData
-                 */
-                $productData = $item['data'];
-
-                if ($productData !== null) {
-                    Data::setDeveloperLog(
-                        __FUNCTION__,
-                        sprintf(
-                            'Add order line %s.',
-                            $productData->get_id()
-                        )
-                    );
-                    $this->getMapiOrderProductRow(
-                        orderLineType: OrderLineType::PHYSICAL_GOODS,
-                        productData: $productData,
-                        wcProductItem: $item
-                    );
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @param WC_Order $order
      * @return bool
      * @throws Exception
@@ -464,16 +308,6 @@ class OrderHandler extends ResursDefault
         }
 
         return $return;
-    }
-
-    /**
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function getOrderLines(): array
-    {
-        return $this->API->getConnection()->getOrderLines();
     }
 
     /**

@@ -14,6 +14,7 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
@@ -52,18 +53,21 @@ class PaymentMethods
     /**
      * Outputs a template string of a table with listed payment methods.
      *
-     * @throws TranslationException
-     * @throws ValidationException
+     * @param string $storeId
+     * @return string
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
      * @throws CurlException
      * @throws EmptyValueException
-     * @throws AuthException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
-     * @throws IllegalTypeException
      * @throws ReflectionException
-     * @throws ApiException
-     * @throws CacheException
-     * @throws FilesystemException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws ConfigException
      * @todo Exception handling. WOO-804.
      */
     public static function getOutput(string $storeId): string

@@ -21,6 +21,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Locale\Locale;
 use Resursbank\Ecom\Lib\Log\FileLogger;
+use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -39,6 +40,7 @@ use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings;
+use Resursbank\Woocommerce\Settings\Advanced;
 use ResursException;
 use stdClass;
 use function count;
@@ -157,14 +159,15 @@ class ResursBankAPI
         }
 
         Config::setup(
-            logger: $fileLogger,
-            cache: new None(),
+            logger: Advanced::getLogger(),
+            cache: Advanced::getCache(),
             jwtAuth: new Jwt(
                 clientId: ClientId::getData(),
                 clientSecret: ClientSecret::getData(),
                 scope: $scope,
                 grantType: $grantType
             ),
+            logLevel: LogLevel::ERROR,
             locale: $locale
         );
     }
