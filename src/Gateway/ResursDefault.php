@@ -1881,15 +1881,11 @@ class ResursDefault extends WC_Payment_Gateway
         // Create order, but skip using the order reference that is used from WooCommerce.
         // This avoids order id collisions when we're on a network site where several stores may have
         // multiple tables with the same id.
-        $payment = Repository::create(
+        return Repository::create(
             storeId: StoreId::getData(),
             paymentMethodId: $this->getPaymentMethod(),
             orderLines: $this->getOrderLinesMapi(),
         );
-
-        // @todo Handle result from create.
-
-        return $return;
     }
 
     /**
