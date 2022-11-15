@@ -2534,32 +2534,23 @@ class Data
     }
 
     /**
-     * Complex settings for getAddress forms.
+     * How to handle getAddress forms.
      *
      * @return bool
-     * @since 0.0.1.0
-     * @todo Rewrite this code to be compatible with MAPI conditions and configuration.
-     * @todo Currently, this is mostly return as a true value for the moment.
+     * @throws Exception
      */
     public static function canUseGetAddressForm(): bool
     {
-        // Section for which merchants can decide if getAddress features should be disabled or not.
-        $getAddressDisabled = (bool)WordPress::applyFilters('getAddressDisabled', false);
+        /*
+         * - Check if getAddress is enabled in config.
+         * - Check if getAddress can be used based on the countryCode.
+         * @todo Some merchants wants to keep the entry field for the govid for countries that do not support the request,
+         * @todo to make the final order process more smooth (where we in short re-use this field to fill in the required
+         * @todo field in the payment method fields).
+         */
 
-        // @todo Make sure we check country code here before using it.
-        // @todo The boolean value should be inherited from the MAPI configuration in wp-admin as there's been
-        // @todo options before to have it entirely disabled on merchant levels as this has often been requested.
-        $return = true;
-        if ($getAddressDisabled) {
-            // Filter overrides the config settings.
-            /** @noinspection PhpConditionAlreadyCheckedInspection */
-            $return = $getAddressDisabled;
-        }
-
-        // @todo Inspections suggested to set this to true instantly, but it should be fetched from configuration,
-        // @todo so it has to be changed.
-        /** @noinspection PhpConditionAlreadyCheckedInspection */
-        return $return;
+        // Make sure the boolean in the filter-apply is returning a value from the config instead of always true.
+        return Data::getCustomerCountry() === 'SE' && WordPress::applyFilters('getAddressEnabled', true);
     }
 
     /**
