@@ -56,12 +56,16 @@ define(constant_name: 'RESURSBANK_ALLOW_PAYMENT_FEE',
     value: WordPress::applyFilters(filterName: 'allowPaymentFee', value: false)
 );
 
-// Early initiation.
-Config::setup(
-    logger: Advanced::getLogger(),
-    cache: Advanced::getCache(),
-    jwtAuth: Api::getJwt()
-);
+// Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
+try {
+    Config::setup(
+        logger: Advanced::getLogger(),
+        cache: Advanced::getCache(),
+        jwtAuth: Api::getJwt()
+    );
+} catch (Exception $e) {
+
+}
 
 // Translation domain is used for all phrases that is not relying on ecom2.
 load_plugin_textdomain(
