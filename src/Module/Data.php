@@ -14,6 +14,10 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Options\ClientId;
+use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Enabled;
+use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursException;
 use RuntimeException;
 use stdClass;
@@ -362,20 +366,11 @@ class Data
 
     /**
      * @return bool
-     * @since 0.0.1.2
-     */
-    public static function isExtendedTest(): bool
-    {
-        return (self::isTest() && self::getResursOption('extended_test_mode'));
-    }
-
-    /**
-     * @return bool
      * @since 0.0.1.0
      */
     public static function isTest(): bool
     {
-        return (self::getResursOption('environment', null, false) === 'test');
+        return Environment::getData() === 'test';
     }
 
     /**
@@ -1951,7 +1946,7 @@ class Data
     }
 
     /**
-     * Get current payment method from session.
+     * Get the current proper payment method from session. This is vital information for the checkout.
      *
      * @return string
      * @throws Exception
@@ -1973,6 +1968,9 @@ class Data
         // update. This value should be pushed out through the fragment update section to the front end
         // script so that the front-end script can see which payment method that is currently selected
         // and hide RCO if something else is active.
+
+        // This method are sometimes executed with a payment method in its post-request, and therefore must
+        // be processed before returning the value, since another value can be stored prior to this change.
         if (isset($_REQUEST['payment_method'])) {
             WooCommerce::setSessionValue('fragment_update_payment_method', $_REQUEST['payment_method']);
         }
@@ -1984,6 +1982,7 @@ class Data
      * Get the name of current checkout in use.
      * @return string
      * @since 0.0.1.0
+     * @todo We no longer use RCO. Can be removed. Do it safely.
      */
     public static function getCheckoutType(): string
     {
@@ -2365,10 +2364,12 @@ class Data
      *
      * @return bool
      * @since 0.0.1.0
+     * @todo There are several places that is still using this method instead of askign Enable:: directly.
+     * @todo Remove this method and use Enable:: instead, where it still is in use.
      */
     public static function isEnabled()
     {
-        return (bool)self::getResursOption('enabled');
+        return Enabled::isEnabled();
     }
 
     /**
@@ -2533,28 +2534,23 @@ class Data
     }
 
     /**
-     * Complex settings for getAddress forms.
+     * How to handle getAddress forms.
      *
-     * @return bool|mixed
-     * @since 0.0.1.0
+     * @return bool
+     * @throws Exception
      */
-    public static function canUseGetAddressForm(): mixed
+    public static function canUseGetAddressForm(): bool
     {
-        // Section for which merchants can decide if getAddress features should be disabled or not.
-        $getAddressDisabled = (bool)WordPress::applyFilters('getAddressDisabled', false);
+        /*
+         * - Check if getAddress is enabled in config.
+         * - Check if getAddress can be used based on the countryCode.
+         * @todo Some merchants wants to keep the entry field for the govid for countries that do not support the request,
+         * @todo to make the final order process more smooth (where we in short re-use this field to fill in the required
+         * @todo field in the payment method fields).
+         */
 
-        // @todo Prior 2.2-filter, that should be considered removed from this release.
-        $getAddressFormDefault = (bool)WordPress::applyFiltersDeprecated(
-            'resurs_getaddress_enabled',
-            self::getResursOption('get_address_form')
-        );
-        if ($getAddressDisabled) {
-            // Filter overrides the config settings.
-            /** @noinspection PhpConditionAlreadyCheckedInspection */
-            $getAddressFormDefault = $getAddressDisabled;
-        }
-
-        return $getAddressFormDefault;
+        // Make sure the boolean in the filter-apply is returning a value from the config instead of always true.
+        return Data::getCustomerCountry() === 'SE' && WordPress::applyFilters('getAddressEnabled', true);
     }
 
     /**
@@ -2745,19 +2741,13 @@ class Data
      */
     public static function hasCredentials(): bool
     {
-        try {
-            self::getResolvedCredentials();
-            $return = true;
-        } catch (RuntimeException $e) {
-            $return = false;
-        }
-
-        return $return;
+        return (ClientSecret::getData() !== '' && ClientId::getData() !== '');
     }
 
     /**
      * @throws Exception
      * @since 0.0.1.0
+     * @todo Can probably be removed. Make sure it's done safely, when switching code to MAPI.
      */
     public static function getResolvedCredentials(): bool
     {

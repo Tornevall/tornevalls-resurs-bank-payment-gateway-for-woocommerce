@@ -11,6 +11,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Cache\Filesystem;
 use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
@@ -51,7 +52,7 @@ class WooCommerce
      * @var string
      * @since 0.0.1.0
      */
-    public static $inCheckoutKey = 'customerWasInCheckout';
+    public static string $inCheckoutKey = 'customerWasInCheckout';
 
     /**
      * @var $basename
@@ -236,9 +237,10 @@ class WooCommerce
         // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
         try {
             if ($canUseTransientCache) {
-                // @todo Centralize Settings::Prefix to use with the key payment_methods as WC_Settings_Page is not
-                // @todo available from checkout pages..
-                $transientMethodList = get_transient(transient: 'resursbank_payment_methods');
+                // @todo there is a task for centralizing this transient to a cache already.
+                $transientMethodList = get_transient(
+                    transient: sprintf('%s_payment_methods', ResursDefault::PREFIX)
+                );
             }
 
             // @todo Build cache-driver for transients.
@@ -256,10 +258,12 @@ class WooCommerce
                 );
             }
 
+            $incrementMethodId = 0;
+            /** @var PaymentMethod $paymentMethod */
             foreach ($paymentMethodList as $paymentMethod) {
                 $gateway = new ResursDefault(resursPaymentMethod: $paymentMethod);
                 if ($gateway->is_available()) {
-                    $gateways[] = $gateway;
+                    $gateways[ResursDefault::PREFIX . '_'. $paymentMethod->id] = $gateway;
                 }
             }
         } catch (Exception $e) {
@@ -675,49 +679,41 @@ class WooCommerce
      *
      * @since 0.0.1.0
      */
-    public static function setIsInCheckout()
+    public static function setIsInCheckout(): void
     {
-        self::setCustomerCheckoutLocation(true);
+        self::setCustomerCheckoutLocation(customerIsInCheckout: true);
     }
 
     /**
-     * v3core: Checkout vs Cart Manipulation.
+     * Checkout vs Cart Manipulation. Makes sure that the customer is marked in as located in checkout and vice versa.
+     * This is for security reasons, where we prevent that cart is manipulated over several windows/tabs.
      *
      * @param $customerIsInCheckout
      * @since 0.0.1.0
      */
-    private static function setCustomerCheckoutLocation($customerIsInCheckout)
+    private static function setCustomerCheckoutLocation($customerIsInCheckout): void
     {
-        Data::writeLogEvent(
-            Data::CAN_LOG_JUNK,
-            sprintf(
-                __(
-                    'Session value %s set to %s.',
-                    'resurs-bank-payments-for-woocommerce'
-                ),
-                self::$inCheckoutKey,
-                $customerIsInCheckout ? 'true' : 'false'
-            )
-        );
-        self::setSessionValue(self::$inCheckoutKey, $customerIsInCheckout);
+        self::setSessionValue(key: self::$inCheckoutKey, value: $customerIsInCheckout);
     }
 
     /**
+     * The proper way to find out whether the customer is currently located in the checkout or not.
+     * @return mixed
+     * @throws Exception
+     */
+    public static function customerIsInCheckout(): mixed
+    {
+        return self::getSessionValue(key: self::$inCheckoutKey);
+    }
+
+    /**
+     * Set up a session based on how WooCommerce has it initiated. Value types are several.
      * @param string $key
-     * @param string|array|stdClass $value
+     * @param array|string|stdClass $value
      * @since 0.0.1.0
      */
-    public static function setSessionValue($key, $value)
+    public static function setSessionValue(string $key, array|string|stdClass $value): void
     {
-        Data::writeLogEvent(
-            Data::CAN_LOG_JUNK,
-            sprintf(
-                '%s, %s=%s',
-                __FUNCTION__,
-                $key,
-                is_string($value) ? $value : print_r($value, true)
-            )
-        );
         if (self::getSession()) {
             WC()->session->set($key, $value);
         } else {

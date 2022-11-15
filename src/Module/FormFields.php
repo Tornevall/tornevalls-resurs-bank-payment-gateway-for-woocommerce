@@ -1351,12 +1351,12 @@ class FormFields extends WC_Settings_API
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getGetAddressForm(null|WC_Checkout$wcCheckout, bool $returnAsHtml = false)
+    public static function getGetAddressForm(null|WC_Checkout$wcCheckout, bool $returnAsHtml = false): mixed
     {
         $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
         $customerTypeByConditions = Data::getCustomerType();
 
-        if (Data::isTest() && Data::isExtendedTest() && file_exists(Data::getGatewayPath() . '/testdata.json')) {
+        if (Data::isTest() && file_exists(Data::getGatewayPath() . '/testdata.json')) {
             try {
                 $testDataFile = Data::getGatewayPath() . '/testdata.json';
                 $liveTestData = json_decode(@file_get_contents($testDataFile), true, 512);
@@ -1384,16 +1384,7 @@ class FormFields extends WC_Settings_API
 
         Data::getSafeStyle();
 
-        // Note: As this feature is just generating the form via woocommerce_before_checkout_billing_form,
-        // it is not necessary to use this one.
-        /*woocommerce_form_field('rbGetAddressFields', [
-            'type' => 'text',
-            'class' => ['ssn form-row-wide resurs_ssn_field'],
-            'label' => 'govIdLabel',
-            'placeholder' => 'billing',
-        ], $wcCheckout->get_value('rbGetAddressFields'));*/
-
-        if ((bool)$returnAsHtml) {
+        if ($returnAsHtml) {
             return $return;
         } else {
             echo Data::getEscapedHtml($return);

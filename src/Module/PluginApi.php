@@ -7,6 +7,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use Resursbank\Ecom\Module\Customer\Repository as CustomerRepoitory;
 use Resursbank\Ecommerce\Types\Callback;
@@ -14,6 +15,7 @@ use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Options\StoreId;
 use ResursException;
 use RuntimeException;
 use TorneLIB\Data\Password;
@@ -1325,7 +1327,7 @@ class PluginApi
      * @throws Exception
      * @since 0.0.1.0
      */
-    public static function getAddress()
+    public static function getAddress(): void
     {
         $addressResponse = [];
         $identification = Data::getRequest('identification');
@@ -1348,32 +1350,24 @@ class PluginApi
 
         WooCommerce::setSessionValue('identification', Data::getRequest('identification'));
 
-        // getAddress for NO was explicitly available from ecom1 only.
+        // @todo Investigate getAddressByPhoneNumber (SOAP) if it will ever return to MAPI.
+        // @todo If not, this switch will be better off as an if.
         switch ($customerCountry) {
             case 'SE':
                 try {
                     // This request is a display-only solution, so it has to be returned as an array so
                     // that the fron script can fetch it.
                     $addressResponse = CustomerRepoitory::getAddress(
-                        ResursBankAPI::getStoreUuidByNationalId(Data::getStoreId()),
+                        StoreId::getData(),
                         $identification,
                         $customerType,
                     )->toArray();
-                    self::getAddressLog($customerCountry, $customerType, $identification, __(
-                        'By government id/company id (See customer type).',
-                        'resurs-bank-payments-for-woocommerce'
-                    ));
                 } catch (Exception $e) {
-                    self::getAddressLog(
-                        $customerCountry,
-                        $customerType,
-                        $identification,
+                    Config::getLogger()->error(
                         sprintf(
-                            __(
-                                'By government id/company id (See customer type), but failed: (%d) %s.',
-                                'resurs-bank-payments-for-woocommerce'
-                            ),
-                            $e->getCode(),
+                            '%s failed for %s with message %s',
+                            __FUNCTION__,
+                            $identification,
                             $e->getMessage()
                         )
                     );
@@ -1386,7 +1380,10 @@ class PluginApi
         $return['identificationResponse'] = $addressResponse;
         $return['billing_country'] = $customerCountry;
 
-        if (is_array($addressResponse) && count($addressResponse)) {
+        // Make sure we really got a valid content from the response since Resurs may return empties on
+        // API-errors even if the government id is valid and working. So we can not just verify that the response
+        // is an array, we also have to make sure it has content.
+        if (count($addressResponse)) {
             $return = self::getTransformedAddressResponse($return, $addressResponse);
         }
 

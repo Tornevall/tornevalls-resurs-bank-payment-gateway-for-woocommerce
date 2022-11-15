@@ -2,11 +2,11 @@
 
 /** @noinspection PhpUndefinedVariableInspection */
 
-use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
-use ResursBank\Gateway\ResursDefault;
+use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Options\Environment;
 
 if ($get_address_form || $get_address_form_always) { ?>
     <span id="rbGetAddressFields">
@@ -37,13 +37,13 @@ if ($get_address_form || $get_address_form_always) { ?>
                 name="resursSsnIdentification">
 
         <?php
-        if (Data::isExtendedTest() && Data::getCheckoutType() !== ResursDefault::TYPE_RCO) {
+        if (Environment::getData() === 'test') {
             $customerCountry = strtoupper(Data::getCustomerCountry());
-            $chosenCustomerType = Data::getCustomerType()->value;
+            $chosenCustomerType = Data::getCustomerType();
             $civicNumberOptions = [];
             if (empty($chosenCustomerType)) {
                 // We can not rely on the CustomerType enum here.
-                $chosenCustomerType = WooCommerce::hasMethodsNatural() ? 'NATURAL' : 'LEGAL';
+                $chosenCustomerType = WooCommerce::hasMethodsNatural() ? CustomerType::NATURAL : CustomerType::LEGAL;
             }
             if (isset($liveTestData[$customerCountry]['payments']['civicNumber']) &&
                 is_array($liveTestData[$customerCountry]['payments']['civicNumber']) &&
@@ -54,8 +54,8 @@ if ($get_address_form || $get_address_form_always) { ?>
                     foreach ($civicNumberList as $civicType => $civicNumber) {
                         $isCompanyCivic = (bool)preg_match('/^company/i', $civicType);
                         // We can not rely on the CustomerType enum here.
-                        if (($chosenCustomerType !== 'LEGAL' && $isCompanyCivic) ||
-                            ($chosenCustomerType !== 'NATURAL' && !$isCompanyCivic)) {
+                        if (($chosenCustomerType !== CustomerType::LEGAL && $isCompanyCivic) ||
+                            ($chosenCustomerType !== CustomerType::NATURAL && !$isCompanyCivic)) {
                             continue;
                         }
                         $civicNumberOptions[] = sprintf(
@@ -95,7 +95,7 @@ if ($get_address_form || $get_address_form_always) { ?>
         $currentCustomerType = Data::getCustomerType();
         if (empty($currentCustomerType)) {
             // What we default to depends on what we have.
-            $chosenCustomerType = WooCommerce::hasMethodsNatural() ? 'NATURAL' : 'LEGAL';
+            $chosenCustomerType = WooCommerce::hasMethodsNatural() ? CustomerType::NATURAL : CustomerType::LEGAL;
         } else {
             $chosenCustomerType = $currentCustomerType;
         }
@@ -103,7 +103,7 @@ if ($get_address_form || $get_address_form_always) { ?>
         if (WooCommerce::hasDualCustomerTypes()) {
             $switchToMessageString = WordPress::applyFilters(
                 'getSwitchToCustomerTypeString',
-                $chosenCustomerType === 'LEGAL' ? 'LEGAL' : 'NATURAL',
+                $chosenCustomerType === CustomerType::LEGAL ? 'LEGAL' : 'NATURAL',
                 ''
             ); ?>
         <button
