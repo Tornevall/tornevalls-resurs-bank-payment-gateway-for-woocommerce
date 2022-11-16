@@ -1837,7 +1837,7 @@ class Data
     {
         $return = false;
         if (self::isTest() && (bool)self::getResursOption('allow_mocking', null, false)) {
-            $mockOptionName = Strings::returnSnakeCase(sprintf('mock%s', ucfirst($specificMock)));
+            $mockOptionName = WordPress::getSnakeCase(sprintf('mock%s', ucfirst($specificMock)));
             if (self::getResursOption(
                 $mockOptionName,
                 null,

@@ -31,6 +31,7 @@ use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
+use Resursbank\Ecom\Lib\Utilities\Strings;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
@@ -49,9 +50,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use ResursException;
 use RuntimeException;
 use stdClass;
-use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\Domain;
-use TorneLIB\Utils\Generic;
 use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
@@ -811,7 +810,7 @@ class ResursDefault extends WC_Payment_Gateway
         $return = json_encode(array_merge((array)$addArray, $this->apiData));
 
         if ((bool)$encode) {
-            $return = Data::base64urlEncode($return);
+            $return = Strings::base64urlEncode($return);
         }
 
         return (string)$return;
@@ -1878,8 +1877,8 @@ class ResursDefault extends WC_Payment_Gateway
         if (isset($_REQUEST['apiData'])) {
             $this->getApiByRco();
             $this->setApiData(json_decode(
-                Data::base64urlDecode(Data::getRequest('apiData')),
-                true
+                Strings::base64urlDecode(Data::getRequest('apiData')),
+                associative: true
             ));
 
             $this->order = $this->getCurrentOrder();
