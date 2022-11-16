@@ -167,6 +167,9 @@ class ErrorHandler
             if (isset($decoded->message) && is_string(value: $decoded->message)) {
                 $message .= (!empty($message) ? ', ' : '') . $decoded->message . ' ';
             }
+            if (isset($decoded->traceId) && is_string(value: $decoded->traceId)) {
+                $message .= (!empty($message) ? ', ' : '') . '[Trace ID: ' . $decoded->traceId . ']';
+            }
         }
 
         return $message;
