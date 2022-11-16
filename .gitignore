@@ -1,3 +1,4 @@
 .svn
 composer.lock
 vendor/resursbank/ecomphp/tests/
+**.git
