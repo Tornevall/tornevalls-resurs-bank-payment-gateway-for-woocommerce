@@ -15,19 +15,28 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Order\CountryCode;
+use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
-use Resursbank\Ecommerce\Types\CheckoutType;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\ResursBankAPI;
@@ -499,8 +508,20 @@ class ResursDefault extends WC_Payment_Gateway
     {
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
         if (Enabled::isEnabled()) {
+            // If we have any header scripts, they should be loaded through this action.
             add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
         }
+    }
+
+    /**
+     * Enqueue scripts that is necessary for RCO (v2) to run properly.
+     *
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getHeaderScripts()
+    {
+        // If we have any header scripts again, they should be loaded through this action.
     }
 
     /**
@@ -618,215 +639,88 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Enqueue scripts that is necessary for RCO (v2) to run properly.
-     *
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function getHeaderScripts()
-    {
-        if (!(bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null) &&
-            Data::getCheckoutType() === self::TYPE_RCO
-        ) {
-            WooCommerce::setSessionValue(WooCommerce::$inCheckoutKey, true);
-
-            $this->processRco();
-        }
-    }
-
-    /**
-     * Standard Resurs Checkout. Not interceptor ready.
-     *
-     * @throws Exception
-     * @since 0.0.1.0
-     * @todo Fix this. There's currently no RCO available in this module.
-     */
-    private function processRco()
-    {
-        // setFraudFlags can not be set for this checkout type.
-        $this->API->setCheckoutType(CheckoutType::RESURS_CHECKOUT);
-
-        // Prevent recreation of an iframe, when it is not needed.
-        // This could crash the order completion (at the successUrl).
-        if (WooCommerce::getValidCart() && WooCommerce::getSessionValue(WooCommerce::$inCheckoutKey)) {
-            $this->setOrderData();
-
-            $paymentId = $this->getProperPaymentId();
-            try {
-                WooCommerce::applyMock('createIframeException');
-                $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
-                $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
-            } catch (Exception $e) {
-                Data::writeLogEvent(
-                    Data::CAN_LOG_ORDER_EVENTS,
-                    sprintf(
-                        __(
-                            'An error (%s, code %s) occurred during the iframe creation. Retrying with a new ' .
-                            'payment id.',
-                            'resurs-bank-payments-for-woocommerce'
-                        ),
-                        $e->getMessage(),
-                        $e->getCode()
-                    )
-                );
-                $paymentId = $this->getProperPaymentId(true);
-                try {
-                    $this->rcoFrame = $this->API->getConnection()->createPayment($paymentId);
-                    $this->rcoFrameData = $this->API->getConnection()->getFullCheckoutResponse();
-                } catch (Exception $e) {
-                    $this->rcoFrameData = new stdClass();
-                    $this->rcoFrameData->script = '';
-                    $this->rcoFrameData->exception = [
-                        'code' => $e->getCode(),
-                        'message' => $e->getMessage(),
-                    ];
-                }
-            } // End of exception.
-
-            // Special method that is use when RCO is active.
-            /** @noinspection PhpUndefinedMethodInspection */
-            $this->rcoFrameData->legacy = $this->paymentMethodInformation->isLegacyIframe($this->rcoFrameData);
-
-            // Since legacy is still a thing, we still need to fetch this variable, even if it is slightly isolated.
-            WooCommerce::setSessionValue('rco_legacy', $this->rcoFrameData->legacy);
-
-            $this->getProperRcoEnqueue();
-        }
-    }
-
-    /**
-     * Global order data handler for where we prepare the order with basic data.
-     * This section applies to all flows.
-     *
-     * @return void
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setOrderData(): void
-    {
-        Data::setDeveloperLog(__FUNCTION__, 'Start.');
-
-        // Handle customer data from checkout only if this is not RCO (unless there is an order ready).
-        // RCO handles them externally.
-        if ($this->order && Data::getCheckoutType() !== self::TYPE_RCO) {
-            $this
-                ->setCustomer();
-        }
-
-        $this
-            ->setCustomerId()
-            ->setStoreId()
-            ->getOrderLinesRco()
-            ->setSigning();
-        Data::setDeveloperLog(fromFunction: __FUNCTION__, message: 'Done.');
-    }
-
-    /**
      * Set up customer data for the order.
-     * @return void
+     * @return Customer
+     * @throws IllegalValueException
+     * @throws IllegalCharsetException
      * @throws Exception
-     * @since 0.0.1.0
-     * @todo This relates to ecom1 and should be handled elsewhere in MAPI.
      */
-    private function setCustomer(): void
+    private function getCustomer(): Customer
     {
-        $governmentId = $this->getCustomerData('government_id');
-        $customerType = Data::getCustomerType();
-        Data::setDeveloperLog(__FUNCTION__, sprintf('setCountryByCountryCode:%s', $this->getCustomerData('country')));
-        $this->API->getConnection()->setCountryByCountryCode($this->getCustomerData('country'));
-        if ($governmentId) {
-            Data::setDeveloperLog(__FUNCTION__, 'setBillingByGetAddress');
-            // Prepare a billing address if government id is present.
-            $this->API->getConnection()->setBillingByGetAddress($governmentId);
-        } else {
-            Data::setDeveloperLog(__FUNCTION__, 'setBillingAddress:WC_Order');
-            $this->API->getConnection()->setBillingAddress(
-                $this->getCustomerData('full_name'),
-                $this->getCustomerData('first_name'),
-                $this->getCustomerData('last_name'),
-                $this->getCustomerData('address_1'),
-                $this->getCustomerData('address_2'),
-                $this->getCustomerData('city'),
-                $this->getCustomerData('postcode'),
-                $this->getCustomerData('country')
-            );
-        }
-
-        if (isset($_REQUEST['ship_to_different_address'])) {
-            Data::setDeveloperLog(__FUNCTION__, 'setDeliveryAddress:WC_Order:billing');
-            $this->API->getConnection()->setDeliveryAddress(
-                $this->getCustomerData('full_name', 'shipping'),
-                $this->getCustomerData('first_name', 'shipping'),
-                $this->getCustomerData('last_name', 'shipping'),
-                $this->getCustomerData('address_1', 'shipping'),
-                $this->getCustomerData('address_2', 'shipping'),
-                $this->getCustomerData('city', 'shipping'),
-                $this->getCustomerData('postcode', 'shipping'),
-                $this->getCustomerData('country', 'shipping')
-            );
-        }
-
-        $govIdData = $customerType === 'NATURAL' ? $this->getCustomerData('government_id') :
+        $customerInfoFrom = isset($_REQUEST['ship_to_different_address']) ? 'shipping' : 'billing';
+        $governmentId = Data::getCustomerType() === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
-        Data::writeLogEvent(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                '%s: govIdData %s',
-                __FUNCTION__,
-                $govIdData
+        // @todo This is a temporary fix until we use form fields or another way to fetch government id's.
+        // @todo This includes getAddress-templates.
+        if (empty($governmentId) && ($sessionIdentification = WooCommerce::getSessionValue('identification'))) {
+            $governmentId = $sessionIdentification;
+        }
+
+        // $this->getCustomerData('phone')
+        // $this->getCustomerData('contact_government_id')
+        return new Customer(
+            deliveryAddress: new Address(
+                addressRow1: $this->getCustomerData('address_1', $customerInfoFrom),
+                postalArea: $this->getCustomerData('city', $customerInfoFrom),
+                postalCode: $this->getCustomerData('postcode', $customerInfoFrom),
+                countryCode: CountryCode::from($this->getCustomerData('country', $customerInfoFrom)),
+                fullName: $this->getCustomerData('full_name', $customerInfoFrom),
+                firstName: $this->getCustomerData('first_name', $customerInfoFrom),
+                lastName: $this->getCustomerData('last_name', $customerInfoFrom),
+                addressRow2: $this->getCustomerData('address_2', $customerInfoFrom),
+            ),
+            customerType: Data::getCustomerType(),
+            contactPerson: $this->getCustomerData('full_name', $customerInfoFrom),
+            email: $this->getCustomerData('email'),
+            governmentId: $governmentId,
+            mobilePhone: $this->getCustomerData('mobile'),
+            deviceInfo: new DeviceInfo(
+                ip: $_SERVER['REMOTE_ADDR'],
+                userAgent: $_SERVER['HTTP_USER_AGENT']
             )
         );
-
-        Data::setDeveloperLog(__FUNCTION__, 'setApiCustomer:$_POST');
-        $this->API->getConnection()->setCustomer(
-            $govIdData,
-            $this->getCustomerData('phone'),
-            $this->getCustomerData('mobile'),
-            $this->getCustomerData('email'),
-            $customerType,
-            $this->getCustomerData('contact_government_id')
-        );
-
     }
 
     /**
      * Fetch proper customer data from applicant form request.
      *
-     * @param $key
-     * @param $returnType
+     * @param string $key
+     * @param string $returnType
      * @return string
      * @since 0.0.1.0
+     * @noinspection PhpArrayIsAlwaysEmptyInspection
      */
-    private function getCustomerData($key, $returnType = null): string
+    private function getCustomerData(string $key, string $returnType = 'billing'): string
     {
-        // applicantPostData has been sanitized before reaching this point.
+        // Primarily, this data has higher priority over internal data as this is based on custom fields.
+        // applicantPostData has been sanitized prior to this point.
         $return = $this->applicantPostData[$key] ?? '';
-
-        if ($key === 'mobile' && isset($return['phone']) && !$return) {
-            $return = $return['phone'];
-        }
-        if ($key === 'phone' && isset($return['mobile']) && !$return) {
-            $return = $return['phone'];
-        }
 
         // If it's not in the post data, it could possibly be found in the order maintained from the order.
         $billingAddress = $this->order->get_address();
         $deliveryAddress = $this->order->get_address('shipping');
 
-        if ((!$returnType || $returnType === 'billing') && !$return && isset($billingAddress[$key])) {
-            $return = $billingAddress[$key];
-        }
-        if (($returnType === 'shipping' || $returnType === 'delivery') && !$return && isset($deliveryAddress[$key])) {
-            $return = $deliveryAddress[$key];
+        $customerInfo = $billingAddress;
+        if ($returnType === 'shipping' || $returnType === 'delivery') {
+            $customerInfo = $deliveryAddress;
         }
 
+        if (isset($customerInfo[$key])) {
+            $return = $customerInfo[$key];
+        }
+
+        // Mobile is usually not included in WooCommerce fields, so the return value is still empty here,
+        // we should fetch mobile from billing phone field instead.
+        if ($key === 'mobile' && !$return && isset($customerInfo['phone'])) {
+            $return = $customerInfo['phone'];
+        }
+
+        // Magic for full name.
         if ($key === 'full_name') {
             // Full name is a merge from first and last name. It's made up but sometimes necessary.
             $return = sprintf('%s %s', $this->getCustomerData('first_name'), $this->getCustomerData('last_name'));
         }
-
-        Data::writeLogEvent(Data::CAN_LOG_JUNK, sprintf('%s:%s,%s', __FUNCTION__, $key, $return));
 
         return (string)$return;
     }
@@ -1589,21 +1483,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Url-generator for admin options
-     *
-     * @since 0.0.1.0
-     */
-    public function admin_options()
-    {
-        $_REQUEST['tab'] = Data::getPrefix('admin');
-        $url = admin_url('admin.php');
-        $url = add_query_arg('page', Data::getRequest('page'), $url);
-        $url = add_query_arg('tab', Data::getRequest('tab'), $url);
-        wp_safe_redirect($url);
-        die('Deprecated space');
-    }
-
-    /**
      * Simplified checkout form field generator. This is WooCommerce-specific inherits for which we render
      * fields required by Resurs.
      *
@@ -1614,12 +1493,20 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function payment_fields()
     {
-        $fieldHtml = 'Display fields for method here.';
+        /* Remember: When we display the fields, we must also make sure that WordPress is the part that sanitize
+         * and display the fields. Therefore, we eventually need to tell WordPress further about safe styling.
 
+           add_filter('safe_style_css', function ($styles) {
+                $styles[] = 'display';
+                return $styles;
+            });
 
-        return $fieldHtml;
+         */
+
+        // @todo See the code after the return part. This smaller is just temporary.
+        return 'Display "USP" - and eventually on demand also government id fields here.';
+
         // @todo All code below is deprecated and should be replaced.
-
         // If not here, no fields are required.
         /** @noinspection PhpUndefinedFieldInspection */
         $requiredFields = FormFields::getSpecificTypeFields(
@@ -1745,21 +1632,15 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param $order
+     * @param WC_Order $order
      * @param string $result
-     * @param null $resursReturnUrl
      * @return string
      * @since 0.0.1.0
      * @noinspection ParameterDefaultValueIsNotNullInspection
      */
-    private function getReturnUrl($order, $result = 'failure', $resursReturnUrl = null)
+    private function getReturnUrl(WC_Order $order, string $result = 'failure'): string
     {
-        $returnUrl = $this->get_return_url($order);
-        if (empty($resursReturnUrl)) {
-            $returnUrl = $resursReturnUrl;
-        }
-
-        return $result === 'success' ? $returnUrl : html_entity_decode($order->get_cancel_order_url());
+        return $result === 'success' ? $this->get_return_url($order) : html_entity_decode($order->get_cancel_order_url());
     }
 
     /**
@@ -1877,7 +1758,7 @@ class ResursDefault extends WC_Payment_Gateway
         // Defaults returning to WooCommerce if not successful.
         $return = [
             'result' => 'failure',
-            'redirect' => $this->getReturnUrl($order)
+            'redirect' => $this->getReturnUrl($order),
         ];
 
         try {
@@ -1885,24 +1766,76 @@ class ResursDefault extends WC_Payment_Gateway
             // No order reference is passed to ecom at this point, to avoid order id collisions in both ends.
             // If we're on a WordPress Network site where several stores may have multiple tables with same
             // order id-collection, this way of handling orders helps a lot.
+            $paymentResponse = PaymentRepository::create(
+                storeId: StoreId::getData(),
+                paymentMethodId: $this->getPaymentMethod(),
+                orderLines: $this->getOrderLinesMapi(),
+                customer: $this->getCustomer(),
+                options: $this->getOptions($order),
+            );
             $return = $this->getReturnResponse(
-                PaymentRepository::create(
-                    storeId: StoreId::getData(),
-                    paymentMethodId: $this->getPaymentMethod(),
-                    orderLines: $this->getOrderLinesMapi(),
-                ),
+                $paymentResponse,
                 return: $return,
                 order: $order
             );
+
+            // @todo Add meta data at Resurs with WooCommerce order id ($order->get_id()).
+            Data::setOrderMeta($order, 'orderReference', $paymentResponse->order->orderReference);
         } catch (Exception $createPaymentException) {
             // Add note to notices and write to log.
             $order->add_order_note(
                 $createPaymentException->getMessage()
             );
             Config::getLogger()->error($createPaymentException);
+            // Add on-screen message from failure.
+            wc_add_notice($createPaymentException->getMessage(), 'error');
         }
 
         return $return;
+    }
+
+    /**
+     * @param WC_Order $order
+     * @return Options
+     * @throws IllegalValueException
+     */
+    private function getOptions(WC_Order $order): Options
+    {
+        // @todo Some of the defaults here should be changed to configurable options through the admin panel.
+        return new Options(
+            initiatedOnCustomerDevice: true,
+            handleManualInspection: false,
+            handleFrozenPayments: false,
+            redirectionUrls: new RedirectionUrls(
+                customer: new ParticipantRedirectionUrls(
+                    failUrl: $this->getReturnUrl($order, 'failure'),
+                    successUrl: $this->getReturnUrl($order, 'success')
+                ),
+                coApplicant: null,
+                merchant: null
+            ),
+            callbacks: new Callbacks(
+                authorization: new Options\Callback(
+                    url: $this->getCallbackUrl('authorization'),
+                    description: 'Authorization callback'
+                ),
+                management: new Options\Callback(
+                    url: $this->getCallbackUrl('management'),
+                    description: 'Management callback'
+                ),
+            ),
+            timeToLiveInMinutes: 120,
+        );
+    }
+
+    /**
+     * @param string $urlType
+     * @return string
+     */
+    private function getCallbackUrl(string $urlType): string
+    {
+        // @todo Generate proper url.
+        return Data::getGatewayUrl() . '/callback/' . $urlType;
     }
 
     /**
