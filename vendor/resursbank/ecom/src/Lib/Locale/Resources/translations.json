@@ -108,5 +108,19 @@
       "fi": "laivaus",
       "sv": "frakt"
     }
+  },
+  {
+    "id": "pay-in-installments-with-resurs-bank",
+    "translation": {
+      "en": "Pay in installments with Resurs Bank",
+      "sv": "Delbetala med Resurs Bank"
+    }
+  },
+  {
+    "id": "starting-at",
+    "translation": {
+      "en": "Starting at %1 per month, for %2 months",
+      "sv": "Från %1 per månad, i %2 månader"
+    }
   }
 ]
