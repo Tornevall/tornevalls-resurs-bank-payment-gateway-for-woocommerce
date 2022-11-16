@@ -23,6 +23,7 @@ use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
@@ -639,6 +640,7 @@ class ResursDefault extends WC_Payment_Gateway
             $this->getCustomerData('applicant_government_id');
 
         // @todo This is a temporary fix until we use form fields or another way to fetch government id's.
+        // @todo This includes getAddress-templates.
         if (empty($governmentId) && ($sessionIdentification = WooCommerce::getSessionValue('identification'))) {
             $governmentId = $sessionIdentification;
         }
@@ -660,7 +662,11 @@ class ResursDefault extends WC_Payment_Gateway
             contactPerson: $this->getCustomerData('full_name', $customerInfoFrom),
             email: $this->getCustomerData('email'),
             governmentId: $governmentId,
-            mobilePhone: $this->getCustomerData('mobile')
+            mobilePhone: $this->getCustomerData('mobile'),
+            deviceInfo: new DeviceInfo(
+                ip: $_SERVER['REMOTE_ADDR'],
+                userAgent: $_SERVER['HTTP_USER_AGENT']
+            )
         );
     }
 
@@ -675,27 +681,30 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getCustomerData(string $key, string $returnType = 'billing'): string
     {
-        // applicantPostData has been sanitized before reaching this point.
+        // Primarily, this data has higher priority over internal data as this is based on custom fields.
+        // applicantPostData has been sanitized prior to this point.
         $return = $this->applicantPostData[$key] ?? '';
-
-        if ($key === 'mobile' && isset($return['phone']) && !$return) {
-            $return = $return['phone'];
-        }
-        if ($key === 'phone' && isset($return['mobile']) && !$return) {
-            $return = $return['phone'];
-        }
 
         // If it's not in the post data, it could possibly be found in the order maintained from the order.
         $billingAddress = $this->order->get_address();
         $deliveryAddress = $this->order->get_address('shipping');
 
-        if ((!$returnType || $returnType === 'billing') && !$return && isset($billingAddress[$key])) {
-            $return = $billingAddress[$key];
-        }
-        if (($returnType === 'shipping' || $returnType === 'delivery') && !$return && isset($deliveryAddress[$key])) {
-            $return = $deliveryAddress[$key];
+        $customerInfo = $billingAddress;
+        if ($returnType === 'shipping' || $returnType === 'delivery') {
+            $customerInfo = $deliveryAddress;
         }
 
+        if (isset($customerInfo[$key])) {
+            $return = $customerInfo[$key];
+        }
+
+        // Mobile is usually not included in WooCommerce fields, so the return value is still empty here,
+        // we should fetch mobile from billing phone field instead.
+        if ($key === 'mobile' && !$return && isset($customerInfo['phone'])) {
+            $return = $customerInfo['phone'];
+        }
+
+        // Magic for full name.
         if ($key === 'full_name') {
             // Full name is a merge from first and last name. It's made up but sometimes necessary.
             $return = sprintf('%s %s', $this->getCustomerData('first_name'), $this->getCustomerData('last_name'));
@@ -1745,18 +1754,21 @@ class ResursDefault extends WC_Payment_Gateway
             // No order reference is passed to ecom at this point, to avoid order id collisions in both ends.
             // If we're on a WordPress Network site where several stores may have multiple tables with same
             // order id-collection, this way of handling orders helps a lot.
+            $paymentResponse = PaymentRepository::create(
+                storeId: StoreId::getData(),
+                paymentMethodId: $this->getPaymentMethod(),
+                orderLines: $this->getOrderLinesMapi(),
+                customer: $this->getCustomer(),
+                options: $this->getOptions($order),
+            );
             $return = $this->getReturnResponse(
-                PaymentRepository::create(
-                    storeId: StoreId::getData(),
-                    paymentMethodId: $this->getPaymentMethod(),
-                    orderLines: $this->getOrderLinesMapi(),
-                    customer: $this->getCustomer(),
-                    options: $this->getOptions($order),
-                ),
+                $paymentResponse,
                 return: $return,
                 order: $order
             );
-            // @todo id: payment reference, must be set in meta.
+
+            // @todo Add meta data at Resurs with WooCommerce order id ($order->get_id()).
+            Data::setOrderMeta($order, 'orderReference', $paymentResponse->order->orderReference);
         } catch (Exception $createPaymentException) {
             // Add note to notices and write to log.
             $order->add_order_note(
