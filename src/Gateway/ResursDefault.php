@@ -508,7 +508,8 @@ class ResursDefault extends WC_Payment_Gateway
     {
         add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
         if (Enabled::isEnabled()) {
-            // Reserved for actions like header scripts etc.
+            // If we have any header scripts, they should be loaded through this action.
+            add_action('wp_enqueue_scripts', [$this, 'getHeaderScripts'], 0);
         }
     }
 
