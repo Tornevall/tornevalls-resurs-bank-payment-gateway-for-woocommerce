@@ -514,6 +514,17 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Enqueue scripts that is necessary for RCO (v2) to run properly.
+     *
+     * @throws Exception
+     * @since 0.0.1.0
+     */
+    public function getHeaderScripts()
+    {
+        // If we have any header scripts again, they should be loaded through this action.
+    }
+
+    /**
      * Get specific payment method information.
      * @param $key
      * @return null|mixed
