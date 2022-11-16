@@ -195,15 +195,6 @@ class ResursDefault extends WC_Payment_Gateway
     private PaymentMethod $paymentMethodInformation;
 
     /**
-     * Generic library, mainly used for automatically handling templates.
-     *
-     * @var Generic $generic
-     * @since 0.0.1.0
-     * @todo Import generic library (remaining methods) to ecom2 instead.
-     */
-    private $generic;
-
-    /**
      * ResursDefault constructor.
      *
      * @param PaymentMethod|null $resursPaymentMethod Making sure the gateway is reachable even if initialization has failed.
@@ -236,9 +227,6 @@ class ResursDefault extends WC_Payment_Gateway
         if ($woocommerce->cart instanceof WC_Cart) {
             $this->cart = $woocommerce->cart;
         }
-
-        // @todo Switch this class to something else. This is mostly used for displaying templates in phtml-format.
-        $this->generic = Data::getGenericClass();
 
         // Below is initial default preparations for the gateway, which is normally used to show up in wp-admin
         // When this class is initialized with a proper $paymentMethod, we can instead use it to set up the gateway
@@ -823,7 +811,7 @@ class ResursDefault extends WC_Payment_Gateway
         $return = json_encode(array_merge((array)$addArray, $this->apiData));
 
         if ((bool)$encode) {
-            $return = (new Strings())->base64urlEncode($return);
+            $return = Data::base64urlEncode($return);
         }
 
         return (string)$return;
@@ -1547,6 +1535,7 @@ class ResursDefault extends WC_Payment_Gateway
                             $displayField = true;
                         }
                 }
+                // Code breaking disabled.
                 /** @noinspection SpellCheckingInspection */
                 $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
                     'displayMode' => $displayField ? '' : 'none',
@@ -1564,12 +1553,13 @@ class ResursDefault extends WC_Payment_Gateway
                 ]);
             }
 
+            // Code breaking disabled.
             /** @noinspection SpellCheckingInspection */
-            $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
+            /*$fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
                 'method' => $this->paymentMethodInformation,
                 'total' => $this->cart->total ?? 0,
                 'customDescription' => WooCommerce::getCustomDescription($this->paymentMethodInformation->id),
-            ]);
+            ]);*/
 
             // Considering this place as a safe place to apply display in styles.
             add_filter('safe_style_css', function ($styles) {
@@ -1888,7 +1878,7 @@ class ResursDefault extends WC_Payment_Gateway
         if (isset($_REQUEST['apiData'])) {
             $this->getApiByRco();
             $this->setApiData(json_decode(
-                (new Strings())->base64urlDecode(Data::getRequest('apiData')),
+                Data::base64urlDecode(Data::getRequest('apiData')),
                 true
             ));
 

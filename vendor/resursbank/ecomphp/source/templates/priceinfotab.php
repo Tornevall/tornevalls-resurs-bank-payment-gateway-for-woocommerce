@@ -1,1 +1,0 @@
-<button class="priceinfotablink" onclick="openPriceInfo(event, '<?php echo $methodHash ?>')"><?php echo $methodName ?></button>

@@ -4,6 +4,7 @@ namespace ResursBank\Service;
 
 use Exception;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
@@ -121,7 +122,7 @@ class WordPress
         ];
 
         foreach ($actionList as $action) {
-            $camelCaseAction = sprintf('ResursBank\Module\PluginApi::%s', Strings::returnCamelCase($action));
+            $camelCaseAction = sprintf('ResursBank\Module\PluginApi::%s', self::getCamelCase($action));
             add_action(
                 sprintf('rbwc_%s', $action),
                 $camelCaseAction
@@ -479,12 +480,44 @@ class WordPress
     public static function getFilterName($filterName): string
     {
         $return = $filterName;
-        if (defined('RESURSBANK_SNAKE_CASE_FILTERS')) {
-            $return = (new Strings())->getSnakeCase($filterName);
+
+        if (defined(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS')) {
+            $return = self::getSnakeCase($filterName);
         }
 
         return $return;
     }
+
+    /**
+     * Temporarily moved snake_case-converter from ecom1 to here.
+     * @param $string
+     * @return string
+     * @todo We can either push this up to ecom2, or we can just drop this requirement entirely when we reach
+     * @todo that point.
+     */
+    public static function getSnakeCase($string): string
+    {
+        $return = preg_split('/(?=[A-Z])/', $string);
+
+        if (is_array($return)) {
+            $return = implode('_', array_map('strtolower', $return));
+        }
+
+        return (string)$return;
+    }
+
+    /**
+     * Temporarily moved camelCase-converter from ecom1 to here.
+     * @param $string
+     * @return string
+     * @todo We can either push this up to ecom2, or we can just drop this requirement entirely when we reach
+     * @todo that point.
+     */
+    public static function getCamelCase($string): string
+    {
+        return lcfirst(implode(@array_map("ucfirst", preg_split('/-|_|\s+/', $string))));
+    }
+
 
     /**
      * Clean up arguments and return the real ones.
@@ -671,6 +704,7 @@ class WordPress
      *
      * @param $return
      * @return mixed
+     * @throws ConfigException
      * @since 0.0.1.0
      */
     private static function getLocalizationDataAdmin($return)
@@ -679,7 +713,7 @@ class WordPress
         $return['prefix'] = Data::getPrefix();
         $return['current_section'] = $current_section;
         $return['noncify'] = self::getNonce('admin');
-        $return['environment'] = ResursBankAPI::getEnvironment();
+        $return['environment'] = Config::isProduction() ? 'prod' : 'test';
         $return['wsdl'] = ResursBankAPI::getWsdlMode();
         $return['translate_checkout_rco'] = __(
             'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
