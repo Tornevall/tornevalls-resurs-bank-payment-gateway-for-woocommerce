@@ -1462,21 +1462,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Url-generator for admin options
-     *
-     * @since 0.0.1.0
-     */
-    public function admin_options()
-    {
-        $_REQUEST['tab'] = Data::getPrefix('admin');
-        $url = admin_url('admin.php');
-        $url = add_query_arg('page', Data::getRequest('page'), $url);
-        $url = add_query_arg('tab', Data::getRequest('tab'), $url);
-        wp_safe_redirect($url);
-        die('Deprecated space');
-    }
-
-    /**
      * Simplified checkout form field generator. This is WooCommerce-specific inherits for which we render
      * fields required by Resurs.
      *
@@ -1487,8 +1472,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function payment_fields()
     {
-        $fieldHtml = 'Display fields for method here.';
-
+        // @todo See the code after the return part. This smaller is just temporary.
+        $fieldHtml = 'Display "USP" - and eventually on demand also government id fields here.';
 
         return $fieldHtml;
         // @todo All code below is deprecated and should be replaced.
