@@ -8,9 +8,11 @@ namespace ResursBank\Module;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Order\CustomerType;
+use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
@@ -132,12 +134,6 @@ class Data
         'resursbank_all' => 'resursbank_global.js',
         'resursbank_admin' => 'resursbank_admin.js',
     ];
-
-    /**
-     * @var Generic $genericClass
-     * @since 0.0.1.0
-     */
-    private static $genericClass;
 
     /**
      * @var array $jsDependencies List of dependencies for the scripts in this plugin.
@@ -1088,20 +1084,6 @@ class Data
     }
 
     /**
-     * @return Generic
-     * @since 0.0.1.0
-     */
-    public static function getGenericClass(): Generic
-    {
-        if (self::$genericClass !== Generic::class) {
-            self::$genericClass = new Generic();
-            self::$genericClass->setTemplatePath(self::getGatewayPath('templates'));
-        }
-
-        return self::$genericClass;
-    }
-
-    /**
      * Carefully check and return order from Resurs Bank but only if it does exist. We do this by checking
      * if the payment method allows us doing a getPayment and if true, then we will return a new WC_Order with
      * Resurs Bank ecom metadata included.
@@ -2033,22 +2015,23 @@ class Data
     }
 
     /**
-     * Get data from plugin setup (top of init.php).
+     * Get data from plugin setup block (top of init.php), like WP, but from within our own needs.
      *
      * @param $key
      * @return string
-     * @throws ExceptionHandler
      * @version 0.0.1.0
      */
     private static function getPluginDataContent($key): string
     {
-        if (!self::$wordpressUtils instanceof WPUtils) {
-            /** @var WPUtils WordpressUtils */
-            self::$wordpressUtils = new WPUtils();
-            self::$wordpressUtils->setPluginBaseFile(self::getPluginInitFile());
+        $return = '';
+
+        // Origin code borrowed from WP.
+        if (file_exists(self::getPluginInitFile())) {
+            $pluginContent = get_file_data(self::getPluginInitFile(), [$key => $key]);
+            $return = $pluginContent[$key];
         }
 
-        return self::$wordpressUtils->getPluginDataContent($key);
+        return $return;
     }
 
     /**
@@ -2269,7 +2252,7 @@ class Data
             $return = $crypt->aesEncrypt($data);
         } catch (Exception $e) {
             $dataEncryptionState = $e;
-            $return = (new Strings())->base64urlEncode($data);
+            $return = self::base64urlEncode($data);
         }
 
         if ($dataEncryptionState instanceof Exception) {
@@ -2287,6 +2270,28 @@ class Data
         }
 
         return (string)$return;
+    }
+
+    /**
+     * Base64-encoded data, but with URL-safe characters.
+     * @param string $data
+     * @return string
+     * @todo Can we import this to ecom2?
+     */
+    public function base64urlEncode(string $data): string
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+
+    /**
+     * Base64-decoded data, but with URL-safe characters.
+     * @param string $data
+     * @return string
+     * @todo Can we import this to ecom2?
+     */
+    public function base64urlDecode(string $data): string
+    {
+        return (string)base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
     }
 
     /**
@@ -2345,14 +2350,14 @@ class Data
         if (isset($data)) {
             try {
                 if ($base64) {
-                    $return = (new Strings())->base64urlDecode($data);
+                    $return = self::base64urlDecode($data);
                 } else {
                     $crypt = self::getCrypt();
                     $return = $crypt->aesDecrypt($data);
                 }
             } catch (Exception $e) {
                 self::writeLogException($e, __FUNCTION__);
-                $return = (new Strings())->base64urlDecode($data);
+                $return = Data::base64urlDecode($data);
             }
         }
 
@@ -2632,17 +2637,18 @@ class Data
     /**
      * Recursive string sanitizer.
      *
-     * @param $array
+     * @param mixed $array Data not only from the plugin lands here.
      * @return array
      * @throws Exception
      * @since 0.0.1.1
      */
-    public static function getSanitizedArray($array)
+    public static function getSanitizedArray(mixed $array): array
     {
-        $arrays = new Arrays();
+        $arrays = new ArrayValidation();
         $returnArray = [];
         if (is_array($array)) {
-            if ($arrays->isAssoc($array)) {
+            try {
+                $arrays->isAssoc($array);
                 foreach ($array as $arrayKey => $arrayValue) {
                     if (is_array($arrayValue)) {
                         // Recursive request.
@@ -2651,7 +2657,7 @@ class Data
                         $returnArray[self::getSanitizedKeyElement($arrayKey)] = esc_html($arrayValue);
                     }
                 }
-            } elseif ($array) {
+            } catch (IllegalValueException $e) {
                 foreach ($array as $item) {
                     if (is_array($item)) {
                         // Recursive request.

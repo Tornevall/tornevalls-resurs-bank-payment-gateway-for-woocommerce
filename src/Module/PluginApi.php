@@ -70,12 +70,12 @@ class PluginApi
             sprintf(
                 'Backend: %s (%s), params %s',
                 __FUNCTION__,
-                self::getAction(),
+                self::getActionFromRequest(),
                 print_r(Data::getObfuscatedData($_REQUEST), true)
             )
         );
 
-        $returnedValue = WordPress::applyFilters(self::getAction(), null, $_REQUEST);
+        $returnedValue = WordPress::applyFilters(self::getActionFromRequest(), null, $_REQUEST);
 
         if (!empty($returnedValue)) {
             self::reply($returnedValue);
@@ -89,17 +89,16 @@ class PluginApi
     {
         // Making sure ecom2 is preconfigured during ajax-calls too.
         new ResursBankAPI();
-        WordPress::doAction(self::getAction(), null);
+        WordPress::doAction(self::getActionFromRequest(), null);
     }
 
     /**
      * @return string
      * @throws Exception
-     * @since 0.0.1.0
      */
-    private static function getAction(): string
+    private static function getActionFromRequest(): string
     {
-        return (new Strings())->getCamelCase(self::getTrimmedActionString(Data::getRequest('action')));
+        return WordPress::getCamelCase(self::getTrimmedActionString(Data::getRequest('action')));
     }
 
     /**
@@ -134,15 +133,15 @@ class PluginApi
             $out['ajax_success'] = $success;
         }
 
-        $out['action'] = self::getAction();
+        $out['action'] = self::getActionFromRequest();
 
         Data::writeLogEvent(
             Data::CAN_LOG_BACKEND,
             sprintf(
                 'Backend Reply: %s (%s), params %s',
                 __FUNCTION__,
-                self::getAction(),
-                print_r(self::getAction() !== 'getAddress' ? $out : Data::getObfuscatedData(
+                self::getActionFromRequest(),
+                print_r(self::getActionFromRequest() !== 'getAddress' ? $out : Data::getObfuscatedData(
                     $out,
                     'identificationResponse'
                 ), true)

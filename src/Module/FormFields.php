@@ -7,6 +7,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Lib\Widget\Widget;
 use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
@@ -1365,24 +1366,26 @@ class FormFields extends WC_Settings_API
             }
         }
 
-        $return = Data::getGenericClass()->getTemplate(
-            'checkout_getaddress.phtml',
-            [
-                'customer_private' => __('Private person', 'resurs-bank-payments-for-woocommerce'),
-                'customer_company' => __('Company', 'resurs-bank-payments-for-woocommerce'),
-                'customer_type' => $customerTypeByConditions,
-                'customer_button_text' => WordPress::applyFilters(
-                    'getAddressButtonText',
-                    __('Get address', 'resurs-bank-payments-for-woocommerce')
-                ),
-                'supported_country' => Data::isGetAddressSupported(),
-                'get_address_form' => Data::canUseGetAddressForm(),
-                'get_address_form_always' => $getAddressFormAlways,
-                'liveTestData' => $liveTestData ?? [],
-            ]
-        );
-
         Data::getSafeStyle();
+
+        $template = sprintf('%s/checkout_getaddress.phtml', Data::getGatewayPath('templates'));
+
+        global $legacyVariables;
+        $legacyVariables = [
+            'customer_private' => __('Private person', 'resurs-bank-payments-for-woocommerce'),
+            'customer_company' => __('Company', 'resurs-bank-payments-for-woocommerce'),
+            'customer_type' => $customerTypeByConditions,
+            'customer_button_text' => WordPress::applyFilters(
+                'getAddressButtonText',
+                __('Get address', 'resurs-bank-payments-for-woocommerce')
+            ),
+            'supported_country' => Data::isGetAddressSupported(),
+            'get_address_form' => Data::canUseGetAddressForm(),
+            'get_address_form_always' => $getAddressFormAlways,
+            'liveTestData' => $liveTestData ?? [],
+        ];
+
+        $return = (new Widget())->render(file: $template);
 
         if ($returnAsHtml) {
             return $return;

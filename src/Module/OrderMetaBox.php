@@ -25,6 +25,12 @@ class OrderMetaBox
      */
     public static function output_order($post)
     {
+        // @todo We no longer use renderers from Generic class loaded via ecom1, so we have to rebuild this view.
+        // @todo This will be rendered from a getPayment-widget in ecom2, so while waiting for this moment,
+        // @todo we'll just return an empty string.
+
+        return '';
+
         if (!$post instanceof WP_Post && $post->post_type !== 'shop_order') {
             return;
         }
@@ -54,12 +60,12 @@ class OrderMetaBox
                     WooCommerce::getEcomHadProblemsInfo($orderData);
             }
 
-            echo Data::getEscapedHtml(
+            /*echo Data::getEscapedHtml(
                 content: Data::getGenericClass()->getTemplate(
                     templateName: 'adminpage_details.phtml',
                     assignedVariables: $orderData
                 )
-            );
+            );*/
             WordPress::doAction(actionName: 'showOrderDetails', value: $orderData);
         }
     }
