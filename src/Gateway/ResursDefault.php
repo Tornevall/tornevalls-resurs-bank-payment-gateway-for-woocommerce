@@ -1472,12 +1472,20 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function payment_fields()
     {
+        /* Remember: When we display the fields, we must also make sure that WordPress is the part that sanitize
+         * and display the fields. Therefore, we eventually need to tell WordPress further about safe styling.
+
+           add_filter('safe_style_css', function ($styles) {
+                $styles[] = 'display';
+                return $styles;
+            });
+
+         */
+
         // @todo See the code after the return part. This smaller is just temporary.
-        $fieldHtml = 'Display "USP" - and eventually on demand also government id fields here.';
+        return 'Display "USP" - and eventually on demand also government id fields here.';
 
-        return $fieldHtml;
         // @todo All code below is deprecated and should be replaced.
-
         // If not here, no fields are required.
         /** @noinspection PhpUndefinedFieldInspection */
         $requiredFields = FormFields::getSpecificTypeFields(
