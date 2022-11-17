@@ -108,7 +108,7 @@ class OrderHandler extends ResursDefault
                             $productData->get_id()
                         )
                     );
-                    $return[] = $this->getMapiOrderProductRow(
+                    $return[] = $this->getProductRow(
                         orderLineType: OrderLineType::PHYSICAL_GOODS,
                         productData: $productData,
                         wcProductItem: $item
@@ -146,7 +146,7 @@ class OrderHandler extends ResursDefault
                         sprintf('Apply payment fee %s', $fee->amount)
                     );
 
-                    $return[] = $this->getMapiCustomOrderLine(
+                    $return[] = $this->getCustomOrderLine(
                         orderLineType: OrderLineType::FEE,
                         description: $fee->name,
                         reference: $fee->id,
@@ -180,7 +180,7 @@ class OrderHandler extends ResursDefault
         $shipping = $this->cart->get_shipping_total();
 
         return !is_float($shipping) || $shipping < 0.01 ? [] : [
-            $this->getMapiCustomOrderLine(
+            $this->getCustomOrderLine(
                 orderLineType: OrderLineType::SHIPPING,
                 description: WordPress::applyFilters(
                     filterName: 'getShippingDescription',
@@ -248,7 +248,7 @@ class OrderHandler extends ResursDefault
                     )
                 );
 
-                $return[] = $this->getMapiCustomOrderLine(
+                $return[] = $this->getCustomOrderLine(
                     orderLineType: OrderLineType::DISCOUNT,
                     description: WordPress::applyFilters(
                         filterName: 'getCouponDescription',

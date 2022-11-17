@@ -142,8 +142,6 @@ class WordPress
         add_filter('plugin_row_meta', 'ResursBank\Module\Data::getPluginRowMeta', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
-        // Localization.
-        add_filter('rbwc_localizations_generic', 'ResursBank\Service\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Service\WooCommerce::getSettingsPages');
         add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
@@ -908,8 +906,6 @@ class WordPress
         if (Data::hasCredentials() && !is_admin()) {
             $return['getAddressFieldController'] = WordPress::getAddressFieldController();
         }
-        $return['checkoutType'] = Data::getCheckoutType();
-
         $return['switchToLegal'] = WordPress::applyFilters(
             'getSwitchToCustomerTypeString',
             'NATURAL',
