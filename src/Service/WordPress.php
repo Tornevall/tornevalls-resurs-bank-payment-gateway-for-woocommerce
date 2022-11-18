@@ -15,6 +15,7 @@ use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
+use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use RuntimeException;
@@ -50,6 +51,8 @@ class WordPress
 
         // Initialize adaptions.
         new ResursPlugin();
+
+	    GetAddress::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
 //         Data::getDefaultsInit();
