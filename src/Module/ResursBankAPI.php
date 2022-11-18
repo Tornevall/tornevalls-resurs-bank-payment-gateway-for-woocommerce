@@ -661,10 +661,9 @@ class ResursBankAPI
     {
         $this->ecom->setUserAgent(
             sprintf(
-                '%s_%s_%s',
+                '%s_%s',
                 Data::getPluginTitle(true),
-                Data::getCurrentVersion(),
-                Data::getCheckoutType()
+                Data::getCurrentVersion()
             )
         );
     }
