@@ -33,6 +33,24 @@ class Url
 		) . $file;
 	}
 
+    /**
+     * Generate a URL for a given endpoint, with a list of arguments.
+     * @param string $baseUrl
+     * @param array $arguments
+     * @return string
+     */
+    public static function getQueryArg(string $baseUrl, array $arguments): string
+    {
+        $queryArgument = $baseUrl;
+        foreach ($arguments as $argumentKey => $argumentValue) {
+            if (is_string($argumentValue) || is_int($argumentValue)) {
+                $queryArgument = add_query_arg($argumentKey, (string)$argumentValue, $queryArgument);
+            }
+        }
+
+        return is_string(value: $queryArgument) ? $queryArgument : '';
+    }
+
 //	/**
 //	 * @param string $segment
 //	 * @return string
