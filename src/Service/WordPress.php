@@ -9,17 +9,11 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use Resursbank\Woocommerce\Database\Options\ClientId;
-use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
-use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
-use Resursbank\Woocommerce\Settings\Advanced;
-use Resursbank\Woocommerce\Settings\Api;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
-use WC_Logger;
 use WP_Post;
 
 use function count;
@@ -172,6 +166,10 @@ class WordPress
     private static function setupScripts()
     {
         add_action('wp_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScripts');
+		add_action(
+			'wp_head',
+			'Resursbank\Woocommerce\Modules\PartPayment\Module::setCss'
+		);
         add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
@@ -192,7 +190,10 @@ class WordPress
         add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
-        add_action('woocommerce_single_product_summary', 'ResursBank\Module\Data::getAnnuityFactors');
+	    add_action(
+		    'woocommerce_single_product_summary',
+		    'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
+	    );
         add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         // Checkout Actions.
         if (Data::isEnabled()) {
