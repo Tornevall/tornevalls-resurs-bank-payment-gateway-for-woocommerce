@@ -865,13 +865,6 @@ class FormFields extends WC_Settings_API
             ],
         ];
 
-        // Filter based on merchant requested feature.
-        if (Data::getCheckoutType() !== ResursDefault::TYPE_SIMPLIFIED &&
-            WordPress::applyFilters('canHideFraudControl', true)
-        ) {
-            unset($formFields['fraud_control']);
-        }
-
         if (Data::hasCredentials()) {
             try {
                 $defaultStore = ['0'=>''];
@@ -1443,7 +1436,7 @@ class FormFields extends WC_Settings_API
                     'silentAnnuityException' => $silentAnnuityException,
                     'environment' => Data::getResursOption('environment'),
                     'lastMethodUpdate' => self::getLastPaymentMethodUpdate(),
-                    'canUseFee' => Data::getCheckoutType() !== 'rco' && Data::isPaymentFeeAllowed(),
+                    'canUseFee' => true,
                 ]
             );
             echo Data::getEscapedHtml($paymentMethodTemplate);

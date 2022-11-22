@@ -1653,27 +1653,6 @@ class Data
     }
 
     /**
-     * Returns a true value if the metadata contains internal payment indicators.
-     * By means, we check if the current payment is created by this plugin.
-     *
-     * @param $prefetchObject
-     * @return bool
-     * @throws ResursException
-     * @since 0.0.1.8
-     */
-    private static function isInternalPayment($prefetchObject): bool
-    {
-        return (isset($prefetchObject['apiType']) && in_array($prefetchObject['apiType'], ['SOAP', 'REST'])) ||
-            in_array(
-                self::getOrderMeta('checkoutType', $prefetchObject), [
-                    ResursDefault::TYPE_SIMPLIFIED,
-                    ResursDefault::TYPE_RCO,
-                    ResursDefault::TYPE_HOSTED
-                ]
-            );
-    }
-
-    /**
      * Check if severity level is allowed before writing to log.
      * @param $eventType
      * @param $logData
@@ -1981,35 +1960,6 @@ class Data
         }
 
         return (string)WooCommerce::getSessionValue('fragment_update_payment_method');
-    }
-
-    /**
-     * Get the name of current checkout in use.
-     * @return string
-     * @since 0.0.1.0
-     * @todo We no longer use RCO. Can be removed. Do it safely.
-     */
-    public static function getCheckoutType(): string
-    {
-        $currentCheckoutType = self::getResursOption('checkout_type');
-        // Warning: Filter makes this plugin feel very bad.
-        if ($currentCheckoutType === ResursDefault::TYPE_RCO &&
-            (bool)WordPress::applyFiltersDeprecated('temporary_disable_checkout', null)
-        ) {
-            $currentCheckoutType = ResursDefault::TYPE_SIMPLIFIED;
-        }
-        switch ($currentCheckoutType) {
-            case 'simplified':
-                $return = ResursDefault::TYPE_SIMPLIFIED;
-                break;
-            case 'rco':
-                $return = ResursDefault::TYPE_RCO;
-                break;
-            default:
-                $return = '';
-        }
-
-        return $return;
     }
 
     /**

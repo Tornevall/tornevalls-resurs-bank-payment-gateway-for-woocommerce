@@ -22,8 +22,15 @@ use ResursBank\Module\Data;
 use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress as Controller;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
+use Resursbank\Woocommerce\Util\Route;
+
+define(
+	constant_name: 'RESURSBANK_MODULE_DIR_NAME',
+	value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
+);
 
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
@@ -84,3 +91,6 @@ if (!WooCommerce::getActiveState()) {
 add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
+
+// Execute custom routing options.
+Route::exec();

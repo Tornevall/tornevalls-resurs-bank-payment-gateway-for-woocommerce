@@ -54,12 +54,6 @@ class OrderMetaBox
                     []
                 );
             }
-            $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
-            if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-                $orderData['ecom_short']['ecom_had_reference_problems'] =
-                    WooCommerce::getEcomHadProblemsInfo($orderData);
-            }
-
             /*echo Data::getEscapedHtml(
                 content: Data::getGenericClass()->getTemplate(
                     templateName: 'adminpage_details.phtml',
@@ -96,10 +90,6 @@ class OrderMetaBox
                 );
             }
             $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
-            if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-                $orderData['ecom_short']['ecom_had_reference_problems'] =
-                    WooCommerce::getEcomHadProblemsInfo($orderData);
-            }
 
             echo Data::getEscapedHtml(
                 Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)

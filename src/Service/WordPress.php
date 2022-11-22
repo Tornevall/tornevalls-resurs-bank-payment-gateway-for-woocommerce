@@ -12,6 +12,7 @@ use ResursBank\Module\FormFields;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
+use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
 use WP_Post;
@@ -44,6 +45,8 @@ class WordPress
 
         // Initialize adaptions.
         new ResursPlugin();
+
+	    GetAddress::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
 //         Data::getDefaultsInit();
@@ -136,8 +139,6 @@ class WordPress
         add_filter('plugin_row_meta', 'ResursBank\Module\Data::getPluginRowMeta', 10, 2);
         // Data calls.
         add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
-        // Localization.
-        add_filter('rbwc_localizations_generic', 'ResursBank\Service\WooCommerce::getGenericLocalization', 10, 2);
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Service\WooCommerce::getSettingsPages');
         add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
@@ -909,8 +910,6 @@ class WordPress
         if (Data::hasCredentials() && !is_admin()) {
             $return['getAddressFieldController'] = WordPress::getAddressFieldController();
         }
-        $return['checkoutType'] = Data::getCheckoutType();
-
         $return['switchToLegal'] = WordPress::applyFilters(
             'getSwitchToCustomerTypeString',
             'NATURAL',
