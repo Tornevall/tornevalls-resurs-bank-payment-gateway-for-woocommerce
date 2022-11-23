@@ -225,9 +225,7 @@ class WooCommerce
      */
     private static function getGatewaysFromPaymentMethods(array $gateways = []): array
     {
-        // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
         try {
-            // @todo Build cache-driver for transients.
             $paymentMethodList = PaymentMethodRepository::getPaymentMethods(StoreId::getData());
 
             /** @var PaymentMethod $paymentMethod */
