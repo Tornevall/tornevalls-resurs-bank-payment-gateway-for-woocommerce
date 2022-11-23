@@ -79,9 +79,8 @@ class Module
 		if (is_product() && Enabled::isEnabled()) {
 			try {
 				$widget = new self();
-				echo '<style type="text/css">' . $widget->instance->css . '</style>';
+				echo '<style id="rb-pp-styles">' . $widget->instance->css . '</style>';
 			} catch (Exception $exception) {
-
 			}
 		}
 	}
