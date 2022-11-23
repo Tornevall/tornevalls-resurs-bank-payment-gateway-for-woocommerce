@@ -8,6 +8,7 @@
 
 namespace ResursBank\Gateway;
 
+use Error;
 use Exception;
 use JsonException;
 use ReflectionException;
@@ -19,8 +20,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\Address;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
@@ -34,10 +35,12 @@ use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Strings;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callback;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\ResursBankAPI;
@@ -47,7 +50,7 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use ResursException;
+use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use stdClass;
 use WC_Cart;
@@ -58,7 +61,6 @@ use WC_Tax;
 use function count;
 use function function_exists;
 use function in_array;
-use function is_array;
 use function is_object;
 use function sha1;
 use function uniqid;
@@ -440,7 +442,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         if (Enabled::isEnabled()) {
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
-            add_filter('woocommerce_order_get_payment_method_title', [$this, 'getPaymentMethodTitle'], 10, 2);
         }
     }
 
@@ -862,7 +863,7 @@ class ResursDefault extends WC_Payment_Gateway
                 wcProductItemData: $wcProductItem
             ),
             totalAmountIncludingVat: $this->getFromProduct(
-                getValueType: 'totalAmountWithVat',
+                getValueType: 'totalAmountIncludingVat',
                 productObject: $productData,
                 wcProductItemData: $wcProductItem
             ),
@@ -878,7 +879,7 @@ class ResursDefault extends WC_Payment_Gateway
             ),
             type: $orderLineType,
             unitAmountIncludingVat: $this->getFromProduct(
-                getValueType: 'unitAmountWithVat',
+                getValueType: 'unitAmountIncludingVat',
                 productObject: $productData,
                 wcProductItemData: $wcProductItem
             ),
@@ -1347,14 +1348,12 @@ class ResursDefault extends WC_Payment_Gateway
         ];
 
         try {
-            // Order Creation.
-            // No order reference is passed to ecom at this point, to avoid order id collisions in both ends.
-            // If we're on a WordPress Network site where several stores may have multiple tables with same
-            // order id-collection, this way of handling orders helps a lot.
+            // Order Creation
             $paymentResponse = PaymentRepository::create(
                 storeId: StoreId::getData(),
                 paymentMethodId: $this->getPaymentMethod(),
                 orderLines: $this->getOrderLinesMapi(),
+                orderReference: $order->get_id(),
                 customer: $this->getCustomer(),
                 options: $this->getOptions($order),
             );
@@ -1386,7 +1385,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getOptions(WC_Order $order): Options
     {
-        // @todo Some of the defaults here should be changed to configurable options through the admin panel.
+        // @todo Defaults like manual inspection, frozen payments, etc should be changed to configurable options
+        // @todo through the admin panel.
         return new Options(
             initiatedOnCustomerDevice: true,
             handleManualInspection: false,
@@ -1400,12 +1400,12 @@ class ResursDefault extends WC_Payment_Gateway
                 merchant: null
             ),
             callbacks: new Callbacks(
-                authorization: new Options\Callback(
-                    url: $this->getCallbackUrl('authorization'),
+                authorization: new Callback(
+                    url: $this->getCallbackUrl(callbackType: CallbackType::AUTHORIZATION),
                     description: 'Authorization callback'
                 ),
-                management: new Options\Callback(
-                    url: $this->getCallbackUrl('management'),
+                management: new Callback(
+                    url: $this->getCallbackUrl(callbackType: CallbackType::MANAGEMENT),
                     description: 'Management callback'
                 ),
             ),
@@ -1414,13 +1414,20 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param string $urlType
+     * Generate URL for MAPI callbacks.
+     * Note: We don't have to apply the order id to the callback URL, as the callback will be sent back as a POST (json).
+     *
+     * @param CallbackType $callbackType
      * @return string
      */
-    private function getCallbackUrl(string $urlType): string
+    private function getCallbackUrl(CallbackType $callbackType): string
     {
-        // @todo Generate proper url.
-        return Data::getGatewayUrl() . '/callback/' . $urlType;
+        return Url::getQueryArg(
+            WooCommerce::getWcApiUrl(),
+            [
+                'mapi-callback' => $callbackType->value,
+            ]
+        );
     }
 
     /**
@@ -1457,9 +1464,23 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getApiRequest()
     {
-        // 'c' stands for callback and is used to direct Resurs callbacks to its own handling section.
-        if (isset($_REQUEST['c'])) {
-            WooCommerce::getHandledCallback();
+        if (isset($_REQUEST['mapi-callback']) &&
+            is_string($_REQUEST['mapi-callback']) &&
+            isset($_REQUEST['orderId'])
+        ) {
+            $response = [
+                'success' => false
+            ];
+
+            // Callback will respond and exit.
+            try {
+                $response = CallbackModule::processCallback(CallbackType::from(strtoupper($_REQUEST['mapi-callback'])));
+            } catch (Error $e) {
+                Config::getLogger()->error($e);
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
             exit;
         }
 

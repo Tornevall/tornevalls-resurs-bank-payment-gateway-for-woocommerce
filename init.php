@@ -35,7 +35,6 @@ define(
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
 }
-
 require_once(__DIR__ . '/autoload.php');
 
 // Using same path identifier as the rest of the plugin-verse.
