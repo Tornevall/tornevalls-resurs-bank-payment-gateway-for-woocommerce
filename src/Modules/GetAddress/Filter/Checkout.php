@@ -28,7 +28,7 @@ class Checkout
 	{
 		add_filter(
 			'woocommerce_before_checkout_form',
-			function () { self::exec(); }
+			fn () => self::exec()
 		);
 
 		add_action(
@@ -38,14 +38,24 @@ class Checkout
 					handle: 'rb-get-address',
 					src: Url::getScriptUrl(
 						module: 'GetAddress',
-						file: 'get-address.js'
+						file: 'populateForm.js'
 					)
 				);
+
+                wp_enqueue_style(
+                    handle: 'rb-get-address-style',
+                    src: Url::getEcomUrl(
+                        path: 'src/Module/Customer/Widget/get-address.css'
+                    )
+                );
 			}
 		);
 	}
 
 	/**
+     * Renders and returns the content of the widget that fetches the customer
+     * address.
+     *
 	 * @return void
 	 */
 	public static function exec(): void
@@ -54,7 +64,7 @@ class Checkout
 
 		try {
 			$address = new GetAddress(
-				fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
+				fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS),
 			);
 
 			$result = $address->content;
