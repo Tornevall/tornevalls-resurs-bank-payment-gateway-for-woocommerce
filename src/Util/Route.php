@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Lib\Http\Controller;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 
 use function str_contains;
 
@@ -30,6 +31,11 @@ class Route
 	 */
 	public const ROUTE_GET_ADDRESS = 'get-address';
 
+    /**
+     * Route to get part payment controller.
+     */
+    public const ROUTE_PART_PAYMENT = 'part-payment';
+
 	/**
 	 * @return void
 	 */
@@ -44,6 +50,9 @@ class Route
 			case self::ROUTE_GET_ADDRESS:
 				GetAddress::exec();
 				break;
+            case self::ROUTE_PART_PAYMENT:
+                PartPayment::exec();
+                break;
 			case '':
 				break;
 			default:
