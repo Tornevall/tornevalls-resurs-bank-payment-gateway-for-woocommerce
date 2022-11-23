@@ -221,7 +221,7 @@ class WooCommerce
      * @param array $gateways
      * @return array
      * @since 0.0.1.0
-     * @todo Create payment method cache-driver based on transients via ecom2.
+     * @todo Create payment method cache-driver based on transients via ecom2 (WOO-847).
      */
     private static function getGatewaysFromPaymentMethods(array $gateways = []): array
     {
