@@ -47,11 +47,9 @@ class PluginHooks
      */
     private function getFilters()
     {
-        add_filter('rbwc_js_loaders_checkout', [$this, 'getRcoLoaderScripts']);
         add_filter('rbwc_get_payment_method_icon', [$this, 'getMethodIconByContent'], 10, 2);
         add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
-        add_filter('resursbank_temporary_disable_checkout', [$this, 'setRcoDisabledWarning'], 99999, 1);
         add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
         add_filter('rbwc_get_configuration_fields', [$this, 'getAvailableConfigurationFields'], 10, 2);
     }
@@ -1192,41 +1190,5 @@ class PluginHooks
 
         // Should always be treated as a string in the end. If no criteria above matched, we can't return a value.
         return (string)$url;
-    }
-
-    /**
-     * @param $filterIsActive
-     */
-    public function setRcoDisabledWarning($filterIsActive)
-    {
-        if ($filterIsActive) {
-            Data::writeLogByLogLevel(
-                LogLevel::WARNING,
-                sprintf(
-                    __(
-                        'The filter "%s" is currently put in an active state by an unknown third party plugin. This ' .
-                        'setting is deprecated and no longer fully supported. It is highly recommended to disable ' .
-                        'or remove the filter entirely and solve the problem that required this from start somehow ' .
-                        'else.',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    'resursbank_temporary_disable_checkout'
-                )
-            );
-        }
-    }
-
-    /**
-     * @param $scriptList
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public function getRcoLoaderScripts($scriptList)
-    {
-        if (Data::getCheckoutType() === ResursDefault::TYPE_RCO) {
-            $scriptList['resursbank_rco_legacy'] = 'vendor/resurscheckoutjs/resurscheckout.js';
-        }
-
-        return $scriptList;
     }
 }

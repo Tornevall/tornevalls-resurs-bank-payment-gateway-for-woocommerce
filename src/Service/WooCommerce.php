@@ -571,29 +571,6 @@ class WooCommerce
 
     /**
      * @param $return
-     * @param $scriptName
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection PhpUnused
-     */
-    public static function getGenericLocalization($return, $scriptName)
-    {
-        // @todo ECom1 was generating a temporary order id sequence that do longer exist. This has to be fixed
-        // @todo some other way then this random sha1-string.
-        if (preg_match('/_checkout$/', $scriptName) && is_checkout() && Data::hasCredentials()) {
-            $return[sprintf(
-                '%s_rco_suggest_id',
-                Data::getPrefix()
-            )] = sha1(microtime(true));
-            $return[sprintf('%s_checkout_type', Data::getPrefix())] = Data::getCheckoutType();
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $return
      * @return mixed
      * @since 0.0.1.0
      */
