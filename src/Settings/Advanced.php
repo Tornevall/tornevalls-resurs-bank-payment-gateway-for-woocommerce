@@ -96,7 +96,7 @@ class Advanced
             }
 
             if (is_string(value: $path) &&
-                is_dir(filename: LogDir::getData())
+                is_dir(filename: $path)
             ) {
                 $result = new FileLogger(path: $path);
             }
