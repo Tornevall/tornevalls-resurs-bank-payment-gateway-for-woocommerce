@@ -54,18 +54,29 @@ class Route
 		}
 	}
 
-	/**
-	 * Resolve full URL.
-	 *
-	 * @param string $route
-	 * @return string
-	 */
+    /**
+     * Resolve full URL.
+     *
+     * @param string $route
+     * @return string
+     * @throws HttpException
+     */
 	public static function getUrl(
 		string $route
 	): string {
 		$url = get_site_url();
-		$url .= str_contains($url, '?') ? '&' : '?';
 
-		return $url . self::ROUTE_PARAM . '=' . $route;
+        if (!is_string(value: $url)) {
+            throw new HttpException(
+                message: 'A site URL could not be created.'
+            );
+        }
+
+        $url .= str_contains(haystack: $url, needle: '?') ? '&' : '?';
+
+		return Url::getQueryArg(
+            baseUrl: $url,
+            arguments: [self::ROUTE_PARAM => $route]
+        );
 	}
 }

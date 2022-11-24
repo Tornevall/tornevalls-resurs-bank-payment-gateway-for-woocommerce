@@ -52,12 +52,12 @@ class Checkout
 		);
 	}
 
-	/**
+    /**
      * Renders and returns the content of the widget that fetches the customer
      * address.
      *
-	 * @return void
-	 */
+     * @return void
+     */
 	public static function exec(): void
 	{
 		$result = '';

@@ -57,9 +57,14 @@ class Url
     public static function getQueryArg(string $baseUrl, array $arguments): string
     {
         $queryArgument = $baseUrl;
+
         foreach ($arguments as $argumentKey => $argumentValue) {
-            if (is_string($argumentValue) || is_int($argumentValue)) {
-                $queryArgument = add_query_arg($argumentKey, (string)$argumentValue, $queryArgument);
+            if (is_string(value: $argumentValue) || is_int(value: $argumentValue)) {
+                $queryArgument = add_query_arg(
+                    $argumentKey,
+                    (string)$argumentValue,
+                    $queryArgument
+                );
             }
         }
 
@@ -75,10 +80,15 @@ class Url
     public static function getUrl(
         string $path
     ): string {
-        $file = (string) substr($path, strrpos($path, '/') + 1);
+        $file = (string) substr(
+            string: $path,
+            offset: strrpos(haystack: $path, needle:  '/') + 1
+        );
 
         if ($file === '') {
-            if ($path !== '' && strrpos($path, '/') === strlen($path) - 1) {
+            if ($path !== '' &&
+                strrpos(haystack: $path, needle: '/') === strlen(string: $path) - 1
+            ) {
                 throw new RuntimeException(
                     message: 'The path may not end with a "/".'
                 );
@@ -90,7 +100,7 @@ class Url
         }
 
         // NOTE: plugin_dir_url returns everything up to the last slash.
-        return self::getPluginUrl($path, $file);
+        return self::getPluginUrl(path: $path, file: $file);
     }
 
     /**
@@ -104,12 +114,12 @@ class Url
         string $path,
         string $file
     ): string {
-        $result = plugin_dir_url($path) . $file;
+        $result = plugin_dir_url(file: $path) . $file;
 
-        if (!is_string($result)) {
+        if (!is_string(value: $result)) {
             throw new RuntimeException(
                 message: 'Could not produce a string URL for ' .
-                "\"$path\". Result came back as: " . gettype($result)
+                "\"$path\". Result came back as: " . gettype(value: $result)
             );
         }
 
