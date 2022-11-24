@@ -19,17 +19,17 @@ class GetAddress
 	/**
 	 * @return void
 	 */
-	public static function exec(): void
+	public static function exec(): string
 	{
 		$controller = new GetAddressController();
 
 		try {
-			$controller->exec(
+			return $controller->exec(
 				storeId: StoreId::getData(),
 				data: $controller->getRequestData()
 			);
 		} catch (HttpException $e) {
-			$controller->respondWithError(exception: $e);
+			return $controller->respondWithError(exception: $e);
 		}
 	}
 }
