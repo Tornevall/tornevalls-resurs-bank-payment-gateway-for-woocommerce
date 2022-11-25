@@ -58,11 +58,6 @@ if (Data::isOriginalCodeBase()) {
 // in one sweep - if necessary.
 define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
 
-//@todo According to WOO-817, this feature may be misconfigured.
-define(constant_name: 'RESURSBANK_ALLOW_PAYMENT_FEE',
-    value: WordPress::applyFilters(filterName: 'allowPaymentFee', value: false)
-);
-
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
 try {
     Config::setup(
@@ -71,7 +66,6 @@ try {
         jwtAuth: Api::getJwt()
     );
 } catch (Exception $e) {
-
 }
 
 // Translation domain is used for all phrases that is not relying on ecom2.
@@ -92,4 +86,4 @@ add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerc
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 
 // Execute custom routing options.
-Route::exec();
+//Route::exec();

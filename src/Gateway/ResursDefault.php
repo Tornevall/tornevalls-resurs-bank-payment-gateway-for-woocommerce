@@ -19,6 +19,7 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Http\Controller;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
@@ -34,11 +35,13 @@ use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Strings;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Application;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callback;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
+use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
@@ -50,6 +53,7 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use stdClass;
@@ -1347,6 +1351,8 @@ class ResursDefault extends WC_Payment_Gateway
             'redirect' => $this->getReturnUrl($order),
         ];
 
+        // @todo Add meta data at Resurs with WooCommerce order id ($order->get_id()).
+
         try {
             // Order Creation
             $paymentResponse = PaymentRepository::create(
@@ -1354,18 +1360,26 @@ class ResursDefault extends WC_Payment_Gateway
                 paymentMethodId: $this->getPaymentMethod(),
                 orderLines: $this->getOrderLinesMapi(),
                 orderReference: $order->get_id(),
+                application: $this->getApplication(),
                 customer: $this->getCustomer(),
-                options: $this->getOptions($order),
+                options: $this->getOptions($order)
             );
             $return = $this->getReturnResponse(
-                $paymentResponse,
+                createPaymentResponse: $paymentResponse,
                 return: $return,
                 order: $order
             );
-
-            // @todo Add meta data at Resurs with WooCommerce order id ($order->get_id()).
-            Data::setOrderMeta($order, 'orderReference', $paymentResponse->order->orderReference);
+            Metadata::setOrderMeta(
+                order: $order,
+                metaDataKey: sprintf('%s_order_reference', ResursDefault::PREFIX),
+                metaDataValue: $paymentResponse->id
+            );
         } catch (Exception $createPaymentException) {
+            // In case we get an error from any other component than the create, we need to rewrite this response.
+            $return = [
+                'result' => 'failure',
+                'redirect' => $this->getReturnUrl($order)
+            ];
             // Add note to notices and write to log.
             $order->add_order_note(
                 $createPaymentException->getMessage()
@@ -1376,6 +1390,17 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         return $return;
+    }
+
+    /**
+     * @return Application
+     */
+    private function getApplication(): Application
+    {
+        return new Application(
+            requestedCreditLimit: null,
+            applicationData: null
+        );
     }
 
     /**
@@ -1393,8 +1418,8 @@ class ResursDefault extends WC_Payment_Gateway
             handleFrozenPayments: false,
             redirectionUrls: new RedirectionUrls(
                 customer: new ParticipantRedirectionUrls(
-                    failUrl: $this->getReturnUrl($order, 'failure'),
-                    successUrl: $this->getReturnUrl($order, 'success')
+                    failUrl: $this->getReturnUrl($order, result: 'failure'),
+                    successUrl: $this->getReturnUrl($order, result: 'success')
                 ),
                 coApplicant: null,
                 merchant: null
@@ -1465,26 +1490,28 @@ class ResursDefault extends WC_Payment_Gateway
     public function getApiRequest()
     {
         if (isset($_REQUEST['mapi-callback']) &&
-            is_string($_REQUEST['mapi-callback']) &&
-            isset($_REQUEST['orderId'])
+            is_string($_REQUEST['mapi-callback'])
         ) {
             $response = [
-                'success' => false
+                'success' => false,
+                'message' => ''
             ];
+
+            $responseController = new Controller();
 
             // Callback will respond and exit.
             try {
-                $response = CallbackModule::processCallback(CallbackType::from(strtoupper($_REQUEST['mapi-callback'])));
-            } catch (Error $e) {
+                $response['success'] = CallbackModule::processCallback(CallbackType::from(strtoupper($_REQUEST['mapi-callback'])));
+            } catch (Exception|Error $e) {
                 Config::getLogger()->error($e);
+                $response['message'] = $e->getMessage();
             }
 
-            header('Content-Type: application/json');
-            echo json_encode($response);
+            $responseController->respond($response, code: $response['success'] ? 202 : 408);
             exit;
         }
 
-        die;
+        exit;
     }
 
     /**
