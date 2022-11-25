@@ -1,3 +1,8 @@
+/**
+ * Copyright © Resurs Bank AB. All rights reserved.
+ * See LICENSE for license details.
+ */
+
 const rbHandleFetchAddressResponse = (() => {
     /**
      * @namespace Rb
@@ -129,7 +134,7 @@ const rbHandleFetchAddressResponse = (() => {
     const getUsableFields = (obj) => obj.name !== '';
 
     /**
-     * Maps an array of elements to an array of
+     * Maps an array of elements to an array of fields.
      *
      * @param {Element[]} els
      * @returns {Rb.GetAddress.MappedAddressEl[]}
@@ -180,8 +185,6 @@ const rbHandleFetchAddressResponse = (() => {
     };
 
     return (data) => {
-        console.log('rbHandleFetchAddressResponse:', data);
-
         try {
             updateAddressFields(data);
         } catch (e) {
