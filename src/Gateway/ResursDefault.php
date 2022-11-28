@@ -24,7 +24,8 @@ use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Lib\Model\Payment\Customer as CustomerRepository;
+use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
@@ -531,7 +532,7 @@ class ResursDefault extends WC_Payment_Gateway
             $this->getCustomerData('applicant_government_id');
 
         if (empty($governmentId) && CustomerRepository::getSsnData() !== null) {
-            $governmentId = Repository::getSsnData();
+            $governmentId = CustomerRepository::getSsnData();
         }
 
         // $this->getCustomerData('phone')
