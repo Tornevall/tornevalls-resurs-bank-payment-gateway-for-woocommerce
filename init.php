@@ -83,5 +83,5 @@ if (!WooCommerce::getActiveState()) {
 // or checking that we're in "WordPress mode" with if (function_exists('add_action')) {}.
 add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
 
-// Execute custom routing options
+// Execute custom routing options.
 Route::exec();
