@@ -93,8 +93,6 @@ class Callback
     {
         $success = false;
 
-        Config::getLogger()->error(print_r($_REQUEST, true));
-
         /** @var Management $callbackModel */
         $callbackModel = (new AuthorizationController())->getRequestModel(model: Management::class);
         $order = Database::getOrderByReference($callbackModel->paymentId);
