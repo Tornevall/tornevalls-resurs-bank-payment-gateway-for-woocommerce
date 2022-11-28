@@ -15,7 +15,9 @@ use Resursbank\Ecom\Lib\Http\Controller;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 
+use function is_string;
 use function str_contains;
+use function strlen;
 
 /**
  * Primitive routing, executing arbitrary code depending on $_GET parameters.
@@ -36,18 +38,18 @@ class Route {
      */
     public static function exec(): void {
 	    $route = (
-		    isset( $_GET[ self::ROUTE_PARAM ] ) &&
-		    is_string( $_GET[ self::ROUTE_PARAM ] )
-	    ) ? $_GET[ self::ROUTE_PARAM ] : '';
+		    isset($_GET[self::ROUTE_PARAM]) &&
+		    is_string(value: $_GET[self::ROUTE_PARAM])
+	    ) ? $_GET[self::ROUTE_PARAM] : '';
 
 		try {
-			switch ( $route ) {
+			switch ($route) {
 				case self::ROUTE_GET_ADDRESS:
 					GetAddress::exec();
 					break;
 				case '':
 					throw new HttpException(
-						message: "Route can not be empty.",
+						message: 'Route can not be empty.',
 						code: 400
 					);
 				default:

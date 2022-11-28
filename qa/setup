@@ -1,0 +1,141 @@
+#!/bin/sh -eu
+
+if [ ! -d .git/hooks ]; then
+  echo "Error: Please run this script from the root of the repository."
+  exit 1;
+fi
+
+# Resolve PHP cmd.
+dockerCmd=""
+phpService=""
+phpCmd=""
+
+read -p "Enter absolute path to module directory (wp-content/plugins/resursbank-woocommerce) within PHP container (no trailing slash): " dir
+read -p "Running PHP in Docker (y/n)?" localPhp
+case "$localPhp" in
+  y|Y ) read -p "Enter name of docker compose command (eg. docker compose or docker-compose): " dockerCmd; read -p "Enter name of php server (eg. php or phpfpm): " phpService; phpCmd="${dockerCmd} exec -w ${dir} -T ${phpService}";;
+  n|N ) read -p "Enter name of/path to php binary (eg. php): " php;;
+  * ) echo "Invalid response."; exit 1;;
+esac
+
+HOOK_FILE=".git/hooks/pre-commit"
+
+if [ -f $HOOK_FILE ]; then
+  rm -f $HOOK_FILE
+fi
+
+touch $HOOK_FILE
+chmod +x $HOOK_FILE
+
+if [ ! -d ./qa/bin ]; then
+  mkdir -p ./qa/bin
+fi
+
+if [ ! -d ./qa/psalm/cache ]; then
+  mkdir ./qa/psalm/cache
+fi
+
+if [ ! -f ./qa/php-cs-fixer/.php-cs-fixer.cache ]; then
+  mkdir -p ./qa/php-cs-fixer
+  touch ./qa/php-cs-fixer/.php-cs-fixer.cache
+fi
+
+echo ""
+echo "--==( Installing PHPMD )==--"
+echo ""
+curl -L https://github.com/phpmd/phpmd/releases/latest/download/phpmd.phar > ./qa/bin/phpmd
+chmod +x ./qa/bin/phpmd
+
+echo ""
+echo ""
+echo "--==( Installing PHPCS )==--"
+echo ""
+curl -L https://github.com/squizlabs/PHP_CodeSniffer/releases/latest/download/phpcs.phar > ./qa/bin/phpcs
+chmod +x ./qa/bin/phpcs
+
+echo ""
+echo ""
+echo "--==( Installing PHPCBF )==--"
+echo ""
+curl -L https://github.com/squizlabs/PHP_CodeSniffer/releases/latest/download/phpcbf.phar > ./qa/bin/phpcbf
+chmod +x ./qa/bin/phpcbf
+
+echo ""
+echo ""
+echo "--==( Installing PHPCS Fixer )==--"
+echo ""
+curl -L https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar > ./qa/bin/php-cs-fixer
+chmod +x ./qa/bin/php-cs-fixer
+
+echo ""
+echo ""
+echo "--==( Installing Psalm )==--"
+echo ""
+curl -L https://github.com/vimeo/psalm/releases/latest/download/psalm.phar > ./qa/bin/psalm
+chmod +x ./qa/bin/psalm
+
+echo ""
+echo ""
+echo "--==( Installing PHP Stan )==--"
+echo ""
+curl -L https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar > ./qa/bin/phpstan
+chmod +x ./qa/bin/phpstan
+
+cat <<EOT >> $HOOK_FILE
+#!/usr/bin/env -S bash -eu
+
+AFFECTED=\`git diff --cached --name-only --diff-filter=ACM\`
+AFFECTED_STRING=\${AFFECTED[@]}
+
+if [ -n "\$AFFECTED_STRING" ]; then
+  echo "=========================================================="
+  echo "Running tests."
+  echo ""
+  echo "---==( Executing Psalm tests. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/psalm -c $dir/qa/psalm/psalm.xml --show-info=true \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHPMD tests on source files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpmd $dir/src text $dir/qa/phpmd/src.xml \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHPMD tests on test files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpmd $dir/tests text $dir/qa/phpmd/tests.xml \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHP CBF for source files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpcbf --standard=PSR12 \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHP CBF for test files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpcbf --standard=PSR12 \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHPCS for source files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpcs --standard=PSR12 \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHPCS for test files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpcs --standard=PSR12 \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHPStan for source files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpstan analyse -c $dir/qa/phpstan.neon \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHPStan for test files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/phpstan analyse -c $dir/qa/phpstan.neon \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHP CS Fixer for source files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache fix \$AFFECTED_STRING
+  echo ""
+  echo "---==( Executing PHP CS Fixer for test files. )==---"
+  echo ""
+  $phpCmd $dir/qa/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache fix \$AFFECTED_STRING
+fi
+EOT
+
+echo OK
+exit 0
