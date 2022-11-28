@@ -16,24 +16,24 @@ use RuntimeException;
  */
 class Url
 {
-	public const NAMESPACE = 'resursbank';
+    public const NAMESPACE = 'resursbank';
 
-	/**
-	 * Helper to get script file from sub-module resource directory.
-	 *
-	 * @param string $module
-	 * @param string $file | File path relative to resources dir.
-	 * @return string
-	 */
-	public static function getScriptUrl(
-		string $module,
-		string $file
-	): string {
-		// NOTE: plugin_dir_url returns everything up to the last slash.
-		return plugin_dir_url(
-			file: RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/$file"
-		) . $file;
-	}
+    /**
+     * Helper to get script file from sub-module resource directory.
+     *
+     * @param string $module
+     * @param string $file | File path relative to resources dir.
+     * @return string
+     */
+    public static function getScriptUrl(
+        string $module,
+        string $file
+    ): string {
+        // NOTE: plugin_dir_url returns everything up to the last slash.
+        return plugin_dir_url(
+                file: RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/$file"
+            ) . $file;
+    }
 
     /**
      * Returns URL for a "lib/ecom" file.
@@ -80,9 +80,9 @@ class Url
     public static function getUrl(
         string $path
     ): string {
-        $file = (string) substr(
+        $file = (string)substr(
             string: $path,
-            offset: strrpos(haystack: $path, needle:  '/') + 1
+            offset: strrpos(haystack: $path, needle: '/') + 1
         );
 
         if ($file === '') {

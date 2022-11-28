@@ -335,34 +335,27 @@ class WordPress
 
         $requiredVersionNotice = sprintf(
             __(
-                'The current plugin "%s" requires at least version %s - for the moment, you are running ' .
+                'The current plugin requires at least version %s - for the moment, you are running ' .
                 'on version %s. You should consider upgrading as soon as possible.',
                 'resurs-bank-payments-for-woocommerce'
             ),
-            Data::getPluginTitle(true),
             WooCommerce::getRequiredVersion(),
             WooCommerce::getWooCommerceVersion()
         );
 
-        try {
-            if ($parent_file === 'woocommerce' || $current_tab === Data::getPrefix('admin')) {
+        if ($parent_file === 'woocommerce') {
+            try {
                 WooCommerce::testRequiredVersion(false);
+            } catch (Exception $e) {
+                Data::writeLogException($e, __FUNCTION__);
+                // @todo Rewrite this section to warn about lowest requirement of WooCommerce if current installation
+                // @todo is below that version. This code is temporarily changed to release the needs of the
+                // @todo Generic-class-renderer, and need to be fixed.
+                echo Data::getEscapedHtml(
+                    content: '<div class="notice notice-error is-dismissible" style="font-weight: bold; color: #6c0c0c; background: #fac5c5;">
+                      <p>' . $requiredVersionNotice . '</p></div>
+            ');
             }
-        } catch (Exception $e) {
-            Data::writeLogException($e, __FUNCTION__);
-            echo Data::getEscapedHtml(
-                Data::getGenericClass()->getTemplate(
-                    'adminpage_woocommerce_requirement',
-                    [
-                        'requiredVersionNotice' => $requiredVersionNotice,
-                    ]
-                )
-            );
-        }
-
-        $selfAwareness = self::applyFiltersDeprecated('v22_woo_appearance', false);
-        if ($selfAwareness) {
-            self::getOldSelfAwareness();
         }
     }
 
@@ -531,30 +524,6 @@ class WordPress
         }
 
         return $args;
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getOldSelfAwareness()
-    {
-        echo Data::getEscapedHtml(
-            Data::getGenericClass()->getTemplate(
-                'adminpage_woocommerce_version22',
-                [
-                    'wooPlug22VersionInfo' => sprintf(
-                        __(
-                            'It seems that you still have another plugin enabled (%s %s) in this platform that works ' .
-                            'as Resurs Bank Payment Gateway. If this is intended, you can ignore this message.',
-                            'resurs-bank-payments-for-woocommerce'
-                        ),
-                        defined('RB_WOO_CLIENTNAME') ? RB_WOO_CLIENTNAME : 'Resurs Bank for WooCommerce',
-                        defined('RB_WOO_VERSION') ? RB_WOO_VERSION : 'v2.x'
-                    ),
-                ]
-            )
-        );
     }
 
     /**
