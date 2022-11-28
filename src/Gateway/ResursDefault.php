@@ -19,10 +19,9 @@ use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Lib\Model\Payment\Customer as CustomerRepository;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
@@ -32,6 +31,7 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Strings;
+use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
@@ -47,7 +47,6 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use ResursException;
 use RuntimeException;
 use stdClass;
 use WC_Cart;
@@ -55,10 +54,8 @@ use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
-use function count;
 use function function_exists;
 use function in_array;
-use function is_array;
 use function is_object;
 use function sha1;
 use function uniqid;
@@ -524,10 +521,8 @@ class ResursDefault extends WC_Payment_Gateway
         $governmentId = Data::getCustomerType() === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
-        // @todo This is a temporary fix until we use form fields or another way to fetch government id's.
-        // @todo This includes getAddress-templates.
-        if (empty($governmentId) && ($sessionIdentification = WooCommerce::getSessionValue('identification'))) {
-            $governmentId = $sessionIdentification;
+        if (empty($governmentId) && CustomerRepository::getSsnData() !== null) {
+            $governmentId = Repository::getSsnData();
         }
 
         // $this->getCustomerData('phone')
@@ -1171,82 +1166,6 @@ class ResursDefault extends WC_Payment_Gateway
 
         // @todo See the code after the return part. This smaller is just temporary.
         return 'Display "USP" - and eventually on demand also government id fields here.';
-
-        // @todo All code below is deprecated and should be replaced.
-        // If not here, no fields are required.
-        /** @noinspection PhpUndefinedFieldInspection */
-        $requiredFields = FormFields::getSpecificTypeFields(
-            $this->paymentMethodInformation->type,
-            Data::getCustomerType()
-        );
-
-        if (count($requiredFields)) {
-            $getAddressVisible = Data::canUseGetAddressForm();
-            foreach ($requiredFields as $fieldName) {
-                $fieldValue = null;
-                $displayField = $this->getDisplayableField($fieldName);
-                $alwaysShowApplicantFields = Data::getResursOption('streamline_payment_fields');
-                switch ($fieldName) {
-                    case 'government_id':
-                        $fieldValue = WooCommerce::getSessionValue('identification');
-                        if (!$getAddressVisible) {
-                            $displayField = true;
-                        } elseif (!$alwaysShowApplicantFields) {
-                            $displayField = false;
-                        }
-                        $isInternal = self::isInternalMethod($this->paymentMethodInformation);
-                        if (!$isInternal && $displayField) {
-                            $displayField = false;
-                            // External payment methods does not require the govt. id.
-                            $alwaysShowApplicantFields = false;
-                        }
-
-                        // As we don't know if this field is filled in when we enter the page, we prefer to
-                        // properly show it, if it has been seen as empty when entering the checkout. Letting
-                        // the ecom-helper decide if the method is internal, this is easier to follow.
-                        if ($isInternal && !$displayField && empty($fieldValue)) {
-                            $displayField = true;
-                        }
-                        break;
-                    default:
-                        if (!$getAddressVisible || $alwaysShowApplicantFields) {
-                            $displayField = true;
-                        }
-                }
-                // Code breaking disabled.
-                /** @noinspection SpellCheckingInspection */
-                $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
-                    'displayMode' => $displayField ? '' : 'none',
-                    'methodId' => $this->paymentMethodInformation->id ?? '?',
-                    'fieldSize' => WordPress::applyFilters('getPaymentFieldSize', 24, $fieldName),
-                    'alwaysShowApplicantFields' => $alwaysShowApplicantFields,
-                    'fieldLabel' => FormFields::getFieldString($fieldName),
-                    'fieldName' => sprintf(
-                        '%s_%s_%s',
-                        Data::getPrefix(),
-                        $fieldName,
-                        $this->paymentMethodInformation->id
-                    ),
-                    'fieldValue' => $fieldValue,
-                ]);
-            }
-
-            // Code breaking disabled.
-            /** @noinspection SpellCheckingInspection */
-            /*$fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
-                'method' => $this->paymentMethodInformation,
-                'total' => $this->cart->total ?? 0,
-                'customDescription' => WooCommerce::getCustomDescription($this->paymentMethodInformation->id),
-            ]);*/
-
-            // Considering this place as a safe place to apply display in styles.
-            add_filter('safe_style_css', function ($styles) {
-                $styles[] = 'display';
-                return $styles;
-            });
-
-            echo Data::getEscapedHtml($fieldHtml);
-        }
     }
 
     /**
