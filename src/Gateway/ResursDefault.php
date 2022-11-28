@@ -1396,6 +1396,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @return Application
+     * @todo Temporary solution, until MAPI stops require the Application block.
      */
     private function getApplication(): Application
     {
