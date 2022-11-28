@@ -31,18 +31,14 @@ class Callback
      * Callback automation goes here.
      * @param CallbackType $callbackType
      * @return bool
-     * @throws CallbackTypeException
      * @throws HttpException
      */
     public static function processCallback(CallbackType $callbackType): bool
     {
-        if ($callbackType === CallbackType::AUTHORIZATION) {
-            return self::processAuthorization();
-        } elseif ($callbackType === CallbackType::MANAGEMENT) {
-            return self::processManagement();
-        }
-
-        throw new CallbackTypeException(message: 'Unknown callback type.');
+        return match($callbackType) {
+            CallbackType::AUTHORIZATION => self::processAuthorization(),
+            CallbackType::MANAGEMENT => self::processManagement(),
+        };
     }
 
     /**
@@ -51,28 +47,23 @@ class Callback
      */
     private static function processAuthorization(): bool
     {
-        $success = false;
-
         /** @var Authorization $callbackModel */
         $callbackModel = (new AuthorizationController())->getRequestModel(model: Authorization::class);
 
         // If order fails to be fetched, exceptions thrown here will be catched in the primary method,
         // so it will show a proper error to the sender.
-        $order = Database::getOrderByReference($callbackModel->paymentId);
+        $order = Database::getOrderByReference(orderReference: $callbackModel->paymentId);
 
         // @todo This request should be based on a getPayment rather than the received callbacks.
         // @todo By doing this, we'll get a secure layer between the callback server and the shop.
         $resursStatus = self::getAuthorizationStatusByCallbackPayload(status: $callbackModel->status);
 
         // @todo Status setter should be centralized.
-        if ($order->get_status() === $resursStatus) {
-            // Do not change status twice if already set, just report received-success back.
-            $success = true;
-        } else {
+        if ($order->get_status() !== $resursStatus) {
             // Do not change status if order is cancelled, due to the fact that order reservations and stock may
             // have changed since the order was cancelled.
             if ($order->get_status() !== 'cancelled') {
-                $success = $order->update_status(
+                $order->update_status(
                     $resursStatus, note: Translator::translate(phraseId: 'updated-status-by-callback')
                 );
                 if ($resursStatus === 'completed') {
@@ -82,7 +73,7 @@ class Callback
             }
         }
 
-        return $success;
+        return $order->get_status() === $resursStatus;
     }
 
     /**
@@ -91,21 +82,16 @@ class Callback
      */
     public static function processManagement(): bool
     {
-        $success = false;
-
         /** @var Management $callbackModel */
         $callbackModel = (new AuthorizationController())->getRequestModel(model: Management::class);
-        $order = Database::getOrderByReference($callbackModel->paymentId);
+        $order = Database::getOrderByReference(orderReference: $callbackModel->paymentId);
 
         // @todo This request should be based on a getPayment rather than the received callbacks.
         // @todo By doing this, we'll get a secure layer between the callback server and the shop.
         $resursStatus = self::getManagementStatusByCallbackPayload(action: $callbackModel->action);
 
         // @todo Status setter should be centralized.
-        if ($order->get_status() === $resursStatus) {
-            // Do not change status twice if already set, just report received-success back.
-            $success = true;
-        } else {
+        if ($order->get_status() !== $resursStatus) {
             // Do not change status if order is cancelled, due to the fact that order reservations and stock may
             // have changed since the order was cancelled.
             if ($order->get_status() !== 'cancelled') {
@@ -119,7 +105,7 @@ class Callback
             }
         }
 
-        return $success;
+        return $order->get_status() === $resursStatus;
     }
 
     /**

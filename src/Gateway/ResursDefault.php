@@ -1373,7 +1373,7 @@ class ResursDefault extends WC_Payment_Gateway
             // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
             Metadata::setOrderMeta(
                 order: $order,
-                metaDataKey: sprintf('%s_order_reference', ResursDefault::PREFIX),
+                metaDataKey: ResursDefault::PREFIX . '_order_reference',
                 metaDataValue: $paymentResponse->id
             );
         } catch (Exception $createPaymentException) {
@@ -1450,9 +1450,10 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getCallbackUrl(CallbackType $callbackType): string
     {
+        // @todo Switch getWcApiUrl to utils.
         return Url::getQueryArg(
-            WooCommerce::getWcApiUrl(),
-            [
+            baseUrl: WooCommerce::getWcApiUrl(),
+            arguments: [
                 'mapi-callback' => $callbackType->value,
             ]
         );
@@ -1502,7 +1503,11 @@ class ResursDefault extends WC_Payment_Gateway
 
             // Callback will respond and exit.
             try {
-                $response['success'] = CallbackModule::processCallback(CallbackType::from(strtoupper($_REQUEST['mapi-callback'])));
+                $response['success'] = CallbackModule::processCallback(
+                    callbackType: CallbackType::from(
+                        value: strtoupper($_REQUEST['mapi-callback'])
+                    )
+                );
             } catch (Error|Exception $e) {
                 Config::getLogger()->error($e);
                 $response['message'] = $e->getMessage();

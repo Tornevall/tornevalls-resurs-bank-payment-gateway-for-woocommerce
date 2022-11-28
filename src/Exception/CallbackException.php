@@ -11,6 +11,9 @@ namespace ResursBank\Exception;
 
 use Exception;
 
+/**
+ * Exceptions triggered when the callback request is invalid.
+ */
 class CallbackException extends Exception
 {
 }

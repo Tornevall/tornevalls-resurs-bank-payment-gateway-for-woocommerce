@@ -24,7 +24,6 @@ class Database
      * the uuid as order reference. This is the only proper way to fetch such data.
      * @param string $orderReference
      * @return WC_Order
-     * @since 0.0.1.0
      * @noinspection SqlResolve
      * @noinspection UnknownInspectionInspection
      */
