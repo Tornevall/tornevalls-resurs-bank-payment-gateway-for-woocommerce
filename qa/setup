@@ -133,5 +133,8 @@ cat <<EOT >> ./composer.json
 }
 EOT
 
+# Install composer packages for QA tools.
+$phpCmd composer install
+
 echo OK
 exit 0
