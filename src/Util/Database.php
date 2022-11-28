@@ -20,6 +20,8 @@ use wpdb;
 class Database
 {
     /**
+     * Get the order ID from the database, based on the metadata stored on it for which Resurs always sets
+     * the uuid as order reference. This is the only proper way to fetch such data.
      * @param string $orderReference
      * @return WC_Order
      * @since 0.0.1.0
@@ -32,7 +34,8 @@ class Database
 
         if ($wpdb instanceof wpdb) {
             $tableName = $wpdb->prefix . 'postmeta';
-            // This is the WP safe way to do queries.
+            // Using WP safe queries to fetch data from the metas. This is the only way doing it properly
+            // as WP do not provide any other way to fetch data from the database.
             $orderResult = $wpdb->get_var(
                 query: $wpdb->prepare(
                     "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
@@ -48,6 +51,6 @@ class Database
             }
         }
 
-        throw new RuntimeException('Could not get order by reference.');
+        throw new RuntimeException('No such order.');
     }
 }

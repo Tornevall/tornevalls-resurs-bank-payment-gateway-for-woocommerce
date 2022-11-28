@@ -15,14 +15,12 @@ use Resursbank\Ecom\Exception\CallbackTypeException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Callback\Authorization;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\Action;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\Status;
 use Resursbank\Ecom\Lib\Model\Callback\Management;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
-use ResursBank\Exception\CallbackException;
 use Resursbank\Woocommerce\Util\Database;
-use WC_Order;
-use WC_Session_Handler;
 
 /**
  * Callback handling by automation.
@@ -58,14 +56,15 @@ class Callback
         /** @var Authorization $callbackModel */
         $callbackModel = (new AuthorizationController())->getRequestModel(model: Authorization::class);
 
-        // If order fails to be fetched, exceptions thrown are catched in the primary method, so it will show a proper error
-        // to the sender.
+        // If order fails to be fetched, exceptions thrown here will be catched in the primary method,
+        // so it will show a proper error to the sender.
         $order = Database::getOrderByReference($callbackModel->paymentId);
 
         // @todo This request should be based on a getPayment rather than the received callbacks.
         // @todo By doing this, we'll get a secure layer between the callback server and the shop.
-        $resursStatus = self::getStatusByCallbackPayload(status: $callbackModel->status);
+        $resursStatus = self::getAuthorizationStatusByCallbackPayload(status: $callbackModel->status);
 
+        // @todo Status setter should be centralized.
         if ($order->get_status() === $resursStatus) {
             // Do not change status twice if already set, just report received-success back.
             $success = true;
@@ -94,11 +93,33 @@ class Callback
     {
         $success = false;
 
+        Config::getLogger()->error(print_r($_REQUEST, true));
+
         /** @var Management $callbackModel */
         $callbackModel = (new AuthorizationController())->getRequestModel(model: Management::class);
         $order = Database::getOrderByReference($callbackModel->paymentId);
 
-        // $callbackModel->action
+        // @todo This request should be based on a getPayment rather than the received callbacks.
+        // @todo By doing this, we'll get a secure layer between the callback server and the shop.
+        $resursStatus = self::getManagementStatusByCallbackPayload(action: $callbackModel->action);
+
+        // @todo Status setter should be centralized.
+        if ($order->get_status() === $resursStatus) {
+            // Do not change status twice if already set, just report received-success back.
+            $success = true;
+        } else {
+            // Do not change status if order is cancelled, due to the fact that order reservations and stock may
+            // have changed since the order was cancelled.
+            if ($order->get_status() !== 'cancelled') {
+                $success = $order->update_status(
+                    $resursStatus, note: Translator::translate(phraseId: 'updated-status-by-callback')
+                );
+                if ($resursStatus === 'completed') {
+                    // Trigger internal functions and let others handle hooks related to order completion.
+                    $order->payment_complete();
+                }
+            }
+        }
 
         return $success;
     }
@@ -106,28 +127,30 @@ class Callback
     /**
      * @param Status $status
      * @return string
+     * @todo Centralize this with ecom2, since management actions are based on the same setup
      */
-    private static function getStatusByCallbackPayload(Status $status): string
+    private static function getAuthorizationStatusByCallbackPayload(Status $status): string
     {
-        switch ($status) {
-            case Status::FROZEN:
-                $return = 'on-hold';
-                break;
-            case Status::AUTHORIZED:
-                $return = 'processing';
-                break;
-            case Status::CAPTURED:
-                $return = 'completed';
-                break;
-            case Status::REJECTED:
-                // @todo Decide whether we should fail or cancel the order.
-                // @todo By using cancelled, we also need to handle the cancellation.
-                $return = 'failed';
-                break;
-            default:
-                $return = 'failed';
-        }
+        return match ($status) {
+            Status::FROZEN => 'on-hold',
+            Status::AUTHORIZED => 'processing',
+            Status::CAPTURED => 'completed',
+            default => 'failed',
+        };
+    }
 
-        return $return;
+    /**
+     * @param Action $action
+     * @return string
+     * @todo Centralize this with ecom2, since management actions are based on the same setup
+     */
+    private static function getManagementStatusByCallbackPayload(Action $action): string
+    {
+        return match ($action) {
+            Action::CANCEL => 'cancelled',
+            Action::CAPTURE => 'completed',
+            Action::REFUND => 'refunded',
+            default => 'failed',
+        };
     }
 }
