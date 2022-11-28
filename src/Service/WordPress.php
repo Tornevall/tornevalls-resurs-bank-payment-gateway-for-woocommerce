@@ -195,10 +195,6 @@ class WordPress
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
         add_action('woocommerce_single_product_summary', 'ResursBank\Module\Data::getAnnuityFactors');
         add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
-        // Checkout Actions.
-        if (Data::isEnabled()) {
-            add_filter('woocommerce_before_checkout_billing_form', 'ResursBank\Module\FormFields::getGetAddressForm');
-        }
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
     }
 

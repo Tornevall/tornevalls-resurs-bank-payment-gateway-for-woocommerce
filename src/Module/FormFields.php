@@ -1339,56 +1339,6 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param WC_Checkout|null $wcCheckout
-     * @param bool $returnAsHtml
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getGetAddressForm(null|WC_Checkout$wcCheckout, bool $returnAsHtml = false): mixed
-    {
-        $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
-        $customerTypeByConditions = Data::getCustomerType();
-
-        if (Data::isTest() && file_exists(Data::getGatewayPath() . '/testdata.json')) {
-            try {
-                $testDataFile = Data::getGatewayPath() . '/testdata.json';
-                $liveTestData = json_decode(@file_get_contents($testDataFile), true, 512);
-            } catch (Exception $e) {
-                Data::writeLogException($e, __FUNCTION__);
-            }
-        }
-
-        Data::getSafeStyle();
-
-        $template = sprintf('%s/checkout_getaddress.phtml', Data::getGatewayPath('templates'));
-
-        global $legacyVariables;
-        $legacyVariables = [
-            'customer_private' => __('Private person', 'resurs-bank-payments-for-woocommerce'),
-            'customer_company' => __('Company', 'resurs-bank-payments-for-woocommerce'),
-            'customer_type' => $customerTypeByConditions,
-            'customer_button_text' => WordPress::applyFilters(
-                'getAddressButtonText',
-                __('Get address', 'resurs-bank-payments-for-woocommerce')
-            ),
-            'supported_country' => Data::isGetAddressSupported(),
-            'get_address_form' => Data::canUseGetAddressForm(),
-            'get_address_form_always' => $getAddressFormAlways,
-            'liveTestData' => $liveTestData ?? [],
-        ];
-
-        $return = (new Widget())->render(file: $template);
-
-        if ($returnAsHtml) {
-            return $return;
-        } else {
-            echo Data::getEscapedHtml($return);
-        }
-        return $wcCheckout instanceof WC_Checkout ? $wcCheckout : '';
-    }
-
-    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
