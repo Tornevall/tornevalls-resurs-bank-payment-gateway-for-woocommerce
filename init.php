@@ -86,4 +86,4 @@ add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerc
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 
 // Execute custom routing options.
-//Route::exec();
+Route::exec();
