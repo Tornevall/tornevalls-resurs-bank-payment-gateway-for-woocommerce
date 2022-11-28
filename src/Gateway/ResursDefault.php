@@ -1497,17 +1497,18 @@ class ResursDefault extends WC_Payment_Gateway
                 'message' => ''
             ];
 
-            $responseController = new Controller();
-
             // Callback will respond and exit.
             try {
                 $response['success'] = CallbackModule::processCallback(CallbackType::from(strtoupper($_REQUEST['mapi-callback'])));
-            } catch (Exception|Error $e) {
+            } catch (Error|Exception $e) {
                 Config::getLogger()->error($e);
                 $response['message'] = $e->getMessage();
             }
 
-            $responseController->respond($response, code: $response['success'] ? 202 : 408);
+            // @todo We used $responseController to reply with JSON before. Since we need a customized response code
+            // @todo this must be fixed again.
+            header(header: 'Content-Type: application/json',response_code: $response['success'] ? 202 : 408);
+
             exit;
         }
 
