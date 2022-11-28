@@ -19,10 +19,9 @@ use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Lib\Model\Payment\Customer as CustomerRepository;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
@@ -32,6 +31,7 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Strings;
+use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
@@ -47,7 +47,6 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use ResursException;
 use RuntimeException;
 use stdClass;
 use WC_Cart;
@@ -55,10 +54,8 @@ use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
-use function count;
 use function function_exists;
 use function in_array;
-use function is_array;
 use function is_object;
 use function sha1;
 use function uniqid;
@@ -524,10 +521,8 @@ class ResursDefault extends WC_Payment_Gateway
         $governmentId = Data::getCustomerType() === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
-        // @todo This is a temporary fix until we use form fields or another way to fetch government id's.
-        // @todo This includes getAddress-templates.
-        if (empty($governmentId) && ($sessionIdentification = WooCommerce::getSessionValue('identification'))) {
-            $governmentId = $sessionIdentification;
+        if (empty($governmentId) && CustomerRepository::getSsnData() !== null) {
+            $governmentId = Repository::getSsnData();
         }
 
         // $this->getCustomerData('phone')

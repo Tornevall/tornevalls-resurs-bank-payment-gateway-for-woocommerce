@@ -1510,59 +1510,6 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param null $key
-     * @return array|mixed
-     * @since 0.0.1.0
-     */
-    public static function getFieldString($key = null)
-    {
-        $fields = [
-            'government_id' => __('Social security number', 'resurs-bank-payments-for-woocommerce'),
-            'phone' => __('Phone number', 'resurs-bank-payments-for-woocommerce'),
-            'mobile' => __('Mobile number', 'resurs-bank-payments-for-woocommerce'),
-            'email' => __('E-mail address', 'resurs-bank-payments-for-woocommerce'),
-            'government_id_contact' => __(
-                'Applicant government id',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'contact_government_id' => __(
-                'Contact government id',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'card_number' => __('Card number', 'resurs-bank-payments-for-woocommerce'),
-            'applicant_government_id' => __(
-                'Applicant Government ID',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_telephone_number' => __(
-                'Applicant Telephone Number',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_mobile_number' => __(
-                'Applicant Mobile Number',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_email_address' => __(
-                'Applicant E-Mail Address',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_full_name' => __(
-                'Applicant Full Name',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-        ];
-
-        // If no key are sent here, it is probably a localization request.
-        $return = $fields;
-
-        if (!empty($key) && isset($fields[$key])) {
-            $return = $fields[$key];
-        }
-
-        return $return;
-    }
-
-    /**
      * @param $key
      * @return bool
      * @since 0.0.1.0

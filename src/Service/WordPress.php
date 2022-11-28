@@ -901,7 +901,6 @@ class WordPress
             'You may want to reload your browser before proceeding.',
             'resurs-bank-payments-for-woocommerce'
         );
-        $return['checkout_fields'] = FormFields::getFieldString();
         if (Data::hasCredentials() && !is_admin()) {
             $return['getAddressFieldController'] = WordPress::getAddressFieldController();
         }
