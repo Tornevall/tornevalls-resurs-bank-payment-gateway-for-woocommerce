@@ -35,7 +35,6 @@ define(
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
 }
-
 require_once(__DIR__ . '/autoload.php');
 
 // Using same path identifier as the rest of the plugin-verse.
@@ -59,11 +58,6 @@ if (Data::isOriginalCodeBase()) {
 // in one sweep - if necessary.
 define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
 
-//@todo According to WOO-817, this feature may be misconfigured.
-define(constant_name: 'RESURSBANK_ALLOW_PAYMENT_FEE',
-    value: WordPress::applyFilters(filterName: 'allowPaymentFee', value: false)
-);
-
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
 try {
     Config::setup(
@@ -72,7 +66,6 @@ try {
         jwtAuth: Api::getJwt()
     );
 } catch (Exception $e) {
-
 }
 
 // Translation domain is used for all phrases that is not relying on ecom2.
@@ -89,8 +82,6 @@ if (!WooCommerce::getActiveState()) {
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "WordPress mode" with if (function_exists('add_action')) {}.
 add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
-// Necessary on an early level.
-add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 
 // Execute custom routing options.
 Route::exec();
