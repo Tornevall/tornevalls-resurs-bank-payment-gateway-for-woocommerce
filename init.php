@@ -85,5 +85,6 @@ add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerc
 // Necessary on an early level.
 add_filter('rbwc_get_custom_form_fields', 'ResursBank\Module\FormFields::getDeveloperTweaks', 10, 2);
 
-// Execute custom routing options.
-Route::exec();
+// @todo Execute custom routing options
+// @todo This still generates blank pages, so it is temporaily disabled. This has to be fixed before enabling.
+//Route::exec();
