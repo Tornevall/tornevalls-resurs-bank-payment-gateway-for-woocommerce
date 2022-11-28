@@ -1369,6 +1369,8 @@ class ResursDefault extends WC_Payment_Gateway
                 return: $return,
                 order: $order
             );
+            // This is our link to the payment at Resurs for which we save the uuid we get at the create.
+            // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
             Metadata::setOrderMeta(
                 order: $order,
                 metaDataKey: sprintf('%s_order_reference', ResursDefault::PREFIX),
