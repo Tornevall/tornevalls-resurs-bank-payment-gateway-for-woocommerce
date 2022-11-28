@@ -18,15 +18,6 @@ case "$localPhp" in
   * ) echo "Invalid response."; exit 1;;
 esac
 
-HOOK_FILE=".git/hooks/pre-commit"
-
-if [ -f $HOOK_FILE ]; then
-  rm -f $HOOK_FILE
-fi
-
-touch $HOOK_FILE
-chmod +x $HOOK_FILE
-
 if [ ! -d ./qa/bin ]; then
   mkdir -p ./qa/bin
 fi
@@ -51,7 +42,16 @@ if [ "" = "$($phpCmd which composer)" ]; then
   echo ""
 fi
 
-# Install composer packages.
+
+# Create git pre-commit hook file.
+HOOK_FILE=".git/hooks/pre-commit"
+
+if [ -f $HOOK_FILE ]; then
+  rm -f $HOOK_FILE
+fi
+
+touch $HOOK_FILE
+chmod +x $HOOK_FILE
 
 cat <<EOT >> $HOOK_FILE
 #!/usr/bin/env -S bash -eu
@@ -65,48 +65,72 @@ if [ -n "\$AFFECTED_STRING" ]; then
   echo ""
   echo "---==( Executing Psalm tests. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/psalm -c $dir/qa/psalm/psalm.xml --show-info=true \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/psalm -c $dir/qa/psalm/psalm.xml --show-info=true \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHPMD tests on source files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpmd $dir/src text $dir/qa/phpmd/src.xml \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpmd $dir/src text $dir/qa/phpmd/src.xml \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHPMD tests on test files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpmd $dir/tests text $dir/qa/phpmd/tests.xml \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpmd $dir/tests text $dir/qa/phpmd/tests.xml \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHP CBF for source files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpcbf --standard=PSR12 \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpcbf --standard=PSR12 \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHP CBF for test files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpcbf --standard=PSR12 \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpcbf --standard=PSR12 \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHPCS for source files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpcs --standard=PSR12 \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpcs --standard=PSR12 \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHPCS for test files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpcs --standard=PSR12 \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpcs --standard=PSR12 \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHPStan for source files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpstan analyse -c $dir/qa/phpstan.neon \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan.neon \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHPStan for test files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/phpstan analyse -c $dir/qa/phpstan.neon \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan.neon \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHP CS Fixer for source files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache fix \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache fix \$AFFECTED_STRING
   echo ""
   echo "---==( Executing PHP CS Fixer for test files. )==---"
   echo ""
-  $phpCmd $dir/qa/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache fix \$AFFECTED_STRING
+  $phpCmd $dir/vendor/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache fix \$AFFECTED_STRING
 fi
+EOT
+
+# Create composer.json file for QA tools.
+if [ -f ./composer.json ]; then
+  rm -f ./composer.json
+fi
+
+touch ./composer.json
+
+cat <<EOT >> ./composer.json
+{
+  "require-dev": {
+    "phpunit/phpunit": "^9",
+    "phpmd/phpmd": "^2",
+    "squizlabs/php_codesniffer": "^3",
+    "friendsofphp/php-cs-fixer": "^3",
+    "vimeo/psalm": "^4",
+    "phpstan/phpstan": "^1"
+  },
+  "require": {
+    "php": "8.1.*",
+    "ext-curl": "*"
+  }
+}
 EOT
 
 echo OK
