@@ -40,46 +40,18 @@ if [ ! -f ./qa/php-cs-fixer/.php-cs-fixer.cache ]; then
   touch ./qa/php-cs-fixer/.php-cs-fixer.cache
 fi
 
-echo ""
-echo "--==( Installing PHPMD )==--"
-echo ""
-curl -L https://github.com/phpmd/phpmd/releases/latest/download/phpmd.phar > ./qa/bin/phpmd
-chmod +x ./qa/bin/phpmd
+# Install Composer if it's not already available.
+if [ "" = "$($phpCmd which composer)" ]; then
+  echo ""
+  echo ""
+  echo "--==( Installing Composer )==--"
+  echo ""
+  curl -L https://github.com/composer/composer/releases/download/2.4.2/composer.phar -o ./qa/bin/composer
+  echo ""
+  echo ""
+fi
 
-echo ""
-echo ""
-echo "--==( Installing PHPCS )==--"
-echo ""
-curl -L https://github.com/squizlabs/PHP_CodeSniffer/releases/latest/download/phpcs.phar > ./qa/bin/phpcs
-chmod +x ./qa/bin/phpcs
-
-echo ""
-echo ""
-echo "--==( Installing PHPCBF )==--"
-echo ""
-curl -L https://github.com/squizlabs/PHP_CodeSniffer/releases/latest/download/phpcbf.phar > ./qa/bin/phpcbf
-chmod +x ./qa/bin/phpcbf
-
-echo ""
-echo ""
-echo "--==( Installing PHPCS Fixer )==--"
-echo ""
-curl -L https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar > ./qa/bin/php-cs-fixer
-chmod +x ./qa/bin/php-cs-fixer
-
-echo ""
-echo ""
-echo "--==( Installing Psalm )==--"
-echo ""
-curl -L https://github.com/vimeo/psalm/releases/latest/download/psalm.phar > ./qa/bin/psalm
-chmod +x ./qa/bin/psalm
-
-echo ""
-echo ""
-echo "--==( Installing PHP Stan )==--"
-echo ""
-curl -L https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar > ./qa/bin/phpstan
-chmod +x ./qa/bin/phpstan
+# Install composer packages.
 
 cat <<EOT >> $HOOK_FILE
 #!/usr/bin/env -S bash -eu
