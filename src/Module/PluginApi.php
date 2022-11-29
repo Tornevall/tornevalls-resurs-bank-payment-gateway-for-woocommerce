@@ -26,6 +26,7 @@ use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use WC_Checkout;
 use WC_Order;
+
 use function count;
 use function in_array;
 use function is_array;
@@ -1091,7 +1092,7 @@ class PluginApi
             $return['api_error'] = __(
                 'Service is currently not active.',
                 'resurs-bank-payments-for-woocommerce'
-             );
+            );
             self::reply($return);
         }
 

@@ -55,6 +55,7 @@ use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
 use WC_Tax;
+
 use function count;
 use function function_exists;
 use function in_array;
@@ -80,43 +81,43 @@ class ResursDefault extends WC_Payment_Gateway
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_FINALIZED = 'completed';
+    public const STATUS_FINALIZED = 'completed';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_BOOKED = 'processing';
+    public const STATUS_BOOKED = 'processing';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_FROZEN = 'on-hold';
+    public const STATUS_FROZEN = 'on-hold';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_SIGNING = 'on-hold';
+    public const STATUS_SIGNING = 'on-hold';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_DENIED = 'failed';
+    public const STATUS_DENIED = 'failed';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_FAILED = 'failed';
+    public const STATUS_FAILED = 'failed';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_CANCELLED = 'cancelled';
 
     /**
      * This prefix is used for various parts of the settings by WooCommerce,
@@ -978,8 +979,10 @@ class ResursDefault extends WC_Payment_Gateway
                 $return = wc_get_price_excluding_tax($productObject);
                 break;
             case 'totalVatAmount':
-                $return = wc_get_price_including_tax($productObject,
-                        ['qty' => $wcProductItemData['quantity']]) - wc_get_price_excluding_tax(
+                $return = wc_get_price_including_tax(
+                    $productObject,
+                    ['qty' => $wcProductItemData['quantity']]
+                ) - wc_get_price_excluding_tax(
                         $productObject,
                         ['qty' => $wcProductItemData['quantity']]
                     );
@@ -1024,7 +1027,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         $rates = array_shift($ratesArray);
         if (isset($rates['rate'])) {
-            $return = (double)$rates['rate'];
+            $return = (float)$rates['rate'];
         } else {
             $return = 0;
         }

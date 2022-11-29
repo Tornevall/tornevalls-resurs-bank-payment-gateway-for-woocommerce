@@ -16,6 +16,7 @@ use stdClass;
 use TorneLIB\IO\Data\Arrays;
 use WC_Checkout;
 use WC_Settings_API;
+
 use function count;
 use function in_array;
 use function is_array;
@@ -149,8 +150,10 @@ class FormFields extends WC_Settings_API
                 ],
                 'jwt_client_id_production' => [
                     'id' => 'jwt_client_id_production',
-                    'title' => __('JWT Client ID (Production).',
-                        'resurs-bank-payments-for-woocommerce'),
+                    'title' => __(
+                        'JWT Client ID (Production).',
+                        'resurs-bank-payments-for-woocommerce'
+                    ),
                     'type' => 'text',
                     'desc' => __(
                         'JWT Client ID (username), received from Resurs Bank.',

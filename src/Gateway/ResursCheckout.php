@@ -5,6 +5,7 @@ namespace ResursBank\Gateway;
 use Exception;
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
+
 use function count;
 use function is_array;
 
@@ -80,8 +81,8 @@ class ResursCheckout
     public function isLegacyIframe($iframeContainer): bool
     {
         return (
-        (isset($iframeContainer, $iframeContainer->script) &&
-            preg_match('/oc-shop.js/', $iframeContainer->script))
+            (isset($iframeContainer, $iframeContainer->script) &&
+                preg_match('/oc-shop.js/', $iframeContainer->script))
         );
     }
 

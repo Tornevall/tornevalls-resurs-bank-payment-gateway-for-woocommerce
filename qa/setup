@@ -82,11 +82,11 @@ $phpCmd $dir/vendor/bin/phpcs --standard=PSR12 --ignore=Service/,ResursBank/,Gat
 echo ""
 echo "---==( Executing PHPStan for source files. )==---"
 echo ""
-$phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan/src.neon --xdebug $dir/src
+$phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan/src.neon -a $dir/autoload.php $dir/src
 echo ""
 echo "---==( Executing PHP CS Fixer for source files. )==---"
 echo ""
-# $phpCmd $dir/vendor/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache fix $dir/src
+$phpCmd $dir/vendor/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache --config=$dir/qa/php-cs-fixer/.php-cs-fixer.dist.php fix
 EOT
 
 echo ""

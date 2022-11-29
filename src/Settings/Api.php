@@ -38,6 +38,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
  * API settings section.
  *
  * @todo Translations should be moved to ECom. See WOO-802 & ECP-205.
+ * @todo After refactoring, remove all error suppression (phpstan etc.).
  */
 class Api
 {
@@ -98,13 +99,16 @@ class Api
                 ],
                 'environment' => [
                     'id' => Environment::getName(),
+                    /* @phpstan-ignore-next-line */
                     'title' => __('Environment', 'resurs-bank-payments-for-woocommerce'),
                     'type' => 'select',
                     'options' => [
+                        /* @phpstan-ignore-next-line */
                         'test' => __(
                             'Test',
                             'resurs-bank-payments-for-woocommerce'
                         ),
+                        /* @phpstan-ignore-next-line */
                         'prod' => __(
                             'Production',
                             'resurs-bank-payments-for-woocommerce'

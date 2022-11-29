@@ -52,25 +52,5 @@
                 <file name="../../src/Database/StringOption.php" />
             </errorLevel>
         </MixedAssignment>
-<!--        <InvalidNullableReturnType>-->
-<!--            <errorLevel type="suppress">-->
-<!--                <file name="../../src/Config.php" />-->
-<!--            </errorLevel>-->
-<!--        </InvalidNullableReturnType>-->
-<!--        <PossiblyNullPropertyFetch>-->
-<!--            <errorLevel type="suppress">-->
-<!--                <file name="../../src/Config.php" />-->
-<!--            </errorLevel>-->
-<!--        </PossiblyNullPropertyFetch>-->
-<!--        <NullableReturnStatement>-->
-<!--            <errorLevel type="suppress">-->
-<!--                <file name="../../src/Config.php" />-->
-<!--            </errorLevel>-->
-<!--        </NullableReturnStatement>-->
-<!--        <MixedAssignment>-->
-<!--            <errorLevel type="suppress">-->
-<!--                <file name="../../src/Lib/Model/Model.php" />-->
-<!--            </errorLevel>-->
-<!--        </MixedAssignment>-->
     </issueHandlers>
 </psalm>

@@ -43,6 +43,7 @@ use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Settings\Advanced;
 use ResursException;
 use stdClass;
+
 use function count;
 use function in_array;
 use function is_array;
@@ -55,7 +56,6 @@ use function is_object;
  */
 class ResursBankAPI
 {
-
     /**
      * @var ResursBank $resursBank
      * @since 0.0.1.0

@@ -22,6 +22,7 @@ use WC_Cart;
 use WC_Coupon;
 use WC_Order;
 use WC_Product;
+
 use function count;
 use function is_array;
 use function is_object;
