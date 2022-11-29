@@ -171,6 +171,10 @@ class WordPress
 			'wp_head',
 			'Resursbank\Woocommerce\Modules\PartPayment\Module::setCss'
 		);
+        add_action(
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\PartPayment\Module::setJs'
+        );
         add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
