@@ -1,0 +1,8 @@
+parameters:
+    level: 0
+    tipsOfTheDay: false
+    excludePaths:
+        - 'Service/*'
+        - 'ResursBank/*'
+        - 'Gateway/*'
+        - 'Module/*'

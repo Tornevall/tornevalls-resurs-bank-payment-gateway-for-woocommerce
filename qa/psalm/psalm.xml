@@ -1,45 +1,76 @@
 <?xml version="1.0"?>
 <psalm
-    cacheDirectory="cache">
+    cacheDirectory="cache"
+    autoloader="../../autoload.php">
     <projectFiles>
         <directory name="../../src" />
-        <directory name="../../tests" />
         <ignoreFiles>
-            <file name="../../src/Lib/Utilities/DataConverter.php" />
-            <file name="../../tests/Utilities/MockSessionTrait.php" />
+            <directory name="../../src/Gateway" />
+            <directory name="../../src/Module" />
+            <directory name="../../src/ResursBank" />
+            <directory name="../../src/Service" />
         </ignoreFiles>
     </projectFiles>
     <issueHandlers>
-        <PropertyNotSetInConstructor>
+        <RedundantConditionGivenDocblockType>
             <errorLevel type="suppress">
-                <directory name="../../tests" />
-                <file name="../../src/Lib/Utilities/Generic.php" />
+                <directory name="../../src" />
             </errorLevel>
-        </PropertyNotSetInConstructor>
-        <MixedPropertyFetch>
+        </RedundantConditionGivenDocblockType>
+        <TypeDoesNotContainType>
             <errorLevel type="suppress">
-                <directory name="./" />
+                <file name="../../src/Util/Url.php" />
             </errorLevel>
-        </MixedPropertyFetch>
-        <InvalidNullableReturnType>
+        </TypeDoesNotContainType>
+        <UndefinedFunction>
             <errorLevel type="suppress">
-                <file name="../../src/Config.php" />
+                <directory name="../../src" />
             </errorLevel>
-        </InvalidNullableReturnType>
-        <PossiblyNullPropertyFetch>
+        </UndefinedFunction>
+        <RedundantCastGivenDocblockType>
             <errorLevel type="suppress">
-                <file name="../../src/Config.php" />
+                <directory name="../../src" />
             </errorLevel>
-        </PossiblyNullPropertyFetch>
-        <NullableReturnStatement>
+        </RedundantCastGivenDocblockType>
+        <UndefinedConstant>
             <errorLevel type="suppress">
-                <file name="../../src/Config.php" />
+                <file name="../../src/Util/Url.php" />
             </errorLevel>
-        </NullableReturnStatement>
+        </UndefinedConstant>
+        <UndefinedClass>
+            <errorLevel type="suppress">
+                <file name="../../src/Settings.php" />
+            </errorLevel>
+        </UndefinedClass>
+        <MixedMethodCall>
+            <errorLevel type="suppress">
+                <file name="../../src/Settings/Advanced.php" />
+            </errorLevel>
+        </MixedMethodCall>
         <MixedAssignment>
             <errorLevel type="suppress">
-                <file name="../../src/Lib/Model/Model.php" />
+                <file name="../../src/Database/StringOption.php" />
             </errorLevel>
         </MixedAssignment>
+<!--        <InvalidNullableReturnType>-->
+<!--            <errorLevel type="suppress">-->
+<!--                <file name="../../src/Config.php" />-->
+<!--            </errorLevel>-->
+<!--        </InvalidNullableReturnType>-->
+<!--        <PossiblyNullPropertyFetch>-->
+<!--            <errorLevel type="suppress">-->
+<!--                <file name="../../src/Config.php" />-->
+<!--            </errorLevel>-->
+<!--        </PossiblyNullPropertyFetch>-->
+<!--        <NullableReturnStatement>-->
+<!--            <errorLevel type="suppress">-->
+<!--                <file name="../../src/Config.php" />-->
+<!--            </errorLevel>-->
+<!--        </NullableReturnStatement>-->
+<!--        <MixedAssignment>-->
+<!--            <errorLevel type="suppress">-->
+<!--                <file name="../../src/Lib/Model/Model.php" />-->
+<!--            </errorLevel>-->
+<!--        </MixedAssignment>-->
     </issueHandlers>
 </psalm>

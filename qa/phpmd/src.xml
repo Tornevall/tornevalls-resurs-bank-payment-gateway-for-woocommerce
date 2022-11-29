@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="EcomPHP Source"
+<ruleset name="Source files"
          xmlns="http://pmd.sf.net/ruleset/1.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0
@@ -7,7 +7,7 @@
          xsi:noNamespaceSchemaLocation="
                      http://pmd.sf.net/ruleset_xml_schema.xsd">
     <description>
-        Ecom PHPMD Ruleset applying to src files.
+        PHPMD Ruleset applying to src files.
     </description>
 
     <rule ref="rulesets/codesize.xml">
@@ -30,7 +30,8 @@
         </properties>
     </rule>
 
-    <exclude-pattern>Lib/Order/CountryCode.php</exclude-pattern>
-    <exclude-pattern>Lib/Network/ContentType.php</exclude-pattern>
-    <exclude-pattern>Lib/Model/PaymentMethod/ApplicationFormSpecResponse/ApplicationFormSpecElementResponse/Type.php</exclude-pattern>
+    <exclude-pattern>Service/*</exclude-pattern>
+    <exclude-pattern>ResursBank/*</exclude-pattern>
+    <exclude-pattern>Gateway/*</exclude-pattern>
+    <exclude-pattern>Module/*</exclude-pattern>
 </ruleset>
