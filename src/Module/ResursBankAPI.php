@@ -158,6 +158,8 @@ class ResursBankAPI
                 $locale = Locale::en;
         }
 
+        WC()->initialize_session();
+
         Config::setup(
             logger: Advanced::getLogger(),
             cache: Advanced::getCache(),

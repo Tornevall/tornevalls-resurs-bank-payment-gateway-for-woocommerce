@@ -25,6 +25,7 @@ use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
@@ -62,6 +63,7 @@ use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
+use WC_Session_Handler;
 use WC_Tax;
 use function count;
 use function function_exists;
@@ -531,8 +533,10 @@ class ResursDefault extends WC_Payment_Gateway
         $governmentId = Data::getCustomerType() === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
-        if (empty($governmentId) && CustomerRepository::getSsnData() !== null) {
-            $governmentId = CustomerRepository::getSsnData();
+        // Since WooCommerce uses a cookie to pick up a session, we can't use the ecom "real" session to fetch the
+        // government id.
+        if (WC()->session instanceof WC_Session_Handler && empty($governmentId)) {
+            $governmentId = WC()->session->get(key: ResursDefault::PREFIX . Repository::SESSION_KEY_SSN_DATA);
         }
 
         // $this->getCustomerData('phone')
