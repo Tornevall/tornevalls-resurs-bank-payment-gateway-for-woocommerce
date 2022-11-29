@@ -215,27 +215,6 @@ function resursPlaceOrderControl() {
     }
 }
 
-jQuery(document).ready(function () {
-    jQuery('.variations_form').each(function () {
-        jQuery(this).on('found_variation', function (event, variation) {
-            var price = variation.display_price;
-            getResursAjaxify(
-                'post',
-                'resursbank_get_new_annuity_calculation',
-                {
-                    'price': price
-                },
-                function (pricedata) {
-                    if (typeof pricedata.price !== 'undefined') {
-                        $rQuery('#r_annuity_price').html(pricedata.price);
-                    }
-                }
-            );
-        });
-    });
-});
-
-
 /**
  * Render cost of purchase popup.
  * @param method
