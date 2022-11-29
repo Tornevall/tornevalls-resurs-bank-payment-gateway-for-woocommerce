@@ -243,47 +243,6 @@ function rbSwitchCustomerType() {
 }
 
 /**
- * @since 0.0.1.0
- */
-function getResursAddress() {
-    var ssnIdentification = $rQuery('#resursSsnIdentification');
-    $rQuery('#resursGetAddressSpinnify').show();
-    getResursSpin('#resursGetAddressSpinnify');
-    if (
-        $rQuery('#resursSsnIdentification').length > 0 &&
-        ssnIdentification.val() !== ''
-    ) {
-        getResursAjaxify(
-            'post',
-            'resursbank_get_address',
-            {'identification': ssnIdentification.val()},
-            function (response) {
-                $rQuery('#resursGetAddressSpinnify').hide();
-                if (response['api_error'] !== '') {
-                    $rQuery('.resursGetAddressError').text(response['api_error']);
-                    $rQuery('.resursGetAddressError').show();
-                    $rQuery('.resursGetAddressError').delay('4000').fadeOut('medium');
-                } else {
-                    for (var responseKey in response) {
-                        if ($rQuery('#' + responseKey).length > 0) {
-                            $rQuery('#' + responseKey).val(response[responseKey]);
-                        }
-                    }
-                    if (typeof response.billing_country !== 'undefined' && $rQuery("#billing_country").length > 0) {
-                        $rQuery("#billing_country").val(response.billing_country).change();
-                    }
-                }
-            },
-            function (requestFailure) {
-                $rQuery('.resursGetAddressError').text(requestFailure.statusText);
-                $rQuery('.resursGetAddressError').show();
-                $rQuery('.resursGetAddressError').delay('4000').fadeOut('medium');
-            }
-        );
-    }
-}
-
-/**
  * Handle rejected payments in RCO mode.
  * @param data
  * @since 0.0.1.0

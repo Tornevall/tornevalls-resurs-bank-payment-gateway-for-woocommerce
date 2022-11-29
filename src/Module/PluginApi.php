@@ -135,19 +135,6 @@ class PluginApi
 
         $out['action'] = self::getActionFromRequest();
 
-        Data::writeLogEvent(
-            Data::CAN_LOG_BACKEND,
-            sprintf(
-                'Backend Reply: %s (%s), params %s',
-                __FUNCTION__,
-                self::getActionFromRequest(),
-                print_r(self::getActionFromRequest() !== 'getAddress' ? $out : Data::getObfuscatedData(
-                    $out,
-                    'identificationResponse'
-                ), true)
-            )
-        );
-
         header('Content-type: application/json; charset=utf-8', true, 200);
         // Can not sanitize output as the browser is strictly typed to specific content.
         echo json_encode($out);
@@ -1068,73 +1055,6 @@ class PluginApi
             __('Received', 'resurs-bank-payments-for-woocommerce'),
             date('Y-m-d H:i:s', (int)$lastTestResponseString)
         );
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getAddress(): void
-    {
-        $addressResponse = [];
-        $identification = Data::getRequest('identification');
-        $customerType = Data::getCustomerType();
-        $customerCountry = Data::getCustomerCountry();
-
-        $return = [
-            'api_error' => '',
-            'code' => 0,
-            'identificationResponse' => [],
-        ];
-
-        if (!Data::hasCredentials()) {
-            $return['api_error'] = __(
-                'Service is currently not active.',
-                'resurs-bank-payments-for-woocommerce'
-             );
-            self::reply($return);
-        }
-
-        WooCommerce::setSessionValue('identification', Data::getRequest('identification'));
-
-        // @todo Investigate getAddressByPhoneNumber (SOAP) if it will ever return to MAPI.
-        // @todo If not, this switch will be better off as an if.
-        switch ($customerCountry) {
-            case 'SE':
-                try {
-                    // This request is a display-only solution, so it has to be returned as an array so
-                    // that the fron script can fetch it.
-                    $addressResponse = CustomerRepoitory::getAddress(
-                        StoreId::getData(),
-                        $identification,
-                        $customerType,
-                    )->toArray();
-                } catch (Exception $e) {
-                    Config::getLogger()->error(
-                        sprintf(
-                            '%s failed for %s with message %s',
-                            __FUNCTION__,
-                            $identification,
-                            $e->getMessage()
-                        )
-                    );
-                    $return['api_error'] = $e->getMessage();
-                    $return['code'] = $e->getCode();
-                }
-                break;
-            default:
-        }
-        $return['identificationResponse'] = $addressResponse;
-        $return['billing_country'] = $customerCountry;
-
-        // Make sure we really got a valid content from the response since Resurs may return empties on
-        // API-errors even if the government id is valid and working. So we can not just verify that the response
-        // is an array, we also have to make sure it has content.
-        if (count($addressResponse)) {
-            $return = self::getTransformedAddressResponse($return, $addressResponse);
-        }
-
-        self::reply($return);
     }
 
     /**

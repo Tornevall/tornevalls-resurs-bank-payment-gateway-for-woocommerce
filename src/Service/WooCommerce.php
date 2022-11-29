@@ -218,47 +218,16 @@ class WooCommerce
      * Handle payment methods as separate gateways without the necessary steps to have separate classes on disk
      * or written in database.
      *
-     * This method fetches payment methods live from Resurs Bank and generates a gateway for each of them
-     * by the ResursDefault-class. In case there are a file cache available, the methods will be stored temporarily
-     * there, instead, for the performance. We could however use transients for local storage too, if there is no
-     * file cache available in ecom2.
-     *
      * @param array $gateways
      * @return array
-     * @throws ConfigException
      * @since 0.0.1.0
+     * @todo Create payment method cache-driver based on transients via ecom2 (WOO-847).
      */
     private static function getGatewaysFromPaymentMethods(array $gateways = []): array
     {
-        // Local fail-over if ecom2 has no initial file cache available.
-        $canUseTransientCache = Config::getCache() instanceof None;
-        $transientMethodList = null;
-
-        // We want to fetch payment methods from storage at this point, in cae Resurs Bank API is down.
         try {
-            if ($canUseTransientCache) {
-                // @todo there is a task for centralizing this transient to a cache already.
-                $transientMethodList = get_transient(
-                    transient: sprintf('%s_payment_methods', ResursDefault::PREFIX)
-                );
-            }
+            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(StoreId::getData());
 
-            // @todo Build cache-driver for transients.
-            $paymentMethodList = !$transientMethodList instanceof PaymentMethodCollection ?
-                PaymentMethodRepository::getPaymentMethods(StoreId::getData()) : $transientMethodList;
-
-            // Save short term cache in case of problems that may disable sections of WooCommerce that is supposed
-            // to be alive during network errors. In case of changes Resurs side, the transient ttl should be as
-            // short as possible. However, this only applies to cases when no local ecom-cache is available.
-            if ($canUseTransientCache) {
-                set_transient(
-                    transient: 'resursbank_payment_methods',
-                    value: $paymentMethodList,
-                    expiration: 600
-                );
-            }
-
-            $incrementMethodId = 0;
             /** @var PaymentMethod $paymentMethod */
             foreach ($paymentMethodList as $paymentMethod) {
                 $gateway = new ResursDefault(resursPaymentMethod: $paymentMethod);
@@ -1252,7 +1221,6 @@ class WooCommerce
      */
     public static function getReviewFragments($fragments): array
     {
-        $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
         $fragments['fragmethod'] = Data::getMethodFromFragmentOrSession();
 
         return $fragments;
