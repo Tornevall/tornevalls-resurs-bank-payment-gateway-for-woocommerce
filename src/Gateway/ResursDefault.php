@@ -1297,6 +1297,12 @@ class ResursDefault extends WC_Payment_Gateway
                 return: $return,
                 order: $order
             );
+
+            if ($return['result'] === 'success') {
+                // Forget the session variable if there is a success.
+                WC()->session->set(ResursDefault::PREFIX . Repository::SESSION_KEY_SSN_DATA, null);
+            }
+
             // This is our link to the payment at Resurs for which we save the uuid we get at the create.
             // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
             Metadata::setOrderMeta(
