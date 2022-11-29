@@ -41,7 +41,6 @@ class Route {
      * @return void
      */
     public static function exec(): void {
-<<<<<<< HEAD
 	    $route = (
 		    isset( $_GET[ self::ROUTE_PARAM ] ) &&
 		    is_string( $_GET[ self::ROUTE_PARAM ] )
@@ -64,9 +63,6 @@ class Route {
         } catch (Exception $exception) {
             self::respondWithError(exception: $exception);
         }
-
-        self::outputHeaders(body: $response);
-        echo $response;
     }
 
     /**
