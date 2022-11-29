@@ -1222,7 +1222,6 @@ class WooCommerce
      */
     public static function getReviewFragments($fragments): array
     {
-        $fragments['#rbGetAddressFields'] = FormFields::getGetAddressForm(null, true);
         $fragments['fragmethod'] = Data::getMethodFromFragmentOrSession();
 
         return $fragments;

@@ -1342,56 +1342,6 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param WC_Checkout|null $wcCheckout
-     * @param bool $returnAsHtml
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getGetAddressForm(null|WC_Checkout$wcCheckout, bool $returnAsHtml = false): mixed
-    {
-        $getAddressFormAlways = (bool)Data::getResursOption('get_address_form_always');
-        $customerTypeByConditions = Data::getCustomerType();
-
-        if (Data::isTest() && file_exists(Data::getGatewayPath() . '/testdata.json')) {
-            try {
-                $testDataFile = Data::getGatewayPath() . '/testdata.json';
-                $liveTestData = json_decode(@file_get_contents($testDataFile), true, 512);
-            } catch (Exception $e) {
-                Data::writeLogException($e, __FUNCTION__);
-            }
-        }
-
-        Data::getSafeStyle();
-
-        $template = sprintf('%s/checkout_getaddress.phtml', Data::getGatewayPath('templates'));
-
-        global $legacyVariables;
-        $legacyVariables = [
-            'customer_private' => __('Private person', 'resurs-bank-payments-for-woocommerce'),
-            'customer_company' => __('Company', 'resurs-bank-payments-for-woocommerce'),
-            'customer_type' => $customerTypeByConditions,
-            'customer_button_text' => WordPress::applyFilters(
-                'getAddressButtonText',
-                __('Get address', 'resurs-bank-payments-for-woocommerce')
-            ),
-            'supported_country' => Data::isGetAddressSupported(),
-            'get_address_form' => Data::canUseGetAddressForm(),
-            'get_address_form_always' => $getAddressFormAlways,
-            'liveTestData' => $liveTestData ?? [],
-        ];
-
-        $return = (new Widget())->render(file: $template);
-
-        if ($returnAsHtml) {
-            return $return;
-        } else {
-            echo Data::getEscapedHtml($return);
-        }
-        return $wcCheckout instanceof WC_Checkout ? $wcCheckout : '';
-    }
-
-    /**
      * Fetch payment methods list. formData is not necessary here since this is a very specific field.
      *
      * @throws Exception
@@ -1560,59 +1510,6 @@ class FormFields extends WC_Settings_API
             'Never.',
             'resurs-bank-payments-for-woocommerce'
         );
-    }
-
-    /**
-     * @param null $key
-     * @return array|mixed
-     * @since 0.0.1.0
-     */
-    public static function getFieldString($key = null)
-    {
-        $fields = [
-            'government_id' => __('Social security number', 'resurs-bank-payments-for-woocommerce'),
-            'phone' => __('Phone number', 'resurs-bank-payments-for-woocommerce'),
-            'mobile' => __('Mobile number', 'resurs-bank-payments-for-woocommerce'),
-            'email' => __('E-mail address', 'resurs-bank-payments-for-woocommerce'),
-            'government_id_contact' => __(
-                'Applicant government id',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'contact_government_id' => __(
-                'Contact government id',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'card_number' => __('Card number', 'resurs-bank-payments-for-woocommerce'),
-            'applicant_government_id' => __(
-                'Applicant Government ID',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_telephone_number' => __(
-                'Applicant Telephone Number',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_mobile_number' => __(
-                'Applicant Mobile Number',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_email_address' => __(
-                'Applicant E-Mail Address',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            'applicant_full_name' => __(
-                'Applicant Full Name',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-        ];
-
-        // If no key are sent here, it is probably a localization request.
-        $return = $fields;
-
-        if (!empty($key) && isset($fields[$key])) {
-            $return = $fields[$key];
-        }
-
-        return $return;
     }
 
     /**

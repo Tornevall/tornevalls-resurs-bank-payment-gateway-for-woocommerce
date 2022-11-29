@@ -40,6 +40,8 @@
         <UndefinedClass>
             <errorLevel type="suppress">
                 <file name="../../src/Settings.php" />
+                <file name="../../src/Util/Database.php" />
+                <file name="../../src/Util/Metadata.php" />
             </errorLevel>
         </UndefinedClass>
         <MixedMethodCall>

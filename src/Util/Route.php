@@ -48,18 +48,10 @@ class Route
         try {
             switch ($route) {
                 case self::ROUTE_GET_ADDRESS:
-                    GetAddress::exec();
+                    self::respond(body: GetAddress::exec());
                     break;
-                case '':
-                    throw new HttpException(
-                        message: 'Route can not be empty.',
-                        code: 400
-                    );
                 default:
-                    throw new HttpException(
-                        message: "Route $route not found.",
-                        code: 404
-                    );
+                    break;
             }
         } catch (Exception $e) {
             self::respondWithError(exception: $e);

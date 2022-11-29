@@ -8,6 +8,7 @@
 
 namespace ResursBank\Gateway;
 
+use Error;
 use Exception;
 use JsonException;
 use ReflectionException;
@@ -18,11 +19,13 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Http\Controller;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\Address;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer;
+use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
@@ -32,12 +35,16 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Strings;
+use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Application;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
+use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callback;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
 use ResursBank\Module\ResursBankAPI;
@@ -47,7 +54,8 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use ResursException;
+use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use stdClass;
 use WC_Cart;
@@ -441,7 +449,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         if (Enabled::isEnabled()) {
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
-            add_filter('woocommerce_order_get_payment_method_title', [$this, 'getPaymentMethodTitle'], 10, 2);
         }
     }
 
@@ -525,10 +532,8 @@ class ResursDefault extends WC_Payment_Gateway
         $governmentId = Data::getCustomerType() === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
-        // @todo This is a temporary fix until we use form fields or another way to fetch government id's.
-        // @todo This includes getAddress-templates.
-        if (empty($governmentId) && ($sessionIdentification = WooCommerce::getSessionValue('identification'))) {
-            $governmentId = $sessionIdentification;
+        if (empty($governmentId) && CustomerRepository::getSsnData() !== null) {
+            $governmentId = CustomerRepository::getSsnData();
         }
 
         // $this->getCustomerData('phone')
@@ -863,7 +868,7 @@ class ResursDefault extends WC_Payment_Gateway
                 wcProductItemData: $wcProductItem
             ),
             totalAmountIncludingVat: $this->getFromProduct(
-                getValueType: 'totalAmountWithVat',
+                getValueType: 'totalAmountIncludingVat',
                 productObject: $productData,
                 wcProductItemData: $wcProductItem
             ),
@@ -879,7 +884,7 @@ class ResursDefault extends WC_Payment_Gateway
             ),
             type: $orderLineType,
             unitAmountIncludingVat: $this->getFromProduct(
-                getValueType: 'unitAmountWithVat',
+                getValueType: 'unitAmountIncludingVat',
                 productObject: $productData,
                 wcProductItemData: $wcProductItem
             ),
@@ -1174,82 +1179,6 @@ class ResursDefault extends WC_Payment_Gateway
 
         // @todo See the code after the return part. This smaller is just temporary.
         return 'Display "USP" - and eventually on demand also government id fields here.';
-
-        // @todo All code below is deprecated and should be replaced.
-        // If not here, no fields are required.
-        /** @noinspection PhpUndefinedFieldInspection */
-        $requiredFields = FormFields::getSpecificTypeFields(
-            $this->paymentMethodInformation->type,
-            Data::getCustomerType()
-        );
-
-        if (count($requiredFields)) {
-            $getAddressVisible = Data::canUseGetAddressForm();
-            foreach ($requiredFields as $fieldName) {
-                $fieldValue = null;
-                $displayField = $this->getDisplayableField($fieldName);
-                $alwaysShowApplicantFields = Data::getResursOption('streamline_payment_fields');
-                switch ($fieldName) {
-                    case 'government_id':
-                        $fieldValue = WooCommerce::getSessionValue('identification');
-                        if (!$getAddressVisible) {
-                            $displayField = true;
-                        } elseif (!$alwaysShowApplicantFields) {
-                            $displayField = false;
-                        }
-                        $isInternal = self::isInternalMethod($this->paymentMethodInformation);
-                        if (!$isInternal && $displayField) {
-                            $displayField = false;
-                            // External payment methods does not require the govt. id.
-                            $alwaysShowApplicantFields = false;
-                        }
-
-                        // As we don't know if this field is filled in when we enter the page, we prefer to
-                        // properly show it, if it has been seen as empty when entering the checkout. Letting
-                        // the ecom-helper decide if the method is internal, this is easier to follow.
-                        if ($isInternal && !$displayField && empty($fieldValue)) {
-                            $displayField = true;
-                        }
-                        break;
-                    default:
-                        if (!$getAddressVisible || $alwaysShowApplicantFields) {
-                            $displayField = true;
-                        }
-                }
-                // Code breaking disabled.
-                /** @noinspection SpellCheckingInspection */
-                $fieldHtml .= $this->generic->getTemplate('checkout_paymentfield.phtml', [
-                    'displayMode' => $displayField ? '' : 'none',
-                    'methodId' => $this->paymentMethodInformation->id ?? '?',
-                    'fieldSize' => WordPress::applyFilters('getPaymentFieldSize', 24, $fieldName),
-                    'alwaysShowApplicantFields' => $alwaysShowApplicantFields,
-                    'fieldLabel' => FormFields::getFieldString($fieldName),
-                    'fieldName' => sprintf(
-                        '%s_%s_%s',
-                        Data::getPrefix(),
-                        $fieldName,
-                        $this->paymentMethodInformation->id
-                    ),
-                    'fieldValue' => $fieldValue,
-                ]);
-            }
-
-            // Code breaking disabled.
-            /** @noinspection SpellCheckingInspection */
-            /*$fieldHtml .= $this->generic->getTemplate('checkout_paymentfield_after.phtml', [
-                'method' => $this->paymentMethodInformation,
-                'total' => $this->cart->total ?? 0,
-                'customDescription' => WooCommerce::getCustomDescription($this->paymentMethodInformation->id),
-            ]);*/
-
-            // Considering this place as a safe place to apply display in styles.
-            add_filter('safe_style_css', function ($styles) {
-                $styles[] = 'display';
-                return $styles;
-            });
-
-            echo Data::getEscapedHtml($fieldHtml);
-        }
     }
 
     /**
@@ -1349,27 +1278,37 @@ class ResursDefault extends WC_Payment_Gateway
             'redirect' => $this->getReturnUrl($order),
         ];
 
+        // @todo Add meta data at Resurs with WooCommerce order id ($order->get_id()).
+
         try {
-            // Order Creation.
-            // No order reference is passed to ecom at this point, to avoid order id collisions in both ends.
-            // If we're on a WordPress Network site where several stores may have multiple tables with same
-            // order id-collection, this way of handling orders helps a lot.
+            // Order Creation
             $paymentResponse = PaymentRepository::create(
                 storeId: StoreId::getData(),
                 paymentMethodId: $this->getPaymentMethod(),
                 orderLines: $this->getOrderLinesMapi(),
+                orderReference: $order->get_id(),
+                application: $this->getApplication(),
                 customer: $this->getCustomer(),
-                options: $this->getOptions($order),
+                options: $this->getOptions($order)
             );
             $return = $this->getReturnResponse(
-                $paymentResponse,
+                createPaymentResponse: $paymentResponse,
                 return: $return,
                 order: $order
             );
-
-            // @todo Add meta data at Resurs with WooCommerce order id ($order->get_id()).
-            Data::setOrderMeta($order, 'orderReference', $paymentResponse->order->orderReference);
+            // This is our link to the payment at Resurs for which we save the uuid we get at the create.
+            // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
+            Metadata::setOrderMeta(
+                order: $order,
+                metaDataKey: ResursDefault::PREFIX . '_order_reference',
+                metaDataValue: $paymentResponse->id
+            );
         } catch (Exception $createPaymentException) {
+            // In case we get an error from any other component than the create, we need to rewrite this response.
+            $return = [
+                'result' => 'failure',
+                'redirect' => $this->getReturnUrl($order)
+            ];
             // Add note to notices and write to log.
             $order->add_order_note(
                 $createPaymentException->getMessage()
@@ -1383,32 +1322,45 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * @return Application
+     * @todo Temporary solution, until MAPI stops require the Application block.
+     */
+    private function getApplication(): Application
+    {
+        return new Application(
+            requestedCreditLimit: null,
+            applicationData: null
+        );
+    }
+
+    /**
      * @param WC_Order $order
      * @return Options
      * @throws IllegalValueException
      */
     private function getOptions(WC_Order $order): Options
     {
-        // @todo Some of the defaults here should be changed to configurable options through the admin panel.
+        // @todo Defaults like manual inspection, frozen payments, etc should be changed to configurable options
+        // @todo through the admin panel.
         return new Options(
             initiatedOnCustomerDevice: true,
             handleManualInspection: false,
             handleFrozenPayments: false,
             redirectionUrls: new RedirectionUrls(
                 customer: new ParticipantRedirectionUrls(
-                    failUrl: $this->getReturnUrl($order, 'failure'),
-                    successUrl: $this->getReturnUrl($order, 'success')
+                    failUrl: $this->getReturnUrl($order, result: 'failure'),
+                    successUrl: $this->getReturnUrl($order, result: 'success')
                 ),
                 coApplicant: null,
                 merchant: null
             ),
             callbacks: new Callbacks(
-                authorization: new Options\Callback(
-                    url: $this->getCallbackUrl('authorization'),
+                authorization: new Callback(
+                    url: $this->getCallbackUrl(callbackType: CallbackType::AUTHORIZATION),
                     description: 'Authorization callback'
                 ),
-                management: new Options\Callback(
-                    url: $this->getCallbackUrl('management'),
+                management: new Callback(
+                    url: $this->getCallbackUrl(callbackType: CallbackType::MANAGEMENT),
                     description: 'Management callback'
                 ),
             ),
@@ -1417,13 +1369,21 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param string $urlType
+     * Generate URL for MAPI callbacks.
+     * Note: We don't have to apply the order id to the callback URL, as the callback will be sent back as a POST (json).
+     *
+     * @param CallbackType $callbackType
      * @return string
      */
-    private function getCallbackUrl(string $urlType): string
+    private function getCallbackUrl(CallbackType $callbackType): string
     {
-        // @todo Generate proper url.
-        return Data::getGatewayUrl() . '/callback/' . $urlType;
+        // @todo Switch getWcApiUrl to utils.
+        return Url::getQueryArg(
+            baseUrl: WooCommerce::getWcApiUrl(),
+            arguments: [
+                'mapi-callback' => $callbackType->value,
+            ]
+        );
     }
 
     /**
@@ -1460,13 +1420,32 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getApiRequest()
     {
-        // 'c' stands for callback and is used to direct Resurs callbacks to its own handling section.
-        if (isset($_REQUEST['c'])) {
-            WooCommerce::getHandledCallback();
-            exit;
+        if (isset($_REQUEST['mapi-callback']) &&
+            is_string($_REQUEST['mapi-callback'])
+        ) {
+            $response = [
+                'success' => false,
+                'message' => ''
+            ];
+
+            // Callback will respond and exit.
+            try {
+                $response['success'] = CallbackModule::processCallback(
+                    callbackType: CallbackType::from(
+                        value: strtoupper($_REQUEST['mapi-callback'])
+                    )
+                );
+            } catch (Error|Exception $e) {
+                Config::getLogger()->error($e);
+                $response['message'] = $e->getMessage();
+            }
+
+            // @todo We used $responseController to reply with JSON before. Since we need a customized response code
+            // @todo this must be fixed again.
+            header(header: 'Content-Type: application/json',response_code: $response['success'] ? 202 : 408);
         }
 
-        die;
+        exit;
     }
 
     /**
