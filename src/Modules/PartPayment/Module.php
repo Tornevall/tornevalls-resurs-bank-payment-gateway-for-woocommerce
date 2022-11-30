@@ -1,12 +1,30 @@
 <?php
 
+/**
+ * Copyright © Resurs Bank AB. All rights reserved.
+ * See LICENSE for license details.
+ */
+
+declare(strict_types=1);
+
 namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use Exception;
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
@@ -16,11 +34,14 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use WC_Product;
 
 /**
  * Part payment widget
  */
-class Module {
+class Module
+{
+    /** @var PartPayment  */
     private PartPayment $instance;
 
     /**
@@ -28,18 +49,24 @@ class Module {
      * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
-     * @throws \Resursbank\Ecom\Exception\CacheException
-     * @throws \Resursbank\Ecom\Exception\ConfigException
-     * @throws \Resursbank\Ecom\Exception\CurlException
-     * @throws \Resursbank\Ecom\Exception\FilesystemException
-     * @throws \Resursbank\Ecom\Exception\TranslationException
-     * @throws \Resursbank\Ecom\Exception\ValidationException
-     * @throws \Resursbank\Ecom\Exception\Validation\EmptyValueException
-     * @throws \Resursbank\Ecom\Exception\Validation\IllegalTypeException
-     * @throws \Resursbank\Ecom\Exception\Validation\IllegalValueException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws FilesystemException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws HttpException
      */
-    public function __construct() {
+    public function __construct()
+    {
         global $product;
+
+        if (!$product instanceof WC_Product) {
+            throw new IllegalTypeException(message: 'Unable to fetch product');
+        }
 
         $this->instance = new PartPayment(
             storeId: StoreId::getData(),
@@ -47,8 +74,8 @@ class Module {
                 storeId: StoreId::getData(),
                 paymentMethodId: PaymentMethod::getData()
             ),
-            months: Period::getData(),
-            amount: $product->get_price(),
+            months: (int)Period::getData(),
+            amount: (float)$product->get_price(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
         );
     }
@@ -57,13 +84,16 @@ class Module {
      * Output widget HTML if on single product page
      *
      * @return void
+     * @throws ConfigException
      */
-    public static function getWidget(): void {
+    public static function getWidget(): void
+    {
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
                 echo Data::getEscapedHtml($widget->instance->content);
             } catch (Exception $exception) {
+                Config::getLogger()->error(message: $exception);
             }
         }
     }
@@ -72,23 +102,36 @@ class Module {
      * Output widget CSS if on single product page
      *
      * @return void
+     * @throws ConfigException
      */
-    public static function setCss(): void {
+    public static function setCss(): void
+    {
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
                 echo '<style id="rb-pp-styles">' . $widget->instance->css . '</style>';
             } catch (Exception $exception) {
+                Config::getLogger()->error(message: $exception);
             }
         }
     }
 
-    public static function setJs(): void {
+    /**
+     * Set Js if on single product page
+     *
+     * @return void
+     * @throws ConfigException
+     */
+    public static function setJs(): void
+    {
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
 
-                $url = plugin_dir_url(file: RESURSBANK_MODULE_DIR_NAME . '/js/') . 'js/resursbank_partpayment.js';
+                $url = Url::getPluginUrl(
+                    path: RESURSBANK_MODULE_DIR_NAME . '/js',
+                    file: 'js/resursbank_partpayment.js'
+                );
                 wp_enqueue_script(
                     handle: 'partpayment-script',
                     src: $url,
@@ -103,6 +146,7 @@ class Module {
                     'partpayment-script'
                 );
             } catch (Exception $exception) {
+                Config::getLogger()->error(message: $exception);
             }
         }
     }
