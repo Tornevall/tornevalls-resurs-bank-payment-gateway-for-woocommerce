@@ -18,6 +18,7 @@ use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
+use Resursbank\Woocommerce\Util\Route;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
 use WC_Logger;
@@ -45,6 +46,10 @@ class WordPress
         if (!class_exists('WC_Payment_Gateway')) {
             return;
         }
+
+        // Register special routes (do not put this in init.php, but after WooCommerce init).
+        // If executed in wrong order, the routes will instead crash the site (even from a plugins_loaded perspective).
+        Route::exec();
 
         // Make sure Ecom2 is loaded as soon as possible.
         new ResursBankAPI();

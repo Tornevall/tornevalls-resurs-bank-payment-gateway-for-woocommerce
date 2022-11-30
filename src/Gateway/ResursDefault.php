@@ -19,13 +19,11 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Http\Controller;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer;
-use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
@@ -34,6 +32,7 @@ use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
+use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Lib\Utilities\Strings;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
@@ -54,6 +53,7 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
@@ -62,11 +62,10 @@ use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
 use WC_Product;
+use WC_Session_Handler;
 use WC_Tax;
-use function count;
 use function function_exists;
 use function in_array;
-use function is_array;
 use function is_object;
 use function sha1;
 use function uniqid;
@@ -531,8 +530,10 @@ class ResursDefault extends WC_Payment_Gateway
         $governmentId = Data::getCustomerType() === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
-        if (empty($governmentId) && CustomerRepository::getSsnData() !== null) {
-            $governmentId = CustomerRepository::getSsnData();
+        // Since WooCommerce uses a cookie to pick up a session, we can't use the ecom "real" session to fetch the
+        // government id.
+        if (WC()->session instanceof WC_Session_Handler && empty($governmentId)) {
+            $governmentId = WC()->session->get(key: (new Session())->getKey(Repository::SESSION_KEY_SSN_DATA));
         }
 
         // $this->getCustomerData('phone')
@@ -1293,6 +1294,12 @@ class ResursDefault extends WC_Payment_Gateway
                 return: $return,
                 order: $order
             );
+
+            if (isset($return['result']) && $return['result'] === 'success') {
+                // Forget the session variable if there is a success.
+                WcSession::unset((new Session())->getKey(key: Repository::SESSION_KEY_SSN_DATA));
+            }
+
             // This is our link to the payment at Resurs for which we save the uuid we get at the create.
             // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
             Metadata::setOrderMeta(
@@ -1439,7 +1446,7 @@ class ResursDefault extends WC_Payment_Gateway
 
             // @todo We used $responseController to reply with JSON before. Since we need a customized response code
             // @todo this must be fixed again.
-            header(header: 'Content-Type: application/json',response_code: $response['success'] ? 202 : 408);
+            header(header: 'Content-Type: application/json', response_code: $response['success'] ? 202 : 408);
         }
 
         exit;
