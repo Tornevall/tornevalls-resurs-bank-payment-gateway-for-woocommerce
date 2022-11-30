@@ -45,8 +45,7 @@ class Route {
 		    isset( $_GET[ self::ROUTE_PARAM ] ) &&
 		    is_string( $_GET[ self::ROUTE_PARAM ] )
 	    ) ? $_GET[ self::ROUTE_PARAM ] : '';
-
-        $response = '';
+        
         try {
             switch ($route) {
                 case self::ROUTE_GET_ADDRESS:
