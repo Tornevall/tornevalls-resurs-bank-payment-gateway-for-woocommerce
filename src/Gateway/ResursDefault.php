@@ -1295,7 +1295,7 @@ class ResursDefault extends WC_Payment_Gateway
                 order: $order
             );
 
-            if ($return['result'] === 'success') {
+            if (isset($return['result']) && $return['result'] === 'success') {
                 // Forget the session variable if there is a success.
                 WcSession::unset((new Session())->getKey(key: Repository::SESSION_KEY_SSN_DATA));
             }
