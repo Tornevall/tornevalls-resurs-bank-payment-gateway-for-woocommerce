@@ -91,7 +91,8 @@ class Module {
                 $url = plugin_dir_url(file: RESURSBANK_MODULE_DIR_NAME . '/js/') . 'js/resursbank_partpayment.js';
                 wp_enqueue_script(
                     handle: 'partpayment-script',
-                    src: $url
+                    src: $url,
+                    deps: ['jquery']
                 );
                 wp_add_inline_script(
                     handle: 'partpayment-script',
