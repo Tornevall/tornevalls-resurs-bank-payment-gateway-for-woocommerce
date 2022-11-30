@@ -33,6 +33,7 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Environment;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use ResursException;
@@ -109,7 +110,6 @@ class ResursBankAPI
     /**
      * @return void
      * @throws EmptyValueException
-     * @throws FormatException
      * @throws MapiCredentialsException
      * @throws Exception
      * @since 0.0.1.0
@@ -126,24 +126,6 @@ class ResursBankAPI
             );
         }
 
-        // @todo Add support for other locales (this is why we use switches here).
-        // @todo ECP-251 + WOO-842
-        switch (Data::getCustomerCountry()) {
-            case 'SE':
-                $locale = Locale::sv;
-                break;
-            case 'DK':
-                $locale = Locale::da;
-                break;
-            case 'NO':
-                $locale = Locale::no;
-                break;
-            case 'FI':
-                $locale = Locale::fi;
-            default:
-                $locale = Locale::en;
-        }
-
         WC()->initialize_session();
 
         Config::setup(
@@ -152,11 +134,17 @@ class ResursBankAPI
             jwtAuth: new Jwt(
                 clientId: ClientId::getData(),
                 clientSecret: ClientSecret::getData(),
-                scope: $scope,
+                scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
                 grantType: 'client_credentials'
             ),
             logLevel: LogLevel::ERROR,
-            locale: $locale
+            locale: match (Data::getCustomerCountry()) {
+                'SE' => Locale::sv,
+                'DK' => Locale::da,
+                'NO' => Locale::no,
+                'FI' => Locale::fi,
+                default => Locale::en,
+            }
         );
     }
 
