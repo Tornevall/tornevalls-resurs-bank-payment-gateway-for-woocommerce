@@ -12,7 +12,7 @@ namespace Resursbank\Woocommerce\Database\Options\PartPayment;
 use Resursbank\Woocommerce\Database\StringOption;
 
 /**
- * Setting for globally enabling the gateway (not the plugin).
+ * Setting for globally enabling the part payment widget.
  */
 class Enabled extends StringOption
 {
