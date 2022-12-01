@@ -956,6 +956,7 @@ class Data
             'a' => [
                 'href' => [],
                 'target' => [],
+	            'onclick' => true
             ],
             'table' => [
                 'id' => [],
@@ -995,7 +996,7 @@ class Data
                 'onclick' => [],
             ],
             'div' => [
-                'style' => [],
+                'style' => true,
                 'id' => [],
                 'name' => [],
                 'class' => [],
@@ -1038,6 +1039,7 @@ class Data
                 'src' => [],
                 'class' => [],
                 'style' => [],
+	            'id' => []
             ],
             'input' => [
                 'id' => [],
@@ -1052,6 +1054,27 @@ class Data
                 'onchange' => [],
                 'checked' => [],
             ],
+	        'svg' => [
+				'width' => true,
+		        'height' => true,
+		        'viewbox' => true,
+		        'version' => true,
+		        'id' => true,
+		        'xmlns' => true
+		        ],
+            'defs' => [
+				'id' => true
+            ],
+            'g' => [
+				'id' => true,
+				'transform' => true
+            ],
+            'path' => [
+				'style' => true,
+				'd' => true,
+				'id' => true,
+				'fill' => true
+            ]
         ];
 
         // Run the purger, to limit clickable elements outside wp-admin.
