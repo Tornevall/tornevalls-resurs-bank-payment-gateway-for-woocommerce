@@ -104,6 +104,10 @@ class PartPayment
     {
         $storeId = StoreId::getData();
 
+        if (empty($storeId)) {
+            return [];
+        }
+
         $options = [];
         try {
             $paymentMethods = Repository::getPaymentMethods(storeId: $storeId);
@@ -144,6 +148,11 @@ class PartPayment
     private static function getAnnuityPeriods(): array
     {
         $paymentMethodId = PaymentMethodOption::getData();
+        $storeId = StoreId::getData();
+
+        if (empty($paymentMethodId) || empty($storeId)) {
+            return [];
+        }
 
         try {
             $annuityFactors = AnnuityRepository::getAnnuityFactors(
