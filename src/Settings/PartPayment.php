@@ -18,16 +18,18 @@ use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
-use Resursbank\Ecom\Module\PriceSignage\Repository as SignageRepository;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
@@ -50,10 +52,12 @@ class PartPayment
      * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
+     * @throws FilesystemException
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws TranslationException
      * @throws ValidationException
      */
     #[ArrayShape([self::SECTION_ID => "array"])] public static function getSettings(): array
@@ -63,20 +67,20 @@ class PartPayment
                 'title'          => self::SECTION_TITLE,
                 'enabled'        => [
                     'id'      => Enabled::getName(),
-                    'title'   => 'Part payment widget enabled',
+                    'title'   => Translator::translate(phraseId: 'part-payment-widget-enabled'),
                     'type'    => 'checkbox',
                     'default' => 'no',
                     'desc'    => 'Enabled'
                 ],
                 'payment_method' => [
                     'id'      => PaymentMethodOption::getName(),
-                    'title'   => 'Payment method',
+                    'title'   => Translator::translate(phraseId: 'payment-method'),
                     'type'    => 'select',
                     'options' => self::getPaymentMethods()
                 ],
                 'period'         => [
                     'id'      => Period::getName(),
-                    'title'   => 'Annuity period',
+                    'title'   => Translator::translate(phraseId: 'annuity-period'),
                     'type'    => 'select',
                     'options' => self::getAnnuityPeriods()
                 ]
@@ -133,17 +137,19 @@ class PartPayment
      * Fetch annuity period options for configured payment method
      *
      * @return array
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
      * @throws ConfigException
      * @throws CurlException
-     * @throws ValidationException
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws FilesystemException
+     * @throws TranslationException
      */
     private static function getAnnuityPeriods(): array
     {
@@ -168,7 +174,8 @@ class PartPayment
 
         /** @var AnnuityInformation $annuityFactor */
         foreach ($annuityFactors->content as $annuityFactor) {
-            $return[$annuityFactor->durationInMonths] = $annuityFactor->durationInMonths . ' months';
+            $return[$annuityFactor->durationInMonths] = $annuityFactor->durationInMonths . ' ' .
+                                                        Translator::translate(phraseId: 'months');
         }
 
         return $return;
