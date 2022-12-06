@@ -53,9 +53,9 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WcSession;
 use RuntimeException;
 use stdClass;
 use WC_Cart;
@@ -246,10 +246,12 @@ class ResursDefault extends WC_Payment_Gateway
         // in the checkout page.
         $this->has_fields = true;
 
-        // Since this gateway is built to handle many payment methods from one class, we need to make sure that
-        // the specific payment method has their own properties that is not based on the gateway setup.
-        // This is built up from "getPaymentMethods".
-        $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
+        if ($paymentMethod instanceof PaymentMethod) {
+            // Since this gateway is built to handle many payment methods from one class, we need to make sure that
+            // the specific payment method has their own properties that is not based on the gateway setup.
+            // This is built up from "getPaymentMethods".
+            $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
+        }
 
         $this->setFilters();
         $this->setActions();
@@ -536,8 +538,10 @@ class ResursDefault extends WC_Payment_Gateway
             $governmentId = WC()->session->get(key: (new Session())->getKey(Repository::SESSION_KEY_SSN_DATA));
         }
 
+        // @todo Also those fields for LEGAL customers.
         // $this->getCustomerData('phone')
         // $this->getCustomerData('contact_government_id')
+        // @todo Change the usage of Data::getCustomerType to the new getAddress-widget methods.
         return new Customer(
             deliveryAddress: new Address(
                 addressRow1: $this->getCustomerData('address_1', $customerInfoFrom),
@@ -1447,6 +1451,8 @@ class ResursDefault extends WC_Payment_Gateway
             // @todo We used $responseController to reply with JSON before. Since we need a customized response code
             // @todo this must be fixed again.
             header(header: 'Content-Type: application/json', response_code: $response['success'] ? 202 : 408);
+            // Human-readable content included.
+            echo json_encode($response);
         }
 
         exit;
