@@ -24,6 +24,9 @@ use WC_Settings_Page;
 
 /**
  * Resurs Bank settings for WooCommerce.
+ *
+ * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+ * @SuppressWarnings(PHPMD.CamelCaseVariableName)
  */
 class Settings extends WC_Settings_Page
 {
@@ -73,8 +76,9 @@ class Settings extends WC_Settings_Page
      *
      * @return array - Parent returns mixed but documents array.
      * @see parent::output_sections()
+     * @phpcsSuppress
      */
-    public function get_sections(): array
+    public function get_sections(): array // phpcs:ignore
     {
         return [
             Api::SECTION_ID => Api::SECTION_TITLE,
@@ -89,6 +93,8 @@ class Settings extends WC_Settings_Page
      *
      * @return void
      * @throws ConfigException
+     * @todo Refactor this. WOO-873. Remove suppression below after refactor.
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public function output(): void
     {
@@ -145,7 +151,7 @@ class Settings extends WC_Settings_Page
      * all fields from all sections.
      * @return array
      */
-    public function get_settings(string $section = ''): array
+    public function get_settings(string $section = ''): array // phpcs:ignore
     {
         // Section must always be set, so if it is empty, this indicates that we're in the primary sub-tab!
         if ($section === '') {

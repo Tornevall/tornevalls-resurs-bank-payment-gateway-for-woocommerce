@@ -19,6 +19,7 @@ use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+
 use function is_array;
 
 /**

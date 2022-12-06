@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database;
 
+use function is_string;
+
 /**
  * Handle string values in database.
  */
@@ -21,6 +23,6 @@ class StringOption extends Option
     {
         $result = parent::getData();
 
-        return is_string($result) ? $result : '';
+        return is_string(value: $result) ? $result : '';
     }
 }

@@ -16,7 +16,9 @@ use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 
+use function is_string;
 use function str_contains;
+use function strlen;
 
 /**
  * Primitive routing, executing arbitrary code depending on $_GET parameters.
@@ -40,8 +42,8 @@ class Route
 
     /**
      * @return void
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-
     public static function exec(): void
     {
         $route = (
@@ -70,7 +72,7 @@ class Route
      *
      * @param string $route
      * @return string
-     * @throws HttpException
+     * @throws HttpException|IllegalValueException
      */
     public static function getUrl(
         string $route

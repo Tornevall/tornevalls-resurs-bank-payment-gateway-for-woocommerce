@@ -26,6 +26,7 @@ use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
 use WC_Checkout;
 use WC_Order;
+
 use function count;
 use function in_array;
 use function is_array;
@@ -1055,71 +1056,6 @@ class PluginApi
             __('Received', 'resurs-bank-payments-for-woocommerce'),
             date('Y-m-d H:i:s', (int)$lastTestResponseString)
         );
-    }
-
-    /**
-     * Log an event of getAddress.
-     *
-     * @param string $customerCountry
-     * @param CustomerType $customerType
-     * @param string $identification
-     * @param string $runFunctionInfo
-     * @since 0.0.1.0
-     */
-    private static function getAddressLog(
-        string $customerCountry,
-        CustomerType $customerType,
-        string $identification,
-        string $runFunctionInfo
-    ): void {
-        Data::writeLogEvent(
-            Data::CAN_LOG_ORDER_EVENTS,
-            sprintf(
-                __(
-                    'getAddress request (country %s, type %s) for %s: %s',
-                    'resurs-bank-payments-for-woocommerce'
-                ),
-                $customerCountry,
-                $customerType->value,
-                $identification,
-                $runFunctionInfo
-            )
-        );
-    }
-
-    /**
-     * Transform getAddress responses into WooCommerce friendly data fields so that they
-     * can be easily pushed out to the default forms.
-     * @param $return
-     * @param $addressResponse
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getTransformedAddressResponse($return, $addressResponse)
-    {
-        $compileKeys = [];
-        $compileInfo = [];
-        $addressFields = WordPress::applyFilters('getAddressFieldController', []);
-        foreach ($addressFields as $addressField => $addressTransform) {
-            // Check if the session is currently holding something that we want to put up in some fields.
-            $wooSessionData = trim(Data::getRequest($addressTransform));
-            if (!empty($wooSessionData)) {
-                $addressResponse[$addressTransform] = $wooSessionData;
-            }
-            if (preg_match('/:/', $addressTransform)) {
-                $splitInfo = explode(':', $addressTransform);
-                foreach ($splitInfo as $splitKey) {
-                    $compileInfo[] = '%s';
-                    $compileKeys[] = $addressResponse[$splitKey] ?? '';
-                }
-                $return[$addressField] = vsprintf(implode(' ', $compileInfo), $compileKeys);
-            } else {
-                $return[$addressField] = $addressResponse[$addressTransform] ?? '';
-            }
-        }
-
-        return $return;
     }
 
     /**

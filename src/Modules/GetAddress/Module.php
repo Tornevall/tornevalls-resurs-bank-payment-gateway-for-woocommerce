@@ -13,8 +13,8 @@ use Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout as Widget;
 
 class Module
 {
-	public static function setup(): void
-	{
-		Widget::register();
-	}
+    public static function setup(): void
+    {
+        Widget::register();
+    }
 }

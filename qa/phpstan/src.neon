@@ -1,0 +1,33 @@
+parameters:
+    level: 0
+    tipsOfTheDay: false
+    excludePaths:
+        - ../../src/Gateway/*
+        - ../../src/ResursBank/*
+        - ../../src/Module/*
+        - ../../src/Service/*
+        - ../../src/Util/Url.php
+        - ../../src/Util/Route.php
+        - ../../src/Settings.php
+        - ../../src/Util/Database.php
+    ignoreErrors:
+        -
+            message: '#^Function __ not found\.$#'
+        -
+            message: '#^Function wp_upload_dir not found\.$#'
+        -
+            message: '#^Function wp_enqueue_style not found\.$#'
+        -
+            message: '#^Function wp_enqueue_script not found\.$#'
+        -
+            message: '#^Function add_action not found\.$#'
+        -
+            message: '#^Function add_filter not found\.$#'
+        -
+            message: '#^Function get_option not found\.$#'
+        -
+            message: '#^Function update_option not found\.$#'
+        -
+            message: '#^Function add_post_meta not found\.$#'
+        -
+            message: '#^Parameter \$order of method Resursbank\\Woocommerce\\Util\\Metadata::setOrderMeta\(\) has invalid type WC_Order\.$#'

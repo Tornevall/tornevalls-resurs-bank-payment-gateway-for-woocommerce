@@ -53,7 +53,7 @@ class WordPress
         // Initialize adaptions.
         new ResursPlugin();
 
-	    GetAddress::setup();
+        GetAddress::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
 //         Data::getDefaultsInit();
@@ -325,7 +325,8 @@ class WordPress
         // See if there is a credential error for Resurs Bank.
         self::getCredentialError();
 
-        $internalExceptions = self::applyFilters('getPluginAdminNotices',
+        $internalExceptions = self::applyFilters(
+            'getPluginAdminNotices',
             (isset($_SESSION[Data::getPrefix()]['exception']) ? $_SESSION[Data::getPrefix()]['exception'] : [])
         );
 
