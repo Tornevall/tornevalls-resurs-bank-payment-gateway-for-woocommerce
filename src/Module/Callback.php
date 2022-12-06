@@ -49,7 +49,7 @@ class Callback
     {
         $callbackModel = self::getCallbackModel(callbackType: $callbackType);
         $paymentId = self::getOrderReferenceFromCallbackModel(
-            $callbackModel
+            callbackModel: $callbackModel
         );
         if ($paymentId !== '') {
             $order = Database::getOrderByReference(orderReference: $paymentId);
@@ -57,8 +57,13 @@ class Callback
             // @todo Solve the questions around order statuses before running this check.
             //self::getStatusFromResurs($paymentId);
 
-            return self::setWcOrderStatus(order: $order, wcResursStatus: self::getStatusByPayload($callbackType,
-                $callbackModel));
+            return self::setWcOrderStatus(
+                order: $order,
+                wcResursStatus: self::getStatusByPayload(
+                    callbackType: $callbackType,
+                    callbackModel: $callbackModel
+                )
+            );
         }
 
         throw new CallbackException(message: 'Could not handle callback.', code: 408);
@@ -107,7 +112,10 @@ class Callback
             // have changed since the order was cancelled.
             if ($order->get_status() !== 'cancelled') {
                 $order->update_status(
-                    $wcResursStatus, note: Translator::translate(phraseId: 'updated-status-by-callback')
+                    new_status: $wcResursStatus,
+                    note: Translator::translate(
+                        phraseId: 'updated-status-by-callback'
+                    )
                 );
                 if ($wcResursStatus === 'completed') {
                     // Trigger internal functions and let others handle hooks related to order completion.
