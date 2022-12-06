@@ -1438,11 +1438,14 @@ class ResursDefault extends WC_Payment_Gateway
 
             // Callback will respond and exit.
             try {
-                $response['success'] = CallbackModule::processCallback(
+                // The way we handle callback now do not require a boolean the same way as before. Instead, we will
+                // just handle exceptions as errors.
+                CallbackModule::processCallback(
                     callbackType: CallbackType::from(
                         value: strtoupper($_REQUEST['mapi-callback'])
                     )
                 );
+                $response['success'] = true;
             } catch (Error|Exception $e) {
                 Config::getLogger()->error($e);
                 $response['message'] = $e->getMessage();

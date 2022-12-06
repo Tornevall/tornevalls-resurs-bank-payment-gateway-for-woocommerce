@@ -35,17 +35,11 @@ class Callback
     /**
      * Callback automation goes here.
      * @param CallbackType $callbackType
-     * @return bool
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws HttpException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * @return void
      * @throws CallbackException
+     * @throws HttpException
      */
-    public static function processCallback(CallbackType $callbackType): bool
+    public static function processCallback(CallbackType $callbackType): void
     {
         $callbackModel = self::getCallbackModel(callbackType: $callbackType);
         $paymentId = self::getOrderReferenceFromCallbackModel(
@@ -57,8 +51,13 @@ class Callback
             // @todo Solve the questions around order statuses before running this check.
             //self::getStatusFromResurs($paymentId);
 
-            return self::setWcOrderStatus(order: $order, wcResursStatus: self::getStatusByPayload($callbackType,
-                $callbackModel));
+            // @todo We still need to handle failures (denies & cancellations here).
+            self::setWcOrderStatus(
+                order: $order,
+                wcResursStatus: self::getStatusByPayload($callbackType, $callbackModel)
+            );
+
+            return;
         }
 
         throw new CallbackException(message: 'Could not handle callback.', code: 408);
@@ -92,31 +91,19 @@ class Callback
     /**
      * @param WC_Order $order
      * @param string $wcResursStatus Status returned from Resurs, in WooCommerce terms.
-     * @return bool
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * @return void
      */
-    private static function setWcOrderStatus(WC_Order $order, string $wcResursStatus): bool
+    private static function setWcOrderStatus(WC_Order $order, string $wcResursStatus): void
     {
-        if ($order->get_status() !== $wcResursStatus) {
+        if (!$order->has_status(status: ['on-hold', 'processing', 'completed']) &&
+            $order->get_status() !== $wcResursStatus
+        ) {
             // Do not change status if order is cancelled, due to the fact that order reservations and stock may
             // have changed since the order was cancelled.
             if ($order->get_status() !== 'cancelled') {
-                $order->update_status(
-                    $wcResursStatus, note: Translator::translate(phraseId: 'updated-status-by-callback')
-                );
-                if ($wcResursStatus === 'completed') {
-                    // Trigger internal functions and let others handle hooks related to order completion.
-                    $order->payment_complete();
-                }
+                $order->payment_complete();
             }
         }
-
-        return $order->get_status() === $wcResursStatus;
     }
 
     /**
