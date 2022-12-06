@@ -182,6 +182,13 @@ class WordPress
             'wp_enqueue_scripts',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::setJs'
         );
+        if (is_admin()) {
+            add_action(
+                'admin_enqueue_scripts',
+                'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
+            );
+        }
+
         add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
