@@ -43,7 +43,7 @@ class Callback
     {
         $callbackModel = self::getCallbackModel(callbackType: $callbackType);
         $paymentId = self::getOrderReferenceFromCallbackModel(
-            $callbackModel
+            callbackModel: $callbackModel
         );
         if ($paymentId !== '') {
             $order = Database::getOrderByReference(orderReference: $paymentId);
@@ -54,7 +54,10 @@ class Callback
             // @todo We still need to handle failures (denies & cancellations here).
             self::setWcOrderStatus(
                 order: $order,
-                wcResursStatus: self::getStatusByPayload($callbackType, $callbackModel)
+                wcResursStatus: self::getStatusByPayload(
+                    callbackType: $callbackType,
+                    callbackModel: $callbackModel
+                )
             );
 
             return;
