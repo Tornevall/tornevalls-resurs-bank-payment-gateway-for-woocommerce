@@ -9,11 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Exception;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Throwable;
 
 use function is_string;
 use function str_contains;
@@ -50,10 +50,11 @@ class Route
                 case self::ROUTE_GET_ADDRESS:
                     self::respond(body: GetAddress::exec());
                     break;
+
                 default:
                     break;
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             self::respondWithError(exception: $e);
         }
     }
@@ -103,17 +104,27 @@ class Route
     }
 
     /**
-     * @param Exception $exception
+     * @param Throwable $exception
      * @return void
      */
     public static function respondWithError(
-        Exception $exception
+        Throwable $exception
     ): void {
         $controller = new CoreController();
 
         self::respond(
-            body: $controller->respondWithError(exception: $exception),
-            code: $controller->getErrorResponseCode(exception: $exception)
+            body: $controller->respondWithError(
+                exception: new HttpException(
+                    message: $exception->getMessage(),
+                    previous: $exception
+                )
+            ),
+            code: $controller->getErrorResponseCode(
+                exception: new HttpException(
+                    message: $exception->getMessage(),
+                    previous: $exception
+                )
+            )
         );
     }
 }

@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
+use Throwable;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
@@ -39,16 +40,29 @@ class Settings extends WC_Settings_Page
         $this->label = 'Resurs Bank';
 
         // Adds the Resurs Bank tab.
-        add_filter('woocommerce_settings_tabs_array', [$this, 'add_settings_page'], 20);
+        add_filter(
+            hook_name: 'woocommerce_settings_tabs_array',
+            callback: [$this, 'add_settings_page'],
+            priority: 20
+        );
 
         // Renders the settings fields.
-        add_action('woocommerce_settings_' . $this->id, [$this, 'output']);
+        add_action(
+            hook_name: 'woocommerce_settings_' . $this->id,
+            callback: [$this, 'output']
+        );
 
         // Renders the sections (tabs) inside the Resurs Bank tab.
-        add_action('woocommerce_sections_' . $this->id, [$this, 'output_sections']);
+        add_action(
+            hook_name: 'woocommerce_sections_' . $this->id,
+            callback: [$this, 'output_sections']
+        );
 
         // Saves settings to the database.
-        add_action('woocommerce_settings_save_' . $this->id, [$this, 'save']);
+        add_action(
+            hook_name: 'woocommerce_settings_save_' . $this->id,
+            callback: [$this, 'save']
+        );
 
         parent::__construct();
     }
@@ -60,13 +74,14 @@ class Settings extends WC_Settings_Page
      *
      * @return void
      * @see self::__construct()
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function save(): void
     {
         global $current_section;
 
         woocommerce_update_options(
-            $this->get_settings(section: $current_section)
+            options: $this->get_settings(section: $current_section)
         );
     }
 
@@ -76,6 +91,7 @@ class Settings extends WC_Settings_Page
      * @return array - Parent returns mixed but documents array.
      * @see parent::output_sections()
      * @phpcsSuppress
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function get_sections(): array // phpcs:ignore
     {
@@ -91,9 +107,12 @@ class Settings extends WC_Settings_Page
      *
      * @return void
      * @throws ConfigException
-     * @todo Refactor this. WOO-873. Remove suppression below after refactor.
+     * @phpcsSuppress
      * @SuppressWarnings(PHPMD.ElseExpression)
+     * @noinspection PhpMissingParentCallCommonInspection
+     * @todo Refactor this. WOO-873. Remove suppression after refactor, remember phpcs:ignore below.
      */
+    // phpcs:ignore
     public function output(): void
     {
         global $current_section;
@@ -108,20 +127,26 @@ class Settings extends WC_Settings_Page
                 if (StoreId::getData() === '') {
                     // The lazy handler.
                     throw new Exception(
-                        __('Please select a store in the API settings tab.')
+                        message: __(
+                            text: 'Please select a store in the API settings tab.'
+                        )
                     );
                 }
 
-                echo Data::getEscapedHtml(content: PaymentMethods::getOutput(storeId: StoreId::getData()));
-            } catch (Exception $e) {
+                echo Data::getEscapedHtml(
+                    content: PaymentMethods::getOutput(
+                        storeId: StoreId::getData()
+                    )
+                );
+            } catch (Throwable $e) {
                 Config::getLogger()->error(
-                    message: 'Failed to render payment methods: ' . $e->getMessage(),
+                    message: 'Failed to render payment methods: ' . $e->getMessage()
                 );
                 // @todo Add proper translation via ecom2.
                 echo '<div style="border: 1px solid black !important; padding: 5px !important;">
                     Failed to render payment methods:  ' .
                     Data::getEscapedHtml(
-                        $e->getMessage()
+                        content: $e->getMessage()
                     ) . '</div>';
             }
         } else {
@@ -133,7 +158,9 @@ class Settings extends WC_Settings_Page
 
             // Always default to first "tab" if no section has been selected.
             WC_Admin_Settings::output_fields(
-                $this->get_settings(section: empty($current_section) ? 'api_settings' : $current_section)
+                options: $this->get_settings(section: (
+                    empty($current_section) ? 'api_settings' : $current_section
+                ))
             );
 
             echo '</table>';
@@ -148,6 +175,7 @@ class Settings extends WC_Settings_Page
      * consist of fields from only that section. An empty string will return
      * all fields from all sections.
      * @return array
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function get_settings(string $section = ''): array // phpcs:ignore
     {
@@ -159,7 +187,7 @@ class Settings extends WC_Settings_Page
         $result = array_merge(
             Api::getSettings(),
             PaymentMethods::getSettings(),
-            Advanced::getSettings(),
+            Advanced::getSettings()
         );
 
         return $result[$section] ?? $result;

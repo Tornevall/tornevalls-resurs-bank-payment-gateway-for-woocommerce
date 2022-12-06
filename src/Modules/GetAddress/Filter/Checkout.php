@@ -9,12 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
-use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Customer\Widget\GetAddress;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Throwable;
 
 /**
  * Render get address form above the form on the checkout page.
@@ -23,17 +24,19 @@ class Checkout
 {
     /**
      * @return void
+     * @todo Refactor, method is too big. WOO-895. Remove phpcs:ignore when done.
      */
+    // phpcs:ignore
     public static function register(): void
     {
         add_filter(
             'woocommerce_before_checkout_form',
-            fn () => self::exec()
+            static fn () => self::exec()
         );
 
         add_action(
             'wp_enqueue_scripts',
-            function () {
+            static function () {
                 wp_enqueue_script(
                     handle: 'rb-get-address',
                     src: Url::getScriptUrl(
@@ -64,13 +67,18 @@ class Checkout
 
         try {
             $address = new GetAddress(
-                fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS),
+                fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
             );
 
             $result = $address->content;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             try {
-                Config::getLogger()->error(message: $e);
+                Config::getLogger()->error(
+                    message: new GetAddressException(
+                        message: 'Failed to render get address widget.',
+                        previous: $e
+                    )
+                );
             } catch (ConfigException) {
                 $result = 'Resursbank: failed to render get address widget.';
             }

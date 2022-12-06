@@ -22,7 +22,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Util\Url;
 
 /**
  * Controller to fetch address content.

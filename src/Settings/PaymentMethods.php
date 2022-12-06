@@ -39,14 +39,14 @@ class PaymentMethods
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
-     * @return array[]
+     * @return array<array>
      */
     public static function getSettings(): array
     {
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
-            ]
+            ],
         ];
     }
 
