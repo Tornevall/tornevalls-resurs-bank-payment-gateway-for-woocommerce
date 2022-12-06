@@ -117,7 +117,6 @@ class PartPayment
             $paymentMethods = Repository::getPaymentMethods(storeId: $storeId);
         } catch (Exception $exception) {
             WordPress::setGenericError(exception: $exception);
-            throw $exception;
         }
 
         /** @var PaymentMethod $paymentMethod */
@@ -167,7 +166,6 @@ class PartPayment
             );
         } catch (Exception $exception) {
             WordPress::setGenericError(exception: $exception);
-            throw $exception;
         }
 
         $return = [];
