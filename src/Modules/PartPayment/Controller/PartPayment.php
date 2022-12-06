@@ -60,7 +60,7 @@ class PartPayment
             'html' => ''
         ];
         if (isset($_GET['amount'])) {
-            $amount = $_GET['amount'];
+            $amount = sanitize_text_field(str: $_GET['amount']);
             $widget = new \Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment(
                 storeId: StoreId::getData(),
                 paymentMethod: Repository::getById(
