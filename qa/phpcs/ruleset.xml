@@ -240,7 +240,6 @@
         <properties>
             <property name="linesCountBeforeDeclare" value="1" />
             <property name="linesCountAfterDeclare" value="1" />
-            <!-- @todo ask, encourage 1 -->
             <property name="spacesCountAroundEqualsSign" value="0" />
         </properties>
     </rule>
@@ -249,9 +248,9 @@
     <rule ref="SlevomatCodingStandard.TypeHints.NullTypeHintOnLastPosition" />
     <rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue" />
     <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHintSpacing" />
-<!--    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint" />-->
+    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint" />
     <rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint" />
-<!--    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint" />-->
+    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint" />
     <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing">
         <properties>
             <property name="spacesCountBeforeColon" value="0" />

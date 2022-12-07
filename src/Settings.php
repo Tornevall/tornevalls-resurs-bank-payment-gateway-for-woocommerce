@@ -18,11 +18,8 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
-<<<<<<< HEAD
 use Throwable;
-=======
 use Resursbank\Woocommerce\Settings\PartPayment;
->>>>>>> WOO-867
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
@@ -192,12 +189,8 @@ class Settings extends WC_Settings_Page
         $result = array_merge(
             Api::getSettings(),
             PaymentMethods::getSettings(),
-<<<<<<< HEAD
-            Advanced::getSettings()
-=======
             Advanced::getSettings(),
             PartPayment::getSettings()
->>>>>>> WOO-867
         );
 
         return $result[$section] ?? $result;
