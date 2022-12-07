@@ -10,30 +10,18 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel;
-use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
-use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\Environment;
-use ResursException;
 use RuntimeException;
 use stdClass;
-use TorneLIB\Data\Aes;
-use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\IO\Data\Arrays;
-use TorneLIB\IO\Data\Strings;
-use TorneLIB\Module\Network\NetWrapper;
-use TorneLIB\Utils\Generic;
-use TorneLIB\Utils\WordPress as WPUtils;
 use WC_Customer;
 use WC_Order;
-
 use function count;
 use function defined;
 use function in_array;
@@ -212,9 +200,9 @@ class Data
 
         // Match allowed file extensions and return if it exists within the file name.
         if ($hasExtension && (bool)preg_match(
-            sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
-            $imageFile
-        )) {
+                sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
+                $imageFile
+            )) {
             $imageFile = preg_replace(
                 sprintf('/^(.*)(.%s)$/', implode('|.', self::$fileImageExtensions)),
                 '$1',
@@ -958,7 +946,7 @@ class Data
             'a' => [
                 'href' => [],
                 'target' => [],
-	            'onclick' => true
+                'onclick' => true
             ],
             'table' => [
                 'id' => [],
@@ -1041,7 +1029,7 @@ class Data
                 'src' => [],
                 'class' => [],
                 'style' => [],
-	            'id' => []
+                'id' => []
             ],
             'input' => [
                 'id' => [],
@@ -1056,26 +1044,26 @@ class Data
                 'onchange' => [],
                 'checked' => [],
             ],
-	        'svg' => [
-				'width' => true,
-		        'height' => true,
-		        'viewbox' => true,
-		        'version' => true,
-		        'id' => true,
-		        'xmlns' => true
-		        ],
+            'svg' => [
+                'width' => true,
+                'height' => true,
+                'viewbox' => true,
+                'version' => true,
+                'id' => true,
+                'xmlns' => true
+            ],
             'defs' => [
-				'id' => true
+                'id' => true
             ],
             'g' => [
-				'id' => true,
-				'transform' => true
+                'id' => true,
+                'transform' => true
             ],
             'path' => [
-				'style' => true,
-				'd' => true,
-				'id' => true,
-				'fill' => true
+                'style' => true,
+                'd' => true,
+                'id' => true,
+                'fill' => true
             ]
         ];
 
@@ -2498,74 +2486,6 @@ class Data
     }
 
     /**
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function isGetAddressSupported(): bool
-    {
-        return in_array(
-            self::getCustomerCountry(),
-            WordPress::applyFilters(
-                'getCompatibleGetAddressCountries',
-                ['NO', 'SE']
-            ),
-            true
-        );
-    }
-
-    /**
-     * How to handle getAddress forms.
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public static function canUseGetAddressForm(): bool
-    {
-        /*
-         * - Check if getAddress is enabled in config.
-         * - Check if getAddress can be used based on the countryCode.
-         * @todo Some merchants wants to keep the entry field for the govid for countries that do not support the request,
-         * @todo to make the final order process more smooth (where we in short re-use this field to fill in the required
-         * @todo field in the payment method fields).
-         */
-
-        // Make sure the boolean in the filter-apply is returning a value from the config instead of always true.
-        return Data::getCustomerCountry() === 'SE' && WordPress::applyFilters('getAddressEnabled', true);
-    }
-
-    /**
-     * Get the current customer type, based on what's in the session. If the current request is based on
-     * POST/GET, this will return the customer type from the updated session.
-     * @return CustomerType
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getCustomerType(): CustomerType
-    {
-        // Check and set update values in the session IF they are requested in this current request.
-        self::setCustomerTypeToSession();
-
-        // Get the customer type from the session.
-        return self::getCustomerTypeFromSession();
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function setCustomerTypeToSession(): void
-    {
-        $customerTypeByGetAddress = self::getRequest('resursSsnCustomerType', true);
-
-        // If there is a post/get-request with new customerType-values, make sure the session is
-        // updated before returning it somwhere else.
-        if (!empty($customerTypeByGetAddress)) {
-            WooCommerce::setSessionValue('resursSsnCustomerType', $customerTypeByGetAddress);
-        }
-    }
-
-    /**
      * @param $key
      * @param $post_data
      * @return mixed
@@ -2670,50 +2590,6 @@ class Data
         }
 
         return apply_filters('sanitize_key', $sanitized_key, $key);
-    }
-
-    /**
-     * @return CustomerType
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getCustomerTypeFromSession(): CustomerType
-    {
-        // Fetch customer type from session. If there is a string we will return the customer type as an ecom2-enum.
-        $return = WooCommerce::getSessionValue('resursSsnCustomerType');
-
-        // This section translates the incoming above string to the proper enum.
-        switch ($return) {
-            case 'NATURAL':
-                $return = CustomerType::NATURAL;
-                break;
-            case 'LEGAL':
-                $return = CustomerType::LEGAL;
-                break;
-            default:
-                // If the session is empty, we will return defaults that is based on the available payment methods.
-                if (WooCommerce::hasMethodsNatural()) {
-                    $return = CustomerType::NATURAL;
-                } else {
-                    // If the merchan only have legal payment methods, we will return legal as default.
-                    $return = CustomerType::LEGAL;
-                }
-        }
-
-        // The return value will remain as is from above, unless we discover a billing company name from the request.
-        // If this happens, the company name should override the first set values.
-        $customerTypeByCompanyName = self::getRequest('billing_company', true);
-
-        return empty($customerTypeByCompanyName) ? $return : CustomerType::LEGAL;
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.6
-     */
-    public static function isPaymentFeeAllowed(): bool
-    {
-        return defined('RESURSBANK_ALLOW_PAYMENT_FEE') ? (bool)RESURSBANK_ALLOW_PAYMENT_FEE : false;
     }
 
     /**

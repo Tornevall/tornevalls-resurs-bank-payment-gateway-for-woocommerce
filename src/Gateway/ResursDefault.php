@@ -530,7 +530,9 @@ class ResursDefault extends WC_Payment_Gateway
     private function getCustomer(): Customer
     {
         $customerInfoFrom = isset($_REQUEST['ship_to_different_address']) ? 'shipping' : 'billing';
-        $governmentId = Data::getCustomerType() === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
+        $sessionCustomerType = WcSession::getCustomerType();
+
+        $governmentId = $sessionCustomerType === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');
 
         // Since WooCommerce uses a cookie to pick up a session, we can't use the ecom "real" session to fetch the
@@ -542,7 +544,6 @@ class ResursDefault extends WC_Payment_Gateway
         // @todo Also those fields for LEGAL customers.
         // $this->getCustomerData('phone')
         // $this->getCustomerData('contact_government_id')
-        // @todo Change the usage of Data::getCustomerType to the new getAddress-widget methods.
         return new Customer(
             deliveryAddress: new Address(
                 addressRow1: $this->getCustomerData('address_1', $customerInfoFrom),
@@ -554,7 +555,7 @@ class ResursDefault extends WC_Payment_Gateway
                 lastName: $this->getCustomerData('last_name', $customerInfoFrom),
                 addressRow2: $this->getCustomerData('address_2', $customerInfoFrom),
             ),
-            customerType: Data::getCustomerType(),
+            customerType: $sessionCustomerType,
             contactPerson: $this->getCustomerData('full_name', $customerInfoFrom),
             email: $this->getCustomerData('email'),
             governmentId: $governmentId,
@@ -1081,7 +1082,7 @@ class ResursDefault extends WC_Payment_Gateway
                 return false;
             }
         }
-        $customerType = Data::getCustomerType();
+        $customerType = WcSession::getCustomerType();
 
         // If this feature is not missing the method, we now know that there is chance that we're
         // located in a checkout. We will at this moment run through the min-max amount that resides
@@ -1305,6 +1306,7 @@ class ResursDefault extends WC_Payment_Gateway
             if (isset($return['result']) && $return['result'] === 'success') {
                 // Forget the session variable if there is a success.
                 WcSession::unset((new Session())->getKey(key: Repository::SESSION_KEY_SSN_DATA));
+                WcSession::unset((new Session())->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE));
             }
 
             // This is our link to the payment at Resurs for which we save the uuid we get at the create.

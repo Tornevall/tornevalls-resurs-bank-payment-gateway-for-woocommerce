@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Lib\Order\CustomerType;
+use Resursbank\Ecom\Lib\Utilities\Session;
+use Resursbank\Ecom\Module\Customer\Repository;
 use RuntimeException;
 use WC_Session_Handler;
 
@@ -61,6 +64,14 @@ class WcSession
         }
 
         return $return ?? '';
+    }
+
+    /**
+     * @return CustomerType
+     */
+    public static function getCustomerType(): CustomerType
+    {
+        return CustomerType::from(self::get((new Session())->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE)));
     }
 
     /**

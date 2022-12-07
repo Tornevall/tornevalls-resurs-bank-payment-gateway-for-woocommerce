@@ -7,30 +7,21 @@
 namespace ResursBank\Module;
 
 use Exception;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
-use Resursbank\Ecom\Module\Customer\Repository as CustomerRepoitory;
 use Resursbank\Ecommerce\Types\Callback;
-use ResursBank\Gateway\ResursCheckout;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
-use Resursbank\Woocommerce\Database\Options\StoreId;
 use ResursException;
-use RuntimeException;
 use TorneLIB\Data\Password;
 use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\IO\Data\Strings;
 use TorneLIB\Module\Network\Domain;
 use TorneLIB\Module\Network\NetWrapper;
 use TorneLIB\Module\Network\Wrappers\CurlWrapper;
-use WC_Checkout;
 use WC_Order;
-
 use function count;
 use function in_array;
 use function is_array;
-use function is_bool;
 
 /**
  * Backend API Handler.
