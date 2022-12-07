@@ -10,10 +10,10 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Throwable;
+use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 
 use function is_string;
 use function str_contains;
@@ -35,6 +35,11 @@ class Route
     public const ROUTE_GET_ADDRESS = 'get-address';
 
     /**
+     * Route to get part payment controller.
+     */
+    public const ROUTE_PART_PAYMENT = 'part-payment';
+
+    /**
      * @return void
      * @SuppressWarnings(PHPMD.Superglobals)
      */
@@ -42,7 +47,7 @@ class Route
     {
         $route = (
             isset($_GET[self::ROUTE_PARAM]) &&
-            is_string(value: $_GET[self::ROUTE_PARAM])
+            is_string($_GET[self::ROUTE_PARAM])
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
         try {
@@ -50,12 +55,14 @@ class Route
                 case self::ROUTE_GET_ADDRESS:
                     self::respond(body: GetAddress::exec());
                     break;
-
+                case self::ROUTE_PART_PAYMENT:
+                    self::respond(body: $response = PartPayment::exec());
+                    break;
                 default:
                     break;
             }
-        } catch (Throwable $e) {
-            self::respondWithError(exception: $e);
+        } catch (Throwable $exception) {
+            self::respondWithError(exception: $exception);
         }
     }
 

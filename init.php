@@ -21,15 +21,13 @@ use Resursbank\Ecom\Config;
 use ResursBank\Module\Data;
 use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
-use ResursBank\Service\WordPress;
-use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress as Controller;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Route;
 
 define(
-	constant_name: 'RESURSBANK_MODULE_DIR_NAME',
-	value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
+    constant_name: 'RESURSBANK_MODULE_DIR_NAME',
+    value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
 );
 
 if (!defined(constant_name: 'ABSPATH')) {
@@ -82,6 +80,3 @@ if (!WooCommerce::getActiveState()) {
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "WordPress mode" with if (function_exists('add_action')) {}.
 add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
-
-// Execute custom routing options.
-Route::exec();

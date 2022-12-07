@@ -9,18 +9,15 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
-use Resursbank\Woocommerce\Database\Options\ClientId;
-use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
-use Resursbank\Woocommerce\Database\Options\Environment;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
+use Resursbank\Woocommerce\Util\Route;
 use RuntimeException;
 use TorneLIB\IO\Data\Strings;
-use WC_Logger;
 use WP_Post;
 
 use function count;
@@ -45,6 +42,10 @@ class WordPress
         if (!class_exists('WC_Payment_Gateway')) {
             return;
         }
+
+        // Register special routes (do not put this in init.php, but after WooCommerce init).
+        // If executed in wrong order, the routes will instead crash the site (even from a plugins_loaded perspective).
+        Route::exec();
 
         // Make sure Ecom2 is loaded as soon as possible.
         new ResursBankAPI();
@@ -173,6 +174,14 @@ class WordPress
     private static function setupScripts()
     {
         add_action('wp_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScripts');
+		add_action(
+			'wp_head',
+			'Resursbank\Woocommerce\Modules\PartPayment\Module::setCss'
+		);
+        add_action(
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\PartPayment\Module::setJs'
+        );
         add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
@@ -193,7 +202,10 @@ class WordPress
         add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
-        add_action('woocommerce_single_product_summary', 'ResursBank\Module\Data::getAnnuityFactors');
+	    add_action(
+		    'woocommerce_single_product_summary',
+		    'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
+	    );
         add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
     }

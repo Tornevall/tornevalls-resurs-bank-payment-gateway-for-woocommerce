@@ -12,24 +12,19 @@ use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\CollectionException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\FormatException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Locale\Locale;
-use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\LogLevel;
-use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Models\StoreCollection;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use ResursBank\Exception\MapiCredentialsException;
 use ResursBank\Exception\StoreException;
 use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
@@ -38,8 +33,8 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Environment;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Settings\Advanced;
 use ResursException;
 use stdClass;
@@ -115,31 +110,14 @@ class ResursBankAPI
     /**
      * @return void
      * @throws EmptyValueException
-     * @throws FormatException
      * @throws MapiCredentialsException
      * @throws Exception
      * @since 0.0.1.0
      */
     public function getConnection(): void
     {
-        // @todo Make sure the scope for production is correct.
-        $scope = Data::getResursOption('environment') === 'test' ? 'mock-merchant-api' : 'merchant-api';
-        $grantType = 'client_credentials';
-
         if (!Config::hasInstance()) {
             return;
-        }
-
-        // Default logs to no writer, in case we don't have a logger available.
-        $fileLogger = new NoneLogger();
-
-        // Check if the proper logger is available.
-        if (WooCommerce::getPluginLogDir()) {
-            try {
-                $fileLogger = new FileLogger(WooCommerce::getPluginLogDir());
-            } catch (FilesystemException $e) {
-                WordPress::setGenericError($e);
-            }
         }
 
         if (empty(ClientId::getData()) || empty(ClientSecret::getData())) {
@@ -148,15 +126,7 @@ class ResursBankAPI
             );
         }
 
-        // @todo Add support for other locales (this is why we use switches here).
-        // @todo ECP-251 + WOO-842
-        switch (Data::getCustomerCountry()) {
-            case 'SE':
-                $locale = Locale::sv;
-                break;
-            default:
-                $locale = Locale::en;
-        }
+        WC()->initialize_session();
 
         Config::setup(
             logger: Advanced::getLogger(),
@@ -164,11 +134,17 @@ class ResursBankAPI
             jwtAuth: new Jwt(
                 clientId: ClientId::getData(),
                 clientSecret: ClientSecret::getData(),
-                scope: $scope,
-                grantType: $grantType
+                scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
+                grantType: 'client_credentials'
             ),
             logLevel: LogLevel::ERROR,
-            locale: $locale
+            locale: match (Data::getCustomerCountry()) {
+                'SE' => Locale::sv,
+                'DK' => Locale::da,
+                'NO' => Locale::no,
+                'FI' => Locale::fi,
+                default => Locale::en,
+            }
         );
     }
 
