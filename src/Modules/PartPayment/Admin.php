@@ -11,28 +11,27 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use Exception;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Module\AnnuityFactor\Widget\DurationByMonths;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 
+/**
+ * Part payment admin functionality
+ */
 class Admin
 {
-    public function __construct()
-    {
-
-    }
-
     /**
      * @return void
-     * @throws \Resursbank\Ecom\Exception\ConfigException
+     * @throws ConfigException
      */
     public static function setJs(): void
     {
         try {
             $widget = new DurationByMonths(endpointUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT_ADMIN));
-            $url = Url::getPluginUrl(
-                path: RESURSBANK_MODULE_DIR_NAME . '/Modules',
-                file: 'src/Modules/PartPayment/resources/js/admin/updateAnnuityPeriod.js'
+            $url = Url::getScriptUrl(
+                module: 'PartPayment',
+                file: 'admin/updateAnnuityPeriod.js'
             );
             wp_enqueue_script(
                 handle: 'partpayment-admin-scripts',
