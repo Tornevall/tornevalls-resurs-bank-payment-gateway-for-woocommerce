@@ -98,14 +98,10 @@ class Callback
      */
     private static function setWcOrderStatus(WC_Order $order, string $wcResursStatus): void
     {
-        if (!$order->has_status(status: ['on-hold', 'processing', 'completed']) &&
+        if (!$order->has_status(status: ['on-hold', 'processing', 'completed', 'cancelled']) &&
             $order->get_status() !== $wcResursStatus
         ) {
-            // Do not change status if order is cancelled, due to the fact that order reservations and stock may
-            // have changed since the order was cancelled.
-            if ($order->get_status() !== 'cancelled') {
-                $order->payment_complete();
-            }
+            $order->payment_complete();
         }
     }
 
