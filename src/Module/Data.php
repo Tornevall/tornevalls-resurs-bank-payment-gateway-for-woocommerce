@@ -1,4 +1,5 @@
 <?php
+
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection SpellCheckingInspection */
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
@@ -32,6 +33,7 @@ use TorneLIB\Utils\Generic;
 use TorneLIB\Utils\WordPress as WPUtils;
 use WC_Customer;
 use WC_Order;
+
 use function count;
 use function defined;
 use function in_array;
@@ -51,38 +53,38 @@ class Data
      * @var int
      * @since 0.0.1.4
      */
-    const UNSET_CREDENTIALS_EXCEPTION = 4444;
+    public const UNSET_CREDENTIALS_EXCEPTION = 4444;
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const CAN_LOG_JUNK = 'junk';
+    public const CAN_LOG_JUNK = 'junk';
 
     /**
      * Can log all backend calls.
      * var string
      * @since 0.0.1.0
      */
-    const CAN_LOG_BACKEND = 'backend';
+    public const CAN_LOG_BACKEND = 'backend';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const CAN_LOG_ORDER_EVENTS = 'order_events';
+    public const CAN_LOG_ORDER_EVENTS = 'order_events';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const CAN_LOG_ORDER_DEVELOPER = 'order_developer';
+    public const CAN_LOG_ORDER_DEVELOPER = 'order_developer';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const CAN_LOG_INFO = 'info';
+    public const CAN_LOG_INFO = 'info';
 
     /**
      * @var array
@@ -210,9 +212,9 @@ class Data
 
         // Match allowed file extensions and return if it exists within the file name.
         if ($hasExtension && (bool)preg_match(
-                sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
-                $imageFile
-            )) {
+            sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
+            $imageFile
+        )) {
             $imageFile = preg_replace(
                 sprintf('/^(.*)(.%s)$/', implode('|.', self::$fileImageExtensions)),
                 '$1',
@@ -1408,7 +1410,8 @@ class Data
                 $prefetchObject['apiType'] = self::getMethodApiTypeByPreFetch($prefetchObject);
                 try {
                     $prefetchObject['ecom'] = ResursBankAPI::getPayment(
-                        $prefetchObject['resurs'], null,
+                        $prefetchObject['resurs'],
+                        null,
                         $prefetchObject
                     );
                     $prefetchObject['ecom_had_reference_problems'] = false;

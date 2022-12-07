@@ -9,7 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use RuntimeException;
+
+use function is_string;
+use function strlen;
 
 /**
  * URL related helper methods.
@@ -54,22 +58,28 @@ class Url
      * @param string $baseUrl
      * @param array $arguments
      * @return string
+     * @throws IllegalValueException
      */
     public static function getQueryArg(string $baseUrl, array $arguments): string
     {
         $queryArgument = $baseUrl;
 
         foreach ($arguments as $argumentKey => $argumentValue) {
-            if (is_string(value: $argumentValue) || is_int(value: $argumentValue)) {
-                $queryArgument = add_query_arg(
-                    $argumentKey,
-                    (string)$argumentValue,
-                    $queryArgument
+            if (!is_string(value: $argumentValue)) {
+                throw new IllegalValueException(
+                    message: "$argumentValue is not a string"
                 );
+            }
+
+            /** @psalm-suppress MixedAssignment */
+            $query = add_query_arg($argumentKey, $argumentValue, $queryArgument);
+
+            if (is_string(value: $query)) {
+                $queryArgument = $query;
             }
         }
 
-        return is_string(value: $queryArgument) ? $queryArgument : '';
+        return $queryArgument;
     }
 
     /**
@@ -81,13 +91,15 @@ class Url
     public static function getUrl(
         string $path
     ): string {
-        $file = (string)substr(
-            string: $path,
-            offset: strrpos(haystack: $path, needle: '/') + 1
-        );
+        $offset = strrpos(haystack: $path, needle:  '/');
+
+        /** @noinspection PhpCastIsUnnecessaryInspection */
+        $file = $offset !== false ?
+            (string) substr(string: $path, offset: $offset + 1) : '';
 
         if ($file === '') {
-            if ($path !== '' &&
+            if (
+                $path !== '' &&
                 strrpos(haystack: $path, needle: '/') === strlen(string: $path) - 1
             ) {
                 throw new RuntimeException(
@@ -117,6 +129,7 @@ class Url
     ): string {
         $result = plugin_dir_url(file: $path) . $file;
 
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
         if (!is_string(value: $result)) {
             throw new RuntimeException(
                 message: 'Could not produce a string URL for ' .

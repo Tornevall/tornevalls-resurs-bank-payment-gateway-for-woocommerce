@@ -19,6 +19,8 @@ use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Woocommerce\Database\Options\CacheDir;
 use Resursbank\Woocommerce\Database\Options\LogDir;
 use WC_Logger;
+
+use function is_array;
 use function is_dir;
 use function is_string;
 
@@ -37,7 +39,8 @@ class Advanced
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
-     * @return array[]
+     * @return array
+     * @todo Move translations to ecom.
      */
     public static function getSettings(): array
     {
@@ -79,6 +82,8 @@ class Advanced
      * if the setting is empty.
      *
      * @return LoggerInterface
+     * @todo Refactor this method. WOO-872. Remove the CyclomaticComplexity suppression below when this is fixed.
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public static function getLogger(): LoggerInterface
     {
@@ -91,18 +96,34 @@ class Advanced
             if ($path === 'wc-logs') {
                 // If wc-logs are defined, we use the same log directory that WooCommerce sets up to be WC_LOG_PATH.
                 // This is used to simplify the setup for some instances that do not know about their log path.
-                $upload_dir = wp_upload_dir(create_dir: false);
-                $path = preg_replace(pattern: '/\/$/', replacement: '', subject: $upload_dir['basedir'] . '/wc-logs/');
+                /** @var array $uploadDir */
+                $uploadDir = wp_upload_dir(create_dir: false);
+
+                if (
+                    is_array(value: $uploadDir) &&
+                    isset($uploadDir['basedir']) &&
+                    is_string(value: $uploadDir['basedir']) &&
+                    $uploadDir['basedir'] !== ''
+                ) {
+                    $path = preg_replace(
+                        pattern: '/\/$/',
+                        replacement: '',
+                        subject: $uploadDir['basedir'] . '/wc-logs/'
+                    );
+                }
             }
 
-            if (is_string(value: $path) &&
+            if (
+                is_string(value: $path) &&
                 is_dir(filename: $path)
             ) {
                 $result = new FileLogger(path: $path);
             }
         } catch (Exception $e) {
             if (class_exists(class: WC_Logger::class)) {
-                (new WC_Logger())->critical('Resurs Bank: ' . $e->getMessage());
+                (new WC_Logger())->critical(
+                    message: 'Resurs Bank: ' . $e->getMessage()
+                );
             }
         }
 
@@ -122,14 +143,14 @@ class Advanced
         try {
             $path = CacheDir::getData();
 
-            if (is_string(value: $path) &&
-                is_dir(filename: CacheDir::getData())
-            ) {
+            if (is_dir(filename: CacheDir::getData())) {
                 $result = new Filesystem(path: $path);
             }
         } catch (Exception $e) {
             if (class_exists(class: WC_Logger::class)) {
-                (new WC_Logger())->critical('Resurs Bank: ' . $e->getMessage());
+                (new WC_Logger())->critical(
+                    message: 'Resurs Bank: ' . $e->getMessage()
+                );
             }
         }
 

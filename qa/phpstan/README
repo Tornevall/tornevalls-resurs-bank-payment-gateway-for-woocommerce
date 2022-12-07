@@ -1,0 +1,8 @@
+- ../../src/Gateway/            | Remove after completing initial dev.
+- ../../src/ResursBank/*        | Remove after completing initial dev.
+- ../../src/Module/*            | Remove after completing initial dev.
+- ../../src/Service/*           | Remove after completing initial dev.
+- ../../src/Util/Url.php        | Contains errors which are inaccurate and cannot be ignored.
+- ../../src/Util/Route.php      | Contains errors which are inaccurate and cannot be ignored.
+- ../../src/Settings.php        | Contains errors which are inaccurate and cannot be ignored.
+- ../../src/Util/Database.php   | Contains errors which are inaccurate and cannot be ignored.

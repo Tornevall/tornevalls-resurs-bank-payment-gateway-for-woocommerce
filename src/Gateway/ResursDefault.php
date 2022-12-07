@@ -53,9 +53,9 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WcSession;
 use RuntimeException;
 use stdClass;
 use WC_Cart;
@@ -64,6 +64,7 @@ use WC_Payment_Gateway;
 use WC_Product;
 use WC_Session_Handler;
 use WC_Tax;
+
 use function function_exists;
 use function in_array;
 use function is_object;
@@ -87,43 +88,43 @@ class ResursDefault extends WC_Payment_Gateway
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_FINALIZED = 'completed';
+    public const STATUS_FINALIZED = 'completed';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_BOOKED = 'processing';
+    public const STATUS_BOOKED = 'processing';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_FROZEN = 'on-hold';
+    public const STATUS_FROZEN = 'on-hold';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_SIGNING = 'on-hold';
+    public const STATUS_SIGNING = 'on-hold';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_DENIED = 'failed';
+    public const STATUS_DENIED = 'failed';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_FAILED = 'failed';
+    public const STATUS_FAILED = 'failed';
 
     /**
      * @var string
      * @since 0.0.1.0
      */
-    const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_CANCELLED = 'cancelled';
 
     /**
      * This prefix is used for various parts of the settings by WooCommerce,
@@ -246,10 +247,12 @@ class ResursDefault extends WC_Payment_Gateway
         // in the checkout page.
         $this->has_fields = true;
 
-        // Since this gateway is built to handle many payment methods from one class, we need to make sure that
-        // the specific payment method has their own properties that is not based on the gateway setup.
-        // This is built up from "getPaymentMethods".
-        $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
+        if ($paymentMethod instanceof PaymentMethod) {
+            // Since this gateway is built to handle many payment methods from one class, we need to make sure that
+            // the specific payment method has their own properties that is not based on the gateway setup.
+            // This is built up from "getPaymentMethods".
+            $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
+        }
 
         $this->setFilters();
         $this->setActions();
@@ -536,8 +539,10 @@ class ResursDefault extends WC_Payment_Gateway
             $governmentId = WC()->session->get(key: (new Session())->getKey(Repository::SESSION_KEY_SSN_DATA));
         }
 
+        // @todo Also those fields for LEGAL customers.
         // $this->getCustomerData('phone')
         // $this->getCustomerData('contact_government_id')
+        // @todo Change the usage of Data::getCustomerType to the new getAddress-widget methods.
         return new Customer(
             deliveryAddress: new Address(
                 addressRow1: $this->getCustomerData('address_1', $customerInfoFrom),
@@ -984,8 +989,10 @@ class ResursDefault extends WC_Payment_Gateway
                 $return = wc_get_price_excluding_tax($productObject);
                 break;
             case 'totalVatAmount':
-                $return = wc_get_price_including_tax($productObject,
-                        ['qty' => $wcProductItemData['quantity']]) - wc_get_price_excluding_tax(
+                $return = wc_get_price_including_tax(
+                    $productObject,
+                    ['qty' => $wcProductItemData['quantity']]
+                ) - wc_get_price_excluding_tax(
                         $productObject,
                         ['qty' => $wcProductItemData['quantity']]
                     );
@@ -1030,7 +1037,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         $rates = array_shift($ratesArray);
         if (isset($rates['rate'])) {
-            $return = (double)$rates['rate'];
+            $return = (float)$rates['rate'];
         } else {
             $return = 0;
         }
@@ -1447,6 +1454,8 @@ class ResursDefault extends WC_Payment_Gateway
             // @todo We used $responseController to reply with JSON before. Since we need a customized response code
             // @todo this must be fixed again.
             header(header: 'Content-Type: application/json', response_code: $response['success'] ? 202 : 408);
+            // Human-readable content included.
+            echo json_encode($response);
         }
 
         exit;

@@ -19,11 +19,11 @@ use Resursbank\Woocommerce\Database\StringOption;
  */
 class ClientSecret extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
-	{
-		return self::NAME_PREFIX . 'client_secret';
-	}
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
+    {
+        return self::NAME_PREFIX . 'client_secret';
+    }
 }

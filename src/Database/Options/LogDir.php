@@ -14,15 +14,15 @@ use Resursbank\Woocommerce\Database\StringOption;
 /**
  * Database interface for cache_dir in wp_options table.
  *
- * @todo Add value validation before appending value to database. Validation should be done inside Ecom. See WOO-800 and ECP-202.
+ * @todo Add value validation before appending value to database. Validate from Ecom. See WOO-800 and ECP-202.
  */
 class LogDir extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
-	{
-		return self::NAME_PREFIX . 'log_dir';
-	}
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
+    {
+        return self::NAME_PREFIX . 'log_dir';
+    }
 }

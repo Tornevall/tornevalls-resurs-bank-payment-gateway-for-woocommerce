@@ -1,0 +1,6 @@
+vendor
+composer.json
+composer.lock
+qa/psalm/cache
+qa/php-cs-fixer/.php-cs-fixer.cache
+

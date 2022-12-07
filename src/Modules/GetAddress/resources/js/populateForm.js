@@ -177,7 +177,7 @@ const rbHandleFetchAddressResponse = (() => {
     const updateAddressFields = (data) => {
         const fields = getAddressFields(getCheckoutForm());
 
-        fields?.billing.forEach((obj) => {
+        fields ? .billing.forEach((obj) => {
             const newVal = data[obj.name];
 
             obj.el.value = typeof newVal === 'string' ? newVal : obj.el.value;

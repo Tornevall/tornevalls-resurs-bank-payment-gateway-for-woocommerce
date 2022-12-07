@@ -18,11 +18,11 @@ use Resursbank\Woocommerce\Database\StringOption;
  */
 class StoreId extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
-	{
-		return self::NAME_PREFIX . 'store_id';
-	}
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
+    {
+        return self::NAME_PREFIX . 'store_id';
+    }
 }

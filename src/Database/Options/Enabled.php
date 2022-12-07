@@ -16,10 +16,10 @@ use Resursbank\Woocommerce\Database\StringOption;
  */
 class Enabled extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
     {
         return self::NAME_PREFIX . 'enabled';
     }
