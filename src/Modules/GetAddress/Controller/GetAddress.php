@@ -61,6 +61,10 @@ class GetAddress
                 $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
                 $requestData->govId
             );
+            WcSession::set(
+                $ecomSession->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE),
+                $requestData->customerType->value
+            );
         } catch (Exception $e) {
         }
 
