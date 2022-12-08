@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 paymentMethodSelect.addEventListener(
                     'change',
                     async function (event) {
-                        let durations = await getDurationsForPaymentMethodId(event.target.value);
+                        let durations = await rbGetDurationsForPaymentMethodId(event.target.value);
                         let periodSelect = document.getElementById('resursbank_partpayment_period');
                         if (!jQuery.isEmptyObject(periodSelect) && periodSelect.nodeName === 'SELECT') {
                             deleteSelectOptions(periodSelect);
