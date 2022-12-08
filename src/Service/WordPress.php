@@ -8,18 +8,13 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
-use ResursBank\Module\FormFields;
-use Resursbank\Woocommerce\Database\Options\Enabled;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
+use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
-use Resursbank\Woocommerce\Settings\Advanced;
-use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Route;
 use RuntimeException;
-use TorneLIB\IO\Data\Strings;
 use WP_Post;
-
 use function count;
 use function defined;
 use function func_get_args;
@@ -53,7 +48,7 @@ class WordPress
         // Initialize adaptions.
         new ResursPlugin();
 
-	    GetAddress::setup();
+        GetAddress::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
 //         Data::getDefaultsInit();
@@ -162,7 +157,6 @@ class WordPress
                 'woocommerce_available_payment_gateways',
                 'ResursBank\Service\WooCommerce::getAvailableGateways'
             );
-            add_filter('rbwc_get_address_field_controller', 'ResursBank\Service\WordPress::getAddressFieldController');
         }
     }
 
@@ -174,10 +168,10 @@ class WordPress
     private static function setupScripts()
     {
         add_action('wp_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScripts');
-		add_action(
-			'wp_head',
-			'Resursbank\Woocommerce\Modules\PartPayment\Module::setCss'
-		);
+        add_action(
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\PartPayment\Module::setCss'
+        );
         add_action(
             'wp_enqueue_scripts',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::setJs'
@@ -202,10 +196,10 @@ class WordPress
         add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
-	    add_action(
-		    'woocommerce_single_product_summary',
-		    'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
-	    );
+        add_action(
+            'woocommerce_single_product_summary',
+            'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
+        );
         add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
     }
@@ -325,7 +319,8 @@ class WordPress
         // See if there is a credential error for Resurs Bank.
         self::getCredentialError();
 
-        $internalExceptions = self::applyFilters('getPluginAdminNotices',
+        $internalExceptions = self::applyFilters(
+            'getPluginAdminNotices',
             (isset($_SESSION[Data::getPrefix()]['exception']) ? $_SESSION[Data::getPrefix()]['exception'] : [])
         );
 
@@ -882,20 +877,6 @@ class WordPress
             'You may want to reload your browser before proceeding.',
             'resurs-bank-payments-for-woocommerce'
         );
-        if (Data::hasCredentials() && !is_admin()) {
-            $return['getAddressFieldController'] = WordPress::getAddressFieldController();
-        }
-        $return['switchToLegal'] = WordPress::applyFilters(
-            'getSwitchToCustomerTypeString',
-            'NATURAL',
-            __('Switch to private person', 'resurs-bank-payments-for-woocommerce')
-        );
-        $return['switchToNatural'] = WordPress::applyFilters(
-            'getSwitchToCustomerTypeString',
-            'LEGAL',
-            __('Switch to company', 'resurs-bank-payments-for-woocommerce')
-        );
-        $return['fix_callback_urls'] = Data::getResursOption('fix_callback_urls');
 
         return self::applyFilters('localizationsGlobal', $return);
     }
@@ -913,30 +894,6 @@ class WordPress
         $return['noncify'] = self::getNonce('simple');
 
         return self::applyFilters('localizationsGeneric', $return, $scriptName);
-    }
-
-    /**
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getAddressFieldController(): array
-    {
-        $return = [
-            'billing_first_name' => 'firstName',
-            'billing_last_name' => 'lastName',
-            'applicant-full-name' => 'firstName:lastName',
-            'billing_address_1' => 'addressRow1',
-            'billing_address_2' => 'addressRow2',
-            'billing_postcode' => 'postalCode',
-            'billing_city' => 'postalArea',
-        ];
-
-        if (Data::getCustomerType() === CustomerType::LEGAL) {
-            $return['billing_company'] = 'fullName';
-        }
-
-        return $return;
     }
 
     /**

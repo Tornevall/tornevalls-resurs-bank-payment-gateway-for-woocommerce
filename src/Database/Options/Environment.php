@@ -18,11 +18,11 @@ use Resursbank\Woocommerce\Database\StringOption;
  */
 class Environment extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
-	{
-		return self::NAME_PREFIX . 'environment';
-	}
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
+    {
+        return self::NAME_PREFIX . 'environment';
+    }
 }

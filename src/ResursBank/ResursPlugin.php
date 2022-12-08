@@ -19,6 +19,7 @@ use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+
 use function is_array;
 
 /**
@@ -71,7 +72,6 @@ class ResursPlugin
         add_filter('rbwc_get_plugin_prefix', [$this, 'getPluginPrefix']);
         add_filter('rbwc_get_obfuscate_lookup_keys', [$this, 'getObfuscateLookupKeys']);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getOrderNotePrefix']);
-        add_filter('rbwc_get_address_request', [$this, 'getAddressRequest'], 10, 3);
     }
 
     /**
@@ -105,23 +105,6 @@ class ResursPlugin
         bool $asArray = true
     ): array|PaymentMethodCollection {
         return $asArray ? Repository::getPaymentMethods($storeId)->toArray() : Repository::getPaymentMethods($storeId);
-    }
-
-    /**
-     * @param $addressResponse
-     * @param $identification
-     * @param $customerType
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.8
-     */
-    public function getAddressRequest($addressResponse, $identification, $customerType): array
-    {
-        if (WordPress::applyFilters('setInternalAddressRequestEnabled', true)) {
-            $addressResponse = (array)ResursBankAPI::getResurs()->getAddress($identification, $customerType);
-        }
-
-        return $addressResponse;
     }
 
     /**
@@ -165,11 +148,6 @@ class ResursPlugin
                 'postalArea',
                 'postalCode',
             ]);
-
-            $extraFormFields = WordPress::getAddressFieldController();
-            foreach ($extraFormFields as $fieldKey => $fieldValue) {
-                $currentObfuscateArray[] = $fieldKey;
-            }
         }
 
         return $currentObfuscateArray;

@@ -30,6 +30,7 @@ use stdClass;
 use WC_Order;
 use WC_Product;
 use WC_Tax;
+
 use function count;
 use function func_get_args;
 use function in_array;

@@ -131,7 +131,7 @@ class Callback
             Status::FROZEN => 'on-hold',
             Status::AUTHORIZED => 'processing',
             Status::CAPTURED => 'completed',
-            default => 'failed',
+            Status::REJECTED => 'failed',
         };
     }
 
@@ -146,7 +146,6 @@ class Callback
             Action::CANCEL => 'cancelled',
             Action::CAPTURE => 'completed',
             Action::REFUND => 'refunded',
-            default => 'failed',
         };
     }
 

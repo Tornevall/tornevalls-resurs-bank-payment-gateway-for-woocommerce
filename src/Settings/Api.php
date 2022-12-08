@@ -38,6 +38,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
  * API settings section.
  *
  * @todo Translations should be moved to ECom. See WOO-802 & ECP-205.
+ * @todo After refactoring, remove all error suppression (phpstan etc.).
  */
 class Api
 {
@@ -98,13 +99,16 @@ class Api
                 ],
                 'environment' => [
                     'id' => Environment::getName(),
+                    /* @phpstan-ignore-next-line */
                     'title' => __('Environment', 'resurs-bank-payments-for-woocommerce'),
                     'type' => 'select',
                     'options' => [
+                        /* @phpstan-ignore-next-line */
                         'test' => __(
                             'Test',
                             'resurs-bank-payments-for-woocommerce'
                         ),
+                        /* @phpstan-ignore-next-line */
                         'prod' => __(
                             'Production',
                             'resurs-bank-payments-for-woocommerce'
@@ -148,9 +152,13 @@ class Api
 
         if ($clientId !== '' && $clientSecret !== '') {
             try {
-                $storeList = StoreRepository::getStores();
-                foreach ($storeList as $store) {
-                    $return[$store->id] = sprintf('%s: %s', $store->nationalStoreId, $store->name);
+                /** @var Store $store */
+                foreach (StoreRepository::getStores() as $store) {
+                    $return[$store->id] = sprintf(
+                        '%s: %s',
+                        $store->nationalStoreId,
+                        $store->name
+                    );
                 }
             } catch (Exception $e) {
                 // Log all errors in the admin panel regardless of where the exception comes from.
@@ -167,7 +175,7 @@ class Api
     /**
      * @return Jwt|null
      * @throws Exception
-     * @todo Use Enums and constants for scope / grant type. These should be declared in Ecom. Make it part of the above issues or create new ones.
+     * @todo Use Enums and constants for scope / grant type. These should be declared in Ecom.
      * @todo Fix credentials validation. See WOO-805 & ECP-206.
      */
     public static function getJwt(): Jwt|null
@@ -177,16 +185,17 @@ class Api
         $clientSecret = ClientSecret::getData();
 
         try {
-            if ($clientId !== '' && $clientSecret !== '') {
-                $result = new Jwt(
-                    clientId: ClientId::getData(),
-                    clientSecret: ClientSecret::getData(),
-                    scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
-                    grantType: 'client_credentials',
-                );
-            } else {
-                throw new Exception('Missing credentials');
+            if ($clientId === '' || $clientSecret === '') {
+                // @todo Consider throwing a more appropriate Exception.
+                throw new Exception(message: 'Missing credentials');
             }
+
+            $result = new Jwt(
+                clientId: ClientId::getData(),
+                clientSecret: ClientSecret::getData(),
+                scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
+                grantType: 'client_credentials',
+            );
         } catch (Exception $e) {
             // Handle all errors the same way, regardless of the cause.
             WordPress::setGenericError($e);

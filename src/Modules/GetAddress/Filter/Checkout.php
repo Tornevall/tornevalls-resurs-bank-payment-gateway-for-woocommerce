@@ -21,26 +21,26 @@ use Resursbank\Woocommerce\Util\Url;
  */
 class Checkout
 {
-	/**
-	 * @return void
-	 */
-	public static function register(): void
-	{
-		add_filter(
-			'woocommerce_before_checkout_form',
-			fn () => self::exec()
-		);
+    /**
+     * @return void
+     */
+    public static function register(): void
+    {
+        add_filter(
+            'woocommerce_before_checkout_form',
+            fn () => self::exec()
+        );
 
-		add_action(
-			'wp_enqueue_scripts',
-			function () {
-				wp_enqueue_script(
-					handle: 'rb-get-address',
-					src: Url::getScriptUrl(
-						module: 'GetAddress',
-						file: 'populateForm.js'
-					)
-				);
+        add_action(
+            'wp_enqueue_scripts',
+            function () {
+                wp_enqueue_script(
+                    handle: 'rb-get-address',
+                    src: Url::getScriptUrl(
+                        module: 'GetAddress',
+                        file: 'populateForm.js'
+                    )
+                );
 
                 wp_enqueue_style(
                     handle: 'rb-get-address-style',
@@ -48,9 +48,9 @@ class Checkout
                         path: 'src/Module/Customer/Widget/get-address.css'
                     )
                 );
-			}
-		);
-	}
+            }
+        );
+    }
 
     /**
      * Renders and returns the content of the widget that fetches the customer
@@ -58,24 +58,24 @@ class Checkout
      *
      * @return void
      */
-	public static function exec(): void
-	{
-		$result = '';
+    public static function exec(): void
+    {
+        $result = '';
 
-		try {
-			$address = new GetAddress(
-				fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS),
-			);
+        try {
+            $address = new GetAddress(
+                fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS),
+            );
 
-			$result = $address->content;
-		} catch (Exception $e) {
-			try {
-				Config::getLogger()->error(message: $e);
-			} catch (ConfigException) {
-				$result = 'Resursbank: failed to render get address widget.';
-			}
-		}
+            $result = $address->content;
+        } catch (Exception $e) {
+            try {
+                Config::getLogger()->error(message: $e);
+            } catch (ConfigException) {
+                $result = 'Resursbank: failed to render get address widget.';
+            }
+        }
 
-		echo $result;
-	}
+        echo $result;
+    }
 }

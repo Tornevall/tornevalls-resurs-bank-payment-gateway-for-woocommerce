@@ -22,12 +22,15 @@ class Metadata
      * @param string $metaDataValue
      * @return bool
      */
-    public static function setOrderMeta(WC_Order $order, string $metaDataKey, string $metaDataValue): bool
-    {
-        return (bool)add_post_meta(
-            $order->get_id(),
-            $metaDataKey,
-            $metaDataValue
+    public static function setOrderMeta(
+        WC_Order $order,
+        string $metaDataKey,
+        string $metaDataValue
+    ): bool {
+        return (bool) add_post_meta(
+            post_id: $order->get_id(),
+            meta_key: $metaDataKey,
+            meta_value: $metaDataValue
         );
     }
 }

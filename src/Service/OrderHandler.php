@@ -22,6 +22,7 @@ use WC_Cart;
 use WC_Coupon;
 use WC_Order;
 use WC_Product;
+
 use function count;
 use function is_array;
 use function is_object;
@@ -268,10 +269,13 @@ class OrderHandler extends ResursDefault
     }
 
     /**
+     * Customer address synchronization.
+     *
      * @param WC_Order $order
      * @return bool
      * @throws Exception
-     * @since 0.0.1.0
+     * @todo Do we still need this as MAPI may not give us the same opportunity?
+     * @todo Suggested solution is to just remove this method together with the self::$getAddressTranslation.
      */
     public function getCustomerRealAddress($order): bool
     {
