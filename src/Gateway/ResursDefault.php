@@ -58,6 +58,7 @@ use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
 use RuntimeException;
 use stdClass;
+use Throwable;
 use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
@@ -1082,7 +1083,15 @@ class ResursDefault extends WC_Payment_Gateway
                 return false;
             }
         }
-        $customerType = WcSession::getCustomerType();
+
+        try {
+            $customerType = WcSession::getCustomerType();
+        } catch (Throwable $wcSessionException) {
+            // Possible to-do: Make sure that defaults are set by available payment methods, not just NATURAL.
+            // Normally, this is not a problem, since the merchant majority is of type LEGAL, so for now we're
+            // good to go with this.
+            $customerType = CustomerType::NATURAL;
+        }
 
         // If this feature is not missing the method, we now know that there is chance that we're
         // located in a checkout. We will at this moment run through the min-max amount that resides
