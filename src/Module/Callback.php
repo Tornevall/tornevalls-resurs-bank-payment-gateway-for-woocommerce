@@ -11,18 +11,21 @@ namespace ResursBank\Module;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Lib\Locale\Translator;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Callback\Authorization;
-use Resursbank\Ecom\Lib\Model\Callback\Enum\Action;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
-use Resursbank\Ecom\Lib\Model\Callback\Enum\Status;
 use Resursbank\Ecom\Lib\Model\Callback\Management;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
+use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
+use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use ResursBank\Exception\CallbackException;
 use Resursbank\Woocommerce\Util\Database;
 use WC_Order;
@@ -35,38 +38,39 @@ class Callback
     /**
      * Callback automation goes here.
      * @param CallbackType $callbackType
-     * @return void
+     * @return bool
+     * @throws ApiException
+     * @throws AuthException
      * @throws CallbackException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
      * @throws HttpException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
      */
-    public static function processCallback(CallbackType $callbackType): void
+    public static function processCallback(CallbackType $callbackType): bool
     {
         $callbackModel = self::getCallbackModel(callbackType: $callbackType);
-        $paymentId = self::getOrderReferenceFromCallbackModel(
-            callbackModel: $callbackModel
-        );
+        $paymentId = self::getOrderReferenceFromCallbackModel(callbackModel: $callbackModel);
+
         if ($paymentId !== '') {
             $order = Database::getOrderByReference(orderReference: $paymentId);
-            // Currently not using getPayment as it is not yet clarified.
-            // @todo Solve the questions around order statuses before running this check.
-            //self::getStatusFromResurs($paymentId);
 
-            // @todo We still need to handle failures (denies & cancellations here).
-            self::setWcOrderStatus(
+            return self::setWcOrderStatus(
                 order: $order,
-                wcResursStatus: self::getStatusByPayload(
-                    callbackType: $callbackType,
-                    callbackModel: $callbackModel
-                )
+                paymentId: $paymentId
             );
-
-            return;
         }
 
         throw new CallbackException(message: 'Could not handle callback.', code: 408);
     }
 
     /**
+     * Get correct callback model for where we can find a paymentId.
      * @param CallbackType $callbackType
      * @return Authorization|Management
      * @throws HttpException
@@ -93,70 +97,39 @@ class Callback
 
     /**
      * @param WC_Order $order
-     * @param string $wcResursStatus Status returned from Resurs, in WooCommerce terms.
-     * @return void
-     */
-    private static function setWcOrderStatus(WC_Order $order, string $wcResursStatus): void
-    {
-        if (!$order->has_status(status: ['on-hold', 'processing', 'completed', 'cancelled']) &&
-            $order->get_status() !== $wcResursStatus
-        ) {
-            $order->payment_complete();
-        }
-    }
-
-    /**
-     * @param CallbackType $callbackType
-     * @param Authorization|Management $callbackModel
-     * @return string
-     */
-    private static function getStatusByPayload(
-        CallbackType $callbackType,
-        Authorization|Management $callbackModel
-    ): string {
-        return match ($callbackType) {
-            CallbackType::AUTHORIZATION => self::getAuthorizationStatusByCallbackPayload(status: $callbackModel->status),
-            CallbackType::MANAGEMENT => self::getManagementStatusByCallbackPayload(action: $callbackModel->action),
-        };
-    }
-
-    /**
-     * @param Status $status
-     * @return string
-     * @todo Centralize this with ecom2, since management actions are based on the same setup
-     */
-    private static function getAuthorizationStatusByCallbackPayload(Status $status): string
-    {
-        return match ($status) {
-            Status::FROZEN => 'on-hold',
-            Status::AUTHORIZED => 'processing',
-            Status::CAPTURED => 'completed',
-            Status::REJECTED => 'failed',
-        };
-    }
-
-    /**
-     * @param Action $action
-     * @return string
-     * @todo Centralize this with ecom2, since management actions are based on the same setup
-     */
-    private static function getManagementStatusByCallbackPayload(Action $action): string
-    {
-        return match ($action) {
-            Action::CANCEL => 'cancelled',
-            Action::CAPTURE => 'completed',
-            Action::REFUND => 'refunded',
-        };
-    }
-
-    /**
      * @param string $paymentId
-     * @return void
-     * @todo This is not yet fully implemented but left here for future use.
+     * @return bool
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @noinspection PhpUnhandledExceptionInspection
      */
-    private static function getStatusFromResurs(string $paymentId): void
+    private static function setWcOrderStatus(WC_Order $order, string $paymentId): bool
     {
-        //$resursPayment = Repository::get(paymentId: $paymentId);
-        //return $resursPayment;
+        // Try-catch should not be placed here, as any exceptions will be caught at the json-response level.
+        $resursPayment = PaymentRepository::get(paymentId: $paymentId);
+
+        if (!$order->has_status(status: ['on-hold', 'processing', 'completed', 'cancelled'])) {
+            $return = match ($resursPayment->status) {
+                PaymentStatus::ACCEPTED => $order->payment_complete(),
+                PaymentStatus::REJECTED => $order->update_status(
+                    new_status: 'failed',
+                    note: 'Payment rejected by Resurs.'
+                ),
+                default => $order->update_status(
+                    new_status: 'on-hold',
+                    note: 'Payment is waiting for more information from Resurs.'
+                ),
+            };
+        }
+
+        return $return ?? false;
     }
 }

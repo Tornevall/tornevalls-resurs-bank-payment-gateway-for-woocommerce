@@ -72,6 +72,9 @@ class OrderMetaBox
      */
     public static function output_meta_details(WP_Post $post): void
     {
+        // @todo Adapt to ecom2. This return will "suppress" output instead of generating exceptions in the order view.
+        return;
+
         $order = new WC_Order($post->ID);
         $paymentMethod = $order->get_payment_method();
 
@@ -92,9 +95,9 @@ class OrderMetaBox
             }
             $orderData['v2'] = Data::isDeprecatedPluginOrder($paymentMethod) ? true : false;
 
-            echo Data::getEscapedHtml(
+            /*echo Data::getEscapedHtml(
                 Data::getGenericClass()->getTemplate('adminpage_details.phtml', $orderData)
-            );
+            );*/
             WordPress::doAction('showOrderDetails', $orderData);
         }
     }
