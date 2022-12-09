@@ -48,7 +48,9 @@ class Url
     public static function getEcomUrl(
         string $path
     ): string {
-        return self::getUrl(path: RESURSBANK_MODULE_DIR_NAME . "/lib/ecom/$path");
+        return self::getUrl(
+            path: RESURSBANK_MODULE_DIR_NAME . "/lib/ecom/$path"
+        );
     }
 
     /**
@@ -71,11 +73,17 @@ class Url
             }
 
             /** @psalm-suppress MixedAssignment */
-            $query = add_query_arg($argumentKey, $argumentValue, $queryArgument);
+            $query = add_query_arg(
+                $argumentKey,
+                $argumentValue,
+                $queryArgument
+            );
 
-            if (is_string(value: $query)) {
-                $queryArgument = $query;
+            if (!is_string(value: $query)) {
+                continue;
             }
+
+            $queryArgument = $query;
         }
 
         return $queryArgument;
@@ -90,7 +98,7 @@ class Url
     public static function getUrl(
         string $path
     ): string {
-        $offset = strrpos(haystack: $path, needle:  '/');
+        $offset = strrpos(haystack: $path, needle: '/');
 
         /** @noinspection PhpCastIsUnnecessaryInspection */
         $file = $offset !== false ?
@@ -99,7 +107,9 @@ class Url
         if ($file === '') {
             if (
                 $path !== '' &&
-                strrpos(haystack: $path, needle: '/') === strlen(string: $path) - 1
+                strrpos(haystack: $path, needle: '/') === strlen(
+                    string: $path
+                ) - 1
             ) {
                 throw new RuntimeException(
                     message: 'The path may not end with a "/".'

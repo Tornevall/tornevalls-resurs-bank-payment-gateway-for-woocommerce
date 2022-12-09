@@ -25,10 +25,8 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
 use Resursbank\Ecom\Module\Customer\Repository;
-use ResursBank\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Util\WcSession;
-use WC_Session_Handler;
 
 /**
  * Controller to fetch address content.
