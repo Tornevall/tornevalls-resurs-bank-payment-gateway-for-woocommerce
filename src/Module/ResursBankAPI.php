@@ -137,7 +137,6 @@ class ResursBankAPI
                 scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
                 grantType: 'client_credentials'
             ),
-            logLevel: LogLevel::ERROR,
             locale: match (Data::getCustomerCountry()) {
                 'SE' => Locale::sv,
                 'DK' => Locale::da,

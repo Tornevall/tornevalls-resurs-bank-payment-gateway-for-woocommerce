@@ -11,6 +11,7 @@ namespace ResursBank\Module;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
@@ -58,6 +59,17 @@ class Callback
         $paymentId = self::getOrderReferenceFromCallbackModel(callbackModel: $callbackModel);
 
         if ($paymentId !== '') {
+            Config::getLogger()->info(
+                message: sprintf(
+                    'Callback %s (status/action: %s).',
+                    $callbackType->value,
+                    $callbackType === CallbackType::AUTHORIZATION ? $callbackModel->status->value : $callbackModel->action->value
+                )
+            );
+            Config::getLogger()->info(
+                file_get_contents('php://input')
+            );
+
             $order = Database::getOrderByReference(orderReference: $paymentId);
 
             return self::setWcOrderStatus(
