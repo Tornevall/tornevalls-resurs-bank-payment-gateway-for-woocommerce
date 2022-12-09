@@ -51,6 +51,9 @@ class Option
      */
     public static function setData(string $value): bool
     {
-        return update_option(option: static::getName(), value: $value) === true;
+        return update_option(
+            option: static::getName(),
+            value: $value
+        ) === true;
     }
 }

@@ -9,11 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Error;
-use Exception;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Throwable;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 
 use function is_string;
@@ -62,7 +61,7 @@ class Route
                 default:
                     break;
             }
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             self::respondWithError(exception: $exception);
         }
     }
@@ -112,17 +111,27 @@ class Route
     }
 
     /**
-     * @param Exception $exception
+     * @param Throwable $exception
      * @return void
      */
     public static function respondWithError(
-        Exception $exception
+        Throwable $exception
     ): void {
         $controller = new CoreController();
 
         self::respond(
-            body: $controller->respondWithError(exception: $exception),
-            code: $controller->getErrorResponseCode(exception: $exception)
+            body: $controller->respondWithError(
+                exception: new HttpException(
+                    message: $exception->getMessage(),
+                    previous: $exception
+                )
+            ),
+            code: $controller->getErrorResponseCode(
+                exception: new HttpException(
+                    message: $exception->getMessage(),
+                    previous: $exception
+                )
+            )
         );
     }
 }
