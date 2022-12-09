@@ -14,6 +14,7 @@ use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Throwable;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
+use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 
 use function is_string;
 use function str_contains;
@@ -40,6 +41,11 @@ class Route
     public const ROUTE_PART_PAYMENT = 'part-payment';
 
     /**
+     * Route to get part payment admin controller.
+     */
+    public const ROUTE_PART_PAYMENT_ADMIN = 'part-payment-admin';
+
+    /**
      * @return void
      * @SuppressWarnings(PHPMD.Superglobals)
      */
@@ -56,7 +62,10 @@ class Route
                     self::respond(body: GetAddress::exec());
                     break;
                 case self::ROUTE_PART_PAYMENT:
-                    self::respond(body: $response = PartPayment::exec());
+                    self::respond(body: PartPayment::exec());
+                    break;
+                case self::ROUTE_PART_PAYMENT_ADMIN:
+                    self::respond(body: GetValidDurations::exec());
                     break;
                 default:
                     break;

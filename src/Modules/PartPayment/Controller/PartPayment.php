@@ -59,8 +59,8 @@ class PartPayment
             'css' => '',
             'html' => ''
         ];
-        if (isset($_GET['amount'])) {
-            $amount = $_GET['amount'];
+        if (isset($_GET['amount']) && is_numeric(value: $_GET['amount'])) {
+            $amount = (float)$_GET['amount'];
             $widget = new \Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment(
                 storeId: StoreId::getData(),
                 paymentMethod: Repository::getById(
