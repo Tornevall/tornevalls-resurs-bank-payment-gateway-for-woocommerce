@@ -28,6 +28,7 @@ use Resursbank\Ecom\Module\Customer\Repository;
 use ResursBank\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Util\WcSession;
+use Throwable;
 use WC_Session_Handler;
 
 /**
