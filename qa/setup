@@ -32,7 +32,7 @@ if [ ! -f ./qa/php-cs-fixer/.php-cs-fixer.cache ]; then
 fi
 
 # Install Composer if it's not already available.
-if [ "" = "$($phpCmd which composer)" ]; then
+if [ ! -f ./qa/bin/composer ]; then
   echo ""
   echo ""
   echo "--==( Installing Composer )==--"
@@ -134,7 +134,7 @@ cat <<EOT >> ./composer.json
 EOT
 
 # Install composer packages for QA tools.
-$phpCmd composer install
+$phpCmd $dir/qa/bin/composer install
 
 echo OK
 exit 0
