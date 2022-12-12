@@ -14,6 +14,7 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use RuntimeException;
 use WC_Session_Handler;
+use WooCommerce;
 
 /**
  * WooCommerce <-> ECom2 Session handling.
@@ -24,14 +25,34 @@ use WC_Session_Handler;
 class WcSession
 {
     /**
+     * @var WooCommerce
+     * @psalm-suppress UndefinedClass
+     */
+    private static WooCommerce $wc;
+
+    /**
+     * Initializing WC() if not already done.
      * @return void
      */
     private static function getWcSession(): void
     {
-        // Initializing WC() if not already done.
-        WC()->initialize_session();
-        if (!WC()->session instanceof WC_Session_Handler) {
-            throw new RuntimeException('WC()->session is not available.');
+        /**
+         * @psalm-suppress UndefinedClass
+         */
+        if (!(self::$wc instanceof WooCommerce)) {
+            throw new RuntimeException(message: 'WooCommerce is not available.');
+        };
+
+        /**
+         * @psalm-suppress MixedAssignment
+         */
+        self::$wc = WC();
+
+        /**
+         * @psalm-suppress MixedPropertyFetch
+         */
+        if (isset(self::$wc) && (!self::$wc->session instanceof WC_Session_Handler)) {
+            throw new RuntimeException(message: 'WC()->session is not available.');
         }
     }
 
@@ -44,8 +65,12 @@ class WcSession
     {
         try {
             self::getWcSession();
-            WC()->session->set($key, $value); // void.
-        } catch (RuntimeException $e) {
+
+            /**
+             * @psalm-suppress MixedMethodCall
+             */
+            self::$wc->session->set($key, $value);
+        } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
         }
     }
@@ -58,8 +83,12 @@ class WcSession
     {
         try {
             self::getWcSession();
-            $return = WC()->session->get($key);
-        } catch (RuntimeException $e) {
+
+            /**
+             * @psalm-suppress MixedMethodCall
+             */
+            $return = (string)self::$wc->session->get($key);
+        } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
         }
 
@@ -82,7 +111,11 @@ class WcSession
     {
         try {
             self::getWcSession();
-            WC()->session->set($key, null);
+
+            /**
+             * @psalm-suppress MixedMethodCall
+             */
+            self::$wc->session->set($key, null);
         } catch (RuntimeException $e) {
             // If WC()->session is not available, we can't use it.
         }
