@@ -62,6 +62,7 @@ class GetAddress
                 $requestData->customerType->value
             );
         } catch (Exception) {
+            // Do nothing.
         }
 
         return $controller->exec(
