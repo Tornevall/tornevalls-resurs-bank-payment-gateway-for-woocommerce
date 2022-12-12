@@ -27,7 +27,6 @@ class WcSession
     /**
      * WC() as an initialized variable.
      * @var WooCommerce
-     * @psalm-suppress UndefinedClass
      */
     private static WooCommerce $wooCom;
 
@@ -37,16 +36,10 @@ class WcSession
      */
     private static function getWcSession(): void
     {
-        /**
-         * @psalm-suppress UndefinedClass
-         */
         if (!(self::$wooCom instanceof WooCommerce)) {
             throw new RuntimeException(message: 'WooCommerce is not available.');
         }
-
-        /**
-         * @psalm-suppress MixedAssignment
-         */
+        
         self::$wooCom = WC();
 
         /**
@@ -66,10 +59,6 @@ class WcSession
     {
         try {
             self::getWcSession();
-
-            /**
-             * @psalm-suppress MixedMethodCall
-             */
             self::$wooCom->session->set($key, $value);
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
@@ -85,9 +74,6 @@ class WcSession
         try {
             self::getWcSession();
 
-            /**
-             * @psalm-suppress MixedMethodCall
-             */
             $return = (string)self::$wooCom->session->get($key);
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
@@ -113,9 +99,6 @@ class WcSession
         try {
             self::getWcSession();
 
-            /**
-             * @psalm-suppress MixedMethodCall
-             */
             self::$wooCom->session->set($key, null);
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
