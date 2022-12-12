@@ -17,8 +17,8 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
+use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Utilities\Tax;
 use WC_Coupon;
 
@@ -31,10 +31,6 @@ use function is_string;
 class Discount
 {
     /**
-     * @param WC_Coupon $coupon
-     * @param float $inclTax
-     * @param float $exclTax
-     * @return OrderLine
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -56,7 +52,10 @@ class Discount
             quantityUnit: Translator::translate(
                 phraseId: 'default-quantity-unit'
             ),
-            vatRate: Tax::getRate(taxAmount: ($inclTax - $exclTax), totalInclTax: $inclTax),
+            vatRate: Tax::getRate(
+                taxAmount: $inclTax - $exclTax,
+                totalInclTax: $inclTax
+            ),
             totalAmountIncludingVat: $inclTax,
             description: $couponDescription !== '' ? $couponDescription : $code,
             reference: self::getCode(coupon: $coupon),
@@ -65,8 +64,6 @@ class Discount
     }
 
     /**
-     * @param WC_Coupon $coupon
-     * @return string
      * @throws IllegalValueException
      */
     public static function getCode(WC_Coupon $coupon): string
@@ -83,8 +80,6 @@ class Discount
     }
 
     /**
-     * @param WC_Coupon $coupon
-     * @return string
      * @throws IllegalValueException
      */
     public static function getDescription(WC_Coupon $coupon): string
@@ -103,7 +98,6 @@ class Discount
     /**
      * Wrapper to safely check if coupon usage is enabled.
      *
-     * @return bool
      * @throws IllegalValueException
      */
     public static function isCouponsEnabled(): bool

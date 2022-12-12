@@ -17,8 +17,8 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
+use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Utilities\Tax;
 
 /**
@@ -27,9 +27,6 @@ use Resursbank\Ecom\Lib\Utilities\Tax;
 class Shipping
 {
     /**
-     * @param float $total
-     * @param float $tax
-     * @return OrderLine
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException

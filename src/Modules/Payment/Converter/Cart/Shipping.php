@@ -22,7 +22,6 @@ use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Shipping as ShippingItem;
 use WC_Cart;
 
-
 /**
  * Convert shipping data to OrderLine.
  */
@@ -31,7 +30,7 @@ class Shipping extends ShippingItem
     /**
      * Create MAPI orderLine from WooCommerce shipping.
      *
-     * @return OrderLine[]
+     * @return array<OrderLine>
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -51,8 +50,6 @@ class Shipping extends ShippingItem
     /**
      * Wrapper to safely retrieve shipping amount.
      *
-     * @param WC_Cart $cart
-     * @return float
      * @throws IllegalValueException
      */
     public static function getTotal(WC_Cart $cart): float
@@ -71,8 +68,6 @@ class Shipping extends ShippingItem
     /**
      * Wrapper to safely resolve shipping tax.
      *
-     * @param WC_Cart $cart
-     * @return float
      * @throws IllegalValueException
      */
     public static function getTax(WC_Cart $cart): float

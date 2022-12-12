@@ -20,15 +20,15 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
-use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
+use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Cart\Discount;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Cart\Shipping;
 use WC_Cart;
 use WC_Product;
 use WC_Product_Simple;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Cart\Discount;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Cart\Shipping;
-
 use WooCommerce;
+
 use function array_merge;
 use function is_array;
 
@@ -38,7 +38,6 @@ use function is_array;
 class Cart
 {
     /**
-     * @return OrderLineCollection
      * @throws IllegalTypeException
      * @throws Exception
      */
@@ -50,7 +49,7 @@ class Cart
             data: $cart !== null ? array_merge(
                 self::getProductOrderLines(cart: $cart),
                 Shipping::getOrderLines(cart: $cart),
-                Discount::getOrderLines(cart: $cart),
+                Discount::getOrderLines(cart: $cart)
             ) : []
         );
     }
@@ -59,7 +58,7 @@ class Cart
      * Create collection of orderLines from a valid WooCommerce cart
      * (default handler of products).
      *
-     * @return OrderLine[]
+     * @return array<OrderLine>
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -79,13 +78,15 @@ class Cart
             $productData = $item['data'] ?? null;
             $qty = $item['quantity'] ?? 1.0;
 
-            if ($productData instanceof WC_Product) {
-                $result[] = Product::toOrderLine(
-                    product: $productData,
-                    qty: (float) $qty,
-                    orderLineType: OrderLineType::NORMAL
-                );
+            if (!($productData instanceof WC_Product)) {
+                continue;
             }
+
+            $result[] = Product::toOrderLine(
+                product: $productData,
+                qty: (float) $qty,
+                orderLineType: OrderLineType::NORMAL
+            );
         }
 
         return $result;
@@ -94,8 +95,7 @@ class Cart
     /**
      * Wrapper to safely resolve cart contents.
      *
-     * @param WC_Cart $cart
-     * @return array
+     * @return array<int, mixed>
      * @throws IllegalValueException
      */
     public static function getCartContents(WC_Cart $cart): array
@@ -111,9 +111,6 @@ class Cart
         return $result;
     }
 
-    /**
-     * @return WC_Cart|null
-     */
     public static function getCart(): ?WC_Cart
     {
         $wooCom = WC();

@@ -18,6 +18,7 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Discount as DiscountItem;
 use WC_Cart;
 use WC_Coupon;
@@ -34,8 +35,7 @@ class Discount extends DiscountItem
     /**
      * Get MAPI orderLine from WooCommerce coupons.
      *
-     * @param WC_Cart $cart
-     * @return array
+     * @return array<int, OrderLine>
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -48,11 +48,14 @@ class Discount extends DiscountItem
     {
         return !self::isCouponsEnabled() ?
             [] : array_map(
-                callback: static fn (WC_Coupon $item) =>
-                DiscountItem::toOrderLine(
+                callback: static fn (WC_Coupon $item) => DiscountItem::toOrderLine(
                     coupon: $item,
                     inclTax: self::getAmount(cart: $cart, coupon: $item),
-                    exclTax: self::getAmount(cart: $cart, coupon: $item, exclTax: true),
+                    exclTax: self::getAmount(
+                        cart: $cart,
+                        coupon: $item,
+                        exclTax: true
+                    )
                 ),
                 array: self::getCoupons(cart: $cart)
             );
@@ -61,8 +64,7 @@ class Discount extends DiscountItem
     /**
      * Wrapper to safely retrieve applied coupons.
      *
-     * @param WC_Cart $cart
-     * @return array
+     * @return array<int, WC_Coupon>
      * @throws IllegalValueException
      */
     public static function getCoupons(WC_Cart $cart): array
@@ -79,10 +81,6 @@ class Discount extends DiscountItem
     }
 
     /**
-     * @param WC_Cart $cart
-     * @param WC_Coupon $coupon
-     * @param bool $exclTax
-     * @return float
      * @throws IllegalValueException
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */

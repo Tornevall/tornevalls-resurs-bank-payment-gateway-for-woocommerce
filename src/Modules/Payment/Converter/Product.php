@@ -17,8 +17,8 @@ use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
+use Resursbank\Ecom\Lib\Order\OrderLineType;
 use WC_Product;
 use WC_Tax;
 
@@ -33,10 +33,6 @@ use function is_string;
 class Product
 {
     /**
-     * @param WC_Product $product
-     * @param float $qty
-     * @param OrderLineType|null $orderLineType
-     * @return OrderLine
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -48,7 +44,7 @@ class Product
     public static function toOrderLine(
         WC_Product $product,
         float $qty,
-        OrderLineType $orderLineType = null,
+        ?OrderLineType $orderLineType = null
     ): OrderLine {
         return new OrderLine(
             quantity: $qty,
@@ -65,9 +61,7 @@ class Product
     }
 
     /**
-     * @param WC_Product $product
-     * @param array $args
-     * @return float
+     * @param array<int, array<string, float>> $args
      * @throws IllegalValueException
      */
     public static function getPriceIncludingTax(
@@ -86,8 +80,6 @@ class Product
     }
 
     /**
-     * @param WC_Product $product
-     * @return string
      * @throws IllegalValueException
      */
     public static function getTitle(WC_Product $product): string
@@ -104,8 +96,6 @@ class Product
     }
 
     /**
-     * @param WC_Product $product
-     * @return string
      * @throws IllegalValueException
      */
     public static function getSku(WC_Product $product): string
@@ -122,8 +112,6 @@ class Product
     }
 
     /**
-     * @param WC_Product $product
-     * @return string
      * @throws IllegalValueException
      */
     public static function getTaxClass(WC_Product $product): string
@@ -140,8 +128,7 @@ class Product
     }
 
     /**
-     * @param string $taxClass
-     * @return array
+     * @return array<int, array<string, mixed>>
      * @throws IllegalValueException
      */
     public static function getTaxRates(string $taxClass): array
@@ -158,8 +145,6 @@ class Product
     }
 
     /**
-     * @param WC_Product $product
-     * @return float
      * @throws IllegalValueException
      */
     public static function getProductVatRate(WC_Product $product): float
@@ -167,8 +152,8 @@ class Product
         $taxClass = self::getTaxClass(product: $product);
         $ratesArray = self::getTaxRates(taxClass: $taxClass);
         /**
-         * @noinspection PhpArgumentWithoutNamedIdentifierInspection
          * @psalm-suppress MixedAssignment
+         * @noinspection PhpArgumentWithoutNamedIdentifierInspection
          */
         $rates = array_shift($ratesArray);
 
@@ -179,9 +164,6 @@ class Product
     }
 
     /**
-     * @param WC_Product $product
-     * @param float $qty
-     * @return float
      * @throws IllegalValueException
      */
     public static function getTotalAmountIncludingVat(
@@ -195,7 +177,6 @@ class Product
     }
 
     /**
-     * @return string
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -208,8 +189,6 @@ class Product
     public static function getQuantityUnit(): string
     {
         // Using default measure from ECom for now.
-        return Translator::translate(
-            phraseId: 'default-quantity-unit'
-        );
+        return Translator::translate(phraseId: 'default-quantity-unit');
     }
 }
