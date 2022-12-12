@@ -60,7 +60,7 @@ class PartPayment
      * @throws TranslationException
      * @throws ValidationException
      */
-    #[ArrayShape([self::SECTION_ID => "array"])] public static function getSettings(): array
+    public static function getSettings(): array
     {
         return [
             self::SECTION_ID => [
@@ -119,13 +119,15 @@ class PartPayment
             WordPress::setGenericError(exception: $exception);
         }
 
-        /** @var PaymentMethod $paymentMethod */
-        foreach ($paymentMethods as $paymentMethod) {
-            if (
-                $paymentMethod->type === Type::RESURS_PART_PAYMENT ||
-                $paymentMethod->type === Type::RESURS_REVOLVING_CREDIT
-            ) {
-                $options[$paymentMethod->id] = $paymentMethod->name;
+        if (isset($paymentMethods)) {
+            /** @var PaymentMethod $paymentMethod */
+            foreach ($paymentMethods as $paymentMethod) {
+                if (
+                    $paymentMethod->type === Type::RESURS_PART_PAYMENT ||
+                    $paymentMethod->type === Type::RESURS_REVOLVING_CREDIT
+                ) {
+                    $options[$paymentMethod->id] = $paymentMethod->name;
+                }
             }
         }
 
@@ -170,10 +172,12 @@ class PartPayment
 
         $return = [];
 
-        /** @var AnnuityInformation $annuityFactor */
-        foreach ($annuityFactors->content as $annuityFactor) {
-            $return[$annuityFactor->durationInMonths] = $annuityFactor->durationInMonths . ' ' .
-                                                        Translator::translate(phraseId: 'months');
+        if (isset($annuityFactors)) {
+            /** @var AnnuityInformation $annuityFactor */
+            foreach ($annuityFactors->content as $annuityFactor) {
+                $return[$annuityFactor->durationInMonths] = $annuityFactor->durationInMonths . ' ' .
+                                                            Translator::translate(phraseId: 'months');
+            }
         }
 
         return $return;

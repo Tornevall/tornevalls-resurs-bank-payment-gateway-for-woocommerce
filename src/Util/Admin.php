@@ -24,7 +24,7 @@ class Admin
     public static function isAdmin(): bool
     {
         try {
-            return is_admin();
+            return is_admin() ?? false;
         } catch (Throwable $error) {
             return false;
         }

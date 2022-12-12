@@ -68,12 +68,18 @@ class Module
             throw new IllegalTypeException(message: 'Unable to fetch product');
         }
 
+        $paymentMethod = Repository::getById(
+            storeId: StoreId::getData(),
+            paymentMethodId: PaymentMethod::getData()
+        );
+
+        if ($paymentMethod === null) {
+            throw new IllegalTypeException(message: 'Payment method is null');
+        }
+
         $this->instance = new PartPayment(
             storeId: StoreId::getData(),
-            paymentMethod: Repository::getById(
-                storeId: StoreId::getData(),
-                paymentMethodId: PaymentMethod::getData()
-            ),
+            paymentMethod: $paymentMethod,
             months: (int)Period::getData(),
             amount: (float)$product->get_price(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
@@ -128,6 +134,7 @@ class Module
             try {
                 $widget = new self();
 
+                /** @psalm-suppress UndefinedConstant */
                 $url = Url::getPluginUrl(
                     path: RESURSBANK_MODULE_DIR_NAME . '/js',
                     file: 'js/resursbank_partpayment.js'
