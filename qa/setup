@@ -32,7 +32,7 @@ if [ ! -f ./qa/php-cs-fixer/.php-cs-fixer.cache ]; then
 fi
 
 # Install Composer if it's not already available.
-if [ "" = "$($phpCmd which composer)" ]; then
+if [ ! -f ./qa/bin/composer ]; then
   echo ""
   echo ""
   echo "--==( Installing Composer )==--"
@@ -76,9 +76,13 @@ echo "---==( Executing PHP CBF for source files. )==---"
 echo ""
 $phpCmd $dir/vendor/bin/phpcbf --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src
 echo ""
+$phpCmd $dir/vendor/bin/phpcbf --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src
+echo ""
 echo "---==( Executing PHPCS for source files. )==---"
 echo ""
 $phpCmd $dir/vendor/bin/phpcs --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src
+echo ""
+$phpCmd $dir/vendor/bin/phpcs --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src
 echo ""
 echo "---==( Executing PHPStan for source files. )==---"
 echo ""
@@ -114,17 +118,23 @@ cat <<EOT >> ./composer.json
     "squizlabs/php_codesniffer": "^3",
     "friendsofphp/php-cs-fixer": "^3",
     "vimeo/psalm": "^4",
-    "phpstan/phpstan": "^1"
+    "phpstan/phpstan": "^1",
+    "slevomat/coding-standard": "~8.0"
   },
   "require": {
     "php": "8.1.*",
     "ext-curl": "*"
-  }
+  },
+   "config": {
+     "allow-plugins": {
+       "dealerdirect/phpcodesniffer-composer-installer": true
+     }
+   }
 }
 EOT
 
 # Install composer packages for QA tools.
-$phpCmd composer install
+$phpCmd $dir/qa/bin/composer install
 
 echo OK
 exit 0

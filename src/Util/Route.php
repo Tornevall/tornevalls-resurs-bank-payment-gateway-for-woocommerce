@@ -9,12 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Exception;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Throwable;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
+use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 
 use function is_string;
 use function str_contains;
@@ -41,6 +42,11 @@ class Route
     public const ROUTE_PART_PAYMENT = 'part-payment';
 
     /**
+     * Route to get part payment admin controller.
+     */
+    public const ROUTE_PART_PAYMENT_ADMIN = 'part-payment-admin';
+
+    /**
      * @return void
      * @SuppressWarnings(PHPMD.Superglobals)
      */
@@ -59,10 +65,13 @@ class Route
                 case self::ROUTE_PART_PAYMENT:
                     self::respond(body: PartPayment::exec());
                     break;
+                case self::ROUTE_PART_PAYMENT_ADMIN:
+                    self::respond(body: GetValidDurations::exec());
+                    break;
                 default:
                     break;
             }
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             self::respondWithError(exception: $exception);
         }
     }
@@ -112,17 +121,27 @@ class Route
     }
 
     /**
-     * @param Exception $exception
+     * @param Throwable $exception
      * @return void
      */
     public static function respondWithError(
-        Exception $exception
+        Throwable $exception
     ): void {
         $controller = new CoreController();
 
         self::respond(
-            body: $controller->respondWithError(exception: $exception),
-            code: $controller->getErrorResponseCode(exception: $exception)
+            body: $controller->respondWithError(
+                exception: new HttpException(
+                    message: $exception->getMessage(),
+                    previous: $exception
+                )
+            ),
+            code: $controller->getErrorResponseCode(
+                exception: new HttpException(
+                    message: $exception->getMessage(),
+                    previous: $exception
+                )
+            )
         );
     }
 }

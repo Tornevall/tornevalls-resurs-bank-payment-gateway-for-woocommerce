@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Exception;
 use Resursbank\Ecom\Lib\Cache\CacheInterface;
 use Resursbank\Ecom\Lib\Cache\Filesystem;
 use Resursbank\Ecom\Lib\Cache\None;
@@ -18,6 +17,7 @@ use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Woocommerce\Database\Options\CacheDir;
 use Resursbank\Woocommerce\Database\Options\LogDir;
+use Throwable;
 use WC_Logger;
 
 use function is_array;
@@ -40,8 +40,9 @@ class Advanced
      * WooCommerce to a form on the config page.
      *
      * @return array
-     * @todo Move translations to ecom.
+     * @todo Refactor, method too big, move translations to ECom. WOO-897. Remove phpcs:ignore when completed.
      */
+    // phpcs:ignore
     public static function getSettings(): array
     {
         return [
@@ -73,7 +74,7 @@ class Advanced
                     ),
                     'default' => '',
                 ],
-            ]
+            ],
         ];
     }
 
@@ -82,9 +83,10 @@ class Advanced
      * if the setting is empty.
      *
      * @return LoggerInterface
-     * @todo Refactor this method. WOO-872. Remove the CyclomaticComplexity suppression below when this is fixed.
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @todo Refactor this method. WOO-872. Remove the PHPCS & PHPMD suppression.
      */
+    // phpcs:ignore
     public static function getLogger(): LoggerInterface
     {
         $result = new NoneLogger();
@@ -119,7 +121,7 @@ class Advanced
             ) {
                 $result = new FileLogger(path: $path);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if (class_exists(class: WC_Logger::class)) {
                 (new WC_Logger())->critical(
                     message: 'Resurs Bank: ' . $e->getMessage()
@@ -146,7 +148,7 @@ class Advanced
             if (is_dir(filename: CacheDir::getData())) {
                 $result = new Filesystem(path: $path);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if (class_exists(class: WC_Logger::class)) {
                 (new WC_Logger())->critical(
                     message: 'Resurs Bank: ' . $e->getMessage()

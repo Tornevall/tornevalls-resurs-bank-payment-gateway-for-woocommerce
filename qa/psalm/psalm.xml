@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <psalm
-    cacheDirectory="cache"
-    autoloader="../../autoload.php">
+        cacheDirectory="cache"
+        autoloader="../../autoload.php">
     <projectFiles>
         <directory name="../../src" />
         <ignoreFiles>
@@ -39,19 +39,17 @@
         </UndefinedConstant>
         <UndefinedClass>
             <errorLevel type="suppress">
-                <file name="../../src/Settings.php" />
-                <file name="../../src/Util/Database.php" />
-                <file name="../../src/Util/Metadata.php" />
+                <directory name="../../src" />
             </errorLevel>
         </UndefinedClass>
         <MixedMethodCall>
             <errorLevel type="suppress">
-                <file name="../../src/Settings/Advanced.php" />
+                <directory name="../../src" />
             </errorLevel>
         </MixedMethodCall>
         <MixedAssignment>
             <errorLevel type="suppress">
-                <file name="../../src/Database/StringOption.php" />
+                <directory name="../../src" />
             </errorLevel>
         </MixedAssignment>
     </issueHandlers>

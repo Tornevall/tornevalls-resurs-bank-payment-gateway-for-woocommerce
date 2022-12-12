@@ -12,7 +12,9 @@ use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
+use Resursbank\Woocommerce\Settings\Advanced;
+use Resursbank\Woocommerce\Settings\Api;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Route;
 use RuntimeException;
 use Throwable;
@@ -178,6 +180,13 @@ class WordPress
             'wp_enqueue_scripts',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::setJs'
         );
+        if (Admin::isAdmin()) {
+            add_action(
+                'admin_enqueue_scripts',
+                'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
+            );
+        }
+
         add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
