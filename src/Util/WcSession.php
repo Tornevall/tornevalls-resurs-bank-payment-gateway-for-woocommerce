@@ -14,6 +14,7 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use RuntimeException;
 use WC_Session_Handler;
+use WooCommerce;
 
 /**
  * WooCommerce <-> ECom2 Session handling.
@@ -24,14 +25,28 @@ use WC_Session_Handler;
 class WcSession
 {
     /**
+     * WC() as an initialized variable.
+     * @var WooCommerce
+     */
+    private static WooCommerce $wooCom;
+
+    /**
+     * Initializing WC() if not already done.
      * @return void
      */
     private static function getWcSession(): void
     {
-        // Initializing WC() if not already done.
-        WC()->initialize_session();
-        if (!WC()->session instanceof WC_Session_Handler) {
-            throw new RuntimeException('WC()->session is not available.');
+        if (!(self::$wooCom instanceof WooCommerce)) {
+            throw new RuntimeException(message: 'WooCommerce is not available.');
+        }
+
+        self::$wooCom = WC();
+
+        /**
+         * @psalm-suppress MixedPropertyFetch
+         */
+        if (isset(self::$wooCom) && (!self::$wooCom->session instanceof WC_Session_Handler)) {
+            throw new RuntimeException(message: 'WC()->session is not available.');
         }
     }
 
@@ -44,8 +59,8 @@ class WcSession
     {
         try {
             self::getWcSession();
-            WC()->session->set($key, $value); // void.
-        } catch (RuntimeException $e) {
+            self::$wooCom->session->set($key, $value);
+        } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
         }
     }
@@ -58,8 +73,9 @@ class WcSession
     {
         try {
             self::getWcSession();
-            $return = WC()->session->get($key);
-        } catch (RuntimeException $e) {
+
+            $return = (string)self::$wooCom->session->get($key);
+        } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
         }
 
@@ -82,8 +98,9 @@ class WcSession
     {
         try {
             self::getWcSession();
-            WC()->session->set($key, null);
-        } catch (RuntimeException $e) {
+
+            self::$wooCom->session->set($key, null);
+        } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
         }
     }

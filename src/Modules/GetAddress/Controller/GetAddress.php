@@ -18,7 +18,6 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\SessionException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\ValidationException;
@@ -35,18 +34,17 @@ class GetAddress
 {
     /**
      * @return string
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
-     * @throws GetAddressException
-     * @throws ValidationException
      * @throws EmptyValueException
-     * @throws IllegalTypeException
+     * @throws GetAddressException
      * @throws HttpException
-     * @throws SessionException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
      */
     public static function exec(): string
     {
@@ -63,7 +61,8 @@ class GetAddress
                 $ecomSession->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE),
                 $requestData->customerType->value
             );
-        } catch (Exception $e) {
+        } catch (Exception) {
+            // Do nothing.
         }
 
         return $controller->exec(
