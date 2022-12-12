@@ -39,7 +39,7 @@ class WcSession
         if (!(self::$wooCom instanceof WooCommerce)) {
             throw new RuntimeException(message: 'WooCommerce is not available.');
         }
-        
+
         self::$wooCom = WC();
 
         /**
