@@ -25,10 +25,14 @@ class Database
     /**
      * Get the order ID from the database, based on the metadata stored on it for which Resurs always sets
      * the uuid as order reference. This is the only proper way to fetch such data.
+     *
      * @param string $orderReference
      * @return WC_Order
+     * @psalm-suppress MixedOperand
      * @noinspection SqlResolve
+     * @todo Refactor then remove phpcs:ignore comment below. WOO-893
      */
+    // phpcs:ignore
     public static function getOrderByReference(string $orderReference): WC_Order
     {
         global $wpdb;
