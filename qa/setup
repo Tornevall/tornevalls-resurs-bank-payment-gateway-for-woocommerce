@@ -85,10 +85,10 @@ echo ""
 $phpCmd $dir/vendor/bin/phpcs --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src
 echo ""
 $phpCmd $dir/vendor/bin/phpcs --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src
-echo ""
-echo "---==( Executing PHPStan for source files. )==---"
-echo ""
-$phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan/src.neon -a $dir/autoload.php $dir/src
+#echo ""
+#echo "---==( Executing PHPStan for source files. )==---"
+#echo ""
+#$phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan/src.neon -a $dir/autoload.php $dir/src
 echo ""
 echo "---==( Executing PHP CS Fixer for source files. )==---"
 echo ""
