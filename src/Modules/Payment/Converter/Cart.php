@@ -116,8 +116,8 @@ class Cart
      */
     public static function getCart(): ?WC_Cart
     {
-        $wc = WC();
-        $cart = $wc instanceof WooCommerce ? WC()->cart : null;
+        $wooCom = WC();
+        $cart = $wooCom instanceof WooCommerce ? WC()->cart : null;
 
         return $cart instanceof WC_Cart ? $cart : null;
     }

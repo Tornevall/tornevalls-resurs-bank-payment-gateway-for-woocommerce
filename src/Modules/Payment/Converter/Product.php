@@ -205,7 +205,8 @@ class Product
      * @todo Get the default quantity from somewhere else, like if there's an
      *      option in WordPress for that.
      */
-    public static function getQuantityUnit(): string {
+    public static function getQuantityUnit(): string
+    {
         // Using default measure from ECom for now.
         return Translator::translate(
             phraseId: 'default-quantity-unit'

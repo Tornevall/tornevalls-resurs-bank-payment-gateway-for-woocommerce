@@ -84,6 +84,7 @@ class Discount extends DiscountItem
      * @param bool $exclTax
      * @return float
      * @throws IllegalValueException
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public static function getAmount(
         WC_Cart $cart,
