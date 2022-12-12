@@ -42,6 +42,8 @@ if [ ! -f ./qa/bin/composer ]; then
   echo ""
 fi
 
+chmod +x ./qa/bin/composer
+
 echo ""
 echo ""
 echo "--==( Setting up git pre-commit hook )==--"
