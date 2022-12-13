@@ -1093,7 +1093,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         try {
             $customerType = WcSession::getCustomerType();
-        } catch (Throwable $wcSessionException) {
+        } catch (Throwable) {
             // Possible to-do: Make sure that defaults are set by available payment methods, not just NATURAL.
             // Normally, this is not a problem, since the merchant majority is of type LEGAL, so for now we're
             // good to go with this.

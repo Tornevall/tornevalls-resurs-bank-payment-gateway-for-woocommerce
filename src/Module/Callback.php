@@ -39,7 +39,7 @@ class Callback
     /**
      * Callback automation goes here.
      * @param CallbackType $callbackType
-     * @return bool
+     * @return void
      * @throws ApiException
      * @throws AuthException
      * @throws CallbackException
@@ -53,7 +53,7 @@ class Callback
      * @throws ReflectionException
      * @throws ValidationException
      */
-    public static function processCallback(CallbackType $callbackType): bool
+    public static function processCallback(CallbackType $callbackType): void
     {
         $callbackModel = self::getCallbackModel(callbackType: $callbackType);
         $paymentId = self::getOrderReferenceFromCallbackModel(callbackModel: $callbackModel);
@@ -74,7 +74,7 @@ class Callback
 
             $order = Database::getOrderByReference(orderReference: $paymentId);
 
-            return self::setWcOrderStatus(
+            self::setWcOrderStatus(
                 order: $order,
                 paymentId: $paymentId
             );
