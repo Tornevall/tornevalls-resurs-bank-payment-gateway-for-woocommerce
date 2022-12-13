@@ -33,6 +33,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment;
+use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use WC_Product;
@@ -77,7 +78,7 @@ class Module
             ),
             months: (int)Period::getData(),
             amount: (float)$product->get_price(),
-            currencySymbol: get_woocommerce_currency_symbol(),
+            currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: self::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
         );
@@ -90,7 +91,7 @@ class Module
      */
     public static function getEcomCurrencyFormat(): CurrencyFormat
     {
-        $wooFormat = get_woocommerce_price_format();
+        $wooFormat = Currency::getWooCommerceCurrencyFormat();
         if (preg_match(
             pattern: '/\%1\$s.*\%2\$s/',
             subject: $wooFormat

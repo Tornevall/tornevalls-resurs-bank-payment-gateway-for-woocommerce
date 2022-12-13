@@ -31,6 +31,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\PartPayment\Module;
+use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 
 /**
@@ -61,8 +62,9 @@ class PartPayment
             'css' => '',
             'html' => ''
         ];
-        $format = get_woocommerce_price_format();
-        $currencySymbol = get_woocommerce_currency_symbol();
+
+        $currencySymbol = Currency::getWooCommerceCurrencySymbol();
+
         if (isset($_GET['amount']) && is_numeric(value: $_GET['amount'])) {
             $amount = (float)$_GET['amount'];
             $widget = new \Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment(
