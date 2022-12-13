@@ -83,7 +83,6 @@ class PluginHooks
         add_action('mock_update_callback_exception', [$this, 'mockUpdateCallbackException']);
         add_action('mock_refund_exception', [$this, 'mockRefundException']);
         add_action('rbwc_update_order_status_by_queue', [$this, 'updateOrderStatusByQueue'], 10, 3);
-        add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
         add_action('woocommerce_order_status_completed', [$this, 'updateOrderStatusByCompletion'], 10, 3);
         add_action('woocommerce_order_refunded', [$this, 'refundResursOrder'], 10, 2);
         add_action('woocommerce_ajax_order_items_removed', [$this, 'removeOrderItemFromResurs'], 10, 4);
@@ -95,6 +94,10 @@ class PluginHooks
             'rbwc_mock_get_payment_method_namespace_exception',
             [$this, 'mockGetPaymentMethodNamespaceException']
         );
+
+        // @todo Adapt this to the new system. The code in updateOrderStatusByWooCommerce should not be used
+        // @todo in its current form.
+        //add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
     }
 
     /**
