@@ -36,7 +36,7 @@ class WcSession
      */
     private static function getWcSession(): void
     {
-        if (!(self::$wooCom instanceof WooCommerce)) {
+        if (!isset(self::$wooCom) || !(self::$wooCom instanceof WooCommerce)) {
             throw new RuntimeException(message: 'WooCommerce is not available.');
         }
 
