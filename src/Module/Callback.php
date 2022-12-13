@@ -61,9 +61,11 @@ class Callback
         if ($paymentId !== '') {
             Config::getLogger()->info(
                 message: sprintf(
-                    'Callback %s (status/action: %s).',
+                    'Callback %s (status/action: %s, id: %s).',
                     $callbackType->value,
-                    $callbackType === CallbackType::AUTHORIZATION ? $callbackModel->status->value : $callbackModel->action->value
+                    $callbackType === CallbackType::AUTHORIZATION ?
+                        $callbackModel->status->value : $callbackModel->action->value,
+                    $callbackType === CallbackType::MANAGEMENT ? $callbackModel->actionId : '-'
                 )
             );
             Config::getLogger()->info(

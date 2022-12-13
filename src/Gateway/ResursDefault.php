@@ -36,7 +36,6 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Lib\Utilities\Strings;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Application;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callback;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
@@ -65,7 +64,6 @@ use WC_Payment_Gateway;
 use WC_Product;
 use WC_Session_Handler;
 use WC_Tax;
-
 use function function_exists;
 use function in_array;
 use function is_object;
@@ -565,7 +563,8 @@ class ResursDefault extends WC_Payment_Gateway
                 addressRow2: $this->getCustomerData('address_2', $customerInfoFrom),
             ),
             customerType: $sessionCustomerType,
-            contactPerson: $this->getCustomerData('full_name', $customerInfoFrom),
+            contactPerson: $sessionCustomerType === CustomerType::LEGAL ?
+                $this->getCustomerData('full_name', $customerInfoFrom) : '',
             email: $this->getCustomerData('email'),
             governmentId: $governmentId,
             mobilePhone: $this->getCustomerData('mobile'),
@@ -1000,9 +999,9 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'totalVatAmount':
                 $return = wc_get_price_including_tax(
-                    $productObject,
-                    ['qty' => $wcProductItemData['quantity']]
-                ) - wc_get_price_excluding_tax(
+                        $productObject,
+                        ['qty' => $wcProductItemData['quantity']]
+                    ) - wc_get_price_excluding_tax(
                         $productObject,
                         ['qty' => $wcProductItemData['quantity']]
                     );
@@ -1310,7 +1309,6 @@ class ResursDefault extends WC_Payment_Gateway
                 paymentMethodId: $this->getPaymentMethod(),
                 orderLines: $this->getOrderLinesMapi(),
                 orderReference: $order->get_id(),
-                application: $this->getApplication(),
                 customer: $this->getCustomer(),
                 options: $this->getOptions($order)
             );
@@ -1352,18 +1350,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @return Application
-     * @todo Temporary solution, until MAPI stops require the Application block.
-     */
-    private function getApplication(): Application
-    {
-        return new Application(
-            requestedCreditLimit: null,
-            applicationData: null
-        );
-    }
-
-    /**
      * @param WC_Order $order
      * @return Options
      * @throws IllegalValueException
@@ -1375,7 +1361,7 @@ class ResursDefault extends WC_Payment_Gateway
         return new Options(
             initiatedOnCustomerDevice: true,
             handleManualInspection: false,
-            handleFrozenPayments: false,
+            handleFrozenPayments: true,
             redirectionUrls: new RedirectionUrls(
                 customer: new ParticipantRedirectionUrls(
                     failUrl: $this->getReturnUrl($order, result: 'failure'),
