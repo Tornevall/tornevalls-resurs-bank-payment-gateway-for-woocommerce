@@ -128,6 +128,8 @@ class ResursBankAPI
 
         WC()->initialize_session();
 
+        // @todo Loglevel error removed and points to the default (info) for now as it is used in the callback handler
+        // @todo for the moment. This should instead be configurable.
         Config::setup(
             logger: Advanced::getLogger(),
             cache: Advanced::getCache(),
