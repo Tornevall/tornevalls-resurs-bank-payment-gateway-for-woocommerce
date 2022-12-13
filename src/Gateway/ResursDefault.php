@@ -531,7 +531,15 @@ class ResursDefault extends WC_Payment_Gateway
     private function getCustomer(): Customer
     {
         $customerInfoFrom = isset($_REQUEST['ship_to_different_address']) ? 'shipping' : 'billing';
-        $sessionCustomerType = WcSession::getCustomerType();
+
+        try {
+            $sessionCustomerType = WcSession::getCustomerType();
+        } catch (Throwable) {
+            // Possible to-do: Make sure that defaults are set by available payment methods, not just NATURAL.
+            // Normally, this is not a problem, since the merchant majority is of type NATURAL, so for now we're
+            // good to go with this.
+            $sessionCustomerType = CustomerType::NATURAL;
+        }
 
         $governmentId = $sessionCustomerType === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
             $this->getCustomerData('applicant_government_id');

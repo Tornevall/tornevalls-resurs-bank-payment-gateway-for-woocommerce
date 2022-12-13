@@ -23,16 +23,14 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Models\Store;
-use Resursbank\Ecom\Module\Store\Models\StoreCollection;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use ResursBank\Module\Data;
 use ResursBank\Service\WordPress;
-use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\Environment;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Throwable;
 
 /**
  * API settings section.
@@ -49,8 +47,10 @@ class Api
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
-     * @return array[]
+     * @return array<array>
+     * @todo Refactor, method is too big. WOO-896. Remove phpcs:ignore when done.
      */
+    // phpcs:ignore
     public static function getSettings(): array
     {
         try {
@@ -60,16 +60,19 @@ class Api
                 'title' => 'Store ID',
                 'type' => 'select',
                 'default' => '',
-                'options' => $currentStoreOptions
+                'options' => $currentStoreOptions,
             ];
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $storeIdSetting = [
                 'id' => StoreId::getName(),
                 'title' => 'Store ID',
                 'type' => 'title',
                 'default' => '',
                 'desc_tip' => true,
-                'desc' => sprintf('Could not fetch stores from Resurs Bank: %s.', $e->getMessage())
+                'desc' => sprintf(
+                    'Could not fetch stores from Resurs Bank: %s.',
+                    $e->getMessage()
+                ),
             ];
         }
 
@@ -100,7 +103,10 @@ class Api
                 'environment' => [
                     'id' => Environment::getName(),
                     /* @phpstan-ignore-next-line */
-                    'title' => __('Environment', 'resurs-bank-payments-for-woocommerce'),
+                    'title' => __(
+                        'Environment',
+                        'resurs-bank-payments-for-woocommerce'
+                    ),
                     'type' => 'select',
                     'options' => [
                         /* @phpstan-ignore-next-line */
@@ -119,66 +125,18 @@ class Api
                     ],
                     'default' => 'test',
                 ],
-            ]
+            ],
         ];
-    }
-
-    /**
-     * Render an array with available stores for a merchant, based on their national store id as this is shorter
-     * than the full store uuid. The national id is a human-readable variant of the uuid.
-     * @return array
-     * @throws EmptyValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws CollectionException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @noinspection DuplicatedCode
-     */
-    private static function getStoreSelector(): array
-    {
-        $clientId = ClientId::getData();
-        $clientSecret = ClientSecret::getData();
-
-        // Default for multiple stores: Never putting merchants on the first available choice.
-        $return = [
-            '' => 'Select Store'
-        ];
-
-        if ($clientId !== '' && $clientSecret !== '') {
-            try {
-                /** @var Store $store */
-                foreach (StoreRepository::getStores() as $store) {
-                    $return[$store->id] = sprintf(
-                        '%s: %s',
-                        $store->nationalStoreId,
-                        $store->name
-                    );
-                }
-            } catch (Exception $e) {
-                // Log all errors in the admin panel regardless of where the exception comes from.
-                WordPress::setGenericError($e);
-                // Make sure we give the options array a chance to render an error instead of the fields so ensure
-                // the setting won't be saved by mistake when APIs are down.
-                throw $e;
-            }
-        }
-
-        return $return;
     }
 
     /**
      * @return Jwt|null
      * @throws Exception
      * @todo Use Enums and constants for scope / grant type. These should be declared in Ecom.
-     * @todo Fix credentials validation. See WOO-805 & ECP-206.
+     * @todo Fix credentials validation. See WOO-805 & ECP-206. Refactor as well, remove phpcs:ignore after.
      */
-    public static function getJwt(): Jwt|null
+    // phpcs:ignore
+    public static function getJwt(): ?Jwt
     {
         $result = null;
         $clientId = ClientId::getData();
@@ -194,13 +152,76 @@ class Api
                 clientId: ClientId::getData(),
                 clientSecret: ClientSecret::getData(),
                 scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
-                grantType: 'client_credentials',
+                grantType: 'client_credentials'
             );
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             // Handle all errors the same way, regardless of the cause.
-            WordPress::setGenericError($e);
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: $e->getMessage(),
+                    previous: $e
+                )
+            );
         }
 
         return $result;
+    }
+
+    /**
+     * Render an array with available stores for a merchant, based on their national store id as this is shorter
+     * than the full store uuid. The national id is a human-readable variant of the uuid.
+     *
+     * @return array
+     * @throws EmptyValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CollectionException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @phpcsSuppress
+     * @noinspection DuplicatedCode
+     * @todo Refactor, remove phpcs:ignore below after. WOO-894
+     */
+    // phpcs:ignore
+    private static function getStoreSelector(): array
+    {
+        $clientId = ClientId::getData();
+        $clientSecret = ClientSecret::getData();
+
+        // Default for multiple stores: Never putting merchants on the first available choice.
+        $return = [
+            '' => 'Select Store',
+        ];
+
+        if ($clientId !== '' && $clientSecret !== '') {
+            try {
+                /** @var Store $store */
+                foreach (StoreRepository::getStores() as $store) {
+                    $return[$store->id] = sprintf(
+                        '%s: %s',
+                        $store->nationalStoreId,
+                        $store->name
+                    );
+                }
+            } catch (Throwable $e) {
+                // Log all errors in the admin panel regardless of where the exception comes from.
+                WordPress::setGenericError(
+                    exception: new Exception(
+                        message: $e->getMessage(),
+                        previous: $e
+                    )
+                );
+                // Make sure we give the options array a chance to render an error instead of the fields so ensure
+                // the setting won't be saved by mistake when APIs are down.
+                throw $e;
+            }
+        }
+
+        return $return;
     }
 }
