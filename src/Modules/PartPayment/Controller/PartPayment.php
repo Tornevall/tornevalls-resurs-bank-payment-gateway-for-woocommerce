@@ -24,7 +24,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
@@ -87,7 +86,7 @@ class PartPayment
                 value: $response,
                 flags: JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR
             );
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return '';
         }
     }
