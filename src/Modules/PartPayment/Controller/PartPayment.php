@@ -12,7 +12,6 @@ namespace Resursbank\Woocommerce\Modules\PartPayment\Controller;
 use Exception;
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -63,16 +62,17 @@ class PartPayment
             'html' => ''
         ];
 
-        $currencySymbol = Currency::getWooCommerceCurrencySymbol();
+        $paymentMethod = Repository::getById(
+            storeId: StoreId::getData(),
+            paymentMethodId: PaymentMethod::getData()
+        );
 
-        if (isset($_GET['amount']) && is_numeric(value: $_GET['amount'])) {
+        if (isset($_GET['amount']) && is_numeric(value: $_GET['amount']) && $paymentMethod !== null) {
+            $currencySymbol = Currency::getWooCommerceCurrencySymbol();
             $amount = (float)$_GET['amount'];
             $widget = new \Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment(
                 storeId: StoreId::getData(),
-                paymentMethod: Repository::getById(
-                    storeId: StoreId::getData(),
-                    paymentMethodId: PaymentMethod::getData()
-                ),
+                paymentMethod: $paymentMethod,
                 months: (int)Period::getData(),
                 amount: (float)$amount,
                 currencySymbol: $currencySymbol,
