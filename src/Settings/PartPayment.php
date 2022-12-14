@@ -122,10 +122,7 @@ class PartPayment
         if (isset($paymentMethods)) {
             /** @var PaymentMethod $paymentMethod */
             foreach ($paymentMethods as $paymentMethod) {
-                if (
-                    $paymentMethod->type === Type::RESURS_PART_PAYMENT ||
-                    $paymentMethod->type === Type::RESURS_REVOLVING_CREDIT
-                ) {
+                if ($paymentMethod->isPartPayment()) {
                     $options[$paymentMethod->id] = $paymentMethod->name;
                 }
             }
