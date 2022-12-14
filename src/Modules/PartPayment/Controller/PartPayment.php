@@ -25,10 +25,13 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Modules\PartPayment\Module;
+use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 
 /**
@@ -59,6 +62,9 @@ class PartPayment
             'css' => '',
             'html' => ''
         ];
+
+        $currencySymbol = Currency::getWooCommerceCurrencySymbol();
+
         if (isset($_GET['amount']) && is_numeric(value: $_GET['amount'])) {
             $amount = (float)$_GET['amount'];
             $widget = new \Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment(
@@ -69,9 +75,11 @@ class PartPayment
                 ),
                 months: (int)Period::getData(),
                 amount: (float)$amount,
+                currencySymbol: $currencySymbol,
+                currencyFormat: Module::getEcomCurrencyFormat(),
                 apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
             );
-            $response['startingAt'] = $widget->getStartingAtCost();
+            $response['startingAt'] = $widget->getFormattedStartingAtCost();
         }
 
         try {
