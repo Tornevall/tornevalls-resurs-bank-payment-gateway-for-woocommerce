@@ -74,12 +74,12 @@ class PartPayment
                 storeId: StoreId::getData(),
                 paymentMethod: $paymentMethod,
                 months: (int)Period::getData(),
-                amount: (float)$amount,
+                amount: $amount,
                 currencySymbol: $currencySymbol,
                 currencyFormat: Module::getEcomCurrencyFormat(),
                 apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
             );
-            $response['startingAt'] = $widget->getFormattedStartingAtCost();
+            $response['startingAt'] = $widget->getStartingAt();
         }
 
         try {
