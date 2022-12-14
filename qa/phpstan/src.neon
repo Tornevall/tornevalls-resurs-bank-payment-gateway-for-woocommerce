@@ -30,4 +30,12 @@ parameters:
         -
             message: '#^Function add_post_meta not found\.$#'
         -
-            message: '#^Parameter \$order of method Resursbank\\Woocommerce\\Util\\Metadata::setOrderMeta\(\) has invalid type WC_Order\.$#'
+            message: '#^Parameter .+ has invalid type WC_.+\.$#'
+        -
+            message: '#^Class WC_.+ not found\.$#'
+        -
+            message: '#^Method .+ has invalid return type WC_.+\.$#'
+        -
+            message: '#^Function WC not found\.$#'
+        -
+            message: '#^Class WooCommerce not found\.$#'

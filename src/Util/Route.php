@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Throwable;
@@ -53,7 +54,7 @@ class Route
     {
         $route = (
             isset($_GET[self::ROUTE_PARAM]) &&
-            is_string($_GET[self::ROUTE_PARAM])
+            is_string(value: $_GET[self::ROUTE_PARAM])
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
         try {

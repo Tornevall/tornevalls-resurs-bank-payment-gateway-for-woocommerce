@@ -17,6 +17,7 @@ use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Route;
 use RuntimeException;
+use Throwable;
 use WP_Post;
 use function count;
 use function defined;
