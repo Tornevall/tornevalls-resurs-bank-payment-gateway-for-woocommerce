@@ -30,10 +30,12 @@ use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
+use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 
 /**
@@ -83,6 +85,11 @@ class PartPayment
                     'title'   => Translator::translate(phraseId: 'annuity-period'),
                     'type'    => 'select',
                     'options' => self::getAnnuityPeriods()
+                ],
+                'limit' => [
+                    'id' => Limit::getName(),
+                    'title' => Translator::translate(phraseId: 'limit'),
+                    'type' => 'text'
                 ]
             ]
         ];
