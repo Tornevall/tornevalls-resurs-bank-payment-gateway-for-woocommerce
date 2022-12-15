@@ -8,7 +8,6 @@
 
 namespace ResursBank\Gateway;
 
-use Error;
 use Exception;
 use JsonException;
 use ReflectionException;
@@ -45,14 +44,15 @@ use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
 use ResursBank\Module\FormFields;
+use ResursBank\Module\OrderStatus;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderHandler;
-use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
 use RuntimeException;
@@ -83,48 +83,6 @@ use function uniqid;
  */
 class ResursDefault extends WC_Payment_Gateway
 {
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const STATUS_FINALIZED = 'completed';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const STATUS_BOOKED = 'processing';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const STATUS_FROZEN = 'on-hold';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const STATUS_SIGNING = 'on-hold';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const STATUS_DENIED = 'failed';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const STATUS_FAILED = 'failed';
-
-    /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const STATUS_CANCELLED = 'cancelled';
-
     /**
      * This prefix is used for various parts of the settings by WooCommerce,
      * for example, as an ID for these settings, and as a prefix for the values
@@ -449,6 +407,39 @@ class ResursDefault extends WC_Payment_Gateway
     {
         if (Enabled::isEnabled()) {
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
+            // Using woocomerce_thankyou rather than woocommerce_thankyou_<id> as we run dynamic methods.
+            add_action('woocommerce_thankyou', array($this, 'setOrderStatusOnThankYouSuccess'));
+        }
+    }
+
+    /**
+     * Handle the landing-page from within the payment method gateway as the "thank you page" is very much
+     * a dynamic request. It either depends on the payment method (uuid) through the "thank_you_<id>" action or
+     * the single action ("thank_you", which is what we use), that is just firing thank-you's with the current order id.
+     *
+     * @param $order_id
+     * @return void
+     * @throws ConfigException
+     */
+    public function setOrderStatusOnThankYouSuccess($order_id = null): void
+    {
+        try {
+            $order = new WC_Order($order_id);
+            $resursReference = Metadata::getOrderMeta(order: $order, metaDataKey: 'order_reference');
+            $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(order: $order, metaDataKey: 'thankyou_trigger');
+            if ($thankYouTriggerCheck || $resursReference === '') {
+                // Not ours or already triggered.
+                return;
+            }
+            // Record that customer landed on the thank-you page once, so we don't have to run
+            // twice if page is reloaded.
+            Metadata::setOrderMeta(order: $order, metaDataKey: 'thankyou_trigger', metaDataValue: '1');
+            // This visually marks a proper customer return, from an external source.
+            $order->add_order_note(note: 'Customer returned from external source.');
+            OrderStatus::setWcOrderStatus(order: $order, paymentId: $resursReference);
+        } catch (Throwable $e) {
+            // Nothing happens here, except for logging.
+            Config::getLogger()->error(message: $e);
         }
     }
 
@@ -1244,7 +1235,6 @@ class ResursDefault extends WC_Payment_Gateway
                 Data::setOrderMeta($order, 'paymentMethodInformation', json_encode($paymentMethodInformation));
             }
         }
-        $this->setOrderCheckoutMeta($order_id);
         // Used by WooCommerce from class-wc-checkout.php to identify the payment method.
         $order->set_payment_method(Data::getPaymentMethodBySession());
 
@@ -1328,7 +1318,7 @@ class ResursDefault extends WC_Payment_Gateway
             // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
             Metadata::setOrderMeta(
                 order: $order,
-                metaDataKey: ResursDefault::PREFIX . '_order_reference',
+                metaDataKey: 'order_reference',
                 metaDataValue: $paymentResponse->id
             );
         } catch (Exception $createPaymentException) {
@@ -1390,6 +1380,7 @@ class ResursDefault extends WC_Payment_Gateway
      *
      * @param CallbackType $callbackType
      * @return string
+     * @throws IllegalValueException
      */
     private function getCallbackUrl(CallbackType $callbackType): string
     {
@@ -1446,7 +1437,7 @@ class ResursDefault extends WC_Payment_Gateway
 
             // Callback will respond and exit.
             try {
-                // The way we handle callback now do not require a boolean the same way as before. Instead, we will
+                // The way we handle callbacks now do not require a boolean the same way as before. Instead, we will
                 // just handle exceptions as errors.
                 CallbackModule::processCallback(
                     callbackType: CallbackType::from(
@@ -1454,73 +1445,23 @@ class ResursDefault extends WC_Payment_Gateway
                     )
                 );
                 $response['success'] = true;
-            } catch (Error|Exception $e) {
+            } catch (Throwable $e) {
                 Config::getLogger()->error($e);
                 $response['message'] = $e->getMessage();
             }
 
-            // @todo We used $responseController to reply with JSON before. Since we need a customized response code
-            // @todo this must be fixed again.
-            header(header: 'Content-Type: application/json', response_code: $response['success'] ? 202 : 408);
-            // Human-readable content included.
-            echo json_encode($response);
+            $responseCode = $response['success'] ? 202 : 408;
+
+            Config::getLogger()->info(message: 'Callback response, code ' . ($response['success'] ? 202 : 408) . '.');
+            Config::getLogger()->info(message: print_r($response, return: true));
+
+            Route::respond(
+                body: json_encode($response),
+                code: $responseCode
+            );
         }
 
         exit;
-    }
-
-    /**
-     * Get API data from session.
-     *
-     * @param $apiRequestContent
-     * @param $requestArray
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     * @todo Clarify what this actually do, and sanitize the data when added.
-     */
-    private function getSessionApiData($apiRequestContent, $requestArray)
-    {
-        foreach ($requestArray as $itemKey => $fromItemKey) {
-            $sessionValue = WooCommerce::getSessionValue($fromItemKey);
-            if ((!empty($sessionValue) && !isset($apiRequestContent[$itemKey])) ||
-                empty($apiRequestContent[$itemKey])
-            ) {
-                $apiRequestContent[$itemKey] = $sessionValue;
-            }
-        }
-        return $apiRequestContent;
-    }
-
-    /**
-     * Prepare the API data to be sent, by merging it here. Destination is normally any.
-     *
-     * @param $apiArray
-     * @return $this
-     * @since 0.0.1.0
-     */
-    private function setApiData($apiArray): self
-    {
-        $this->apiData = array_merge($this->apiData, $apiArray);
-        return $this;
-    }
-
-    /**
-     * @return WC_Order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function getCurrentOrder(): WC_Order
-    {
-        $return = new WC_Order($this->getApiValue('wc_order_id'));
-
-        // Woocommerce flag here, to make sure things happens the way woocommerce want it.
-        $awaitingOrderId = WooCommerce::getSessionValue('order_awaiting_payment');
-        if ($awaitingOrderId && !$return->get_id()) {
-            $return = new WC_Order($awaitingOrderId);
-        }
-
-        return $return;
     }
 
     /**
@@ -1534,51 +1475,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         // If key is empty or not found, return the whole set.
         return (string)isset($this->apiData[$key]) ? $this->apiData[$key] : $this->apiData;
-    }
-
-    /**
-     * Very much self explained.
-     * @param $woocommerceStatus
-     * @param $statusNotification
-     * @throws Exception
-     * @since 0.0.1.0
-     * @todo Make sure this works with MAPI. Also make sure that we take height for $this->>order->payment_complete.
-     */
-    private function updateOrderStatus($woocommerceStatus, $statusNotification)
-    {
-        Data::setDeveloperLog(
-            __FUNCTION__,
-            sprintf('Status: %s, Message: %s', $woocommerceStatus, $statusNotification)
-        );
-
-        if ($woocommerceStatus === self::STATUS_FINALIZED) {
-            $this->order->payment_complete();
-            WooCommerce::setOrderNote(
-                $this->order,
-                $statusNotification
-            );
-        } else {
-            $currentOrderStatus = $this->order->get_status();
-            if ($currentOrderStatus !== $woocommerceStatus) {
-                OrderStatus::setOrderStatusByQueue($this->order);
-            } else {
-                $orderStatusUpdateNotice = __(
-                    sprintf(
-                        '%s notice: Request to set order to status "%s" but current status is already set.',
-                        __FUNCTION__,
-                        $woocommerceStatus
-                    ),
-                    'resurs-bank-payments-for-woocommerce'
-                );
-                WooCommerce::setOrderNote(
-                    $this->order,
-                    $orderStatusUpdateNotice
-                );
-                Data::writeLogNotice($orderStatusUpdateNotice);
-            }
-        }
-
-        $this->order->save();
     }
 
     /**

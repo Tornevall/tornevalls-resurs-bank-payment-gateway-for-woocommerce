@@ -956,48 +956,6 @@ class FormFields extends WC_Settings_API
     }
 
     /**
-     * @param $formData
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getFieldButton($formData)
-    {
-        (new self())->getFieldButtonApi($formData);
-    }
-
-    /**
-     * @param $formData
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public function getFieldButtonApi($formData)
-    {
-        $action = isset($formData['action']) && !empty($formData['action']) ? $formData['action'] : 'button';
-
-        $allowedFormData = [
-            Data::getPrefix('admin_payment_methods_button'),
-            Data::getPrefix('admin_callbacks_button'),
-            Data::getPrefix('admin_trigger_callback_button'),
-            Data::getPrefix('admin_the_reset_button'),
-            Data::getPrefix('admin_reset_former_plugin_settings'),
-        ];
-
-        if (isset($formData['id']) && in_array($formData['id'], $allowedFormData, true)) {
-            $formArray = $formData;
-            $formArray['action'] = $action; // Our action
-            $formArray['custom_attributes'] = $this->get_custom_attribute_html($formData);
-            $formArray['columns'] = [
-                'the_reset_button' => true,
-                'reset_former_plugin_settings' => true
-            ];
-            $formArray['short_id'] = preg_replace(sprintf('/%s_admin_/', Data::getPrefix()), '', $formArray['id']);
-            echo Data::getEscapedHtml(
-                Data::getGenericClass()->getTemplate('adminpage_button', $formArray)
-            );
-        }
-    }
-
-    /**
      * Filter based addon.
      * Do not use getResursOption in this request as this may cause infinite loops.
      *

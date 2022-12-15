@@ -7,21 +7,15 @@
 namespace ResursBank\Service;
 
 use Exception;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Lib\Cache\Filesystem;
-use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
-use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
-use ResursBank\Module\FormFields;
+use ResursBank\Module\OrderStatus as OrderStatusHandler;
 use ResursBank\Module\PluginHooks;
 use ResursBank\Module\ResursBankAPI;
-use ResursBank\Service\OrderStatus as OrderStatusHandler;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings;
 use ResursException;
@@ -30,7 +24,6 @@ use stdClass;
 use WC_Order;
 use WC_Product;
 use WC_Tax;
-
 use function count;
 use function func_get_args;
 use function in_array;

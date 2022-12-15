@@ -18,6 +18,7 @@ use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
+use Resursbank\Woocommerce\Util\Metadata;
 use WC_Cart;
 use WC_Coupon;
 use WC_Order;
