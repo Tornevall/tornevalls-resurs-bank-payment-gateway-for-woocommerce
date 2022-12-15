@@ -93,18 +93,6 @@ class Module
     }
 
     /**
-     * Indicates whether widget should be visible or not
-     *
-     * @return bool
-     */
-    private function visible(): bool
-    {
-        return Enabled::isEnabled() &&
-               is_numeric(value: Limit::getData()) &&
-               Limit::getData() <= $this->instance->getAmount();
-    }
-
-    /**
      *
      *
      * @return CurrencyFormat
