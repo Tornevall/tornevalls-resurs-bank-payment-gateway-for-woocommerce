@@ -29,6 +29,7 @@ use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Database\Options\StoreId;
@@ -79,15 +80,29 @@ class Module
             throw new IllegalTypeException(message: 'Payment method is null');
         }
 
+        $this->amount = (float)$product->get_price();
+
         $this->instance = new PartPayment(
             storeId: StoreId::getData(),
             paymentMethod: $paymentMethod,
             months: (int)Period::getData(),
-            amount: (float)$product->get_price(),
+            amount: $this->amount,
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: self::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
         );
+    }
+
+    /**
+     * Indicates whether widget should be visible or not
+     *
+     * @return bool
+     */
+    private function visible(): bool
+    {
+        return Enabled::isEnabled() &&
+               is_numeric(value: Limit::getData()) &&
+               Limit::getData() <= $this->instance->getAmount();
     }
 
     /**
@@ -119,7 +134,18 @@ class Module
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
-                echo Data::getEscapedHtml($widget->instance->content);
+                if ($widget->visible()) {
+                    $filtered = apply_filters(
+                        hook_name: 'resursbank_partpayment_widget_display',
+                        value: Data::getEscapedHtml($widget->instance->content)
+                    );
+
+                    if (is_string(value: $filtered)) {
+                        echo $filtered;
+                    } else {
+                        throw new IllegalTypeException(message: 'Filtered widget is no longer a string');
+                    }
+                }
             } catch (Exception $exception) {
                 Config::getLogger()->error(message: $exception);
             }
@@ -137,7 +163,17 @@ class Module
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
-                echo '<style id="rb-pp-styles">' . $widget->instance->css . '</style>';
+                if ($widget->visible()) {
+                    $filtered = apply_filters(
+                        hook_name: 'resursbank_partpayment_css_display',
+                        value: '<style id="rb-pp-styles">' . $widget->instance->css . '</style>'
+                    );
+                    if (is_string(value: $filtered)) {
+                        echo $filtered;
+                    } else {
+                        throw new IllegalTypeException(message: 'Filtered CSS is no longer a string');
+                    }
+                }
             } catch (Exception $exception) {
                 Config::getLogger()->error(message: $exception);
             }
@@ -155,25 +191,26 @@ class Module
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
-
-                /** @psalm-suppress UndefinedConstant */
-                $url = Url::getPluginUrl(
-                    path: RESURSBANK_MODULE_DIR_NAME . '/js',
-                    file: 'js/resursbank_partpayment.js'
-                );
-                wp_enqueue_script(
-                    handle: 'partpayment-script',
-                    src: $url,
-                    deps: ['jquery']
-                );
-                wp_add_inline_script(
-                    handle: 'partpayment-script',
-                    data: $widget->instance->js
-                );
-                add_action(
-                    'wp_enqueue_scripts',
-                    'partpayment-script'
-                );
+                if ($widget->visible()) {
+                    /** @psalm-suppress UndefinedConstant */
+                    $url = Url::getPluginUrl(
+                        path: RESURSBANK_MODULE_DIR_NAME . '/js',
+                        file: 'js/resursbank_partpayment.js'
+                    );
+                    wp_enqueue_script(
+                        handle: 'partpayment-script',
+                        src: $url,
+                        deps: ['jquery']
+                    );
+                    wp_add_inline_script(
+                        handle: 'partpayment-script',
+                        data: $widget->instance->js
+                    );
+                    add_action(
+                        'wp_enqueue_scripts',
+                        'partpayment-script'
+                    );
+                }
             } catch (Exception $exception) {
                 Config::getLogger()->error(message: $exception);
             }
