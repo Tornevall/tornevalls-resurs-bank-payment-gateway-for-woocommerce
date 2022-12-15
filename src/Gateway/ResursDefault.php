@@ -1452,8 +1452,8 @@ class ResursDefault extends WC_Payment_Gateway
 
             $responseCode = $response['success'] ? 202 : 408;
 
-            Config::getLogger()->info(message: 'Callback response, code ' . ($response['success'] ? 202 : 408) . '.');
-            Config::getLogger()->info(message: print_r($response, return: true));
+            Config::getLogger()->debug(message: 'Callback response, code ' . ($response['success'] ? 202 : 408) . '.');
+            Config::getLogger()->debug(message: print_r($response, return: true));
 
             Route::respond(
                 body: json_encode($response),
