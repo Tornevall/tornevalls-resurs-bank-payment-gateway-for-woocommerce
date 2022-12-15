@@ -119,7 +119,16 @@ class Module
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
-                echo Data::getEscapedHtml($widget->instance->content);
+                $filtered = apply_filters(
+                    hook_name: 'resursbank_partpayment_widget_display',
+                    value: Data::getEscapedHtml($widget->instance->content)
+                );
+
+                if (is_string(value: $filtered)) {
+                    echo $filtered;
+                } else {
+                    throw new IllegalTypeException(message: 'Filtered widget is no longer a string');
+                }
             } catch (Exception $exception) {
                 Config::getLogger()->error(message: $exception);
             }
@@ -137,7 +146,15 @@ class Module
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
-                echo '<style id="rb-pp-styles">' . $widget->instance->css . '</style>';
+                $filtered = apply_filters(
+                    hook_name: 'resursbank_partpayment_css_display',
+                    value: '<style id="rb-pp-styles">' . $widget->instance->css . '</style>'
+                );
+                if (is_string(value: $filtered)) {
+                    echo $filtered;
+                } else {
+                    throw new IllegalTypeException(message: 'Filtered CSS is no longer a string');
+                }
             } catch (Exception $exception) {
                 Config::getLogger()->error(message: $exception);
             }
