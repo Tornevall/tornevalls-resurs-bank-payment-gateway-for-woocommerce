@@ -554,7 +554,8 @@ class ResursDefault extends WC_Payment_Gateway
                 addressRow2: $this->getCustomerData('address_2', $customerInfoFrom),
             ),
             customerType: $sessionCustomerType,
-            contactPerson: $this->getCustomerData('full_name', $customerInfoFrom),
+            contactPerson: $sessionCustomerType === CustomerType::LEGAL ?
+                $this->getCustomerData('full_name', $customerInfoFrom) : '',
             email: $this->getCustomerData('email'),
             governmentId: $governmentId,
             mobilePhone: $this->getCustomerData('mobile'),
