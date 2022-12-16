@@ -36,7 +36,12 @@ class WcSession
      */
     private static function getWcSession(): void
     {
-        if (!isset(self::$wooCom) || !(self::$wooCom instanceof WooCommerce)) {
+        /**
+         * Psalm warns about the isset-check, but without this check, we get fatal errors when not set.
+         * @psalm-suppress RedundantCondition
+         * @psalm-suppress RedundantPropertyInitializationCheck
+         */
+        if (isset(self::$wooCom) && !(self::$wooCom instanceof WooCommerce)) {
             throw new RuntimeException(message: 'WooCommerce is not available.');
         }
 
@@ -45,7 +50,7 @@ class WcSession
         /**
          * @psalm-suppress MixedPropertyFetch
          */
-        if (isset(self::$wooCom) && (!self::$wooCom->session instanceof WC_Session_Handler)) {
+        if (!self::$wooCom->session instanceof WC_Session_Handler) {
             throw new RuntimeException(message: 'WC()->session is not available.');
         }
     }

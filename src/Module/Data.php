@@ -2486,23 +2486,24 @@ class Data
     }
 
     /**
-     * @param $key
-     * @param $post_data
+     * @param string $key
+     * @param array|null $wpPostData Data sent from WP/WC (and by default is based on unparsed uri-looking strings).
      * @return mixed
      * @throws Exception
-     * @since 0.0.1.1
+     * @todo Move this to a more appropriate place (Url?), fix proper support for native _GET and solve some weird
+     * @todo if-cases.
      */
-    public static function getRequest($key, $post_data = null)
+    public static function getRequest(string $key, array|null $wpPostData = null): mixed
     {
-        if (is_array($post_data)) {
-            $requestArray = $post_data;
+        if (is_array($wpPostData)) {
+            $requestArray = $wpPostData;
         } else {
             $requestArray = $_REQUEST;
         }
         $request = self::getSanitizedRequest($requestArray);
         $return = $request[$key] ?? null;
 
-        if ($return === null && (bool)$post_data && isset($_REQUEST['post_data'])) {
+        if ($return === null && (bool)$wpPostData && isset($_REQUEST['post_data'])) {
             parse_str($_REQUEST['post_data'], $newPostData);
             if (is_array($newPostData)) {
                 // Early sanitizing should not apply here as we are strict typing some of the values.

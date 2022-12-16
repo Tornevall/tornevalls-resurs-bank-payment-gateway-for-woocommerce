@@ -25,6 +25,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Database\Options\StoreId;
@@ -69,7 +70,7 @@ class PartPayment
         if (isset($_GET['amount']) && is_numeric(value: $_GET['amount']) && $paymentMethod !== null) {
             $currencySymbol = Currency::getWooCommerceCurrencySymbol();
             $amount = (float)$_GET['amount'];
-            $widget = new \Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment(
+            $widget = new PartPaymentWidget(
                 storeId: StoreId::getData(),
                 paymentMethod: $paymentMethod,
                 months: (int)Period::getData(),
