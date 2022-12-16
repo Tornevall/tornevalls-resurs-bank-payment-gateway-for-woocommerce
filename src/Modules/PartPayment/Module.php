@@ -79,11 +79,13 @@ class Module
             throw new IllegalTypeException(message: 'Payment method is null');
         }
 
+        $this->amount = (float)$product->get_price();
+
         $this->instance = new PartPayment(
             storeId: StoreId::getData(),
             paymentMethod: $paymentMethod,
             months: (int)Period::getData(),
-            amount: (float)$product->get_price(),
+            amount: $this->amount,
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: self::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
@@ -172,7 +174,6 @@ class Module
         if (is_product() && Enabled::isEnabled()) {
             try {
                 $widget = new self();
-
                 /** @psalm-suppress UndefinedConstant */
                 $url = Url::getPluginUrl(
                     path: RESURSBANK_MODULE_DIR_NAME . '/js',

@@ -24,7 +24,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
@@ -80,7 +79,7 @@ class PartPayment
                 currencyFormat: Module::getEcomCurrencyFormat(),
                 apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
             );
-            $response['startingAt'] = $widget->getFormattedStartingAtCost();
+            $response['startingAt'] = $widget->getStartingAt();
         }
 
         try {
@@ -88,7 +87,7 @@ class PartPayment
                 value: $response,
                 flags: JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR
             );
-        } catch (Exception $exception) {
+        } catch (Exception) {
             return '';
         }
     }
