@@ -46,6 +46,7 @@ class WcSession
         }
 
         self::$wooCom = WC();
+        self::$wooCom->initialize_session();
 
         /**
          * @psalm-suppress MixedPropertyFetch
