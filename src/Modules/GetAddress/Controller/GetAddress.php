@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Modules\GetAddress\Controller;
 use Exception;
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
@@ -26,6 +27,7 @@ use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Util\WcSession;
+use Throwable;
 
 /**
  * Controller to fetch address content.
@@ -51,8 +53,8 @@ class GetAddress
         $controller = new GetAddressController();
         $requestData = $controller->getRequestData();
 
-        $ecomSession = new Session();
         try {
+            $ecomSession = new Session();
             WcSession::set(
                 $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
                 $requestData->govId
@@ -61,13 +63,15 @@ class GetAddress
                 $ecomSession->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE),
                 $requestData->customerType->value
             );
-        } catch (Exception) {
+            $return = $controller->exec(
+                storeId: StoreId::getData(),
+                data: $requestData
+            );
+        } catch (Throwable $e) {
             // Do nothing.
+            Config::getLogger()->error($e);
         }
 
-        return $controller->exec(
-            storeId: StoreId::getData(),
-            data: $requestData
-        );
+        return $return ?? '{}';
     }
 }
