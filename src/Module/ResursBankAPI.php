@@ -592,17 +592,6 @@ class ResursBankAPI
     }
 
     /**
-     * @param $checkoutType
-     * @throws Exception
-     * @since 0.0.1.0
-     * @todo Flow selecting for simplified / RCO.
-     */
-    public function setCheckoutType($checkoutType)
-    {
-        //$this->getConnection()->setPreferredPaymentFlowService($checkoutType);
-    }
-
-    /**
      * @return string
      * @throws Exception
      * @since 0.0.1.0

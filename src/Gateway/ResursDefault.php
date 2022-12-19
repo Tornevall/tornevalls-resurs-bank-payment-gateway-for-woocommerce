@@ -43,7 +43,6 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Redirecti
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
-use ResursBank\Module\FormFields;
 use ResursBank\Module\OrderStatus;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\OrderHandler;
@@ -1202,17 +1201,6 @@ class ResursDefault extends WC_Payment_Gateway
     public static function isInternalMethod($paymentMethod): bool
     {
         return isset($paymentMethod->type) && str_starts_with($paymentMethod->type, 'RESURS_');
-    }
-
-    /**
-     * @param $fieldName
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private function getDisplayableField($fieldName): bool
-    {
-        return !(Data::getResursOption('streamline_payment_fields') ||
-            !FormFields::canDisplayField($fieldName));
     }
 
     /**

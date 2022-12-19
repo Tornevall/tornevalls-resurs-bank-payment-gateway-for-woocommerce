@@ -1,6 +1,6 @@
 === Resurs Bank Payments for WooCommerce ===
 Contributors: Tornevall
-Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, resurs checkout, checkout, RCO, hosted, simplified, hosted flow, simplified flow
+Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, checkout, hosted, simplified, hosted flow, simplified flow
 Requires at least: 5.5
 Tested up to: 6.0
 Requires PHP: 7.4
@@ -26,7 +26,6 @@ Resurs Bank official repo for this plugin is now set to https://bitbucket.org/re
 = Supported shop flows =
 
 * [Merchant REST API](https://test.resurs.com/docs/display/ecom/Merchant+API). This is the new "simplified shop flow", rest based and entirely developed without SOAP/XML.
-* [Resurs Checkout Plus](https://test.resurs.com/docs/display/ecom/Resurs+Checkout+Web). The payment solution is embedded in the checkout as an iframe. Releases that will be supported is **RCOv2 and lates**.
 
 There is a publicly available release out supported by Resurs Bank (v2.2) that will continue to live until Resurs is closing the old API engines or if you are unable to upgrade instantly. - this plugin will get its own repository at WordPress when it is ready to be released. The reason is that ther will **be too many breaking changes** due to several things.
 

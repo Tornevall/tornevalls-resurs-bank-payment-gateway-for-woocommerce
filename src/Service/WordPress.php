@@ -120,7 +120,6 @@ class WordPress
             'reset_old_plugin_settings',
             'update_payment_method_description',
             'update_payment_method_fee',
-            'resurs_bank_rco_synchronize',
             'set_method_state',
         ];
 
@@ -202,15 +201,10 @@ class WordPress
         add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         add_action('wp_ajax_' . $action, '\ResursBank\Module\PluginApi::execApi');
-        add_action('wp_ajax_nopriv_' . $action, '\ResursBank\Module\PluginApi::execApiNoPriv');
-        add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
-        add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
-        add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
         add_action(
             'woocommerce_single_product_summary',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
         );
-        add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
     }
 
@@ -698,12 +692,6 @@ class WordPress
         $return['noncify'] = self::getNonce('admin');
         $return['environment'] = Config::isProduction() ? 'prod' : 'test';
         $return['wsdl'] = ResursBankAPI::getWsdlMode();
-        $return['translate_checkout_rco'] = __(
-            'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
-            'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
-            'at the endpoint of Resurs Bank.',
-            'resurs-bank-payments-for-woocommerce'
-        );
         $return['translate_checkout_simplified'] = __(
             'The integrated checkout (also known as the "simplified shop flow") is a direct integration with ' .
             'WooCommerce which uses intended APIs to interact with your customers while finishing the orders.',
