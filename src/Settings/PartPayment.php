@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Exception;
-use JetBrains\PhpStorm\ArrayShape;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -30,7 +29,6 @@ use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
-use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
@@ -48,11 +46,7 @@ class PartPayment
 
     /**
      * @return array[]
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
      * @throws ConfigException
-     * @throws CurlException
      * @throws EmptyValueException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -99,17 +93,6 @@ class PartPayment
      * Fetch available payment method options
      *
      * @return array
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
      */
     private static function getPaymentMethods(): array
     {
@@ -145,19 +128,13 @@ class PartPayment
      * Fetch annuity period options for configured payment method
      *
      * @return array
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
      * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
      * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
      * @throws FilesystemException
      * @throws TranslationException
+     * @throws JsonException
      */
     private static function getAnnuityPeriods(): array
     {
@@ -188,5 +165,91 @@ class PartPayment
         }
 
         return $return;
+    }
+
+    /**
+     * Validate Limit setting and show error messages if the user hasn't configured the widget correctly
+     *
+     * @param mixed $option
+     * @param mixed $old
+     * @param mixed $new
+     *
+     * @return void
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @todo Look into moving this logic into Ecom for re-use
+     */
+    public static function validateLimit(mixed $option, mixed $old, mixed $new): void
+    {
+        if ($option === Limit::getName()) {
+            $paymentMethodId = PaymentMethodOption::getData();
+            $storeId = StoreId::getData();
+            $period = Period::getData();
+            if (empty($storeId)) {
+                WordPress::setGenericError(
+                    exception: new Exception(message: Translator::translate(phraseId: 'limit-missing-store-id'))
+                );
+                return;
+            }
+            if (empty($paymentMethodId)) {
+                WordPress::setGenericError(
+                    exception: new Exception(message: Translator::translate(phraseId: 'limit-missing-payment-method'))
+                );
+                return;
+            }
+            if (empty($period)) {
+                WordPress::setGenericError(
+                    exception: new Exception(message: Translator::translate(phraseId: 'limit-missing-period'))
+                );
+                return;
+            }
+
+            $paymentMethod = Repository::getById(
+                storeId: $storeId,
+                paymentMethodId: $paymentMethodId
+            );
+
+            if ($paymentMethod === null) {
+                WordPress::setGenericError(
+                    exception: new Exception(
+                        message: Translator::translate(phraseId: 'limit-failed-to-load-payment-method')
+                    )
+                );
+                return;
+            }
+
+            $maxLimit = $paymentMethod->maxPurchaseLimit;
+
+            //if ($old !== $new) {
+            if (!is_numeric(value: $new)) {
+                WordPress::setGenericError(
+                    exception: new Exception(message: Translator::translate(phraseId: 'limit-new-value-not-numeric'))
+                );
+            } elseif($new < 0) {
+                WordPress::setGenericError(
+                    exception: new Exception(message: Translator::translate(phraseId: 'limit-new-value-not-positive'))
+                );
+            } elseif ($new > $maxLimit) {
+                WordPress::setGenericError(
+                    exception: new Exception(
+                        message: str_replace(
+                            search: '%1',
+                            replace: (string)$maxLimit,
+                            subject: Translator::translate(phraseId: 'limit-new-value-above-max'))
+                    )
+                );
+            }
+        }
     }
 }

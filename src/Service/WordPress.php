@@ -212,6 +212,7 @@ class WordPress
             'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
         );
         add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
+        add_action('updated_option', 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
     }
 
