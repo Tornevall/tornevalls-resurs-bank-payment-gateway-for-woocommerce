@@ -164,8 +164,7 @@ class PartPayment
         if (isset($annuityFactors)) {
             /** @var AnnuityInformation $annuityFactor */
             foreach ($annuityFactors->content as $annuityFactor) {
-                $return[$annuityFactor->durationInMonths] = $annuityFactor->durationInMonths . ' ' .
-                                                            Translator::translate(phraseId: 'months');
+                $return[$annuityFactor->durationInMonths] = $annuityFactor->paymentPlanName;
             }
         }
 
