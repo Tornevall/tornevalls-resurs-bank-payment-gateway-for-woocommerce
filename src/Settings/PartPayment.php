@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Exception;
-use JetBrains\PhpStorm\ArrayShape;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -26,7 +25,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
@@ -122,10 +120,7 @@ class PartPayment
         if (isset($paymentMethods)) {
             /** @var PaymentMethod $paymentMethod */
             foreach ($paymentMethods as $paymentMethod) {
-                if (
-                    $paymentMethod->type === Type::RESURS_PART_PAYMENT ||
-                    $paymentMethod->type === Type::RESURS_REVOLVING_CREDIT
-                ) {
+                if ($paymentMethod->isPartPayment()) {
                     $options[$paymentMethod->id] = $paymentMethod->name;
                 }
             }
@@ -138,14 +133,8 @@ class PartPayment
      * Fetch annuity period options for configured payment method
      *
      * @return array
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
      * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
      * @throws IllegalTypeException
-     * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
