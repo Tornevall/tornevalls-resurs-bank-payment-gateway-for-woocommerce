@@ -25,11 +25,8 @@ use Resursbank\Ecom\Lib\Model\Callback\Authorization;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Callback\Management;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
-use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
-use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use ResursBank\Exception\CallbackException;
 use Resursbank\Woocommerce\Util\Database;
-use WC_Order;
 
 /**
  * Callback handling by automation.
@@ -59,28 +56,36 @@ class Callback
         $paymentId = self::getOrderReferenceFromCallbackModel(callbackModel: $callbackModel);
 
         if ($paymentId !== '') {
-            Config::getLogger()->info(
-                message: sprintf(
-                    'Callback %s (status/action: %s, trace: %s).',
-                    $callbackType->value,
-                    $callbackType === CallbackType::AUTHORIZATION ?
-                        $callbackModel->status->value : $callbackModel->action->value,
-                    $callbackType === CallbackType::MANAGEMENT ? $callbackModel->actionId : '-'
-                )
-            );
-            Config::getLogger()->info(
-                file_get_contents('php://input')
-            );
-
             $order = Database::getOrderByReference(orderReference: $paymentId);
+            $callbackNote = sprintf(
+                'Callback %s, for payment %s (order %s) received. Status/action: %s, trace: %s.',
+                $callbackType->value,
+                $paymentId,
+                $order->get_id(),
+                $callbackType === CallbackType::AUTHORIZATION ?
+                    $callbackModel->status->value : $callbackModel->action->value,
+                $callbackType === CallbackType::MANAGEMENT ? $callbackModel->actionId : '-'
+            );
 
-            self::setWcOrderStatus(
+            Config::getLogger()->info(
+                message: $callbackNote
+            );
+            Config::getLogger()->info(
+                message: file_get_contents(filename: 'php://input')
+            );
+
+            // Order should be marked as callback-handled to simplify everything further.
+            $order->add_order_note(note: $callbackNote);
+
+            OrderStatus::setWcOrderStatus(
                 order: $order,
                 paymentId: $paymentId
             );
+
+            return;
         }
 
-        throw new CallbackException(message: 'Could not handle callback.', code: 408);
+        throw new CallbackException(message: 'Callback request parameters is incomplete or missing.', code: 408);
     }
 
     /**
@@ -93,7 +98,8 @@ class Callback
     private static function getCallbackModel(CallbackType $callbackType): Authorization|Management
     {
         return match ($callbackType) {
-            CallbackType::AUTHORIZATION => (new AuthorizationController())->getRequestModel(model: Authorization::class),
+            CallbackType::AUTHORIZATION =>
+            (new AuthorizationController())->getRequestModel(model: Authorization::class),
             CallbackType::MANAGEMENT => (new AuthorizationController())->getRequestModel(model: Management::class),
         };
     }
@@ -107,43 +113,5 @@ class Callback
     private static function getOrderReferenceFromCallbackModel(Authorization|Management $callbackModel): string
     {
         return $callbackModel->paymentId;
-    }
-
-    /**
-     * @param WC_Order $order
-     * @param string $paymentId
-     * @return bool
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @noinspection PhpUnhandledExceptionInspection
-     */
-    private static function setWcOrderStatus(WC_Order $order, string $paymentId): bool
-    {
-        // Try-catch should not be placed here, as any exceptions will be caught at the json-response level.
-        $resursPayment = PaymentRepository::get(paymentId: $paymentId);
-
-        if (!$order->has_status(status: ['on-hold', 'processing', 'completed', 'cancelled'])) {
-            $return = match ($resursPayment->status) {
-                PaymentStatus::ACCEPTED => $order->payment_complete(),
-                PaymentStatus::REJECTED => $order->update_status(
-                    new_status: 'failed',
-                    note: 'Payment rejected by Resurs.'
-                ),
-                default => $order->update_status(
-                    new_status: 'on-hold',
-                    note: 'Payment is waiting for more information from Resurs.'
-                ),
-            };
-        }
-
-        return $return ?? false;
     }
 }

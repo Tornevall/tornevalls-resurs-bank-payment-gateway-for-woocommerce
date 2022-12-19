@@ -61,7 +61,9 @@ class Product
     }
 
     /**
-     * @param array<int, array<string, float>> $args
+     * @param WC_Product $product
+     * @param array $args
+     * @return float
      * @throws IllegalValueException
      */
     public static function getPriceIncludingTax(

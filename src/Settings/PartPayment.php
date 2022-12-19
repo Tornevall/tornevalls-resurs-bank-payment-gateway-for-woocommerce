@@ -25,7 +25,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
@@ -112,10 +111,7 @@ class PartPayment
         if (isset($paymentMethods)) {
             /** @var PaymentMethod $paymentMethod */
             foreach ($paymentMethods as $paymentMethod) {
-                if (
-                    $paymentMethod->type === Type::RESURS_PART_PAYMENT ||
-                    $paymentMethod->type === Type::RESURS_REVOLVING_CREDIT
-                ) {
+                if ($paymentMethod->isPartPayment()) {
                     $options[$paymentMethod->id] = $paymentMethod->name;
                 }
             }
@@ -130,6 +126,7 @@ class PartPayment
      * @return array
      * @throws ConfigException
      * @throws IllegalTypeException
+     * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
      * @throws FilesystemException
@@ -231,7 +228,6 @@ class PartPayment
 
             $maxLimit = $paymentMethod->maxPurchaseLimit;
 
-            //if ($old !== $new) {
             if (!is_numeric(value: $new)) {
                 WordPress::setGenericError(
                     exception: new Exception(message: Translator::translate(phraseId: 'limit-new-value-not-numeric'))

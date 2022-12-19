@@ -12,9 +12,7 @@ use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecommerce\Types\CheckoutType;
-use ResursBank\Gateway\ResursDefault;
 use Resursbank\RBEcomPHP\ResursBank;
-use ResursBank\Service\OrderStatus;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use RuntimeException;
@@ -25,7 +23,6 @@ use WC_Order_Item_Product;
 use WC_Order_Refund;
 use WC_Product;
 use WC_Tax;
-
 use function count;
 use function in_array;
 use function is_array;

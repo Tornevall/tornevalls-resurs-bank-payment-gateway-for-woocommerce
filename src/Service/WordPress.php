@@ -203,7 +203,6 @@ class WordPress
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         add_action('wp_ajax_' . $action, '\ResursBank\Module\PluginApi::execApi');
         add_action('wp_ajax_nopriv_' . $action, '\ResursBank\Module\PluginApi::execApiNoPriv');
-        add_action('woocommerce_admin_field_button', '\ResursBank\Module\FormFields::getFieldButton', 10, 2);
         add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
         add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
         add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
