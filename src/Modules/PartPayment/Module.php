@@ -80,13 +80,11 @@ class Module
             throw new IllegalTypeException(message: 'Payment method is null');
         }
 
-        $this->amount = (float)$product->get_price();
-
         $this->instance = new PartPayment(
             storeId: StoreId::getData(),
             paymentMethod: $paymentMethod,
             months: (int)Period::getData(),
-            amount: $this->amount,
+            amount: (float)$product->get_price(),
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: self::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
