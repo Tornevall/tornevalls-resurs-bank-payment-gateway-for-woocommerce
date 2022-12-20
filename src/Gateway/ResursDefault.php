@@ -43,16 +43,17 @@ use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
 use ResursBank\Module\OrderStatus;
 use ResursBank\Module\ResursBankAPI;
-use ResursBank\Service\OrderHandler;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
 use RuntimeException;
+use stdClass;
 use Throwable;
 use WC_Cart;
 use WC_Order;
@@ -556,65 +557,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * @param OrderLineType $orderLineType
-     * @param WC_Product $productData
-     * @param array $wcProductItem Product item details from WooCommerce, contains the extended data that can't be found in WC_Product.
-     * @return OrderLine
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
-     */
-    public function getProductRow(
-        OrderLineType $orderLineType,
-        WC_Product $productData,
-        array $wcProductItem
-    ): OrderLine {
-        return new OrderLine(
-            quantity: $wcProductItem['quantity'],
-            quantityUnit: $this->getFromProduct(
-                getValueType: 'quantityUnit',
-                productObject: $productData,
-                wcProductItemData: $wcProductItem
-            ),
-            vatRate: $this->getFromProduct(
-                getValueType: 'vatRate',
-                productObject: $productData,
-                wcProductItemData: $wcProductItem
-            ),
-            totalAmountIncludingVat: $this->getFromProduct(
-                getValueType: 'totalAmountIncludingVat',
-                productObject: $productData,
-                wcProductItemData: $wcProductItem
-            ),
-            description: $this->getFromProduct(
-                getValueType: 'title',
-                productObject: $productData,
-                wcProductItemData: $wcProductItem
-            ),
-            reference: $this->getFromProduct(
-                getValueType: 'reference',
-                productObject: $productData,
-                wcProductItemData: $wcProductItem
-            ),
-            type: $orderLineType,
-            unitAmountIncludingVat: $this->getFromProduct(
-                getValueType: 'unitAmountIncludingVat',
-                productObject: $productData,
-                wcProductItemData: $wcProductItem
-            ),
-            totalVatAmount: $this->getFromProduct(
-                getValueType: 'totalVatAmount',
-                productObject: $productData,
-                wcProductItemData: $wcProductItem
-            )
-        );
-    }
-
-    /**
      * Add an order line that is not based on pre-defined product data.
      *
      * @param OrderLineType $orderLineType
@@ -999,7 +941,7 @@ class ResursDefault extends WC_Payment_Gateway
             $paymentResponse = PaymentRepository::create(
                 storeId: StoreId::getData(),
                 paymentMethodId: $this->getPaymentMethod(),
-                orderLines: $this->getOrderLinesMapi(),
+                orderLines: Cart::getOrderLines(),
                 orderReference: $order->get_id(),
                 customer: $this->getCustomer(),
                 options: $this->getOptions($order)
@@ -1164,22 +1106,5 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         exit;
-    }
-
-    /**
-     * @return OrderLineCollection
-     * @throws IllegalTypeException
-     */
-    private function getOrderLinesMapi(): OrderLineCollection
-    {
-        if (WooCommerce::getValidCart()) {
-            $orderHandler = new OrderHandler();
-            return $orderHandler->getOrderLines();
-        }
-
-        // todo: Translate this via ecom2.
-        throw new RuntimeException(
-            __('Cart is currently unavailable.')
-        );
     }
 }
