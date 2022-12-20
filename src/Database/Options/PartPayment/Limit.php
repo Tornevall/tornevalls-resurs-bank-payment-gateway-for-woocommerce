@@ -9,12 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options\PartPayment;
 
-use Resursbank\Woocommerce\Database\StringOption;
+use Resursbank\Woocommerce\Database\IntOption;
 
 /**
  * Setting for the duration to be used by the part payment widget.
  */
-class Limit extends StringOption
+class Limit extends IntOption
 {
     /**
      * @inheritdoc

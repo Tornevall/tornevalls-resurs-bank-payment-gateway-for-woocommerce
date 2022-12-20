@@ -227,11 +227,7 @@ class PartPayment
 
             $maxLimit = $paymentMethod->maxPurchaseLimit;
 
-            if (!is_numeric(value: $new)) {
-                WordPress::setGenericError(
-                    exception: new Exception(message: Translator::translate(phraseId: 'limit-new-value-not-numeric'))
-                );
-            } elseif($new < 0) {
+            if($new < 0) {
                 WordPress::setGenericError(
                     exception: new Exception(message: Translator::translate(phraseId: 'limit-new-value-not-positive'))
                 );

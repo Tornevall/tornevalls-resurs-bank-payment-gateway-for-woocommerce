@@ -99,7 +99,6 @@ class Module
     private function visible(): bool
     {
         return Enabled::isEnabled() &&
-               is_numeric(value: Limit::getData()) &&
                Limit::getData() <= $this->instance->getAmount();
     }
 
