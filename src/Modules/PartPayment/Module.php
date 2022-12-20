@@ -139,7 +139,7 @@ class Module
                     );
 
                     if (is_string(value: $filtered)) {
-                        echo $filtered;
+                        echo Data::getEscapedHtml($filtered);
                     } else {
                         throw new IllegalTypeException(message: 'Filtered widget is no longer a string');
                     }
@@ -167,7 +167,7 @@ class Module
                         value: '<style id="rb-pp-styles">' . $widget->instance->css . '</style>'
                     );
                     if (is_string(value: $filtered)) {
-                        echo $filtered;
+                        echo Data::getEscapedHtml($filtered);
                     } else {
                         throw new IllegalTypeException(message: 'Filtered CSS is no longer a string');
                     }
