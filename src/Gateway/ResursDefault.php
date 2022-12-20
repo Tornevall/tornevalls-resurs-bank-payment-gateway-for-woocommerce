@@ -91,6 +91,11 @@ class ResursDefault extends WC_Payment_Gateway
     public const PREFIX = 'resursbank';
 
     /**
+     * Default identifier for this gateway.
+     */
+    public const TITLE = 'Resurs Bank AB';
+
+    /**
      * @var WC_Order $order
      * @since 0.0.1.0
      */
@@ -171,8 +176,10 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function initializePaymentMethod(?PaymentMethod $paymentMethod = null): void
     {
-        // Required: Making sure that woocommerce content is available. Like the cart.
-        global $woocommerce;
+        /** @noinspection SpellCheckingInspection */
+        // It is required to check for any existing orders ($theorder) here since the gateway is also
+        // used from within the order view. Also, $woocommerce is required as WC is storing the cart from there.
+        global $woocommerce, $theorder;
 
         // Validate a cart if present and put it in the class, so that it can be used for the payment
         // later on. If there is no customer cart, it exists as a nullable in $woocommerce.
@@ -185,10 +192,17 @@ class ResursDefault extends WC_Payment_Gateway
         // as a checkout method. The used id below is in such cases instead transformed into UUID's (MAPI).
         $this->id = 'resursbank';
 
+        // Used when the order is already created and there is no payment method data present on
+        // initialization. This indicates that the gateway is not intended to be used in a checkout
+        // and therefore should have its payment method id available instead of the default gateway id.
+        if (!isset($paymentMethod) && isset($theorder) && $theorder->get_payment_method()) {
+            $this->id = $theorder->get_payment_method();
+        }
+
         // The values for title and description is also changed when payment-methods from Resurs is used.
         $this->method_title = 'Resurs Bank AB';
         $this->method_description = 'Resurs Bank Gateway';
-        $this->title = 'Resurs Bank AB';
+        $this->title = self::TITLE;
 
         // Default state for the gateway. If this is disabled, the payment method will be disabled as well.
         // This setting no longer controls the payment method state since the payment methods are normally
@@ -507,7 +521,24 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function get_title(): string
     {
-        return parent::get_title();
+        /**
+         * @noinspection SpellCheckingInspection
+         */
+        // WC Global. Required for parts of this method.
+        global $theorder;
+
+        $return = parent::get_title();
+
+        // Use defaults if no order exists (this method is used on several places).
+        if (!isset($theorder) || (!($theorder instanceof WC_Order))) {
+            return $return;
+        }
+
+        if (parent::get_title() === ResursDefault::TITLE) {
+            $return = $theorder->get_payment_method_title();
+        }
+
+        return $return;
     }
 
     /**
