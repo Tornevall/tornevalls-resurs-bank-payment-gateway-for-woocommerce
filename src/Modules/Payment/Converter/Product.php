@@ -130,7 +130,7 @@ class Product
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return array<array-key, mixed>
      * @throws IllegalValueException
      */
     public static function getTaxRates(string $taxClass): array

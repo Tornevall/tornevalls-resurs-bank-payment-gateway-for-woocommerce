@@ -33,9 +33,10 @@ use function is_float;
 class Discount extends DiscountItem
 {
     /**
-     * Get MAPI orderLine from WooCommerce coupons.
+     * Get MAPI orderLine from WooCommerce coupons
+     * @param WC_Cart $cart
      *
-     * @return array<int, OrderLine>
+     * @return array
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -63,8 +64,9 @@ class Discount extends DiscountItem
 
     /**
      * Wrapper to safely retrieve applied coupons.
+     * @param WC_Cart $cart
      *
-     * @return array<int, WC_Coupon>
+     * @return array
      * @throws IllegalValueException
      */
     public static function getCoupons(WC_Cart $cart): array

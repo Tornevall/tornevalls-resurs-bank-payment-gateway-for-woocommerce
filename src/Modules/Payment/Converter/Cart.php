@@ -95,7 +95,7 @@ class Cart
     /**
      * Wrapper to safely resolve cart contents.
      *
-     * @return array<int, mixed>
+     * @return array<array-key, mixed>
      * @throws IllegalValueException
      */
     public static function getCartContents(WC_Cart $cart): array
