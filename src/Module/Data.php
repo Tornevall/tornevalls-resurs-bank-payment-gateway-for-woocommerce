@@ -118,12 +118,6 @@ class Data
     ];
 
     /**
-     * @var WPUtils $wordpressUtils
-     * @since 0.0.1.0
-     */
-    private static $wordpressUtils;
-
-    /**
      * @var array $jsDependenciesAdmin
      * @since 0.0.1.0
      */
@@ -545,33 +539,6 @@ class Data
             (new ResursBankAPI())->getCredentialString(),
             $paymentMethod
         );
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @param $paymentMethod
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function setPaymentMethodSetting(string $key, $value, $paymentMethod)
-    {
-        $rturn = false;
-
-        if (!empty($paymentMethod)) {
-            $settings = self::getPaymentMethodSettings($paymentMethod);
-            $settings[$key] = $value;
-            $return = Data::setResursOption(
-                sprintf(
-                    '%s_settings',
-                    self::getPaymentMethodNameSpace($paymentMethod)
-                ),
-                $settings
-            );
-        }
-
-        return $return;
     }
 
     /**
