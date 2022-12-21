@@ -328,11 +328,12 @@ class Data
 
     /**
      * @return bool
+     * @throws ConfigException
      * @since 0.0.1.0
      */
     public static function isTest(): bool
     {
-        return Environment::getData() === 'test';
+        return !Config::isProduction();
     }
 
     /**

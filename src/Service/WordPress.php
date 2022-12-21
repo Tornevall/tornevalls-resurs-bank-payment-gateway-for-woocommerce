@@ -330,7 +330,7 @@ class WordPress
      * @param Exception $exception
      * @since 0.0.1.4
      */
-    public static function setGenericError(Exception $exception)
+    public static function setGenericError(Throwable $exception)
     {
         if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
             $_SESSION[Data::getPrefix()]['exception'] = [];
