@@ -12,8 +12,11 @@ use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use RuntimeException;
+use WC_Order;
+use WP_Post;
 use function count;
 use function defined;
 use function func_get_args;
@@ -201,30 +204,37 @@ class WordPress
 
     /**
      * Order data meta box for Resurs.
-     * @since 0.0.1.7
      */
-    public static function getMetaBoxes()
+    public static function getMetaBoxes(): void
     {
-        $screen = get_current_screen();
-        $screen_id = $screen ? $screen->id : '';
+        global $post;
 
-        if ($screen_id === 'shop_order') {
-            add_meta_box(
-                'resursbank_orderinfo',
-                sprintf(
-                    __('%s order information', 'resurs-bank-payments-for-woocommerce'),
-                    'Resurs'
-                ),
-                'ResursBank\Module\OrderMetaBox::output_order'
-            );
-            add_meta_box(
-                'resursbank_order_meta_details',
-                sprintf(
-                    __('%s order meta data', 'resurs-bank-payments-for-woocommerce'),
-                    'Resurs'
-                ),
-                'ResursBank\Module\OrderMetaBox::output_meta_details'
-            );
+        // Validate the order as a Resurs belonging before starting to throw meta-boxes at the order.
+        if (isset($post) &&
+            $post instanceof WP_Post &&
+            Metadata::isValidResursPayment(order: new WC_Order($post->ID))
+        ) {
+            $screen = get_current_screen();
+            $screen_id = $screen ? $screen->id : '';
+
+            if ($screen_id === 'shop_order') {
+                add_meta_box(
+                    'resursbank_orderinfo',
+                    sprintf(
+                        __('%s order information', 'resurs-bank-payments-for-woocommerce'),
+                        'Resurs'
+                    ),
+                    'ResursBank\Module\OrderMetaBox::output_order'
+                );
+                add_meta_box(
+                    'resursbank_order_meta_details',
+                    sprintf(
+                        __('%s order meta data', 'resurs-bank-payments-for-woocommerce'),
+                        'Resurs'
+                    ),
+                    'ResursBank\Module\OrderMetaBox::output_meta_details'
+                );
+            }
         }
     }
 
