@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\PartPayment\Controller;
 
-use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -32,6 +31,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\PartPayment\Module;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
+use Throwable;
 
 /**
  * AJAX controller for the Part payment widget
@@ -39,7 +39,6 @@ use Resursbank\Woocommerce\Util\Route;
 class PartPayment
 {
     /**
-     * @return string
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
@@ -59,7 +58,7 @@ class PartPayment
     {
         $response = [
             'css' => '',
-            'html' => ''
+            'html' => '',
         ];
 
         $paymentMethod = Repository::getById(
@@ -67,7 +66,11 @@ class PartPayment
             paymentMethodId: PaymentMethod::getData()
         );
 
-        if (isset($_GET['amount']) && is_numeric(value: $_GET['amount']) && $paymentMethod !== null) {
+        if (
+            isset($_GET['amount']) &&
+            is_numeric(value: $_GET['amount']) &&
+            $paymentMethod !== null
+        ) {
             $currencySymbol = Currency::getWooCommerceCurrencySymbol();
             $amount = (float)$_GET['amount'];
             $widget = new PartPaymentWidget(
@@ -87,7 +90,7 @@ class PartPayment
                 value: $response,
                 flags: JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR
             );
-        } catch (Exception) {
+        } catch (Throwable) {
             return '';
         }
     }

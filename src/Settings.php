@@ -17,9 +17,9 @@ use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
+use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Throwable;
-use Resursbank\Woocommerce\Settings\PartPayment;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
@@ -73,7 +73,6 @@ class Settings extends WC_Settings_Page
      *
      * This method is called by WordPress actions registered in our constructor.
      *
-     * @return void
      * @see self::__construct()
      * @noinspection PhpMissingParentCallCommonInspection
      */
@@ -100,14 +99,13 @@ class Settings extends WC_Settings_Page
             Api::SECTION_ID => Api::SECTION_TITLE,
             PaymentMethods::SECTION_ID => PaymentMethods::SECTION_TITLE,
             Advanced::SECTION_ID => Advanced::SECTION_TITLE,
-            PartPayment::SECTION_ID => PartPayment::SECTION_TITLE
+            PartPayment::SECTION_ID => PartPayment::SECTION_TITLE,
         ];
     }
 
     /**
      * Outputs the HTML for the current tab section.
      *
-     * @return void
      * @throws ConfigException
      * @phpcsSuppress
      * @SuppressWarnings(PHPMD.ElseExpression)

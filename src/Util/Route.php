@@ -13,9 +13,9 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
-use Throwable;
-use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
+use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
+use Throwable;
 
 use function is_string;
 use function str_contains;
@@ -47,7 +47,6 @@ class Route
     public const ROUTE_PART_PAYMENT_ADMIN = 'part-payment-admin';
 
     /**
-     * @return void
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function exec(): void
@@ -62,12 +61,15 @@ class Route
                 case self::ROUTE_GET_ADDRESS:
                     self::respond(body: GetAddress::exec());
                     break;
+
                 case self::ROUTE_PART_PAYMENT:
                     self::respond(body: PartPayment::exec());
                     break;
+
                 case self::ROUTE_PART_PAYMENT_ADMIN:
                     self::respond(body: GetValidDurations::exec());
                     break;
+
                 default:
                     break;
             }
@@ -79,8 +81,6 @@ class Route
     /**
      * Resolve full URL.
      *
-     * @param string $route
-     * @return string
      * @throws HttpException|IllegalValueException
      */
     public static function getUrl(
@@ -104,10 +104,6 @@ class Route
 
     /**
      * Echo JSON response.
-     *
-     * @param string $body
-     * @param int $code
-     * @return void
      */
     public static function respond(
         string $body,
@@ -120,10 +116,6 @@ class Route
         echo $body;
     }
 
-    /**
-     * @param Throwable $exception
-     * @return void
-     */
     public static function respondWithError(
         Throwable $exception
     ): void {

@@ -25,9 +25,7 @@ class Url
     /**
      * Helper to get script file from sub-module resource directory.
      *
-     * @param string $module
      * @param string $file | File path relative to resources dir.
-     * @return string
      */
     public static function getScriptUrl(
         string $module,
@@ -35,16 +33,13 @@ class Url
     ): string {
         // NOTE: plugin_dir_url returns everything up to the last slash.
         return plugin_dir_url(
-                file: RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/" .
+            file: RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/" .
                       str_replace(search: '/', replace: '', subject: $file)
-            ) . $file;
+        ) . $file;
     }
 
     /**
      * Returns URL for a "lib/ecom" file.
-     *
-     * @param string $path
-     * @return string
      */
     public static function getEcomUrl(
         string $path
@@ -57,9 +52,7 @@ class Url
     /**
      * Generate a URL for a given endpoint, with a list of arguments.
      *
-     * @param string $baseUrl
      * @param array $arguments
-     * @return string
      * @throws IllegalValueException
      */
     public static function getQueryArg(string $baseUrl, array $arguments): string
@@ -92,9 +85,6 @@ class Url
 
     /**
      * Returns the URL of the given path.
-     *
-     * @param string $path
-     * @return string
      */
     public static function getUrl(
         string $path
@@ -128,10 +118,6 @@ class Url
 
     /**
      * Wrapper for `plugin_dir_url()` that ensures that we get a string back.
-     *
-     * @param string $path
-     * @param string $file
-     * @return string
      */
     public static function getPluginUrl(
         string $path,

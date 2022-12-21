@@ -130,7 +130,6 @@ class Api
     }
 
     /**
-     * @return Jwt|null
      * @throws Exception
      * @todo Use Enums and constants for scope / grant type. These should be declared in Ecom.
      * @todo Fix credentials validation. See WOO-805 & ECP-206. Refactor as well, remove phpcs:ignore after.

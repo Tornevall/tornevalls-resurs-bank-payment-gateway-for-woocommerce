@@ -23,7 +23,6 @@ use Throwable;
 class Checkout
 {
     /**
-     * @return void
      * @todo Refactor, method is too big. WOO-895. Remove phpcs:ignore when done.
      */
     // phpcs:ignore
@@ -36,7 +35,7 @@ class Checkout
 
         add_action(
             'wp_enqueue_scripts',
-            static function () {
+            static function (): void {
                 wp_enqueue_script(
                     handle: 'rb-get-address',
                     src: Url::getScriptUrl(
@@ -58,8 +57,6 @@ class Checkout
     /**
      * Renders and returns the content of the widget that fetches the customer
      * address.
-     *
-     * @return void
      */
     public static function exec(): void
     {
