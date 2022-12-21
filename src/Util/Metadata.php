@@ -60,4 +60,14 @@ class Metadata
             single: true
         );
     }
+
+    /**
+     * Check if current order is a valid Resurs Payment.
+     * @param WC_Order $order
+     * @return bool
+     */
+    public static function isValidResursPayment(WC_Order $order): bool
+    {
+        return Metadata::getOrderMeta(order: $order, metaDataKey: 'order_reference') !== '';
+    }
 }

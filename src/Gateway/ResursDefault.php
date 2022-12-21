@@ -86,18 +86,17 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * This prefix is used for various parts of the settings by WooCommerce,
      * for example, as an ID for these settings, and as a prefix for the values
-     * in the database.
+     * in the database. The prefix is also used as an identifier for this gateway.
      */
     public const PREFIX = 'resursbank';
 
     /**
-     * Default identifier for this gateway.
+     * Default identifier title for this gateway.
      */
     public const TITLE = 'Resurs Bank AB';
 
     /**
      * @var WC_Order $order
-     * @since 0.0.1.0
      */
     protected WC_Order $order;
 
@@ -147,9 +146,9 @@ class ResursDefault extends WC_Payment_Gateway
     private string $apiDataId = '';
     /**
      * This instance payment method from Resurs Bank.
-     * @var PaymentMethod $paymentMethodInformation
+     * @var PaymentMethod|null $paymentMethodInformation
      */
-    private PaymentMethod $paymentMethodInformation;
+    private ?PaymentMethod $paymentMethodInformation = null;
 
     /**
      * ResursDefault constructor.
@@ -157,12 +156,52 @@ class ResursDefault extends WC_Payment_Gateway
      * @param PaymentMethod|null $resursPaymentMethod Making sure the gateway is reachable even if initialization has failed.
      * @throws Exception
      * @noinspection ParameterDefaultValueIsNotNullInspection
-     * @since 0.0.1.0
      */
     public function __construct(
         public readonly ?PaymentMethod $resursPaymentMethod = null
     ) {
-        $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
+        // id must always exist regardless.
+        $this->id = $this->getProperGatewayId($resursPaymentMethod);
+
+        // Do not initialize the rest of the gateway if there is no payment method to initialize with.
+        if ($this->canInitializeGateway($this->resursPaymentMethod)) {
+            $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
+        }
+    }
+
+    /**
+     * Special feature that tells us when we are good to go with the payment method initialization.
+     * @param PaymentMethod|null $resursPaymentMethod
+     * @return bool
+     */
+    private function canInitializeGateway(?PaymentMethod $resursPaymentMethod = null): bool
+    {
+        /** @noinspection SpellCheckingInspection */
+        global $theorder;
+
+        // Init gateway can occur either when PaymentMethod is not null or when an order exists
+        // for which has been created with this gateway.
+        return $resursPaymentMethod instanceof PaymentMethod ||
+            (isset($theorder) && $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder));
+    }
+
+    /**
+     * @param PaymentMethod|null $resursPaymentMethod
+     * @return string
+     */
+    private function getProperGatewayId(?PaymentMethod $resursPaymentMethod = null): string
+    {
+        /** @noinspection SpellCheckingInspection */
+        global $theorder;
+
+        // If no PaymentMethod is set at this point, but instead an order, the gateway is considered not
+        // located in the checkout but in a maintenance state (like wp-admin/order). In this case, we
+        // need to identify the current order as created with Resurs payments. Since WooCommerce is using
+        // the gateway id to identify the current payment method, we also need to change the intial id
+        // to they payment uuid that was used when the order was created.
+        return !isset($resursPaymentMethod) && isset($theorder) && (
+            $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder)
+        ) ? $theorder->get_payment_method() : self::PREFIX;
     }
 
     /**
@@ -179,24 +218,12 @@ class ResursDefault extends WC_Payment_Gateway
         /** @noinspection SpellCheckingInspection */
         // It is required to check for any existing orders ($theorder) here since the gateway is also
         // used from within the order view. Also, $woocommerce is required as WC is storing the cart from there.
-        global $woocommerce, $theorder;
+        global $woocommerce;
 
         // Validate a cart if present and put it in the class, so that it can be used for the payment
         // later on. If there is no customer cart, it exists as a nullable in $woocommerce.
         if ($woocommerce->cart instanceof WC_Cart) {
             $this->cart = $woocommerce->cart;
-        }
-
-        // Below is initial default preparations for the gateway, which is normally used to show up in wp-admin
-        // When this class is initialized with a proper $paymentMethod, we can instead use it to set up the gateway
-        // as a checkout method. The used id below is in such cases instead transformed into UUID's (MAPI).
-        $this->id = 'resursbank';
-
-        // Used when the order is already created and there is no payment method data present on
-        // initialization. This indicates that the gateway is not intended to be used in a checkout
-        // and therefore should have its payment method id available instead of the default gateway id.
-        if (!isset($paymentMethod) && isset($theorder) && $theorder->get_payment_method()) {
-            $this->id = $theorder->get_payment_method();
         }
 
         // The values for title and description is also changed when payment-methods from Resurs is used.
@@ -522,6 +549,7 @@ class ResursDefault extends WC_Payment_Gateway
     public function get_title(): string
     {
         /**
+         * $theorder is the correct naming convention according to WC, no spell checking needed.
          * @noinspection SpellCheckingInspection
          */
         // WC Global. Required for parts of this method.
@@ -529,12 +557,19 @@ class ResursDefault extends WC_Payment_Gateway
 
         $return = parent::get_title();
 
-        // Use defaults if no order exists (this method is used on several places).
-        if (!isset($theorder) || (!($theorder instanceof WC_Order))) {
+        if (!isset($theorder)) {
             return $return;
         }
 
-        if (parent::get_title() === ResursDefault::TITLE) {
+        // Use defaults if no order exists (this method is used on several places).
+        if (!($theorder instanceof WC_Order) || !MetaData::isValidResursPayment($theorder)) {
+            return $return;
+        }
+
+        // Since this part of the mechanism in wc-order-view is executed on all orders
+        // including those that are not created with Resurs, we need to make sure that
+        // we only touch orders that belong to us.
+        if (MetaData::isValidResursPayment($theorder)) {
             $return = $theorder->get_payment_method_title();
         }
 
@@ -1089,7 +1124,7 @@ class ResursDefault extends WC_Payment_Gateway
         global $woocommerce;
 
         // If the payment method information is not initialized properly, it should be not in use.
-        if (!isset($this->paymentMethodInformation) || !$this->paymentMethodInformation instanceof PaymentMethod) {
+        if (!isset($this->paymentMethodInformation)) {
             return false;
         }
 
