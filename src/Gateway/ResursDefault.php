@@ -176,8 +176,8 @@ class ResursDefault extends WC_Payment_Gateway
         // If no PaymentMethod is set at this point, but instead an order, the gateway is considered not
         // located in the checkout but in a maintenance state (like wp-admin/order). In this case, we
         // need to identify the current order as created with Resurs payments. Since WooCommerce is using
-        // the gateway id to identify the current payment method, we also need to change the intial id
-        // to they payment uuid that was used when the order was created.
+        // the gateway id to identify the current payment method, we also need to adapt into the initial
+        // id (uuid) that was used when the order was created.
         return !isset($resursPaymentMethod) && isset($theorder) && (
             $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder)
         ) ? $theorder->get_payment_method() : self::PREFIX;
