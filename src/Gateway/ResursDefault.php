@@ -163,7 +163,8 @@ class ResursDefault extends WC_Payment_Gateway
         // id must always exist regardless.
         $this->id = $this->getProperGatewayId($resursPaymentMethod);
 
-        // Do not initialize the rest of the gateway if there is no payment method to initialize with.
+        // Do not initialize the rest of the gateway if there is no payment method (or order) to initialize with.
+        // See canInitializeGateway for further details.
         if ($this->canInitializeGateway($this->resursPaymentMethod)) {
             $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
         }
@@ -568,7 +569,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         // Since this part of the mechanism in wc-order-view is executed on all orders
         // including those that are not created with Resurs, we need to make sure that
-        // we only touch orders that belong to us.
+        // we only touch orders that belong to us before changing the returned output.
         if (MetaData::isValidResursPayment($theorder)) {
             $return = $theorder->get_payment_method_title();
         }
