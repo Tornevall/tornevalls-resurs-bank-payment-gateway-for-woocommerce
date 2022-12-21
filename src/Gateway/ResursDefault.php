@@ -194,9 +194,6 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function initializePaymentMethod(?PaymentMethod $paymentMethod = null): void
     {
-        /** @noinspection SpellCheckingInspection */
-        // It is required to check for any existing orders ($theorder) here since the gateway is also
-        // used from within the order view. Also, $woocommerce is required as WC is storing the cart from there.
         global $woocommerce;
 
         // Validate a cart if present and put it in the class, so that it can be used for the payment
