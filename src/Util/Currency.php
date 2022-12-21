@@ -16,7 +16,6 @@ class Currency
 {
     /**
      * Simple wrapper for get_woocommerce_currency_symbol to ensure we always get a string (even it is empty).
-     * @return string
      */
     public static function getWooCommerceCurrencySymbol(): string
     {

@@ -18,14 +18,12 @@ class Admin
 {
     /**
      * Wrapper for is_admin to ensure we never get exceptions/error thrown.
-     *
-     * @return bool
      */
     public static function isAdmin(): bool
     {
         try {
             return (bool)(is_admin() ?? false);
-        } catch (Throwable $error) {
+        } catch (Throwable) {
             return false;
         }
     }

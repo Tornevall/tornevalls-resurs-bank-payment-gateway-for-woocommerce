@@ -53,8 +53,6 @@ class PaymentMethods
     /**
      * Outputs a template string of a table with listed payment methods.
      *
-     * @param string $storeId
-     * @return string
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException

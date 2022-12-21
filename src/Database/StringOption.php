@@ -16,9 +16,6 @@ use function is_string;
  */
 class StringOption extends Option
 {
-    /**
-     * @return string
-     */
     public static function getData(): string
     {
         $result = parent::getData();

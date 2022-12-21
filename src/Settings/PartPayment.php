@@ -26,14 +26,15 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
-use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
+use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Throwable;
 
 /**
  * Generates the settings form for the Part payment module
@@ -44,7 +45,7 @@ class PartPayment
     public const SECTION_TITLE = 'Part payment';
 
     /**
-     * @return array[]
+     * @return array<array>
      * @throws ConfigException
      * @throws EmptyValueException
      * @throws FilesystemException
@@ -59,33 +60,141 @@ class PartPayment
     {
         return [
             self::SECTION_ID => [
-                'title'          => self::SECTION_TITLE,
-                'enabled'        => [
-                    'id'      => Enabled::getName(),
-                    'title'   => Translator::translate(phraseId: 'part-payment-widget-enabled'),
-                    'type'    => 'checkbox',
+                'title' => self::SECTION_TITLE,
+                'enabled' => [
+                    'id' => Enabled::getName(),
+                    'title' => Translator::translate(
+                        phraseId: 'part-payment-widget-enabled'
+                    ),
+                    'type' => 'checkbox',
                     'default' => 'no',
-                    'desc'    => 'Enabled'
+                    'desc' => 'Enabled',
                 ],
                 'payment_method' => [
-                    'id'      => PaymentMethodOption::getName(),
-                    'title'   => Translator::translate(phraseId: 'payment-method'),
-                    'type'    => 'select',
-                    'options' => self::getPaymentMethods()
+                    'id' => PaymentMethodOption::getName(),
+                    'title' => Translator::translate(
+                        phraseId: 'payment-method'
+                    ),
+                    'type' => 'select',
+                    'options' => self::getPaymentMethods(),
                 ],
-                'period'         => [
-                    'id'      => Period::getName(),
-                    'title'   => Translator::translate(phraseId: 'annuity-period'),
-                    'type'    => 'select',
-                    'options' => self::getAnnuityPeriods()
+                'period' => [
+                    'id' => Period::getName(),
+                    'title' => Translator::translate(
+                        phraseId: 'annuity-period'
+                    ),
+                    'type' => 'select',
+                    'options' => self::getAnnuityPeriods(),
                 ],
                 'limit' => [
                     'id' => Limit::getName(),
                     'title' => Translator::translate(phraseId: 'limit'),
-                    'type' => 'text'
-                ]
-            ]
+                    'type' => 'text',
+                ],
+            ],
         ];
+    }
+
+    /**
+     * Validate Limit setting and show error messages if the user hasn't configured the widget correctly
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @todo Look into moving this logic into Ecom for re-use
+     */
+    public static function validateLimit(mixed $option, mixed $old, mixed $new): void
+    {
+        if ($option !== Limit::getName()) {
+            return;
+        }
+
+        $paymentMethodId = PaymentMethodOption::getData();
+        $storeId = StoreId::getData();
+        $period = Period::getData();
+
+        if (empty($storeId)) {
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: Translator::translate(
+                        phraseId: 'limit-missing-store-id'
+                    )
+                )
+            );
+            return;
+        }
+
+        if (empty($paymentMethodId)) {
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: Translator::translate(
+                        phraseId: 'limit-missing-payment-method'
+                    )
+                )
+            );
+            return;
+        }
+
+        if (empty($period)) {
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: Translator::translate(
+                        phraseId: 'limit-missing-period'
+                    )
+                )
+            );
+            return;
+        }
+
+        $paymentMethod = Repository::getById(
+            storeId: $storeId,
+            paymentMethodId: $paymentMethodId
+        );
+
+        if ($paymentMethod === null) {
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: Translator::translate(
+                        phraseId: 'limit-failed-to-load-payment-method'
+                    )
+                )
+            );
+            return;
+        }
+
+        $maxLimit = $paymentMethod->maxPurchaseLimit;
+
+        if ($new < 0) {
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: Translator::translate(
+                        phraseId: 'limit-new-value-not-positive'
+                    )
+                )
+            );
+        } elseif ($new > $maxLimit) {
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: str_replace(
+                        search: '%1',
+                        replace: (string)$maxLimit,
+                        subject: Translator::translate(
+                            phraseId: 'limit-new-value-above-max'
+                        )
+                    )
+                )
+            );
+        }
     }
 
     /**
@@ -102,18 +211,21 @@ class PartPayment
         }
 
         $options = [];
+
         try {
             $paymentMethods = Repository::getPaymentMethods(storeId: $storeId);
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             WordPress::setGenericError(exception: $exception);
         }
 
         if (isset($paymentMethods)) {
             /** @var PaymentMethod $paymentMethod */
             foreach ($paymentMethods as $paymentMethod) {
-                if ($paymentMethod->isPartPayment()) {
-                    $options[$paymentMethod->id] = $paymentMethod->name;
+                if (!$paymentMethod->isPartPayment()) {
+                    continue;
                 }
+
+                $options[$paymentMethod->id] = $paymentMethod->name;
             }
         }
 
@@ -147,7 +259,7 @@ class PartPayment
                 storeId: StoreId::getData(),
                 paymentMethodId: $paymentMethodId
             );
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             WordPress::setGenericError(exception: $exception);
         }
 
@@ -161,87 +273,5 @@ class PartPayment
         }
 
         return $return;
-    }
-
-    /**
-     * Validate Limit setting and show error messages if the user hasn't configured the widget correctly
-     *
-     * @param mixed $option
-     * @param mixed $old
-     * @param mixed $new
-     *
-     * @return void
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
-     * @throws ValidationException
-     * @todo Look into moving this logic into Ecom for re-use
-     */
-    public static function validateLimit(mixed $option, mixed $old, mixed $new): void
-    {
-        if ($option === Limit::getName()) {
-            $paymentMethodId = PaymentMethodOption::getData();
-            $storeId = StoreId::getData();
-            $period = Period::getData();
-            if (empty($storeId)) {
-                WordPress::setGenericError(
-                    exception: new Exception(message: Translator::translate(phraseId: 'limit-missing-store-id'))
-                );
-                return;
-            }
-            if (empty($paymentMethodId)) {
-                WordPress::setGenericError(
-                    exception: new Exception(message: Translator::translate(phraseId: 'limit-missing-payment-method'))
-                );
-                return;
-            }
-            if (empty($period)) {
-                WordPress::setGenericError(
-                    exception: new Exception(message: Translator::translate(phraseId: 'limit-missing-period'))
-                );
-                return;
-            }
-
-            $paymentMethod = Repository::getById(
-                storeId: $storeId,
-                paymentMethodId: $paymentMethodId
-            );
-
-            if ($paymentMethod === null) {
-                WordPress::setGenericError(
-                    exception: new Exception(
-                        message: Translator::translate(phraseId: 'limit-failed-to-load-payment-method')
-                    )
-                );
-                return;
-            }
-
-            $maxLimit = $paymentMethod->maxPurchaseLimit;
-
-            if ($new < 0) {
-                WordPress::setGenericError(
-                    exception: new Exception(message: Translator::translate(phraseId: 'limit-new-value-not-positive'))
-                );
-            } elseif ($new > $maxLimit) {
-                WordPress::setGenericError(
-                    exception: new Exception(
-                        message: str_replace(
-                            search: '%1',
-                            replace: (string)$maxLimit,
-                            subject: Translator::translate(phraseId: 'limit-new-value-above-max')
-                        )
-                    )
-                );
-            }
-        }
     }
 }

@@ -82,7 +82,6 @@ class Advanced
      * Resolve log handler based on supplied setting value. Returns a dummy
      * if the setting is empty.
      *
-     * @return LoggerInterface
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @todo Refactor this method. WOO-872. Remove the PHPCS & PHPMD suppression.
      */
@@ -135,8 +134,6 @@ class Advanced
     /**
      * Resolve cache handler based on supplied setting value. Returns a dummy
      * if the setting is empty.
-     *
-     * @return CacheInterface
      */
     public static function getCache(): CacheInterface
     {

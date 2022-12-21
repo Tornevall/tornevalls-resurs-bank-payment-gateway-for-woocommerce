@@ -9,16 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database;
 
-use function is_int;
-
 /**
  * Handle int values in database.
  */
 class IntOption extends Option
 {
-    /**
-     * @return int
-     */
     public static function getData(): int
     {
         $result = parent::getData();

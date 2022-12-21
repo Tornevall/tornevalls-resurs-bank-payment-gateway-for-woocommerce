@@ -25,7 +25,6 @@ use Throwable;
 class GetAddress
 {
     /**
-     * @return string
      * @throws ConfigException
      * @throws HttpException
      */
@@ -41,7 +40,9 @@ class GetAddress
                 $requestData->govId
             );
             WcSession::set(
-                $ecomSession->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE),
+                $ecomSession->getKey(
+                    key: Repository::SESSION_KEY_CUSTOMER_TYPE
+                ),
                 $requestData->customerType->value
             );
             $return = $controller->exec(
