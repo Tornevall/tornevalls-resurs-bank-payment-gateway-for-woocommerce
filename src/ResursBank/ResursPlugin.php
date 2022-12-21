@@ -4,21 +4,9 @@ namespace ResursBank\ResursBank;
 
 use Exception;
 use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Models\PaymentMethodCollection;
-use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
-use ResursBank\Service\WordPress;
 
 use function is_array;
 
@@ -83,28 +71,6 @@ class ResursPlugin
     public static function isResursCodeBase(): bool
     {
         return WooCommerce::getBaseName() !== 'resurs-bank-payments-for-woocommerce';
-    }
-
-    /**
-     * @param string $storeId
-     * @param bool $asArray
-     * @return array|PaymentMethodCollection
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws ValidationException
-     * @throws JsonException
-     * @throws ReflectionException
-     */
-    public static function getPaymentMethodCollection(
-        string $storeId,
-        bool $asArray = true
-    ): array|PaymentMethodCollection {
-        return $asArray ? Repository::getPaymentMethods($storeId)->toArray() : Repository::getPaymentMethods($storeId);
     }
 
     /**

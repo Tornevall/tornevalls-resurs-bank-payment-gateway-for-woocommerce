@@ -61,38 +61,70 @@ touch $HOOK_FILE
 chmod +x $HOOK_FILE
 
 cat <<EOT >> $HOOK_FILE
-#!/usr/bin/env -S bash -eu
+#!/usr/bin/env -S bash
+
+ERRORS=0
 
 echo "=========================================================="
 echo "Running tests."
 echo ""
-echo "---==( Executing Psalm tests. )==---"
-echo ""
-$phpCmd $dir/vendor/bin/psalm -c $dir/qa/psalm/psalm.xml --show-info=true
-echo ""
-echo "---==( Executing PHPMD tests on source files. )==---"
-echo ""
-$phpCmd $dir/vendor/bin/phpmd $dir/src text $dir/qa/phpmd/src.xml
-echo ""
+
 echo "---==( Executing PHP CBF for source files. )==---"
 echo ""
-$phpCmd $dir/vendor/bin/phpcbf --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src
+if ! $phpCmd $dir/vendor/bin/phpcbf --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
+  ERRORS=1
+fi
 echo ""
-$phpCmd $dir/vendor/bin/phpcbf --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src
+if ! $phpCmd $dir/vendor/bin/phpcbf --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
+  ERRORS=1
+fi
 echo ""
+
+echo "---==( Executing PHP CS Fixer for source files. )==---"
+echo ""
+if ! $phpCmd $dir/vendor/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache --config=$dir/qa/php-cs-fixer/.php-cs-fixer.dist.php fix; then
+  ERRORS=1
+fi
+echo ""
+
 echo "---==( Executing PHPCS for source files. )==---"
 echo ""
-$phpCmd $dir/vendor/bin/phpcs --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src
+if ! $phpCmd $dir/vendor/bin/phpcs --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
+  ERRORS=1
+fi
 echo ""
-$phpCmd $dir/vendor/bin/phpcs --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src
-#echo ""
+if ! $phpCmd $dir/vendor/bin/phpcs --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
+  ERRORS=1
+fi
+echo ""
+
+echo "---==( Executing Psalm tests. )==---"
+echo ""
+if ! $phpCmd $dir/vendor/bin/psalm -c $dir/qa/psalm/psalm.xml --show-info=true; then
+  ERRORS=1
+fi
+echo ""
+
+echo "---==( Executing PHPMD tests on source files. )==---"
+echo ""
+if ! $phpCmd $dir/vendor/bin/phpmd $dir/src text $dir/qa/phpmd/src.xml; then
+  ERRORS=1
+fi
+echo ""
+
 #echo "---==( Executing PHPStan for source files. )==---"
 #echo ""
 #$phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan/src.neon -a $dir/autoload.php $dir/src
-echo ""
-echo "---==( Executing PHP CS Fixer for source files. )==---"
-echo ""
-$phpCmd $dir/vendor/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache --config=$dir/qa/php-cs-fixer/.php-cs-fixer.dist.php fix
+#echo ""
+
+if [ "\${ERRORS}" = "1" ]; then
+  exec < /dev/tty
+  read -p "Continue commit despite remaining errors? (y/n)?" continueCommit
+  case "\$continueCommit" in
+    y|Y ) exit 0;;
+    * ) echo "Aborting."; exit 1;;
+  esac
+fi
 EOT
 
 echo ""

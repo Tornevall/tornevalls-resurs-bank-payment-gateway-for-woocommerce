@@ -53,14 +53,11 @@ class WordPress
         GetAddress::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
-//         Data::getDefaultsInit();
         self::adminGatewayRedirect();
         self::setupAjaxActions();
         self::setupFilters();
         self::setupScripts();
         self::setupActions();
-        self::setupWoocommerceAdminActions();
-        self::setupWoocommerceCheckoutActions();
         self::doAction('isLoaded', true);
     }
 
@@ -118,7 +115,6 @@ class WordPress
             'reset_old_plugin_settings',
             'update_payment_method_description',
             'update_payment_method_fee',
-            'resurs_bank_rco_synchronize',
             'set_method_state',
         ];
 
@@ -146,7 +142,6 @@ class WordPress
         // Helper calls.
         add_filter('woocommerce_get_settings_pages', 'ResursBank\Service\WooCommerce::getSettingsPages');
         add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
-        add_filter('rbwc_get_part_payment_page', 'ResursBank\Service\WordPress::getPartPaymentPage');
 
         if (Enabled::isEnabled()) {
             // Get list of current payment gateways (for admin parts).
@@ -200,70 +195,11 @@ class WordPress
         add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         add_action('wp_ajax_' . $action, '\ResursBank\Module\PluginApi::execApi');
-        add_action('wp_ajax_nopriv_' . $action, '\ResursBank\Module\PluginApi::execApiNoPriv');
-        add_action('woocommerce_admin_field_decimal_warning', '\ResursBank\Module\FormFields::getFieldDecimals', 10, 2);
-        add_action('woocommerce_admin_field_methodlist', '\ResursBank\Module\FormFields::getFieldMethodList', 10, 2);
-        add_filter('woocommerce_get_settings_general', 'ResursBank\Module\Data::getGeneralSettings');
         add_action(
             'woocommerce_single_product_summary',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
         );
-        add_action('updated_option', 'ResursBank\Module\PluginApi::getOptionsControl', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
-    }
-
-    /**
-     * Admin events.
-     *
-     * @since 0.0.1.0
-     */
-    private static function setupWoocommerceAdminActions()
-    {
-        if (Data::isEnabled()) {
-            add_action(
-                'woocommerce_admin_order_data_after_order_details',
-                'ResursBank\Service\WooCommerce::getAdminAfterOrderDetails'
-            );
-            add_action(
-                'woocommerce_admin_order_data_after_billing_address',
-                'ResursBank\Service\WooCommerce::getAdminAfterBilling'
-            );
-            add_action(
-                'woocommerce_admin_order_data_after_shipping_address',
-                'ResursBank\Service\WooCommerce::getAdminAfterShipping'
-            );
-        }
-    }
-
-    /**
-     * Customer based events (checkout, etc).
-     *
-     * @since 0.0.1.0
-     */
-    private static function setupWoocommerceCheckoutActions()
-    {
-        // Customer is in checkout.
-        // Customer is not in checkout.
-        add_filter(
-            'woocommerce_update_order_review_fragments',
-            'ResursBank\Service\WooCommerce::getReviewFragments'
-        );
-        add_action(
-            'woocommerce_checkout_update_order_review',
-            'ResursBank\Service\WooCommerce::getOrderReviewSettings'
-        );
-        add_action(
-            'woocommerce_cart_calculate_fees',
-            'ResursBank\Service\WooCommerce::applyVisualPaymentFee'
-        );
-        add_action(
-            'woocommerce_cart_totals_after_order_total',
-            'ResursBank\Service\WooCommerce::applyVisualPartPaymentCartTotals'
-        );
-        add_action(
-            'woocommerce_review_order_after_order_total',
-            'ResursBank\Service\WooCommerce::applyVisualPartPaymentReview'
-        );
     }
 
     /**
@@ -300,26 +236,6 @@ class WordPress
                 );
             }
         }
-    }
-
-    /**
-     * Render an options list array for custom part payment widgets.
-     *
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getPartPaymentPage(): array
-    {
-        $pagelist = get_pages();
-        $widgetPages = [
-            '0' => '',
-        ];
-        /** @var WP_Post $pages */
-        foreach ($pagelist as $page) {
-            $widgetPages[$page->ID] = $page->post_title;
-        }
-
-        return $widgetPages;
     }
 
     /**
@@ -451,34 +367,6 @@ class WordPress
             }
         } else {
             $return = false;
-        }
-
-        return $return;
-    }
-
-    /**
-     * Run deprecated filter features, use the new definitions instead. This handler should not even be necessary.
-     *
-     * @param $filterName
-     * @param $value
-     * @return mixed|void
-     * @since 0.0.1.0
-     */
-    public static function applyFiltersDeprecated($filterName, $value)
-    {
-        $return = apply_filters(
-            sprintf('%s_%s', 'resurs_bank', self::getFilterName($filterName)),
-            $value,
-            self::getFilterArgs(func_get_args())
-        );
-
-        // This dual filter solutions isn't very clever.
-        if ($return === null) {
-            $return = apply_filters(
-                sprintf('%s_%s', 'resursbank', self::getFilterName($filterName)),
-                $value,
-                self::getFilterArgs(func_get_args())
-            );
         }
 
         return $return;
@@ -700,15 +588,8 @@ class WordPress
         global $current_tab, $current_section;
         $return['prefix'] = Data::getPrefix();
         $return['current_section'] = $current_section;
-        $return['noncify'] = self::getNonce('admin');
+        //$return['noncify'] = self::getNonce('admin');
         $return['environment'] = Config::isProduction() ? 'prod' : 'test';
-        $return['wsdl'] = ResursBankAPI::getWsdlMode();
-        $return['translate_checkout_rco'] = __(
-            'Resurs Checkout (RCO) is a one page stand-alone checkout, embedded as an iframe on the checkout ' .
-            'page. It is intended to give you a full scale payment solution with all payment methods collected ' .
-            'at the endpoint of Resurs Bank.',
-            'resurs-bank-payments-for-woocommerce'
-        );
         $return['translate_checkout_simplified'] = __(
             'The integrated checkout (also known as the "simplified shop flow") is a direct integration with ' .
             'WooCommerce which uses intended APIs to interact with your customers while finishing the orders.',
@@ -874,10 +755,10 @@ class WordPress
         // Set timeout to one second more than the backend timeout.
         $defaultTimeout = ((Data::getDefaultApiTimeout() + 1) * 1000);
         $setAjaxifyTimeout = self::applyFilters('ajaxifyTimeout', $defaultTimeout);
-        $return['noncify'] = self::getNonce('all');
-        $return['ajaxify'] = admin_url('admin-ajax.php');
-        $return['ajaxifyTimeout'] = (int)$setAjaxifyTimeout ? $setAjaxifyTimeout : $defaultTimeout;
-        $return['spin'] = WordPress::applyFilters('getImageSpinner', Data::getImage('spin.gif'));
+        //$return['noncify'] = self::getNonce('all');
+        //$return['ajaxify'] = admin_url('admin-ajax.php');
+        //$return['ajaxifyTimeout'] = (int)$setAjaxifyTimeout ? $setAjaxifyTimeout : $defaultTimeout;
+        //$return['spin'] = WordPress::applyFilters('getImageSpinner', Data::getImage('spin.gif'));
         $return['success'] = __('Successful.', 'resurs-bank-payments-for-woocommerce');
         $return['failed'] = __('Failed.', 'resurs-bank-payments-for-woocommerce');
         $return['fragmethod'] = Data::getMethodFromFragmentOrSession();

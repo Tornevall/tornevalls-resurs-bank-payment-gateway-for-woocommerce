@@ -4,23 +4,6 @@ var resursHasPlaceOrder;
 var resursTemporaryCartTotal = 0.00;
 
 /**
- * Collection from RCO.
- * @type {{wooCommerce: {}, payment: {}, customer: {}}}
- * @since 0.0.1.0
- */
-var resursBankRcoDataContainer = {
-    rco_customer: {},
-    rco_payment: {},
-};
-
-/**
- * RCO Legacy variable to define allowed communication source.
- * @type {string}
- * @since 0.0.1.0
- */
-var RESURSCHECKOUT_IFRAME_URL = '';
-
-/**
  * Logging.
  * @param consEntry
  * @since 0.0.1.0
@@ -182,36 +165,6 @@ function setRbwcGenericError(errorMessage) {
         }, 1000);
     } else {
         console.log(errorMessage);
-    }
-}
-
-/**
- * @since 0.0.1.0
- */
-function resursPlaceOrderControl() {
-    if (getResursLocalization('checkoutType') === 'rco') {
-        if ($rQuery('#place_order').length > 0) {
-            resursHasPlaceOrder = true;
-        } else {
-            resursHasPlaceOrder = false;
-        }
-        if (rbWcFragMethod.indexOf('RESURS_CHECKOUT') > -1) {
-            if (resursTemporaryCartTotal === 0) {
-                trbwcLog('Button for placing order is visible and cart control indicates a price of 0.');
-                $rQuery('#resursbank_rco_container').hide();
-                $rQuery('.woocommerce-billing-fields').show();
-                $rQuery('.woocommerce-shipping-fields').show();
-            } else if (resursTemporaryCartTotal > 0) {
-                trbwcLog('Cart control indicates change to ' + resursTemporaryCartTotal + '.');
-                $rQuery('.woocommerce-billing-fields').hide();
-                $rQuery('.woocommerce-shipping-fields').hide();
-                $rQuery('#resursbank_rco_container').show();
-            }
-        } else {
-            $rQuery('#resursbank_rco_container').hide();
-            $rQuery('.woocommerce-billing-fields').show();
-            $rQuery('.woocommerce-shipping-fields').show();
-        }
     }
 }
 
