@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Controller;
 
-use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Config;
@@ -35,7 +34,6 @@ use Throwable;
 class GetAddress
 {
     /**
-     * @return string
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
@@ -60,7 +58,9 @@ class GetAddress
                 $requestData->govId
             );
             WcSession::set(
-                $ecomSession->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE),
+                $ecomSession->getKey(
+                    key: Repository::SESSION_KEY_CUSTOMER_TYPE
+                ),
                 $requestData->customerType->value
             );
             $return = $controller->exec(

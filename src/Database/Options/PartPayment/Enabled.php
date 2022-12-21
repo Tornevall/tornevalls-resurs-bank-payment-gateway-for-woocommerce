@@ -16,21 +16,20 @@ use Resursbank\Woocommerce\Database\StringOption;
  */
 class Enabled extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
-	{
-		return self::NAME_PREFIX . 'partpayment_enabled';
-	}
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
+    {
+        return self::NAME_PREFIX . 'partpayment_enabled';
+    }
 
-	/**
-	 * Get a boolean value of the setting. Used internally, and not by WooCommerce that still struggles
-	 * with getting the values as yes/no.
-	 * @return bool
-	 */
-	public static function isEnabled(): bool
-	{
-		return self::getData() === 'yes';
-	}
+    /**
+     * Get a boolean value of the setting. Used internally, and not by WooCommerce that still struggles
+     * with getting the values as yes/no.
+     */
+    public static function isEnabled(): bool
+    {
+        return self::getData() === 'yes';
+    }
 }

@@ -28,7 +28,6 @@ class Option
      * NOTE: Using a method instead of a property to ensure that the name is
      * not left empty.
      *
-     * @return string
      * @throws RuntimeException
      */
     public static function getName(): string
@@ -45,10 +44,6 @@ class Option
         return get_option(option: static::getName(), default: null);
     }
 
-    /**
-     * @param string $value
-     * @return bool
-     */
     public static function setData(string $value): bool
     {
         return update_option(

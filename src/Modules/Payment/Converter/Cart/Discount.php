@@ -18,7 +18,6 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Discount as DiscountItem;
 use WC_Cart;
 use WC_Coupon;
@@ -34,7 +33,6 @@ class Discount extends DiscountItem
 {
     /**
      * Get MAPI orderLine from WooCommerce coupons
-     * @param WC_Cart $cart
      *
      * @return array
      * @throws ConfigException
@@ -64,7 +62,6 @@ class Discount extends DiscountItem
 
     /**
      * Wrapper to safely retrieve applied coupons.
-     * @param WC_Cart $cart
      *
      * @return array
      * @throws IllegalValueException

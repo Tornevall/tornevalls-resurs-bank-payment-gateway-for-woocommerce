@@ -30,7 +30,6 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 class GetValidDurations
 {
     /**
-     * @return string
      * @throws HttpException
      * @throws IllegalValueException
      * @throws JsonException

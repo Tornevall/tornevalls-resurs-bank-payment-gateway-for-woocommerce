@@ -26,42 +26,13 @@ class WcSession
 {
     /**
      * WC() as an initialized variable.
-     * @var WooCommerce
      */
     private static WooCommerce $wooCom;
 
     /**
-     * Initializing WC() if not already done.
-     * @return void
+     * @param string|null $value Using null to "unset".
      */
-    private static function getWcSession(): void
-    {
-        /**
-         * Psalm warns about the isset-check, but without this check, we get fatal errors when not set.
-         * @psalm-suppress RedundantCondition
-         * @psalm-suppress RedundantPropertyInitializationCheck
-         */
-        if (isset(self::$wooCom) && !(self::$wooCom instanceof WooCommerce)) {
-            throw new RuntimeException(message: 'WooCommerce is not available.');
-        }
-
-        self::$wooCom = WC();
-        self::$wooCom->initialize_session();
-
-        /**
-         * @psalm-suppress MixedPropertyFetch
-         */
-        if (!self::$wooCom->session instanceof WC_Session_Handler) {
-            throw new RuntimeException(message: 'WC()->session is not available.');
-        }
-    }
-
-    /**
-     * @param string $key
-     * @param null|string $value Using null to "unset".
-     * @return void
-     */
-    public static function set(string $key, null|string $value): void
+    public static function set(string $key, ?string $value): void
     {
         try {
             self::getWcSession();
@@ -71,10 +42,6 @@ class WcSession
         }
     }
 
-    /**
-     * @param string $key
-     * @return string
-     */
     public static function get(string $key): string
     {
         try {
@@ -88,18 +55,17 @@ class WcSession
         return $return ?? '';
     }
 
-    /**
-     * @return CustomerType
-     */
     public static function getCustomerType(): CustomerType
     {
-        return CustomerType::from(self::get((new Session())->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE)));
+        return CustomerType::from(
+            self::get(
+                (new Session())->getKey(
+                    key: Repository::SESSION_KEY_CUSTOMER_TYPE
+                )
+            )
+        );
     }
 
-    /**
-     * @param string $key
-     * @return void
-     */
     public static function unset(string $key): void
     {
         try {
@@ -108,6 +74,36 @@ class WcSession
             self::$wooCom->session->set($key, null);
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
+        }
+    }
+
+    /**
+     * Initializing WC() if not already done.
+     */
+    private static function getWcSession(): void
+    {
+        /**
+         * Psalm warns about the isset-check, but without this check, we get fatal errors when not set.
+         *
+         * @psalm-suppress RedundantCondition
+         * @psalm-suppress RedundantPropertyInitializationCheck
+         */
+        if (isset(self::$wooCom) && !(self::$wooCom instanceof WooCommerce)) {
+            throw new RuntimeException(
+                message: 'WooCommerce is not available.'
+            );
+        }
+
+        self::$wooCom = WC();
+        self::$wooCom->initialize_session();
+
+        /**
+         * @psalm-suppress MixedPropertyFetch
+         */
+        if (!self::$wooCom->session instanceof WC_Session_Handler) {
+            throw new RuntimeException(
+                message: 'WC()->session is not available.'
+            );
         }
     }
 }
