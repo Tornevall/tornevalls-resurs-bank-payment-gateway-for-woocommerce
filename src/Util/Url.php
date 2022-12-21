@@ -34,7 +34,7 @@ class Url
         // NOTE: plugin_dir_url returns everything up to the last slash.
         return plugin_dir_url(
             file: RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/" .
-                      str_replace(search: '/', replace: '', subject: $file)
+                  str_replace(search: '/', replace: '', subject: $file)
         ) . $file;
     }
 
@@ -52,7 +52,10 @@ class Url
     /**
      * Generate a URL for a given endpoint, with a list of arguments.
      *
+     * @param string $baseUrl
      * @param array $arguments
+     *
+     * @return string
      * @throws IllegalValueException
      */
     public static function getQueryArg(string $baseUrl, array $arguments): string
