@@ -49,22 +49,6 @@ class PluginHooks
         add_filter('rbwc_part_payment_string', [$this, 'getPartPaymentWidgetPage'], 10, 2);
         add_filter('rbwc_get_order_note_prefix', [$this, 'getDefaultOrderNotePrefix'], 1);
         add_filter('rbwc_get_available_auto_debit_methods', [$this, 'getAvailableAutoDebitMethods']);
-        add_filter('rbwc_get_configuration_fields', [$this, 'getAvailableConfigurationFields'], 10, 2);
-    }
-
-    /**
-     * @param $inboundFields
-     * @param string $section
-     * @param null $id
-     * @return array
-     * @since 0.0.1.8
-     */
-    public function getAvailableConfigurationFields($inboundFields, string $section = 'basic', $id = null): array
-    {
-        return FormFields::getFormFields(
-            $section,
-            $id
-        );
     }
 
     /**

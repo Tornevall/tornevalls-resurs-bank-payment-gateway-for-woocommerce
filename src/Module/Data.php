@@ -69,12 +69,6 @@ class Data
     public const CAN_LOG_ORDER_DEVELOPER = 'order_developer';
 
     /**
-     * @var string
-     * @since 0.0.1.0
-     */
-    public const CAN_LOG_INFO = 'info';
-
-    /**
      * @var array
      * @since 0.0.1.0
      */
@@ -107,16 +101,6 @@ class Data
     ];
 
     /**
-     * @var array $jsLoadersCheckout Loadable scripts, only from checkout.
-     * @since 0.0.1.0
-     */
-    private static $jsLoadersCheckout = [
-        'resursbank_checkout' => 'resursbank_checkout.js',
-        'resursbank_rco_v1' => 'resursbank_rco_v1.js',
-        'resursbank_rco_v2' => 'resursbank_rco_v2.js',
-    ];
-
-    /**
      * @var array $jsLoadersAdmin List of loadable scripts for admin.
      * @since 0.0.1.0
      */
@@ -130,16 +114,8 @@ class Data
      * @since 0.0.1.0
      */
     private static $jsDependencies = [
-        'resursbank' => ['jquery'],
-        'resursbank_rco_v1' => ['jquery'],
-        'resursbank_rco_v2' => ['jquery'],
+        'resursbank' => ['jquery']
     ];
-
-    /**
-     * @var WPUtils $wordpressUtils
-     * @since 0.0.1.0
-     */
-    private static $wordpressUtils;
 
     /**
      * @var array $jsDependenciesAdmin
@@ -563,33 +539,6 @@ class Data
             (new ResursBankAPI())->getCredentialString(),
             $paymentMethod
         );
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @param $paymentMethod
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function setPaymentMethodSetting(string $key, $value, $paymentMethod)
-    {
-        $rturn = false;
-
-        if (!empty($paymentMethod)) {
-            $settings = self::getPaymentMethodSettings($paymentMethod);
-            $settings[$key] = $value;
-            $return = Data::setResursOption(
-                sprintf(
-                    '%s_settings',
-                    self::getPaymentMethodNameSpace($paymentMethod)
-                ),
-                $settings
-            );
-        }
-
-        return $return;
     }
 
     /**
@@ -1702,15 +1651,6 @@ class Data
     }
 
     /**
-     * @return string
-     * @since 0.0.1.7
-     */
-    public static function getBrandName(): string
-    {
-        return 'Rɘsurs';
-    }
-
-    /**
      * Allowing specific styles if admin is active.
      *
      * @since 0.0.1.1
@@ -1725,99 +1665,12 @@ class Data
     }
 
     /**
-     * Escaping html where we only new a few elements.
-     *
-     * @return string
-     * @since 0.0.1.1
-     */
-    public static function getTinyEscapedHtml($content)
-    {
-        return wp_kses(
-            $content,
-            [
-                'div' => [
-                    'class' => [],
-                    'style' => [],
-                ],
-                'span' => [
-                    'class' => [],
-                    'style' => [],
-                ],
-            ]
-        );
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.6
-     */
-    public static function getCustomerCompanyName(): string
-    {
-        global $woocommerce;
-
-        $return = '';
-
-        /**
-         * @var WC_Customer $wcCustomer
-         */
-        $wcCustomer = $woocommerce->customer;
-        if ($wcCustomer instanceof WC_Customer) {
-            $return = $wcCustomer->get_billing_company();
-        }
-
-        return $return;
-    }
-
-    /**
      * @return array
      * @since 0.0.1.6
      */
     public static function getSupportArray(): array
     {
         return (array)WordPress::applyFilters('getSupportAddressList', []);
-    }
-
-    /**
-     * Initialize default data from formFields.
-     *
-     * @since 0.0.1.0
-     */
-    public static function getDefaultsInit(): array
-    {
-        if (!is_array(self::$formFieldDefaults) || !count(self::$formFieldDefaults)) {
-            self::$formFieldDefaults = self::getDefaultsFromSections(FormFields::getFormFields('all'));
-        }
-
-        return self::$formFieldDefaults;
-    }
-
-    /**
-     * @param $array
-     * @return array
-     * @since 0.0.1.0
-     */
-    private static function getDefaultsFromSections($array): array
-    {
-        $return = [];
-        /**
-         * We want the content, not the section value.
-         * @noinspection PhpUnusedLocalVariableInspection
-         */
-        foreach ($array as $section => $content) {
-            $return += $content;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param bool $getBasic
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getFormFields($getBasic = null): array
-    {
-        return FormFields::getFormFields($getBasic);
     }
 
     /**
@@ -1848,27 +1701,6 @@ class Data
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function hasDefaults(): bool
-    {
-        return is_array(self::$formFieldDefaults) && count(self::$formFieldDefaults);
-    }
-
-    /**
-     * @return string
-     * @version 0.0.1.0
-     */
-    public static function getGatewayBackend(): string
-    {
-        return sprintf(
-            '%s?action=resurs_bank_backend',
-            admin_url('admin-ajax.php')
-        );
-    }
-
-    /**
      * @param bool $isAdmin
      * @return array
      * @version 0.0.1.0
@@ -1878,10 +1710,7 @@ class Data
         if ($isAdmin) {
             $return = self::$jsLoadersAdmin;
         } else {
-            $return = array_merge(
-                self::$jsLoaders,
-                is_checkout() ? WordPress::applyFilters('jsLoadersCheckout', self::$jsLoadersCheckout) : []
-            );
+            $return = self::$jsLoaders;
         }
 
         return $return;
@@ -1951,20 +1780,6 @@ class Data
         }
 
         return (string)WooCommerce::getSessionValue('fragment_update_payment_method');
-    }
-
-    /**
-     * @return bool
-     * @throws ExceptionHandler
-     * @since 0.0.1.0
-     */
-    public static function getValidatedVersion(): bool
-    {
-        $return = false;
-        if (version_compare(self::getCurrentVersion(), self::getVersionByComposer(), '==')) {
-            $return = true;
-        }
-        return $return;
     }
 
     /**
@@ -2189,18 +2004,6 @@ class Data
         ];
 
         return $array[$key] ?? '';
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isProductionAvailable(): bool
-    {
-        return (
-            !empty(self::getResursOption('login_production')) &&
-            !empty(self::getResursOption('password_production'))
-        );
     }
 
     /**
@@ -2444,31 +2247,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * @param array $settings
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getGeneralSettings($settings = null): array
-    {
-        foreach ((array)$settings as $setting) {
-            if (isset($setting['id']) && $setting['id'] === 'woocommerce_price_num_decimals') {
-                $currentPriceDecimals = wc_get_price_decimals();
-                if ($currentPriceDecimals < 2 && self::getResursOption('prevent_rounding_panic')) {
-                    $settings[] = [
-                        'title' => __(
-                            'Number of decimals headsup message',
-                            'resurs-bank-payments-for-woocommerce'
-                        ),
-                        'type' => 'decimal_warning',
-                        'desc' => 'Description',
-                    ];
-                }
-            }
-        }
-        return (array)$settings;
     }
 
     /**
