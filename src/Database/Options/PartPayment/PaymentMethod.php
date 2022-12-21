@@ -16,11 +16,11 @@ use Resursbank\Woocommerce\Database\StringOption;
  */
 class PaymentMethod extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
-	{
-		return self::NAME_PREFIX . 'partpayment_paymentmethod';
-	}
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
+    {
+        return self::NAME_PREFIX . 'partpayment_paymentmethod';
+    }
 }

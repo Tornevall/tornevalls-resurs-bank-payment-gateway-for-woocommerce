@@ -16,11 +16,11 @@ use Resursbank\Woocommerce\Database\StringOption;
  */
 class Period extends StringOption
 {
-	/**
-	 * @inheritdoc
-	 */
-	public static function getName(): string
-	{
-		return self::NAME_PREFIX . 'partpayment_period';
-	}
+    /**
+     * @inheritdoc
+     */
+    public static function getName(): string
+    {
+        return self::NAME_PREFIX . 'partpayment_period';
+    }
 }

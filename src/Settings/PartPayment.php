@@ -156,7 +156,7 @@ class PartPayment
         if (isset($annuityFactors)) {
             /** @var AnnuityInformation $annuityFactor */
             foreach ($annuityFactors->content as $annuityFactor) {
-                $return[$annuityFactor->durationInMonths] = $annuityFactor->paymentPlanName;
+                $return[$annuityFactor->durationMonths] = $annuityFactor->paymentPlanName;
             }
         }
 
@@ -227,7 +227,7 @@ class PartPayment
 
             $maxLimit = $paymentMethod->maxPurchaseLimit;
 
-            if($new < 0) {
+            if ($new < 0) {
                 WordPress::setGenericError(
                     exception: new Exception(message: Translator::translate(phraseId: 'limit-new-value-not-positive'))
                 );
@@ -237,7 +237,8 @@ class PartPayment
                         message: str_replace(
                             search: '%1',
                             replace: (string)$maxLimit,
-                            subject: Translator::translate(phraseId: 'limit-new-value-above-max'))
+                            subject: Translator::translate(phraseId: 'limit-new-value-above-max')
+                        )
                     )
                 );
             }
