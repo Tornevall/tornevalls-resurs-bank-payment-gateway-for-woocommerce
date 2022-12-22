@@ -77,11 +77,11 @@ echo ""
 
 echo "---==( Executing PHPCS for source files. )==---"
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
+if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
   ERRORS=1
 fi
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
+if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
   ERRORS=1
 fi
 echo ""
