@@ -24,6 +24,7 @@ use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Woocommerce\Database\Options\CacheDir;
+use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\LogDir;
 use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Throwable;
@@ -96,7 +97,14 @@ class Advanced
                         'resurs-bank-payments-for-woocommerce'
                     ),
                     'default' => '',
-                ]
+                ],
+                'get_address_enabled' => [
+                    'id' => EnableGetAddress::getName(),
+                    'type' => 'checkbox',
+                    'title' => 'Enable widget to get address',
+                    'desc' => '',
+                    'default' => '',
+                ],
             ],
         ];
     }
