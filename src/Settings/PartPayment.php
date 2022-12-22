@@ -111,6 +111,8 @@ class PartPayment
      * @throws ReflectionException
      * @throws TranslationException
      * @throws ValidationException
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @noinspection PhpUnusedParameterInspection
      * @todo Look into moving this logic into Ecom for re-use
      */
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void

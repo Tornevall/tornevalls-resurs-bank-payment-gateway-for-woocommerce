@@ -31,6 +31,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\PartPayment\Module;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 /**
@@ -66,18 +67,18 @@ class PartPayment
             paymentMethodId: PaymentMethod::getData()
         );
 
+        $requestAmount = Url::getHttpGet('amount');
+
         if (
-            isset($_GET['amount']) &&
-            is_numeric(value: $_GET['amount']) &&
+            is_numeric(value: $requestAmount) &&
             $paymentMethod !== null
         ) {
             $currencySymbol = Currency::getWooCommerceCurrencySymbol();
-            $amount = (float)$_GET['amount'];
             $widget = new PartPaymentWidget(
                 storeId: StoreId::getData(),
                 paymentMethod: $paymentMethod,
                 months: (int)Period::getData(),
-                amount: $amount,
+                amount: (float)$requestAmount,
                 currencySymbol: $currencySymbol,
                 currencyFormat: Module::getEcomCurrencyFormat(),
                 apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)

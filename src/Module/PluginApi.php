@@ -11,16 +11,8 @@ use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WordPress;
-use ResursException;
-use TorneLIB\Data\Password;
-use TorneLIB\Exception\ExceptionHandler;
-use TorneLIB\Module\Network\Domain;
-use TorneLIB\Module\Network\NetWrapper;
-use TorneLIB\Module\Network\Wrappers\CurlWrapper;
-use WC_Order;
-use function count;
+use Resursbank\Woocommerce\Util\Url;
 use function in_array;
-use function is_array;
 
 /**
  * Backend API Handler.
@@ -79,7 +71,7 @@ class PluginApi
      */
     private static function getActionFromRequest(): string
     {
-        return WordPress::getCamelCase(self::getTrimmedActionString(Data::getRequest('action')));
+        return WordPress::getCamelCase(self::getTrimmedActionString(Url::getRequest('action')));
     }
 
     /**
@@ -158,7 +150,7 @@ class PluginApi
         }
 
         foreach ($nonceArray as $nonceType) {
-            if (wp_verify_nonce(Data::getRequest('n'), WordPress::getNonceTag($nonceType))) {
+            if (wp_verify_nonce(Url::getRequest('n'), WordPress::getNonceTag($nonceType))) {
                 $return = true;
                 break;
             }
@@ -209,11 +201,11 @@ class PluginApi
         $optionTag = 'resurs_nonce_' . $nonceTag;
         $return = false;
         $lastNonce = get_option($optionTag);
-        if (Data::getRequest('n') === $lastNonce) {
+        if (Url::getRequest('n') === $lastNonce) {
             $return = true;
         } else {
             // Only update if different.
-            update_option($optionTag, Data::getRequest('n'));
+            update_option($optionTag, Url::getRequest('n'));
         }
         return $return;
     }

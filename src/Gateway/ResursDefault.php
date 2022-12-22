@@ -25,7 +25,6 @@ use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
-use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
@@ -52,8 +51,6 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
-use RuntimeException;
-use stdClass;
 use Throwable;
 use WC_Cart;
 use WC_Order;
@@ -352,7 +349,7 @@ class ResursDefault extends WC_Payment_Gateway
         $return = [];
         // Skip the scraping if this is not a payment.
         if ($this->isPaymentReady()) {
-            $saneRequest = Data::getSanitizedRequest($_REQUEST ?? []);
+            $saneRequest = Url::getSanitizedArray(array: $_REQUEST ?? []);
             foreach ($saneRequest as $requestKey => $requestValue) {
                 if (preg_match(sprintf('/%s$/', $realMethodId), $requestKey)) {
                     $applicantDataKey = sanitize_text_field(

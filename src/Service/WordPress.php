@@ -14,6 +14,7 @@ use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use Throwable;
 use WC_Order;
@@ -191,7 +192,7 @@ class WordPress
      */
     private static function setupActions()
     {
-        $action = Data::getRequest('action');
+        $action = Url::getRequest('action');
         add_action('admin_notices', '\ResursBank\Service\WordPress::getAdminNotices');
         add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
@@ -475,7 +476,7 @@ class WordPress
             self::setEnqueue($realScriptName, $scriptFile, $isAdmin);
         }
 
-        if (Data::getRequest('action') === 'resursbank_get_cost_of_purchase') {
+        if (Url::getRequest('action') === 'resursbank_get_cost_of_purchase') {
             $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
             $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
 
