@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
@@ -127,9 +128,7 @@ class Settings extends WC_Settings_Page
                 if (StoreId::getData() === '') {
                     // The lazy handler.
                     throw new Exception(
-                        message: __(
-                            text: 'Please select a store in the API settings tab.'
-                        )
+                        message: Translator::translate(phraseId: 'please-select-a-store')
                     );
                 }
 
