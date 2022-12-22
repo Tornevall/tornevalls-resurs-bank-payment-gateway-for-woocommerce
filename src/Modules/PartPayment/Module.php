@@ -206,7 +206,10 @@ class Module
     }
 
     /**
-     * Indicates whether widget should be visible or not
+     * Indicates whether widget should be visible or not.
+     * Suppressed warning, as this is used from setJs.
+     *
+     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
     private function visible(): bool
     {
