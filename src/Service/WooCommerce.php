@@ -13,17 +13,15 @@ use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
-use ResursBank\Module\OrderStatus as OrderStatusHandler;
 use ResursBank\Module\PluginHooks;
-use ResursBank\Module\ResursBankAPI;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings;
+use Resursbank\Woocommerce\Util\Url;
 use ResursException;
 use RuntimeException;
 use stdClass;
 use WC_Order;
 use WC_Product;
-use WC_Tax;
 use function count;
 use function in_array;
 use function is_array;
@@ -695,7 +693,7 @@ class WooCommerce
     public static function getSessionValue($key): mixed
     {
         $return = null;
-        $session = Data::getSanitizedArray(isset($_SESSION) ? $_SESSION : []);
+        $session = Url::getSanitizedArray(isset($_SESSION) ? $_SESSION : []);
 
         if (self::getSession()) {
             $return = WC()->session->get($key);

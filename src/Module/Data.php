@@ -9,9 +9,7 @@ namespace ResursBank\Module;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Log\LogLevel;
-use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
@@ -2262,114 +2260,6 @@ class Data
             $currentValue = 2;
         }
         return $currentValue;
-    }
-
-    /**
-     * @param string $key
-     * @param array|null $wpPostData Data sent from WP/WC (and by default is based on unparsed uri-looking strings).
-     * @return mixed
-     * @throws Exception
-     * @todo Move this to a more appropriate place (Url?), fix proper support for native _GET and solve some weird
-     * @todo if-cases.
-     */
-    public static function getRequest(string $key, array|null $wpPostData = null): mixed
-    {
-        if (is_array($wpPostData)) {
-            $requestArray = $wpPostData;
-        } else {
-            $requestArray = $_REQUEST;
-        }
-        $request = self::getSanitizedRequest($requestArray);
-        $return = $request[$key] ?? null;
-
-        if ($return === null && (bool)$wpPostData && isset($_REQUEST['post_data'])) {
-            parse_str($_REQUEST['post_data'], $newPostData);
-            if (is_array($newPostData)) {
-                // Early sanitizing should not apply here as we are strict typing some of the values.
-                // Applying the values wrong could cause strange values.
-                $return = $newPostData[$key] ?? '';
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * $_REQUEST-sanitizer.
-     * @param $requestArray
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.1
-     */
-    public static function getSanitizedRequest($requestArray): array
-    {
-        $returnRequest = [];
-        if (is_array($requestArray)) {
-            $returnRequest = self::getSanitizedArray($requestArray);
-        }
-        return $returnRequest;
-    }
-
-    /**
-     * Recursive string sanitizer.
-     *
-     * @param mixed $array Data not only from the plugin lands here.
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.1
-     */
-    public static function getSanitizedArray(mixed $array): array
-    {
-        $arrays = new ArrayValidation();
-        $returnArray = [];
-        if (is_array($array)) {
-            try {
-                $arrays->isAssoc($array);
-                foreach ($array as $arrayKey => $arrayValue) {
-                    if (is_array($arrayValue)) {
-                        // Recursive request.
-                        $returnArray[self::getSanitizedKeyElement($arrayKey)] = self::getSanitizedArray($arrayValue);
-                    } elseif (!is_object($arrayValue)) {
-                        $returnArray[self::getSanitizedKeyElement($arrayKey)] = esc_html($arrayValue);
-                    }
-                }
-            } catch (IllegalValueException $e) {
-                foreach ($array as $item) {
-                    if (is_array($item)) {
-                        // Recursive request.
-                        $returnArray[] = self::getSanitizedArray($item);
-                    } elseif (is_string($item)) {
-                        $returnArray[] = esc_html($item);
-                    }
-                }
-            }
-        } else {
-            self::writeLogError(
-                'Someone sent other data than arrays into the sanitizer!'
-            );
-            throw new RuntimeException('Can not sanitize other data than arrays!', 500);
-        }
-
-        return $returnArray;
-    }
-
-    /**
-     * Case fixed sanitizer, cloned from WordPress own functions, for which we sanitize keys based on
-     * element id's. Resurs Bank is very much built on case-sensitive values for why we want to sanitize
-     * on both lower- and uppercase.
-     * @param $key
-     * @return mixed
-     * @since 0.0.1.1
-     */
-    public static function getSanitizedKeyElement($key)
-    {
-        $sanitized_key = '';
-
-        if (is_scalar($key)) {
-            $sanitized_key = preg_replace('/[^a-z0-9_\-]/i', '', $key);
-        }
-
-        return apply_filters('sanitize_key', $sanitized_key, $key);
     }
 
     /**

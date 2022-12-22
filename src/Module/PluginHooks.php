@@ -15,6 +15,7 @@ use Resursbank\Ecommerce\Types\CheckoutType;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Utils\WordPress as wpHelper;
@@ -969,7 +970,7 @@ class PluginHooks
         // If we are saving or are somewhere else than in the payment methods section, we don't need
         // to run this controller as it is only used for visuals.
         if (!isset($_REQUEST['save']) &&
-            Data::getRequest('section') === 'payment_methods'
+            Url::getRequest('section') === 'payment_methods'
         ) {
             try {
                 $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
