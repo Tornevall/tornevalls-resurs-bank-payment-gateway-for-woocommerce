@@ -16,7 +16,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Locale\Locale;
+use Resursbank\Ecom\Lib\Locale\Language;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
@@ -115,12 +115,12 @@ class ResursBankAPI
                 scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
                 grantType: 'client_credentials'
             ),
-            locale: match (Data::getCustomerCountry()) {
-                'SE' => Locale::sv,
-                'DK' => Locale::da,
-                'NO' => Locale::no,
-                'FI' => Locale::fi,
-                default => Locale::en,
+            language: match (Data::getCustomerCountry()) {
+                'SE' => Language::sv,
+                'DK' => Language::da,
+                'NO' => Language::no,
+                'FI' => Language::fi,
+                default => Language::en,
             }
         );
     }
