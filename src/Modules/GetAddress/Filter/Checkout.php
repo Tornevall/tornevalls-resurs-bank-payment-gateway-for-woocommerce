@@ -13,7 +13,6 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Customer\Widget\GetAddress;
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -82,6 +81,8 @@ class Checkout
             }
         }
 
-        echo Data::getEscapedHtml($result);
+        // @todo Reinstate sanitizer (see WOO-954 ECP-327).
+//        echo Data::getEscapedHtml($result);
+        echo $result;
     }
 }
