@@ -192,6 +192,8 @@ const rbHandleFetchAddressResponse = (() => {
             if (obj.name === 'fullName') {
                 if (customerType === "LEGAL") {
                     obj.el.value = newVal;
+                } else {
+                    obj.el.value = '';
                 }
             } else {
                 obj.el.value = newVal;
