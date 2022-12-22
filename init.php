@@ -61,7 +61,8 @@ try {
     Config::setup(
         logger: Advanced::getLogger(),
         cache: Advanced::getCache(),
-        jwtAuth: Api::getJwt()
+        jwtAuth: Api::getJwt(),
+        logLevel: Advanced::getLogLevel()
     );
 } catch (Exception $e) {
 }
