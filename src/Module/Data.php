@@ -1014,7 +1014,10 @@ class Data
                 'd' => true,
                 'id' => true,
                 'fill' => true
-            ]
+            ],
+            'script' => [],
+            '=' => [],
+            '=>' => []
         ];
 
         // Run the purger, to limit clickable elements outside wp-admin.

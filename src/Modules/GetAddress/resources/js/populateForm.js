@@ -109,6 +109,11 @@ const rbHandleFetchAddressResponse = (() => {
             case 'city':
                 result = 'postalArea';
                 break;
+            case 'company':
+                // Resurs Bank puts the company name in the key "fullName" in
+                // the fetched address data.
+                result = 'fullName';
+                break;
             default:
                 result = '';
         }
@@ -173,20 +178,30 @@ const rbHandleFetchAddressResponse = (() => {
      * Updates checkout address fields with the supplied address data.
      *
      * @param {Rb.Address} data
+     * @param {"NATURAL"|"LEGAL"} customerType
      */
-    const updateAddressFields = (data) => {
+    const updateAddressFields = (data, customerType) => {
         const fields = getAddressFields(getCheckoutForm());
 
         fields?.billing.forEach((obj) => {
-            const newVal = data[obj.name];
+            const dataVal = data[obj.name];
+            const newVal = typeof dataVal === 'string' ? dataVal : obj.el.value;
 
-            obj.el.value = typeof newVal === 'string' ? newVal : obj.el.value;
+            // If-statement to avoid populating company field if customer type
+            // is "NATURAL".
+            if (obj.name === 'fullName') {
+                if (customerType === "LEGAL") {
+                    obj.el.value = newVal;
+                }
+            } else {
+                obj.el.value = newVal;
+            }
         });
     };
 
-    return (data) => {
+    return (data, customerType) => {
         try {
-            updateAddressFields(data);
+            updateAddressFields(data, customerType);
         } catch (e) {
             console.log(e);
         }
