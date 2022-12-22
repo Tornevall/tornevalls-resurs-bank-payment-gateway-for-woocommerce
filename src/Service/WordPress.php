@@ -16,6 +16,7 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
+use Throwable;
 use WC_Order;
 use WP_Post;
 use function count;
@@ -328,10 +329,10 @@ class WordPress
     }
 
     /**
-     * @param Exception $exception
+     * @param Throwable|Exception $exception
      * @since 0.0.1.4
      */
-    public static function setGenericError(Exception $exception)
+    public static function setGenericError(Throwable|Exception $exception)
     {
         if (!isset($_SESSION[Data::getPrefix()]['exception'])) {
             $_SESSION[Data::getPrefix()]['exception'] = [];
