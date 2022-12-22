@@ -26,11 +26,6 @@ if [ ! -d ./qa/psalm/cache ]; then
   mkdir ./qa/psalm/cache
 fi
 
-if [ ! -f ./qa/php-cs-fixer/.php-cs-fixer.cache ]; then
-  mkdir -p ./qa/php-cs-fixer
-  touch ./qa/php-cs-fixer/.php-cs-fixer.cache
-fi
-
 # Install Composer if it's not already available.
 if [ ! -f ./qa/bin/composer ]; then
   echo ""
@@ -71,29 +66,22 @@ echo ""
 
 echo "---==( Executing PHP CBF for source files. )==---"
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcbf --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
+if ! $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
   ERRORS=1
 fi
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcbf --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
-  ERRORS=1
-fi
-echo ""
-
-echo "---==( Executing PHP CS Fixer for source files. )==---"
-echo ""
-if ! $phpCmd $dir/vendor/bin/php-cs-fixer --cache-file=$dir/qa/php-cs-fixer/.php-cs-fixer.cache --config=$dir/qa/php-cs-fixer/.php-cs-fixer.dist.php fix; then
+if ! $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
   ERRORS=1
 fi
 echo ""
 
 echo "---==( Executing PHPCS for source files. )==---"
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcs --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
+if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
   ERRORS=1
 fi
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcs --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
+if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
   ERRORS=1
 fi
 echo ""
@@ -150,7 +138,6 @@ cat <<EOT >> ./composer.json
     "phpunit/phpunit": "^9",
     "phpmd/phpmd": "^2",
     "squizlabs/php_codesniffer": "^3",
-    "friendsofphp/php-cs-fixer": "^3",
     "vimeo/psalm": "^4",
     "phpstan/phpstan": "^1",
     "slevomat/coding-standard": "~8.0"
