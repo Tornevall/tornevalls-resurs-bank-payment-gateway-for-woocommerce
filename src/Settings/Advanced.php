@@ -9,15 +9,24 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Cache\CacheInterface;
 use Resursbank\Ecom\Lib\Cache\Filesystem;
 use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\FileLogger;
+use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Woocommerce\Database\Options\CacheDir;
 use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\LogDir;
+use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Throwable;
 use WC_Logger;
 
@@ -40,8 +49,14 @@ class Advanced
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
-     * @return array
      * @todo Refactor, method too big, move translations to ECom. WOO-897. Remove phpcs:ignore when completed.
+     * @return array[]
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws TranslationException
+     * @throws IllegalTypeException
      */
     // phpcs:ignore
     public static function getSettings(): array
@@ -61,6 +76,14 @@ class Advanced
                         'resurs-bank-payments-for-woocommerce'
                     ),
                     'default' => '',
+                ],
+                'log_level' => [
+                    'id' => LogLevel::getName(),
+                    'type' => 'select',
+                    'title' => Translator::translate(phraseId: 'log-level'),
+                    'desc' => Translator::translate(phraseId: 'log-level-description'),
+                    'default' => EcomLogLevel::INFO->value,
+                    'options' => self::getLogLevelOptions()
                 ],
                 'cache_dir' => [
                     'id' => CacheDir::getName(),
@@ -105,7 +128,6 @@ class Advanced
             if ($path === 'wc-logs') {
                 // If wc-logs are defined, we use the same log directory that WooCommerce sets up to be WC_LOG_PATH.
                 // This is used to simplify the setup for some instances that do not know about their log path.
-                /** @var array $uploadDir */
                 $uploadDir = wp_upload_dir(create_dir: false);
 
                 if (
@@ -140,6 +162,16 @@ class Advanced
     }
 
     /**
+     * Return the configured log level
+     *
+     * @return EcomLogLevel
+     */
+    public static function getLogLevel(): EcomLogLevel
+    {
+        return LogLevel::getLogLevel();
+    }
+
+    /**
      * Resolve cache handler based on supplied setting value. Returns a dummy
      * if the setting is empty.
      */
@@ -162,5 +194,21 @@ class Advanced
         }
 
         return $result;
+    }
+
+    /**
+     * Fetch options for the log level selector
+     *
+     * @return array
+     */
+    private static function getLogLevelOptions(): array
+    {
+        $options = [];
+
+        foreach (EcomLogLevel::cases() as $case) {
+            $options[$case->value] = $case->name;
+        }
+
+        return $options;
     }
 }
