@@ -32,7 +32,7 @@ if [ ! -f ./qa/bin/composer ]; then
   echo ""
   echo "--==( Installing Composer )==--"
   echo ""
-  curl -L https://github.com/composer/composer/releases/download/2.4.2/composer.phar -o ./qa/bin/composer
+  curl -L https://github.com/composer/composer/releases/latest/download/composer.phar -o ./qa/bin/composer
   echo ""
   echo ""
 fi

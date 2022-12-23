@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
+use Resursbank\Ecom\Module\Customer\Models\GetAddressRequest;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -34,26 +35,41 @@ class GetAddress
         $requestData = $controller->getRequestData();
 
         try {
-            $ecomSession = new Session();
-            WcSession::set(
-                $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
-                $requestData->govId
-            );
-            WcSession::set(
-                $ecomSession->getKey(
-                    key: Repository::SESSION_KEY_CUSTOMER_TYPE
-                ),
-                $requestData->customerType->value
-            );
+            self::updateSessionData(data: $requestData);
+
             $return = $controller->exec(
                 storeId: StoreId::getData(),
                 data: $requestData
             );
         } catch (Throwable $e) {
             // Do nothing.
-            Config::getLogger()->error($e);
+            Config::getLogger()->error(message: $e);
         }
 
         return $return ?? '{}';
+    }
+
+    /**
+     * Update selected customer type and submitted SSN (supplied when using the
+     * fetch address widget at checkout). These values will later be submitted
+     * to Resurs Bank to speed up the gateway procedure. Note that submitting
+     * these values to Resurs Bank is not a requirement for everything to work.
+     */
+    private static function updateSessionData(
+        GetAddressRequest $data
+    ): void {
+        $ecomSession = new Session();
+
+        WcSession::set(
+            key: $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
+            value: $data->govId
+        );
+
+        WcSession::set(
+            key: $ecomSession->getKey(
+                key: Repository::SESSION_KEY_CUSTOMER_TYPE
+            ),
+            value: $data->customerType->value
+        );
     }
 }
