@@ -43,7 +43,7 @@ class GetAddress
             );
         } catch (Throwable $e) {
             // Do nothing.
-            Config::getLogger()->error($e);
+            Config::getLogger()->error(message: $e);
         }
 
         return $return ?? '{}';
@@ -54,8 +54,6 @@ class GetAddress
      * fetch address widget at checkout). These values will later be submitted
      * to Resurs Bank to speed up the gateway procedure. Note that submitting
      * these values to Resurs Bank is not a requirement for everything to work.
-     *
-     * @return void
      */
     private static function updateSessionData(
         GetAddressRequest $data
