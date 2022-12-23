@@ -20,8 +20,8 @@ use Resursbank\Ecom\Lib\Cache\Filesystem;
 use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\FileLogger;
-use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
+use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Woocommerce\Database\Options\CacheDir;
 use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
@@ -49,14 +49,14 @@ class Advanced
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
-     * @todo Refactor, method too big, move translations to ECom. WOO-897. Remove phpcs:ignore when completed.
-     * @return array[]
+     * @return array<array>
      * @throws JsonException
      * @throws ReflectionException
      * @throws ConfigException
      * @throws FilesystemException
      * @throws TranslationException
      * @throws IllegalTypeException
+     * @todo Refactor, method too big, move translations to ECom. WOO-897. Remove phpcs:ignore when completed.
      */
     // phpcs:ignore
     public static function getSettings(): array
@@ -81,9 +81,11 @@ class Advanced
                     'id' => LogLevel::getName(),
                     'type' => 'select',
                     'title' => Translator::translate(phraseId: 'log-level'),
-                    'desc' => Translator::translate(phraseId: 'log-level-description'),
+                    'desc' => Translator::translate(
+                        phraseId: 'log-level-description'
+                    ),
                     'default' => EcomLogLevel::INFO->value,
-                    'options' => self::getLogLevelOptions()
+                    'options' => self::getLogLevelOptions(),
                 ],
                 'cache_dir' => [
                     'id' => CacheDir::getName(),
@@ -163,8 +165,6 @@ class Advanced
 
     /**
      * Return the configured log level
-     *
-     * @return EcomLogLevel
      */
     public static function getLogLevel(): EcomLogLevel
     {

@@ -128,7 +128,9 @@ class Settings extends WC_Settings_Page
                 if (StoreId::getData() === '') {
                     // The lazy handler.
                     throw new Exception(
-                        message: Translator::translate(phraseId: 'please-select-a-store')
+                        message: Translator::translate(
+                            phraseId: 'please-select-a-store'
+                        )
                     );
                 }
 

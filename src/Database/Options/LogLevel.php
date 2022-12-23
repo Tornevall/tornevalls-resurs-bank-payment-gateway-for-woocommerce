@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options;
 
-use Resursbank\Woocommerce\Database\StringOption;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
+use Resursbank\Woocommerce\Database\StringOption;
 use ValueError;
 
 /**
@@ -28,8 +28,6 @@ class LogLevel extends StringOption
 
     /**
      * Fetch configured log level as an actual LogLevel case
-     *
-     * @return EcomLogLevel
      */
     public static function getLogLevel(): EcomLogLevel
     {
