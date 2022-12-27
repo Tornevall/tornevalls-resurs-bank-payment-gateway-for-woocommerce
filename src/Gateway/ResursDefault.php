@@ -162,16 +162,14 @@ class ResursDefault extends WC_Payment_Gateway
         $return = null;
 
         if (isset($theorder)) {
-            Config::getLogger()->info('OrderView Using Order');
             $return = $theorder;
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
-            Config::getLogger()->info("OrderView Using Post");
             $return = new WC_Order($post->ID);
         } elseif (isset($_GET) && isset($_GET['post']) && is_string($_GET['post'])) {
-            Config::getLogger()->info("OrderView Using Get (emergency fallback).");
+            Config::getLogger()->warning(
+                message: 'OrderView is currently using $_GET to reach the current order (emergency fallback).'
+            );
             $return = new WC_Order($_GET['post']);
-        } else {
-            Config::getLogger()->info("OrderView has problems that makes me blind.");
         }
 
         return $return;
