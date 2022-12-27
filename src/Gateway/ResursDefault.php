@@ -156,12 +156,16 @@ class ResursDefault extends WC_Payment_Gateway
         global $post, $theorder;
         $return = null;
 
+        Config::getLogger()->info('Admin Set: ' . (Admin::isAdmin() ? 'yes':'no');
+
         if (isset($theorder)) {
             $return = $theorder;
             Config::getLogger()->info('OrderView Using Order');
-        } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order' && Admin::isAdmin()) {
+        } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
             $return = new WC_Order($post->ID);
-            Config::getLogger()->info("Orderview Using Post");
+            Config::getLogger()->info("OrderView Using Post");
+        } else {
+            Config::getLogger()->info('OrderView Cant See Anything.');
         }
 
         return $return;
