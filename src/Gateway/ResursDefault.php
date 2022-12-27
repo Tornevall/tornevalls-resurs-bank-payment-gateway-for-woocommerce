@@ -134,13 +134,21 @@ class ResursDefault extends WC_Payment_Gateway
     public function __construct(
         public readonly ?PaymentMethod $resursPaymentMethod = null
     ) {
-        // Do not verify if this sections is allowed to initialize. It has to initialize itself each time this
-        // class is called, even if the payment method itself is null (API calls is still depending on its existence).
-        $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
+        global $theorder;
 
         // A proper ID must always exist regardless of the init outcome. However, it should be set after the init
         // as the order view may want to use it differently.
         $this->id = $this->getProperGatewayId($resursPaymentMethod);
+
+        // Do not verify if this sections is allowed to initialize. It has to initialize itself each time this
+        // class is called, even if the payment method itself is null (API calls is still depending on its existence).
+        $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
+
+        Config::getLogger()->info('Payment method loaded: ' . $this->id);
+
+        if (isset($theorder)) {
+            Config::getLogger()->info('Loaded order view! Gateway id initialized: ' . $this->id);
+        }
     }
 
     /**
@@ -159,7 +167,7 @@ class ResursDefault extends WC_Payment_Gateway
         // id (uuid) that was used when the order was created.
         return !isset($resursPaymentMethod) && isset($theorder) && (
             $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder)
-        ) ? $theorder->get_payment_method() : $this->id;
+        ) ? $theorder->get_payment_method() : self::PREFIX;
     }
 
     /**
