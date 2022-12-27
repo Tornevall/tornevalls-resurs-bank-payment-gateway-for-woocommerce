@@ -154,6 +154,8 @@ class ResursDefault extends WC_Payment_Gateway
 
         if (isset($theorder) && $theorder instanceof WC_Order) {
             Config::getLogger()->info('Initialize paymentMethod based on order. Current ID: ' . $this->id);
+        } else {
+            Config::getLogger()->info('Initialize paymentMethod based on defaults (no order discovered). Current ID: ' . $this->id);
         }
 
         // If no PaymentMethod is set at this point, but instead an order, the gateway is considered not
