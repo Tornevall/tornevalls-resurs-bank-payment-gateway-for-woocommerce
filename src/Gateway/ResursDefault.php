@@ -134,13 +134,13 @@ class ResursDefault extends WC_Payment_Gateway
     public function __construct(
         public readonly ?PaymentMethod $resursPaymentMethod = null
     ) {
-        // A proper ID must always exist regardless of the init outcome. However, it should be set after the init
-        // as the order view may want to use it differently.
-        $this->id = $this->getProperGatewayId($resursPaymentMethod);
-
         // Do not verify if this sections is allowed to initialize. It has to initialize itself each time this
         // class is called, even if the payment method itself is null (API calls is still depending on its existence).
         $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
+
+        // A proper ID must always exist regardless of the init outcome. However, it should be set after the init
+        // as the order view may want to use it differently.
+        $this->id = $this->getProperGatewayId($resursPaymentMethod);
     }
 
     /**
@@ -151,16 +151,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         /** @noinspection SpellCheckingInspection */
         global $theorder;
-
-        if (!isset($theorder)) {
-            Config::getLogger()->info('$theorder is no set.');
-        }
-
-        if (isset($theorder) && $theorder instanceof WC_Order) {
-            Config::getLogger()->info('Initialize paymentMethod based on order. Current ID: ' . $this->id);
-        } else {
-            Config::getLogger()->info('Initialize paymentMethod based on defaults (no order discovered). Current ID: ' . $this->id);
-        }
 
         // If no PaymentMethod is set at this point, but instead an order, the gateway is considered not
         // located in the checkout but in a maintenance state (like wp-admin/order). In this case, we
