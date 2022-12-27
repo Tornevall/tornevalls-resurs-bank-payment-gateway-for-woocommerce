@@ -146,8 +146,10 @@ class ResursDefault extends WC_Payment_Gateway
 
         //Config::getLogger()->info('Payment method loaded: ' . $this->id);
 
-        if (!isset($theorder)) {
-            Config::getLogger()->info('Loaded order view! Gateway id initialized: ' . $this->id);
+        if (isset($theorder)) {
+            Config::getLogger()->info('Gateway id initialized with order, current id is ' . $this->id);
+        } else {
+            Config::getLogger()->info('Gateway id initialized without order, current id is ' . $this->id);
         }
     }
 
