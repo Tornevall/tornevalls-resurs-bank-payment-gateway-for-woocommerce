@@ -140,6 +140,8 @@ class ResursDefault extends WC_Payment_Gateway
         // Do not verify if this sections is allowed to initialize. It has to initialize itself each time this
         // class is called, even if the payment method itself is null (API calls is still depending on its existence).
         $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
+
+        Config::getLogger()->info('Init: ' . $this->id);
     }
 
     /**
