@@ -155,10 +155,10 @@ class ResursDefault extends WC_Payment_Gateway
         global $post, $theorder;
         $return = null;
 
-        Config::getLogger()->info('getOrder isset($theorder): ' . isset($theorder) ? 'Y':'N');
-        Config::getLogger()->info('getOrder isset($post): ' . isset($post) ? 'Y':'N');
-        Config::getLogger()->info('is_admin: ' . Admin::isAdmin() ? 'Y':'N');
-        
+        Config::getLogger()->info('getOrder isset($theorder): ' . isset($theorder) ? 'theorder':'no-order');
+        Config::getLogger()->info('getOrder isset($post): ' . isset($post) ? 'post-set':'post-not-set');
+        Config::getLogger()->info('is_admin: ' . Admin::isAdmin() ? 'is-admin':'not-admin');
+
         if (isset($theorder)) {
             $return = $theorder;
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order' && Admin::isAdmin()) {
