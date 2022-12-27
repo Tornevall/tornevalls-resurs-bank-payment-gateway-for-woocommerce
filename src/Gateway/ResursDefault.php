@@ -150,6 +150,9 @@ class ResursDefault extends WC_Payment_Gateway
      * @return WC_Order|null
      * @throws ConfigException
      * @noinspection SpellCheckingInspection
+     * @todo There is a problem somewhere related to dashboard or similar that makes us unable to
+     * @todo get access to an order in the internal order view. This method solves this problem temporarily
+     * @todo but should not be forced to use $_GET. It has to be changed to be safe.
      */
     private function getOrder(): WC_Order|null
     {
@@ -159,13 +162,14 @@ class ResursDefault extends WC_Payment_Gateway
         $return = null;
 
         if (isset($theorder)) {
-            $return = $theorder;
             Config::getLogger()->info('OrderView Using Order');
+            $return = $theorder;
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
-            $return = new WC_Order($post->ID);
             Config::getLogger()->info("OrderView Using Post");
-        } elseif (isset($_GET)) {
-            Config::getLogger()->info("OrderView has a \$_GET: " . print_r($_GET, true));
+            $return = new WC_Order($post->ID);
+        } elseif (isset($_GET) && isset($_GET['post']) && is_string($_GET['post'])) {
+            Config::getLogger()->info("OrderView Using Get (emergency fallback).");
+            $return = new WC_Order($_GET['post']);
         } else {
             Config::getLogger()->info("OrderView has problems that makes me blind.");
         }
