@@ -159,7 +159,7 @@ class ResursDefault extends WC_Payment_Gateway
         // id (uuid) that was used when the order was created.
         return !isset($resursPaymentMethod) && isset($theorder) && (
             $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder)
-        ) ? $theorder->get_payment_method() : self::PREFIX;
+        ) ? $theorder->get_payment_method() : $this->id;
     }
 
     /**
