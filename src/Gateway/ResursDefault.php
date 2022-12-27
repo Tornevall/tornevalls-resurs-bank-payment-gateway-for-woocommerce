@@ -46,6 +46,7 @@ use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -57,6 +58,7 @@ use WC_Payment_Gateway;
 use WC_Product;
 use WC_Session_Handler;
 use WC_Tax;
+use WP_Post;
 use function in_array;
 use function is_object;
 use function sha1;
@@ -134,8 +136,6 @@ class ResursDefault extends WC_Payment_Gateway
     public function __construct(
         public readonly ?PaymentMethod $resursPaymentMethod = null
     ) {
-        global $theorder;
-
         // A proper ID must always exist regardless of the init outcome. However, it should be set after the init
         // as the order view may want to use it differently.
         $this->id = $this->getProperGatewayId($resursPaymentMethod);
@@ -143,14 +143,24 @@ class ResursDefault extends WC_Payment_Gateway
         // Do not verify if this sections is allowed to initialize. It has to initialize itself each time this
         // class is called, even if the payment method itself is null (API calls is still depending on its existence).
         $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
+    }
 
-        //Config::getLogger()->info('Payment method loaded: ' . $this->id);
+    /**
+     * Method to properly fetch an order if it is present in a current "view".
+     * @return WC_Order|null
+     */
+    private function getOrder(): WC_Order|null
+    {
+        global $post, $theorder;
+        $return = null;
 
-        if (!is_null($theorder)) {
-            Config::getLogger()->info('Gateway id initialized with order, current id is ' . $this->id);
-        } else {
-            Config::getLogger()->info('Gateway id initialized without order, current id is ' . $this->id);
+        if (isset($theorder)) {
+            $return = $theorder;
+        } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order' && Admin::isAdmin()) {
+            $return = new WC_Order($post->ID);
         }
+
+        return $return;
     }
 
     /**
@@ -159,17 +169,16 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function getProperGatewayId(?PaymentMethod $resursPaymentMethod = null): string
     {
-        /** @noinspection SpellCheckingInspection */
-        global $theorder;
+        $currentOrder = $this->getOrder();
 
         // If no PaymentMethod is set at this point, but instead an order, the gateway is considered not
         // located in the checkout but in a maintenance state (like wp-admin/order). In this case, we
         // need to identify the current order as created with Resurs payments. Since WooCommerce is using
         // the gateway id to identify the current payment method, we also need to adapt into the initial
         // id (uuid) that was used when the order was created.
-        return !isset($resursPaymentMethod) && isset($theorder) && (
-            $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder)
-        ) ? $theorder->get_payment_method() : self::PREFIX;
+        return !isset($resursPaymentMethod) && isset($currentOrder) && (
+            $currentOrder instanceof WC_Order && Metadata::isValidResursPayment($currentOrder)
+        ) ? $currentOrder->get_payment_method() : self::PREFIX;
     }
 
     /**
