@@ -150,9 +150,9 @@ class ResursDefault extends WC_Payment_Gateway
      * @return WC_Order|null
      * @throws ConfigException
      * @noinspection SpellCheckingInspection
-     * @todo There is a problem somewhere related to dashboard or similar that makes us unable to
-     * @todo get access to an order in the internal order view. This method solves this problem temporarily
-     * @todo but should not be forced to use $_GET. It has to be changed to be safe.
+     * @todo WOO-960 - There is a problem somewhere related to dashboard or similar that makes us unable to
+     * @todo WOO-960 - get access to an order in the internal order view. This method solves this problem temporarily
+     * @todo WOO-960 - but should not be forced to use $_GET. It has to be changed to be safe.
      */
     private function getOrder(): WC_Order|null
     {
