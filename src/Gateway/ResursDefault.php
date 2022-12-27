@@ -162,8 +162,6 @@ class ResursDefault extends WC_Payment_Gateway
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
             $return = new WC_Order($post->ID);
             Config::getLogger()->info("OrderView Using Post");
-        } else {
-            Config::getLogger()->info('OrderView Cant See Anything.');
         }
 
         return $return;
