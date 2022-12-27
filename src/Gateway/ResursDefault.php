@@ -156,8 +156,6 @@ class ResursDefault extends WC_Payment_Gateway
         global $post, $theorder;
         $return = null;
 
-        Config::getLogger()->info('Admin Set: ' . (Admin::isAdmin() ? 'yes':'no'));
-
         if (isset($theorder)) {
             $return = $theorder;
             Config::getLogger()->info('OrderView Using Order');
