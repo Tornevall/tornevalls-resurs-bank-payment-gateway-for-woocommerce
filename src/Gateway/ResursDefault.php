@@ -148,6 +148,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * Method to properly fetch an order if it is present in a current "view".
      * @return WC_Order|null
+     * @throws ConfigException
      * @noinspection SpellCheckingInspection
      */
     private function getOrder(): WC_Order|null
@@ -155,14 +156,12 @@ class ResursDefault extends WC_Payment_Gateway
         global $post, $theorder;
         $return = null;
 
-        Config::getLogger()->info('getOrder isset($theorder): ' . isset($theorder) ? 'theorder':'no-order');
-        Config::getLogger()->info('getOrder isset($post): ' . isset($post) ? 'post-set':'post-not-set');
-        Config::getLogger()->info('is_admin: ' . Admin::isAdmin() ? 'is-admin':'not-admin');
-
         if (isset($theorder)) {
             $return = $theorder;
+            Config::getLogger()->info('OrderView Using Order');
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order' && Admin::isAdmin()) {
             $return = new WC_Order($post->ID);
+            Config::getLogger()->info("Orderview Using Post");
         }
 
         return $return;
