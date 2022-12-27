@@ -152,6 +152,10 @@ class ResursDefault extends WC_Payment_Gateway
         /** @noinspection SpellCheckingInspection */
         global $theorder;
 
+        if (isset($theorder)) {
+            Config::getLogger()->info(get_class($theorder));
+        }
+
         if (isset($theorder) && $theorder instanceof WC_Order) {
             Config::getLogger()->info('Initialize paymentMethod based on order. Current ID: ' . $this->id);
         } else {
