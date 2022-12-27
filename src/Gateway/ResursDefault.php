@@ -144,9 +144,9 @@ class ResursDefault extends WC_Payment_Gateway
         // class is called, even if the payment method itself is null (API calls is still depending on its existence).
         $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
 
-        Config::getLogger()->info('Payment method loaded: ' . $this->id);
+        //Config::getLogger()->info('Payment method loaded: ' . $this->id);
 
-        if (isset($theorder)) {
+        if (!isset($theorder)) {
             Config::getLogger()->info('Loaded order view! Gateway id initialized: ' . $this->id);
         }
     }
