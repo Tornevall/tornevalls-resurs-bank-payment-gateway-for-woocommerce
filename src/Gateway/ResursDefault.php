@@ -152,8 +152,8 @@ class ResursDefault extends WC_Payment_Gateway
         /** @noinspection SpellCheckingInspection */
         global $theorder;
 
-        if (isset($theorder)) {
-            Config::getLogger()->info(get_class($theorder));
+        if (!isset($theorder)) {
+            Config::getLogger()->info('$theorder is no set.');
         }
 
         if (isset($theorder) && $theorder instanceof WC_Order) {
