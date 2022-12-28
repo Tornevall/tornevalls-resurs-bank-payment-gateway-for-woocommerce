@@ -40,13 +40,13 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Redirecti
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
-use ResursBank\Module\OrderStatus;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -58,6 +58,7 @@ use WC_Payment_Gateway;
 use WC_Product;
 use WC_Session_Handler;
 use WC_Tax;
+use WP_Post;
 use function in_array;
 use function is_object;
 use function sha1;
@@ -135,49 +136,62 @@ class ResursDefault extends WC_Payment_Gateway
     public function __construct(
         public readonly ?PaymentMethod $resursPaymentMethod = null
     ) {
-        // id must always exist regardless.
+        // A proper ID must always exist regardless of the init outcome. However, it should be set after the init
+        // as the order view may want to use it differently.
         $this->id = $this->getProperGatewayId($resursPaymentMethod);
 
-        // Do not initialize the rest of the gateway if there is no payment method (or order) to initialize with.
-        // See canInitializeGateway for further details.
-        if ($this->canInitializeGateway($this->resursPaymentMethod)) {
-            $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
-        }
+        // Do not verify if this sections is allowed to initialize. It has to initialize itself each time this
+        // class is called, even if the payment method itself is null (API calls is still depending on its existence).
+        $this->initializePaymentMethod(paymentMethod: $resursPaymentMethod);
     }
 
     /**
-     * Special feature that tells us when we are good to go with the payment method initialization.
-     * @param PaymentMethod|null $resursPaymentMethod
-     * @return bool
+     * Method to properly fetch an order if it is present in a current "view".
+     * @return WC_Order|null
+     * @throws ConfigException
+     * @noinspection SpellCheckingInspection
+     * @todo WOO-960 - There is a problem somewhere related to dashboard or similar that makes us unable to
+     * @todo WOO-960 - get access to an order in the internal order view. This method solves this problem temporarily
+     * @todo WOO-960 - but should not be forced to use $_GET. It has to be changed to be safe.
      */
-    private function canInitializeGateway(?PaymentMethod $resursPaymentMethod = null): bool
+    private function getOrder(): WC_Order|null
     {
-        /** @noinspection SpellCheckingInspection */
         global $theorder;
+        $post = get_post();
 
-        // Init gateway can occur either when PaymentMethod is not null or when an order exists
-        // for which has been created with this gateway.
-        return $resursPaymentMethod instanceof PaymentMethod ||
-            (isset($theorder) && $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder));
+        $return = null;
+
+        if (isset($theorder)) {
+            $return = $theorder;
+        } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
+            $return = new WC_Order($post->ID);
+        } elseif (isset($_GET) && isset($_GET['post']) && is_string($_GET['post'])) {
+            Config::getLogger()->warning(
+                message: 'OrderView is currently using $_GET to reach the current order (emergency fallback).'
+            );
+            $return = new WC_Order($_GET['post']);
+        }
+
+        return $return;
     }
 
     /**
      * @param PaymentMethod|null $resursPaymentMethod
      * @return string
+     * @throws ConfigException
      */
     private function getProperGatewayId(?PaymentMethod $resursPaymentMethod = null): string
     {
-        /** @noinspection SpellCheckingInspection */
-        global $theorder;
+        $currentOrder = $this->getOrder();
 
         // If no PaymentMethod is set at this point, but instead an order, the gateway is considered not
         // located in the checkout but in a maintenance state (like wp-admin/order). In this case, we
         // need to identify the current order as created with Resurs payments. Since WooCommerce is using
         // the gateway id to identify the current payment method, we also need to adapt into the initial
         // id (uuid) that was used when the order was created.
-        return !isset($resursPaymentMethod) && isset($theorder) && (
-            $theorder instanceof WC_Order && Metadata::isValidResursPayment($theorder)
-        ) ? $theorder->get_payment_method() : self::PREFIX;
+        return !isset($resursPaymentMethod) && isset($currentOrder) && (
+            $currentOrder instanceof WC_Order && Metadata::isValidResursPayment($currentOrder)
+        ) ? $currentOrder->get_payment_method() : self::PREFIX;
     }
 
     /**
@@ -402,39 +416,6 @@ class ResursDefault extends WC_Payment_Gateway
     {
         if (Enabled::isEnabled()) {
             add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
-            // Using woocomerce_thankyou rather than woocommerce_thankyou_<id> as we run dynamic methods.
-            add_action('woocommerce_thankyou', array($this, 'setOrderStatusOnThankYouSuccess'));
-        }
-    }
-
-    /**
-     * Handle the landing-page from within the payment method gateway as the "thank you page" is very much
-     * a dynamic request. It either depends on the payment method (uuid) through the "thank_you_<id>" action or
-     * the single action ("thank_you", which is what we use), that is just firing thank-you's with the current order id.
-     *
-     * @param $order_id
-     * @return void
-     * @throws ConfigException
-     */
-    public function setOrderStatusOnThankYouSuccess($order_id = null): void
-    {
-        try {
-            $order = new WC_Order($order_id);
-            $resursReference = Metadata::getOrderMeta(order: $order, metaDataKey: 'order_reference');
-            $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(order: $order, metaDataKey: 'thankyou_trigger');
-            if ($thankYouTriggerCheck || $resursReference === '') {
-                // Not ours or already triggered.
-                return;
-            }
-            // Record that customer landed on the thank-you page once, so we don't have to run
-            // twice if page is reloaded.
-            Metadata::setOrderMeta(order: $order, metaDataKey: 'thankyou_trigger', metaDataValue: '1');
-            // This visually marks a proper customer return, from an external source.
-            $order->add_order_note(note: 'Customer returned from external source.');
-            OrderStatus::setWcOrderStatus(order: $order, paymentId: $resursReference);
-        } catch (Throwable $e) {
-            // Nothing happens here, except for logging.
-            Config::getLogger()->error(message: $e);
         }
     }
 

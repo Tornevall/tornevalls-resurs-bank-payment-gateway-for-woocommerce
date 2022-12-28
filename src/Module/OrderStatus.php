@@ -11,6 +11,7 @@ namespace ResursBank\Module;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
@@ -21,6 +22,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use Resursbank\Woocommerce\Util\Metadata;
+use Throwable;
 use WC_Order;
 
 /**
@@ -62,6 +65,37 @@ class OrderStatus
                     note: 'Payment is waiting for more information from Resurs.'
                 ),
             };
+        }
+    }
+
+    /**
+     * Handle the landing-page from within the payment method gateway as the "thank you page" is very much
+     * a dynamic request. It either depends on the payment method (uuid) through the "thank_you_<id>" action or
+     * the single action ("thank_you", which is what we use), that is just firing thank-you's with the current order id.
+     *
+     * @param $order_id
+     * @return void
+     * @throws ConfigException
+     */
+    public static function setOrderStatusOnThankYouSuccess($order_id = null): void
+    {
+        try {
+            $order = new WC_Order($order_id);
+            $resursReference = Metadata::getOrderMeta(order: $order, metaDataKey: 'order_reference');
+            $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(order: $order, metaDataKey: 'thankyou_trigger');
+            if ($thankYouTriggerCheck || $resursReference === '') {
+                // Not ours or already triggered.
+                return;
+            }
+            // Record that customer landed on the thank-you page once, so we don't have to run
+            // twice if page is reloaded.
+            Metadata::setOrderMeta(order: $order, metaDataKey: 'thankyou_trigger', metaDataValue: '1');
+            // This visually marks a proper customer return, from an external source.
+            $order->add_order_note(note: 'Customer returned from external source.');
+            OrderStatus::setWcOrderStatus(order: $order, paymentId: $resursReference);
+        } catch (Throwable $e) {
+            // Nothing happens here, except for logging.
+            Config::getLogger()->error(message: $e);
         }
     }
 }
