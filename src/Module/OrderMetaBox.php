@@ -39,7 +39,6 @@ class OrderMetaBox
         if (Data::canHandleOrder($paymentMethod)) {
             $orderData = Data::getOrderInfo($order);
             self::setOrderMetaInformation($orderData);
-            $orderData['ecom_meta'] = [];
             try {
                 $paymentInformation = new Module(paymentId: $orderData['meta']['resursbank_order_reference'][0]);
                 echo Data::getEscapedHtml(content: $paymentInformation->widget->content);
