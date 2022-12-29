@@ -3,11 +3,13 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Modules\PaymentInformation\Module;
 use ResursException;
 use Throwable;
 use WC_Order;
@@ -39,10 +41,11 @@ class OrderMetaBox
             self::setOrderMetaInformation($orderData);
             $orderData['ecom_meta'] = [];
             try {
-                $widget = new PaymentInformation(paymentId: $orderData['meta']['resursbank_order_reference'][0]);
-                echo Data::getEscapedHtml($widget->content);
+                $paymentInformation = new Module(paymentId: $orderData['meta']['resursbank_order_reference'][0]);
+                echo Data::getEscapedHtml(content: $paymentInformation->widget->content);
             } catch (Throwable $error) {
                 echo '<b>' . $error->getMessage() . '</b>';
+                Config::getLogger()->error(message: $error);
             }
         }
     }
