@@ -4,10 +4,12 @@ namespace ResursBank\Module;
 
 use Exception;
 use Resursbank\Ecom\Lib\Log\LogLevel;
+use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use ResursException;
+use Throwable;
 use WC_Order;
 use WP_Post;
 
@@ -26,12 +28,6 @@ class OrderMetaBox
      */
     public static function output_order($post)
     {
-        // @todo We no longer use renderers from Generic class loaded via ecom1, so we have to rebuild this view.
-        // @todo This will be rendered from a getPayment-widget in ecom2, so while waiting for this moment,
-        // @todo we'll just return an empty string.
-
-        return '';
-
         if (!$post instanceof WP_Post && $post->post_type !== 'shop_order') {
             return;
         }
@@ -42,26 +38,12 @@ class OrderMetaBox
             $orderData = Data::getOrderInfo($order);
             self::setOrderMetaInformation($orderData);
             $orderData['ecom_meta'] = [];
-            if (!isset($orderData['ecom'])) {
-                $orderData['ecom'] = [];
+            try {
+                $widget = new PaymentInformation(paymentId: $orderData['meta']['resursbank_order_reference'][0]);
+                echo Data::getEscapedHtml($widget->content);
+            } catch (Throwable $error) {
+                echo '<b>' . $error->getMessage() . '</b>';
             }
-            if (!isset($orderData['ecom_short'])) {
-                $orderData['ecom_short'] = [];
-            }
-
-            if (isset($orderData['meta']) && is_array($orderData['meta'])) {
-                $orderData['ecom_short'] = WooCommerce::getMetaDataFromOrder(
-                    $orderData['ecom_short'],
-                    []
-                );
-            }
-            /*echo Data::getEscapedHtml(
-                content: Data::getGenericClass()->getTemplate(
-                    templateName: 'adminpage_details.phtml',
-                    assignedVariables: $orderData
-                )
-            );*/
-            WordPress::doAction(actionName: 'showOrderDetails', value: $orderData);
         }
     }
 
