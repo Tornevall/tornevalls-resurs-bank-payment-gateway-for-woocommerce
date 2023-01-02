@@ -182,6 +182,11 @@ class WordPress
             );
         }
 
+        add_action(
+            'admin_head',
+            'Resursbank\Woocommerce\Modules\PaymentInformation\Module::setCss'
+        );
+
         add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
