@@ -81,9 +81,9 @@ class OrderStatus
     {
         try {
             $order = new WC_Order($order_id);
-            $resursReference = Metadata::getOrderMeta(order: $order, metaDataKey: 'order_reference');
+            $resursPaymentId = Metadata::getOrderMeta(order: $order, metaDataKey: 'payment_id');
             $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(order: $order, metaDataKey: 'thankyou_trigger');
-            if ($thankYouTriggerCheck || $resursReference === '') {
+            if ($thankYouTriggerCheck || $resursPaymentId === '') {
                 // Not ours or already triggered.
                 return;
             }
@@ -92,7 +92,7 @@ class OrderStatus
             Metadata::setOrderMeta(order: $order, metaDataKey: 'thankyou_trigger', metaDataValue: '1');
             // This visually marks a proper customer return, from an external source.
             $order->add_order_note(note: 'Customer returned from external source.');
-            OrderStatus::setWcOrderStatus(order: $order, paymentId: $resursReference);
+            OrderStatus::setWcOrderStatus(order: $order, paymentId: $resursPaymentId);
         } catch (Throwable $e) {
             // Nothing happens here, except for logging.
             Config::getLogger()->error(message: $e);

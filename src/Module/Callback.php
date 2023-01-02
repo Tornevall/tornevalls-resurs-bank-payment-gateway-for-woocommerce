@@ -56,7 +56,7 @@ class Callback
         $paymentId = self::getOrderReferenceFromCallbackModel(callbackModel: $callbackModel);
 
         if ($paymentId !== '') {
-            $order = Database::getOrderByReference(orderReference: $paymentId);
+            $order = Database::getOrderByPaymentId(paymentId: $paymentId);
             $callbackNote = sprintf(
                 'Callback %s, for payment %s (order %s) received. Status/action: %s, trace: %s.',
                 $callbackType->value,
