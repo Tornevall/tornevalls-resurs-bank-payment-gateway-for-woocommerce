@@ -1004,7 +1004,7 @@ class ResursDefault extends WC_Payment_Gateway
             // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
             Metadata::setOrderMeta(
                 order: $order,
-                metaDataKey: 'order_reference',
+                metaDataKey: 'payment_id',
                 metaDataValue: $paymentResponse->id
             );
         } catch (Exception $createPaymentException) {

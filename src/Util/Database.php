@@ -31,7 +31,7 @@ class Database
      * @todo Refactor then remove phpcs:ignore comment below. WOO-893
      */
     // phpcs:ignore
-    public static function getOrderByReference(string $orderReference): WC_Order
+    public static function getOrderByPaymentId(string $paymentId): WC_Order
     {
         global $wpdb;
 
@@ -43,8 +43,8 @@ class Database
             $orderResult = $wpdb->get_var(
                 query: $wpdb->prepare(
                     "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
-                    ResursDefault::PREFIX . '_order_reference',
-                    $orderReference
+                    ResursDefault::PREFIX . '_payment_id',
+                    $paymentId
                 )
             );
 

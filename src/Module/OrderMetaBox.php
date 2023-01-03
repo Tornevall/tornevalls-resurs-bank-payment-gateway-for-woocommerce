@@ -93,11 +93,11 @@ class OrderMetaBox
      */
     private static function getResursBankPaymentId(array $orderData): string
     {
-        if (!isset($orderData['meta']['resursbank_order_reference'][0])) {
-            throw new MissingKeyException(message: 'Missing resursbank_order_reference in metadata');
+        if (!isset($orderData['meta']['resursbank_payment_id'][0])) {
+            throw new MissingKeyException(message: 'Missing resursbank_payment_id in metadata');
         }
 
-        return $orderData['meta']['resursbank_order_reference'][0];
+        return $orderData['meta']['resursbank_payment_id'][0];
     }
 
     /**
