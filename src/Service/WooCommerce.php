@@ -7,6 +7,7 @@
 namespace ResursBank\Service;
 
 use Exception;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
@@ -27,6 +28,7 @@ use function in_array;
 use function is_array;
 use function is_object;
 use function is_string;
+use Throwable;
 
 /**
  * Class WooCommerce related actions.
@@ -104,6 +106,7 @@ class WooCommerce
      * @param mixed $gateways
      * @return mixed
      * @throws ConfigException
+     * @throws Throwable
      * @since 0.0.1.0
      */
     public static function getAvailableGateways(mixed $gateways): mixed
@@ -115,7 +118,14 @@ class WooCommerce
         if (is_array($gateways)) {
             // Payment methods here are listed for non-admin-pages only. In admin, the only gateway visible
             // should be ResursDefault in its default state.
-            $gateways += WooCommerce::getGatewaysFromPaymentMethods($gateways);
+            try {
+                $gateways += WooCommerce::getGatewaysFromPaymentMethods($gateways);
+            } catch (Throwable $e) {
+                // Catch errors if something goes wrong during gateway fetching.
+                // If errors occurs in wp-admin, an error note will show up, instead of crashing the entire site.
+                WordPress::setGenericError($e);
+                Config::getLogger()->error($e);
+            }
         }
 
         return $gateways;
