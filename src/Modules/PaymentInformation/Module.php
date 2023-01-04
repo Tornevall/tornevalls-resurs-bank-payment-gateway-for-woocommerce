@@ -30,12 +30,10 @@ use Resursbank\Woocommerce\Util\Currency;
  */
 class Module
 {
-    /** @var PaymentInformation */
     public PaymentInformation $widget;
 
     /**
      * @param string $paymentId Resurs payment ID
-     *
      * @throws JsonException
      * @throws ReflectionException
      * @throws ApiException
@@ -60,14 +58,6 @@ class Module
     }
 
     /**
-     * Outputs the actual widget HTML
-     */
-    public function getWidget(): void
-    {
-        echo Data::getEscapedHtml($this->widget->content);
-    }
-
-    /**
      * Sets CSS in header if the current page is the order view.
      */
     public static function setCss(): void
@@ -75,9 +65,21 @@ class Module
         $screen = get_current_screen();
         $screen_id = $screen ? $screen->id : '';
 
-        if ($screen_id === 'shop_order') {
-            echo '<style>' . Data::getEscapedHtml(PaymentInformation::getCss()) . '</style>';
+        if ($screen_id !== 'shop_order') {
+            return;
         }
+
+        echo '<style>' . Data::getEscapedHtml(
+            PaymentInformation::getCss()
+        ) . '</style>';
+    }
+
+    /**
+     * Outputs the actual widget HTML
+     */
+    public function getWidget(): void
+    {
+        echo Data::getEscapedHtml($this->widget->content);
     }
 
     /**

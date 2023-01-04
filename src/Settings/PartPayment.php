@@ -77,7 +77,9 @@ class PartPayment
                     ),
                     'type' => 'select',
                     'options' => self::getPaymentMethods(),
-                    'desc' => Translator::translate(phraseId: 'part-payment-payment-method')
+                    'desc' => Translator::translate(
+                        phraseId: 'part-payment-payment-method'
+                    ),
                 ],
                 'period' => [
                     'id' => Period::getName(),
@@ -86,13 +88,17 @@ class PartPayment
                     ),
                     'type' => 'select',
                     'options' => self::getAnnuityPeriods(),
-                    'desc' => Translator::translate(phraseId: 'part-payment-annuity-period')
+                    'desc' => Translator::translate(
+                        phraseId: 'part-payment-annuity-period'
+                    ),
                 ],
                 'limit' => [
                     'id' => Limit::getName(),
                     'title' => Translator::translate(phraseId: 'limit'),
                     'type' => 'text',
-                    'desc' => Translator::translate(phraseId: 'part-payment-limit')
+                    'desc' => Translator::translate(
+                        phraseId: 'part-payment-limit'
+                    ),
                 ],
             ],
         ];
