@@ -337,10 +337,9 @@ class WordPress
     }
 
     /**
-     * @param Throwable|Exception $exception
-     * @since 0.0.1.4
+     * @param Throwable $exception
      */
-    public static function setGenericError(Throwable|Exception $exception)
+    public static function setGenericError(Throwable $exception): void
     {
         if (!isset($_SESSION[ResursDefault::PREFIX]['exception'])) {
             $_SESSION[ResursDefault::PREFIX]['exception'] = [];
@@ -356,11 +355,11 @@ class WordPress
     /**
      * Look for duplicate messages in session exceptions.
      *
-     * @param Throwable|Exception $exception
+     * @param Throwable $exception
      * @return bool
      * @since 0.0.1.4
      */
-    private static function canAddException(Throwable|Exception $exception): bool
+    private static function canAddException(Throwable $exception): bool
     {
         $return = true;
 
