@@ -57,15 +57,17 @@ class Callback
 
         if ($paymentId !== '') {
             $order = Database::getOrderByPaymentId(paymentId: $paymentId);
-            $callbackNote = sprintf(
-                'Callback %s, for payment %s (order %s) received. Status/action: %s, trace: %s.',
-                $callbackType->value,
-                $paymentId,
-                $order->get_id(),
-                $callbackType === CallbackType::AUTHORIZATION ?
-                    $callbackModel->status->value : $callbackModel->action->value,
-                $callbackType === CallbackType::MANAGEMENT ? $callbackModel->actionId : '-'
-            );
+
+            $traceInfo = $callbackType === CallbackType::MANAGEMENT ? $callbackModel->actionId : '';
+            $callbackNote = 'Callback ' . $callbackType->value . ' received. Status/action: ' .
+                (
+                    $callbackType === CallbackType::AUTHORIZATION ?
+                    $callbackModel->status->value : $callbackModel->action->value
+                );
+
+            if ($traceInfo !== '') {
+                $callbackNote .= ' (Trace: ' . $traceInfo . ').';
+            }
 
             Config::getLogger()->info(
                 message: $callbackNote

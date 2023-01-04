@@ -20,6 +20,9 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Locale\Language;
+use Resursbank\Ecom\Lib\Locale\Translation;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -58,11 +61,11 @@ class OrderStatus
                 PaymentStatus::ACCEPTED => $order->payment_complete(),
                 PaymentStatus::REJECTED => $order->update_status(
                     new_status: 'failed',
-                    note: 'Payment rejected by Resurs.'
+                    note: Translator::translate(phraseId: 'payment-status-failed')
                 ),
                 default => $order->update_status(
                     new_status: 'on-hold',
-                    note: 'Payment is waiting for more information from Resurs.'
+                    note: Translator::translate(phraseId: 'payment-status-on-hold')
                 ),
             };
         }
@@ -91,7 +94,7 @@ class OrderStatus
             // twice if page is reloaded.
             Metadata::setOrderMeta(order: $order, metaDataKey: 'thankyou_trigger', metaDataValue: '1');
             // This visually marks a proper customer return, from an external source.
-            $order->add_order_note(note: 'Customer returned from external source.');
+            $order->add_order_note(note: Translator::translate(phraseId: 'customer-landingpage-return'));
             OrderStatus::setWcOrderStatus(order: $order, paymentId: $resursPaymentId);
         } catch (Throwable $e) {
             // Nothing happens here, except for logging.
