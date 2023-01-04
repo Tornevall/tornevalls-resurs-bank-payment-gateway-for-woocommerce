@@ -341,10 +341,12 @@ class WordPress
      */
     public static function setGenericError(Throwable $exception): void
     {
-        if (!isset($_SESSION[ResursDefault::PREFIX]['exception']) ||
-            !is_array($_SESSION[ResursDefault::PREFIX]['exception'])
+        if (!isset($_SESSION[ResursDefault::PREFIX]) ||
+            !is_array($_SESSION[ResursDefault::PREFIX])
         ) {
-            $_SESSION[ResursDefault::PREFIX]['exception'] = [];
+            $_SESSION[ResursDefault::PREFIX] = [
+                'exception' => []
+            ];
         }
         // Make sure the errors are not duplicated.
         if (self::canAddException(exception: $exception)) {
