@@ -15,6 +15,7 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use ResursBank\Module\Data;
+use Throwable;
 
 /**
  * Checkout Unique selling Point (USP) functionality
