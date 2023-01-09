@@ -14,25 +14,14 @@ use WC_Order;
 
 /**
  * Order metadata handler.
+ *
  * @psalm-suppress MissingDependency
  */
 class Metadata
 {
     /**
-     * Reported fix: Left operand cannot be mixed (see https://psalm.dev/059)
-     * @return string
-     */
-    private static function getPrefix(): string
-    {
-        return Settings::PREFIX;
-    }
-
-    /**
-     * Set meta data to WC Order
-     * @param WC_Order $order
-     * @param string $metaDataKey
-     * @param string $metaDataValue
-     * @return bool
+     * Set metadata to an order.
+     * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
      */
     public static function setOrderMeta(
         WC_Order $order,
@@ -48,9 +37,8 @@ class Metadata
     }
 
     /**
-     * @param WC_Order $order
-     * @param string $metaDataKey
-     * @return string
+     * Return metadata from an order, as a single variable.
+     * Normally metadata is returned as array, but currently we usually only save values once.
      */
     public static function getOrderMeta(WC_Order $order, string $metaDataKey): string
     {
@@ -63,11 +51,20 @@ class Metadata
 
     /**
      * Check if current order is a valid Resurs Payment.
-     * @param WC_Order $order
-     * @return bool
      */
     public static function isValidResursPayment(WC_Order $order): bool
     {
-        return Metadata::getOrderMeta(order: $order, metaDataKey: 'payment_id') !== '';
+        return Metadata::getOrderMeta(
+            order: $order,
+            metaDataKey: 'payment_id'
+        ) !== '';
+    }
+
+    /**
+     * Reported fix: Left operand cannot be mixed (see https://psalm.dev/059)
+     */
+    private static function getPrefix(): string
+    {
+        return Settings::PREFIX;
     }
 }
