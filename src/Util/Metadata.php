@@ -14,6 +14,7 @@ use WC_Order;
 
 /**
  * Order metadata handler.
+ * @psalm-suppress MissingDependency
  */
 class Metadata
 {

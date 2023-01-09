@@ -27,6 +27,8 @@ use Resursbank\Woocommerce\Util\Currency;
 
 /**
  * Handles the output of the order view payment information widget
+ *
+ * @SuppressWarnings(PHPMD.CamelCaseVariableName)
  */
 class Module
 {
