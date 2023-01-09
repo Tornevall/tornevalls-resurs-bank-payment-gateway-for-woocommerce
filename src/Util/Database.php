@@ -19,6 +19,8 @@ use function is_string;
 
 /**
  * Actions to handle raw database requests.
+ *
+ * @psalm-suppress MissingDependency
  */
 class Database
 {

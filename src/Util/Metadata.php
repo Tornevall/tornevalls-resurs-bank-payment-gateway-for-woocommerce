@@ -21,11 +21,10 @@ class Metadata
     /**
      * Reported fix: Left operand cannot be mixed (see https://psalm.dev/059)
      * @return string
-     * @consider Centralizing this differently.
      */
     private static function getPrefix(): string
     {
-        return (string)Settings::PREFIX;
+        return Settings::PREFIX;
     }
 
     /**
