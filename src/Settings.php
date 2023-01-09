@@ -76,7 +76,7 @@ class Settings extends WC_Settings_Page
     }
 
     /**
-     * Compatible request method for functions that is currently using the above constant.
+     * Compatible request method for functions that is currently not using the above constant.
      */
     public static function getPrefix(): string
     {
