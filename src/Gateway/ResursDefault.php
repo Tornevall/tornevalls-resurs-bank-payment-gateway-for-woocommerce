@@ -321,6 +321,9 @@ class ResursDefault extends WC_Payment_Gateway
 
         // Make sure that the payment method is properly instantiated before using it.
         if (!empty($this->paymentMethodInformation)) {
+            if ($this->paymentMethodInformation->isResursMethod()) {
+                $return = Data::getImage(imageName: 'resurs-logo.png');
+            }
             // The filter we're calling is used internally from PluginHooks (method getMethodIconByContent).
             // Urls to a proper image is built from there if the images are properly included in this package.
             if (($icon = $this->getIconByFilter())) {
