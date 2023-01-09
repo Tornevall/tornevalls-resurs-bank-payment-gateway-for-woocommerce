@@ -30,7 +30,7 @@ class Metadata
     ): bool {
         return (bool)add_post_meta(
             post_id: $order->get_id(),
-            meta_key: self::getPrefix() . '_' . $metaDataKey,
+            meta_key: Settings::PREFIX . '_' . $metaDataKey,
             meta_value: $metaDataValue,
             unique: true
         );
@@ -44,7 +44,7 @@ class Metadata
     {
         return (string)get_post_meta(
             post_id: $order->get_id(),
-            key: self::getPrefix() . '_' . $metaDataKey,
+            key: Settings::PREFIX . '_' . $metaDataKey,
             single: true
         );
     }
@@ -58,13 +58,5 @@ class Metadata
             order: $order,
             metaDataKey: 'payment_id'
         ) !== '';
-    }
-
-    /**
-     * Reported fix: Left operand cannot be mixed (see https://psalm.dev/059)
-     */
-    private static function getPrefix(): string
-    {
-        return Settings::PREFIX;
     }
 }
