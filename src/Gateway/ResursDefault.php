@@ -47,6 +47,7 @@ use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -282,7 +283,6 @@ class ResursDefault extends WC_Payment_Gateway
             $this->id = self::PREFIX . '_' . $this->paymentMethodInformation->id;
             $this->payment_method = $this->id;
             $this->title = $this->paymentMethodInformation->name ?? '';
-            $this->method_description = '';
             $this->icon = $this->getMethodIconUrl();
 
             // Applicant post data should also be collected, so we can re-use it later.
@@ -871,24 +871,20 @@ class ResursDefault extends WC_Payment_Gateway
      * fields required by Resurs.
      *
      * @throws Exception
-     * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
-     * @todo Utilize ecom2!
      */
-    public function payment_fields()
+    public function payment_fields(): void
     {
-        /* Remember: When we display the fields, we must also make sure that WordPress is the part that sanitize
-         * and display the fields. Therefore, we eventually need to tell WordPress further about safe styling.
-
-           add_filter('safe_style_css', function ($styles) {
-                $styles[] = 'display';
-                return $styles;
-            });
-
-         */
-
-        // @todo See the code after the return part. This smaller is just temporary.
-        return 'Display "USP" - and eventually on demand also government id fields here.';
+        try {
+            $usp = PaymentMethodRepository::getUniqueSellingPoint(
+                paymentMethod: $this->resursPaymentMethod,
+                amount: $this->get_order_total()
+            );
+            echo $usp->content;
+        } catch (Throwable $error) {
+            Config::getLogger()->error(message: $error);
+            echo "";
+        }
     }
 
     /**
