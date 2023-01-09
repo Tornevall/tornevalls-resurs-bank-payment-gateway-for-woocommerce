@@ -46,7 +46,7 @@ use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
-use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -77,13 +77,6 @@ use function uniqid;
  */
 class ResursDefault extends WC_Payment_Gateway
 {
-    /**
-     * This prefix is used for various parts of the settings by WooCommerce,
-     * for example, as an ID for these settings, and as a prefix for the values
-     * in the database. The prefix is also used as an identifier for this gateway.
-     */
-    public const PREFIX = 'resursbank';
-
     /**
      * Default identifier title for this gateway.
      */
@@ -191,7 +184,7 @@ class ResursDefault extends WC_Payment_Gateway
         // id (uuid) that was used when the order was created.
         return !isset($resursPaymentMethod) && isset($currentOrder) && (
             $currentOrder instanceof WC_Order && Metadata::isValidResursPayment($currentOrder)
-        ) ? $currentOrder->get_payment_method() : self::PREFIX;
+        ) ? $currentOrder->get_payment_method() : Settings::PREFIX;
     }
 
     /**
@@ -279,7 +272,7 @@ class ResursDefault extends WC_Payment_Gateway
         if ($paymentMethod instanceof PaymentMethod) {
             // Collect the entire payment method information.
             $this->paymentMethodInformation = $paymentMethod;
-            $this->id = self::PREFIX . '_' . $this->paymentMethodInformation->id;
+            $this->id = Settings::PREFIX . '_' . $this->paymentMethodInformation->id;
             $this->payment_method = $this->id;
             $this->title = $this->paymentMethodInformation->name ?? '';
             $this->method_description = '';
@@ -370,7 +363,7 @@ class ResursDefault extends WC_Payment_Gateway
                         (string)preg_replace(
                             sprintf(
                                 '/%s_(.*?)_%s/',
-                                Data::getPrefix(),
+                                Settings::getPrefix(),
                                 $realMethodId
                             ),
                             '$1',

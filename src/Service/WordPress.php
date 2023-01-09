@@ -11,6 +11,7 @@ use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
+use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -262,7 +263,7 @@ class WordPress
 
         $internalExceptions = self::applyFilters(
             'getPluginAdminNotices',
-            (isset($_SESSION[Data::getPrefix()]['exception']) ? $_SESSION[Data::getPrefix()]['exception'] : [])
+            (isset($_SESSION[Settings::getPrefix()]['exception']) ? $_SESSION[Settings::getPrefix()]['exception'] : [])
         );
 
         if (count($internalExceptions)) {
@@ -273,11 +274,11 @@ class WordPress
                     '<div class="%1$s"><p>[%3$s] %2$s</p></div>',
                     esc_attr($class),
                     esc_html($item->getMessage()),
-                    Data::getPrefix()
+                    Settings::getPrefix()
                 );
             }
-            if (isset($_SESSION[Data::getPrefix()]['exception'])) {
-                unset($_SESSION[Data::getPrefix()]['exception']);
+            if (isset($_SESSION[Settings::getPrefix()]['exception'])) {
+                unset($_SESSION[Settings::getPrefix()]['exception']);
             }
         }
 
@@ -341,10 +342,10 @@ class WordPress
      */
     public static function setGenericError(Throwable $exception): void
     {
-        if (!isset($_SESSION[ResursDefault::PREFIX]) ||
-            !is_array($_SESSION[ResursDefault::PREFIX])
+        if (!isset($_SESSION[Settings::PREFIX]) ||
+            !is_array($_SESSION[Settings::PREFIX])
         ) {
-            $_SESSION[ResursDefault::PREFIX] = [
+            $_SESSION[Settings::PREFIX] = [
                 'exception' => []
             ];
         }
@@ -352,7 +353,7 @@ class WordPress
         if (self::canAddException(exception: $exception)) {
             // Add the exception to the session variable since that's where we can give it to WordPress in
             // the easiest way on page reloads/changes.
-            $_SESSION[ResursDefault::PREFIX]['exception'][] = $exception;
+            $_SESSION[Settings::PREFIX]['exception'][] = $exception;
         }
     }
 
@@ -367,9 +368,9 @@ class WordPress
     {
         $return = true;
 
-        if (isset($_SESSION[Data::getPrefix()]['exception'])) {
+        if (isset($_SESSION[Settings::getPrefix()]['exception'])) {
             /** @var Exception $item */
-            foreach ($_SESSION[Data::getPrefix()]['exception'] as $exceptionItem) {
+            foreach ($_SESSION[Settings::getPrefix()]['exception'] as $exceptionItem) {
                 if ($exceptionItem instanceof Exception) {
                     $message = $exceptionItem->getMessage();
                     if ($exception->getMessage() === $message) {
@@ -518,7 +519,7 @@ class WordPress
                 '%s/js/%s?%s',
                 Data::getGatewayUrl(),
                 $scriptFile,
-                Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
+                Data::getTestMode() ? Settings::getPrefix() . '-' . time() : 'static'
             ),
             Data::getJsDependencies($scriptName, $isAdmin)
         );
@@ -599,7 +600,7 @@ class WordPress
     private static function getLocalizationDataAdmin($return)
     {
         global $current_tab, $current_section;
-        $return['prefix'] = Data::getPrefix();
+        $return['prefix'] = Settings::getPrefix();
         $return['current_section'] = $current_section;
         //$return['noncify'] = self::getNonce('admin');
         $return['environment'] = Config::isProduction() ? 'prod' : 'test';
@@ -719,7 +720,7 @@ class WordPress
      */
     public static function getNonceTag($tag, $strictify = true): string
     {
-        return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
+        return Settings::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
     }
 
     /**

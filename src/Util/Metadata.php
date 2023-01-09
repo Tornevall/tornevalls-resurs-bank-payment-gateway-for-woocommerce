@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use ResursBank\Gateway\ResursDefault;
+use Resursbank\Woocommerce\Settings;
 use WC_Order;
 
 /**
@@ -24,7 +24,7 @@ class Metadata
      */
     private static function getPrefix(): string
     {
-        return (string)ResursDefault::PREFIX;
+        return (string)Settings::PREFIX;
     }
 
     /**

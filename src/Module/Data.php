@@ -15,7 +15,7 @@ use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
-use Resursbank\Woocommerce\Database\Options\Environment;
+use Resursbank\Woocommerce\Settings;
 use RuntimeException;
 use stdClass;
 use WC_Customer;
@@ -351,7 +351,7 @@ class Data
         if (!is_null($namespace) && preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
-        $optionKeyPrefix = sprintf('%s_%s', self::getPrefix('admin', true), $key);
+        $optionKeyPrefix = sprintf('%s_%s', Settings::getPrefix('admin', true), $key);
         if ($getDefaults) {
             $return = self::getDefault($key);
         }
@@ -419,41 +419,6 @@ class Data
             $return = false;
         } else {
             $return = null;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param null $extra
-     * @param null $ignoreCodeBase
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getPrefix($extra = null, $ignoreCodeBase = null): string
-    {
-        // If no extra data are added in the prefix handler, use the regular prefix.
-        if (empty($extra)) {
-            // If we're in the original codebase slug, we should not allow any filters to hijack us.
-            if (!$ignoreCodeBase && self::isOriginalCodeBase()) {
-                $return = RESURSBANK_PREFIX;
-            } else {
-                // If we're in a forked repo, go for it.
-                $return = WordPress::applyFilters('getPluginPrefix', RESURSBANK_PREFIX);
-            }
-        } elseif ($ignoreCodeBase || self::isOriginalCodeBase()) {
-            $return = sprintf(
-                '%s_%s',
-                RESURSBANK_PREFIX,
-                $extra
-            );
-        } else {
-            // If we're in a forked repo, go for it.
-            $return = sprintf(
-                '%s_%s',
-                WordPress::applyFilters('getPluginPrefix', RESURSBANK_PREFIX),
-                $extra
-            );
         }
 
         return $return;
@@ -548,7 +513,7 @@ class Data
      */
     public static function setResursOption($key, $value): bool
     {
-        return update_option(sprintf('%s_%s', self::getPrefix('admin'), $key), $value);
+        return update_option(sprintf('%s_%s', Settings::getPrefix('admin'), $key), $value);
     }
 
     /**
@@ -558,7 +523,7 @@ class Data
     public static function getTimeoutStatus(): int
     {
         return (int)get_transient(
-            sprintf('%s_resurs_api_timeout', self::getPrefix())
+            sprintf('%s_resurs_api_timeout', Settings::getPrefix())
         );
     }
 
@@ -1075,7 +1040,7 @@ class Data
      */
     public static function isResursMethod($paymentMethod): bool
     {
-        $return = (bool)preg_match(sprintf('/^%s_/', self::getPrefix()), $paymentMethod);
+        $return = (bool)preg_match(sprintf('/^%s_/', Settings::getPrefix()), $paymentMethod);
 
         if (!$return && Data::canHandleOrder($paymentMethod)) {
             $return = true;
@@ -1100,7 +1065,7 @@ class Data
             'resurs_bank_',
             'rbwc_',
             'trbwc_',
-            Data::getPrefix() . '_'
+            Settings::getPrefix() . '_'
         ];
         $canHandleOrderMethodPrefix = (array)WordPress::applyFilters('canHandleOrderPrefix', $allowMethod);
         $allowMethod += $canHandleOrderMethodPrefix;
@@ -1216,7 +1181,7 @@ class Data
             $getPostId = self::getRefVarFromDatabase(
                 sprintf(
                     '%s_%s',
-                    self::getPrefix(),
+                    Settings::getPrefix(),
                     $key
                 ),
                 $reference
@@ -1298,7 +1263,7 @@ class Data
 
         // Looking for meta root keys.
         $metaKeys = [
-            self::getPrefix(),
+            Settings::getPrefix(),
             'trbwc',
         ];
 
@@ -1430,10 +1395,10 @@ class Data
      */
     public static function writeLogException(Exception $exception, string $fromFunction = ''): void
     {
-        if (!isset($_SESSION[self::getPrefix()])) {
-            $_SESSION[self::getPrefix()]['exception'] = [];
+        if (!isset($_SESSION[Settings::getPrefix()])) {
+            $_SESSION[Settings::getPrefix()]['exception'] = [];
         }
-        $_SESSION[self::getPrefix()]['exception'][] = $exception;
+        $_SESSION[Settings::getPrefix()]['exception'][] = $exception;
 
         if (!empty($fromFunction)) {
             $logMessage = __(
@@ -1443,7 +1408,7 @@ class Data
             self::writeLogError(
                 sprintf(
                     $logMessage,
-                    self::getPrefix(),
+                    Settings::getPrefix(),
                     $exception->getCode(),
                     $fromFunction,
                     $exception->getMessage(),
@@ -1459,7 +1424,7 @@ class Data
             self::writeLogError(
                 sprintf(
                     $logMessage,
-                    self::getPrefix(),
+                    Settings::getPrefix(),
                     $exception->getCode(),
                     $exception->getMessage(),
                     $exception->getFile(),
@@ -1554,7 +1519,7 @@ class Data
             //$return = $orderData['meta'][$key];
             $return = self::getOrderMetaByKey($key, $orderData['meta']);
         }
-        $pluginPrefixedKey = sprintf('%s_%s', self::getPrefix(), $key);
+        $pluginPrefixedKey = sprintf('%s_%s', Settings::getPrefix(), $key);
         if (isset($orderData['meta'])) {
             $pluginReturn = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
             if (!empty($pluginReturn) && empty($return)) {
@@ -1641,7 +1606,7 @@ class Data
             'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
         ];
 
-        $scriptName = sprintf('%s_resursbank_order', self::getPrefix());
+        $scriptName = sprintf('%s_resursbank_order', Settings::getPrefix());
         WordPress::setEnqueue(
             $scriptName,
             'resursbank_order.js',
@@ -1909,7 +1874,7 @@ class Data
             __(
                 'Internal Release Prefix',
                 'resurs-bank-payments-for-woocommerce'
-            ) => esc_html(self::getPrefix()),
+            ) => esc_html(Settings::getPrefix()),
             __(
                 'WooCommerce',
                 'resurs-bank-payments-for-woocommerce'
@@ -2081,8 +2046,8 @@ class Data
 
             self::$encrypt = new Aes();
             self::$encrypt->setAesKeys(
-                self::getPrefix() . $aesKey,
-                self::getPrefix() . $aesIv
+                Settings::getPrefix() . $aesKey,
+                Settings::getPrefix() . $aesIv
             );
         }
 
@@ -2223,13 +2188,13 @@ class Data
             if ($insert) {
                 $return = add_post_meta(
                     $orderId,
-                    sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
+                    sprintf('%s_%s', (bool)$protected ? Settings::getPrefix() : 'u_' . Settings::getPrefix(), $key),
                     $value
                 );
             } else {
                 $return = update_post_meta(
                     $orderId,
-                    sprintf('%s_%s', (bool)$protected ? self::getPrefix() : 'u_' . self::getPrefix(), $key),
+                    sprintf('%s_%s', (bool)$protected ? Settings::getPrefix() : 'u_' . Settings::getPrefix(), $key),
                     $value
                 );
             }
@@ -2327,7 +2292,7 @@ class Data
      */
     public static function delResursOption($key): bool
     {
-        return delete_option(sprintf('%s_%s', self::getPrefix('admin'), $key));
+        return delete_option(sprintf('%s_%s', Settings::getPrefix('admin'), $key));
     }
 
     /**
@@ -2425,7 +2390,7 @@ class Data
         $return = '';
         if (self::isResursMethod($paymentMethod)) {
             $return = (string)preg_replace(
-                sprintf('/^%s_/', self::getPrefix()),
+                sprintf('/^%s_/', Settings::getPrefix()),
                 '',
                 $paymentMethod
             );

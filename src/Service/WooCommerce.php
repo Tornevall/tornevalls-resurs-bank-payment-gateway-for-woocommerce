@@ -11,16 +11,15 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use Resursbank\Ecommerce\Types\OrderStatus;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\PluginHooks;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Url;
-use ResursException;
 use RuntimeException;
 use stdClass;
+use Throwable;
 use WC_Order;
 use WC_Product;
 use function count;
@@ -28,7 +27,6 @@ use function in_array;
 use function is_array;
 use function is_object;
 use function is_string;
-use Throwable;
 
 /**
  * Class WooCommerce related actions.
@@ -163,7 +161,7 @@ class WooCommerce
             foreach ($paymentMethodList as $paymentMethod) {
                 $gateway = new ResursDefault(resursPaymentMethod: $paymentMethod);
                 if ($gateway->is_available()) {
-                    $gateways[ResursDefault::PREFIX . '_'. $paymentMethod->id] = $gateway;
+                    $gateways[Settings::PREFIX . '_'. $paymentMethod->id] = $gateway;
                 }
             }
         } catch (Exception $e) {
@@ -207,20 +205,17 @@ class WooCommerce
      * @param $file
      * @param null $section
      * @return mixed
-     * @since 0.0.1.0
+     * @todo Translate 'Settings' from ecom2.
      */
     public static function getPluginAdminUrl($links, $file, $section = null)
     {
         if (strpos($file, self::getBaseName()) !== false) {
             /** @noinspection HtmlUnknownTarget */
             $links[] = sprintf(
-                '<a href="%s?page=wc-settings&tab=%s&section=%s">%s</a>',
+                '<a href="%s?page=wc-settings&tab=%s&section=api_settings">%s</a>',
                 admin_url('admin.php'),
-                Data::getPrefix('admin'),
-                $section,
-                __(
-                    'Settings'
-                )
+                Settings::getPrefix(),
+                'Settings'
             );
         }
         return $links;
@@ -332,7 +327,7 @@ class WooCommerce
      */
     public static function getMetaDataFromOrder(array $ecomHolder, array $metaArray)
     {
-        $metaPrefix = Data::getPrefix();
+        $metaPrefix = Settings::getPrefix();
         /** @var array $ecomMetaArray */
         $ecomMetaArray = [];
         foreach ($metaArray as $metaKey => $metaValue) {
@@ -365,7 +360,7 @@ class WooCommerce
             'requestMethod',
         ]);
         // Not necessary for customer to view.
-        $metaPrefix = Data::getPrefix();
+        $metaPrefix = Settings::getPrefix();
         if (is_array($metaDataContainer) && count($metaDataContainer)) {
             foreach ($purgeArray as $purgeKey) {
                 if (isset($metaDataContainer[$purgeKey])) {
@@ -391,7 +386,7 @@ class WooCommerce
     {
         /** @noinspection NotOptimalRegularExpressionsInspection */
         // Order meta that is protected against editing.
-        if (($metaType === 'post') && preg_match(sprintf('/^%s/i', Data::getPrefix()), $metaKey)) {
+        if (($metaType === 'post') && preg_match(sprintf('/^%s/i', Settings::getPrefix()), $metaKey)) {
             $protected = true;
         }
         return $protected;
@@ -643,7 +638,7 @@ class WooCommerce
     {
         return sprintf(
             '[%s] %s',
-            WordPress::applyFilters('getOrderNotePrefix', Data::getPrefix()),
+            WordPress::applyFilters('getOrderNotePrefix', Settings::getPrefix()),
             $orderNote
         );
     }

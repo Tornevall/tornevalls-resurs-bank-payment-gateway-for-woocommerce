@@ -13,7 +13,6 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
@@ -33,12 +32,19 @@ use WC_Settings_Page;
 class Settings extends WC_Settings_Page
 {
     /**
+     * This prefix is used for various parts of the settings by WooCommerce,
+     * for example, as an ID for these settings, and as a prefix for the values
+     * in the database. The prefix is also used as an identifier for this gateway.
+     */
+    public const PREFIX = 'resursbank';
+
+    /**
      * Initializes settings properties and registers WordPress actions for
      * rendering content and saving settings.
      */
     public function __construct()
     {
-        $this->id = ResursDefault::PREFIX;
+        $this->id = self::PREFIX;
         $this->label = 'Resurs Bank';
 
         // Adds the Resurs Bank tab.
@@ -67,6 +73,14 @@ class Settings extends WC_Settings_Page
         );
 
         parent::__construct();
+    }
+
+    /**
+     * Compatible request method for functions that is currently using the above constant.
+     */
+    public static function getPrefix(): string
+    {
+        return Settings::PREFIX;
     }
 
     /**
