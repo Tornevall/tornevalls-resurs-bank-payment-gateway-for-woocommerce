@@ -149,7 +149,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function getOrder(): WC_Order|null
     {
         global $theorder;
-        $post = get_post($_REQUEST['post'] ?? null);
+        $post = get_post(post: $_REQUEST['post'] ?? null);
 
         $return = null;
 
@@ -167,7 +167,6 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @param PaymentMethod|null $resursPaymentMethod
      * @return string
-     * @throws ConfigException
      */
     private function getProperGatewayId(?PaymentMethod $resursPaymentMethod = null): string
     {
