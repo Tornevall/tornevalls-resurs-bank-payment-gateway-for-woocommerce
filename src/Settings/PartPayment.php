@@ -55,7 +55,9 @@ class PartPayment
      * @throws ReflectionException
      * @throws TranslationException
      * @throws ValidationException
+     * @todo Refactor, method is too large. WOO-979. Remove phpcs:ignore below when done.
      */
+    // phpcs:ignore
     public static function getSettings(): array
     {
         return [
@@ -122,8 +124,9 @@ class PartPayment
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
-     * @todo Look into moving this logic into Ecom for re-use
+     * @todo Refactor, method is too large, complex, unused. WOO-980. Remove phpcs:ignore below when done.
      */
+    // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
     {
         if ($option !== Limit::getName()) {
@@ -212,7 +215,9 @@ class PartPayment
      * Fetch available payment method options
      *
      * @return array
+     * @todo Refactor. Method is too complex. WOO-981. Remove phpcs:ignore below when done.
      */
+    // phpcs:ignore
     private static function getPaymentMethods(): array
     {
         $storeId = StoreId::getData();
@@ -247,15 +252,9 @@ class PartPayment
      * Fetch annuity period options for configured payment method
      *
      * @return array
-     * @throws ConfigException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
-     * @throws FilesystemException
-     * @throws TranslationException
-     * @throws JsonException
+     * @todo Refactor, method is too complex. WOO-981. Remove phpcs:ignore below when done.
      */
+    // phpcs:ignore
     private static function getAnnuityPeriods(): array
     {
         $paymentMethodId = PaymentMethodOption::getData();
