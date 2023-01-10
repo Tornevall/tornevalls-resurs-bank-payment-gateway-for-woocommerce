@@ -152,7 +152,6 @@ class Product
         $taxClass = self::getTaxClass(product: $product);
         $ratesArray = self::getTaxRates(taxClass: $taxClass);
         /**
-         * @psalm-suppress MixedAssignment
          * @noinspection PhpArgumentWithoutNamedIdentifierInspection
          */
         $rates = array_shift($ratesArray);

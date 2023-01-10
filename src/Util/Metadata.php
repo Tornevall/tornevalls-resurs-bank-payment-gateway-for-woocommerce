@@ -40,8 +40,10 @@ class Metadata
      * Return metadata from an order, as a single variable.
      * Normally metadata is returned as array, but currently we usually only save values once.
      */
-    public static function getOrderMeta(WC_Order $order, string $metaDataKey): string
-    {
+    public static function getOrderMeta(
+        WC_Order $order,
+        string $metaDataKey
+    ): string {
         return (string)get_post_meta(
             post_id: $order->get_id(),
             key: Settings::PREFIX . '_' . $metaDataKey,
@@ -60,4 +62,3 @@ class Metadata
         ) !== '';
     }
 }
-

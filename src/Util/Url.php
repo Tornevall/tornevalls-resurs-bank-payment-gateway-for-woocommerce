@@ -192,7 +192,9 @@ class Url
      * @param array $array Data not only from the plugin lands here.
      * @return array
      * @throws Exception
+     * @todo Refactor, method is too complex. WOO-982. Remove phpcs:ignore below when done.
      */
+    // phpcs:ignore
     public static function getSanitizedArray(array $array): array
     {
         $arrays = new ArrayValidation();
