@@ -29,6 +29,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
@@ -317,7 +318,23 @@ class ResursDefault extends WC_Payment_Gateway
         if (!empty($this->paymentMethodInformation)) {
             if ($this->paymentMethodInformation->isResursMethod()) {
                 $return = Data::getImage(imageName: 'resurs-logo.png');
+            } elseif(str_contains(haystack: strtolower(string: $this->paymentMethodInformation->name), needle: 'trustly')) {
+                $return = Data::getImage(imageName: 'method_trustly.svg');
+            } else {
+                switch ($this->paymentMethodInformation->type) {
+                    case Type::DEBIT_CARD:
+                    case Type::CREDIT_CARD:
+                    case Type::CARD:
+                        $return = Data::getImage(imageName: 'method_pspcard.svg');
+                        break;
+                    case Type::SWISH:
+                        $return = Data::getImage(imageName: 'method_swish.png');
+                        break;
+                    default:
+                        break;
+                }
             }
+
             // The filter we're calling is used internally from PluginHooks (method getMethodIconByContent).
             // Urls to a proper image is built from there if the images are properly included in this package.
             if (($icon = $this->getIconByFilter())) {
