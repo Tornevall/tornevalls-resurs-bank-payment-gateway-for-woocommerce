@@ -318,7 +318,10 @@ class ResursDefault extends WC_Payment_Gateway
         if (!empty($this->paymentMethodInformation)) {
             if ($this->paymentMethodInformation->isResursMethod()) {
                 $return = Data::getImage(imageName: 'resurs-logo.png');
-            } elseif(str_contains(haystack: strtolower(string: $this->paymentMethodInformation->name), needle: 'trustly')) {
+            } elseif(str_contains(
+                haystack: strtolower(string: $this->paymentMethodInformation->name),
+                needle: 'trustly'
+            )) {
                 $return = Data::getImage(imageName: 'method_trustly.svg');
             } else {
                 switch ($this->paymentMethodInformation->type) {
