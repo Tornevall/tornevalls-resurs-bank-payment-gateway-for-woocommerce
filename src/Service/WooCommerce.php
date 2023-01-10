@@ -199,15 +199,15 @@ class WooCommerce
     }
 
     /**
-     * Self-aware setup link.
+     * Self-aware setup link. Used from filter, meaning this method looks unused.
      *
      * @param $links
      * @param $file
      * @param null $section
      * @return mixed
-     * @todo Translate 'Settings' from ecom2.
+     * @noinspection PhpUnused
      */
-    public static function getPluginAdminUrl($links, $file, $section = null)
+    public static function getPluginAdminUrl($links, $file, $section = null): mixed
     {
         if (strpos($file, self::getBaseName()) !== false) {
             /** @noinspection HtmlUnknownTarget */
