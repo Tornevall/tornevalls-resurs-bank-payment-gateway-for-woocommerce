@@ -122,18 +122,6 @@ class Data
     private static $jsDependenciesAdmin = [];
 
     /**
-     * @var array $styles List of loadable styles.
-     * @since 0.0.1.0
-     */
-    private static $styles = ['resursbank' => 'resursbank.css'];
-
-    /**
-     * @var array $stylesAdmin
-     * @since 0.0.1.0
-     */
-    private static $stylesAdmin = ['resursbank_admin' => 'resursbank_admin.css'];
-
-    /**
      * @var array $fileImageExtensions
      * @since 0.0.1.0
      */
@@ -573,69 +561,6 @@ class Data
     }
 
     /**
-     * @param $wcDisplayPrice
-     * @param $annuityMethod
-     * @param $annuityDuration
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getAnnuityHtml($wcDisplayPrice, $annuityMethod, $annuityDuration)
-    {
-        $customerCountry = self::getCustomerCountry();
-
-        $monthlyPrice = ResursBankAPI::getResurs()->getAnnuityPriceByDuration(
-            $wcDisplayPrice,
-            $annuityMethod,
-            $annuityDuration
-        );
-        $defaultThreshold = self::getDefaultPartPaymentThreshold($customerCountry);
-
-        if ($monthlyPrice >= $defaultThreshold || self::getTestMode()) {
-            $annuityPaymentMethod = (array)self::getPaymentMethodById($annuityMethod);
-
-            // Customized string.
-            $partPayString = self::getPartPayStringByTags(
-                WordPress::applyFilters(
-                    'partPaymentString',
-                    sprintf(
-                        __(
-                            'Part pay from %s per month. | %s',
-                            'resurs-bank-payments-for-woocommerce'
-                        ),
-                        self::getWcPriceSpan($monthlyPrice),
-                        self::getReadMoreString($annuityPaymentMethod, $monthlyPrice)
-                    )
-                ),
-                [
-                    'currency' => get_woocommerce_currency_symbol(),
-                    'monthlyPrice' => (float)$monthlyPrice,
-                    'monthlyDuration' => (int)$annuityDuration,
-                    'paymentLimit' => $defaultThreshold,
-                    'paymentMethod' => $annuityPaymentMethod,
-                    'isTest' => self::getTestMode(),
-                    'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
-                ]
-            );
-
-            // Fetch the rest from the template and display.
-            return Data::getEscapedHtml(
-                self::getGenericClass()->getTemplate(
-                    'product_annuity.phtml',
-                    [
-                        'currency' => get_woocommerce_currency_symbol(),
-                        'monthlyPrice' => $monthlyPrice,
-                        'monthlyDuration' => $annuityDuration,
-                        'partPayString' => $partPayString,
-                        'paymentMethod' => $annuityPaymentMethod,
-                        'isTest' => self::getTestMode(),
-                        'readmore' => self::getReadMoreString($annuityPaymentMethod, $monthlyPrice),
-                    ]
-                )
-            );
-        }
-    }
-
-    /**
      * @return string
      * @throws Exception
      * @since 0.0.1.0
@@ -662,35 +587,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * @param $customerCountry
-     * @return float
-     * @since 0.0.1.6
-     */
-    private static function getDefaultPartPaymentThreshold($customerCountry): float
-    {
-        $threshold = (float)Data::getResursOption('part_payment_threshold');
-
-        if ($threshold === 150.00 && $customerCountry === 'FI') {
-            $threshold = 15.00;
-        } elseif ((int)$threshold === 0) {
-            $threshold = 150.00;
-        }
-
-        return (float)WordPress::applyFilters('getMinimumAnnuityPrice', $threshold, $customerCountry);
-    }
-
-    /**
-     * Returns test mode boolean.
-     *
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getTestMode(): bool
-    {
-        return in_array(self::getResursOption('environment'), ['test', 'staging']);
     }
 
     /**
@@ -1395,10 +1291,10 @@ class Data
      */
     public static function writeLogException(Exception $exception, string $fromFunction = ''): void
     {
-        if (!isset($_SESSION[Settings::getPrefix()])) {
-            $_SESSION[Settings::getPrefix()]['exception'] = [];
+        if (!isset($_SESSION)) {
+            $_SESSION['exception'] = [];
         }
-        $_SESSION[Settings::getPrefix()]['exception'][] = $exception;
+        $_SESSION['exception'][] = $exception;
 
         if (!empty($fromFunction)) {
             $logMessage = __(
