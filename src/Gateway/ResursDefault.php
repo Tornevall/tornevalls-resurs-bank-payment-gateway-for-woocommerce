@@ -147,30 +147,24 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Method to properly fetch an order if it is present in a current "view".
+     * Method to properly fetch an order if it is present on a current screen (the order view), making sure we
+     * can display "Payment via <method>" instead of "Payment via <uuid>".
      * @return WC_Order|null
-     * @throws ConfigException
      * @noinspection SpellCheckingInspection
-     * @todo WOO-960 - There is a problem somewhere related to dashboard or similar that makes us unable to
-     * @todo WOO-960 - get access to an order in the internal order view. This method solves this problem temporarily
-     * @todo WOO-960 - but should not be forced to use $_GET. It has to be changed to be safe.
      */
     private function getOrder(): WC_Order|null
     {
         global $theorder;
-        $post = get_post();
+        $post = get_post($_REQUEST['post'] ?? null);
 
         $return = null;
 
+        // Normally we want to trust the content from $theorder. However, in some rare cases, $theorder may
+        // not always be present even if we are located at the order view screen.
         if (isset($theorder)) {
             $return = $theorder;
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
             $return = new WC_Order($post->ID);
-        } elseif (isset($_GET) && isset($_GET['post']) && is_string($_GET['post'])) {
-            Config::getLogger()->warning(
-                message: 'OrderView is currently using $_GET to reach the current order (emergency fallback).'
-            );
-            $return = new WC_Order($_GET['post']);
         }
 
         return $return;

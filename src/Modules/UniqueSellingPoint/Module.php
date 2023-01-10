@@ -23,7 +23,6 @@ use Throwable;
 class Module
 {
     /**
-     * @return void
      * @throws IllegalTypeException
      * @throws ConfigException
      * @throws FilesystemException
