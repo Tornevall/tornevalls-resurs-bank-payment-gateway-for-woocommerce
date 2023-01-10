@@ -170,6 +170,10 @@ class WordPress
         add_action('wp_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScripts');
         add_action(
             'wp_head',
+            'Resursbank\Woocommerce\Modules\UniqueSellingPoint\Module::setCss'
+        );
+        add_action(
+            'wp_head',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::setCss'
         );
         add_action(
