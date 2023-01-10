@@ -47,6 +47,7 @@ use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -146,30 +147,24 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Method to properly fetch an order if it is present in a current "view".
+     * Method to properly fetch an order if it is present on a current screen (the order view), making sure we
+     * can display "Payment via <method>" instead of "Payment via <uuid>".
      * @return WC_Order|null
-     * @throws ConfigException
      * @noinspection SpellCheckingInspection
-     * @todo WOO-960 - There is a problem somewhere related to dashboard or similar that makes us unable to
-     * @todo WOO-960 - get access to an order in the internal order view. This method solves this problem temporarily
-     * @todo WOO-960 - but should not be forced to use $_GET. It has to be changed to be safe.
      */
     private function getOrder(): WC_Order|null
     {
         global $theorder;
-        $post = get_post();
+        $post = get_post($_REQUEST['post'] ?? null);
 
         $return = null;
 
+        // Normally we want to trust the content from $theorder. However, in some rare cases, $theorder may
+        // not always be present even if we are located at the order view screen.
         if (isset($theorder)) {
             $return = $theorder;
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
             $return = new WC_Order($post->ID);
-        } elseif (isset($_GET) && isset($_GET['post']) && is_string($_GET['post'])) {
-            Config::getLogger()->warning(
-                message: 'OrderView is currently using $_GET to reach the current order (emergency fallback).'
-            );
-            $return = new WC_Order($_GET['post']);
         }
 
         return $return;
@@ -282,7 +277,6 @@ class ResursDefault extends WC_Payment_Gateway
             $this->id = self::PREFIX . '_' . $this->paymentMethodInformation->id;
             $this->payment_method = $this->id;
             $this->title = $this->paymentMethodInformation->name ?? '';
-            $this->method_description = '';
             $this->icon = $this->getMethodIconUrl();
 
             // Applicant post data should also be collected, so we can re-use it later.
@@ -321,6 +315,9 @@ class ResursDefault extends WC_Payment_Gateway
 
         // Make sure that the payment method is properly instantiated before using it.
         if (!empty($this->paymentMethodInformation)) {
+            if ($this->paymentMethodInformation->isResursMethod()) {
+                $return = Data::getImage(imageName: 'resurs-logo.png');
+            }
             // The filter we're calling is used internally from PluginHooks (method getMethodIconByContent).
             // Urls to a proper image is built from there if the images are properly included in this package.
             if (($icon = $this->getIconByFilter())) {
@@ -871,24 +868,20 @@ class ResursDefault extends WC_Payment_Gateway
      * fields required by Resurs.
      *
      * @throws Exception
-     * @since 0.0.1.0
      * @noinspection PhpUndefinedFieldInspection
-     * @todo Utilize ecom2!
      */
-    public function payment_fields()
+    public function payment_fields(): void
     {
-        /* Remember: When we display the fields, we must also make sure that WordPress is the part that sanitize
-         * and display the fields. Therefore, we eventually need to tell WordPress further about safe styling.
-
-           add_filter('safe_style_css', function ($styles) {
-                $styles[] = 'display';
-                return $styles;
-            });
-
-         */
-
-        // @todo See the code after the return part. This smaller is just temporary.
-        return 'Display "USP" - and eventually on demand also government id fields here.';
+        try {
+            $usp = PaymentMethodRepository::getUniqueSellingPoint(
+                paymentMethod: $this->resursPaymentMethod,
+                amount: $this->get_order_total()
+            );
+            echo $usp->content;
+        } catch (Throwable $error) {
+            Config::getLogger()->error(message: $error);
+            echo "";
+        }
     }
 
     /**
