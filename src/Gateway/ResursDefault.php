@@ -161,15 +161,19 @@ class ResursDefault extends WC_Payment_Gateway
 
         $return = null;
 
-        if (isset($theorder)) {
-            $return = $theorder;
-        } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
-            $return = new WC_Order($post->ID);
-        } elseif (isset($_GET) && isset($_GET['post']) && is_string($_GET['post'])) {
-            Config::getLogger()->warning(
-                message: 'OrderView is currently using $_GET to reach the current order (emergency fallback).'
-            );
-            $return = new WC_Order($_GET['post']);
+        try {
+            if (isset($theorder)) {
+                $return = $theorder;
+            } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
+                $return = new WC_Order($post->ID);
+            } elseif (isset($_GET) && isset($_GET['post']) && is_string($_GET['post'])) {
+                Config::getLogger()->warning(
+                    message: 'OrderView is currently using $_GET to reach the current order (emergency fallback).'
+                );
+                $return = new WC_Order($_GET['post']);
+            }
+        } catch (Throwable $e) {
+            Config::getLogger()->error($e);
         }
 
         return $return;
