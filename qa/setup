@@ -22,10 +22,6 @@ if [ ! -d ./qa/bin ]; then
   mkdir -p ./qa/bin
 fi
 
-if [ ! -d ./qa/psalm/cache ]; then
-  mkdir ./qa/psalm/cache
-fi
-
 # Install Composer if it's not already available.
 if [ ! -f ./qa/bin/composer ]; then
   echo ""
@@ -60,19 +56,55 @@ cat <<EOT >> $HOOK_FILE
 
 ERRORS=0
 
-echo "=========================================================="
-echo "Running tests."
+echo "====================================================== ====="
 echo ""
 
-echo "---==( Executing PHP CBF for source files. )==---"
+echo "==========================================================="
+echo "#                                                         #"
+echo "#             APPLYING AUTOMATIC ADJUSTMENTS              #"
+echo "#                                                         #"
+echo "==========================================================="
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=PSR12 --ignore=Service/,ResursBank/,Gateway/,Module/ $dir/src; then
-  ERRORS=1
+
+SRC_FILES=""
+
+for file in \$(git diff --name-only --cached)
+do
+  if [ "\$(echo \$file | cut -d/ -f1)" = "src" ]; then
+      SRC_FILES="\$SRC_FILES $dir/\$file"
+  fi
+done
+
+if [ -n "\$SRC_FILES" ]; then
+  echo ""
+  echo ""
+  echo "---==( Automatically adjusting src files )==---"
+  echo ""
+  echo ""
+  echo "[APPLYING PSR-12 RULESET]"
+  echo ""
+  $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=PSR12 \$SRC_FILES
+  echo ""
+  echo ""
+  echo "[APPLYING CUSTOM RULESET]"
+  echo ""
+  $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=qa/phpcs/src.xml \$SRC_FILES
+else
+  echo ""
+  echo ""
+  echo "No fixable errors found."
+  echo ""
+  echo ""
 fi
+
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
-  ERRORS=1
-fi
+echo ""
+echo "==========================================================="
+echo "#                                                         #"
+echo "#                  SCANNING SOURCE FILES                  #"
+echo "#                                                         #"
+echo "==========================================================="
+echo ""
 echo ""
 
 echo "---==( Executing PHPCS for source files. )==---"
@@ -81,14 +113,7 @@ if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=PSR12 --ign
   ERRORS=1
 fi
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=qa/phpcs/ruleset.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
-  ERRORS=1
-fi
-echo ""
-
-echo "---==( Executing Psalm tests. )==---"
-echo ""
-if ! $phpCmd $dir/vendor/bin/psalm -c $dir/qa/psalm/psalm.xml --show-info=true; then
+if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=qa/phpcs/src.xml --ignore=Service/,ResursBank/,Gateway/,Module/,Exception/ $dir/src; then
   ERRORS=1
 fi
 echo ""
@@ -138,7 +163,6 @@ cat <<EOT >> ./composer.json
     "phpunit/phpunit": "^9",
     "phpmd/phpmd": "^2",
     "squizlabs/php_codesniffer": "^3",
-    "vimeo/psalm": "^4",
     "phpstan/phpstan": "^1",
     "slevomat/coding-standard": "~8.0"
   },
