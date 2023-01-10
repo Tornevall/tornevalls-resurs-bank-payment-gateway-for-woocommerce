@@ -147,21 +147,20 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Method to properly fetch an order if it is present in a current "view".
+     * Method to properly fetch an order if it is present on a current screen (the order view), making sure we
+     * can display "Payment via <method>" instead of "Payment via <uuid>".
      * @return WC_Order|null
      * @noinspection SpellCheckingInspection
      */
     private function getOrder(): WC_Order|null
     {
         global $theorder;
-        if (isset($_REQUEST['post'])) {
-            $post = get_post($_REQUEST['post']);
-        } else {
-            $post = get_post();
-        }
+        $post = get_post($_REQUEST['post'] ?? null);
 
         $return = null;
 
+        // Normally we want to trust the content from $theorder. However, in some rare cases, $theorder may
+        // not always be present even if we are located at the order view screen.
         if (isset($theorder)) {
             $return = $theorder;
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
