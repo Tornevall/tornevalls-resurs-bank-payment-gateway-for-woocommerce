@@ -144,7 +144,8 @@ class Api
         try {
             if ($clientId === '' || $clientSecret === '') {
                 // @todo Consider throwing a more appropriate Exception.
-                throw new Exception(message: 'Missing credentials');
+                // @todo Since we validate credentials on several places, it should at least be centralized.
+                throw new Exception(message: 'Credentials not set.');
             }
 
             $result = new Jwt(

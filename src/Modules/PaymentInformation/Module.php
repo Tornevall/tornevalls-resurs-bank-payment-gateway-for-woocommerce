@@ -27,6 +27,8 @@ use Resursbank\Woocommerce\Util\Currency;
 
 /**
  * Handles the output of the order view payment information widget
+ *
+ * @SuppressWarnings(PHPMD.CamelCaseVariableName)
  */
 class Module
 {
@@ -63,9 +65,9 @@ class Module
     public static function setCss(): void
     {
         $screen = get_current_screen();
-        $screen_id = $screen ? $screen->id : '';
+        $screenId = $screen ? $screen->id : '';
 
-        if ($screen_id !== 'shop_order') {
+        if ($screenId !== 'shop_order') {
             return;
         }
 

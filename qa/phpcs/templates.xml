@@ -80,7 +80,7 @@
             <property name="linesCountBetweenAnnotationsGroups" value="0" />
             <property name="linesCountAfterLastContent" value="0" />
             <property name="annotationsGroups" type="array">
-                <element value="@param, @return, @throws, @see, @phpcsSuppress, @SuppressWarnings, @psalm-suppress, @noinspection, @todo"/>
+                <element value="@param, @return, @throws, @see, @phpcsSuppress, @SuppressWarnings, @noinspection, @todo"/>
             </property>
         </properties>
     </rule>
@@ -98,23 +98,16 @@
         </properties>
     </rule>
     <rule ref="SlevomatCodingStandard.Commenting.EmptyComment" />
-    <rule ref="SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration" />
     <rule ref="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment" />
     <rule ref="SlevomatCodingStandard.Complexity.Cognitive" />
     <rule ref="SlevomatCodingStandard.ControlStructures.AssignmentInCondition" />
-    <rule ref="SlevomatCodingStandard.ControlStructures.BlockControlStructureSpacing">
-        <properties>
-            <property name="linesCountBefore" value="1" />
-            <property name="linesCountAfter" value="1" />
-        </properties>
-    </rule>
     <rule ref="SlevomatCodingStandard.ControlStructures.EarlyExit" />
     <rule ref="SlevomatCodingStandard.ControlStructures.DisallowContinueWithoutIntegerOperandInSwitch" />
     <rule ref="SlevomatCodingStandard.ControlStructures.LanguageConstructWithParentheses" />
     <rule ref="SlevomatCodingStandard.ControlStructures.NewWithParentheses" />
     <rule ref="SlevomatCodingStandard.ControlStructures.RequireMultiLineCondition">
         <properties>
-            <property name="minLineLength" value="80" />
+            <property name="minLineLength" value="121" />
             <property name="booleanOperatorOnPreviousLine" value="true" />
             <property name="alwaysSplitAllConditionParts" value="true" />
         </properties>
@@ -134,13 +127,6 @@
     <rule ref="SlevomatCodingStandard.Exceptions.DeadCatch" />
     <rule ref="SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly" />
     <rule ref="SlevomatCodingStandard.Exceptions.RequireNonCapturingCatch" />
-    <rule ref="SlevomatCodingStandard.Files.FileLength">
-        <properties>
-            <property name="includeComments" value="false" />
-            <property name="includeWhitespace" value="false" />
-            <property name="maxLinesLength" value="250" />
-        </properties>
-    </rule>
     <rule ref="SlevomatCodingStandard.Files.LineLength">
         <properties>
             <property name="lineLengthLimit" value="120" />
@@ -151,7 +137,7 @@
     <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
         <properties>
             <property name="rootNamespaces" type="array">
-                <element key="src/wp-content/plugins/resursbank-woocommerce/src" value="Resursbank\Woocommerce" />
+                <element key="src/src" value="Resursbank\Ecom" />
             </property>
         </properties>
     </rule>
@@ -174,7 +160,7 @@
     <rule ref="SlevomatCodingStandard.Functions.RequireArrowFunction" />
     <rule ref="SlevomatCodingStandard.Functions.RequireMultiLineCall">
         <properties>
-            <property name="minLineLength" value="80" />
+            <property name="minLineLength" value="121" />
         </properties>
     </rule>
     <rule ref="SlevomatCodingStandard.Functions.RequireSingleLineCall">
@@ -216,7 +202,6 @@
     <rule ref="SlevomatCodingStandard.Numbers.DisallowNumericLiteralSeparator" />
     <rule ref="SlevomatCodingStandard.Numbers.DisallowNumericLiteralSeparator" />
     <rule ref="SlevomatCodingStandard.Operators.DisallowEqualOperators" />
-    <rule ref="SlevomatCodingStandard.Operators.DisallowIncrementAndDecrementOperators" />
     <rule ref="SlevomatCodingStandard.Operators.NegationOperatorSpacing">
         <properties>
             <property name="spacesCount" value="0" />
@@ -248,9 +233,15 @@
     <rule ref="SlevomatCodingStandard.TypeHints.NullTypeHintOnLastPosition" />
     <rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue" />
     <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHintSpacing" />
-    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint" />
-    <rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint" />
-    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint" />
+    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification" />
+    </rule>
+    <rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
+        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" />
+    </rule>
+    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint">
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingTraversableTypeHintSpecification" />
+    </rule>
     <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing">
         <properties>
             <property name="spacesCountBeforeColon" value="0" />

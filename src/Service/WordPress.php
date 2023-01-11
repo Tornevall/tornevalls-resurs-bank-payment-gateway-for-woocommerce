@@ -11,6 +11,7 @@ use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
+use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -19,6 +20,7 @@ use RuntimeException;
 use Throwable;
 use WC_Order;
 use WP_Post;
+
 use function count;
 use function defined;
 use function func_get_args;
@@ -77,7 +79,8 @@ class WordPress
             return;
         }
 
-        if ($_REQUEST['page'] === 'wc-settings' &&
+        if (
+            $_REQUEST['page'] === 'wc-settings' &&
             $_REQUEST['tab'] === 'checkout' &&
             $_REQUEST['section'] === (new ResursDefault())->id
         ) {
@@ -262,18 +265,15 @@ class WordPress
     /**
      * Look for admin notices.
      * @throws Exception
-     * @since 0.0.1.0
+     * @noinspection PhpUnused
      */
-    public static function getAdminNotices()
+    public static function getAdminNotices(): void
     {
         global $current_tab, $parent_file;
 
-        // See if there is a credential error for Resurs Bank.
-        self::getCredentialError();
-
         $internalExceptions = self::applyFilters(
             'getPluginAdminNotices',
-            (isset($_SESSION[Data::getPrefix()]['exception']) ? $_SESSION[Data::getPrefix()]['exception'] : [])
+            (isset($_SESSION['exception']) && is_array($_SESSION['exception']) ? $_SESSION['exception'] : [])
         );
 
         if (count($internalExceptions)) {
@@ -281,14 +281,13 @@ class WordPress
             /** @noinspection PhpUnusedLocalVariableInspection */
             foreach ($internalExceptions as $index => $item) {
                 printf(
-                    '<div class="%1$s"><p>[%3$s] %2$s</p></div>',
+                    '<div class="%1$s"><p>%2$s</p></div>',
                     esc_attr($class),
-                    esc_html($item->getMessage()),
-                    Data::getPrefix()
+                    esc_html($item->getMessage())
                 );
             }
-            if (isset($_SESSION[Data::getPrefix()]['exception'])) {
-                unset($_SESSION[Data::getPrefix()]['exception']);
+            if (isset($_SESSION['exception'])) {
+                unset($_SESSION['exception']);
             }
         }
 
@@ -313,37 +312,9 @@ class WordPress
                 echo Data::getEscapedHtml(
                     content: '<div class="notice notice-error is-dismissible" style="font-weight: bold; color: #6c0c0c; background: #fac5c5;">
                       <p>' . $requiredVersionNotice . '</p></div>
-            ');
+            '
+                );
             }
-        }
-    }
-
-    /**
-     * Generate admin notices the ugly way since there is no proper front end script to push
-     * out such notices.
-     * @since 0.0.1.0
-     */
-    private static function getCredentialError()
-    {
-        $frontCredentialCheck = Data::getResursOption('front_callbacks_credential_error');
-        try {
-            if (!empty($frontCredentialCheck)) {
-                $credentialMessage = json_decode($frontCredentialCheck, false);
-                // Generate an exception the ugly way.
-                if (isset($credentialMessage->message)) {
-                    throw new RuntimeException(
-                        sprintf(
-                            'Resurs Bank %s (%s): %s',
-                            $credentialMessage->function ?? __FUNCTION__,
-                            $credentialMessage->code,
-                            $credentialMessage->message
-                        ),
-                        $credentialMessage->code
-                    );
-                }
-            }
-        } catch (Exception $e) {
-            self::setGenericError($e);
         }
     }
 
@@ -352,18 +323,18 @@ class WordPress
      */
     public static function setGenericError(Throwable $exception): void
     {
-        if (!isset($_SESSION[ResursDefault::PREFIX]) ||
-            !is_array($_SESSION[ResursDefault::PREFIX])
+        // This method can't use RESURSBANK_MODULE_PREFIX directly as it can be called before WooCommmerce initiation.
+        if (
+            !isset($_SESSION) ||
+            !is_array(value: $_SESSION)
         ) {
-            $_SESSION[ResursDefault::PREFIX] = [
-                'exception' => []
-            ];
+            $_SESSION['exception'] = [];
         }
         // Make sure the errors are not duplicated.
         if (self::canAddException(exception: $exception)) {
             // Add the exception to the session variable since that's where we can give it to WordPress in
             // the easiest way on page reloads/changes.
-            $_SESSION[ResursDefault::PREFIX]['exception'][] = $exception;
+            $_SESSION['exception'][] = $exception;
         }
     }
 
@@ -378,9 +349,9 @@ class WordPress
     {
         $return = true;
 
-        if (isset($_SESSION[Data::getPrefix()]['exception'])) {
+        if (isset($_SESSION['exception']) && is_array(value: $_SESSION['exception'])) {
             /** @var Exception $item */
-            foreach ($_SESSION[Data::getPrefix()]['exception'] as $exceptionItem) {
+            foreach ($_SESSION['exception'] as $exceptionItem) {
                 if ($exceptionItem instanceof Exception) {
                     $message = $exceptionItem->getMessage();
                     if ($exception->getMessage() === $message) {
@@ -475,29 +446,6 @@ class WordPress
      */
     public static function setResursBankScripts($isAdmin = null)
     {
-        // Note: This section used to be called with a prefix to define which version of the plugin
-        // we use. However, as there's a static setup in the front-end section, the prefix can not in this
-        // case be used without having problems loading scripts. So: Do not use dynamic prefixes in this
-        // autoloader.
-        foreach (Data::getPluginStyles($isAdmin) as $styleName => $styleFile) {
-            wp_enqueue_style(
-                sprintf('trbwc_%s', $styleName),
-                sprintf(
-                    '%s/css/%s?%s',
-                    Data::getGatewayUrl(),
-                    $styleFile,
-                    Data::getTestMode() ? time() : 'static'
-                ),
-                [],
-                Data::getCurrentVersion()
-            );
-        }
-
-        foreach (Data::getPluginScripts($isAdmin) as $scriptName => $scriptFile) {
-            $realScriptName = sprintf('trbwc_%s', $scriptName);
-            self::setEnqueue($realScriptName, $scriptFile, $isAdmin);
-        }
-
         if (Url::getRequest('action') === 'resursbank_get_cost_of_purchase') {
             $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
             $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
@@ -523,16 +471,6 @@ class WordPress
      */
     public static function setEnqueue($scriptName, $scriptFile, $isAdmin, $localizeArray = [])
     {
-        wp_enqueue_script(
-            $scriptName,
-            sprintf(
-                '%s/js/%s?%s',
-                Data::getGatewayUrl(),
-                $scriptFile,
-                Data::getTestMode() ? Data::getPrefix() . '-' . time() : 'static'
-            ),
-            Data::getJsDependencies($scriptName, $isAdmin)
-        );
         self::doAction('getLocalizedScripts', $scriptName, $isAdmin, $localizeArray);
     }
 
@@ -610,7 +548,7 @@ class WordPress
     private static function getLocalizationDataAdmin($return)
     {
         global $current_tab, $current_section;
-        $return['prefix'] = Data::getPrefix();
+        $return['prefix'] = RESURSBANK_MODULE_PREFIX;
         $return['current_section'] = $current_section;
         //$return['noncify'] = self::getNonce('admin');
         $return['environment'] = Config::isProduction() ? 'prod' : 'test';
@@ -730,7 +668,7 @@ class WordPress
      */
     public static function getNonceTag($tag, $strictify = true): string
     {
-        return Data::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
+        return RESURSBANK_MODULE_PREFIX . '|' . $tag . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
     }
 
     /**
@@ -743,17 +681,6 @@ class WordPress
      */
     public static function applyFilters($filterName, $value)
     {
-        Data::writeLogEvent(
-            Data::CAN_LOG_JUNK,
-            sprintf(
-                __(
-                    'Apply filter: %s',
-                    'resurs-bank-payments-for-woocommerce'
-                ),
-                $filterName
-            )
-        );
-
         $applyArray = [
             sprintf(
                 '%s_%s',

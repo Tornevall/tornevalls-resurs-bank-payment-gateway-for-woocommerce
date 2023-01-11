@@ -24,7 +24,6 @@ use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Route;
-
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
     value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
@@ -38,23 +37,10 @@ require_once(__DIR__ . '/autoload.php');
 // Using same path identifier as the rest of the plugin-verse.
 define(constant_name: 'RESURSBANK_GATEWAY_PATH', value: plugin_dir_path(__FILE__));
 
-// Note: The prefix below is used by this plugin only and should not be changed. Instead
-// you should use the filter "rbwc_get_plugin_prefix", if you really need to change this.
-// @todo Build us out of this prefix.
-if (Data::isOriginalCodeBase()) {
-    // @todo We are still partially depending on this due to the characteristics of the original
-    // @todo behaviour from Data::getPrefix, where we partially can add more data to it.
-    // @todo Do NOT alone change this value, make sure all filters has the proper call too.
-    // @todo The new way of calling for a correct prefix is to use ResursDefault::PREFIX.
-    define(constant_name: 'RESURSBANK_PREFIX', value: 'resursbank');
-} elseif (ResursPlugin::isResursCodeBase()) {
-    // Look for an alternative origin.
-    define(constant_name: 'RESURSBANK_PREFIX', value: ResursPlugin::RESURS_BANK_PREFIX);
-}
-
 // Do not touch this just yet. Converting filters to something else than snake_cases has to be done
 // in one sweep - if necessary.
 define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
+define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
 try {

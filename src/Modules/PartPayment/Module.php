@@ -107,7 +107,9 @@ class Module
      * Output widget HTML if on single product page
      *
      * @throws ConfigException
+     * @todo Remove ignore below after refactor (WOO-978)
      */
+    // phpcs:ignore
     public static function getWidget(): void
     {
         if (!is_product() || !Enabled::isEnabled()) {
@@ -140,7 +142,9 @@ class Module
      * Output widget CSS if on single product page
      *
      * @throws ConfigException
+     * @todo Remove ignore below after refactor (WOO-978)
      */
+    // phpcs:ignore
     public static function setCss(): void
     {
         if (!is_product() || !Enabled::isEnabled()) {
