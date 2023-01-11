@@ -307,10 +307,12 @@ class ResursDefault extends WC_Payment_Gateway
         if (!empty($this->paymentMethodInformation)) {
             if ($this->paymentMethodInformation->isResursMethod()) {
                 $return = Data::getImage(imageName: 'resurs-logo.png');
-            } elseif(str_contains(
-                haystack: strtolower(string: $this->paymentMethodInformation->name),
-                needle: 'trustly'
-            )) {
+            } elseif (
+                str_contains(
+                    haystack: strtolower(string: $this->paymentMethodInformation->name),
+                    needle: 'trustly'
+                )
+            ) {
                 $return = Data::getImage(imageName: 'method_trustly.svg');
             } else {
                 switch ($this->paymentMethodInformation->type) {
@@ -752,28 +754,25 @@ class ResursDefault extends WC_Payment_Gateway
             $customerType = CustomerType::NATURAL;
         }
 
-        // If this feature is not missing the method, we now know that there is chance that we're
-        // located in a checkout. We will at this moment run through the min-max amount that resides
-        // in each payment method that is requested here. If the payment method is not present,
-        // this one will be skipped and the rest of the function will fail over to the parent value.
-        if (isset($this->paymentMethodInformation, $this->paymentMethodInformation->minLimit)) {
-            $minMax = ResursBankAPI::getResurs()->getMinMax(
-                $this->get_order_total(),
-                $this->getRealMin($this->paymentMethodInformation->minLimit),
-                $this->getRealMax($this->paymentMethodInformation->maxLimit)
-            );
-            if (!$minMax) {
+        if (
+            !Admin::isAdmin() &&
+            isset($this->paymentMethodInformation) &&
+            $this->paymentMethodInformation instanceof PaymentMethod
+        ) {
+            // Return false on the conditions that the price is not matching min/max limits.
+            // Also return false if customer types are not supported.
+            if (
+                !(
+                (float)$this->get_order_total() >= $this->paymentMethodInformation->minPurchaseLimit &&
+                (float)$this->get_order_total() <= $this->paymentMethodInformation->maxPurchaseLimit
+                )
+            ) {
                 $return = false;
             }
-
-            // We decide at this level if the payment method should be available,
-            // based on current chosen country. Beware of the admin parts.
-            if ($return && !empty($customerType) && !is_admin()) {
-                $return = in_array(
-                    $customerType,
-                    (array)$this->paymentMethodInformation->customerType,
-                    true
-                );
+            if ($customerType === CustomerType::LEGAL && !$this->paymentMethodInformation->enabledForLegalCustomer) {
+                $return = false;
+            } elseif ($customerType === CustomerType::NATURAL && !$this->paymentMethodInformation->enabledForNaturalCustomer) {
+                $return = false;
             }
         }
 
