@@ -318,11 +318,6 @@ class ResursDefault extends WC_Payment_Gateway
         if (!empty($this->paymentMethodInformation)) {
             if ($this->paymentMethodInformation->isResursMethod()) {
                 $return = Data::getImage(imageName: 'resurs-logo.png');
-            } elseif(str_contains(
-                haystack: strtolower(string: $this->paymentMethodInformation->name),
-                needle: 'trustly'
-            )) {
-                $return = Data::getImage(imageName: 'method_trustly.svg');
             } else {
                 switch ($this->paymentMethodInformation->type) {
                     case Type::DEBIT_CARD:
@@ -332,6 +327,10 @@ class ResursDefault extends WC_Payment_Gateway
                         break;
                     case Type::SWISH:
                         $return = Data::getImage(imageName: 'method_swish.png');
+                        break;
+                    case Type::INTERNET:
+                        // Yes, "INTERNET" is a type only used for Trustly (Source: WOO-736 comments)
+                        $return = Data::getImage(imageName: 'method_trustly.svg');
                         break;
                     default:
                         break;
