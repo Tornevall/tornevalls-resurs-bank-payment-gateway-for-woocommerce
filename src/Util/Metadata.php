@@ -9,16 +9,19 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use ResursBank\Gateway\ResursDefault;
+use Resursbank\Woocommerce\Settings;
 use WC_Order;
 
 /**
  * Order metadata handler.
+ *
+ * @psalm-suppress MissingDependency
  */
 class Metadata
 {
     /**
-     * Set meta data to WC Order
+     * Set metadata to an order.
+     * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
      */
     public static function setOrderMeta(
         WC_Order $order,
@@ -27,19 +30,23 @@ class Metadata
     ): bool {
         return (bool)add_post_meta(
             post_id: $order->get_id(),
-            meta_key: ResursDefault::PREFIX . '_' . $metaDataKey,
+            meta_key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
             meta_value: $metaDataValue,
             unique: true
         );
     }
 
+    /**
+     * Return metadata from an order, as a single variable.
+     * Normally metadata is returned as array, but currently we usually only save values once.
+     */
     public static function getOrderMeta(
         WC_Order $order,
         string $metaDataKey
     ): string {
         return (string)get_post_meta(
             post_id: $order->get_id(),
-            key: ResursDefault::PREFIX . '_' . $metaDataKey,
+            key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
             single: true
         );
     }
@@ -49,7 +56,7 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order $order): bool
     {
-        return self::getOrderMeta(
+        return Metadata::getOrderMeta(
             order: $order,
             metaDataKey: 'payment_id'
         ) !== '';
