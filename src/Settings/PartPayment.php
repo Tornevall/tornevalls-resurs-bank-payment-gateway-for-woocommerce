@@ -28,6 +28,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use ResursBank\Module\Data;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -184,7 +185,7 @@ class PartPayment
         }
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
-        $minLimit =
+        $customerCountry = Data::getCustomerCountry();
 
         if ($new < 0) {
             WordPress::setGenericError(
