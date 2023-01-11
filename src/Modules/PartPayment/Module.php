@@ -213,8 +213,7 @@ class Module
      */
     private function visible(): bool
     {
-        $limit = Limit::getData() >= 150 ? Limit::getData() : 150;
         return Enabled::isEnabled() &&
-               $this->instance->getStartingAtCost() >= $limit;
+               $this->instance->getStartingAtCost() >= Limit::getData();
     }
 }
