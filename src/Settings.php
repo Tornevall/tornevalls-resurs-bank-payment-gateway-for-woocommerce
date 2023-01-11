@@ -13,7 +13,6 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
@@ -38,7 +37,7 @@ class Settings extends WC_Settings_Page
      */
     public function __construct()
     {
-        $this->id = ResursDefault::PREFIX;
+        $this->id = RESURSBANK_MODULE_PREFIX;
         $this->label = 'Resurs Bank';
 
         // Adds the Resurs Bank tab.
