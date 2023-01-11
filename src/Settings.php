@@ -69,14 +69,6 @@ class Settings extends WC_Settings_Page
     }
 
     /**
-     * Compatible request method for functions that is currently not using the above constant.
-     */
-    public static function getPrefix(): string
-    {
-        return RESURSBANK_MODULE_PREFIX;
-    }
-
-    /**
      * Saves settings from our fields to the database.
      *
      * This method is called by WordPress actions registered in our constructor.
