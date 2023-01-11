@@ -184,6 +184,7 @@ class PartPayment
         }
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
+        $minLimit =
 
         if ($new < 0) {
             WordPress::setGenericError(
@@ -201,6 +202,18 @@ class PartPayment
                         replace: (string)$maxLimit,
                         subject: Translator::translate(
                             phraseId: 'limit-new-value-above-max'
+                        )
+                    )
+                )
+            );
+        } elseif ($new < $minLimit) {
+            WordPress::setGenericError(
+                exception: new Exception(
+                    message: str_replace(
+                        search: '%1',
+                        replace: (string)$minLimit,
+                        subject: Translator::translate(
+                            phraseId: 'limit-new-value-below-min'
                         )
                     )
                 )
