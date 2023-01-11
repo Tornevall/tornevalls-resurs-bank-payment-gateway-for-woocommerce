@@ -3,6 +3,7 @@
 // We do use camel cases in this file.
 
 /** @noinspection PhpCSValidationInspection */
+
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
@@ -47,6 +48,7 @@ use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
+use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -79,13 +81,6 @@ use function uniqid;
  */
 class ResursDefault extends WC_Payment_Gateway
 {
-    /**
-     * This prefix is used for various parts of the settings by WooCommerce,
-     * for example, as an ID for these settings, and as a prefix for the values
-     * in the database. The prefix is also used as an identifier for this gateway.
-     */
-    public const PREFIX = 'resursbank';
-
     /**
      * Default identifier title for this gateway.
      */
@@ -156,7 +151,7 @@ class ResursDefault extends WC_Payment_Gateway
     private function getOrder(): WC_Order|null
     {
         global $theorder;
-        $post = get_post($_REQUEST['post'] ?? null);
+        $post = get_post(post: $_REQUEST['post'] ?? null);
 
         $return = null;
 
@@ -174,7 +169,6 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * @param PaymentMethod|null $resursPaymentMethod
      * @return string
-     * @throws ConfigException
      */
     private function getProperGatewayId(?PaymentMethod $resursPaymentMethod = null): string
     {
@@ -187,7 +181,7 @@ class ResursDefault extends WC_Payment_Gateway
         // id (uuid) that was used when the order was created.
         return !isset($resursPaymentMethod) && isset($currentOrder) && (
             $currentOrder instanceof WC_Order && Metadata::isValidResursPayment($currentOrder)
-        ) ? $currentOrder->get_payment_method() : self::PREFIX;
+        ) ? $currentOrder->get_payment_method() : RESURSBANK_MODULE_PREFIX;
     }
 
     /**
@@ -275,15 +269,10 @@ class ResursDefault extends WC_Payment_Gateway
         if ($paymentMethod instanceof PaymentMethod) {
             // Collect the entire payment method information.
             $this->paymentMethodInformation = $paymentMethod;
-            $this->id = self::PREFIX . '_' . $this->paymentMethodInformation->id;
+            $this->id = RESURSBANK_MODULE_PREFIX . '_' . $this->paymentMethodInformation->id;
             $this->payment_method = $this->id;
             $this->title = $this->paymentMethodInformation->name ?? '';
             $this->icon = $this->getMethodIconUrl();
-
-            // Applicant post data should also be collected, so we can re-use it later.
-            // The post data arrives in a way that is not always a _REQUEST/_POST/_GET, so this is centralized here.
-            // Besides, this is also an escaper.
-            $this->applicantPostData = $this->getApplicantPostData();
         }
     }
 
@@ -356,43 +345,6 @@ class ResursDefault extends WC_Payment_Gateway
             null,
             $this->paymentMethodInformation
         );
-    }
-
-    /**
-     * Post data from the simplified post fields with applicant information.
-     * We use this method to keep the data collected properly and in the same time sanitized with proper
-     * WordPress rules.
-     *
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function getApplicantPostData(): array
-    {
-        $realMethodId = $this->getRealMethodId();
-        $return = [];
-        // Skip the scraping if this is not a payment.
-        if ($this->isPaymentReady()) {
-            $saneRequest = Url::getSanitizedArray(array: $_REQUEST ?? []);
-            foreach ($saneRequest as $requestKey => $requestValue) {
-                if (preg_match(sprintf('/%s$/', $realMethodId), $requestKey)) {
-                    $applicantDataKey = sanitize_text_field(
-                        (string)preg_replace(
-                            sprintf(
-                                '/%s_(.*?)_%s/',
-                                Data::getPrefix(),
-                                $realMethodId
-                            ),
-                            '$1',
-                            $requestKey
-                        )
-                    );
-                    $return[$applicantDataKey] = $requestValue;
-                }
-            }
-        }
-
-        return $return;
     }
 
     /**
@@ -697,12 +649,12 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'totalVatAmount':
                 $return = wc_get_price_including_tax(
-                        $productObject,
-                        ['qty' => $wcProductItemData['quantity']]
-                    ) - wc_get_price_excluding_tax(
-                        $productObject,
-                        ['qty' => $wcProductItemData['quantity']]
-                    );
+                    $productObject,
+                    ['qty' => $wcProductItemData['quantity']]
+                ) - wc_get_price_excluding_tax(
+                    $productObject,
+                    ['qty' => $wcProductItemData['quantity']]
+                );
                 break;
             case 'vatRate':
                 $return = $this->getProductVat($productObject);
@@ -779,7 +731,8 @@ class ResursDefault extends WC_Payment_Gateway
 
         // If there's no cart, and we miss get_order_total in this gateway this instance probably do not belong
         // to the storefront.
-        if (!isset($woocommerce->cart) ||
+        if (
+            !isset($woocommerce->cart) ||
             !method_exists($this, method: 'get_order_total') ||
             !isset($this->paymentMethodInformation->id)
         ) {
@@ -1119,7 +1072,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getApiRequest()
     {
-        if (isset($_REQUEST['mapi-callback']) &&
+        if (
+            isset($_REQUEST['mapi-callback']) &&
             is_string($_REQUEST['mapi-callback'])
         ) {
             $response = [
