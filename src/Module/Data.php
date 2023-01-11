@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection EfferentObjectCouplingInspection */
+
 /** @noinspection SpellCheckingInspection */
 /** @noinspection ParameterDefaultValueIsNotNullInspection */
 
@@ -161,10 +162,12 @@ class Data
         $hasExtension = (bool)preg_match('/\./', $imageName);
 
         // Match allowed file extensions and return if it exists within the file name.
-        if ($hasExtension && (bool)preg_match(
+        if (
+            $hasExtension && (bool)preg_match(
                 sprintf('/^(.*?)(.%s)$/', implode('|.', self::$fileImageExtensions)),
                 $imageFile
-            )) {
+            )
+        ) {
             $imageFile = preg_replace(
                 sprintf('/^(.*)(.%s)$/', implode('|.', self::$fileImageExtensions)),
                 '$1',
@@ -327,7 +330,7 @@ class Data
      * @param mixed $namespace
      * @param bool $getDefaults
      * @return mixed
-     * @since 0.0.1.0
+     * @todo Remove when no longer in use.
      */
     public static function getResursOption(
         $key,
@@ -339,7 +342,7 @@ class Data
         if (!is_null($namespace) && preg_match('/woocom(.*?)resurs/', $namespace)) {
             return self::getResursOptionDeprecated($key, $namespace);
         }
-        $optionKeyPrefix = sprintf('%s_%s', Settings::getPrefix('admin', true), $key);
+        $optionKeyPrefix = sprintf('%s_%s', RESURSBANK_MODULE_PREFIX, $key);
         if ($getDefaults) {
             $return = self::getDefault($key);
         }
@@ -501,7 +504,7 @@ class Data
      */
     public static function setResursOption($key, $value): bool
     {
-        return update_option(sprintf('%s_%s', Settings::getPrefix('admin'), $key), $value);
+        return update_option(sprintf('%s_%s', RESURSBANK_MODULE_PREFIX, $key), $value);
     }
 
     /**
@@ -511,7 +514,7 @@ class Data
     public static function getTimeoutStatus(): int
     {
         return (int)get_transient(
-            sprintf('%s_resurs_api_timeout', Settings::getPrefix())
+            sprintf('%s_resurs_api_timeout', RESURSBANK_MODULE_PREFIX)
         );
     }
 
@@ -936,7 +939,7 @@ class Data
      */
     public static function isResursMethod($paymentMethod): bool
     {
-        $return = (bool)preg_match(sprintf('/^%s_/', Settings::getPrefix()), $paymentMethod);
+        $return = (bool)preg_match(sprintf('/^%s_/', RESURSBANK_MODULE_PREFIX), $paymentMethod);
 
         if (!$return && Data::canHandleOrder($paymentMethod)) {
             $return = true;
@@ -961,7 +964,7 @@ class Data
             'resurs_bank_',
             'rbwc_',
             'trbwc_',
-            Settings::getPrefix() . '_'
+            RESURSBANK_MODULE_PREFIX . '_'
         ];
         $canHandleOrderMethodPrefix = (array)WordPress::applyFilters('canHandleOrderPrefix', $allowMethod);
         $allowMethod += $canHandleOrderMethodPrefix;
@@ -1025,7 +1028,8 @@ class Data
             }
         }
 
-        if ((int)($orderId) &&
+        if (
+            (int)($orderId) &&
             is_object($order)
         ) {
             // Dynamically fetch order data during order-view session (sharable over many actions).
@@ -1077,7 +1081,7 @@ class Data
             $getPostId = self::getRefVarFromDatabase(
                 sprintf(
                     '%s_%s',
-                    Settings::getPrefix(),
+                    RESURSBANK_MODULE_PREFIX,
                     $key
                 ),
                 $reference
@@ -1159,7 +1163,7 @@ class Data
 
         // Looking for meta root keys.
         $metaKeys = [
-            Settings::getPrefix(),
+            RESURSBANK_MODULE_PREFIX,
             'trbwc',
         ];
 
@@ -1304,7 +1308,7 @@ class Data
             self::writeLogError(
                 sprintf(
                     $logMessage,
-                    Settings::getPrefix(),
+                    RESURSBANK_MODULE_PREFIX,
                     $exception->getCode(),
                     $fromFunction,
                     $exception->getMessage(),
@@ -1320,7 +1324,7 @@ class Data
             self::writeLogError(
                 sprintf(
                     $logMessage,
-                    Settings::getPrefix(),
+                    RESURSBANK_MODULE_PREFIX,
                     $exception->getCode(),
                     $exception->getMessage(),
                     $exception->getFile(),
@@ -1415,7 +1419,7 @@ class Data
             //$return = $orderData['meta'][$key];
             $return = self::getOrderMetaByKey($key, $orderData['meta']);
         }
-        $pluginPrefixedKey = sprintf('%s_%s', Settings::getPrefix(), $key);
+        $pluginPrefixedKey = sprintf('%s_%s', RESURSBANK_MODULE_PREFIX, $key);
         if (isset($orderData['meta'])) {
             $pluginReturn = self::getOrderMetaByKey($pluginPrefixedKey, $orderData['meta']);
             if (!empty($pluginReturn) && empty($return)) {
@@ -1502,7 +1506,7 @@ class Data
             'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
         ];
 
-        $scriptName = sprintf('%s_resursbank_order', Settings::getPrefix());
+        $scriptName = sprintf('%s_resursbank_order', RESURSBANK_MODULE_PREFIX);
         WordPress::setEnqueue(
             $scriptName,
             'resursbank_order.js',
@@ -1545,11 +1549,13 @@ class Data
         $return = false;
         if (self::isTest() && (bool)self::getResursOption('allow_mocking', null, false)) {
             $mockOptionName = WordPress::getSnakeCase(sprintf('mock%s', ucfirst($specificMock)));
-            if (self::getResursOption(
-                $mockOptionName,
-                null,
-                false
-            )) {
+            if (
+                self::getResursOption(
+                    $mockOptionName,
+                    null,
+                    false
+                )
+            ) {
                 if ($resetMock) {
                     // Disable mockoption after first execution.
                     self::setResursOption($mockOptionName, false);
@@ -1770,7 +1776,7 @@ class Data
             __(
                 'Internal Release Prefix',
                 'resurs-bank-payments-for-woocommerce'
-            ) => esc_html(Settings::getPrefix()),
+            ) => esc_html(RESURSBANK_MODULE_PREFIX),
             __(
                 'WooCommerce',
                 'resurs-bank-payments-for-woocommerce'
@@ -1942,8 +1948,8 @@ class Data
 
             self::$encrypt = new Aes();
             self::$encrypt->setAesKeys(
-                Settings::getPrefix() . $aesKey,
-                Settings::getPrefix() . $aesIv
+                RESURSBANK_MODULE_PREFIX . $aesKey,
+                RESURSBANK_MODULE_PREFIX . $aesIv
             );
         }
 
@@ -2084,13 +2090,13 @@ class Data
             if ($insert) {
                 $return = add_post_meta(
                     $orderId,
-                    sprintf('%s_%s', (bool)$protected ? Settings::getPrefix() : 'u_' . Settings::getPrefix(), $key),
+                    sprintf('%s_%s', (bool)$protected ? RESURSBANK_MODULE_PREFIX : 'u_' . RESURSBANK_MODULE_PREFIX, $key),
                     $value
                 );
             } else {
                 $return = update_post_meta(
                     $orderId,
-                    sprintf('%s_%s', (bool)$protected ? Settings::getPrefix() : 'u_' . Settings::getPrefix(), $key),
+                    sprintf('%s_%s', (bool)$protected ? RESURSBANK_MODULE_PREFIX : 'u_' . RESURSBANK_MODULE_PREFIX, $key),
                     $value
                 );
             }
@@ -2188,7 +2194,7 @@ class Data
      */
     public static function delResursOption($key): bool
     {
-        return delete_option(sprintf('%s_%s', Settings::getPrefix('admin'), $key));
+        return delete_option(sprintf('%s_%s', RESURSBANK_MODULE_PREFIX, $key));
     }
 
     /**
@@ -2262,7 +2268,8 @@ class Data
         }
 
         foreach ($obfuscateThis as $item => $value) {
-            if (is_string($value) &&
+            if (
+                is_string($value) &&
                 ((bool)preg_match('/^billing_/i', $item) || (bool)preg_match('/^shipping_/i', $item))
             ) {
                 $obfuscateThis[$item] = htmlentities($stringHandler->getObfuscatedStringFull(
@@ -2286,7 +2293,7 @@ class Data
         $return = '';
         if (self::isResursMethod($paymentMethod)) {
             $return = (string)preg_replace(
-                sprintf('/^%s_/', Settings::getPrefix()),
+                sprintf('/^%s_/', RESURSBANK_MODULE_PREFIX),
                 '',
                 $paymentMethod
             );

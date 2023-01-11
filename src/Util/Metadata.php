@@ -30,7 +30,7 @@ class Metadata
     ): bool {
         return (bool)add_post_meta(
             post_id: $order->get_id(),
-            meta_key: Settings::PREFIX . '_' . $metaDataKey,
+            meta_key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
             meta_value: $metaDataValue,
             unique: true
         );
@@ -46,7 +46,7 @@ class Metadata
     ): string {
         return (string)get_post_meta(
             post_id: $order->get_id(),
-            key: Settings::PREFIX . '_' . $metaDataKey,
+            key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
             single: true
         );
     }

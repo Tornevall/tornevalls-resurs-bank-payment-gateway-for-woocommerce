@@ -161,7 +161,7 @@ class WooCommerce
             foreach ($paymentMethodList as $paymentMethod) {
                 $gateway = new ResursDefault(resursPaymentMethod: $paymentMethod);
                 if ($gateway->is_available()) {
-                    $gateways[Settings::PREFIX . '_'. $paymentMethod->id] = $gateway;
+                    $gateways[RESURSBANK_MODULE_PREFIX . '_' . $paymentMethod->id] = $gateway;
                 }
             }
         } catch (Exception $e) {
@@ -214,7 +214,7 @@ class WooCommerce
             $links[] = sprintf(
                 '<a href="%s?page=wc-settings&tab=%s&section=api_settings">%s</a>',
                 admin_url('admin.php'),
-                Settings::getPrefix(),
+                RESURSBANK_MODULE_PREFIX,
                 'Settings'
             );
         }
@@ -301,7 +301,8 @@ class WooCommerce
      */
     private static function getAdminAfterOldCheck($order)
     {
-        if ($order->meta_exists('resursBankPaymentFlow') &&
+        if (
+            $order->meta_exists('resursBankPaymentFlow') &&
             !Data::hasOldGateway() &&
             !Data::getResursOption('deprecated_interference')
         ) {
@@ -327,7 +328,7 @@ class WooCommerce
      */
     public static function getMetaDataFromOrder(array $ecomHolder, array $metaArray)
     {
-        $metaPrefix = Settings::getPrefix();
+        $metaPrefix = RESURSBANK_MODULE_PREFIX;
         /** @var array $ecomMetaArray */
         $ecomMetaArray = [];
         foreach ($metaArray as $metaKey => $metaValue) {
@@ -360,7 +361,7 @@ class WooCommerce
             'requestMethod',
         ]);
         // Not necessary for customer to view.
-        $metaPrefix = Settings::getPrefix();
+        $metaPrefix = RESURSBANK_MODULE_PREFIX;
         if (is_array($metaDataContainer) && count($metaDataContainer)) {
             foreach ($purgeArray as $purgeKey) {
                 if (isset($metaDataContainer[$purgeKey])) {
@@ -386,7 +387,7 @@ class WooCommerce
     {
         /** @noinspection NotOptimalRegularExpressionsInspection */
         // Order meta that is protected against editing.
-        if (($metaType === 'post') && preg_match(sprintf('/^%s/i', Settings::getPrefix()), $metaKey)) {
+        if (($metaType === 'post') && preg_match(sprintf('/^%s/i', RESURSBANK_MODULE_PREFIX), $metaKey)) {
             $protected = true;
         }
         return $protected;
@@ -530,7 +531,8 @@ class WooCommerce
     {
         $return = $product->get_id();
         $productSkuValue = $product->get_sku();
-        if (!empty($productSkuValue) &&
+        if (
+            !empty($productSkuValue) &&
             WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
         ) {
             $return = $productSkuValue;
@@ -638,7 +640,7 @@ class WooCommerce
     {
         return sprintf(
             '[%s] %s',
-            WordPress::applyFilters('getOrderNotePrefix', Settings::getPrefix()),
+            WordPress::applyFilters('getOrderNotePrefix', RESURSBANK_MODULE_PREFIX),
             $orderNote
         );
     }

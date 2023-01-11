@@ -3,6 +3,7 @@
 // We do use camel cases in this file.
 
 /** @noinspection PhpCSValidationInspection */
+
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
@@ -179,7 +180,7 @@ class ResursDefault extends WC_Payment_Gateway
         // id (uuid) that was used when the order was created.
         return !isset($resursPaymentMethod) && isset($currentOrder) && (
             $currentOrder instanceof WC_Order && Metadata::isValidResursPayment($currentOrder)
-        ) ? $currentOrder->get_payment_method() : Settings::PREFIX;
+        ) ? $currentOrder->get_payment_method() : RESURSBANK_MODULE_PREFIX;
     }
 
     /**
@@ -267,7 +268,7 @@ class ResursDefault extends WC_Payment_Gateway
         if ($paymentMethod instanceof PaymentMethod) {
             // Collect the entire payment method information.
             $this->paymentMethodInformation = $paymentMethod;
-            $this->id = Settings::PREFIX . '_' . $this->paymentMethodInformation->id;
+            $this->id = RESURSBANK_MODULE_PREFIX . '_' . $this->paymentMethodInformation->id;
             $this->payment_method = $this->id;
             $this->title = $this->paymentMethodInformation->name ?? '';
             $this->icon = $this->getMethodIconUrl();
@@ -635,12 +636,12 @@ class ResursDefault extends WC_Payment_Gateway
                 break;
             case 'totalVatAmount':
                 $return = wc_get_price_including_tax(
-                        $productObject,
-                        ['qty' => $wcProductItemData['quantity']]
-                    ) - wc_get_price_excluding_tax(
-                        $productObject,
-                        ['qty' => $wcProductItemData['quantity']]
-                    );
+                    $productObject,
+                    ['qty' => $wcProductItemData['quantity']]
+                ) - wc_get_price_excluding_tax(
+                    $productObject,
+                    ['qty' => $wcProductItemData['quantity']]
+                );
                 break;
             case 'vatRate':
                 $return = $this->getProductVat($productObject);
@@ -717,7 +718,8 @@ class ResursDefault extends WC_Payment_Gateway
 
         // If there's no cart, and we miss get_order_total in this gateway this instance probably do not belong
         // to the storefront.
-        if (!isset($woocommerce->cart) ||
+        if (
+            !isset($woocommerce->cart) ||
             !method_exists($this, method: 'get_order_total') ||
             !isset($this->paymentMethodInformation->id)
         ) {
@@ -1057,7 +1059,8 @@ class ResursDefault extends WC_Payment_Gateway
      */
     public function getApiRequest()
     {
-        if (isset($_REQUEST['mapi-callback']) &&
+        if (
+            isset($_REQUEST['mapi-callback']) &&
             is_string($_REQUEST['mapi-callback'])
         ) {
             $response = [

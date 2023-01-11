@@ -20,6 +20,7 @@ use RuntimeException;
 use Throwable;
 use WC_Order;
 use WP_Post;
+
 use function count;
 use function defined;
 use function func_get_args;
@@ -78,7 +79,8 @@ class WordPress
             return;
         }
 
-        if ($_REQUEST['page'] === 'wc-settings' &&
+        if (
+            $_REQUEST['page'] === 'wc-settings' &&
             $_REQUEST['tab'] === 'checkout' &&
             $_REQUEST['section'] === (new ResursDefault())->id
         ) {
@@ -310,7 +312,8 @@ class WordPress
                 echo Data::getEscapedHtml(
                     content: '<div class="notice notice-error is-dismissible" style="font-weight: bold; color: #6c0c0c; background: #fac5c5;">
                       <p>' . $requiredVersionNotice . '</p></div>
-            ');
+            '
+                );
             }
         }
     }
@@ -320,8 +323,9 @@ class WordPress
      */
     public static function setGenericError(Throwable $exception): void
     {
-        // This method can't use Settings::PREFIX directly as it can be called before WooCommmerce initiation.
-        if (!isset($_SESSION) ||
+        // This method can't use RESURSBANK_MODULE_PREFIX directly as it can be called before WooCommmerce initiation.
+        if (
+            !isset($_SESSION) ||
             !is_array(value: $_SESSION)
         ) {
             $_SESSION['exception'] = [];
@@ -544,7 +548,7 @@ class WordPress
     private static function getLocalizationDataAdmin($return)
     {
         global $current_tab, $current_section;
-        $return['prefix'] = Settings::getPrefix();
+        $return['prefix'] = RESURSBANK_MODULE_PREFIX;
         $return['current_section'] = $current_section;
         //$return['noncify'] = self::getNonce('admin');
         $return['environment'] = Config::isProduction() ? 'prod' : 'test';
@@ -664,7 +668,7 @@ class WordPress
      */
     public static function getNonceTag($tag, $strictify = true): string
     {
-        return Settings::getPrefix($tag) . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
+        return RESURSBANK_MODULE_PREFIX . '|' . $tag . '|' . ($strictify ? $_SERVER['REMOTE_ADDR'] : '');
     }
 
     /**

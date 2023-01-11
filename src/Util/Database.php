@@ -44,7 +44,7 @@ class Database
             $orderResult = $wpdb->get_var(
                 query: $wpdb->prepare(
                     "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
-                    Settings::PREFIX . '_payment_id',
+                    RESURSBANK_MODULE_PREFIX . '_payment_id',
                     $paymentId
                 )
             );
