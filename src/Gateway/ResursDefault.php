@@ -337,12 +337,6 @@ class ResursDefault extends WC_Payment_Gateway
                         break;
                 }
             }
-
-            // The filter we're calling is used internally from PluginHooks (method getMethodIconByContent).
-            // Urls to a proper image is built from there if the images are properly included in this package.
-            if (($icon = $this->getIconByFilter())) {
-                $return = $icon;
-            }
         }
 
         return $return;
