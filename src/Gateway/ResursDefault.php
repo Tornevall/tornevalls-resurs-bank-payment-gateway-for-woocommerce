@@ -411,7 +411,8 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         // Use defaults if no order exists (this method is used on several places).
-        return $this->isValidResursOrder() ? $theorder->get_payment_method_title() : parent::get_title();
+        return $this->isValidResursOrder() && is_string($theorder->get_payment_method_title()) ?
+            $theorder->get_payment_method_title() : parent::get_title();
     }
 
     /**
