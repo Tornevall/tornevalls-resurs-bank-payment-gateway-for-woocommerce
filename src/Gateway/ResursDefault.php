@@ -926,8 +926,8 @@ class ResursDefault extends WC_Payment_Gateway
 
             if (isset($return['result']) && $return['result'] === 'success') {
                 // Forget the session variable if there is a success.
-                WcSession::unset((new Session())->getKey(key: Repository::SESSION_KEY_SSN_DATA));
-                WcSession::unset((new Session())->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE));
+                WcSession::unset(key: (new Session())->getKey(key: Repository::SESSION_KEY_SSN_DATA));
+                WcSession::unset(key: (new Session())->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE));
             }
 
             // This is our link to the payment at Resurs for which we save the uuid we get at the create.
