@@ -126,6 +126,8 @@ class Advanced
         try {
             $path = LogDir::getData();
 
+            if ($path === '') {$path = 'wc-logs';}
+
             // Path-helper for complex instances.
             if ($path === 'wc-logs') {
                 // If wc-logs are defined, we use the same log directory that WooCommerce sets up to be WC_LOG_PATH.

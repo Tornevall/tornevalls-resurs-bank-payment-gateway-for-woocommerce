@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use ResursBank\Gateway\ResursDefault;
+use Resursbank\Woocommerce\Settings;
 use RuntimeException;
 use WC_Order;
 use WC_Order_Refund;
@@ -19,6 +19,8 @@ use function is_string;
 
 /**
  * Actions to handle raw database requests.
+ *
+ * @psalm-suppress MissingDependency
  */
 class Database
 {
@@ -42,7 +44,7 @@ class Database
             $orderResult = $wpdb->get_var(
                 query: $wpdb->prepare(
                     "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
-                    ResursDefault::PREFIX . '_payment_id',
+                    RESURSBANK_MODULE_PREFIX . '_payment_id',
                     $paymentId
                 )
             );
