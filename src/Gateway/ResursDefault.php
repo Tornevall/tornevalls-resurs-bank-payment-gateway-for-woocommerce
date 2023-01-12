@@ -521,7 +521,7 @@ class ResursDefault extends WC_Payment_Gateway
         // Magic for full name.
         if ($key === 'full_name') {
             // Full name is a merge from first and last name. It's made up but sometimes necessary.
-            $return = sprintf('%s %s', $this->getCustomerData('first_name'), $this->getCustomerData('last_name'));
+            $return = $customerInfo['first_name'] . ' ' . $customerInfo['last_name'];
         }
 
         return (string)$return;
