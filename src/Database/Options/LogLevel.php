@@ -43,7 +43,7 @@ class LogLevel extends IntOption
         }
     }
 
-    public static function getDefault(): string
+    public static function getDefault(): int
     {
         return EcomLogLevel::INFO->value;
     }
