@@ -14,6 +14,7 @@ use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
@@ -27,6 +28,7 @@ use Resursbank\Ecom\Lib\Model\Payment\Customer;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Network\Curl\ErrorTranslator;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
@@ -55,6 +57,7 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
+use stdClass;
 use Throwable;
 use WC_Cart;
 use WC_Order;
@@ -307,13 +310,6 @@ class ResursDefault extends WC_Payment_Gateway
         if (!empty($this->paymentMethodInformation)) {
             if ($this->paymentMethodInformation->isResursMethod()) {
                 $return = Data::getImage(imageName: 'resurs-logo.png');
-            } elseif (
-                str_contains(
-                    haystack: strtolower(string: $this->paymentMethodInformation->name),
-                    needle: 'trustly'
-                )
-            ) {
-                $return = Data::getImage(imageName: 'method_trustly.svg');
             } else {
                 switch ($this->paymentMethodInformation->type) {
                     case Type::DEBIT_CARD:
@@ -323,6 +319,10 @@ class ResursDefault extends WC_Payment_Gateway
                         break;
                     case Type::SWISH:
                         $return = Data::getImage(imageName: 'method_swish.png');
+                        break;
+                    case Type::INTERNET:
+                        // Yes, "INTERNET" is a type only used for Trustly (Source: WOO-736 comments)
+                        $return = Data::getImage(imageName: 'method_trustly.svg');
                         break;
                     default:
                         break;
@@ -972,16 +972,56 @@ class ResursDefault extends WC_Payment_Gateway
                 'result' => 'failure',
                 'redirect' => $this->getReturnUrl($order)
             ];
+
             // Add note to notices and write to log.
             $order->add_order_note(
                 $createPaymentException->getMessage()
             );
             Config::getLogger()->error($createPaymentException);
+
             // Add on-screen message from failure.
-            wc_add_notice($createPaymentException->getMessage(), 'error');
+            if ($createPaymentException instanceof CurlException) {
+                $this->addErrorNotice(exception: $createPaymentException);
+            } else {
+                wc_add_notice(message: $createPaymentException->getMessage(), notice_type: 'error');
+            }
         }
 
         return $return;
+    }
+
+    /**
+     * Attempts to extract and translate more detailed error message from CurlException from payment creation.
+     * @param CurlException $exception
+     *
+     * @throws ConfigException
+     */
+    private function addErrorNotice(CurlException $exception): void
+    {
+        if ($exception->httpCode === 400 && !empty($exception->body)) {
+            try {
+                $body = json_decode(
+                    json: $exception->body,
+                    associative: false,
+                    depth: 256,
+                    flags: JSON_THROW_ON_ERROR
+                );
+
+                if (isset($body->parameters) && $body->parameters instanceof stdClass) {
+                    foreach ($body->parameters as $property => $message) {
+                        wc_add_notice(
+                            message: ErrorTranslator::get(errorMessage: $property . ' ' . $message),
+                            notice_type: 'error'
+                        );
+                    }
+                }
+            } catch (Throwable $error) {
+                Config::getLogger()->error(message: $error);
+                wc_add_notice(message: $exception->getMessage(), notice_type: 'error');
+            }
+        } else {
+            wc_add_notice(message: $exception->getMessage(), notice_type: 'error');
+        }
     }
 
     /**
