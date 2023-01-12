@@ -182,9 +182,8 @@ class ResursDefault extends WC_Payment_Gateway
         // need to identify the current order as created with Resurs payments. Since WooCommerce is using
         // the gateway id to identify the current payment method, we also need to adapt into the initial
         // id (uuid) that was used when the order was created.
-        return !isset($resursPaymentMethod) && isset($currentOrder) && (
-            $currentOrder instanceof WC_Order && Metadata::isValidResursPayment($currentOrder)
-        ) ? $currentOrder->get_payment_method() : RESURSBANK_MODULE_PREFIX;
+        return !isset($resursPaymentMethod) && $this->isValidResursOrder() ?
+            $currentOrder->get_payment_method() : RESURSBANK_MODULE_PREFIX;
     }
 
     /**
@@ -401,10 +400,8 @@ class ResursDefault extends WC_Payment_Gateway
     public function get_title(): string
     {
         /**
-         * $theorder is the correct naming convention according to WC, no spell checking needed.
          * @noinspection SpellCheckingInspection
          */
-        // WC Global. Required for parts of this method.
         global $theorder;
 
         $return = parent::get_title();
@@ -414,18 +411,19 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         // Use defaults if no order exists (this method is used on several places).
-        if (!($theorder instanceof WC_Order) || !MetaData::isValidResursPayment($theorder)) {
-            return $return;
-        }
+        return $this->isValidResursOrder() ? $theorder->get_payment_method_title() : parent::get_title();
+    }
 
-        // Since this part of the mechanism in wc-order-view is executed on all orders
-        // including those that are not created with Resurs, we need to make sure that
-        // we only touch orders that belong to us before changing the returned output.
-        if (MetaData::isValidResursPayment($theorder)) {
-            $return = $theorder->get_payment_method_title();
-        }
+    /**
+     * @return bool
+     */
+    private function isValidResursOrder(): bool
+    {
+        $currentOrder = $this->getOrder();
 
-        return $return;
+        return isset($currentOrder) &&
+            $currentOrder instanceof WC_Order &&
+            MetaData::isValidResursPayment(order: $currentOrder);
     }
 
     /**
@@ -874,17 +872,6 @@ class ResursDefault extends WC_Payment_Gateway
         $order = new WC_Order($order_id);
         $this->order = $order;
 
-        if (empty(Data::getOrderMeta('paymentMethodInformation', $order))) {
-            $paymentMethodInformation = Data::getPaymentMethodById(Data::getPaymentMethodBySession());
-            if (is_object($paymentMethodInformation)) {
-                Data::setOrderMeta($order, 'paymentMethodInformation', json_encode($paymentMethodInformation));
-            }
-        }
-        // Used by WooCommerce from class-wc-checkout.php to identify the payment method.
-        $order->set_payment_method(Data::getPaymentMethodBySession());
-
-        // Prepare API data and metas that applies to all orders and all flows.
-        $this->preProcessOrder($order);
         return $this->processResursOrder($order);
     }
 
@@ -898,26 +885,6 @@ class ResursDefault extends WC_Payment_Gateway
     private function getReturnUrl(WC_Order $order, string $result = 'failure'): string
     {
         return $result === 'success' ? $this->get_return_url($order) : html_entity_decode($order->get_cancel_order_url());
-    }
-
-    /**
-     * Prepare stuff before the process actions. Helper to find proper order id's during and after API-calls.
-     *
-     * @param WC_Order $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function preProcessOrder(WC_Order $order): void
-    {
-        $this->apiData['wc_order_id'] = $order->get_id();
-        $this->apiData['preferred_id'] = $this->getOrderReference();
-        Data::setDeveloperLog(
-            __FUNCTION__,
-            sprintf(
-                'setPreferredId:%s',
-                $this->apiData['preferred_id']
-            )
-        );
     }
 
     /**
@@ -952,6 +919,8 @@ class ResursDefault extends WC_Payment_Gateway
                 return: $return,
                 order: $order
             );
+
+            $order->set_payment_method($this->getPaymentMethod());
 
             if (isset($return['result']) && $return['result'] === 'success') {
                 // Forget the session variable if there is a success.
