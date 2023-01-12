@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Database\Options;
 
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
-use Resursbank\Woocommerce\Database\StringOption;
+use Resursbank\Woocommerce\Database\IntOption;
 use ValueError;
 
 /**
