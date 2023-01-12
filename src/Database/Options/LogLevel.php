@@ -16,7 +16,7 @@ use ValueError;
 /**
  * Setting for globally enabling the gateway (not the plugin).
  */
-class LogLevel extends StringOption
+class LogLevel extends IntOption
 {
     /**
      * @inheritdoc
@@ -41,5 +41,10 @@ class LogLevel extends StringOption
         } catch (ValueError) {
             return EcomLogLevel::INFO;
         }
+    }
+
+    public static function getDefault(): string
+    {
+        return EcomLogLevel::INFO->value;
     }
 }

@@ -51,4 +51,12 @@ class Option
             value: $value
         ) === true;
     }
+
+    /**
+     * Gets the option's default value.
+     */
+    public static function getDefault(): mixed
+    {
+        return false;
+    }
 }

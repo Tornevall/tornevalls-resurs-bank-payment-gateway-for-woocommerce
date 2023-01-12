@@ -69,7 +69,7 @@ class PartPayment
                         phraseId: 'part-payment-widget-enabled'
                     ),
                     'type' => 'checkbox',
-                    'default' => 'no',
+                    'default' => Enabled::getDefault(),
                     'desc' => 'Enabled',
                 ],
                 'payment_method' => [
@@ -78,6 +78,7 @@ class PartPayment
                         phraseId: 'payment-method'
                     ),
                     'type' => 'select',
+                    'default' => PaymentMethodOption::getDefault(),
                     'options' => self::getPaymentMethods(),
                     'desc' => Translator::translate(
                         phraseId: 'part-payment-payment-method'
@@ -89,6 +90,7 @@ class PartPayment
                         phraseId: 'annuity-period'
                     ),
                     'type' => 'select',
+                    'default' => Period::getDefault(),
                     'options' => self::getAnnuityPeriods(),
                     'desc' => Translator::translate(
                         phraseId: 'part-payment-annuity-period'
@@ -98,6 +100,7 @@ class PartPayment
                     'id' => Limit::getName(),
                     'title' => Translator::translate(phraseId: 'limit'),
                     'type' => 'text',
+                    'default' => Limit::getDefault(),
                     'desc' => Translator::translate(
                         phraseId: 'part-payment-limit'
                     ),

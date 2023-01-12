@@ -19,4 +19,9 @@ class IntOption extends Option
         $result = parent::getData();
         return is_numeric(value: $result) ? (int)$result : PHP_INT_MAX;
     }
+
+    public static function getDefault(): int
+    {
+        return 0;
+    }
 }
