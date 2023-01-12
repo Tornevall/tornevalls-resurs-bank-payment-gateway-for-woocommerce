@@ -188,7 +188,13 @@ class PartPayment
         }
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
+
+        // @todo Find a better solution for this
         $customerCountry = Data::getCustomerCountry();
+        $minLimit = 150;
+        if ($customerCountry === 'FI') {
+            $minLimit = 15;
+        }
 
         if ($new < 0) {
             WordPress::setGenericError(
