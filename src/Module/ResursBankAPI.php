@@ -4,6 +4,7 @@ namespace ResursBank\Module;
 
 use Exception;
 use JsonException;
+use Locale;
 use ReflectionException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
@@ -41,6 +42,9 @@ use stdClass;
  */
 class ResursBankAPI
 {
+    /** @var Language */
+    private const DEFAULT_LANGUAGE = Language::en;
+
     /**
      * @var ResursBank $resursBank
      * @since 0.0.1.0
@@ -115,13 +119,7 @@ class ResursBankAPI
                 scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
                 grantType: 'client_credentials'
             ),
-            language: match (Data::getCustomerCountry()) {
-                'SE' => Language::sv,
-                'DK' => Language::da,
-                'NO' => Language::no,
-                'FI' => Language::fi,
-                default => Language::en,
-            }
+            language: $this->getSiteLanguage()
         );
     }
 
@@ -252,5 +250,27 @@ class ResursBankAPI
 
         // Keep handling exceptions as before.
         return Data::getResolvedCredentials();
+    }
+
+    /**
+     * Attempts to somewhat safely fetch the correct site language.
+     *
+     * @return Language Configured language or self::DEFAULT_LANGUAGE if no matching language found in Ecom
+     */
+    private function getSiteLanguage(): Language
+    {
+        $language = Locale::getPrimaryLanguage(locale: get_locale());
+
+        if (!$language) {
+            return self::DEFAULT_LANGUAGE;
+        }
+
+        foreach (Language::cases() as $case) {
+            if ($language === $case->value) {
+                return $case;
+            }
+        }
+
+        return self::DEFAULT_LANGUAGE;
     }
 }
