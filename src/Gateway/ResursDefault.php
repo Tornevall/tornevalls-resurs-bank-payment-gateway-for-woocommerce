@@ -415,6 +415,8 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Method that is used to check if there is an order available (formerly $theorder) and if that order
+     * if available is valid as a Resurs Payment. Used to bind the payment method names properly in order views.
      * @return bool
      */
     private function isValidResursOrder(): bool
