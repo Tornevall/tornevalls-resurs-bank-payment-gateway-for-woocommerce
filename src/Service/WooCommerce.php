@@ -276,25 +276,6 @@ class WooCommerce
     }
 
     /**
-     * @param mixed $order
-     * @throws Exception
-     * @throws ResursException
-     * @since 0.0.1.0
-     */
-    public static function getAdminAfterOrderDetails($order = null)
-    {
-        // Considering this place as a safe place to apply display in styles.
-        Data::getSafeStyle();
-
-        if ($order instanceof WC_Order) {
-            $paymentMethod = $order->get_payment_method();
-            if (!Data::canHandleOrder($paymentMethod)) {
-                self::getAdminAfterOldCheck($order);
-            }
-        }
-    }
-
-    /**
      * @param $order
      * @throws Exception
      * @since 0.0.1.0
@@ -391,104 +372,6 @@ class WooCommerce
             $protected = true;
         }
         return $protected;
-    }
-
-    /**
-     * @param $return
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getFormattedPaymentData($return)
-    {
-        // This won't work if the payment is not at Resurs yet.
-        if (isset($return['ecom']) && is_array($return['ecom']) && count($return['ecom'])) {
-            $return['customer_billing'] = isset($return['ecom']->customer->address) ? $return['ecom']->customer->address : [];
-            $return['customer_shipping'] = isset($return['ecom']->deliveryAddress) ? $return['ecom']->deliveryAddress : [];
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $return
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getPaymentInfoDetails($return)
-    {
-        $return['ecom_short'] = [];
-        $purge = [
-            'paymentDiffs',
-            'customer',
-            'deliveryAddress',
-            'paymentMethodId',
-            'totalBonusPoints',
-            'metaData',
-            'username',
-            'jwt_client_id',
-            'isCurrentCredentials',
-            'environment',
-            'cache',
-        ];
-
-        if (isset($return['ecom'])) {
-            $purgedEcom = (array)$return['ecom'];
-            $billingAddress = $purgedEcom['customer']->address ?? [];
-            $deliveryAddress = $purgedEcom['deliveryAddress'] ?? [];
-
-            foreach ($purgedEcom as $key => $value) {
-                if (in_array($key, $purge, true)) {
-                    unset($purgedEcom[$key]);
-                }
-            }
-            $return['ecom_short'] = $purgedEcom;
-            $return['ecom_short']['billingAddress'] = implode("\n", self::getCompactAddress($billingAddress));
-            $return['ecom_short']['deliveryAddress'] = implode("\n", self::getCompactAddress($deliveryAddress));
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $addressData
-     * @return array
-     * @since 0.0.1.7
-     */
-    private static function getCompactAddress($addressData): array
-    {
-        // We no longer have to make this data compact, and show the full customer object.
-        // The new way of showing the data in the meta boxes makes this much better.
-        $purge = [
-            'fullName',
-        ];
-        $ignore = ['country', 'postalCode', 'postalArea'];
-
-        $return = [
-            'fullName' => sprintf(
-                '%s %s',
-                $addressData->firstName ?? '',
-                $addressData->lastName ?? ''
-            ),
-        ];
-        foreach ($purge as $key) {
-            if (isset($addressData->{$key})) {
-                unset($addressData->{$key});
-            }
-        }
-        foreach ($addressData as $key => $value) {
-            if (!in_array($key, $ignore)) {
-                $return[$key] = $value;
-            }
-        }
-
-        $return['postalCity'] = sprintf(
-            '%s-%s %s',
-            $addressData->country ?? '',
-            $addressData->postalCode ?? '',
-            $addressData->postalArea ?? ''
-        );
-
-        return $return;
     }
 
     /**
