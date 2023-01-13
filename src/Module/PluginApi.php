@@ -22,24 +22,6 @@ use function in_array;
 class PluginApi
 {
     /**
-     * @var ResursDefault
-     * @since 0.0.1.0
-     */
-    private static $resursCheckout;
-
-    /**
-     * List of callbacks required for this plugin to handle payments properly.
-     * @var array
-     * @since 0.0.1.0
-     */
-    private static $callbacks = [
-        Callback::UNFREEZE,
-        Callback::TEST,
-        Callback::UPDATE,
-        Callback::BOOKED,
-    ];
-
-    /**
      * @since 0.0.1.0
      */
     public static function execApi()
@@ -114,99 +96,5 @@ class PluginApi
         if ($dieInstantly) {
             exit;
         }
-    }
-
-    /**
-     * @param null $expire
-     * @param null $noReply Boolean that returns the answer instead of replying live.
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getValidatedNonce(
-        $expire = null,
-        $noReply = null,
-        $fromFunction = null
-    ): bool {
-        $return = false;
-        $expired = false;
-        $preExpired = self::expireNonce(__FUNCTION__);
-        $defaultNonceError = 'nonce_validation';
-
-        $isNotSafe = [
-        ];
-
-        $isSafe = (is_admin() && is_ajax() && empty($fromFunction) && in_array($fromFunction, $isNotSafe, true));
-        $nonceArray = [
-            'admin',
-            'all',
-            'simple',
-        ];
-
-        // Not recommended as this expires immediately and stays expired.
-        if ((bool)$expire && $preExpired) {
-            $expired = $preExpired;
-            $defaultNonceError = 'nonce_expire';
-        }
-
-        foreach ($nonceArray as $nonceType) {
-            if (wp_verify_nonce(Url::getRequest('n'), WordPress::getNonceTag($nonceType))) {
-                $return = true;
-                break;
-            }
-        }
-
-        if (!$return && $isSafe && (bool)Data::getResursOption('nonce_trust_admin_session')) {
-            // If request is based on ajax and admin.
-            $return = true;
-            $expired = false;
-        }
-
-        // We do not ask if this can be logged before it is logged, so that we can backtrack
-        // errors without the permission from wp-admin.
-        Data::writeLogInfo(
-            sprintf(
-                __(
-                    'Nonce validation accepted (from function: %s): %s.',
-                    'resurs-bank-payments-for-woocommerce'
-                ),
-                $fromFunction,
-                $return ? 'true' : 'false'
-            )
-        );
-
-        if (!$return || $expired) {
-            if (!(bool)$noReply) {
-                self::reply(
-                    [
-                        'error' => $defaultNonceError,
-                    ]
-                );
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Make sure the used nonce can only be used once.
-     *
-     * @param $nonceTag
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function expireNonce($nonceTag): bool
-    {
-        $optionTag = 'resurs_nonce_' . $nonceTag;
-        $return = false;
-        $lastNonce = get_option($optionTag);
-        if (Url::getRequest('n') === $lastNonce) {
-            $return = true;
-        } else {
-            // Only update if different.
-            update_option($optionTag, Url::getRequest('n'));
-        }
-        return $return;
     }
 }
