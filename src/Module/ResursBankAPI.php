@@ -3,37 +3,17 @@
 namespace ResursBank\Module;
 
 use Exception;
-use JsonException;
 use Locale;
-use ReflectionException;
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\CollectionException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Language;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
-use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
-use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Exception\MapiCredentialsException;
-use Resursbank\RBEcomPHP\RESURS_ENVIRONMENTS;
-use Resursbank\RBEcomPHP\ResursBank;
-use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Environment;
-use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
-use ResursException;
-use stdClass;
 
 /**
  * Class Api EComPHP Translator. Also a guide for what could be made better in the real API.
@@ -45,32 +25,6 @@ class ResursBankAPI
     /** @var Language */
     private const DEFAULT_LANGUAGE = Language::en;
 
-    /**
-     * @var ResursBank $resursBank
-     * @since 0.0.1.0
-     */
-    public static $resursBank;
-
-    /**
-     * @var array $paymentMethods
-     * @since 0.0.1.0
-     */
-    private static $paymentMethods;
-
-    /**
-     * @var array $callbacks
-     * @since 0.0.1.0
-     */
-    private static $callbacks;
-
-    /**
-     * @var array $credentials
-     * @since 0.0.1.0
-     */
-    private $credentials = [
-        'jwt_client_id' => '',
-        'jwt_client_secret' => '',
-    ];
 
     public function __construct()
     {
@@ -121,135 +75,6 @@ class ResursBankAPI
             ),
             language: $this->getSiteLanguage()
         );
-    }
-
-    /**
-     * Get payment properly by testing two API's before giving up.
-     * @param string $paymentId
-     * @return mixed
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
-     * @throws CollectionException
-     * @throws ConfigException
-     * @since 0.0.1.0
-     * @todo Return data as ecom2 Payment object. Also look at the validation issues in ecom2 DataConverter.
-     */
-    public static function getPayment(string $paymentId): array
-    {
-        try {
-            $return = PaymentRepository::get($paymentId);
-        } catch (Exception $e) {
-            Data::writeLogException($e, __FUNCTION__);
-
-            // Only look for legacy payments if the initial get fails.
-            $searchPayment = PaymentRepository::search(
-                StoreId::getData(),
-                $paymentId
-            );
-
-            if ($searchPayment->count() > 0) {
-                /** @var Payment $currentSearchResult */
-                $currentSearchResult = $searchPayment->current();
-
-                $return = PaymentRepository::get(
-                    $currentSearchResult->id
-                )->toArray();
-            } else {
-                throw $e;
-            }
-        }
-
-        return isset($return) && !empty($return) ? $return : new stdClass();
-    }
-
-    /**
-     * Fetch stored or new payment methods.
-     * @param bool $fromStorage
-     * @return array|mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection ParameterDefaultValueIsNotNullInspection
-     */
-    public static function getPaymentMethods($fromStorage = true)
-    {
-        $return = self::$paymentMethods;
-        if ($fromStorage && !empty(Data::getResursOption('paymentMethods'))) {
-            try {
-                $return = json_decode(
-                    Data::getResursOption('paymentMethods'),
-                    associative: false,
-                    flags: JSON_THROW_ON_ERROR
-                );
-            } catch (Exception) {
-            }
-        }
-
-        if (Data::getStoreId() > 0 && (!$fromStorage || empty($return))) {
-            self::$paymentMethods = Repository::getPaymentMethods(Data::getStoreId())->toArray();
-            Data::setResursOption('lastMethodUpdate', time());
-            WooCommerce::setSessionValue('silentGetPaymentMethodsException', null);
-            $return = self::$paymentMethods;
-            Data::setResursOption('paymentMethods', json_encode(self::$paymentMethods));
-        }
-
-        return $return;
-    }
-
-    /**
-     * @return ResursBankAPI|ResursBank
-     * @throws Exception
-     * @since 0.0.1.0
-     * @todo Fix the return type (or use void).
-     */
-    public static function getResurs(): ResursBank|ResursBankAPI
-    {
-        if (empty(self::$resursBank)) {
-            // Instantiation.
-            self::$resursBank = new self();
-        }
-
-        return self::$resursBank;
-    }
-
-    /**
-     * String to identify environment and credentials.
-     * @return string
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public function getCredentialString(): string
-    {
-        $this->getResolvedCredentials();
-
-        return sprintf(
-            '%s_%s',
-            Data::isTest() ? 'test' : 'live',
-            $this->credentials['jwt_client_id']
-        );
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     * @todo Can probably be removed. Make sure it's done safely, when switching code to MAPI.
-     */
-    private function getResolvedCredentials(): bool
-    {
-        // Make sure we still get credentials for the API specifically.
-        if (Data::hasCredentials()) {
-            $this->credentials = Data::getResolvedCredentialData();
-        }
-
-        // Keep handling exceptions as before.
-        return Data::getResolvedCredentials();
     }
 
     /**

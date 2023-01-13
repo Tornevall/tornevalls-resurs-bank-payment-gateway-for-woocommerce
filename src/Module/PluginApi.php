@@ -209,47 +209,4 @@ class PluginApi
         }
         return $return;
     }
-
-    /**
-     * @param bool $reply
-     * @param bool $validate
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection BadExceptionsProcessingInspection
-     */
-    public static function getPaymentMethods($reply = true, $validate = true)
-    {
-        if ($validate) {
-            self::getValidatedNonce();
-        }
-        $e = null;
-
-        // Re-fetch payment methods.
-        try {
-            ResursBankAPI::getPaymentMethods(false);
-            // @todo Can't use old SOAP annuities, so we disable this one during the initial migration!
-            //ResursBankAPI::getAnnuityFactors(false);
-            $canReload = true;
-        } catch (Exception $e) {
-            Data::writeLogException($e, __FUNCTION__);
-            $canReload = false;
-        }
-        if (self::canReply($reply)) {
-            self::reply([
-                'reload' => $canReload,
-                'error' => $e instanceof Exception ? $e->getMessage() : '',
-                'code' => $e instanceof Exception ? $e->getCode() : 0,
-            ]);
-        }
-    }
-
-    /**
-     * @param $reply
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private static function canReply($reply): bool
-    {
-        return $reply === null || (bool)$reply === true;
-    }
 }

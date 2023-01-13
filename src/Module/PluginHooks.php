@@ -958,49 +958,6 @@ class PluginHooks
     }
 
     /**
-     * @param $return
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection BadExceptionsProcessingInspection
-     */
-    public function getAvailableAutoDebitMethods($return)
-    {
-        WooCommerce::setSessionValue('rb_requesting_debit_methods', true);
-        // If we are saving or are somewhere else than in the payment methods section, we don't need
-        // to run this controller as it is only used for visuals.
-        if (!isset($_REQUEST['save']) &&
-            Url::getRequest('section') === 'payment_methods'
-        ) {
-            try {
-                $paymentMethodList = ResursBankAPI::getPaymentMethods(true);
-            } catch (Exception $e) {
-                Data::writeLogException($e, __FUNCTION__);
-                $return = [
-                    'default' => __(
-                        'Payment Methods are currently unavailable!',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                ];
-            }
-            if (isset($paymentMethodList) && is_array($paymentMethodList)) {
-                $return['default'] = __(
-                    'Default (Choice made by plugin)',
-                    'resurs-bank-payments-for-woocommerce'
-                );
-                foreach ($paymentMethodList as $method) {
-                    if ($method->type === 'PAYMENT_PROVIDER') {
-                        $return[$method->specificType] = $method->specificType;
-                    }
-                }
-            }
-        }
-        WooCommerce::setSessionValue('rb_requesting_debit_methods', false);
-
-        return $return;
-    }
-
-    /**
      * @throws Exception
      * @since 0.0.1.0
      */

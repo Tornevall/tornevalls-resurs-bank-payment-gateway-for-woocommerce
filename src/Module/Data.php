@@ -435,68 +435,6 @@ class Data
     }
 
     /**
-     * Check if payment method for specific credentials are enabled or disabled.
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function isPaymentMethodEnabled($paymentMethod): bool
-    {
-        return self::getPaymentMethodSetting('enabled', $paymentMethod) ?? true;
-    }
-
-    /**
-     * @param string $key
-     * @param $paymentMethod
-     * @return mixed|null
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    public static function getPaymentMethodSetting(string $key, $paymentMethod)
-    {
-        if (!empty($paymentMethod)) {
-            $settingBlock = (array)self::getPaymentMethodSettings($paymentMethod);
-        }
-
-        return $settingBlock[$key] ?? null;
-    }
-
-    /**
-     * @param string $paymentMethod
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    private static function getPaymentMethodSettings(string $paymentMethod)
-    {
-        return Data::getResursOption(
-            sprintf(
-                '%s_settings',
-                self::getPaymentMethodNameSpace($paymentMethod)
-            )
-        ) ?: [];
-    }
-
-    /**
-     * Resolve namespace by current environment setup (using environment_username_paymentmethod).
-     *
-     * @param $paymentMethod
-     * @return string
-     * @throws Exception
-     * @since 0.0.1.6
-     */
-    private static function getPaymentMethodNameSpace($paymentMethod): string
-    {
-        WooCommerce::applyMock('getPaymentMethodNamespaceException');
-
-        return sprintf(
-            '%s_%s',
-            (new ResursBankAPI())->getCredentialString(),
-            $paymentMethod
-        );
-    }
-
-    /**
      * @param $key
      * @param $value
      * @return bool
@@ -586,29 +524,6 @@ class Data
             $woocommerceCustomerCountry = $wcCustomer->get_billing_country();
             if (!empty($woocommerceCustomerCountry)) {
                 $return = $woocommerceCustomerCountry;
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $paymentMethodId
-     * @return array|stdClass
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getPaymentMethodById($paymentMethodId)
-    {
-        $return = [];
-
-        $storedMethods = ResursBankAPI::getPaymentMethods();
-        if (is_array($storedMethods)) {
-            foreach ($storedMethods as $method) {
-                if (isset($method->id) && $method->id === $paymentMethodId) {
-                    $return = $method;
-                    break;
-                }
             }
         }
 
@@ -1032,12 +947,8 @@ class Data
             (int)($orderId) &&
             is_object($order)
         ) {
-            // Dynamically fetch order data during order-view session (sharable over many actions).
-            $return = self::getPrefetchedPayment($orderId);
-
-            if (!count($return)) {
-                $return = self::setPrefetchedPayment($orderId, $order);
-            }
+            $return['order'] = $order;
+            $return['meta'] = (int)$orderId ? get_post_custom($orderId) : [];
         }
 
         return $return;
@@ -1116,43 +1027,6 @@ class Data
     }
 
     /**
-     * Get locally stored payment if it is present.
-     *
-     * @param $key
-     * @return array
-     * @since 0.0.1.0
-     */
-    public static function getPrefetchedPayment($key): array
-    {
-        return self::$payments[$key] ?? [];
-    }
-
-    /**
-     * Set and return order information.
-     *
-     * @param $orderId
-     * @param WC_Order $order
-     * @return array|mixed
-     * @since 0.0.1.0
-     */
-    private static function setPrefetchedPayment($orderId, $order)
-    {
-        $return['order'] = $order;
-        $return['meta'] = (int)$orderId ? get_post_custom($orderId) : [];
-        $return['resurs'] = self::getResursReference($return);
-        $return['resurs_secondary'] = self::getResursReference($return, ['resursDefaultReference']);
-
-        if (!empty($return['resurs'])) {
-            $return = self::getPreparedDataByEcom($return);
-            self::getLocalizedOrderData($return);
-        }
-        // Store payment for later use.
-        self::$payments[$orderId] = $return;
-
-        return $return;
-    }
-
-    /**
      * @param $orderDataArray
      * @param string|array $searchFor
      * @return string
@@ -1192,100 +1066,6 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * Fetch order info from EComPHP.
-     *
-     * @param $prefetchObject
-     * @return mixed
-     * @throws ResursException
-     * @since 0.0.1.0
-     */
-    public static function getPreparedDataByEcom($prefetchObject)
-    {
-        $prefetchObject = self::getOrderInfoExceptionData($prefetchObject);
-        $prefetchObject = self::getPreparedDataByExternal($prefetchObject);
-
-        try {
-            if (!$prefetchObject['ecomException']['code']) {
-                $prefetchObject['apiType'] = self::getMethodApiTypeByPreFetch($prefetchObject);
-                try {
-                    $prefetchObject['ecom'] = ResursBankAPI::getPayment(
-                        $prefetchObject['resurs'],
-                        null,
-                        $prefetchObject
-                    );
-                    $prefetchObject['ecom_had_reference_problems'] = false;
-                } catch (Exception $e) {
-                    if (!empty($prefetchObject['resurs_secondary']) && $prefetchObject['resurs_secondary'] !== $prefetchObject['resurs']) {
-                        $prefetchObject['ecom'] = ResursBankAPI::getPayment($prefetchObject['resurs_secondary']);
-                    }
-                    $prefetchObject['ecom_had_reference_problems'] = true;
-                    $prefetchObject['ecomException']['code'] = $e->getCode();
-                    $prefetchObject['ecomException']['message'] = $e->getMessage();
-                }
-                $prefetchObject = WooCommerce::getFormattedPaymentData($prefetchObject);
-                $prefetchObject = WooCommerce::getPaymentInfoDetails($prefetchObject);
-            }
-        } catch (Exception $e) {
-            self::writeLogEvent(
-                self::CAN_LOG_ORDER_EVENTS,
-                sprintf('%s exception (%s), %s.', __FUNCTION__, $e->getCode(), $e->getMessage())
-            );
-            self::writeLogException($e, __FUNCTION__);
-            $prefetchObject['ecomException'] = [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ];
-        }
-        return (array)$prefetchObject;
-    }
-
-    /**
-     * Prepare for exceptions.
-     *
-     * @param $return
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    private static function getOrderInfoExceptionData($return)
-    {
-        $return['errorString'] = __(
-            'An error occurred during the payment information retrieval from Resurs Bank so we can ' .
-            'not show the current order status for the moment.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['ecomException'] = [
-            'message' => null,
-            'code' => 0,
-        ];
-
-        return $return;
-    }
-
-    /**
-     * @param $prefetchObject
-     * @return array
-     */
-    private static function getPreparedDataByExternal($prefetchObject): array
-    {
-        try {
-            // Collect external data before internal.
-            $prefetchObject['externalPaymentInformation'] = WordPress::applyFilters(
-                'getResursPayment',
-                [],
-                $prefetchObject['resurs'],
-                $prefetchObject['resurs'] === $prefetchObject['resurs_secondary'] ? null : $prefetchObject['resurs_secondary']
-            );
-        } catch (Exception $externalGetpaymentException) {
-            self::writeLogException(
-                $externalGetpaymentException,
-                sprintf('%s_filtered_get_payment', __FUNCTION__)
-            );
-        }
-
-        return $prefetchObject;
     }
 
     /**
