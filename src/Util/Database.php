@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Resursbank\Woocommerce\Settings;
 use RuntimeException;
 use WC_Order;
 use WC_Order_Refund;

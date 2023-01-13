@@ -46,10 +46,14 @@ class Product
     ): OrderLine {
         return new OrderLine(
             quantity: self::getQuantity(product: $product),
-            quantityUnit: Translator::translate(phraseId: 'default-quantity-unit'),
+            quantityUnit: Translator::translate(
+                phraseId: 'default-quantity-unit'
+            ),
             vatRate: self::getVatRate(product: $product),
             totalAmountIncludingVat: round(
-                num: self::getSubtotal(product: $product) + self::getVatAmount(product: $product),
+                num: self::getSubtotal(product: $product) + self::getVatAmount(
+                    product: $product
+                ),
                 precision: 2
             ),
             description: self::getTitle(product: $product),

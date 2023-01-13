@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Resursbank\Woocommerce\Settings;
 use WC_Order;
 
 /**

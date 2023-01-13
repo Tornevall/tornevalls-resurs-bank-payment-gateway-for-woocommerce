@@ -16,8 +16,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Converter\DiscountItemCollection;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Product;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
 use WC_Order;
 use WC_Order_Item_Product;
 
@@ -39,7 +39,7 @@ class Order
         $items = self::getOrderContent(order: $order);
         $collection = new DiscountItemCollection(data: []);
 
-        /** @var WC_Order_Item_Product $productData */
+        /** @var WC_Order_Item_Product $item */
         foreach ($items as $item) {
             // Do not trust anonymous arrays.
             if (!($item instanceof WC_Order_Item_Product)) {
@@ -47,10 +47,6 @@ class Order
             }
 
             $result[] = Product::toOrderLine(product: $item);
-
-            if (Product::getSubtotal(product: $item) <= Product::getTotal(product: $item)) {
-                continue;
-            }
 
             // Total incl. tax before discounts are applied.
             $subtotal = Product::getSubtotal(product: $item);
@@ -72,7 +68,9 @@ class Order
 
         $result[] = Shipping::getOrderLine(order: $order);
 
-        return new OrderLineCollection(data: array_merge($result, $collection->getOrderLines()));
+        return new OrderLineCollection(
+            data: array_merge($result, $collection->getOrderLines())
+        );
     }
 
     /**
