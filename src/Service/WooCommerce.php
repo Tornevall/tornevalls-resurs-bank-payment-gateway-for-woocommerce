@@ -10,11 +10,13 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\PluginHooks;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
@@ -69,7 +71,6 @@ class WooCommerce
         new PluginHooks();
 
         add_filter('rbwc_is_available', 'ResursBank\Service\WooCommerce::rbwcIsAvailable', 999);
-
         return in_array(
             'woocommerce/woocommerce.php',
             apply_filters('active_plugins', get_option('active_plugins')),

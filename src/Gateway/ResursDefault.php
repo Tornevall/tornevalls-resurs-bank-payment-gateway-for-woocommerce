@@ -49,8 +49,8 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
 use Resursbank\Woocommerce\Settings;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -912,7 +912,7 @@ class ResursDefault extends WC_Payment_Gateway
             $paymentResponse = PaymentRepository::create(
                 storeId: StoreId::getData(),
                 paymentMethodId: $this->getPaymentMethod(),
-                orderLines: Cart::getOrderLines(),
+                orderLines: Order::getOrderLines(order: $order),
                 orderReference: $order->get_id(),
                 customer: $this->getCustomer(),
                 options: $this->getOptions($order)
@@ -939,6 +939,7 @@ class ResursDefault extends WC_Payment_Gateway
                 metaDataValue: $paymentResponse->id
             );
         } catch (Exception $createPaymentException) {
+            $tesT = 'asd';
             // In case we get an error from any other component than the create, we need to rewrite this response.
             $return = [
                 'result' => 'failure',
