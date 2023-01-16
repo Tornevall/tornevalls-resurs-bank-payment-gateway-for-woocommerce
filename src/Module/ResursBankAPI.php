@@ -254,10 +254,6 @@ class ResursBankAPI
 
     /**
      * Crude way to split a locale string and give back just the language part.
-     *
-     * @param string $locale
-     *
-     * @return string
      */
     private function getLanguageFromLocaleString(string $locale): string
     {
