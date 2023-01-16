@@ -16,11 +16,10 @@ use Resursbank\Ecom\Lib\Locale\Language as EcomLanguage;
  */
 class Language
 {
-    /** @var EcomLanguage */
     public const DEFAULT_LANGUAGE = EcomLanguage::en;
 
     /**
-     * Attempts to somewhat safely fetch the correct site language. (this parenthesis to get file changes)
+     * Attempts to somewhat safely fetch the correct site language.
      *
      * @return EcomLanguage Configured language or self::DEFAULT_LANGUAGE if no matching language found in Ecom
      */
@@ -46,9 +45,6 @@ class Language
      */
     private static function getLanguageFromLocaleString(string $locale): string
     {
-        return explode(
-            separator: '_',
-            string: $locale
-        )[0];
+        return explode(separator: '_', string: $locale)[0];
     }
 }
