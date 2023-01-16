@@ -126,7 +126,9 @@ class Advanced
         try {
             $path = LogDir::getData();
 
-            if ($path === '') {$path = 'wc-logs';}
+            if ($path === '') {
+                $path = 'wc-logs';
+            }
 
             // Path-helper for complex instances.
             if ($path === 'wc-logs') {

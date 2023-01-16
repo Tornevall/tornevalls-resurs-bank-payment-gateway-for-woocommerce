@@ -2,25 +2,23 @@
 
 namespace ResursBank\Service;
 
+use Automattic\WooCommerce\Admin\PageController;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
 use ResursBank\Module\ResursBankAPI;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
+use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
-use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
-use RuntimeException;
 use Throwable;
 use WC_Order;
 use WP_Post;
-
 use function count;
 use function defined;
 use function func_get_args;
@@ -238,10 +236,7 @@ class WordPress
 
             // Validate the order as a Resurs belonging before starting to throw meta-boxes at the order.
             if ($validResursPayment) {
-                $screen = get_current_screen();
-                $screen_id = $screen ? $screen->id : '';
-
-                if ($screen_id === 'shop_order') {
+                if ((new PageController())->get_current_screen_id() === 'shop_order') {
                     add_meta_box(
                         'resursbank_orderinfo',
                         sprintf(
