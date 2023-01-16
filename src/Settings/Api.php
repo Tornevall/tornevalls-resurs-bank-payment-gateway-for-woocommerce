@@ -59,7 +59,7 @@ class Api
                 'id' => StoreId::getName(),
                 'title' => 'Store ID',
                 'type' => 'select',
-                'default' => '',
+                'default' => StoreId::getDefault(),
                 'options' => $currentStoreOptions,
             ];
         } catch (Throwable $e) {
@@ -67,7 +67,7 @@ class Api
                 'id' => StoreId::getName(),
                 'title' => 'Store ID',
                 'type' => 'title',
-                'default' => '',
+                'default' => StoreId::getDefault(),
                 'desc_tip' => true,
                 'desc' => sprintf(
                     'Could not fetch stores from Resurs Bank: %s.',
@@ -84,7 +84,7 @@ class Api
                     'id' => Enabled::getName(),
                     'title' => 'Gateway Enabled',
                     'type' => 'checkbox',
-                    'default' => 'yes',
+                    'default' => Enabled::getDefault(),
                     'desc' => 'Enabled',
                 ],
                 'store_id' => $storeIdSetting,
@@ -92,13 +92,13 @@ class Api
                     'id' => ClientId::getName(),
                     'title' => 'Client ID',
                     'type' => 'text',
-                    'default' => '',
+                    'default' => ClientId::getDefault(),
                 ],
                 'client_secret' => [
                     'id' => ClientSecret::getName(),
                     'title' => 'Client Secret',
                     'type' => 'password',
-                    'default' => '',
+                    'default' => ClientSecret::getDefault(),
                 ],
                 'environment' => [
                     'id' => Environment::getName(),
@@ -123,7 +123,7 @@ class Api
                     'custom_attributes' => [
                         'size' => 1,
                     ],
-                    'default' => 'test',
+                    'default' => Environment::getDefault(),
                 ],
             ],
         ];

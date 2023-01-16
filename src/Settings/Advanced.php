@@ -75,7 +75,7 @@ class Advanced
                         'Leave empty to disable logging.',
                         'resurs-bank-payments-for-woocommerce'
                     ),
-                    'default' => '',
+                    'default' => LogDir::getDefault(),
                 ],
                 'log_level' => [
                     'id' => LogLevel::getName(),
@@ -98,14 +98,14 @@ class Advanced
                         'Leave empty to disable cache.',
                         'resurs-bank-payments-for-woocommerce'
                     ),
-                    'default' => '',
+                    'default' => CacheDir::getDefault(),
                 ],
                 'get_address_enabled' => [
                     'id' => EnableGetAddress::getName(),
                     'type' => 'checkbox',
                     'title' => 'Enable widget to get address',
                     'desc' => '',
-                    'default' => '',
+                    'default' => EnableGetAddress::getDefault(),
                 ],
             ],
         ];

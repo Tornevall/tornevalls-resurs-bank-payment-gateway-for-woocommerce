@@ -44,11 +44,24 @@ class Option
         return get_option(option: static::getName(), default: null);
     }
 
+    /**
+     * @param string $value
+     *
+     * @return bool
+     */
     public static function setData(string $value): bool
     {
         return update_option(
             option: static::getName(),
             value: $value
         ) === true;
+    }
+
+    /**
+     * Gets the option's default value.
+     */
+    public static function getDefault(): mixed
+    {
+        return false;
     }
 }
