@@ -5,27 +5,9 @@
 namespace ResursBank\Service;
 
 use Exception;
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Order\OrderLineType;
-use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
-use ResursBank\Gateway\ResursDefault;
 use ResursBank\Module\Data;
-use ResursBank\Module\ResursBankAPI;
-use Resursbank\Woocommerce\Util\Metadata;
-use WC_Cart;
-use WC_Coupon;
+use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use WC_Order;
-use WC_Product;
-
-use function count;
-use function is_array;
 use function is_object;
 
 /**

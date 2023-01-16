@@ -10,13 +10,13 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Database\Options;
 
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
-use Resursbank\Woocommerce\Database\StringOption;
+use Resursbank\Woocommerce\Database\IntOption;
 use ValueError;
 
 /**
  * Setting for globally enabling the gateway (not the plugin).
  */
-class LogLevel extends StringOption
+class LogLevel extends IntOption
 {
     /**
      * @inheritdoc
@@ -41,5 +41,13 @@ class LogLevel extends StringOption
         } catch (ValueError) {
             return EcomLogLevel::INFO;
         }
+    }
+
+    /**
+     * @return int
+     */
+    public static function getDefault(): int
+    {
+        return EcomLogLevel::INFO->value;
     }
 }
