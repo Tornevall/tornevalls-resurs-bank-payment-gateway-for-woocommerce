@@ -7,6 +7,7 @@
 namespace ResursBank\Module;
 
 use Exception;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use Resursbank\Ecommerce\Types\Callback;
 use ResursBank\Service\WordPress;
@@ -30,15 +31,6 @@ class PluginApi
         new ResursBankAPI();
         // Logging $_REQUEST may break the WooCommerce status log view if not decoded first.
         // For some reason, the logs can't handle utf8-strings.
-        Data::writeLogEvent(
-            Data::CAN_LOG_BACKEND,
-            sprintf(
-                'Backend: %s (%s), params %s',
-                __FUNCTION__,
-                self::getActionFromRequest(),
-                print_r(Data::getObfuscatedData($_REQUEST), true)
-            )
-        );
 
         $returnedValue = WordPress::applyFilters(self::getActionFromRequest(), null, $_REQUEST);
 

@@ -16,12 +16,10 @@ use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
-use Resursbank\Woocommerce\Settings;
+use Resursbank\Woocommerce\Util\Metadata;
 use RuntimeException;
-use stdClass;
 use WC_Customer;
 use WC_Order;
-use function count;
 use function defined;
 use function in_array;
 use function is_array;
@@ -831,199 +829,11 @@ class Data
      *
      * @param int|WC_Order $orderData
      * @return array|null
-     * @throws ResursException
-     * @since 0.0.1.0
+     * @todo Remove me.
      */
     public static function getResursOrderIfExists($orderData): ?array
     {
-        $order = WooCommerce::getProperOrder($orderData, 'order');
-        if (self::isResursMethod($order->get_payment_method())) {
-            $resursOrder = self::getOrderInfo($order);
-            if (!empty($resursOrder['ecom']) && isset($resursOrder['ecom']->id)) {
-                $return = $resursOrder;
-            }
-        }
-
-        return (array)(isset($return) ? $return : []);
-    }
-
-    /**
-     * @param $paymentMethod
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isResursMethod($paymentMethod): bool
-    {
-        $return = (bool)preg_match(sprintf('/^%s_/', RESURSBANK_MODULE_PREFIX), $paymentMethod);
-
-        if (!$return && Data::canHandleOrder($paymentMethod)) {
-            $return = true;
-        }
-
-        return $return;
-    }
-
-    /**
-     * Makes sure nothing interfering with orders that has not been created by us. If this returns false,
-     * it means we should not be there and touch things.
-     *
-     * @param $thisMethod
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function canHandleOrder($thisMethod): bool
-    {
-        $return = false;
-
-        $allowMethod = [
-            'resurs_bank_',
-            'rbwc_',
-            'trbwc_',
-            RESURSBANK_MODULE_PREFIX . '_'
-        ];
-        $canHandleOrderMethodPrefix = (array)WordPress::applyFilters('canHandleOrderPrefix', $allowMethod);
-        $allowMethod += $canHandleOrderMethodPrefix;
-
-        $isResursDeprecated = false;
-        foreach ($allowMethod as $methodKey) {
-            if ((bool)preg_match(sprintf('/^%s/', $methodKey), $thisMethod)) {
-                if (self::isDeprecatedPluginOrder($thisMethod)) {
-                    $isResursDeprecated = true;
-                    break;
-                }
-                $return = true;
-                break;
-            }
-        }
-
-        if ($isResursDeprecated && self::getResursOption('deprecated_interference')) {
-            $return = true;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $thisMethod
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function isDeprecatedPluginOrder($thisMethod): bool
-    {
-        return strncmp($thisMethod, 'resurs_bank_', 12) === 0;
-    }
-
-    /**
-     * Advanced order fetching. Make sure you use Data::canHandleOrder($paymentMethod) before running this.
-     * It is not our purpose to interfere with all orders.
-     *
-     * @param mixed $order
-     * @param null $orderIsResursReference
-     * @return mixed
-     * @throws ResursException
-     * @since 0.0.1.0
-     */
-    public static function getOrderInfo($order, $orderIsResursReference = null)
-    {
-        $return = [];
-        $orderId = null;
-
-        // get_id does not exist in the Order class when Override is used.
-        if (is_object($order) && method_exists($order, 'get_id')) {
-            $orderId = $order->get_id();
-        } elseif ((int)$order && !is_string($order) && !$orderIsResursReference) {
-            $orderId = $order;
-            $order = new WC_Order($orderId);
-        } elseif (is_string($order)) {
-            // Landing here it might be a Resurs or EComPHP reference.
-            $foundOrderId = self::getOrderByEcomRef($order);
-            if ($foundOrderId) {
-                $order = self::getOrderInfo($foundOrderId);
-                $orderId = $order['order']->get_id();
-            }
-        }
-
-        if (
-            (int)($orderId) &&
-            is_object($order)
-        ) {
-            $return['order'] = $order;
-            $return['meta'] = (int)$orderId ? get_post_custom($orderId) : [];
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $orderReference
-     * @param null $asOrder
-     * @return null
-     * @since 0.0.1.0
-     */
-    public static function getOrderByEcomRef($orderReference, $asOrder = null)
-    {
-        $return = 0;
-
-        foreach (self::$searchArray as $key) {
-            $getPostId = self::getRefVarFromMeta($key, $orderReference);
-            if ($getPostId) {
-                $return = $getPostId;
-                break;
-            }
-        }
-
-        if ($return && (bool)$asOrder) {
-            $return = new WC_Order($return);
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $key
-     * @param $reference
-     * @return int
-     * @since 0.0.1.0
-     */
-    private static function getRefVarFromMeta($key, $reference): int
-    {
-        $getPostId = self::getRefVarFromDatabase($key, $reference);
-        if (!$getPostId) {
-            $getPostId = self::getRefVarFromDatabase(
-                sprintf(
-                    '%s_%s',
-                    RESURSBANK_MODULE_PREFIX,
-                    $key
-                ),
-                $reference
-            );
-        }
-        if ((int)$getPostId) {
-            $return = (int)$getPostId;
-        }
-
-        return $return ?? 0;
-    }
-
-    /**
-     * @param $key
-     * @param $reference
-     * @return string|null
-     * @since 0.0.1.0
-     * @noinspection SqlResolve
-     * @noinspection UnknownInspectionInspection
-     */
-    private static function getRefVarFromDatabase($key, $reference)
-    {
-        global $wpdb;
-        $tableName = $wpdb->prefix . 'postmeta';
-        return $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT `post_id` FROM {$tableName} WHERE `meta_key` = '%s' and `meta_value` = '%s'",
-                $key,
-                $reference
-            )
-        );
+        return [];
     }
 
     /**
@@ -1069,64 +879,6 @@ class Data
     }
 
     /**
-     * @param string $fromFunction
-     * @param Exception $exception
-     * @since 0.0.1.0
-     */
-    public static function writeLogException(Exception $exception, string $fromFunction = ''): void
-    {
-        if (!isset($_SESSION)) {
-            $_SESSION['exception'] = [];
-        }
-        $_SESSION['exception'][] = $exception;
-
-        if (!empty($fromFunction)) {
-            $logMessage = __(
-                '%s internal generic exception %s from function %s: %s --- File %s, line %s.',
-                'resurs-bank-payments-for-woocommerce'
-            );
-            self::writeLogError(
-                sprintf(
-                    $logMessage,
-                    RESURSBANK_MODULE_PREFIX,
-                    $exception->getCode(),
-                    $fromFunction,
-                    $exception->getMessage(),
-                    $exception->getFile(),
-                    $exception->getLine()
-                )
-            );
-        } else {
-            $logMessage = __(
-                '%s internal generic exception %s: %s --- File %s, line %s.',
-                'resurs-bank-payments-for-woocommerce'
-            );
-            self::writeLogError(
-                sprintf(
-                    $logMessage,
-                    RESURSBANK_MODULE_PREFIX,
-                    $exception->getCode(),
-                    $exception->getMessage(),
-                    $exception->getFile(),
-                    $exception->getLine()
-                )
-            );
-        }
-    }
-
-    /**
-     * @param string $logMessage
-     * @since 0.0.1.0
-     */
-    public static function writeLogError(string $logMessage): void
-    {
-        self::writeLogByLogLevel(
-            LogLevel::ERROR,
-            $logMessage
-        );
-    }
-
-    /**
      * @param LogLevel $logLevel
      * @param string $message
      * @throws ConfigException
@@ -1163,27 +915,9 @@ class Data
     }
 
     /**
-     * @param $prefetchObject
-     * @return string
-     * @throws ResursException
-     */
-    private static function getMethodApiTypeByPreFetch($prefetchObject): string
-    {
-        $return = '';
-        if (isset($prefetchObject['meta']) && is_array($prefetchObject['meta'])) {
-            $paymentMethodInformation = json_decode(self::getOrderMeta('paymentMethodInformation', $prefetchObject));
-            if (is_object($paymentMethodInformation) && isset($paymentMethodInformation->apiType)) {
-                $return = $paymentMethodInformation->apiType;
-            }
-        }
-        return $return;
-    }
-
-    /**
      * @param $key
      * @param $order
      * @return mixed|null
-     * @throws ResursException
      * @since 0.0.1.0
      */
     public static function getOrderMeta($key, $order)
@@ -1192,7 +926,7 @@ class Data
             // Get from a prefetched request.
             $orderData = $order;
         } else {
-            $orderData = self::getOrderInfo($order);
+            $orderData = Metadata::getOrderInfo($order);
         }
 
         if (isset($key, $orderData['meta'][$key])) {
@@ -1235,87 +969,6 @@ class Data
             }
         }
         return $return ?? null;
-    }
-
-    /**
-     * Check if severity level is allowed before writing to log.
-     * @param $eventType
-     * @param $logData
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function writeLogEvent($eventType, $logData): bool
-    {
-        $return = false;
-
-        // Ask the data base once, then get local storage value.
-        if (!isset(self::$can[$eventType])) {
-            self::$can[$eventType] = (bool)self::getResursOption(
-                sprintf('can_log_%s', $eventType)
-            );
-        }
-
-        if (self::$can[$eventType]) {
-            $return = true;
-            self::writeLogInfo($logData);
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param string $logMessage
-     * @since 0.0.1.0
-     */
-    public static function writeLogInfo(string $logMessage): void
-    {
-        self::writeLogByLogLevel(
-            logLevel: LogLevel::INFO,
-            message: $logMessage
-        );
-    }
-
-    /**
-     * @param array $orderData
-     * @since 0.0.1.0
-     */
-    private static function getLocalizedOrderData($orderData = null)
-    {
-        $localizeArray = [
-            'resursOrder' => $orderData['resurs'] ?? '',
-            'dynamicLoad' => self::getResursOption('dynamicOrderAdmin'),
-        ];
-
-        $scriptName = sprintf('%s_resursbank_order', RESURSBANK_MODULE_PREFIX);
-        WordPress::setEnqueue(
-            $scriptName,
-            'resursbank_order.js',
-            is_admin(),
-            $localizeArray
-        );
-    }
-
-    /**
-     * Allowing specific styles if admin is active.
-     *
-     * @since 0.0.1.1
-     */
-    public static function getSafeStyle()
-    {
-        add_filter('safe_style_css', function ($styles) {
-            $styles[] = 'display';
-            $styles[] = 'border';
-            return $styles;
-        });
-    }
-
-    /**
-     * @return array
-     * @since 0.0.1.6
-     */
-    public static function getSupportArray(): array
-    {
-        return (array)WordPress::applyFilters('getSupportAddressList', []);
     }
 
     /**
@@ -1654,39 +1307,6 @@ class Data
     }
 
     /**
-     * @param $data
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function setEncryptData($data): string
-    {
-        $dataEncryptionState = null;
-        try {
-            $crypt = self::getCrypt();
-            $return = $crypt->aesEncrypt($data);
-        } catch (Exception $e) {
-            $dataEncryptionState = $e;
-            $return = self::base64urlEncode($data);
-        }
-
-        if ($dataEncryptionState instanceof Exception) {
-            self::writeLogNotice(
-                sprintf(
-                    __(
-                        '%s failed encryption (%d): %s. Failover to base64.',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    __FUNCTION__,
-                    $dataEncryptionState->getCode(),
-                    $dataEncryptionState->getMessage()
-                )
-            );
-        }
-
-        return (string)$return;
-    }
-
-    /**
      * Base64-encoded data, but with URL-safe characters.
      * @param string $data
      * @return string
@@ -1709,80 +1329,9 @@ class Data
     }
 
     /**
-     * @return Aes
-     * @throws ExceptionHandler
-     * @since 0.0.1.0
-     */
-    public static function getCrypt(): Aes
-    {
-        if (empty(self::$encrypt)) {
-            $aesKey = self::getResursOption('key');
-            $aesIv = self::getResursOption('iv');
-
-            if (empty($aesKey) && empty($aesIv)) {
-                $aesKey = uniqid('k_' . microtime(true), true);
-                $aesIv = uniqid('i_' . microtime(true), true);
-                self::setResursOption('key', $aesKey);
-                self::setResursOption('iv', $aesIv);
-            }
-
-            self::$encrypt = new Aes();
-            self::$encrypt->setAesKeys(
-                RESURSBANK_MODULE_PREFIX . $aesKey,
-                RESURSBANK_MODULE_PREFIX . $aesIv
-            );
-        }
-
-        return self::$encrypt;
-    }
-
-    /**
-     * @param $logMessage
-     * @since 0.0.1.0
-     */
-    public static function writeLogNotice($logMessage)
-    {
-        self::writeLogByLogLevel(
-            LogLevel::INFO,
-            $logMessage
-        );
-    }
-
-    /**
-     * @param string $data
-     * @param bool $base64
-     * @return mixed
-     * @since 0.0.1.0
-     * @noinspection BadExceptionsProcessingInspection
-     */
-    public static function getDecryptData($data = '', bool $base64 = false)
-    {
-        if (!isset($data)) {
-            $data = '';
-        }
-
-        if (isset($data)) {
-            try {
-                if ($base64) {
-                    $return = self::base64urlDecode($data);
-                } else {
-                    $crypt = self::getCrypt();
-                    $return = $crypt->aesDecrypt($data);
-                }
-            } catch (Exception $e) {
-                self::writeLogException($e, __FUNCTION__);
-                $return = Data::base64urlDecode($data);
-            }
-        }
-
-        return $return ?? $data;
-    }
-
-    /**
      * If plugin is enabled on admin level as a payment method.
      *
      * @return bool
-     * @since 0.0.1.0
      * @todo There are several places that is still using this method instead of askign Enable:: directly.
      * @todo Remove this method and use Enable:: instead, where it still is in use.
      */
@@ -1792,30 +1341,8 @@ class Data
     }
 
     /**
-     * @param $fromFunction
-     * @param $message
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function setDeveloperLog($fromFunction, $message): bool
-    {
-        return self::writeLogEvent(
-            self::CAN_LOG_ORDER_DEVELOPER,
-            sprintf(
-                __(
-                    'DevLog Method "%s" message: %s.',
-                    'resurs-bank-payments-for-woocommerce'
-                ),
-                $fromFunction,
-                $message
-            )
-        );
-    }
-
-    /**
      * @param $ecomObject
      * @return bool
-     * @throws ResursException
      * @since 0.0.1.8
      */
     public static function canIgnoreFrozen($ecomObject): bool
@@ -1856,9 +1383,8 @@ class Data
         }
 
         if (isset($orderId)) {
-            self::writeLogEvent(
-                self::CAN_LOG_JUNK,
-                sprintf(
+            Config::getLogger()->debug(
+                message: sprintf(
                     '%s (%s): %s=%s (protected=%s).',
                     __FUNCTION__,
                     $orderId,
@@ -1894,199 +1420,5 @@ class Data
         }
 
         return $return;
-    }
-
-    /**
-     * @param $currentValue
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getDecimalValue($currentValue)
-    {
-        global $current_tab;
-        if ($current_tab !== 'general' && $currentValue < 2 && self::getResursOption('prevent_rounding_panic')) {
-            $currentValue = 2;
-        }
-        return $currentValue;
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.8
-     */
-    public static function hasCredentials(): bool
-    {
-        return (ClientSecret::getData() !== '' && ClientId::getData() !== '');
-    }
-
-    /**
-     * @throws Exception
-     * @since 0.0.1.0
-     * @todo Can probably be removed. Make sure it's done safely, when switching code to MAPI.
-     */
-    public static function getResolvedCredentials(): bool
-    {
-        $credentials = self::getResolvedCredentialData();
-
-        if (empty($credentials['jwt_client_id']) || empty($credentials['jwt_client_secret'])) {
-            throw new RuntimeException('ECom credentials are not fully set.', self::UNSET_CREDENTIALS_EXCEPTION);
-        }
-
-        return true;
-    }
-
-    /**
-     * @return array
-     * @since 0.0.1.8
-     */
-    public static function getResolvedCredentialData(): array
-    {
-        $environment = self::getResursOption('environment');
-
-        if ($environment === 'live') {
-            $getUserFrom = 'jwt_client_id_production';
-            $getPasswordFrom = 'jwt_client_secret_production';
-        } else {
-            $getUserFrom = 'jwt_client_id';
-            $getPasswordFrom = 'jwt_client_secret';
-        }
-
-        $credentials['jwt_client_id'] = self::getResursOption($getUserFrom);
-        $credentials['jwt_client_secret'] = self::getResursOption($getPasswordFrom);
-
-        return $credentials;
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function clearCredentialNotice(): bool
-    {
-        return self::delResursOption('front_callbacks_credential_error');
-    }
-
-    /**
-     * Remove self settings from option.
-     * @param $key
-     * @return bool
-     */
-    public static function delResursOption($key): bool
-    {
-        return delete_option(sprintf('%s_%s', RESURSBANK_MODULE_PREFIX, $key));
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    public static function getCredentialNotice(): bool
-    {
-        return self::setResursOption(
-            'front_callbacks_credential_error',
-            json_encode(
-                [
-                    'code' => 401,
-                    'message' => __(
-                        'Received an error message from Resurs Bank that indicates that you credentials are incorrect.',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                ]
-            )
-        );
-    }
-
-    /**
-     * Selective string obfuscator for internal debugging.
-     * Only call for this method when debugging since data will be rewritten.
-     *
-     * Since this feature is built for the logging function, obfuscation also means html entites applied to each
-     * string, since the logging feature seems unable to handle utf8-transforming properly..
-     *
-     * @param $obfuscateThis
-     * @param string $keyStart
-     * @return array
-     * @since 0.0.1.1
-     * @todo Adapt this into the new ecom2 methods.
-     */
-    public static function getObfuscatedData($obfuscateThis, string $keyStart = 'rco_customer'): array
-    {
-        if (!Data::getResursOption('must_obfuscate_logged_personal_data')) {
-            return $obfuscateThis;
-        }
-        $stringHandler = new Strings();
-        if (isset($obfuscateThis[$keyStart])) {
-            $obfuscationObject = $obfuscateThis[$keyStart];
-            $lookFor = WordPress::applyFilters('getObfuscateLookupKeys', [
-                'billingAddress',
-                'deliveryAddress',
-                'phone',
-                'email',
-            ]);
-            foreach ($lookFor as $key) {
-                if (isset($obfuscationObject[$key])) {
-                    if (is_array($obfuscationObject[$key])) {
-                        foreach ($obfuscationObject[$key] as $item => $value) {
-                            $obfuscateThis[$keyStart][$key][$item] = htmlentities($stringHandler->getObfuscatedStringFull(
-                                $value,
-                                2,
-                                0
-                            ));
-                        }
-                    } elseif (is_string($obfuscationObject[$key])) {
-                        $obfuscateThis[$keyStart][$key] = htmlentities(
-                            $stringHandler->getObfuscatedStringFull(
-                                $obfuscationObject[$key],
-                                2,
-                                0
-                            )
-                        );
-                    }
-                }
-            }
-        }
-
-        foreach ($obfuscateThis as $item => $value) {
-            if (
-                is_string($value) &&
-                ((bool)preg_match('/^billing_/i', $item) || (bool)preg_match('/^shipping_/i', $item))
-            ) {
-                $obfuscateThis[$item] = htmlentities($stringHandler->getObfuscatedStringFull(
-                    $value,
-                    2,
-                    0
-                ));
-            }
-        }
-
-        return $obfuscateThis;
-    }
-
-    /**
-     * @param $paymentMethod
-     * @return string
-     * @since 0.0.1.5
-     */
-    public static function getResursMethodFromPrefix($paymentMethod): string
-    {
-        $return = '';
-        if (self::isResursMethod($paymentMethod)) {
-            $return = (string)preg_replace(
-                sprintf('/^%s_/', RESURSBANK_MODULE_PREFIX),
-                '',
-                $paymentMethod
-            );
-        }
-
-        return $return;
-    }
-
-    /**
-     * @return int
-     */
-    public static function getStoreId(): int
-    {
-        return (int)self::getResursOption('mapi_store_id');
     }
 }

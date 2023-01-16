@@ -301,7 +301,7 @@ class WordPress
             try {
                 WooCommerce::testRequiredVersion(false);
             } catch (Exception $e) {
-                Data::writeLogException($e, __FUNCTION__);
+                Config::getLogger()->error(message: $e);
                 // @todo Rewrite this section to warn about lowest requirement of WooCommerce if current installation
                 // @todo is below that version. This code is temporarily changed to release the needs of the
                 // @todo Generic-class-renderer, and need to be fixed.

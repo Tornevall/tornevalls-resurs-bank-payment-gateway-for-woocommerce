@@ -169,7 +169,7 @@ class WooCommerce
             // or the site will break. If we are located in admin, we also want to visualize the exception as
             // a message not a crash.
             WordPress::setGenericError($e);
-            Data::writeLogException($e, __FUNCTION__);
+            Config::getLogger()->error(message: $e);
         }
 
         // If request failed or something caused an empty result, we should still return the list of gateways as
@@ -450,9 +450,8 @@ class WooCommerce
 
         $properOrder = self::getProperOrder($order, 'order');
         if (method_exists($properOrder, 'get_id') && $properOrder->get_id()) {
-            Data::writeLogEvent(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
+            Config::getLogger()->debug(
+                message: sprintf(
                     __(
                         'setOrderNote for %s: %s'
                     ),
@@ -497,16 +496,14 @@ class WooCommerce
         }
 
         if ($log) {
-            Data::writeLogNotice(
-                sprintf(
-                    __(
-                        'getProperOrder for %s (as %s).',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    $orderId,
-                    $returnAs
-                )
-            );
+            Config::getLogger()->debug(message: sprintf(
+                __(
+                    'getProperOrder for %s (as %s).',
+                    'resurs-bank-payments-for-woocommerce'
+                ),
+                $orderId,
+                $returnAs
+            ));
         }
 
         return $returnAs === 'order' ? $order : $orderId;

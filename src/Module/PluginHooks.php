@@ -8,6 +8,7 @@ namespace ResursBank\Module;
 
 use Automattic\WooCommerce\Admin\Overrides\Order;
 use Exception;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
@@ -17,6 +18,7 @@ use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
+use Throwable;
 use TorneLIB\IO\Data\Arrays;
 use TorneLIB\Utils\WordPress as wpHelper;
 use WC_Order;
@@ -89,9 +91,8 @@ class PluginHooks
      */
     public function updateOrderStatusEvent(int $orderId, string $status): void
     {
-        // Vital information that should always be logged to confirm the action.
-        Data::writeLogInfo(
-            sprintf(
+        Config::getLogger()->debug(
+            message: sprintf(
                 __(
                     'Passed %d through function %s with order status "%s" for extra handling.',
                     'resurs-bank-payments-for-woocommerce'
@@ -105,9 +106,6 @@ class PluginHooks
         // Copy & Paste.
         $currentOrder = new WC_Order($orderId);
         if (($currentOrder instanceof WC_Order) && $status === 'completed') {
-            Data::writeLogInfo(
-                sprintf('Order %d is completed - executing payment_complete().', $orderId)
-            );
             $currentOrder->payment_complete();
         }
     }
@@ -343,16 +341,6 @@ class PluginHooks
         /** @var array $order */
         $order = Data::getResursOrderIfExists($orderId);
         if (!empty($order) && isset($order['ecom'])) {
-            Data::writeLogEvent(
-                Data::CAN_LOG_ORDER_EVENTS,
-                sprintf(
-                    '%s: orderId=%s, oldSlug=%s, newSlug=%s',
-                    __FUNCTION__,
-                    $orderId,
-                    $oldSlug,
-                    $newSlug
-                )
-            );
 
             // Pre check old status. There are some statuses that prevents editing.
             // Send the full order object here, not just WC_Order.
@@ -844,8 +832,8 @@ class PluginHooks
                     $itemCount
                 )
             );
-        } catch (Exception $e) {
-            Data::writeLogException($e, __FUNCTION__);
+        } catch (Throwable $e) {
+            Config::getLogger()->error(message: $e);
             $order['order']->add_order_note(
                 sprintf(
                     __(
@@ -871,8 +859,8 @@ class PluginHooks
      */
     public function updateOrderStatusByQueue(int $order): void
     {
-        Data::writeLogNotice(
-            sprintf(
+        Config::getLogger()->debug(
+            message: sprintf(
                 '%s: %s',
                 __FUNCTION__,
                 $order
@@ -889,8 +877,8 @@ class PluginHooks
 
             $status = WooCommerce::getOrderStatuses($statusId);
 
-            Data::writeLogNotice(
-                sprintf(
+            Config::getLogger()->debug(
+                message: sprintf(
                     __(
                         'Update order %s from queue requested: %s -> %s',
                         'resurs-bank-payments-for-woocommerce'
@@ -911,8 +899,7 @@ class PluginHooks
                 do_action('resurs_bank_order_status_update', $properOrder->get_id(), $status);
                 // Action for all new plugin versions.
                 WordPress::doAction('updateOrderStatusEvent', $properOrder->get_id(), $status);
-                Data::writeLogNotice(
-                    sprintf(
+                Config::getLogger()->debug(message: sprintf(
                         __(
                             'Queued Status Handler: Updated status for %s to %s.',
                             'resurs-bank-payments-for-woocommerce'
@@ -923,8 +910,8 @@ class PluginHooks
                 );
             } else {
                 // Must always log what happens in the queue.
-                Data::writeLogNotice(
-                    sprintf(
+                Config::getLogger()->debug(
+                    message: sprintf(
                         __(
                             'Queued Status Handler: Status for %s not updated to %s, because that ' .
                             'status was already set.',
@@ -936,8 +923,8 @@ class PluginHooks
                 );
             }
         } else {
-            Data::writeLogNotice(
-                sprintf(
+            Config::getLogger()->debug(
+                message: sprintf(
                     __(
                         'Queued Status Handler: Order %s was not properly queued.',
                         'resurs-bank-payments-for-woocommerce'
@@ -974,9 +961,8 @@ class PluginHooks
     private function getMockException($function)
     {
         $exceptionCode = 470;
-        Data::writeLogEvent(
-            LogLevel::INFO,
-            sprintf(
+        Config::getLogger()->debug(
+            message: sprintf(
                 __('Mocked Exception in action. Throwing MockException for function %s, with error code %d.'),
                 $function,
                 $exceptionCode
