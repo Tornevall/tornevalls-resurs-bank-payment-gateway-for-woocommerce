@@ -939,7 +939,6 @@ class ResursDefault extends WC_Payment_Gateway
                 metaDataValue: $paymentResponse->id
             );
         } catch (Exception $createPaymentException) {
-            $tesT = 'asd';
             // In case we get an error from any other component than the create, we need to rewrite this response.
             $return = [
                 'result' => 'failure',
