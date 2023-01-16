@@ -33,6 +33,9 @@ class Enabled extends StringOption
         return self::getData() === 'yes';
     }
 
+    /**
+     * @return string
+     */
     public static function getDefault(): string
     {
         return 'yes';

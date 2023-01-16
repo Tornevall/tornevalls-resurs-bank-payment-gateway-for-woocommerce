@@ -23,6 +23,9 @@ class StringOption extends Option
         return is_string(value: $result) ? $result : '';
     }
 
+    /**
+     * @return string
+     */
     public static function getDefault(): string
     {
         return '';
