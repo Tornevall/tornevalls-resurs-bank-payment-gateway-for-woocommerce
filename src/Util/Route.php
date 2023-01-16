@@ -60,15 +60,15 @@ class Route
             switch ($route) {
                 case self::ROUTE_GET_ADDRESS:
                     self::respond(body: GetAddress::exec());
-                    break;
+                    exit;
 
                 case self::ROUTE_PART_PAYMENT:
                     self::respond(body: PartPayment::exec());
-                    break;
+                    exit;
 
                 case self::ROUTE_PART_PAYMENT_ADMIN:
                     self::respond(body: GetValidDurations::exec());
-                    break;
+                    exit;
 
                 default:
                     break;
