@@ -926,7 +926,7 @@ class Data
             // Get from a prefetched request.
             $orderData = $order;
         } else {
-            $orderData = Metadata::getOrderInfo($order);
+            $orderData = Metadata::getOrderInfo(order: $order);
         }
 
         if (isset($key, $orderData['meta'][$key])) {

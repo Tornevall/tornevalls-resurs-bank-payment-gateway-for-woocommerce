@@ -82,7 +82,7 @@ class Metadata
      * @param null $orderIsResursReference
      * @return array
      */
-    public static function getOrderInfo(WC_Order $order, $orderIsResursReference = null): array
+    public static function getOrderInfo(WC_Order $order): array
     {
         return [
             'order' => $order,
