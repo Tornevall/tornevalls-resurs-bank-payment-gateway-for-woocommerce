@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-/** @noinspection PhpClassHasTooManyDeclaredMembersInspection */
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
