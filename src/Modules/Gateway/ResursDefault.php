@@ -1,26 +1,24 @@
 <?php
 
-// We do use camel cases in this file.
+/**
+ * Copyright © Resurs Bank AB. All rights reserved.
+ * See LICENSE for license details.
+ */
 
-/** @noinspection PhpCSValidationInspection */
+declare(strict_types=1);
 
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
-namespace ResursBank\Gateway;
+namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Exception;
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -28,12 +26,10 @@ use Resursbank\Ecom\Lib\Model\Payment\Customer;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\EntryCollection;
-use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Network\Curl\ErrorTranslator;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
-use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
@@ -44,17 +40,14 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
-use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
-use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -64,15 +57,8 @@ use Throwable;
 use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
-use WC_Product;
 use WC_Session_Handler;
-use WC_Tax;
 use WP_Post;
-use WP_User;
-use function in_array;
-use function is_object;
-use function sha1;
-use function uniqid;
 
 /**
  * Default payment gateway class. Written to handle payment methods dynamically but still be able to show
@@ -83,7 +69,6 @@ use function uniqid;
  * of data during API communication by converting API-calls to base64-strings which prevents charset problems.
  *
  * @package Resursbank\Gateway
- * @since 0.0.1.0
  */
 class ResursDefault extends WC_Payment_Gateway
 {
@@ -98,30 +83,15 @@ class ResursDefault extends WC_Payment_Gateway
     protected WC_Order $order;
 
     /**
-     * Main API. Use as primary communicator. Acts like a bridge between the real API.
-     * @var ResursBankAPI $API
-     * @since 0.0.1.0
-     */
-    protected $API;
-    /**
      * WooCommerce cart. On WooCommerce-side, this is nullable, so it should only be set if available.
      * @var WC_Cart $cart
-     * @since 0.0.1.0
      */
     protected WC_Cart $cart;
+
     /**
      * @var array $applicantPostData Applicant request.
-     * @since 0.0.1.0
      */
     private array $applicantPostData = [];
-    /**
-     * Data that will be sent between Resurs Bank and ourselves. This array will be merged into base64-encoded strings
-     * to maintain the charset integrity.
-     *
-     * @var array $apiData
-     * @since 0.0.1.0
-     */
-    private array $apiData = [];
 
     /**
      * This instance payment method from Resurs Bank.
@@ -132,7 +102,7 @@ class ResursDefault extends WC_Payment_Gateway
     /**
      * ResursDefault constructor.
      *
-     * @param PaymentMethod|null $resursPaymentMethod Making sure the gateway is reachable even if initialization has failed.
+     * @param PaymentMethod|null $resursPaymentMethod Make sure gateway is reachable even if initialization has failed.
      * @throws Exception
      * @noinspection ParameterDefaultValueIsNotNullInspection
      */
@@ -141,7 +111,7 @@ class ResursDefault extends WC_Payment_Gateway
     ) {
         // A proper ID must always exist regardless of the init outcome. However, it should be set after the init
         // as the order view may want to use it differently.
-        $this->id = $this->getProperGatewayId($resursPaymentMethod);
+        $this->id = $this->getProperGatewayId(resursPaymentMethod: $resursPaymentMethod);
 
         // Do not verify if this sections is allowed to initialize. It has to initialize itself each time this
         // class is called, even if the payment method itself is null (API calls is still depending on its existence).
@@ -166,7 +136,7 @@ class ResursDefault extends WC_Payment_Gateway
         if (isset($theorder)) {
             $return = $theorder;
         } elseif (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
-            $return = new WC_Order($post->ID);
+            $return = new WC_Order(order: $post->ID);
         }
 
         return $return;
@@ -234,77 +204,45 @@ class ResursDefault extends WC_Payment_Gateway
             $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
         }
 
-        $this->setFilters();
         $this->setActions();
     }
 
     /**
      * This section is used by the WC Payment Gateway-toggler. If we decide to support "gateway toggling", this
-     * section has to be used. See @todo's below.
+     * section has to be used.
      *
-     * @param $key
-     * @param $value
+     * @param mixed $key
+     * @param mixed $value
      * @return bool
-     * @todo Due to the way we handle our configuration, this method has no actual effect when executed.
-     * @todo Eventually, we need to adjust the way woocommerce arrays are updating the values by keys.
+     * @noinspection PhpCSValidationInspection
      */
-    public function update_option($key, $value = '')
+    public function update_option(mixed $key, mixed $value = ''): bool
     {
-        // @todo Using this setup to toggle gateway on/off in the woo-admin panel, will remove
-        // @todo the gateway entirely from the list of gateways. That is not what we want, so this is
-        // @todo temporarily disabled.
-        //if ($key === 'enabled') {
-        //    return Enabled::setData($value);
-        //}
-        return parent::update_option($key, $value);
+        return parent::update_option(key: $key, value: $value);
     }
 
     /**
      * Initializer. It is not until we have payment method information we can start using this class for real.
      * @param PaymentMethod|null $paymentMethod
      * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection PhpUndefinedFieldInspection
      */
     private function setPaymentMethodInformation(PaymentMethod $paymentMethod = null)
     {
-        // Generic setup regardless of payment method.
-        $this->setPaymentApiData();
-
         if ($paymentMethod instanceof PaymentMethod) {
             // Collect the entire payment method information.
             $this->paymentMethodInformation = $paymentMethod;
             $this->id = RESURSBANK_MODULE_PREFIX . '_' . $this->paymentMethodInformation->id;
-            $this->payment_method = $this->id;
             $this->title = $this->paymentMethodInformation->name ?? '';
             $this->icon = $this->getMethodIconUrl();
         }
     }
 
     /**
-     * Generic prepare and setup for API-requests, regardless of payment method.
-     * Data added here should always be added to the request.
-     *
-     * @return void
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private function setPaymentApiData(): void
-    {
-        if (!empty(Data::getPaymentMethodBySession())) {
-            // Store this for later use, when the primary processing is done.
-            $this->apiData['paymentMethod'] = Data::getPaymentMethodBySession();
-        }
-        $this->API = new ResursBankAPI();
-    }
-
-    /**
      * Decide how to use method icons in the checkout.
      *
-     * @return string
-     * @since 0.0.1.0
+     * @return string|null
      */
-    private function getMethodIconUrl()
+    private function getMethodIconUrl(): ?string
     {
         $return = null;
 
@@ -336,69 +274,18 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * If a payment requires a specific icon which is not included in this package, this is the place to set it.
-     *
-     * @return mixed
-     * @since 0.0.1.0
-     * @noinspection PhpUndefinedFieldInspection
-     * @todo Decide whether filter for extra icons/logos should be allowed or not.
-     */
-    private function getIconByFilter()
-    {
-        return WordPress::applyFilters(
-            'getPaymentMethodIcon',
-            null,
-            $this->paymentMethodInformation
-        );
-    }
-
-    /**
-     * The payment method id. The real ID, used for checkout, for which we also tell WooCommerce which gateway
-     * to use.
-     * @return string
-     */
-    private function getRealMethodId(): string
-    {
-        // Return the real id for MAPI if MAPI method is initialized, without woocommerce based extra strings
-        // added to it.
-        return $this->paymentMethodInformation->id ?? $this->id;
-    }
-
-    /**
-     * Validate if payment is ready. WC-style.
-     *
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private function isPaymentReady(): bool
-    {
-        return (isset($_REQUEST['payment_method'], $_REQUEST['wc-ajax']) && $_REQUEST['wc-ajax'] === 'checkout');
-    }
-
-    /**
-     * Prepare filters that WooCommerce may want to throw at us.
-     * @since 0.0.1.0
-     */
-    private function setFilters()
-    {
-        if (Enabled::isEnabled()) {
-            add_filter('wc_get_price_decimals', 'ResursBank\Module\Data::getDecimalValue');
-        }
-    }
-
-    /**
      * Prepare actions that WooCommerce may want to throw at us.
-     * @since 0.0.1.0
      */
     private function setActions()
     {
-        add_action('woocommerce_api_resursdefault', [$this, 'getApiRequest']);
+        add_action(hook_name: 'woocommerce_api_resursdefault', callback: [$this, 'getApiRequest']);
     }
 
     /**
      * Used by WooCommerce to get the title of the payment method.
      *
      * @return string
+     * @noinspection PhpCSValidationInspection
      */
     public function get_title(): string
     {
@@ -414,7 +301,7 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         // Use defaults if no order exists (this method is used on several places).
-        return $this->isValidResursOrder() && is_string($theorder->get_payment_method_title()) ?
+        return $this->isValidResursOrder() && is_string(value: $theorder->get_payment_method_title()) ?
             $theorder->get_payment_method_title() : parent::get_title();
     }
 
@@ -427,6 +314,7 @@ class ResursDefault extends WC_Payment_Gateway
     {
         $currentOrder = $this->getOrder();
 
+        /** @noinspection PhpMethodOrClassCallIsNotCaseSensitiveInspection */
         return isset($currentOrder) &&
             $currentOrder instanceof WC_Order &&
             MetaData::isValidResursPayment(order: $currentOrder);
@@ -452,13 +340,13 @@ class ResursDefault extends WC_Payment_Gateway
             $sessionCustomerType = CustomerType::NATURAL;
         }
 
-        $governmentId = $sessionCustomerType === CustomerType::NATURAL ? $this->getCustomerData('government_id') :
-            $this->getCustomerData('applicant_government_id');
+        $governmentId = $sessionCustomerType === CustomerType::NATURAL ? $this->getCustomerData(key: 'government_id') :
+            $this->getCustomerData(key: 'applicant_government_id');
 
         // Since WooCommerce uses a cookie to pick up a session, we can't use the ecom "real" session to fetch the
         // government id.
         if (WC()->session instanceof WC_Session_Handler && empty($governmentId)) {
-            $governmentId = WC()->session->get(key: (new Session())->getKey(Repository::SESSION_KEY_SSN_DATA));
+            $governmentId = WC()->session->get(key: (new Session())->getKey(key: Repository::SESSION_KEY_SSN_DATA));
         }
 
         // @todo Also those fields for LEGAL customers.
@@ -466,21 +354,26 @@ class ResursDefault extends WC_Payment_Gateway
         // $this->getCustomerData('contact_government_id')
         return new Customer(
             deliveryAddress: new Address(
-                addressRow1: $this->getCustomerData('address_1', $customerInfoFrom),
-                postalArea: $this->getCustomerData('city', $customerInfoFrom),
-                postalCode: $this->getCustomerData('postcode', $customerInfoFrom),
-                countryCode: CountryCode::from($this->getCustomerData('country', $customerInfoFrom)),
-                fullName: $this->getCustomerData('full_name', $customerInfoFrom),
-                firstName: $this->getCustomerData('first_name', $customerInfoFrom),
-                lastName: $this->getCustomerData('last_name', $customerInfoFrom),
-                addressRow2: $this->getCustomerData('address_2', $customerInfoFrom),
+                addressRow1: $this->getCustomerData(key: 'address_1', returnType: $customerInfoFrom),
+                postalArea: $this->getCustomerData(key: 'city', returnType: $customerInfoFrom),
+                postalCode: $this->getCustomerData(key: 'postcode', returnType: $customerInfoFrom),
+                countryCode: CountryCode::from(
+                    value: $this->getCustomerData(
+                        key: 'country',
+                        returnType: $customerInfoFrom
+                    )
+                ),
+                fullName: $this->getCustomerData(key: 'full_name', returnType: $customerInfoFrom),
+                firstName: $this->getCustomerData(key: 'first_name', returnType: $customerInfoFrom),
+                lastName: $this->getCustomerData(key: 'last_name', returnType: $customerInfoFrom),
+                addressRow2: $this->getCustomerData(key: 'address_2', returnType: $customerInfoFrom),
             ),
             customerType: $sessionCustomerType,
             contactPerson: $sessionCustomerType === CustomerType::LEGAL ?
-                $this->getCustomerData('full_name', $customerInfoFrom) : '',
-            email: $this->getCustomerData('email'),
+                $this->getCustomerData(key: 'full_name', returnType: $customerInfoFrom) : '',
+            email: $this->getCustomerData(key: 'email'),
             governmentId: $governmentId,
-            mobilePhone: $this->getCustomerData('mobile'),
+            mobilePhone: $this->getCustomerData(key: 'mobile'),
             deviceInfo: new DeviceInfo(
                 ip: $_SERVER['REMOTE_ADDR'],
                 userAgent: $_SERVER['HTTP_USER_AGENT']
@@ -494,8 +387,6 @@ class ResursDefault extends WC_Payment_Gateway
      * @param string $key
      * @param string $returnType
      * @return string
-     * @since 0.0.1.0
-     * @noinspection PhpArrayIsAlwaysEmptyInspection
      */
     private function getCustomerData(string $key, string $returnType = 'billing'): string
     {
@@ -505,7 +396,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         // If it's not in the post data, it could possibly be found in the order maintained from the order.
         $billingAddress = $this->order->get_address();
-        $deliveryAddress = $this->order->get_address('shipping');
+        $deliveryAddress = $this->order->get_address(type: 'shipping');
 
         $customerInfo = $billingAddress;
         if ($returnType === 'shipping' || $returnType === 'delivery') {
@@ -532,183 +423,13 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Resolve payment id to use at Resurs Bank. If the order has not yet been created, use a temporary ID
-     * which will later be replaced by the order id.
-     *
-     * @param WC_Order|null $order
-     * @return string
-     * @since 0.0.1.0
-     * @noinspection SpellCheckingInspection
-     */
-    private function getOrderReference(null|WC_Order $order = null): string
-    {
-        $return = 0;
-
-        if ($order instanceof WC_Order) {
-            $return = $order->get_id();
-        }
-
-        if (!is_int($return) || $return === 0) {
-            $return = sha1(uniqid('payment', true));
-        }
-
-        return $return;
-    }
-
-    /**
      * Get payment full method information object from ecom data.
      *
      * @return string
-     * @since 0.0.1.0
      */
     private function getPaymentMethod(): string
     {
-        /** @noinspection PhpUndefinedFieldInspection */
         return (string)isset($this->paymentMethodInformation->id) ? $this->paymentMethodInformation->id : '';
-    }
-
-    /**
-     * Add an order line that is not based on pre-defined product data.
-     *
-     * @param OrderLineType $orderLineType
-     * @param string $description
-     * @param string $reference
-     * @param float $unitAmountIncludingVat
-     * @param float $vatRate
-     * @param int $quantity
-     * @return OrderLine
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws TranslationException
-     */
-    public function getCustomOrderLine(
-        OrderLineType $orderLineType,
-        string $description,
-        string $reference,
-        float $unitAmountIncludingVat,
-        float $vatRate,
-        int $quantity = 1
-    ): OrderLine {
-        $totalAmountIncludingVat = $unitAmountIncludingVat * $quantity;
-        $totalVatAmount = $totalAmountIncludingVat - ($totalAmountIncludingVat / (1 + ($vatRate / 100)));
-        return new OrderLine(
-            quantity: (float)$quantity,
-            quantityUnit: Translator::translate('default-quantity-unit'),
-            vatRate: $vatRate,
-            totalAmountIncludingVat: $totalAmountIncludingVat,
-            description: $description,
-            reference: $reference,
-            type: $orderLineType,
-            unitAmountIncludingVat: $unitAmountIncludingVat,
-            totalVatAmount: $totalVatAmount
-        );
-    }
-
-    /**
-     * Fetch information about articles from WooCommerce.
-     *
-     * @param string $getValueType
-     * @param WC_Product $productObject
-     * @param array $wcProductItemData
-     * @return float|int|string
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws TranslationException
-     * @throws ReflectionException
-     * @since 0.0.1.0
-     */
-    protected function getFromProduct(
-        string $getValueType,
-        WC_Product $productObject,
-        array $wcProductItemData = []
-    ): float|int|string {
-        $return = '';
-
-        // $wcProductItemData always returns same information for at product. The data here can always be expected
-        // based on the content from WC_Order_Item (see $extra_data in WC_Order_Item).
-
-        switch ($getValueType) {
-            case 'reference':
-                $return = $this->getProperArticleNumber($productObject);
-                break;
-            case 'description':
-            case 'title':
-                $return = !empty($useTitle = $productObject->get_title()) ? $useTitle : __(
-                    'Article description is missing.',
-                    'resurs-bank-payments-for-woocommerce'
-                );
-                break;
-            case 'unitAmountIncludingVat':
-                $return = wc_get_price_including_tax($productObject);
-                break;
-            case 'totalAmountIncludingVat':
-                $return = wc_get_price_including_tax($productObject, ['qty' => $wcProductItemData['quantity']]);
-                break;
-            case 'unitAmountWithoutVat':
-                // Special reflection of what Resurs Bank wants.
-                $return = wc_get_price_excluding_tax($productObject);
-                break;
-            case 'totalVatAmount':
-                $return = wc_get_price_including_tax(
-                    $productObject,
-                    ['qty' => $wcProductItemData['quantity']]
-                ) - wc_get_price_excluding_tax(
-                    $productObject,
-                    ['qty' => $wcProductItemData['quantity']]
-                );
-                break;
-            case 'vatRate':
-                $return = $this->getProductVat($productObject);
-                break;
-            case 'quantityUnit':
-                // Using default measure from ECom for now.
-                $return = Translator::translate('default-quantity-unit');
-                break;
-            default:
-                if (method_exists($productObject, sprintf('get_%s', $getValueType))) {
-                    $return = $productObject->{sprintf('get_%s', $getValueType)}();
-                }
-                break;
-        }
-
-        return $return;
-    }
-
-    /**
-     * Different way to fetch article numbers.
-     * @param WC_Product $product
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    private function getProperArticleNumber(WC_Product $product): mixed
-    {
-        return WooCommerce::getProperArticleNumber($product);
-    }
-
-    /**
-     * @param WC_Product $product
-     * @return float|int
-     * @since 0.0.1.0
-     */
-    private function getProductVat(WC_Product $product): float|int
-    {
-        $taxClass = $product->get_tax_class();
-        $ratesArray = WC_Tax::get_rates($taxClass);
-
-        $rates = array_shift($ratesArray);
-        if (isset($rates['rate'])) {
-            $return = (float)$rates['rate'];
-        } else {
-            $return = 0;
-        }
-
-        return $return;
     }
 
     /**
@@ -716,8 +437,7 @@ class ResursDefault extends WC_Payment_Gateway
      * we also need to check out conditions from the early instantiated cart.
      * @return bool
      * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection PhpUndefinedFieldInspection
+     * @noinspection PhpCSValidationInspection
      */
     public function is_available(): bool
     {
@@ -740,7 +460,7 @@ class ResursDefault extends WC_Payment_Gateway
         // to the storefront.
         if (
             !isset($woocommerce->cart) ||
-            !method_exists($this, method: 'get_order_total') ||
+            !method_exists(object_or_class: $this, method: 'get_order_total') ||
             !isset($this->paymentMethodInformation->id)
         ) {
             // Return false if gateway in Resurs-admin is disabled and stop running the full process here.
@@ -767,15 +487,18 @@ class ResursDefault extends WC_Payment_Gateway
             // Also return false if customer types are not supported.
             if (
                 !(
-                (float)$this->get_order_total() >= $this->paymentMethodInformation->minPurchaseLimit &&
-                (float)$this->get_order_total() <= $this->paymentMethodInformation->maxPurchaseLimit
+                    (float)$this->get_order_total() >= $this->paymentMethodInformation->minPurchaseLimit &&
+                    (float)$this->get_order_total() <= $this->paymentMethodInformation->maxPurchaseLimit
                 )
             ) {
                 $return = false;
             }
             if ($customerType === CustomerType::LEGAL && !$this->paymentMethodInformation->enabledForLegalCustomer) {
                 $return = false;
-            } elseif ($customerType === CustomerType::NATURAL && !$this->paymentMethodInformation->enabledForNaturalCustomer) {
+            } elseif (
+                $customerType === CustomerType::NATURAL &&
+                !$this->paymentMethodInformation->enabledForNaturalCustomer
+            ) {
                 $return = false;
             }
         }
@@ -784,61 +507,12 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Customize minimum allowed amount for a payment method. Can never be lower than the lowest minimum from method.
-     *
-     * @param float $minLimit
-     * @return float
-     * @link https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/42
-     * @since 0.0.1.0
-     * @noinspection PhpUndefinedFieldInspection
-     * @todo Make sure this works as ecom2 works with float instead of int and WooCommerce tend to not do the same.
-     */
-    private function getRealMin(float $minLimit): float
-    {
-        $requestedMinLimit = WordPress::applyFilters(
-            'methodMinLimit',
-            $minLimit,
-            $this->paymentMethodInformation
-        );
-
-        if ($requestedMinLimit < $this->paymentMethodInformation->minLimit) {
-            $requestedMinLimit = $this->paymentMethodInformation->minLimit;
-        }
-
-        return (float)$requestedMinLimit;
-    }
-
-    /**
-     * Customize maximum allowed amount for a payment method. Can never be higher than the highest maximum from method.
-     *
-     * @param float $maxLimit
-     * @return float
-     * @link https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce/issues/42
-     * @since 0.0.1.0
-     * @noinspection PhpUndefinedFieldInspection
-     * @todo Make sure this works as ecom2 works with float instead of int and WooCommerce tend to not do the same.
-     */
-    private function getRealMax(float $maxLimit): float
-    {
-        $requestedMaxLimit = WordPress::applyFilters(
-            'methodMaxLimit',
-            $maxLimit,
-            $this->paymentMethodInformation
-        );
-
-        if ($requestedMaxLimit > $this->paymentMethodInformation->maxLimit) {
-            $requestedMaxLimit = $this->paymentMethodInformation->maxLimit;
-        }
-
-        return (float)$requestedMaxLimit;
-    }
-
-    /**
      * Simplified checkout form field generator. This is WooCommerce-specific inherits for which we render
      * fields required by Resurs.
      *
      * @throws Exception
-     * @noinspection PhpUndefinedFieldInspection
+     * @noinspection PhpMissingParentCallCommonInspection
+     * @noinspection PhpCSValidationInspection
      */
     public function payment_fields(): void
     {
@@ -850,18 +524,7 @@ class ResursDefault extends WC_Payment_Gateway
             echo $usp->content;
         } catch (Throwable $error) {
             Config::getLogger()->error(message: $error);
-            echo "";
         }
-    }
-
-    /**
-     * If this payment method is Resurs bank internal, this will return true.
-     * @param $paymentMethod
-     * @return bool
-     */
-    public static function isInternalMethod($paymentMethod): bool
-    {
-        return isset($paymentMethod->type) && str_starts_with($paymentMethod->type, 'RESURS_');
     }
 
     /**
@@ -871,26 +534,27 @@ class ResursDefault extends WC_Payment_Gateway
      * @param $order_id
      * @return array
      * @throws Exception
-     * @since 0.0.1.0
+     * @noinspection PhpCSValidationInspection
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function process_payment($order_id): array
     {
-        $order = new WC_Order($order_id);
+        $order = new WC_Order(order: $order_id);
         $this->order = $order;
 
-        return $this->processResursOrder($order);
+        return $this->processResursOrder(order: $order);
     }
 
     /**
      * @param WC_Order $order
      * @param string $result
      * @return string
-     * @since 0.0.1.0
      * @noinspection ParameterDefaultValueIsNotNullInspection
      */
-    private function getReturnUrl(WC_Order $order, string $result = 'failure'): string
+    private function getReturnUrl(WC_Order $order, string $result): string
     {
-        return $result === 'success' ? $this->get_return_url($order) : html_entity_decode($order->get_cancel_order_url());
+        return $result === 'success' ?
+            $this->get_return_url(order: $order) : html_entity_decode(string: $order->get_cancel_order_url());
     }
 
     /**
@@ -905,10 +569,8 @@ class ResursDefault extends WC_Payment_Gateway
         // Defaults returning to WooCommerce if not successful.
         $return = [
             'result' => 'failure',
-            'redirect' => $this->getReturnUrl($order),
+            'redirect' => $this->getReturnUrl(order: $order, result: 'failure'),
         ];
-
-        // @todo Add meta data at Resurs with WooCommerce order id ($order->get_id()).
 
         try {
             // Order Creation
@@ -916,10 +578,10 @@ class ResursDefault extends WC_Payment_Gateway
                 storeId: StoreId::getData(),
                 paymentMethodId: $this->getPaymentMethod(),
                 orderLines: Cart::getOrderLines(),
-                orderReference: $order->get_id(),
+                orderReference: (string)$order->get_id(),
                 customer: $this->getCustomer(),
-                options: $this->getOptions(order: $order),
-                metadata: $this->getPaymentMetaData(order: $order)
+                metadata: $this->getPaymentMetaData(order: $order),
+                options: $this->getOptions(order: $order)
             );
             $return = $this->getReturnResponse(
                 createPaymentResponse: $paymentResponse,
@@ -927,7 +589,7 @@ class ResursDefault extends WC_Payment_Gateway
                 order: $order
             );
 
-            $order->set_payment_method($this->getPaymentMethod());
+            $order->set_payment_method(payment_method: $this->getPaymentMethod());
 
             if (isset($return['result']) && $return['result'] === 'success') {
                 // Forget the session variable if there is a success.
@@ -946,14 +608,14 @@ class ResursDefault extends WC_Payment_Gateway
             // In case we get an error from any other component than the create, we need to rewrite this response.
             $return = [
                 'result' => 'failure',
-                'redirect' => $this->getReturnUrl($order)
+                'redirect' => $this->getReturnUrl(order: $order, result: 'failure')
             ];
 
             // Add note to notices and write to log.
             $order->add_order_note(
-                $createPaymentException->getMessage()
+                note: $createPaymentException->getMessage()
             );
-            Config::getLogger()->error($createPaymentException);
+            Config::getLogger()->error(message: $createPaymentException);
 
             // Add on-screen message from failure.
             if ($createPaymentException instanceof CurlException) {
@@ -1015,8 +677,8 @@ class ResursDefault extends WC_Payment_Gateway
             handleFrozenPayments: true,
             redirectionUrls: new RedirectionUrls(
                 customer: new ParticipantRedirectionUrls(
-                    failUrl: $this->getReturnUrl($order, result: 'failure'),
-                    successUrl: $this->getReturnUrl($order, result: 'success')
+                    failUrl: $this->getReturnUrl(order: $order, result: 'failure'),
+                    successUrl: $this->getReturnUrl(order: $order, result: 'success')
                 ),
                 coApplicant: null,
                 merchant: null
@@ -1037,7 +699,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Generate URL for MAPI callbacks.
-     * Note: We don't have to apply the order id to the callback URL, as the callback will be sent back as a POST (json).
+     * We don't have to apply the order id to the callback URL, as the callback will be sent back as a POST (json).
      *
      * @param CallbackType $callbackType
      * @return string
@@ -1069,7 +731,7 @@ class ResursDefault extends WC_Payment_Gateway
             case Status::FROZEN:
             case Status::ACCEPTED:
                 $return['result'] = 'success';
-                $return['redirect'] = $this->getReturnUrl($order, 'success');
+                $return['redirect'] = $this->getReturnUrl(order: $order, result: 'success');
                 break;
             case Status::TASK_REDIRECTION_REQUIRED:
                 $return['result'] = 'success';
@@ -1090,7 +752,7 @@ class ResursDefault extends WC_Payment_Gateway
     {
         if (
             isset($_REQUEST['mapi-callback']) &&
-            is_string($_REQUEST['mapi-callback'])
+            is_string(value: $_REQUEST['mapi-callback'])
         ) {
             $response = [
                 'success' => false,
@@ -1103,22 +765,22 @@ class ResursDefault extends WC_Payment_Gateway
                 // just handle exceptions as errors.
                 CallbackModule::processCallback(
                     callbackType: CallbackType::from(
-                        value: strtoupper($_REQUEST['mapi-callback'])
+                        value: strtoupper(string: $_REQUEST['mapi-callback'])
                     )
                 );
                 $response['success'] = true;
             } catch (Throwable $e) {
-                Config::getLogger()->error($e);
+                Config::getLogger()->error(message: $e);
                 $response['message'] = $e->getMessage();
             }
 
             $responseCode = $response['success'] ? 202 : 408;
 
             Config::getLogger()->debug(message: 'Callback response, code ' . ($response['success'] ? 202 : 408) . '.');
-            Config::getLogger()->debug(message: print_r($response, return: true));
+            Config::getLogger()->debug(message: print_r(value: $response, return: true));
 
             Route::respond(
-                body: json_encode($response),
+                body: json_encode(value: $response),
                 code: $responseCode
             );
         }

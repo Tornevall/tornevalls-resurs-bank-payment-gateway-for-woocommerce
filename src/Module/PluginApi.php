@@ -9,8 +9,8 @@ namespace ResursBank\Module;
 use Exception;
 use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
 use Resursbank\Ecommerce\Types\Callback;
-use ResursBank\Gateway\ResursDefault;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Util\Url;
 use function in_array;
 
