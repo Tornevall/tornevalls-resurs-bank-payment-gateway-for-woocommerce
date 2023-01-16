@@ -20,7 +20,7 @@ class Language
     public const DEFAULT_LANGUAGE = EcomLanguage::en;
 
     /**
-     * Attempts to somewhat safely fetch the correct site language.
+     * Attempts to somewhat safely fetch the correct site language. (this parenthesis to get file changes)
      *
      * @return EcomLanguage Configured language or self::DEFAULT_LANGUAGE if no matching language found in Ecom
      */
