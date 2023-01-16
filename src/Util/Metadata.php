@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use ResursBank\Module\Data;
 use WC_Order;
 
 /**
@@ -71,9 +70,9 @@ class Metadata
     public static function isValidResursPayment(WC_Order $order): bool
     {
         return Metadata::getOrderMeta(
-            order: $order,
-            metaDataKey: 'payment_id'
-        ) !== '';
+                order: $order,
+                metaDataKey: 'payment_id'
+            ) !== '';
     }
 
     /**
