@@ -11,7 +11,7 @@ declare(strict_types=1);
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
-namespace ResursBank\Gateway;
+namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Exception;
 use Resursbank\Ecom\Config;
