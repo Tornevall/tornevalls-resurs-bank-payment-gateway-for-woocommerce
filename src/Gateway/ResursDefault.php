@@ -26,6 +26,8 @@ use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
+use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
+use Resursbank\Ecom\Lib\Model\Payment\Metadata\EntryCollection;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Network\Curl\ErrorTranslator;
@@ -66,6 +68,7 @@ use WC_Product;
 use WC_Session_Handler;
 use WC_Tax;
 use WP_Post;
+use WP_User;
 use function in_array;
 use function is_object;
 use function sha1;
@@ -915,7 +918,8 @@ class ResursDefault extends WC_Payment_Gateway
                 orderLines: Cart::getOrderLines(),
                 orderReference: $order->get_id(),
                 customer: $this->getCustomer(),
-                options: $this->getOptions($order)
+                options: $this->getOptions(order: $order),
+                metadata: $this->getPaymentMetaData(order: $order)
             );
             $return = $this->getReturnResponse(
                 createPaymentResponse: $paymentResponse,
@@ -1120,5 +1124,23 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         exit;
+    }
+
+    /**
+     * Return customer user id as Resurs payment metadata from order (not current_user).
+     * @param WC_Order $order
+     * @return Payment\Metadata|null
+     * @throws IllegalTypeException
+     */
+    private function getPaymentMetaData(WC_Order $order): ?Payment\Metadata
+    {
+        return new Payment\Metadata(
+            custom: new EntryCollection(data: [
+                new Entry(
+                    key: 'externalCustomerId',
+                    value: (string)$order->get_user_id()
+                )
+            ])
+        );
     }
 }
