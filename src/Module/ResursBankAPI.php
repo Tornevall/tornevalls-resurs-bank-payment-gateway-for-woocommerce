@@ -17,7 +17,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Locale\Language;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
@@ -32,6 +31,7 @@ use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Environment;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
+use Resursbank\Woocommerce\Util\Language;
 use ResursException;
 use stdClass;
 
@@ -42,9 +42,6 @@ use stdClass;
  */
 class ResursBankAPI
 {
-    /** @var Language */
-    private const DEFAULT_LANGUAGE = Language::en;
-
     /**
      * @var ResursBank $resursBank
      * @since 0.0.1.0
@@ -119,7 +116,7 @@ class ResursBankAPI
                 scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
                 grantType: 'client_credentials'
             ),
-            language: $this->getSiteLanguage()
+            language: Language::getSiteLanguage()
         );
     }
 
@@ -250,38 +247,5 @@ class ResursBankAPI
 
         // Keep handling exceptions as before.
         return Data::getResolvedCredentials();
-    }
-
-    /**
-     * Crude way to split a locale string and give back just the language part.
-     */
-    private function getLanguageFromLocaleString(string $locale): string
-    {
-        return explode(
-            separator: '_',
-            string: $locale
-        )[0];
-    }
-
-    /**
-     * Attempts to somewhat safely fetch the correct site language.
-     *
-     * @return Language Configured language or self::DEFAULT_LANGUAGE if no matching language found in Ecom
-     */
-    private function getSiteLanguage(): Language
-    {
-        $language = $this->getLanguageFromLocaleString(locale: get_locale());
-
-        if (!$language) {
-            return self::DEFAULT_LANGUAGE;
-        }
-
-        foreach (Language::cases() as $case) {
-            if ($language === $case->value) {
-                return $case;
-            }
-        }
-
-        return self::DEFAULT_LANGUAGE;
     }
 }
