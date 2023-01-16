@@ -2,6 +2,7 @@
 
 namespace ResursBank\Service;
 
+use Automattic\WooCommerce\Admin\PageController;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
@@ -238,10 +239,7 @@ class WordPress
 
             // Validate the order as a Resurs belonging before starting to throw meta-boxes at the order.
             if ($validResursPayment) {
-                $screen = get_current_screen();
-                $screen_id = $screen ? $screen->id : '';
-
-                if ($screen_id === 'shop_order') {
+                if ((new PageController())->get_current_screen_id() === 'shop_order') {
                     add_meta_box(
                         'resursbank_orderinfo',
                         sprintf(
