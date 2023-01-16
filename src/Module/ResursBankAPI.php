@@ -253,13 +253,28 @@ class ResursBankAPI
     }
 
     /**
+     * Crude way to split a locale string and give back just the language part.
+     *
+     * @param string $locale
+     *
+     * @return string
+     */
+    private function getLanguageFromLocaleString(string $locale): string
+    {
+        return explode(
+            separator: '_',
+            string: $locale
+        )[0];
+    }
+
+    /**
      * Attempts to somewhat safely fetch the correct site language.
      *
      * @return Language Configured language or self::DEFAULT_LANGUAGE if no matching language found in Ecom
      */
     private function getSiteLanguage(): Language
     {
-        $language = Locale::getPrimaryLanguage(locale: get_locale());
+        $language = $this->getLanguageFromLocaleString(locale: get_locale());
 
         if (!$language) {
             return self::DEFAULT_LANGUAGE;
