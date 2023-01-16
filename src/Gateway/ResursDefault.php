@@ -8,24 +8,18 @@
 declare(strict_types=1);
 
 /** @noinspection PhpClassHasTooManyDeclaredMembersInspection */
-/** @noinspection PhpCSValidationInspection */
 /** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
 namespace ResursBank\Gateway;
 
 use Exception;
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -33,12 +27,10 @@ use Resursbank\Ecom\Lib\Model\Payment\Customer;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\EntryCollection;
-use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Network\Curl\ErrorTranslator;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
-use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
@@ -49,17 +41,14 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
-use ResursBank\Module\ResursBankAPI;
 use ResursBank\Service\WooCommerce;
-use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
-use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -69,15 +58,8 @@ use Throwable;
 use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
-use WC_Product;
 use WC_Session_Handler;
-use WC_Tax;
 use WP_Post;
-use WP_User;
-use function in_array;
-use function is_object;
-use function sha1;
-use function uniqid;
 
 /**
  * Default payment gateway class. Written to handle payment methods dynamically but still be able to show
@@ -233,6 +215,7 @@ class ResursDefault extends WC_Payment_Gateway
      * @param mixed $key
      * @param mixed $value
      * @return bool
+     * @noinspection PhpCSValidationInspection
      */
     public function update_option(mixed $key, mixed $value = ''): bool
     {
@@ -303,6 +286,7 @@ class ResursDefault extends WC_Payment_Gateway
      * Used by WooCommerce to get the title of the payment method.
      *
      * @return string
+     * @noinspection PhpCSValidationInspection
      */
     public function get_title(): string
     {
@@ -374,9 +358,10 @@ class ResursDefault extends WC_Payment_Gateway
                 addressRow1: $this->getCustomerData(key: 'address_1', returnType: $customerInfoFrom),
                 postalArea: $this->getCustomerData(key: 'city', returnType: $customerInfoFrom),
                 postalCode: $this->getCustomerData(key: 'postcode', returnType: $customerInfoFrom),
-                countryCode: CountryCode::from(value: $this->getCustomerData (
-                    key: 'country',
-                    returnType: $customerInfoFrom
+                countryCode: CountryCode::from(
+                    value: $this->getCustomerData(
+                        key: 'country',
+                        returnType: $customerInfoFrom
                     )
                 ),
                 fullName: $this->getCustomerData(key: 'full_name', returnType: $customerInfoFrom),
@@ -453,6 +438,7 @@ class ResursDefault extends WC_Payment_Gateway
      * we also need to check out conditions from the early instantiated cart.
      * @return bool
      * @throws Exception
+     * @noinspection PhpCSValidationInspection
      */
     public function is_available(): bool
     {
@@ -475,7 +461,7 @@ class ResursDefault extends WC_Payment_Gateway
         // to the storefront.
         if (
             !isset($woocommerce->cart) ||
-            !method_exists($this, method: 'get_order_total') ||
+            !method_exists(object_or_class: $this, method: 'get_order_total') ||
             !isset($this->paymentMethodInformation->id)
         ) {
             // Return false if gateway in Resurs-admin is disabled and stop running the full process here.
@@ -502,15 +488,18 @@ class ResursDefault extends WC_Payment_Gateway
             // Also return false if customer types are not supported.
             if (
                 !(
-                (float)$this->get_order_total() >= $this->paymentMethodInformation->minPurchaseLimit &&
-                (float)$this->get_order_total() <= $this->paymentMethodInformation->maxPurchaseLimit
+                    (float)$this->get_order_total() >= $this->paymentMethodInformation->minPurchaseLimit &&
+                    (float)$this->get_order_total() <= $this->paymentMethodInformation->maxPurchaseLimit
                 )
             ) {
                 $return = false;
             }
             if ($customerType === CustomerType::LEGAL && !$this->paymentMethodInformation->enabledForLegalCustomer) {
                 $return = false;
-            } elseif ($customerType === CustomerType::NATURAL && !$this->paymentMethodInformation->enabledForNaturalCustomer) {
+            } elseif (
+                $customerType === CustomerType::NATURAL &&
+                !$this->paymentMethodInformation->enabledForNaturalCustomer
+            ) {
                 $return = false;
             }
         }
@@ -523,6 +512,8 @@ class ResursDefault extends WC_Payment_Gateway
      * fields required by Resurs.
      *
      * @throws Exception
+     * @noinspection PhpMissingParentCallCommonInspection
+     * @noinspection PhpCSValidationInspection
      */
     public function payment_fields(): void
     {
@@ -538,22 +529,13 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * If this payment method is Resurs bank internal, this will return true.
-     * @param $paymentMethod
-     * @return bool
-     */
-    public static function isInternalMethod($paymentMethod): bool
-    {
-        return isset($paymentMethod->type) && str_starts_with($paymentMethod->type, 'RESURS_');
-    }
-
-    /**
      * The WooCommerce-inherited process_payment method. This is where we normally want to place our
      * payment actions.
      *
      * @param $order_id
      * @return array
      * @throws Exception
+     * @noinspection PhpCSValidationInspection
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function process_payment($order_id): array
@@ -718,7 +700,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Generate URL for MAPI callbacks.
-     * Note: We don't have to apply the order id to the callback URL, as the callback will be sent back as a POST (json).
+     * We don't have to apply the order id to the callback URL, as the callback will be sent back as a POST (json).
      *
      * @param CallbackType $callbackType
      * @return string
@@ -784,12 +766,12 @@ class ResursDefault extends WC_Payment_Gateway
                 // just handle exceptions as errors.
                 CallbackModule::processCallback(
                     callbackType: CallbackType::from(
-                        value: strtoupper($_REQUEST['mapi-callback'])
+                        value: strtoupper(string: $_REQUEST['mapi-callback'])
                     )
                 );
                 $response['success'] = true;
             } catch (Throwable $e) {
-                Config::getLogger()->error($e);
+                Config::getLogger()->error(message: $e);
                 $response['message'] = $e->getMessage();
             }
 
