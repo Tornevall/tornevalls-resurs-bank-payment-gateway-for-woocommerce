@@ -5,6 +5,7 @@
 namespace ResursBank\Service;
 
 use Exception;
+use Resursbank\Ecom\Config;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use WC_Order;
@@ -81,7 +82,9 @@ class OrderHandler extends ResursDefault
             );
             $order->add_order_note($syncNotice);
             Data::setOrderMeta($order, 'customerSynchronization', date('Y-m-d H:i:s', time()));
-            Data::writeLogNotice($syncNotice);
+            Config::getLogger()->debug(
+                message: $syncNotice
+            );
         }
 
         return $return;
