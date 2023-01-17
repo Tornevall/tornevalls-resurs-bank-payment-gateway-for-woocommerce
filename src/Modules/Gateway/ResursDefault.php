@@ -70,7 +70,7 @@ use WP_Post;
  *
  * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  */
-class ResursDefault extends WC_Payment_Gateway
+class ResursDefault extends WC_Payment_Gateway // phpcs:ignore
 {
     /**
      * Default identifier title for this gateway.
@@ -142,11 +142,11 @@ class ResursDefault extends WC_Payment_Gateway
             return $return;
         }
 
+        $paymentMethodTitle = $theorder->get_payment_method_title();
+
         // Use defaults if no order exists (this method is used on several places).
-        return $this->isValidResursOrder() && is_string(
-            value: $theorder->get_payment_method_title()
-        ) ?
-            $theorder->get_payment_method_title() : parent::get_title();
+        return $this->isValidResursOrder() &&
+            is_string(value: $paymentMethodTitle) ? $paymentMethodTitle : parent::get_title();
     }
 
     /**
