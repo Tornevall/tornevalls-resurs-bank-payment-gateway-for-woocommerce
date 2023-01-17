@@ -36,7 +36,7 @@ class ResursBankAPI
             // when trying to reach wp-admin, section will make the platform bail out.
             if (is_admin()) {
                 // If we are in wp-admin, we allow an error message to be shown on screen.
-                WordPress::setGenericError($connectionException);
+                WordPress::setGenericError(exception: $connectionException);
             }
         }
     }
@@ -62,11 +62,10 @@ class ResursBankAPI
 
         WC()->initialize_session();
 
-        // @todo Loglevel error removed and points to the default (info) for now as it is used in the callback handler
-        // @todo for the moment. This should instead be configurable.
         Config::setup(
             logger: Advanced::getLogger(),
             cache: Advanced::getCache(),
+            logLevel: Advanced::getLogLevel(),
             jwtAuth: new Jwt(
                 clientId: ClientId::getData(),
                 clientSecret: ClientSecret::getData(),
