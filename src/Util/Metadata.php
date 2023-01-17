@@ -70,9 +70,9 @@ class Metadata
     public static function isValidResursPayment(WC_Order $order): bool
     {
         return Metadata::getOrderMeta(
-                order: $order,
-                metaDataKey: 'payment_id'
-            ) !== '';
+            order: $order,
+            metaDataKey: 'payment_id'
+        ) !== '';
     }
 
     /**
