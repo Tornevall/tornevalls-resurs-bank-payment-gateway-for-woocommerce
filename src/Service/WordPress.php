@@ -245,14 +245,6 @@ class WordPress
                         ),
                         'ResursBank\Module\OrderMetaBox::output_order'
                     );
-                    add_meta_box(
-                        'resursbank_order_meta_details',
-                        sprintf(
-                            __('%s order meta data', 'resurs-bank-payments-for-woocommerce'),
-                            'Resurs'
-                        ),
-                        'ResursBank\Module\OrderMetaBox::output_meta_details'
-                    );
                 }
             }
         }
