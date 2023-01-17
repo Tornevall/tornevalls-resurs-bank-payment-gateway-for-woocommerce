@@ -3,7 +3,6 @@
 namespace ResursBank\Module;
 
 use Exception;
-use Locale;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Locale\Language;
@@ -22,10 +21,6 @@ use Resursbank\Woocommerce\Settings\Advanced;
  */
 class ResursBankAPI
 {
-    /** @var Language */
-    private const DEFAULT_LANGUAGE = Language::en;
-
-
     public function __construct()
     {
         try {
@@ -72,29 +67,7 @@ class ResursBankAPI
                 scope: Environment::getData() === 'test' ? 'mock-merchant-api' : 'merchant-api',
                 grantType: 'client_credentials'
             ),
-            language: $this->getSiteLanguage()
+            language: Language::getSiteLanguage()
         );
-    }
-
-    /**
-     * Attempts to somewhat safely fetch the correct site language.
-     *
-     * @return Language Configured language or self::DEFAULT_LANGUAGE if no matching language found in Ecom
-     */
-    private function getSiteLanguage(): Language
-    {
-        $language = Locale::getPrimaryLanguage(locale: get_locale());
-
-        if (!$language) {
-            return self::DEFAULT_LANGUAGE;
-        }
-
-        foreach (Language::cases() as $case) {
-            if ($language === $case->value) {
-                return $case;
-            }
-        }
-
-        return self::DEFAULT_LANGUAGE;
     }
 }

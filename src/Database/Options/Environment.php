@@ -25,4 +25,12 @@ class Environment extends StringOption
     {
         return self::NAME_PREFIX . 'environment';
     }
+
+    /**
+     * @return string
+     */
+    public static function getDefault(): string
+    {
+        return 'test';
+    }
 }
