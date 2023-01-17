@@ -147,7 +147,9 @@ class ResursDefault extends WC_Payment_Gateway
 
         // Use defaults if no order exists (this method is used on several places).
         return $this->isValidResursOrder() &&
-            is_string(value: $paymentMethodTitle) ? $paymentMethodTitle : parent::get_title();
+        is_string(value: $paymentMethodTitle)
+            ? $paymentMethodTitle
+            : parent::get_title();
     }
 
     /**
@@ -200,49 +202,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * Feature to check if payment method is still available in checkout after internal cart/method controls.
-     *
-     * @param bool $return
-     * @return bool
-     */
-    private function isAvailableInCheckout(bool $return): bool
-    {
-        try {
-            $customerType = WcSession::getCustomerType();
-        } catch (Throwable) {
-            // Possible to-do: Make sure that defaults are set by available payment methods, not just NATURAL.
-            // Normally, this is not a problem, since the merchant majority is of type LEGAL, so for now we're
-            // good to go with this.
-            $customerType = CustomerType::NATURAL;
-        }
-
-        // Return false on the conditions that the price is not matching min/max limits.
-        // Also return false if customer types are not supported.
-        if (
-            !(
-                (float)$this->get_order_total() >= $this->paymentMethodInformation->minPurchaseLimit &&
-                (float)$this->get_order_total() <= $this->paymentMethodInformation->maxPurchaseLimit
-            )
-        ) {
-            $return = false;
-        }
-
-        if (
-            $customerType === CustomerType::LEGAL &&
-            !$this->paymentMethodInformation->enabledForLegalCustomer
-        ) {
-            $return = false;
-        } elseif (
-            $customerType === CustomerType::NATURAL &&
-            !$this->paymentMethodInformation->enabledForNaturalCustomer
-        ) {
-            $return = false;
-        }
-
-        return $return;
-    }
-
-    /**
      * Simplified checkout form field generator. This is WooCommerce-specific inherits for which we render
      * fields required by Resurs.
      *
@@ -267,7 +226,6 @@ class ResursDefault extends WC_Payment_Gateway
      * The WooCommerce-inherited process_payment method. This is where we normally want to place our
      * payment actions.
      *
-     * @param mixed $order_id
      * @return array
      * @throws Exception
      * @noinspection PhpCSValidationInspection
@@ -328,6 +286,46 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         exit;
+    }
+
+    /**
+     * Feature to check if payment method is still available in checkout after internal cart/method controls.
+     */
+    private function isAvailableInCheckout(bool $return): bool
+    {
+        try {
+            $customerType = WcSession::getCustomerType();
+        } catch (Throwable) {
+            // Possible to-do: Make sure that defaults are set by available payment methods, not just NATURAL.
+            // Normally, this is not a problem, since the merchant majority is of type LEGAL, so for now we're
+            // good to go with this.
+            $customerType = CustomerType::NATURAL;
+        }
+
+        // Return false on the conditions that the price is not matching min/max limits.
+        // Also return false if customer types are not supported.
+        if (
+            !(
+                (float)$this->get_order_total() >= $this->paymentMethodInformation->minPurchaseLimit &&
+                (float)$this->get_order_total() <= $this->paymentMethodInformation->maxPurchaseLimit
+            )
+        ) {
+            $return = false;
+        }
+
+        if (
+            $customerType === CustomerType::LEGAL &&
+            !$this->paymentMethodInformation->enabledForLegalCustomer
+        ) {
+            $return = false;
+        } elseif (
+            $customerType === CustomerType::NATURAL &&
+            !$this->paymentMethodInformation->enabledForNaturalCustomer
+        ) {
+            $return = false;
+        }
+
+        return $return;
     }
 
     /**
