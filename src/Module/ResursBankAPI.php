@@ -5,7 +5,7 @@ namespace ResursBank\Module;
 use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Lib\Locale\Language;
+use Resursbank\Woocommerce\Util\Language;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use ResursBank\Exception\MapiCredentialsException;
 use ResursBank\Service\WordPress;
