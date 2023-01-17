@@ -70,7 +70,8 @@ use WP_Post;
  *
  * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  */
-class ResursDefault extends WC_Payment_Gateway // phpcs:ignore
+// phpcs:ignore
+class ResursDefault extends WC_Payment_Gateway
 {
     /**
      * Default identifier title for this gateway.
