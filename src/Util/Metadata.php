@@ -79,14 +79,14 @@ class Metadata
      * Fetch order information and metadata.
      *
      * @param WC_Order $order
-     * @param null $orderIsResursReference
      * @return array
      */
     public static function getOrderInfo(WC_Order $order): array
     {
+        $meta = get_post_custom(post_id: $order->get_id());
         return [
             'order' => $order,
-            'meta' => get_post_custom(post_id: $order->get_id())
+            'meta' => is_array(value: $meta) ? $meta : []
         ];
     }
 }
