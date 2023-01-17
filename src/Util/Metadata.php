@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Resursbank\Woocommerce\Settings;
 use WC_Order;
 
 /**
@@ -74,5 +73,20 @@ class Metadata
             order: $order,
             metaDataKey: 'payment_id'
         ) !== '';
+    }
+
+    /**
+     * Fetch order information and metadata.
+     *
+     * @param WC_Order $order
+     * @return array
+     */
+    public static function getOrderInfo(WC_Order $order): array
+    {
+        $meta = get_post_custom(post_id: $order->get_id());
+        return [
+            'order' => $order,
+            'meta' => is_array(value: $meta) ? $meta : []
+        ];
     }
 }

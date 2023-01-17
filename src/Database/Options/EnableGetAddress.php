@@ -24,6 +24,9 @@ class EnableGetAddress extends StringOption
         return self::NAME_PREFIX . 'get_address_enabled';
     }
 
+    /**
+     * @return bool
+     */
     public static function isEnabled(): bool
     {
         return self::getData() === 'yes';
