@@ -67,8 +67,7 @@ use WP_Post;
  *
  * Class primarily handles payments, orders and callbacks dynamically, with focus on less loss
  * of data during API communication by converting API-calls to base64-strings which prevents charset problems.
- *
- * @package Resursbank\Gateway
+ * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  */
 class ResursDefault extends WC_Payment_Gateway
 {
@@ -161,7 +160,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Initialize the gateway with the current Resurs payment method model.
-     * Things initialized here is mostly defaults, since we are depending on features that can work independently
+     * Things initialized here is mostly defaults, since we depend on features that can work independently
      * without spontaneous crashes.
      *
      * @param PaymentMethod|null $paymentMethod
@@ -208,7 +207,7 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * This section is used by the WC Payment Gateway-toggler. If we decide to support "gateway toggling", this
+     * This section is used by the WC Payment Gateway toggle. If we decide to support "gateway toggling", this
      * section has to be used.
      *
      * @param mixed $key
@@ -307,7 +306,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * Method that is used to check if there is an order available (formerly $theorder) and if that order
-     * if available is valid as a Resurs Payment. Used to bind the payment method names properly in order views.
+     * is available is valid as a Resurs Payment. Used to bind the payment method names properly in order views.
      * @return bool
      */
     private function isValidResursOrder(): bool
@@ -597,7 +596,7 @@ class ResursDefault extends WC_Payment_Gateway
                 WcSession::unset(key: (new Session())->getKey(key: Repository::SESSION_KEY_CUSTOMER_TYPE));
             }
 
-            // This is our link to the payment at Resurs for which we save the uuid we get at the create.
+            // This is our link to the payment at Resurs for which we save the uuid we get at the creation.
             // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
             Metadata::setOrderMeta(
                 order: $order,
@@ -605,7 +604,7 @@ class ResursDefault extends WC_Payment_Gateway
                 metaDataValue: $paymentResponse->id
             );
         } catch (Exception $createPaymentException) {
-            // In case we get an error from any other component than the create, we need to rewrite this response.
+            // In case we get an error from any other component than the creation, we need to rewrite this response.
             $return = [
                 'result' => 'failure',
                 'redirect' => $this->getReturnUrl(order: $order, result: 'failure')
