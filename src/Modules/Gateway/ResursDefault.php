@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-/** @noinspection EfferentObjectCouplingInspection */
 /** @noinspection PhpAssignmentInConditionInspection */
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
@@ -46,7 +45,7 @@ use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Cart;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -672,7 +671,7 @@ class ResursDefault extends WC_Payment_Gateway
             $paymentResponse = PaymentRepository::create(
                 storeId: StoreId::getData(),
                 paymentMethodId: $this->getPaymentMethod(),
-                orderLines: Cart::getOrderLines(),
+                orderLines: Order::getOrderLines(order: $order),
                 orderReference: (string)$order->get_id(),
                 customer: $this->getCustomer(),
                 metadata: $this->getPaymentMetaData(order: $order),
