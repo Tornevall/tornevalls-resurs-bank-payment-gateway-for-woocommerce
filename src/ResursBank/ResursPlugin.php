@@ -19,6 +19,7 @@ use function is_array;
  * @see https://docs.tornevall.net/x/iQAdBg
  * @since 0.0.1.6
  */
+// phpcs:ignore
 class ResursPlugin
 {
     /**
