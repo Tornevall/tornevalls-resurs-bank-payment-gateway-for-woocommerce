@@ -69,7 +69,7 @@ class Order
         $result[] = Shipping::getOrderLine(order: $order);
 
         return new OrderLineCollection(
-            data: array_merge($result, $collection->getOrderLines())
+            data: array_merge($result, $collection->getOrderLines()->toArray())
         );
     }
 

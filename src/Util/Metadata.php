@@ -27,6 +27,20 @@ class Metadata
         string $metaDataKey,
         string $metaDataValue
     ): bool {
+        $existingMeta = get_post_meta(
+            post_id: $order->get_id(),
+            key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
+            single: true
+        );
+
+        if ($existingMeta) {
+            return (bool)update_post_meta(
+                post_id: $order->get_id(),
+                meta_key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
+                meta_value: $metaDataValue
+            );
+        }
+
         return (bool)add_post_meta(
             post_id: $order->get_id(),
             meta_key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
@@ -59,5 +73,20 @@ class Metadata
             order: $order,
             metaDataKey: 'payment_id'
         ) !== '';
+    }
+
+    /**
+     * Fetch order information and metadata.
+     *
+     * @param WC_Order $order
+     * @return array
+     */
+    public static function getOrderInfo(WC_Order $order): array
+    {
+        $meta = get_post_custom(post_id: $order->get_id());
+        return [
+            'order' => $order,
+            'meta' => is_array(value: $meta) ? $meta : []
+        ];
     }
 }
