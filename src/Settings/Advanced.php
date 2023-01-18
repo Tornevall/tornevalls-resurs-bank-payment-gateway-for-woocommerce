@@ -58,7 +58,6 @@ class Advanced
      * @throws IllegalTypeException
      * @todo Refactor, method too big, move translations to ECom. WOO-897. Remove phpcs:ignore when completed.
      */
-    // phpcs:ignore
     public static function getSettings(): array
     {
         return [
@@ -67,37 +66,23 @@ class Advanced
                 'log_dir' => [
                     'id' => LogDir::getName(),
                     'type' => 'text',
-                    'title' => __(
-                        'Log path',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    'desc' => __(
-                        'Leave empty to disable logging.',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
+                    'title' => Translator::translate(phraseId: 'log-path'),
+                    'desc' => Translator::translate(phraseId: 'leave-empty-to-disable-logging'),
                     'default' => LogDir::getDefault(),
                 ],
                 'log_level' => [
                     'id' => LogLevel::getName(),
                     'type' => 'select',
                     'title' => Translator::translate(phraseId: 'log-level'),
-                    'desc' => Translator::translate(
-                        phraseId: 'log-level-description'
-                    ),
+                    'desc' => Translator::translate(phraseId: 'log-level-description'),
                     'default' => EcomLogLevel::INFO->value,
                     'options' => self::getLogLevelOptions(),
                 ],
                 'cache_dir' => [
                     'id' => CacheDir::getName(),
                     'type' => 'text',
-                    'title' => __(
-                        'Cache path',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    'desc' => __(
-                        'Leave empty to disable cache.',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
+                    'title' => Translator::translate(phraseId: 'cache-path'),
+                    'desc' => Translator::translate(phraseId: 'leave-empty-to-disable-cache'),
                     'default' => CacheDir::getDefault(),
                 ],
                 'get_address_enabled' => [
