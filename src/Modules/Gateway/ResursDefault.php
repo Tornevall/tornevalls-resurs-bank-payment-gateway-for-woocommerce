@@ -45,7 +45,6 @@ use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
