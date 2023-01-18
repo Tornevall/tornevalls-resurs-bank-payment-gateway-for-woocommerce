@@ -151,7 +151,7 @@
     <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
         <properties>
             <property name="rootNamespaces" type="array">
-                <element key="src/wp-content/plugins/resursbank-woocommerce/src" value="Resursbank\Woocommerce" />
+                <element key="src" value="Resursbank\Woocommerce" />
             </property>
         </properties>
     </rule>
