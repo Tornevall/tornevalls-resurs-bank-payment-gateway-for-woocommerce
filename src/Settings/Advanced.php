@@ -11,10 +11,18 @@ namespace Resursbank\Woocommerce\Settings;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\CollectionException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Cache\CacheInterface;
 use Resursbank\Ecom\Lib\Cache\Filesystem;
 use Resursbank\Ecom\Lib\Cache\None;
@@ -23,10 +31,16 @@ use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
+use Resursbank\Ecom\Module\Store\Models\Store;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\CacheDir;
+use Resursbank\Woocommerce\Database\Options\ClientId;
+use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\LogDir;
 use Resursbank\Woocommerce\Database\Options\LogLevel;
+use Resursbank\Woocommerce\Database\Options\StoreId;
 use Throwable;
 use WC_Logger;
 
@@ -61,9 +75,33 @@ class Advanced
     // phpcs:ignore
     public static function getSettings(): array
     {
+        try {
+            $currentStoreOptions = self::getStoreSelector();
+            $storeIdSetting = [
+                'id' => StoreId::getName(),
+                'title' => 'Store ID',
+                'type' => 'select',
+                'default' => StoreId::getDefault(),
+                'options' => $currentStoreOptions,
+            ];
+        } catch (Throwable $e) {
+            $storeIdSetting = [
+                'id' => StoreId::getName(),
+                'title' => 'Store ID',
+                'type' => 'title',
+                'default' => StoreId::getDefault(),
+                'desc_tip' => true,
+                'desc' => sprintf(
+                    'Could not fetch stores from Resurs Bank: %s.',
+                    $e->getMessage()
+                ),
+            ];
+        }
+
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
+                'store_id' => $storeIdSetting,
                 'log_dir' => [
                     'id' => LogDir::getName(),
                     'type' => 'text',
@@ -214,5 +252,63 @@ class Advanced
         }
 
         return $options;
+    }
+
+    /**
+     * Render an array with available stores for a merchant, based on their national store id as this is shorter
+     * than the full store uuid. The national id is a human-readable variant of the uuid.
+     *
+     * @return array
+     * @throws EmptyValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CollectionException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @phpcsSuppress
+     * @noinspection DuplicatedCode
+     * @todo Refactor, remove phpcs:ignore below after. WOO-894
+     */
+    // phpcs:ignore
+    private static function getStoreSelector(): array
+    {
+        $clientId = ClientId::getData();
+        $clientSecret = ClientSecret::getData();
+
+        // Default for multiple stores: Never putting merchants on the first available choice.
+        $return = [
+            '' => 'Select Store',
+        ];
+
+        if ($clientId !== '' && $clientSecret !== '') {
+            try {
+                /** @var Store $store */
+                foreach (StoreRepository::getStores() as $store) {
+                    $return[$store->id] = sprintf(
+                        '%s: %s',
+                        $store->nationalStoreId,
+                        $store->name
+                    );
+                }
+            } catch (Throwable $e) {
+                // Log all errors in the admin panel regardless of where the exception comes from.
+                WordPress::setGenericError(
+                    exception: new Exception(
+                        message: $e->getMessage(),
+                        previous: $e
+                    )
+                );
+                // Make sure we give the options array a chance to render an error instead of the fields so ensure
+                // the setting won't be saved by mistake when APIs are down.
+                throw $e;
+            }
+        }
+
+        return $return;
     }
 }
