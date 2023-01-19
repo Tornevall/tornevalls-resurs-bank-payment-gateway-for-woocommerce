@@ -44,7 +44,7 @@ class Option
         return get_option(
             option: static::getName(),
             default: null
-               ) ?? static::getDefault();
+        ) ?? static::getDefault();
     }
 
     /**
