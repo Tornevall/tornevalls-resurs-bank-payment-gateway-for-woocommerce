@@ -127,6 +127,9 @@ class PartPayment
      * @throws TranslationException
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      * @noinspection PhpUnusedParameterInspection
      * @todo Refactor, method is too large, complex, unused. WOO-980. Remove phpcs:ignore below when done.
      */
@@ -195,6 +198,7 @@ class PartPayment
         // @todo Find a better solution for this
         $customerCountry = Data::getCustomerCountry();
         $minLimit = 150;
+
         if ($customerCountry === 'FI') {
             $minLimit = 15;
         }
