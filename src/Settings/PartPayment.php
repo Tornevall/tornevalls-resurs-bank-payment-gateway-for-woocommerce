@@ -56,56 +56,16 @@ class PartPayment
      * @throws ReflectionException
      * @throws TranslationException
      * @throws ValidationException
-     * @todo Refactor, method is too large. WOO-979. Remove phpcs:ignore below when done.
      */
-    // phpcs:ignore
     public static function getSettings(): array
     {
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
-                'enabled' => [
-                    'id' => Enabled::getName(),
-                    'title' => Translator::translate(
-                        phraseId: 'part-payment-widget-enabled'
-                    ),
-                    'type' => 'checkbox',
-                    'default' => Enabled::getDefault(),
-                    'desc' => 'Enabled',
-                ],
-                'payment_method' => [
-                    'id' => PaymentMethodOption::getName(),
-                    'title' => Translator::translate(
-                        phraseId: 'payment-method'
-                    ),
-                    'type' => 'select',
-                    'default' => PaymentMethodOption::getDefault(),
-                    'options' => self::getPaymentMethods(),
-                    'desc' => Translator::translate(
-                        phraseId: 'part-payment-payment-method'
-                    ),
-                ],
-                'period' => [
-                    'id' => Period::getName(),
-                    'title' => Translator::translate(
-                        phraseId: 'annuity-period'
-                    ),
-                    'type' => 'select',
-                    'default' => Period::getDefault(),
-                    'options' => self::getAnnuityPeriods(),
-                    'desc' => Translator::translate(
-                        phraseId: 'part-payment-annuity-period'
-                    ),
-                ],
-                'limit' => [
-                    'id' => Limit::getName(),
-                    'title' => Translator::translate(phraseId: 'limit'),
-                    'type' => 'text',
-                    'default' => Limit::getDefault(),
-                    'desc' => Translator::translate(
-                        phraseId: 'part-payment-limit'
-                    ),
-                ],
+                'enabled' => self::getEnabledSetting(),
+                'payment_method' => self::getPaymentMethodSetting(),
+                'period' => self::getPeriodSetting(),
+                'limit' => self::getLimitSetting(),
             ],
         ];
     }
@@ -236,6 +196,98 @@ class PartPayment
                 )
             );
         }
+    }
+
+    /**
+     * Fetches the enabled setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getEnabledSetting(): array
+    {
+        return [
+            'id' => Enabled::getName(),
+            'title' => Translator::translate(
+                phraseId: 'part-payment-widget-enabled'
+            ),
+            'type' => 'checkbox',
+            'default' => Enabled::getDefault(),
+            'desc' => 'Enabled',
+        ];
+    }
+
+    /**
+     * Fetches the payment_method setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getPaymentMethodSetting(): array
+    {
+        return [
+            'id' => PaymentMethodOption::getName(),
+            'title' => Translator::translate(phraseId: 'payment-method'),
+            'type' => 'select',
+            'default' => PaymentMethodOption::getDefault(),
+            'options' => self::getPaymentMethods(),
+            'desc' => Translator::translate(
+                phraseId: 'part-payment-payment-method'
+            ),
+        ];
+    }
+
+    /**
+     * Fetches the period setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getPeriodSetting(): array
+    {
+        return [
+            'id' => Period::getName(),
+            'title' => Translator::translate(phraseId: 'annuity-period'),
+            'type' => 'select',
+            'default' => Period::getDefault(),
+            'options' => self::getAnnuityPeriods(),
+            'desc' => Translator::translate(
+                phraseId: 'part-payment-annuity-period'
+            ),
+        ];
+    }
+
+    /**
+     * Fetches the limit setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getLimitSetting(): array
+    {
+        return [
+            'id' => Limit::getName(),
+            'title' => Translator::translate(phraseId: 'limit'),
+            'type' => 'text',
+            'default' => Limit::getDefault(),
+            'desc' => Translator::translate(phraseId: 'part-payment-limit'),
+        ];
     }
 
     /**
