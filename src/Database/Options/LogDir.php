@@ -25,4 +25,27 @@ class LogDir extends StringOption
     {
         return self::NAME_PREFIX . 'log_dir';
     }
+
+    /**
+     * Defaults to attempting to use WooCommerce's log directory, if this can't be found we return ''.
+     */
+    public static function getDefault(): string
+    {
+        $uploadDirectory = wp_upload_dir(create_dir: false);
+
+        if (
+            is_array(value: $uploadDirectory) &&
+            isset($uploadDirectory['basedir']) &&
+            is_string(value: $uploadDirectory['basedir']) &&
+            $uploadDirectory['basedir'] !== ''
+        ) {
+            return preg_replace(
+                pattern: '/\/$/',
+                replacement: '',
+                subject: $uploadDirectory['basedir'] . '/wc-logs/'
+            );
+        }
+
+        return '';
+    }
 }
