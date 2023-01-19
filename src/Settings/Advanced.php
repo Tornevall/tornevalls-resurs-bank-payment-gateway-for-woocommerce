@@ -182,7 +182,7 @@ class Advanced
 
         if ($clientId !== '' && $clientSecret !== '') {
             try {
-                array_merge($return, self::getStores());
+                $return = array_merge($return, self::getStores());
             } catch (Throwable $exception) {
                 WordPress::setGenericError(
                     exception: new Exception(
