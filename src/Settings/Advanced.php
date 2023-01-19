@@ -345,13 +345,12 @@ class Advanced
     private static function getStoreIdSetting(): array
     {
         try {
-            $currentStoreOptions = self::getStoreSelector();
             $storeIdSetting = [
                 'id' => StoreId::getName(),
                 'title' => Translator::translate(phraseId: 'store-id'),
                 'type' => 'select',
                 'default' => StoreId::getDefault(),
-                'options' => $currentStoreOptions,
+                'options' => self::getStoreSelector(),
             ];
         } catch (Throwable $e) {
             $storeIdSetting = [
