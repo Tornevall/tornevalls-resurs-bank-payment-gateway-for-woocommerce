@@ -216,8 +216,7 @@ class PartPayment
                 phraseId: 'part-payment-widget-enabled'
             ),
             'type' => 'checkbox',
-            'default' => Enabled::getDefault(),
-            'desc' => 'Enabled',
+            'default' => Enabled::getDefault()
         ];
     }
 
@@ -241,7 +240,7 @@ class PartPayment
             'options' => self::getPaymentMethods(),
             'desc' => Translator::translate(
                 phraseId: 'part-payment-payment-method'
-            ),
+            )
         ];
     }
 
@@ -265,7 +264,7 @@ class PartPayment
             'options' => self::getAnnuityPeriods(),
             'desc' => Translator::translate(
                 phraseId: 'part-payment-annuity-period'
-            ),
+            )
         ];
     }
 
@@ -286,7 +285,7 @@ class PartPayment
             'title' => Translator::translate(phraseId: 'limit'),
             'type' => 'text',
             'default' => Limit::getDefault(),
-            'desc' => Translator::translate(phraseId: 'part-payment-limit'),
+            'desc' => Translator::translate(phraseId: 'part-payment-limit')
         ];
     }
 
