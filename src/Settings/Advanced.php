@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -206,11 +207,7 @@ class Advanced
      * @throws ValidationException
      * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @phpcsSuppress
-     * @noinspection DuplicatedCode
-     * @todo Refactor, remove phpcs:ignore below after. WOO-894
      */
-    // phpcs:ignore
     private static function getStoreSelector(): array
     {
         $clientId = ClientId::getData();
@@ -223,29 +220,47 @@ class Advanced
 
         if ($clientId !== '' && $clientSecret !== '') {
             try {
-                /** @var Store $store */
-                foreach (StoreRepository::getStores() as $store) {
-                    $return[$store->id] = sprintf(
-                        '%s: %s',
-                        $store->nationalStoreId,
-                        $store->name
-                    );
-                }
-            } catch (Throwable $e) {
-                // Log all errors in the admin panel regardless of where the exception comes from.
+                array_merge($return, self::getStores());
+            } catch (Throwable $exception) {
                 WordPress::setGenericError(
                     exception: new Exception(
-                        message: $e->getMessage(),
-                        previous: $e
+                        message: $exception->getMessage(),
+                        previous: $exception
                     )
                 );
                 // Make sure we give the options array a chance to render an error instead of the fields so ensure
                 // the setting won't be saved by mistake when APIs are down.
-                throw $e;
+                throw $exception;
             }
         }
 
         return $return;
+    }
+
+    /**
+     * Fetch array of stores for store selector.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    private static function getStores(): array
+    {
+        $stores = [];
+
+        /** @var Store $store */
+        foreach (StoreRepository::getStores() as $store) {
+            $stores[$store->id] = $store->nationalStoreId . ': ' . $store->name;
+        }
+
+        return $stores;
     }
 
     /**
