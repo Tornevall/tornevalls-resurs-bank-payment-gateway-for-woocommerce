@@ -41,13 +41,14 @@ class Option
      */
     public static function getData(): mixed
     {
-        return get_option(option: static::getName(), default: null);
+        return get_option(
+            option: static::getName(),
+            default: null
+               ) ?? static::getDefault();
     }
 
     /**
-     * @param string $value
-     *
-     * @return bool
+     * Sets option data.
      */
     public static function setData(string $value): bool
     {
