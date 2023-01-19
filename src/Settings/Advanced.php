@@ -70,7 +70,6 @@ class Advanced
      * @throws FilesystemException
      * @throws TranslationException
      * @throws IllegalTypeException
-     * @todo Refactor, method too big, move translations to ECom. WOO-897. Remove phpcs:ignore when completed.
      */
     public static function getSettings(): array
     {
