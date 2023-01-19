@@ -24,8 +24,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
@@ -242,71 +240,56 @@ class PartPayment
      * Fetch available payment method options
      *
      * @return array
-     * @todo Refactor. Method is too complex. WOO-981. Remove phpcs:ignore below when done.
      */
-    // phpcs:ignore
     private static function getPaymentMethods(): array
     {
         $storeId = StoreId::getData();
-
-        if (empty($storeId)) {
-            return [];
-        }
-
-        $options = [];
+        $paymentMethods = [];
+        $return = [];
 
         try {
-            $paymentMethods = Repository::getPaymentMethods(storeId: $storeId);
+            $paymentMethods = $storeId !== '' ?
+                Repository::getPaymentMethods(storeId: $storeId) : [];
         } catch (Throwable $exception) {
             WordPress::setGenericError(exception: $exception);
         }
 
-        if (isset($paymentMethods)) {
-            /** @var PaymentMethod $paymentMethod */
-            foreach ($paymentMethods as $paymentMethod) {
-                if (!$paymentMethod->isPartPayment()) {
-                    continue;
-                }
-
-                $options[$paymentMethod->id] = $paymentMethod->name;
+        foreach ($paymentMethods as $paymentMethod) {
+            if (!$paymentMethod->isPartPayment()) {
+                continue;
             }
+
+            $return[$paymentMethod->id] = $paymentMethod->name;
         }
 
-        return $options;
+        return $return;
     }
 
     /**
      * Fetch annuity period options for configured payment method
      *
      * @return array
-     * @todo Refactor, method is too complex. WOO-981. Remove phpcs:ignore below when done.
      */
-    // phpcs:ignore
     private static function getAnnuityPeriods(): array
     {
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
-
-        if (empty($paymentMethodId) || empty($storeId)) {
-            return [];
-        }
+        $annuityFactors = [];
+        $return = [];
 
         try {
-            $annuityFactors = AnnuityRepository::getAnnuityFactors(
-                storeId: StoreId::getData(),
-                paymentMethodId: $paymentMethodId
-            );
+            if ($paymentMethodId !== '' && $storeId !== '') {
+                $annuityFactors = AnnuityRepository::getAnnuityFactors(
+                    storeId: $storeId,
+                    paymentMethodId: $paymentMethodId
+                )->content;
+            }
         } catch (Throwable $exception) {
             WordPress::setGenericError(exception: $exception);
         }
 
-        $return = [];
-
-        if (isset($annuityFactors)) {
-            /** @var AnnuityInformation $annuityFactor */
-            foreach ($annuityFactors->content as $annuityFactor) {
-                $return[$annuityFactor->durationMonths] = $annuityFactor->paymentPlanName;
-            }
+        foreach ($annuityFactors as $annuityFactor) {
+            $return[$annuityFactor->durationMonths] = $annuityFactor->paymentPlanName;
         }
 
         return $return;
