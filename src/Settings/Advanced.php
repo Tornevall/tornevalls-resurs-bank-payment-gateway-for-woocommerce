@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -70,81 +71,17 @@ class Advanced
      * @throws FilesystemException
      * @throws TranslationException
      * @throws IllegalTypeException
-     * @todo Refactor, method too big, move translations to ECom. WOO-897. Remove phpcs:ignore when completed.
      */
-    // phpcs:ignore
     public static function getSettings(): array
     {
-        try {
-            $currentStoreOptions = self::getStoreSelector();
-            $storeIdSetting = [
-                'id' => StoreId::getName(),
-                'title' => 'Store ID',
-                'type' => 'select',
-                'default' => StoreId::getDefault(),
-                'options' => $currentStoreOptions,
-            ];
-        } catch (Throwable $e) {
-            $storeIdSetting = [
-                'id' => StoreId::getName(),
-                'title' => 'Store ID',
-                'type' => 'title',
-                'default' => StoreId::getDefault(),
-                'desc_tip' => true,
-                'desc' => sprintf(
-                    'Could not fetch stores from Resurs Bank: %s.',
-                    $e->getMessage()
-                ),
-            ];
-        }
-
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
-                'store_id' => $storeIdSetting,
-                'log_dir' => [
-                    'id' => LogDir::getName(),
-                    'type' => 'text',
-                    'title' => __(
-                        'Log path',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    'desc' => __(
-                        'Leave empty to disable logging.',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    'default' => LogDir::getDefault(),
-                ],
-                'log_level' => [
-                    'id' => LogLevel::getName(),
-                    'type' => 'select',
-                    'title' => Translator::translate(phraseId: 'log-level'),
-                    'desc' => Translator::translate(
-                        phraseId: 'log-level-description'
-                    ),
-                    'default' => EcomLogLevel::INFO->value,
-                    'options' => self::getLogLevelOptions(),
-                ],
-                'cache_dir' => [
-                    'id' => CacheDir::getName(),
-                    'type' => 'text',
-                    'title' => __(
-                        'Cache path',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    'desc' => __(
-                        'Leave empty to disable cache.',
-                        'resurs-bank-payments-for-woocommerce'
-                    ),
-                    'default' => CacheDir::getDefault(),
-                ],
-                'get_address_enabled' => [
-                    'id' => EnableGetAddress::getName(),
-                    'type' => 'checkbox',
-                    'title' => 'Enable widget to get address',
-                    'desc' => '',
-                    'default' => EnableGetAddress::getDefault(),
-                ],
+                'store_id' => self::getStoreIdSetting(),
+                'log_dir' => self::getLogDirSetting(),
+                'log_level' => self::getLogLevelSetting(),
+                'cache_dir' => self::getCacheDirSetting(),
+                'get_address_enabled' => self::getGetAddressEnabledSetting(),
             ],
         ];
     }
@@ -270,11 +207,7 @@ class Advanced
      * @throws ValidationException
      * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @phpcsSuppress
-     * @noinspection DuplicatedCode
-     * @todo Refactor, remove phpcs:ignore below after. WOO-894
      */
-    // phpcs:ignore
     private static function getStoreSelector(): array
     {
         $clientId = ClientId::getData();
@@ -287,28 +220,167 @@ class Advanced
 
         if ($clientId !== '' && $clientSecret !== '') {
             try {
-                /** @var Store $store */
-                foreach (StoreRepository::getStores() as $store) {
-                    $return[$store->id] = sprintf(
-                        '%s: %s',
-                        $store->nationalStoreId,
-                        $store->name
-                    );
-                }
-            } catch (Throwable $e) {
-                // Log all errors in the admin panel regardless of where the exception comes from.
+                array_merge($return, self::getStores());
+            } catch (Throwable $exception) {
                 WordPress::setGenericError(
                     exception: new Exception(
-                        message: $e->getMessage(),
-                        previous: $e
+                        message: $exception->getMessage(),
+                        previous: $exception
                     )
                 );
                 // Make sure we give the options array a chance to render an error instead of the fields so ensure
                 // the setting won't be saved by mistake when APIs are down.
-                throw $e;
+                throw $exception;
             }
         }
 
         return $return;
+    }
+
+    /**
+     * Fetch array of stores for store selector.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    private static function getStores(): array
+    {
+        $stores = [];
+
+        /** @var Store $store */
+        foreach (StoreRepository::getStores() as $store) {
+            $stores[$store->id] = $store->nationalStoreId . ': ' . $store->name;
+        }
+
+        return $stores;
+    }
+
+    /**
+     * Fetches log_dir setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getLogDirSetting(): array
+    {
+        return [
+            'id' => LogDir::getName(),
+            'type' => 'text',
+            'title' => Translator::translate(phraseId: 'log-path'),
+            'desc' => Translator::translate(
+                phraseId: 'leave-empty-to-disable-logging'
+            ),
+            'default' => LogDir::getDefault(),
+        ];
+    }
+
+    /**
+     * Fetches the log_level setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getLogLevelSetting(): array
+    {
+        return [
+            'id' => LogLevel::getName(),
+            'type' => 'select',
+            'title' => Translator::translate(phraseId: 'log-level'),
+            'desc' => Translator::translate(phraseId: 'log-level-description'),
+            'default' => EcomLogLevel::INFO->value,
+            'options' => self::getLogLevelOptions(),
+        ];
+    }
+
+    /**
+     * Fetches the cache_dir setting
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getCacheDirSetting(): array
+    {
+        return [
+            'id' => CacheDir::getName(),
+            'type' => 'text',
+            'title' => Translator::translate(phraseId: 'cache-path'),
+            'desc' => Translator::translate(
+                phraseId: 'leave-empty-to-disable-cache'
+            ),
+            'default' => CacheDir::getDefault(),
+        ];
+    }
+
+    /**
+     * Fetches the get_address_enabled setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getGetAddressEnabledSetting(): array
+    {
+        return [
+            'id' => EnableGetAddress::getName(),
+            'type' => 'checkbox',
+            'title' => Translator::translate(
+                phraseId: 'enable-widget-to-get-address'
+            ),
+            'desc' => '',
+            'default' => EnableGetAddress::getDefault(),
+        ];
+    }
+
+    /**
+     * Fetches the store id setting.
+     */
+    private static function getStoreIdSetting(): array
+    {
+        try {
+            $storeIdSetting = [
+                'id' => StoreId::getName(),
+                'title' => Translator::translate(phraseId: 'store-id'),
+                'type' => 'select',
+                'default' => StoreId::getDefault(),
+                'options' => self::getStoreSelector(),
+            ];
+        } catch (Throwable $e) {
+            $storeIdSetting = [
+                'id' => StoreId::getName(),
+                'title' => Translator::translate(phraseId: 'store-id'),
+                'type' => 'title',
+                'default' => StoreId::getDefault(),
+                'desc_tip' => true,
+                'desc' => sprintf(
+                    'Could not fetch stores from Resurs Bank: %s.',
+                    $e->getMessage()
+                ),
+            ];
+        }
+
+        return $storeIdSetting;
     }
 }
