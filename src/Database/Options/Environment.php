@@ -27,7 +27,7 @@ class Environment extends StringOption
     }
 
     /**
-     * @return string
+     * Return default value.
      */
     public static function getDefault(): string
     {

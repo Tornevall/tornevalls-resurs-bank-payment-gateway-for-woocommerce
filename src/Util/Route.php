@@ -48,6 +48,7 @@ class Route
 
     /**
      * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.ExitExpression)
      */
     public static function exec(): void
     {

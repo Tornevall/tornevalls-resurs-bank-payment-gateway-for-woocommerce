@@ -10,8 +10,13 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Exception;
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
@@ -89,6 +94,12 @@ class Settings extends WC_Settings_Page
      * Method is required by Woocommerce to render tab sections.
      *
      * @return array - Parent returns mixed but documents array.
+     * @throws ConfigException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws FilesystemException
+     * @throws TranslationException
+     * @throws IllegalTypeException
      * @see parent::output_sections()
      * @phpcsSuppress
      * @noinspection PhpMissingParentCallCommonInspection
@@ -96,7 +107,7 @@ class Settings extends WC_Settings_Page
     public function get_sections(): array // phpcs:ignore
     {
         return [
-            Api::SECTION_ID => Api::SECTION_TITLE,
+            Api::SECTION_ID => Api::getTitle(),
             PaymentMethods::SECTION_ID => PaymentMethods::SECTION_TITLE,
             Advanced::SECTION_ID => Advanced::SECTION_TITLE,
             PartPayment::SECTION_ID => PartPayment::SECTION_TITLE,

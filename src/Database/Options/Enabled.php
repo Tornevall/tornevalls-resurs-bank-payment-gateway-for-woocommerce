@@ -34,7 +34,7 @@ class Enabled extends StringOption
     }
 
     /**
-     * @return string
+     * Return default value.
      */
     public static function getDefault(): string
     {
