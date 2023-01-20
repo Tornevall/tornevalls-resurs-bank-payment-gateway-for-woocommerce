@@ -9,14 +9,15 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
-use Exception;
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
@@ -24,6 +25,7 @@ use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
+use RuntimeException;
 use Throwable;
 use WC_Admin_Settings;
 use WC_Settings_Page;
@@ -79,6 +81,15 @@ class Settings extends WC_Settings_Page
      * This method is called by WordPress actions registered in our constructor.
      *
      * @see self::__construct()
+     * @throws ConfigException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function save(): void
@@ -118,63 +129,87 @@ class Settings extends WC_Settings_Page
      * Outputs the HTML for the current tab section.
      *
      * @throws ConfigException
-     * @phpcsSuppress
-     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
      * @noinspection PhpMissingParentCallCommonInspection
-     * @todo Refactor this. WOO-873. Remove suppression after refactor, remember phpcs:ignore below.
      */
-    // phpcs:ignore
     public function output(): void
     {
         global $current_section;
 
-        if ($current_section === '') {
-            $current_section = 'api_settings';
-        }
+        match ($current_section) {
+            'payment_methods' => $this->renderPaymentMethodsPage(),
+            default => $this->renderSettingsPage(section: $current_section)
+        };
+    }
 
-        if ($current_section === 'payment_methods') {
-            // As WordPress requires html to be escaped at the echo, we do a late execute on this.
-            try {
-                if (StoreId::getData() === '') {
-                    // The lazy handler.
-                    throw new Exception(
-                        message: Translator::translate(
-                            phraseId: 'please-select-a-store'
-                        )
-                    );
-                }
+    /**
+     * Render content of any setting tab for our config page.
+     *
+     * @throws ConfigException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
+     */
+    public function renderSettingsPage(string $section): void
+    {
+        // Echo table element to get Woocommerce to properly render our
+        // settings within the right elements and styling. If you include
+        // PHTML templates within the table, it's possible their HTML could
+        // be altered by Woocommerce.
+        echo '<table class="form-table">';
 
-                echo Data::getEscapedHtml(
-                    content: PaymentMethods::getOutput(
-                        storeId: StoreId::getData()
+        // Always default to first "tab" if no section has been selected.
+        WC_Admin_Settings::output_fields(
+            options: $this->get_settings(section: (
+                $section === '' ? 'api_settings' : $section
+            ))
+        );
+
+        echo '</table>';
+    }
+
+    /**
+     * Render content of the payment method tab for our config page.
+     *
+     * @todo Translate error message WOO-1010
+     */
+    public function renderPaymentMethodsPage(): void
+    {
+        try {
+            if (StoreId::getData() === '') {
+                throw new RuntimeException(
+                    message: Translator::translate(
+                        phraseId: 'please-select-a-store'
                     )
                 );
-            } catch (Throwable $e) {
-                Config::getLogger()->error(
-                    message: 'Failed to render payment methods: ' . $e->getMessage()
-                );
-                // @todo Add proper translation via ecom2.
-                echo '<div style="border: 1px solid black !important; padding: 5px !important;">
-                    Failed to render payment methods:  ' .
-                    Data::getEscapedHtml(
-                        content: $e->getMessage()
-                    ) . '</div>';
             }
-        } else {
-            // Echo table element to get Woocommerce to properly render our
-            // settings within the right elements and styling. If you include
-            // PHTML templates within the table, it's possible their HTML could
-            // be altered by Woocommerce.
-            echo '<table class="form-table">';
 
-            // Always default to first "tab" if no section has been selected.
-            WC_Admin_Settings::output_fields(
-                options: $this->get_settings(section: (
-                    empty($current_section) ? 'api_settings' : $current_section
-                ))
+            echo Data::getEscapedHtml(
+                content: PaymentMethods::getOutput(
+                    storeId: StoreId::getData()
+                )
             );
-
-            echo '</table>';
+        } catch (Throwable $e) {
+            echo Data::getEscapedHtml(content:
+                '<div style="border: 1px solid #590804; padding: 5px; color: #fff; background: #8a110a;">' .
+                'Failed to render payment methods. Please review logs for more information.' .
+                '<br />' .
+                '<b>Exception</b>' .
+                '<br />' .
+                $e->getMessage() .
+                '</div>');
         }
     }
 
@@ -186,7 +221,17 @@ class Settings extends WC_Settings_Page
      * consist of fields from only that section. An empty string will return
      * all fields from all sections.
      * @return array
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalValueException
      * @noinspection PhpMissingParentCallCommonInspection
+     * @todo Refactor this WOO-1009
      */
     public function get_settings(string $section = ''): array // phpcs:ignore
     {

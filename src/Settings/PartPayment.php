@@ -24,8 +24,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
@@ -56,56 +54,16 @@ class PartPayment
      * @throws ReflectionException
      * @throws TranslationException
      * @throws ValidationException
-     * @todo Refactor, method is too large. WOO-979. Remove phpcs:ignore below when done.
      */
-    // phpcs:ignore
     public static function getSettings(): array
     {
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
-                'enabled' => [
-                    'id' => Enabled::getName(),
-                    'title' => Translator::translate(
-                        phraseId: 'part-payment-widget-enabled'
-                    ),
-                    'type' => 'checkbox',
-                    'default' => Enabled::getDefault(),
-                    'desc' => 'Enabled',
-                ],
-                'payment_method' => [
-                    'id' => PaymentMethodOption::getName(),
-                    'title' => Translator::translate(
-                        phraseId: 'payment-method'
-                    ),
-                    'type' => 'select',
-                    'default' => PaymentMethodOption::getDefault(),
-                    'options' => self::getPaymentMethods(),
-                    'desc' => Translator::translate(
-                        phraseId: 'part-payment-payment-method'
-                    ),
-                ],
-                'period' => [
-                    'id' => Period::getName(),
-                    'title' => Translator::translate(
-                        phraseId: 'annuity-period'
-                    ),
-                    'type' => 'select',
-                    'default' => Period::getDefault(),
-                    'options' => self::getAnnuityPeriods(),
-                    'desc' => Translator::translate(
-                        phraseId: 'part-payment-annuity-period'
-                    ),
-                ],
-                'limit' => [
-                    'id' => Limit::getName(),
-                    'title' => Translator::translate(phraseId: 'limit'),
-                    'type' => 'text',
-                    'default' => Limit::getDefault(),
-                    'desc' => Translator::translate(
-                        phraseId: 'part-payment-limit'
-                    ),
-                ],
+                'enabled' => self::getEnabledSetting(),
+                'payment_method' => self::getPaymentMethodSetting(),
+                'period' => self::getPeriodSetting(),
+                'limit' => self::getLimitSetting(),
             ],
         ];
     }
@@ -239,74 +197,150 @@ class PartPayment
     }
 
     /**
+     * Fetches the enabled setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getEnabledSetting(): array
+    {
+        return [
+            'id' => Enabled::getName(),
+            'title' => Translator::translate(
+                phraseId: 'part-payment-widget-enabled'
+            ),
+            'type' => 'checkbox',
+            'default' => Enabled::getDefault()
+        ];
+    }
+
+    /**
+     * Fetches the payment_method setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getPaymentMethodSetting(): array
+    {
+        return [
+            'id' => PaymentMethodOption::getName(),
+            'title' => Translator::translate(phraseId: 'payment-method'),
+            'type' => 'select',
+            'default' => PaymentMethodOption::getDefault(),
+            'options' => self::getPaymentMethods(),
+            'desc' => Translator::translate(
+                phraseId: 'part-payment-payment-method'
+            )
+        ];
+    }
+
+    /**
+     * Fetches the period setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getPeriodSetting(): array
+    {
+        return [
+            'id' => Period::getName(),
+            'title' => Translator::translate(phraseId: 'annuity-period'),
+            'type' => 'select',
+            'default' => Period::getDefault(),
+            'options' => self::getAnnuityPeriods(),
+            'desc' => Translator::translate(
+                phraseId: 'part-payment-annuity-period'
+            )
+        ];
+    }
+
+    /**
+     * Fetches the limit setting.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getLimitSetting(): array
+    {
+        return [
+            'id' => Limit::getName(),
+            'title' => Translator::translate(phraseId: 'limit'),
+            'type' => 'text',
+            'default' => Limit::getDefault(),
+            'desc' => Translator::translate(phraseId: 'part-payment-limit')
+        ];
+    }
+
+    /**
      * Fetch available payment method options
      *
      * @return array
-     * @todo Refactor. Method is too complex. WOO-981. Remove phpcs:ignore below when done.
      */
-    // phpcs:ignore
     private static function getPaymentMethods(): array
     {
         $storeId = StoreId::getData();
-
-        if (empty($storeId)) {
-            return [];
-        }
-
-        $options = [];
+        $paymentMethods = [];
+        $return = [];
 
         try {
-            $paymentMethods = Repository::getPaymentMethods(storeId: $storeId);
+            $paymentMethods = $storeId !== '' ?
+                Repository::getPaymentMethods(storeId: $storeId) : [];
         } catch (Throwable $exception) {
             WordPress::setGenericError(exception: $exception);
         }
 
-        if (isset($paymentMethods)) {
-            /** @var PaymentMethod $paymentMethod */
-            foreach ($paymentMethods as $paymentMethod) {
-                if (!$paymentMethod->isPartPayment()) {
-                    continue;
-                }
-
-                $options[$paymentMethod->id] = $paymentMethod->name;
+        foreach ($paymentMethods as $paymentMethod) {
+            if (!$paymentMethod->isPartPayment()) {
+                continue;
             }
+
+            $return[$paymentMethod->id] = $paymentMethod->name;
         }
 
-        return $options;
+        return $return;
     }
 
     /**
      * Fetch annuity period options for configured payment method
      *
      * @return array
-     * @todo Refactor, method is too complex. WOO-981. Remove phpcs:ignore below when done.
      */
-    // phpcs:ignore
     private static function getAnnuityPeriods(): array
     {
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
-
-        if (empty($paymentMethodId) || empty($storeId)) {
-            return [];
-        }
+        $annuityFactors = [];
+        $return = [];
 
         try {
-            $annuityFactors = AnnuityRepository::getAnnuityFactors(
-                storeId: StoreId::getData(),
-                paymentMethodId: $paymentMethodId
-            );
+            if ($paymentMethodId !== '' && $storeId !== '') {
+                $annuityFactors = AnnuityRepository::getAnnuityFactors(
+                    storeId: $storeId,
+                    paymentMethodId: $paymentMethodId
+                )->content;
+            }
         } catch (Throwable $exception) {
             WordPress::setGenericError(exception: $exception);
         }
 
-        $return = [];
-
-        if (isset($annuityFactors)) {
-            /** @var AnnuityInformation $annuityFactor */
-            foreach ($annuityFactors->content as $annuityFactor) {
-                $return[$annuityFactor->durationMonths] = $annuityFactor->paymentPlanName;
-            }
+        foreach ($annuityFactors as $annuityFactor) {
+            $return[$annuityFactor->durationMonths] = $annuityFactor->paymentPlanName;
         }
 
         return $return;

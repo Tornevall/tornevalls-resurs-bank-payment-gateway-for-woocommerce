@@ -45,9 +45,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Throwable;
 use WC_Logger;
 
-use function is_array;
 use function is_dir;
-use function is_string;
 
 /**
  * Advanced settings section.
@@ -93,50 +91,14 @@ class Advanced
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @todo Refactor this method. WOO-872. Remove the PHPCS & PHPMD suppression.
      */
-    // phpcs:ignore
     public static function getLogger(): LoggerInterface
     {
         $result = new NoneLogger();
 
         try {
-            $path = LogDir::getData();
-
-            if ($path === '') {
-                $path = 'wc-logs';
-            }
-
-            // Path-helper for complex instances.
-            if ($path === 'wc-logs') {
-                // If wc-logs are defined, we use the same log directory that WooCommerce sets up to be WC_LOG_PATH.
-                // This is used to simplify the setup for some instances that do not know about their log path.
-                $uploadDir = wp_upload_dir(create_dir: false);
-
-                if (
-                    is_array(value: $uploadDir) &&
-                    isset($uploadDir['basedir']) &&
-                    is_string(value: $uploadDir['basedir']) &&
-                    $uploadDir['basedir'] !== ''
-                ) {
-                    $path = preg_replace(
-                        pattern: '/\/$/',
-                        replacement: '',
-                        subject: $uploadDir['basedir'] . '/wc-logs/'
-                    );
-                }
-            }
-
-            if (
-                is_string(value: $path) &&
-                is_dir(filename: $path)
-            ) {
-                $result = new FileLogger(path: $path);
-            }
+            $result = new FileLogger(path: LogDir::getData());
         } catch (Throwable $e) {
-            if (class_exists(class: WC_Logger::class)) {
-                (new WC_Logger())->critical(
-                    message: 'Resurs Bank: ' . $e->getMessage()
-                );
-            }
+            self::logWcCritical(message: $e->getMessage());
         }
 
         return $result;
@@ -220,7 +182,7 @@ class Advanced
 
         if ($clientId !== '' && $clientSecret !== '') {
             try {
-                array_merge($return, self::getStores());
+                $return = array_merge($return, self::getStores());
             } catch (Throwable $exception) {
                 WordPress::setGenericError(
                     exception: new Exception(
@@ -382,5 +344,17 @@ class Advanced
         }
 
         return $storeIdSetting;
+    }
+
+    /**
+     * Use WC_Logger to log a critical message.
+     */
+    private static function logWcCritical(string $message): void
+    {
+        if (!class_exists(class: WC_Logger::class)) {
+            return;
+        }
+
+        (new WC_Logger())->critical(message: 'Resurs Bank: ' . $message);
     }
 }
