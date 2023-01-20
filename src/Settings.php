@@ -80,7 +80,6 @@ class Settings extends WC_Settings_Page
      *
      * This method is called by WordPress actions registered in our constructor.
      *
-     * @see self::__construct()
      * @throws ConfigException
      * @throws EmptyValueException
      * @throws FilesystemException
@@ -90,6 +89,7 @@ class Settings extends WC_Settings_Page
      * @throws ReflectionException
      * @throws TranslationException
      * @throws ValidationException
+     * @see self::__construct()
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function save(): void
