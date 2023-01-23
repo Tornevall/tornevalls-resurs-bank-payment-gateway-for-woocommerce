@@ -130,6 +130,7 @@ class Route
      * @param int $code
      * @return void
      * @noinspection PhpNoReturnAttributeCanBeAddedInspection
+     * @SuppressWarnings(PHPMD.ExitExpression)
      */
     public static function respondWithExit(
         string $body,
