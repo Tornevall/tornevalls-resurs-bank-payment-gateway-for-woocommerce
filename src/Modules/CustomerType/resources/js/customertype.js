@@ -45,8 +45,7 @@ function rbUpdateCustomerType(setCustomerTypeValue) {
  * @returns {boolean}
  */
 function rbIsCompany() {
-    var billingCompany = jQuery('#billing_company');
-    return billingCompany.length > 0 && billingCompany.val() !== ''
+    return rbHasCompanyField() && jQuery('#billing_company').val() !== ''
 }
 
 /**
