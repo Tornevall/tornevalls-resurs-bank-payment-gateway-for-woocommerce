@@ -42,6 +42,7 @@ class WcSession
             // If WC()->session is not available, we can't use it.
             $return = false;
         }
+
         return $return;
     }
 
@@ -60,7 +61,6 @@ class WcSession
 
     /**
      * Fetch customer type stored in session.
-     * @return CustomerType
      */
     public static function getCustomerType(): CustomerType
     {
