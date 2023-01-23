@@ -29,19 +29,20 @@ class Checkout
     public static function register(): void
     {
         add_filter(
-            'woocommerce_before_checkout_form',
-            static fn () => self::exec()
+            hook_name: 'woocommerce_before_checkout_form',
+            callback: static fn () => self::exec()
         );
 
         add_action(
-            'wp_enqueue_scripts',
-            static function (): void {
+            hook_name: 'wp_enqueue_scripts',
+            callback: static function (): void {
                 wp_enqueue_script(
                     handle: 'rb-get-address',
                     src: Url::getScriptUrl(
                         module: 'GetAddress',
                         file: 'populateForm.js'
-                    )
+                    ),
+                    deps: ['rb-set-customertype']
                 );
 
                 wp_enqueue_style(

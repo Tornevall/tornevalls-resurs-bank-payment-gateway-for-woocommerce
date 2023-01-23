@@ -12,11 +12,11 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
+use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Throwable;
-
 use function is_string;
 use function str_contains;
 use function strlen;
@@ -35,6 +35,11 @@ class Route
      * Route to get address controller.
      */
     public const ROUTE_GET_ADDRESS = 'get-address';
+
+    /**
+     * Route to update current customer type in session.
+     */
+    public const ROUTE_SET_CUSTOMER_TYPE = 'set-customer-type';
 
     /**
      * Route to get part payment controller.
@@ -70,6 +75,10 @@ class Route
                     self::respond(body: GetValidDurations::exec());
                     exit;
 
+                case self::ROUTE_SET_CUSTOMER_TYPE:
+                    self::respond(body: SetCustomerType::exec());
+                    exit;
+
                 default:
                     break;
             }
@@ -94,12 +103,25 @@ class Route
             );
         }
 
+        // Some sites may not add the trailing slash properly, making urls break with arguments
+        // merged into the hostname instead of the uri. This one fixes that problem.
+        $url = self::getUrlWithProperTrailingSlash(url: $url);
         $url .= str_contains(haystack: $url, needle: '?') ? '&' : '?';
 
         return Url::getQueryArg(
             baseUrl: $url,
             arguments: [self::ROUTE_PARAM => $route]
         );
+    }
+
+    /**
+     * Fix trailing slashes for urls that is missing them out.
+     * @param string $url
+     * @return string
+     */
+    private static function getUrlWithProperTrailingSlash(string $url): string
+    {
+        return preg_replace(pattern: '/\/$/', replacement: '', subject: $url) . '/';
     }
 
     /**

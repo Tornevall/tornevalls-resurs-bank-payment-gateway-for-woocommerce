@@ -32,14 +32,17 @@ class WcSession
     /**
      * @param string|null $value Using null to "unset".
      */
-    public static function set(string $key, ?string $value): void
+    public static function set(string $key, ?string $value): bool
     {
         try {
             self::getWcSession();
-            self::$wooCom->session->set($key, $value);
+            self::$wooCom->session->set(key: $key, value: $value);
+            $return = true;
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
+            $return = false;
         }
+        return $return;
     }
 
     public static function get(string $key): string
@@ -47,7 +50,7 @@ class WcSession
         try {
             self::getWcSession();
 
-            $return = (string)self::$wooCom->session->get($key);
+            $return = (string)self::$wooCom->session->get(key: $key);
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
         }
@@ -55,11 +58,15 @@ class WcSession
         return $return ?? '';
     }
 
+    /**
+     * Fetch customer type stored in session.
+     * @return CustomerType
+     */
     public static function getCustomerType(): CustomerType
     {
         return CustomerType::from(
-            self::get(
-                (new Session())->getKey(
+            value: self::get(
+                key: (new Session())->getKey(
                     key: Repository::SESSION_KEY_CUSTOMER_TYPE
                 )
             )
