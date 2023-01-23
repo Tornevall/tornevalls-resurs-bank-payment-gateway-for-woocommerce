@@ -701,13 +701,7 @@ class ResursDefault extends WC_Payment_Gateway
                 );
             }
 
-            // This is our link to the payment at Resurs for which we save the uuid we get at the creation.
-            // At callback level, this is the reference we look for, to re-match the WooCommerce order id.
-            Metadata::setOrderMeta(
-                order: $order,
-                metaDataKey: 'payment_id',
-                metaDataValue: $paymentResponse->id
-            );
+            Metadata::setPaymentId(order: $order, id: $paymentResponse->id);
         } catch (Throwable $createPaymentException) {
             // In case we get an error from any other component than the creation, we need to rewrite this response.
             $return = [

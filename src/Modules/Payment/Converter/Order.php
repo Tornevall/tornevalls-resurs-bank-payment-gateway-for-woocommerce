@@ -22,6 +22,7 @@ use WC_Order;
 use WC_Order_Item_Product;
 
 use function array_merge;
+use function in_array;
 use function is_array;
 
 /**
@@ -30,11 +31,15 @@ use function is_array;
 class Order
 {
     /**
+     * @param $filter | List of items ids to include. Empty = include all.
      * @throws IllegalTypeException
      * @throws Exception
      */
-    public static function getOrderLines(WC_Order $order): OrderLineCollection
-    {
+    public static function getOrderLines(
+        WC_Order $order,
+        array $filter = [],
+        bool $includeShipping = true
+    ): OrderLineCollection {
         $result = [];
         $items = self::getOrderContent(order: $order);
         $collection = new DiscountItemCollection(data: []);
@@ -42,7 +47,7 @@ class Order
         /** @var WC_Order_Item_Product $item */
         foreach ($items as $item) {
             // Do not trust anonymous arrays.
-            if (!($item instanceof WC_Order_Item_Product)) {
+            if (!self::validateItem(item: $item, filter: $filter)) {
                 continue;
             }
 
@@ -66,7 +71,10 @@ class Order
             );
         }
 
-        $result[] = Shipping::getOrderLine(order: $order);
+        // When we filter specific items we do not want to include this.
+        if ($includeShipping) {
+            $result[] = Shipping::getOrderLine(order: $order);
+        }
 
         return new OrderLineCollection(
             data: array_merge($result, $collection->getOrderLines()->toArray())
@@ -79,7 +87,7 @@ class Order
      * @return array<array-key, mixed>
      * @throws IllegalValueException
      */
-    public static function getOrderContent(WC_Order $order): array
+    private static function getOrderContent(WC_Order $order): array
     {
         $result = $order->get_items();
 
@@ -90,5 +98,23 @@ class Order
         }
 
         return $result;
+    }
+
+    /**
+     * Check if item can be part of outgoing API payload.
+     */
+    private static function validateItem(mixed $item, array $filter): bool
+    {
+        return (
+            $item instanceof WC_Order_Item_Product &&
+            (
+                empty($filter) ||
+                in_array(
+                    needle: (int) $item->get_id(),
+                    haystack: $filter,
+                    strict: true
+                )
+            )
+        );
     }
 }

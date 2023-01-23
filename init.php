@@ -22,9 +22,12 @@ use ResursBank\Module\Data;
 use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Route;
+
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
     value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
@@ -59,4 +62,8 @@ if (!WooCommerce::getActiveState()) {
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "WordPress mode" with if (function_exists('add_action')) {}.
-add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
+add_action(hook_name: 'plugins_loaded', callback: static function(): void {
+    ResursBank\Service\WordPress::initializeWooCommerce();
+    Order::init();
+    MessageBag::init();
+});

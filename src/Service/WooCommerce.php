@@ -15,6 +15,7 @@ use ResursBank\Module\Data;
 use ResursBank\Module\PluginHooks;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
@@ -120,8 +121,8 @@ class WooCommerce
             } catch (Throwable $e) {
                 // Catch errors if something goes wrong during gateway fetching.
                 // If errors occurs in wp-admin, an error note will show up, instead of crashing the entire site.
-                WordPress::setGenericError($e);
-                Config::getLogger()->error($e);
+                MessageBag::addError(msg: 'Failed to get list of gatways.');
+                Config::getLogger()->error(message: $e);
             }
         }
 
@@ -167,7 +168,7 @@ class WooCommerce
             // If we run the above request live, when the APIs are down, we want to catch the exception silently
             // or the site will break. If we are located in admin, we also want to visualize the exception as
             // a message not a crash.
-            WordPress::setGenericError($e);
+            MessageBag::addError(msg: 'Failed to apply payment gateways.');
             Config::getLogger()->error(message: $e);
         }
 

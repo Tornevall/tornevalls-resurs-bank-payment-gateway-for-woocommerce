@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Api;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\GrantType;
@@ -20,6 +21,7 @@ use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Environment;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Util\Language;
 use Throwable;
@@ -33,6 +35,8 @@ class Connection
 {
     /**
      * Setup ECom API connection (creates a singleton to handle API calls).
+     *
+     * @throws ConfigException
      */
     public static function setup(): void
     {
@@ -49,10 +53,8 @@ class Connection
                 language: Language::getSiteLanguage()
             );
         } catch (Throwable $e) {
-            if (is_admin()) {
-                // Display friendly error message inside admin panel.
-                WordPress::setGenericError(exception: $e);
-            }
+            MessageBag::addError(msg: 'Failed to initiate ECom library.');
+            Config::getLogger()->error(message: $e);
         }
     }
 
