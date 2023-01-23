@@ -66,16 +66,16 @@ class Route
         try {
             switch ($route) {
                 case self::ROUTE_GET_ADDRESS:
-                    self::respond(body: GetAddress::exec());
-                    exit;
+                    self::respondWithExit(body: GetAddress::exec());
+                    break;
 
                 case self::ROUTE_PART_PAYMENT:
-                    self::respond(body: PartPayment::exec());
-                    exit;
+                    self::respondWithExit(body: PartPayment::exec());
+                    break;
 
                 case self::ROUTE_PART_PAYMENT_ADMIN:
-                    self::respond(body: GetValidDurations::exec());
-                    exit;
+                    self::respondWithExit(body: GetValidDurations::exec());
+                    break;
 
                 case self::ROUTE_SET_CUSTOMER_TYPE:
                     self::respond(body: SetCustomerType::exec());
@@ -128,6 +128,29 @@ class Route
         http_response_code(response_code: $code);
 
         echo $body;
+    }
+
+    /**
+     * Method that exits after response instead of proceeding with regular WordPress executions.
+     *
+     * In some cases, during API responding, WordPress could potentially execute other data that renders
+     * more content after the final json responses, and breaks the requests. This happens due to how
+     * WP is handling unknown requests and depends on how the site is configured with permalinks and rewrite-urls.
+     * For example, when WP handles 404 errors on unknown http-requests, we have to stop our own execution
+     * like this.
+     *
+     * @param string $body
+     * @param int $code
+     * @return void
+     * @noinspection PhpNoReturnAttributeCanBeAddedInspection
+     * @SuppressWarnings(PHPMD.ExitExpression)
+     */
+    public static function respondWithExit(
+        string $body,
+        int $code = 200
+    ): void {
+        self::respond(body: $body, code: $code);
+        exit;
     }
 
     public static function respondWithError(
