@@ -879,9 +879,7 @@ class ResursDefault extends WC_Payment_Gateway
      */
     private function isLoggedInUser(WC_Order $order): bool
     {
-        $orderUserId = (int)$order->get_user_id();
-
-        return $orderUserId > 0;
+        return ((int)$order->get_user_id() > 0);
     }
 
     /**
