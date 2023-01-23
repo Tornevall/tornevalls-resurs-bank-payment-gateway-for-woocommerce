@@ -21,13 +21,10 @@ use Throwable;
  */
 class SetCustomerType
 {
-    /**
-     * @return string
-     */
     public static function exec(): string
     {
         $response = [
-            'update' => false
+            'update' => false,
         ];
         $customerType = Url::getHttpGet(key: 'customerType');
 
@@ -35,6 +32,7 @@ class SetCustomerType
             $ecomSession = new Session();
             WC()->initialize_session();
             $customerType = CustomerType::from(value: $customerType);
+
             if ($customerType instanceof CustomerType) {
                 // Report back if successful or not.
                 $response['update'] = WcSession::set(

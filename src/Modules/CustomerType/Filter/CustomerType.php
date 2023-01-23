@@ -11,8 +11,6 @@ namespace Resursbank\Woocommerce\Modules\CustomerType\Filter;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -34,7 +32,6 @@ class CustomerType
 
     /**
      * Prepare the script used to handle customer type on getAddress updates.
-     * @return void
      */
     private static function enqueueScript(): void
     {
@@ -45,14 +42,14 @@ class CustomerType
                 file: 'customertype.js'
             ),
             deps: [
-                'jquery'
+                'jquery',
             ]
         );
     }
 
     /**
      * Localize data required for customerType-pushing to work.
-     * @return void
+     *
      * @throws ConfigException
      */
     private static function enqueueAjaxLocalization(): void
@@ -65,7 +62,7 @@ class CustomerType
                     'currentCustomerType' => WcSession::getCustomerType(),
                     'apiUrl' => Route::getUrl(
                         route: Route::ROUTE_SET_CUSTOMER_TYPE
-                    )
+                    ),
                 ]
             );
         } catch (Throwable $e) {
