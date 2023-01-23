@@ -126,11 +126,8 @@ class Route
      * For example, when WP handles 404 errors on unknown http-requests, we have to stop our own execution
      * like this.
      *
-     * @param string $body
-     * @param int $code
-     * @return void
-     * @noinspection PhpNoReturnAttributeCanBeAddedInspection
      * @SuppressWarnings(PHPMD.ExitExpression)
+     * @noinspection PhpNoReturnAttributeCanBeAddedInspection
      */
     public static function respondWithExit(
         string $body,
