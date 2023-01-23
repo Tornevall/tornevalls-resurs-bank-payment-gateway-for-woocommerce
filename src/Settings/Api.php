@@ -16,15 +16,12 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\Environment;
-use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 
 /**
  * API settings section.
@@ -61,11 +58,6 @@ class Api
      */
     public static function getSettings(): array
     {
-        try {
-            $callbackUrlSetup = self::getCallbackUrlSetup();
-        } catch (Exception) {
-            $callbackUrlSetup = [];
-        }
         return [
             self::SECTION_ID => [
                 'title' => self::getTitle(),
@@ -73,7 +65,6 @@ class Api
                 'environment' => self::getEnvironment(),
                 'client_id' => self::getClientId(),
                 'client_secret' => self::getClientSecret(),
-                'callback_url' => $callbackUrlSetup,
             ],
         ];
     }
@@ -156,19 +147,6 @@ class Api
             'title' => Translator::translate(phraseId: 'client-secret'),
             'type' => 'password',
             'default' => ClientSecret::getDefault(),
-        ];
-    }
-
-    /**
-     * @throws IllegalValueException
-     */
-    private static function getCallbackUrlSetup(): array
-    {
-        return [
-            'id' => 'callback_url',
-            'title' => (new ResursDefault())->getCallbackUrl(callbackType: CallbackType::AUTHORIZATION),
-            'type' => 'title',
-            'default' => (new ResursDefault())->getCallbackUrl(callbackType: CallbackType::AUTHORIZATION)
         ];
     }
 }
