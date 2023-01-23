@@ -134,7 +134,7 @@ class Route
         int $code = 200
     ): void {
         self::respond(body: $body, code: $code);
-        //exit;
+        exit;
     }
 
     public static function respondWithError(
