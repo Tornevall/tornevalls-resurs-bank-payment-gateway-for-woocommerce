@@ -9,14 +9,13 @@ namespace ResursBank\Module;
 use Automattic\WooCommerce\Admin\Overrides\Order;
 use Exception;
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Lib\Log\LogLevel;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecommerce\Types\CheckoutType;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
-use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use Throwable;
 use TorneLIB\IO\Data\Arrays;
@@ -317,7 +316,7 @@ class PluginHooks
 
             /** @var WC_Order $order */
             //$order = $findEcom['order'];
-            $connection = (new ResursBankAPI())->getConnection();
+            $connection = Connection::setup();
             if (!$canIgnoreFrozen && $connection->isFrozen($findEcom['ecom'])) {
                 // WooCommerce tend to set the order status as completed even if we throw an exception.
                 // To properly make sure this is not happening, we'll put a new status queue up before the throw.
@@ -397,7 +396,7 @@ class PluginHooks
         $afterShopResponseString = '';
 
         $wpHelper = new wpHelper();
-        $resursConnection = (new ResursBankAPI())->getConnection();
+        $resursConnection = Connection::setup();
 
         // Userdata that should follow with the afterShopFlow when changing order status on Resurs side,
         // for backtracking actions.
@@ -705,7 +704,7 @@ class PluginHooks
             $refundObject = new WC_Order_Refund($refundId);
             $resursOrder = Data::getResursReference($order);
 
-            $resursConnection = (new ResursBankAPI())->getConnection();
+            $resursConnection = Connection::setup();
             $resursConnection->setPreferredPaymentFlowService(CheckoutType::SIMPLIFIED_FLOW);
 
             // TODO: Store this information as metadata instead so each order gets handled
@@ -871,7 +870,7 @@ class PluginHooks
 
         if (isset($resursOrder['order'], $resursOrder['ecom']->id) && $resursOrder['order'] instanceof WC_Order) {
             $properOrder = $resursOrder['order'];
-            $resursConnection = (new ResursBankAPI())->getConnection();
+            $resursConnection = Connection::setup();
             $statusId = $resursConnection->getOrderStatusByPayment($resursOrder['ecom']->id);
             $currentStatus = $properOrder->get_status();
 

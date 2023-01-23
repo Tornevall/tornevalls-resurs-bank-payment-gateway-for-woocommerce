@@ -7,13 +7,10 @@
 namespace ResursBank\Module;
 
 use Exception;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Module\Customer\Enum\CustomerType;
-use Resursbank\Ecommerce\Types\Callback;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use ResursBank\Service\WordPress;
-use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Util\Url;
-use function in_array;
 
 /**
  * Backend API Handler.
@@ -28,7 +25,7 @@ class PluginApi
     public static function execApi()
     {
         // Making sure ecom2 is preconfigured during ajax-calls too.
-        new ResursBankAPI();
+        Connection::setup();
         // Logging $_REQUEST may break the WooCommerce status log view if not decoded first.
         // For some reason, the logs can't handle utf8-strings.
 

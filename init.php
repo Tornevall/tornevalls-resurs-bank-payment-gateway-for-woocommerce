@@ -21,6 +21,7 @@ use Resursbank\Ecom\Config;
 use ResursBank\Module\Data;
 use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Route;
@@ -43,15 +44,7 @@ define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
 define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
-try {
-    Config::setup(
-        logger: Advanced::getLogger(),
-        cache: Advanced::getCache(),
-        jwtAuth: Api::getJwt(),
-        logLevel: Advanced::getLogLevel()
-    );
-} catch (Exception $e) {
-}
+Connection::setup();
 
 // Translation domain is used for all phrases that is not relying on ecom2.
 load_plugin_textdomain(

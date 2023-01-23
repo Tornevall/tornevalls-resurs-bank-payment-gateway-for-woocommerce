@@ -44,7 +44,7 @@ class LogLevel extends IntOption
     }
 
     /**
-     * @return int
+     * Return default value.
      */
     public static function getDefault(): int
     {
