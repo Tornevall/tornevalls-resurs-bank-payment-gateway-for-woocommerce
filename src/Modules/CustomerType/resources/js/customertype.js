@@ -1,25 +1,24 @@
+/**
+ * Copyright © Resurs Bank AB. All rights reserved.
+ * See LICENSE for license details.
+ */
+
 jQuery(document).ready(function ($) {
     if (rbHasCompanyField()) {
-        rbBindGetAddressButtons();
+        rbUpdateCustomerType();
+        // Billing company should override the radios.
+        jQuery('#billing_company').on(
+            'blur',
+            function () {
+                rbUpdateCustomerType();
+            }
+        );
     }
 });
 
 /**
- * Bind getAddress button to WooCommerce checkout updates.
- */
-function rbBindGetAddressButtons() {
-    rbUpdateCustomerType();
-    // Billing company should override the radios.
-    jQuery('#billing_company').on(
-        'blur',
-        function () {
-            rbUpdateCustomerType();
-        }
-    );
-}
-
-/**
  * Update customer type in session backend.
+ *
  * @param setCustomerTypeValue
  */
 function rbUpdateCustomerType(setCustomerTypeValue) {
@@ -42,11 +41,12 @@ function rbUpdateCustomerType(setCustomerTypeValue) {
 
 /**
  * Check if company is filled in.
+ *
  * @returns {boolean}
  */
 function rbIsCompany() {
-    let billingCompany = jQuery('#billing_company');
-    return billingCompany.val() !== ''
+    var billingCompany = jQuery('#billing_company');
+    return billingCompany.length > 0 && billingCompany.val() !== ''
 }
 
 /**
