@@ -23,9 +23,8 @@ use Throwable;
 class Checkout
 {
     /**
-     * @todo Refactor, method is too big. WOO-895. Remove phpcs:ignore when done.
+     * Register
      */
-    // phpcs:ignore
     public static function register(): void
     {
         add_filter(
