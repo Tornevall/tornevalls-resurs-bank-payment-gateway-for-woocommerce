@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
+use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
@@ -37,6 +38,11 @@ class Route
     public const ROUTE_GET_ADDRESS = 'get-address';
 
     /**
+     * Route to update current customer type in session.
+     */
+    public const ROUTE_SET_CUSTOMER_TYPE = 'set-customer-type';
+
+    /**
      * Route to get part payment controller.
      */
     public const ROUTE_PART_PAYMENT = 'part-payment';
@@ -60,15 +66,19 @@ class Route
         try {
             switch ($route) {
                 case self::ROUTE_GET_ADDRESS:
-                    self::respond(body: GetAddress::exec());
-                    exit;
+                    self::respondWithExit(body: GetAddress::exec());
+                    break;
 
                 case self::ROUTE_PART_PAYMENT:
-                    self::respond(body: PartPayment::exec());
-                    exit;
+                    self::respondWithExit(body: PartPayment::exec());
+                    break;
 
                 case self::ROUTE_PART_PAYMENT_ADMIN:
-                    self::respond(body: GetValidDurations::exec());
+                    self::respondWithExit(body: GetValidDurations::exec());
+                    break;
+
+                case self::ROUTE_SET_CUSTOMER_TYPE:
+                    self::respondWithExit(body: SetCustomerType::exec());
                     exit;
 
                 default:
@@ -95,6 +105,9 @@ class Route
             );
         }
 
+        // Some sites may not add the trailing slash properly, making urls break with arguments
+        // merged into the hostname instead of the uri. This one fixes that problem.
+        $url = self::getUrlWithProperTrailingSlash(url: $url);
         $url .= str_contains(haystack: $url, needle: '?') ? '&' : '?';
 
         return Url::getQueryArg(
@@ -117,6 +130,26 @@ class Route
         echo $body;
     }
 
+    /**
+     * Method that exits after response instead of proceeding with regular WordPress executions.
+     *
+     * In some cases, during API responding, WordPress could potentially execute other data that renders
+     * more content after the final json responses, and breaks the requests. This happens due to how
+     * WP is handling unknown requests and depends on how the site is configured with permalinks and rewrite-urls.
+     * For example, when WP handles 404 errors on unknown http-requests, we have to stop our own execution
+     * like this.
+     *
+     * @SuppressWarnings(PHPMD.ExitExpression)
+     * @noinspection PhpNoReturnAttributeCanBeAddedInspection
+     */
+    public static function respondWithExit(
+        string $body,
+        int $code = 200
+    ): void {
+        self::respond(body: $body, code: $code);
+        exit;
+    }
+
     public static function respondWithError(
         Throwable $exception
     ): void {
@@ -136,5 +169,17 @@ class Route
                 )
             )
         );
+    }
+
+    /**
+     * Fix trailing slashes for urls that is missing them out.
+     */
+    private static function getUrlWithProperTrailingSlash(string $url): string
+    {
+        return preg_replace(
+            pattern: '/\/$/',
+            replacement: '',
+            subject: $url
+        ) . '/';
     }
 }
