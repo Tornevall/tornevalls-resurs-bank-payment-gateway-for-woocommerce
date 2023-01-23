@@ -59,7 +59,7 @@ class Option
     }
 
     /**
-     * Gets the option's default value.
+     * Gets the options default value.
      */
     public static function getDefault(): mixed
     {

@@ -7,7 +7,7 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use ResursBank\Module\Data;
-use ResursBank\Module\ResursBankAPI;
+use Resursbank\WooCommerce\Modules\Api\Connection;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
@@ -48,7 +48,7 @@ class WordPress
         Route::exec();
 
         // Make sure Ecom2 is loaded as soon as possible.
-        new ResursBankAPI();
+        Connection::setup();
 
         // Initialize adaptions.
         new ResursPlugin();
