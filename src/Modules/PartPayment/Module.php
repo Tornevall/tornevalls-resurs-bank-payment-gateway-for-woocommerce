@@ -104,77 +104,27 @@ class Module
     }
 
     /**
-     * Output widget HTML if on single product page
+     * Output widget HTML if on single product page.
      *
      * @throws ConfigException
-     * @todo Remove ignore below after refactor (WOO-978)
      */
-    // phpcs:ignore
     public static function getWidget(): void
     {
-        if (!is_product() || !Enabled::isEnabled()) {
-            return;
-        }
-
-        try {
-            $widget = new self();
-
-            if ($widget->visible()) {
-                $filtered = apply_filters(
-                    hook_name: 'resursbank_partpayment_widget_display',
-                    value: Data::getEscapedHtml($widget->instance->content)
-                );
-
-                if (!is_string(value: $filtered)) {
-                    throw new IllegalTypeException(
-                        message: 'Filtered widget is no longer a string'
-                    );
-                }
-
-                echo Data::getEscapedHtml($filtered);
-            }
-        } catch (Throwable $exception) {
-            Config::getLogger()->error(message: $exception);
-        }
+        self::displayWidgetProperty(propertyName: 'content');
     }
 
     /**
-     * Output widget CSS if on single product page
+     * Output widget CSS if on single product page.
      *
      * @throws ConfigException
-     * @todo Remove ignore below after refactor (WOO-978)
      */
-    // phpcs:ignore
     public static function setCss(): void
     {
-        if (!is_product() || !Enabled::isEnabled()) {
-            return;
-        }
-
-        try {
-            $widget = new self();
-
-            if ($widget->visible()) {
-                $filtered = apply_filters(
-                    hook_name: 'resursbank_partpayment_css_display',
-                    value: '<style id="rb-pp-styles">' . $widget->instance->css . '</style>'
-                );
-
-                if (!is_string(value: $filtered)) {
-                    throw new IllegalTypeException(
-                        message: 'Filtered CSS is no longer a string'
-                    );
-                }
-
-                echo Data::getEscapedHtml($filtered);
-            }
-        } catch (Throwable $exception) {
-            Config::getLogger()->error(message: $exception);
-        }
+        self::displayWidgetProperty(propertyName: 'css');
     }
 
     /**
-     * Set Js if on single product page
+     * Set Js if on single product page.
      *
      * @throws ConfigException
      */
@@ -210,10 +160,73 @@ class Module
     }
 
     /**
-     * Indicates whether widget should be visible or not.
-     * Suppressed warning, as this is used from setJs.
+     * Output widget content.
      *
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
+     * @throws ConfigException
+     */
+    private static function displayWidgetProperty(string $propertyName): void
+    {
+        if (!is_product() || !Enabled::isEnabled()) {
+            return;
+        }
+
+        try {
+            $widget = new self();
+
+            if ($widget->visible()) {
+                $filtered = self::applyFiltersToOutput(
+                    propertyName: $propertyName,
+                    widget: $widget
+                );
+                echo Data::getEscapedHtml(content: $filtered);
+            }
+        } catch (Throwable $exception) {
+            Config::getLogger()->error(message: $exception);
+        }
+    }
+
+    /**
+     * Apply filters to output.
+     *
+     * @throws IllegalTypeException
+     */
+    private static function applyFiltersToOutput(string $propertyName, self $widget): string
+    {
+        $filtered = apply_filters(
+            hook_name: 'resursbank_partpayment_' . $propertyName . '_display',
+            value: self::getOutputValue(
+                propertyName: $propertyName,
+                widget: $widget
+            )
+        );
+
+        if (!is_string(value: $filtered)) {
+            throw new IllegalTypeException(
+                message: 'Filtered ' . $propertyName . ' is no longer a string'
+            );
+        }
+
+        return $filtered;
+    }
+
+    /**
+     * Get output value.
+     */
+    private static function getOutputValue(string $propertyName, self $widget): string
+    {
+        if ($propertyName === 'content') {
+            return Data::getEscapedHtml($widget->instance->content);
+        }
+
+        if ($propertyName === 'css') {
+            return '<style id="rb-pp-styles">' . $widget->instance->css . '</style>';
+        }
+
+        return '';
+    }
+
+    /**
+     * Indicates whether widget should be visible or not.
      */
     private function visible(): bool
     {
