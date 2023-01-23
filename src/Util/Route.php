@@ -78,7 +78,7 @@ class Route
                     break;
 
                 case self::ROUTE_SET_CUSTOMER_TYPE:
-                    self::respond(body: SetCustomerType::exec());
+                    self::respondWithExit(body: SetCustomerType::exec());
                     exit;
 
                 default:
