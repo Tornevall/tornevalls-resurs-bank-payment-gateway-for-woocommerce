@@ -790,7 +790,7 @@ class ResursDefault extends WC_Payment_Gateway
         // @todo Defaults like manual inspection, frozen payments, etc should be changed to configurable options
         // @todo through the admin panel.
         return new Options(
-            initiatedOnCustomerDevice: true,
+            initiatedOnCustomersDevice: true,
             handleManualInspection: false,
             handleFrozenPayments: true,
             redirectionUrls: new RedirectionUrls(
@@ -811,14 +811,12 @@ class ResursDefault extends WC_Payment_Gateway
                 authorization: new Callback(
                     url: $this->getCallbackUrl(
                         callbackType: CallbackType::AUTHORIZATION
-                    ),
-                    description: 'Authorization callback'
+                    )
                 ),
                 management: new Callback(
                     url: $this->getCallbackUrl(
                         callbackType: CallbackType::MANAGEMENT
-                    ),
-                    description: 'Management callback'
+                    )
                 )
             ),
             timeToLiveInMinutes: 120
