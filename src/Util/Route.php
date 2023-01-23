@@ -17,6 +17,7 @@ use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Throwable;
+
 use function is_string;
 use function str_contains;
 use function strlen;
@@ -116,16 +117,6 @@ class Route
     }
 
     /**
-     * Fix trailing slashes for urls that is missing them out.
-     * @param string $url
-     * @return string
-     */
-    private static function getUrlWithProperTrailingSlash(string $url): string
-    {
-        return preg_replace(pattern: '/\/$/', replacement: '', subject: $url) . '/';
-    }
-
-    /**
      * Echo JSON response.
      */
     public static function respond(
@@ -158,5 +149,17 @@ class Route
                 )
             )
         );
+    }
+
+    /**
+     * Fix trailing slashes for urls that is missing them out.
+     */
+    private static function getUrlWithProperTrailingSlash(string $url): string
+    {
+        return preg_replace(
+            pattern: '/\/$/',
+            replacement: '',
+            subject: $url
+        ) . '/';
     }
 }
