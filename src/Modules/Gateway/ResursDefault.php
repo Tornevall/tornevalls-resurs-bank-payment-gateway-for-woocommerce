@@ -674,7 +674,11 @@ class ResursDefault extends WC_Payment_Gateway
                 orderLines: Order::getOrderLines(order: $order),
                 orderReference: (string)$order->get_id(),
                 customer: $this->getCustomer(),
-                metadata: $this->isLoggedInUser(order: $order) ? $this->getLoggedInCustomerIdMeta(order: $order) : null,
+                metadata: $this->isLoggedInUser(
+                    order: $order
+                ) ? $this->getLoggedInCustomerIdMeta(
+                    order: $order
+                ) : null,
                 options: $this->getOptions(order: $order)
             );
             $return = $this->getReturnResponse(
@@ -873,13 +877,9 @@ class ResursDefault extends WC_Payment_Gateway
         return $return;
     }
 
-    /**
-     * @param WC_Order $order
-     * @return bool
-     */
     private function isLoggedInUser(WC_Order $order): bool
     {
-        return ((int)$order->get_user_id() > 0);
+        return (int)$order->get_user_id() > 0;
     }
 
     /**
