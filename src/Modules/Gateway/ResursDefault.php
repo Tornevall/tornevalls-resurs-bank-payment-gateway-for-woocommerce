@@ -877,6 +877,9 @@ class ResursDefault extends WC_Payment_Gateway
         return $return;
     }
 
+    /**
+     * Check if user is logged in during order, or not.
+     */
     private function isLoggedInUser(WC_Order $order): bool
     {
         return (int)$order->get_user_id() > 0;
