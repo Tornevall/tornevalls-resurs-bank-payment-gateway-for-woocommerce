@@ -118,11 +118,13 @@ class Route
     }
 
     /**
-     * Method that exists after response instead of proceeding with regular WordPress executions.
-     * In some cases, during an API response, WordPress is potentially executing other data that renders
-     * more content after the final json responses, and breaks the requests. This is most likely depending
-     * on how permalinks and rewrite-urls are configured, and how WP usually handles unknown http-requests
-     * that in the end handles for example 404 pages.
+     * Method that exits after response instead of proceeding with regular WordPress executions.
+     *
+     * In some cases, during API responding, WordPress could potentially execute other data that renders
+     * more content after the final json responses, and breaks the requests. This happens due to how
+     * WP is handling unknown requests and depends on how the site is configured with permalinks and rewrite-urls.
+     * For example, when WP handles 404 errors on unknown http-requests, we have to stop our own execution
+     * like this.
      *
      * @param string $body
      * @param int $code
