@@ -15,6 +15,7 @@ use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
+
 use function function_exists;
 
 /**
@@ -24,7 +25,6 @@ class SetCustomerType
 {
     /**
      * Handle session storing of customer type when checkout is updated.
-     * @return string
      */
     public static function exec(): string
     {
