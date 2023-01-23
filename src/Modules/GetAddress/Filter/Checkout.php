@@ -23,7 +23,7 @@ use Throwable;
 class Checkout
 {
     /**
-     * Register
+     * Register filter subscribers
      */
     public static function register(): void
     {
