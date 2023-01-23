@@ -9,6 +9,15 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\StoreId;
@@ -71,6 +80,15 @@ class Settings extends WC_Settings_Page
      *
      * This method is called by WordPress actions registered in our constructor.
      *
+     * @throws ConfigException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
      * @see self::__construct()
      * @noinspection PhpMissingParentCallCommonInspection
      */
@@ -87,6 +105,12 @@ class Settings extends WC_Settings_Page
      * Method is required by Woocommerce to render tab sections.
      *
      * @return array - Parent returns mixed but documents array.
+     * @throws ConfigException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws FilesystemException
+     * @throws TranslationException
+     * @throws IllegalTypeException
      * @see parent::output_sections()
      * @phpcsSuppress
      * @noinspection PhpMissingParentCallCommonInspection
@@ -94,7 +118,7 @@ class Settings extends WC_Settings_Page
     public function get_sections(): array // phpcs:ignore
     {
         return [
-            Api::SECTION_ID => Api::SECTION_TITLE,
+            Api::SECTION_ID => Api::getTitle(),
             PaymentMethods::SECTION_ID => PaymentMethods::SECTION_TITLE,
             Advanced::SECTION_ID => Advanced::SECTION_TITLE,
             PartPayment::SECTION_ID => PartPayment::SECTION_TITLE,
@@ -104,6 +128,15 @@ class Settings extends WC_Settings_Page
     /**
      * Outputs the HTML for the current tab section.
      *
+     * @throws ConfigException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function output(): void
@@ -118,6 +151,16 @@ class Settings extends WC_Settings_Page
 
     /**
      * Render content of any setting tab for our config page.
+     *
+     * @throws ConfigException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
      */
     public function renderSettingsPage(string $section): void
     {
@@ -178,6 +221,15 @@ class Settings extends WC_Settings_Page
      * consist of fields from only that section. An empty string will return
      * all fields from all sections.
      * @return array
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalValueException
      * @noinspection PhpMissingParentCallCommonInspection
      * @todo Refactor this WOO-1009
      */

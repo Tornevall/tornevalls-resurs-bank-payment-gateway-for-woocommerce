@@ -21,7 +21,7 @@ class IntOption extends Option
     }
 
     /**
-     * @return int
+     * Return default value.
      */
     public static function getDefault(): int
     {

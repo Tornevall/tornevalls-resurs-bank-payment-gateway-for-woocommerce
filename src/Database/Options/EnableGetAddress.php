@@ -25,7 +25,7 @@ class EnableGetAddress extends StringOption
     }
 
     /**
-     * @return bool
+     * Check if enabled.
      */
     public static function isEnabled(): bool
     {
