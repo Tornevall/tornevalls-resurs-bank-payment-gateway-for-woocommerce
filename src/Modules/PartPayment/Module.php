@@ -125,8 +125,10 @@ class Module
 
     /**
      * Set Js if on single product page.
+     * Used from filters.
      *
      * @throws ConfigException
+     * @noinspection PhpUnused
      */
     public static function setJs(): void
     {
@@ -227,6 +229,9 @@ class Module
 
     /**
      * Indicates whether widget should be visible or not.
+     *
+     * @noinspection PhpUnused
+     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
     private function visible(): bool
     {
