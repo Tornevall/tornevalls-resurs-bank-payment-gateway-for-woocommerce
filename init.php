@@ -18,13 +18,9 @@
 declare(strict_types=1);
 
 use Resursbank\Ecom\Config;
-use ResursBank\Module\Data;
-use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
-use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Advanced;
-use Resursbank\Woocommerce\Settings\Api;
-use Resursbank\Woocommerce\Util\Route;
+
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
     value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
@@ -44,7 +40,17 @@ define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
 define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
-Connection::setup();
+try {
+    // Do NOT move/remove this initialization!! This is the primary highly required initialization
+    // of ecom (early-instantiation) that makes ecom available before the plugin is fully configured.
+    // If we do not initialize the instance like this, the whole site will bail out, when credentials
+    // for example are unset.
+    Config::setup(
+        logger: Advanced::getLogger(),
+        cache: Advanced::getCache(),
+    );
+} catch (Throwable) {
+}
 
 // Translation domain is used for all phrases that is not relying on ecom2.
 load_plugin_textdomain(

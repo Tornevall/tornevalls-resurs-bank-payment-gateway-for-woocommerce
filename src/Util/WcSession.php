@@ -64,12 +64,15 @@ class WcSession
      */
     public static function getCustomerType(): CustomerType
     {
-        return CustomerType::from(
-            value: self::get(
-                key: (new Session())->getKey(
-                    key: Repository::SESSION_KEY_CUSTOMER_TYPE
-                )
+        // Use default if not set in session or errors like this will occur when session is not yet configured:
+        // ERROR: "" is not a valid backing value for enum.
+        $customerTypeValue = self::get(
+            key: (new Session())->getKey(
+                key: Repository::SESSION_KEY_CUSTOMER_TYPE
             )
+        );
+        return CustomerType::from(
+            value: $customerTypeValue !== '' ? $customerTypeValue : 'NATURAL'
         );
     }
 

@@ -57,23 +57,33 @@ class Connection
     }
 
     /**
+     * Ensure we have available credentials.
+     *
+     * @return bool
+     */
+    public static function hasCredentials(): bool
+    {
+        $clientId = ClientId::getData();
+        $clientSecret = ClientSecret::getData();
+
+        return ($clientId !== '' && $clientSecret !== '');
+    }
+
+    /**
      * @throws MapiCredentialsException
      * @throws EmptyValueException
      */
     public static function getJwt(): ?Jwt
     {
-        $clientId = ClientId::getData();
-        $clientSecret = ClientSecret::getData();
-
-        if ($clientId === '' || $clientSecret === '') {
+        if (!self::hasCredentials()) {
             throw new MapiCredentialsException(
                 message: 'Credentials are not set.'
             );
         }
 
         return new Jwt(
-            clientId: $clientId,
-            clientSecret: $clientSecret,
+            clientId: ClientId::getData(),
+            clientSecret: ClientSecret::getData(),
             scope: Environment::getData() === EnvironmentEnum::PROD->value ?
                 Scope::MERCHANT_API :
                 Scope::MOCK_MERCHANT_API,

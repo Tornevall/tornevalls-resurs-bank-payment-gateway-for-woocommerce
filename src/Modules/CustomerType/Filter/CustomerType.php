@@ -11,6 +11,8 @@ namespace Resursbank\Woocommerce\Modules\CustomerType\Filter;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -26,8 +28,11 @@ class CustomerType
      */
     public static function setup(): void
     {
-        self::enqueueScript();
-        self::enqueueAjaxLocalization();
+        // Customer type scripts is only necessary outside admin, and if credentials are present.
+        if (Connection::hasCredentials() && !Admin::isAdmin()) {
+            self::enqueueScript();
+            self::enqueueAjaxLocalization();
+        }
     }
 
     /**
