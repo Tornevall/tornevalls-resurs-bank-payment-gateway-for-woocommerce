@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ConfigException;
