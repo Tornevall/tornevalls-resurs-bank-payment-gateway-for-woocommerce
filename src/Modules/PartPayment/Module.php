@@ -229,6 +229,7 @@ class Module
 
     /**
      * Indicates whether widget should be visible or not.
+     *
      * @noinspection PhpUnused
      */
     private function visible(): bool
