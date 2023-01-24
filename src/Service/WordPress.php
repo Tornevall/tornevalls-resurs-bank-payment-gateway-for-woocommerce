@@ -230,8 +230,7 @@ class WordPress
         // on the fly here, making sure that Resurs meta boxes are only active in the order view.
         if (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
             try {
-                Metadata::isValidResursPayment(order: new WC_Order($post->ID));
-                $validResursPayment = true;
+                $validResursPayment = Metadata::isValidResursPayment(order: new WC_Order(order: $post->ID));
             } catch (Throwable) {
                 $validResursPayment = false;
             }
