@@ -7,9 +7,9 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use ResursBank\Module\Data;
-use Resursbank\WooCommerce\Modules\Api\Connection;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
@@ -39,7 +39,7 @@ class WordPress
     public static function initializeWooCommerce()
     {
         // Do not actively work where WooCommerce isn't live.
-        if (!class_exists('WC_Payment_Gateway')) {
+        if (!class_exists(class: 'WC_Payment_Gateway')) {
             return;
         }
 

@@ -11,6 +11,8 @@ namespace Resursbank\Woocommerce\Modules\CustomerType\Filter;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -22,10 +24,15 @@ use Throwable;
 class CustomerType
 {
     /**
-     * @throws ConfigException
+     * @return void
      */
     public static function setup(): void
     {
+        // Customer type scripts is only necessary outside admin, and if credentials are present.
+        if (Admin::isAdmin()) {
+            return;
+        }
+
         self::enqueueScript();
         self::enqueueAjaxLocalization();
     }
@@ -49,8 +56,6 @@ class CustomerType
 
     /**
      * Localize data required for customerType-pushing to work.
-     *
-     * @throws ConfigException
      */
     private static function enqueueAjaxLocalization(): void
     {
