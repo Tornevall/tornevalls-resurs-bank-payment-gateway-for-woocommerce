@@ -674,7 +674,11 @@ class ResursDefault extends WC_Payment_Gateway
                 orderLines: Order::getOrderLines(order: $order),
                 orderReference: (string)$order->get_id(),
                 customer: $this->getCustomer(),
-                metadata: $this->getPaymentMetaData(order: $order),
+                metadata: $this->isLoggedInUser(
+                    order: $order
+                ) ? $this->getLoggedInCustomerIdMeta(
+                    order: $order
+                ) : null,
                 options: $this->getOptions(order: $order)
             );
             $return = $this->getReturnResponse(
@@ -874,11 +878,19 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
+     * Check if user is logged in during order, or not.
+     */
+    private function isLoggedInUser(WC_Order $order): bool
+    {
+        return (int)$order->get_user_id() > 0;
+    }
+
+    /**
      * Return customer user id as Resurs payment metadata from order (not current_user).
      *
      * @throws IllegalTypeException
      */
-    private function getPaymentMetaData(WC_Order $order): ?Payment\Metadata
+    private function getLoggedInCustomerIdMeta(WC_Order $order): ?Payment\Metadata
     {
         return new Payment\Metadata(
             custom: new EntryCollection(data: [
