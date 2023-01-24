@@ -231,6 +231,7 @@ class Module
      * Indicates whether widget should be visible or not.
      *
      * @noinspection PhpUnused
+     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
      */
     private function visible(): bool
     {
