@@ -53,13 +53,8 @@ class WordPress
         // Initialize adaptions.
         new ResursPlugin();
 
-        if (Connection::hasCredentials()) {
-            try {
-                GetAddress::setup();
-                CustomerType::setup();
-            } catch (Throwable) {
-            }
-        }
+        GetAddress::setup();
+        CustomerType::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
         self::adminGatewayRedirect();

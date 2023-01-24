@@ -24,12 +24,12 @@ use Throwable;
 class CustomerType
 {
     /**
-     * @throws ConfigException
+     * @return void
      */
     public static function setup(): void
     {
         // Customer type scripts is only necessary outside admin, and if credentials are present.
-        if (!Connection::hasCredentials() || Admin::isAdmin()) {
+        if (Admin::isAdmin()) {
             return;
         }
 
@@ -56,8 +56,6 @@ class CustomerType
 
     /**
      * Localize data required for customerType-pushing to work.
-     *
-     * @throws ConfigException
      */
     private static function enqueueAjaxLocalization(): void
     {
