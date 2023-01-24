@@ -835,7 +835,7 @@ class ResursDefault extends WC_Payment_Gateway
      *
      * @throws IllegalValueException
      */
-    private function getCallbackUrl(CallbackType $callbackType): string
+    public function getCallbackUrl(CallbackType $callbackType): string
     {
         // @todo Switch getWcApiUrl to utils.
         return Url::getQueryArg(
