@@ -39,7 +39,7 @@ class WordPress
     public static function initializeWooCommerce()
     {
         // Do not actively work where WooCommerce isn't live.
-        if (!class_exists('WC_Payment_Gateway')) {
+        if (!class_exists(class: 'WC_Payment_Gateway')) {
             return;
         }
 
