@@ -58,15 +58,13 @@ class Connection
 
     /**
      * Ensure we have available credentials.
-     *
-     * @return bool
      */
     public static function hasCredentials(): bool
     {
         $clientId = ClientId::getData();
         $clientSecret = ClientSecret::getData();
 
-        return ($clientId !== '' && $clientSecret !== '');
+        return $clientId !== '' && $clientSecret !== '';
     }
 
     /**

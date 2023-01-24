@@ -29,10 +29,12 @@ class CustomerType
     public static function setup(): void
     {
         // Customer type scripts is only necessary outside admin, and if credentials are present.
-        if (Connection::hasCredentials() && !Admin::isAdmin()) {
-            self::enqueueScript();
-            self::enqueueAjaxLocalization();
+        if (!Connection::hasCredentials() || Admin::isAdmin()) {
+            return;
         }
+
+        self::enqueueScript();
+        self::enqueueAjaxLocalization();
     }
 
     /**
