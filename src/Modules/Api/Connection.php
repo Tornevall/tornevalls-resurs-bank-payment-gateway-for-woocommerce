@@ -45,7 +45,7 @@ class Connection
                 logger: Advanced::getLogger(),
                 cache: Advanced::getCache(),
                 logLevel: Advanced::getLogLevel(),
-                jwtAuth: self::getJwt(),
+                jwtAuth: self::hasCredentials() ? self::getJwt() : null,
                 language: Language::getSiteLanguage()
             );
         } catch (Throwable $e) {

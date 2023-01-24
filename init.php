@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 use Resursbank\Ecom\Config;
 use ResursBank\Service\WooCommerce;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Advanced;
 
 define(
@@ -41,15 +42,9 @@ define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
 try {
-    // Do NOT move/remove this initialization!! This is the primary highly required initialization
-    // of ecom (early-instantiation) that makes ecom available before the plugin is fully configured.
-    // If we do not initialize the instance like this, the whole site will bail out, when credentials
-    // for example are unset.
-    Config::setup(
-        logger: Advanced::getLogger(),
-        cache: Advanced::getCache(),
-    );
+    Connection::setup();
 } catch (Throwable) {
+    return;
 }
 
 // Translation domain is used for all phrases that is not relying on ecom2.
@@ -65,4 +60,4 @@ if (!WooCommerce::getActiveState()) {
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
 // or checking that we're in "WordPress mode" with if (function_exists('add_action')) {}.
-add_action('plugins_loaded', 'ResursBank\Service\WordPress::initializeWooCommerce');
+add_action(hook_name: 'plugins_loaded', callback: 'ResursBank\Service\WordPress::initializeWooCommerce');
