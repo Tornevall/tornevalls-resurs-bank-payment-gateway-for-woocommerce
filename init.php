@@ -17,9 +17,6 @@
 
 declare(strict_types=1);
 
-use Resursbank\Ecom\Config;
-use ResursBank\Module\Data;
-use ResursBank\ResursBank\ResursPlugin;
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -28,11 +25,11 @@ use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Route;
 
+
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
     value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
 );
-
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
 }
@@ -40,14 +37,18 @@ require_once(__DIR__ . '/autoload.php');
 
 // Using same path identifier as the rest of the plugin-verse.
 define(constant_name: 'RESURSBANK_GATEWAY_PATH', value: plugin_dir_path(__FILE__));
+define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 // Do not touch this just yet. Converting filters to something else than snake_cases has to be done
 // in one sweep - if necessary.
 define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
-define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
-Connection::setup();
+try {
+    Connection::setup();
+} catch (Throwable) {
+    return;
+}
 
 // Translation domain is used for all phrases that is not relying on ecom2.
 load_plugin_textdomain(

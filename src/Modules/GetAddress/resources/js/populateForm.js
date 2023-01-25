@@ -157,7 +157,6 @@ const rbHandleFetchAddressResponse = (() => {
      */
     const getAddressFields = (form) => {
         let result = null;
-
         if (form instanceof HTMLFormElement) {
             const arr = Array.from(form.elements);
             const namedFields = arr.filter(getNamedFields);
@@ -204,6 +203,7 @@ const rbHandleFetchAddressResponse = (() => {
     return (data, customerType) => {
         try {
             updateAddressFields(data, customerType);
+            rbUpdateCustomerType(customerType);
         } catch (e) {
             console.log(e);
         }

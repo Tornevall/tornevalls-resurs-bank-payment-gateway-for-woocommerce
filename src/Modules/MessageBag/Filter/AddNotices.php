@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\MessageBag\Filter;
 
-
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 
 /**
@@ -24,7 +23,7 @@ class AddNotices
     {
         add_action(
             hook_name: 'admin_notices',
-            callback: static function(): void {
+            callback: static function (): void {
                 self::printErrors();
             }
         );
@@ -40,11 +39,11 @@ class AddNotices
         }
 
         foreach (MessageBag::getErrors() as $msg) {
-            echo (
+            echo
                 '<div class="error notice"><p>'
                 . esc_html(text: $msg)
                 . '</p></div>'
-            );
+            ;
         }
     }
 }

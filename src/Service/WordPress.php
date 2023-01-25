@@ -7,9 +7,10 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use ResursBank\Module\Data;
-use Resursbank\WooCommerce\Modules\Api\Connection;
 use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Enabled;
+use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
 use Resursbank\Woocommerce\Util\Admin;
@@ -38,7 +39,7 @@ class WordPress
     public static function initializeWooCommerce()
     {
         // Do not actively work where WooCommerce isn't live.
-        if (!class_exists('WC_Payment_Gateway')) {
+        if (!class_exists(class: 'WC_Payment_Gateway')) {
             return;
         }
 
@@ -50,6 +51,7 @@ class WordPress
         new ResursPlugin();
 
         GetAddress::setup();
+        CustomerType::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
         self::adminGatewayRedirect();
@@ -57,7 +59,7 @@ class WordPress
         self::setupFilters();
         self::setupScripts();
         self::setupActions();
-        self::doAction('isLoaded', true);
+        self::doAction(actionName: 'isLoaded', value: true);
     }
 
     /**
@@ -225,8 +227,7 @@ class WordPress
         // on the fly here, making sure that Resurs meta boxes are only active in the order view.
         if (isset($post) && $post instanceof WP_Post && $post->post_type === 'shop_order') {
             try {
-                Metadata::isValidResursPayment(order: new WC_Order($post->ID));
-                $validResursPayment = true;
+                $validResursPayment = Metadata::isValidResursPayment(order: new WC_Order(order: $post->ID));
             } catch (Throwable) {
                 $validResursPayment = false;
             }

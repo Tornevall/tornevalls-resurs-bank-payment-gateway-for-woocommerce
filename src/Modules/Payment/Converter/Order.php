@@ -105,7 +105,7 @@ class Order
      */
     private static function validateItem(mixed $item, array $filter): bool
     {
-        return (
+        return 
             $item instanceof WC_Order_Item_Product &&
             (
                 empty($filter) ||
@@ -115,6 +115,6 @@ class Order
                     strict: true
                 )
             )
-        );
+        ;
     }
 }

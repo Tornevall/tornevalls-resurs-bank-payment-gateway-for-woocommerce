@@ -15,7 +15,6 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\CollectionException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
@@ -32,6 +31,7 @@ use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use ResursBank\Service\WordPress;
@@ -42,10 +42,10 @@ use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\LogDir;
 use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
 use WC_Logger;
-
 use function is_dir;
 
 /**
@@ -73,6 +73,12 @@ class Advanced
      */
     public static function getSettings(): array
     {
+        try {
+            $callbackUrlSetup = Advanced::getCallbackUrlSetup();
+        } catch (Exception) {
+            $callbackUrlSetup = [];
+        }
+
         return [
             self::SECTION_ID => [
                 'title' => self::SECTION_TITLE,
@@ -81,6 +87,7 @@ class Advanced
                 'log_level' => self::getLogLevelSetting(),
                 'cache_dir' => self::getCacheDirSetting(),
                 'get_address_enabled' => self::getGetAddressEnabledSetting(),
+                'callback_url' => $callbackUrlSetup,
             ],
         ];
     }
@@ -159,17 +166,17 @@ class Advanced
      * than the full store uuid. The national id is a human-readable variant of the uuid.
      *
      * @return array
-     * @throws EmptyValueException
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
-     * @throws CollectionException
      * @throws CurlException
-     * @throws ValidationException
+     * @throws EmptyValueException
      * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws ValidationException
      */
     private static function getStoreSelector(): array
     {
@@ -352,5 +359,21 @@ class Advanced
         }
 
         (new WC_Logger())->critical(message: 'Resurs Bank: ' . $message);
+    }
+
+    /**
+     * @throws IllegalValueException
+     */
+    public static function getCallbackUrlSetup(): array
+    {
+        return [
+            'id' => 'callback_url',
+            'type' => 'text',
+            'title' => 'Callback URL Template',
+            'custom_attributes' => [
+                'readonly' => 'readonly',
+            ],
+            'default' => (new ResursDefault())->getCallbackUrl(callbackType: CallbackType::AUTHORIZATION)
+        ];
     }
 }
