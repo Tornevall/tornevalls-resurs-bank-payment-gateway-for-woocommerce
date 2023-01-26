@@ -24,6 +24,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -164,26 +165,20 @@ class OrderStatus
      */
     private static function handleFrozenConditions(WC_Order $order, Payment $resursPayment): void
     {
-        /** @noinspection PhpUncoveredEnumCasesInspection */
-        match ($resursPayment->status) {
-            PaymentStatus::REJECTED => $order->update_status(
+        if ($resursPayment->status === PaymentStatus::REJECTED) {
+            $order->update_status(
                 new_status: 'failed',
                 note: Translator::translate(phraseId: 'payment-status-failed')
-            ),
-            PaymentStatus::ACCEPTED => self::setOrderThawed(order: $order),
-        };
-    }
+            );
+        }
 
-    /**
-     * Reset data of a formerly held order.
-     */
-    private static function setOrderThawed(WC_Order $order): void
-    {
-        $order->payment_complete();
-        Metadata::setOrderMeta(
-            order: $order,
-            metaDataKey: 'resurs_hold',
-            metaDataValue: '0'
-        );
+        if ($resursPayment->status === PaymentStatus::ACCEPTED) {
+            $order->payment_complete();
+            Metadata::setOrderMeta(
+                order: $order,
+                metaDataKey: 'resurs_hold',
+                metaDataValue: '0'
+            );
+        }
     }
 }
