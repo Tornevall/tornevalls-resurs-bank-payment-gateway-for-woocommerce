@@ -119,9 +119,6 @@ class Connection
         return $result;
     }
 
-    /**
-     * @return CacheInterface
-     */
     public static function getCache(): CacheInterface
     {
         return CacheEnabled::isEnabled() ? new Transient() : new None();
