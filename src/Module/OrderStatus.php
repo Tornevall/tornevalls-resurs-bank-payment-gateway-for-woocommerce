@@ -16,13 +16,14 @@ use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Locale\Language;
-use Resursbank\Ecom\Lib\Locale\Translation;
 use Resursbank\Ecom\Lib\Locale\Translator;
+use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -43,10 +44,12 @@ class OrderStatus
      * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
+     * @throws FilesystemException
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws TranslationException
      * @throws ValidationException
      * @noinspection PhpUnhandledExceptionInspection
      */
@@ -55,8 +58,19 @@ class OrderStatus
         // Try-catch should not be placed here, as any exceptions will be caught at the json-response level.
         $resursPayment = PaymentRepository::get(paymentId: $paymentId);
 
+        // If order is held, check if prior order statuses was frozen.
+        if ($order->has_status(status: ['on-hold']) &&
+            Metadata::getOrderMeta(order: $order, metaDataKey: 'resurs_hold') === '1'
+        ) {
+            self::handleFrozenConditions(order: $order, resursPayment: $resursPayment);
+        }
+
         // Silently handle statuses.
         if (!$order->has_status(status: ['on-hold', 'processing', 'completed', 'cancelled'])) {
+            // Mark order as held, if held from Resurs.
+            if ($resursPayment->status === PaymentStatus::FROZEN || $resursPayment->status === PaymentStatus::INSPECTION) {
+                Metadata::setOrderMeta(order: $order, metaDataKey: 'resurs_hold', metaDataValue: '1');
+            }
             match ($resursPayment->status) {
                 PaymentStatus::ACCEPTED => $order->payment_complete(),
                 PaymentStatus::REJECTED => $order->update_status(
@@ -72,6 +86,42 @@ class OrderStatus
     }
 
     /**
+     * Thaw or cancel an order that has been marked as held by Resurs.
+     *
+     * @param WC_Order $order
+     * @param Payment $resursPayment
+     * @return void
+     * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws FilesystemException
+     * @throws TranslationException
+     */
+    private static function handleFrozenConditions(WC_Order $order, Payment $resursPayment): void
+    {
+        /** @noinspection PhpUncoveredEnumCasesInspection */
+        match ($resursPayment->status) {
+            PaymentStatus::REJECTED => $order->update_status(
+                new_status: 'failed',
+                note: Translator::translate(phraseId: 'payment-status-failed')
+            ),
+            PaymentStatus::ACCEPTED => self::setOrderThawed(order: $order),
+        };
+    }
+
+    /**
+     * Reset data of a formerly held order.
+     * @param WC_Order $order
+     * @return void
+     */
+    private static function setOrderThawed(WC_Order $order): void
+    {
+        $order->payment_complete();
+        Metadata::setOrderMeta(order: $order, metaDataKey: 'resurs_hold', metaDataValue: '0');
+    }
+
+    /**
      * Handle the landing-page from within the payment method gateway as the "thank you page" is very much
      * a dynamic request. It either depends on the payment method (uuid) through the "thank_you_<id>" action or
      * the single action ("thank_you", which is what we use), that is just firing thank-you's with the current order id.
@@ -83,7 +133,7 @@ class OrderStatus
     public static function setOrderStatusOnThankYouSuccess($order_id = null): void
     {
         try {
-            $order = new WC_Order($order_id);
+            $order = new WC_Order(order: $order_id);
             $resursPaymentId = Metadata::getOrderMeta(order: $order, metaDataKey: 'payment_id');
             $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(order: $order, metaDataKey: 'thankyou_trigger');
             if ($thankYouTriggerCheck || $resursPaymentId === '') {
