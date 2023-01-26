@@ -38,7 +38,6 @@ class OrderStatus
     /**
      * @param WC_Order $order WooCommerce order.
      * @param string $paymentId Resurs payment id (uuid based).
-     * @return void
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
@@ -59,38 +58,103 @@ class OrderStatus
         $resursPayment = PaymentRepository::get(paymentId: $paymentId);
 
         // If order is held, check if prior order statuses was frozen.
-        if ($order->has_status(status: ['on-hold']) &&
-            Metadata::getOrderMeta(order: $order, metaDataKey: 'resurs_hold') === '1'
+        if (
+            $order->has_status(status: ['on-hold']) &&
+            Metadata::getOrderMeta(
+                order: $order,
+                metaDataKey: 'resurs_hold'
+            ) === '1'
         ) {
-            self::handleFrozenConditions(order: $order, resursPayment: $resursPayment);
+            self::handleFrozenConditions(
+                order: $order,
+                resursPayment: $resursPayment
+            );
         }
 
         // Silently handle statuses.
-        if (!$order->has_status(status: ['on-hold', 'processing', 'completed', 'cancelled'])) {
-            // Mark order as held, if held from Resurs.
-            if ($resursPayment->status === PaymentStatus::FROZEN || $resursPayment->status === PaymentStatus::INSPECTION) {
-                Metadata::setOrderMeta(order: $order, metaDataKey: 'resurs_hold', metaDataValue: '1');
+        if ($order->has_status(
+            status: ['on-hold', 'processing', 'completed', 'cancelled']
+        )) {
+            return;
+        }
+
+        // Mark order as held, if held from Resurs.
+        if (
+            $resursPayment->status === PaymentStatus::FROZEN ||
+            $resursPayment->status === PaymentStatus::INSPECTION
+        ) {
+            Metadata::setOrderMeta(
+                order: $order,
+                metaDataKey: 'resurs_hold',
+                metaDataValue: '1'
+            );
+        }
+
+        match ($resursPayment->status) {
+            PaymentStatus::ACCEPTED => $order->payment_complete(),
+            PaymentStatus::REJECTED => $order->update_status(
+                new_status: 'failed',
+                note: Translator::translate(phraseId: 'payment-status-failed')
+            ),
+            default => $order->update_status(
+                new_status: 'on-hold',
+                note: Translator::translate(phraseId: 'payment-status-on-hold')
+            ),
+        };
+    }
+
+    /**
+     * Handle the landing-page from within the payment method gateway as the "thank you page" is very much
+     * a dynamic request. It either depends on the payment method (uuid) through the "thank_you_<id>" action or
+     * the single action ("thank_you", which is what we use), that is just firing thank-you's with the current order id.
+     *
+     * @param $order_id
+     * @throws ConfigException
+     */
+    public static function setOrderStatusOnThankYouSuccess($order_id = null): void
+    {
+        try {
+            $order = new WC_Order(order: $order_id);
+            $resursPaymentId = Metadata::getOrderMeta(
+                order: $order,
+                metaDataKey: 'payment_id'
+            );
+            $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(
+                order: $order,
+                metaDataKey: 'thankyou_trigger'
+            );
+
+            if ($thankYouTriggerCheck || $resursPaymentId === '') {
+                // Not ours or already triggered.
+                return;
             }
-            match ($resursPayment->status) {
-                PaymentStatus::ACCEPTED => $order->payment_complete(),
-                PaymentStatus::REJECTED => $order->update_status(
-                    new_status: 'failed',
-                    note: Translator::translate(phraseId: 'payment-status-failed')
-                ),
-                default => $order->update_status(
-                    new_status: 'on-hold',
-                    note: Translator::translate(phraseId: 'payment-status-on-hold')
-                ),
-            };
+
+            // Record that customer landed on the thank-you page once, so we don't have to run
+            // twice if page is reloaded.
+            Metadata::setOrderMeta(
+                order: $order,
+                metaDataKey: 'thankyou_trigger',
+                metaDataValue: '1'
+            );
+            // This visually marks a proper customer return, from an external source.
+            $order->add_order_note(
+                note: Translator::translate(
+                    phraseId: 'customer-landingpage-return'
+                )
+            );
+            OrderStatus::setWcOrderStatus(
+                order: $order,
+                paymentId: $resursPaymentId
+            );
+        } catch (Throwable $e) {
+            // Nothing happens here, except for logging.
+            Config::getLogger()->error(message: $e);
         }
     }
 
     /**
      * Thaw or cancel an order that has been marked as held by Resurs.
      *
-     * @param WC_Order $order
-     * @param Payment $resursPayment
-     * @return void
      * @throws ConfigException
      * @throws IllegalTypeException
      * @throws JsonException
@@ -112,43 +176,14 @@ class OrderStatus
 
     /**
      * Reset data of a formerly held order.
-     * @param WC_Order $order
-     * @return void
      */
     private static function setOrderThawed(WC_Order $order): void
     {
         $order->payment_complete();
-        Metadata::setOrderMeta(order: $order, metaDataKey: 'resurs_hold', metaDataValue: '0');
-    }
-
-    /**
-     * Handle the landing-page from within the payment method gateway as the "thank you page" is very much
-     * a dynamic request. It either depends on the payment method (uuid) through the "thank_you_<id>" action or
-     * the single action ("thank_you", which is what we use), that is just firing thank-you's with the current order id.
-     *
-     * @param $order_id
-     * @return void
-     * @throws ConfigException
-     */
-    public static function setOrderStatusOnThankYouSuccess($order_id = null): void
-    {
-        try {
-            $order = new WC_Order(order: $order_id);
-            $resursPaymentId = Metadata::getOrderMeta(order: $order, metaDataKey: 'payment_id');
-            $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(order: $order, metaDataKey: 'thankyou_trigger');
-            if ($thankYouTriggerCheck || $resursPaymentId === '') {
-                // Not ours or already triggered.
-                return;
-            }
-            // Record that customer landed on the thank-you page once, so we don't have to run
-            // twice if page is reloaded.
-            Metadata::setOrderMeta(order: $order, metaDataKey: 'thankyou_trigger', metaDataValue: '1');
-            // This visually marks a proper customer return, from an external source.
-            $order->add_order_note(note: Translator::translate(phraseId: 'customer-landingpage-return'));
-            OrderStatus::setWcOrderStatus(order: $order, paymentId: $resursPaymentId);
-        } catch (Throwable $e) {
-            // Nothing happens here, except for logging.
-            Config::getLogger()->error(message: $e);
-        }
+        Metadata::setOrderMeta(
+            order: $order,
+            metaDataKey: 'resurs_hold',
+            metaDataValue: '0'
+        );
     }
 }
