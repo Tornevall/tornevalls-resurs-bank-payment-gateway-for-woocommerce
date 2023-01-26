@@ -80,7 +80,7 @@
             <property name="linesCountBetweenAnnotationsGroups" value="0" />
             <property name="linesCountAfterLastContent" value="0" />
             <property name="annotationsGroups" type="array">
-                <element value="@param, @return, @throws, @see, @phpcsSuppress, @SuppressWarnings, @noinspection, @todo"/>
+                <element value="@inheritdoc, @param, @return, @throws, @see, @phpcsSuppress, @SuppressWarnings, @noinspection, @todo"/>
             </property>
         </properties>
     </rule>
