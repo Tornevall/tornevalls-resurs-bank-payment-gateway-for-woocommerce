@@ -23,19 +23,13 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Cache\CacheInterface;
-use Resursbank\Ecom\Lib\Cache\Filesystem;
-use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Locale\Translator;
-use Resursbank\Ecom\Lib\Log\FileLogger;
-use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
-use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use ResursBank\Service\WordPress;
-use Resursbank\Woocommerce\Database\Options\CacheDir;
+use Resursbank\Woocommerce\Database\Options\Advanced\CacheEnabled;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
@@ -45,8 +39,6 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
-use WC_Logger;
-use function is_dir;
 
 /**
  * Advanced settings section.
@@ -75,7 +67,7 @@ class Advanced
     {
         try {
             $callbackUrlSetup = Advanced::getCallbackUrlSetup();
-        } catch (Exception) {
+        } catch (Throwable) {
             $callbackUrlSetup = [];
         }
 
@@ -85,7 +77,7 @@ class Advanced
                 'store_id' => self::getStoreIdSetting(),
                 'log_dir' => self::getLogDirSetting(),
                 'log_level' => self::getLogLevelSetting(),
-                'cache_dir' => self::getCacheDirSetting(),
+                'cache_enabled' => self::getCacheEnabled(),
                 'get_address_enabled' => self::getGetAddressEnabledSetting(),
                 'callback_url' => $callbackUrlSetup,
             ],
@@ -93,56 +85,21 @@ class Advanced
     }
 
     /**
-     * Resolve log handler based on supplied setting value. Returns a dummy
-     * if the setting is empty.
-     *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @todo Refactor this method. WOO-872. Remove the PHPCS & PHPMD suppression.
+     * @throws IllegalValueException
      */
-    public static function getLogger(): LoggerInterface
+    public static function getCallbackUrlSetup(): array
     {
-        $result = new NoneLogger();
-
-        try {
-            $result = new FileLogger(path: LogDir::getData());
-        } catch (Throwable $e) {
-            self::logWcCritical(message: $e->getMessage());
-        }
-
-        return $result;
-    }
-
-    /**
-     * Return the configured log level
-     */
-    public static function getLogLevel(): EcomLogLevel
-    {
-        return LogLevel::getLogLevel();
-    }
-
-    /**
-     * Resolve cache handler based on supplied setting value. Returns a dummy
-     * if the setting is empty.
-     */
-    public static function getCache(): CacheInterface
-    {
-        $result = new None();
-
-        try {
-            $path = CacheDir::getData();
-
-            if (is_dir(filename: CacheDir::getData())) {
-                $result = new Filesystem(path: $path);
-            }
-        } catch (Throwable $e) {
-            if (class_exists(class: WC_Logger::class)) {
-                (new WC_Logger())->critical(
-                    message: 'Resurs Bank: ' . $e->getMessage()
-                );
-            }
-        }
-
-        return $result;
+        return [
+            'id' => 'callback_url',
+            'type' => 'text',
+            'title' => 'Callback URL Template',
+            'custom_attributes' => [
+                'readonly' => 'readonly',
+            ],
+            'default' => (new ResursDefault())->getCallbackUrl(
+                callbackType: CallbackType::AUTHORIZATION
+            ),
+        ];
     }
 
     /**
@@ -274,8 +231,6 @@ class Advanced
     }
 
     /**
-     * Fetches the cache_dir setting
-     *
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -283,16 +238,13 @@ class Advanced
      * @throws ReflectionException
      * @throws TranslationException
      */
-    private static function getCacheDirSetting(): array
+    private static function getCacheEnabled(): array
     {
         return [
-            'id' => CacheDir::getName(),
-            'type' => 'text',
-            'title' => Translator::translate(phraseId: 'cache-path'),
-            'desc' => Translator::translate(
-                phraseId: 'leave-empty-to-disable-cache'
-            ),
-            'default' => CacheDir::getDefault(),
+            'id' => CacheEnabled::getName(),
+            'title' => Translator::translate(phraseId: 'cache-enabled'),
+            'type' => 'checkbox',
+            'default' => CacheEnabled::getDefault(),
         ];
     }
 
@@ -347,33 +299,5 @@ class Advanced
         }
 
         return $storeIdSetting;
-    }
-
-    /**
-     * Use WC_Logger to log a critical message.
-     */
-    private static function logWcCritical(string $message): void
-    {
-        if (!class_exists(class: WC_Logger::class)) {
-            return;
-        }
-
-        (new WC_Logger())->critical(message: 'Resurs Bank: ' . $message);
-    }
-
-    /**
-     * @throws IllegalValueException
-     */
-    public static function getCallbackUrlSetup(): array
-    {
-        return [
-            'id' => 'callback_url',
-            'type' => 'text',
-            'title' => 'Callback URL Template',
-            'custom_attributes' => [
-                'readonly' => 'readonly',
-            ],
-            'default' => (new ResursDefault())->getCallbackUrl(callbackType: CallbackType::AUTHORIZATION)
-        ];
     }
 }
