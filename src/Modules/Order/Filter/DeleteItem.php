@@ -33,8 +33,6 @@ use WC_Order_Item_Shipping;
  */
 class DeleteItem
 {
-//    private static WC_Order|null $order;
-
     /**
      * Register action filter which executed when order item gets deleted.
      *
