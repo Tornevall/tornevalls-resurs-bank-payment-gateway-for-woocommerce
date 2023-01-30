@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use WC_Order;
+
 use function is_array;
 
 /**
@@ -106,7 +107,6 @@ class Metadata
     /**
      * Fetch order information and metadata.
      *
-     * @param WC_Order $order
      * @return array
      */
     public static function getOrderInfo(WC_Order $order): array
