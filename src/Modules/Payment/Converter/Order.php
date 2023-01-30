@@ -54,6 +54,10 @@ class Order
             // Total incl. tax after discounts have been applied.
             $total = Product::getTotal(product: $item);
 
+            // VAT amounts for subtotal and total.
+            $subtotalVat = Product::getSubtotalVat(product: $item);
+            $totalVat = Product::getTotalVat(product: $item);
+
             // Similar checks are performed by WC to confirm discount.
             if ($subtotal <= $total) {
                 continue;
@@ -62,7 +66,7 @@ class Order
             // Create new rate group / append amount to existing rate group.
             $collection->addRateData(
                 rate: Product::getVatRate(product: $item),
-                amount: $subtotal - $total
+                amount: $subtotal + $subtotalVat - $total - $totalVat
             );
         }
 
