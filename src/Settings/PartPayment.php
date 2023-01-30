@@ -33,6 +33,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
 
 /**
@@ -103,35 +104,23 @@ class PartPayment
         $period = Period::getData();
 
         if (empty($storeId)) {
-            WordPress::setGenericError(
-                exception: new Exception(
-                    message: Translator::translate(
-                        phraseId: 'limit-missing-store-id'
-                    )
-                )
-            );
+            MessageBag::addError(msg: Translator::translate(
+                phraseId: 'limit-missing-store-id'
+            ));
             return;
         }
 
         if (empty($paymentMethodId)) {
-            WordPress::setGenericError(
-                exception: new Exception(
-                    message: Translator::translate(
-                        phraseId: 'limit-missing-payment-method'
-                    )
-                )
-            );
+            MessageBag::addError(msg: Translator::translate(
+                phraseId: 'limit-missing-payment-method'
+            ));
             return;
         }
 
         if (empty($period)) {
-            WordPress::setGenericError(
-                exception: new Exception(
-                    message: Translator::translate(
-                        phraseId: 'limit-missing-period'
-                    )
-                )
-            );
+            MessageBag::addError(msg: Translator::translate(
+                phraseId: 'limit-missing-period'
+            ));
             return;
         }
 
@@ -141,13 +130,9 @@ class PartPayment
         );
 
         if ($paymentMethod === null) {
-            WordPress::setGenericError(
-                exception: new Exception(
-                    message: Translator::translate(
-                        phraseId: 'limit-failed-to-load-payment-method'
-                    )
-                )
-            );
+            MessageBag::addError(msg: Translator::translate(
+                phraseId: 'limit-failed-to-load-payment-method'
+            ));
             return;
         }
 
@@ -162,37 +147,26 @@ class PartPayment
         }
 
         if ($new < 0) {
-            WordPress::setGenericError(
-                exception: new Exception(
-                    message: Translator::translate(
-                        phraseId: 'limit-new-value-not-positive'
-                    )
-                )
-            );
+            MessageBag::addError(msg: Translator::translate(
+                phraseId: 'limit-new-value-not-positive'
+            ));
         } elseif ($new > $maxLimit) {
-            WordPress::setGenericError(
-                exception: new Exception(
-                    message: str_replace(
-                        search: '%1',
-                        replace: (string)$maxLimit,
-                        subject: Translator::translate(
-                            phraseId: 'limit-new-value-above-max'
-                        )
-                    )
+            MessageBag::addError(msg: str_replace(
+                search: '%1',
+                replace: (string)$maxLimit,
+                subject: Translator::translate(
+                    phraseId: 'limit-new-value-above-max'
                 )
-            );
+            ));
+
         } elseif ($new < $minLimit) {
-            WordPress::setGenericError(
-                exception: new Exception(
-                    message: str_replace(
-                        search: '%1',
-                        replace: (string)$minLimit,
-                        subject: Translator::translate(
-                            phraseId: 'limit-new-value-below-min'
-                        )
-                    )
+            MessageBag::addError(msg: str_replace(
+                search: '%1',
+                replace: (string)$minLimit,
+                subject: Translator::translate(
+                    phraseId: 'limit-new-value-below-min'
                 )
-            );
+            ));
         }
     }
 
@@ -301,8 +275,8 @@ class PartPayment
         try {
             $paymentMethods = $storeId !== '' ?
                 Repository::getPaymentMethods(storeId: $storeId) : [];
-        } catch (Throwable $exception) {
-            WordPress::setGenericError(exception: $exception);
+        } catch (Throwable) {
+            MessageBag::addError(msg: 'Failed to get payment methods.');
         }
 
         foreach ($paymentMethods as $paymentMethod) {
@@ -335,8 +309,8 @@ class PartPayment
                     paymentMethodId: $paymentMethodId
                 )->content;
             }
-        } catch (Throwable $exception) {
-            WordPress::setGenericError(exception: $exception);
+        } catch (Throwable) {
+            MessageBag::addError(msg: 'Failed to get annuity periods.');
         }
 
         foreach ($annuityFactors as $annuityFactor) {

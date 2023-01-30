@@ -37,6 +37,7 @@ use Resursbank\Woocommerce\Database\Options\LogDir;
 use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
 
 /**
@@ -148,12 +149,7 @@ class Advanced
             try {
                 $return = array_merge($return, self::getStores());
             } catch (Throwable $exception) {
-                WordPress::setGenericError(
-                    exception: new Exception(
-                        message: $exception->getMessage(),
-                        previous: $exception
-                    )
-                );
+                MessageBag::addError(msg: 'Failed to get available stores.');
                 // Make sure we give the options array a chance to render an error instead of the fields so ensure
                 // the setting won't be saved by mistake when APIs are down.
                 throw $exception;

@@ -11,6 +11,8 @@ namespace Resursbank\Woocommerce\Util;
 
 use WC_Order;
 
+use function is_array;
+
 /**
  * Order metadata handler.
  *
@@ -18,6 +20,33 @@ use WC_Order;
  */
 class Metadata
 {
+    public const KEY_PAYMENT_ID = 'payment_id';
+
+    /**
+     * Store UUID of Resurs Bank payment on order.
+     */
+    public static function setPaymentId(
+        WC_Order $order,
+        string $id
+    ): void {
+        self::setOrderMeta(
+            order: $order,
+            metaDataKey: self::KEY_PAYMENT_ID,
+            metaDataValue: $id
+        );
+    }
+
+    /**
+     * Get UUID of Resurs Bank payment attached to order.
+     */
+    public static function getPaymentId(WC_Order $order): string
+    {
+        return self::getOrderMeta(
+            order: $order,
+            metaDataKey: self::KEY_PAYMENT_ID
+        );
+    }
+
     /**
      * Set metadata to an order.
      * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
@@ -69,7 +98,7 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order $order): bool
     {
-        return Metadata::getOrderMeta(
+        return self::getOrderMeta(
             order: $order,
             metaDataKey: 'payment_id'
         ) !== '';

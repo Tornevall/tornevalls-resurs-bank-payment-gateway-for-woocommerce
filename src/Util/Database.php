@@ -25,6 +25,7 @@ class Database
      * at Resurs Bank).
      *
      * @throws RuntimeException
+     * @todo This method handles metadata, it should be part of the Metadata class. WOO-1014
      */
     public static function getOrderByPaymentId(string $paymentId): WC_Order
     {
