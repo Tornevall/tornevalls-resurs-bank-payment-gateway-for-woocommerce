@@ -12,7 +12,6 @@ namespace Resursbank\Woocommerce\Util;
 use RuntimeException;
 use WC_Order;
 use wpdb;
-
 use function is_string;
 
 /**
@@ -54,5 +53,24 @@ class Database
         }
 
         throw new RuntimeException(message: "No order matching $paymentId");
+    }
+
+    /**
+     * The only way to get information about a specific product type.
+     *
+     * @param int $itemId
+     * @return string
+     */
+    public static function getProductItemType(int $itemId): string
+    {
+        global $wpdb;
+        $return = $wpdb->get_var(
+            query: $wpdb->prepare(
+                query: "SELECT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = '%d'",
+                args: $itemId
+            )
+        );
+
+        return is_string(value: $return) ? $return : '';
     }
 }
