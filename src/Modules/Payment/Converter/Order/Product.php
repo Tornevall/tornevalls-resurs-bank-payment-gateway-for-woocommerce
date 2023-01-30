@@ -56,7 +56,6 @@ class Product
                 ) + self::getSubtotalVat(
                     product: $product
                 ),
-                //num: self::getTotal(product: $product),
                 precision: 2
             ),
             description: self::getTitle(product: $product),
