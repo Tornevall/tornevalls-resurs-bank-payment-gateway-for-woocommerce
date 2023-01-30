@@ -24,7 +24,6 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Database;
 use Throwable;
 use WC_Order;
 use WC_Order_Item_Shipping;
@@ -58,19 +57,18 @@ class DeleteItem
 
     /**
      * Find out if item is of type shipping.
-     * @param WC_Order $order
-     * @param int $itemId
-     * @return bool
      */
     private static function isShipping(WC_Order $order, int $itemId): bool
     {
         $shippingItems = $order->get_items(types: 'shipping');
 
         foreach ($shippingItems as $shippingItem) {
-            if ($shippingItem instanceof WC_Order_Item_Shipping) {
-                if ($shippingItem->get_id() === $itemId) {
-                    return true;
-                }
+            if (!($shippingItem instanceof WC_Order_Item_Shipping)) {
+                continue;
+            }
+
+            if ($shippingItem->get_id() === $itemId) {
+                return true;
             }
         }
 
@@ -106,11 +104,14 @@ class DeleteItem
             filter: [$itemId],
             includeShipping: $isShipping
         );
-        if ($orderLineCollection->count()) {
-            Repository::cancel(
-                paymentId: OrderModule::getPaymentId(order: $order),
-                orderLines: $orderLineCollection
-            );
+
+        if (!$orderLineCollection->count()) {
+            return;
         }
+
+        Repository::cancel(
+            paymentId: OrderModule::getPaymentId(order: $order),
+            orderLines: $orderLineCollection
+        );
     }
 }

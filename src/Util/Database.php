@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Util;
 use RuntimeException;
 use WC_Order;
 use wpdb;
+
 use function is_string;
 
 /**
