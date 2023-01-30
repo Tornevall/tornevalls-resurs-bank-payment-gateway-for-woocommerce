@@ -62,13 +62,15 @@ class DeleteItem
     {
         $shippingItems = $order->get_items(types: 'shipping');
 
-        foreach ($shippingItems as $shippingItem) {
-            if (!($shippingItem instanceof WC_Order_Item_Shipping)) {
-                continue;
-            }
+        if (is_array(value: $shippingItems)) {
+            foreach ($shippingItems as $shippingItem) {
+                if (!($shippingItem instanceof WC_Order_Item_Shipping)) {
+                    continue;
+                }
 
-            if ($shippingItem->get_id() === $itemId) {
-                return true;
+                if ($shippingItem->get_id() === $itemId) {
+                    return true;
+                }
             }
         }
 
