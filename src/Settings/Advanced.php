@@ -29,6 +29,7 @@ use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use ResursBank\Service\WordPress;
+use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\Advanced\CacheEnabled;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
@@ -77,6 +78,7 @@ class Advanced
                 'log_dir' => self::getLogDirSetting(),
                 'log_level' => self::getLogLevelSetting(),
                 'cache_enabled' => self::getCacheEnabled(),
+                'invalidate_cache' => self::getInvalidateCacheButton(),
                 'get_address_enabled' => self::getGetAddressEnabledSetting(),
                 'callback_url' => $callbackUrlSetup,
             ],
@@ -249,6 +251,23 @@ class Advanced
             'title' => Translator::translate(phraseId: 'cache-enabled'),
             'type' => 'checkbox',
             'default' => CacheEnabled::getDefault(),
+        ];
+    }
+
+    /**
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function getInvalidateCacheButton(): array
+    {
+        return [
+            'id' => Option::NAME_PREFIX . 'invalidate_cache',
+            'title' => Translator::translate(phraseId: 'clear-cache'),
+            'type' => 'rbinvalidatecachebutton',
         ];
     }
 

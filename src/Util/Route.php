@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
+use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
@@ -53,6 +54,11 @@ class Route
     public const ROUTE_PART_PAYMENT_ADMIN = 'part-payment-admin';
 
     /**
+     * Route to get part payment admin controller.
+     */
+    public const ROUTE_ADMIN_CACHE_INVALIDATE = 'admin-cache-invalidate';
+
+    /**
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.ExitExpression)
      */
@@ -81,12 +87,27 @@ class Route
                     self::respondWithExit(body: SetCustomerType::exec());
                     exit;
 
+                case self::ROUTE_ADMIN_CACHE_INVALIDATE:
+                    Invalidate::exec();
+                    self::redirectBack();
+                    break;
+
                 default:
                     break;
             }
         } catch (Throwable $exception) {
             self::respondWithError(exception: $exception);
         }
+    }
+
+    /**
+     * Redirect request back to previous page.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function redirectBack(): void
+    {
+        header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
     }
 
     /**

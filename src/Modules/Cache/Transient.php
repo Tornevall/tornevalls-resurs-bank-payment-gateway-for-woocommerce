@@ -9,10 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Cache;
 
+use JsonException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Cache\AbstractCache;
 use Resursbank\Ecom\Lib\Cache\CacheInterface;
-
-use function is_string;
 
 /**
  * ECom compliant implementation of Transient cache API.
@@ -20,28 +21,47 @@ use function is_string;
 class Transient extends AbstractCache implements CacheInterface
 {
     /**
-     * @inheritDoc
+     * @inheritdoc
+     * @throws ValidationException|ConfigException
      */
     public function read(string $key): ?string
     {
-        $data = get_transient(transient: $key);
+        $this->validateKey(key: $key);
 
-        return is_string(value: $data) && $data !== '' ? $data : null;
+        $entry = $this->decodeEntry(
+            data: (string) get_transient(transient: $key)
+        );
+
+         return (
+            $entry !== null &&
+            $this->validate(key: $key, entry: $entry)
+        ) ? $entry->data : null;
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
+     * @throws ValidationException
+     * @throws JsonException
      */
     public function write(string $key, string $data, int $ttl): void
     {
-        set_transient(transient: $key, value: $data, expiration: $ttl);
+        $this->validateKey(key: $key);
+
+        set_transient(
+            transient: $key,
+            value: $this->encodeEntry(data: $data, ttl: $ttl),
+            expiration: $ttl
+        );
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
+     * @throws ValidationException
      */
     public function clear(string $key): void
     {
+        $this->validateKey(key: $key);
+
         delete_transient(transient: $key);
     }
 }

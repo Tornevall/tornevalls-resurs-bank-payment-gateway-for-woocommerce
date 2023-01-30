@@ -19,6 +19,8 @@ declare(strict_types=1);
 
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Modules\Cache\Cache;
+use Resursbank\Woocommerce\Settings\Settings;
 
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
@@ -53,6 +55,13 @@ load_plugin_textdomain(
 // Make sure there is an instance of WooCommerce among active plugins.
 if (!WooCommerce::getActiveState()) {
     return;
+}
+
+if (is_admin()) {
+    add_action(
+        hook_name: 'woocommerce_loaded',
+        callback: static fn() => Settings::setup()
+    );
 }
 
 // This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
