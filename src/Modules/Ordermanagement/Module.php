@@ -14,6 +14,9 @@ namespace Resursbank\Woocommerce\Modules\Ordermanagement;
  */
 class Module
 {
+    /**
+     * The actual method that sets up actions for order status change hooks.
+     */
     public static function setupActions(): void
     {
         add_action(
