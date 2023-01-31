@@ -13,7 +13,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use Resursbank\Ecommerce\Types\CheckoutType;
 use Resursbank\Woocommerce\Modules\Api\Connection;
-use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrderManagementModule;
+use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
 use Resursbank\RBEcomPHP\ResursBank;
 use ResursBank\Service\WooCommerce;
 use ResursBank\Service\WordPress;
@@ -82,7 +82,7 @@ class PluginHooks
         // @todo Adapt this to the new system. The code in updateOrderStatusByWooCommerce should not be used
         // @todo in its current form.
         //add_action('woocommerce_order_status_changed', [$this, 'updateOrderStatusByWooCommerce'], 10, 3);
-        OrderManagementModule::setupActions();
+        OrdermanagementModule::setupActions();
     }
 
     /**
