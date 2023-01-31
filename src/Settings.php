@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce;
 
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
@@ -91,19 +90,11 @@ class Settings extends WC_Settings_Page
      * @throws TranslationException
      * @throws ValidationException
      * @see self::__construct()
-     * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function save(): void
     {
         global $current_section;
-
-        if (
-            isset($_POST['resursbank_clear_cache']) &&
-            $_POST['resursbank_clear_cache'] === '1'
-        ) {
-            Config::getCache()->invalidate();
-        }
 
         woocommerce_update_options(
             options: $this->get_settings(section: $current_section)

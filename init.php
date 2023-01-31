@@ -19,8 +19,9 @@ declare(strict_types=1);
 
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Settings\Settings;
+use Resursbank\Woocommerce\Settings\CustomElements;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order;
 
@@ -73,6 +74,6 @@ add_action(hook_name: 'plugins_loaded', callback: static function(): void {
     MessageBag::init();
 
     if (Admin::isAdmin()) {
-        Settings::init();
+        InvalidateCacheButton::register();
     }
 });
