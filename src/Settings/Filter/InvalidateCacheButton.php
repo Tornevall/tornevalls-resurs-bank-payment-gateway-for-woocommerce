@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Settings\Filter;
 
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\Sanitize;
 use Throwable;
 
 /**
@@ -26,8 +27,8 @@ class InvalidateCacheButton
         add_action(
             hook_name: 'woocommerce_admin_field_rbinvalidatecachebutton',
             callback: static function (): void {
-                $url = self::getUrl();
-                $title = self::getTitle();
+                $url = Sanitize::sanitizeHtml(html: self::getUrl());
+                $title = Sanitize::sanitizeHtml(html: self::getTitle());
 
                 echo <<<EX
 <tr>

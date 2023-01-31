@@ -13,6 +13,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\Model;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Woocommerce\Modules\MessageBag\Type;
+use Resursbank\Woocommerce\Util\Sanitize;
 
 /**
  * Message definition.
@@ -37,7 +38,7 @@ class Message extends Model
      */
     public function getEscapedMsg(): string
     {
-        return (string) esc_html(text: $this->msg);
+        return Sanitize::sanitizeHtml(html: $this->msg);
     }
 
     /**
