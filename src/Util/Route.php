@@ -112,8 +112,10 @@ class Route
             : '';
 
         if ($url !== '') {
-            header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
+            return;
         }
+
+        header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
     }
 
     /**
