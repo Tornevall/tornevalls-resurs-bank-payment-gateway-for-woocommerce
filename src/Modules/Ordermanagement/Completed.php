@@ -27,8 +27,12 @@ class Completed
      * @param int $orderId WooCommerce order ID
      * @throws ConfigException
      */
-    public static function capture(int $orderId): void
+    public static function capture(int $orderId, string $old, string $new): void
     {
+        if ($new !== 'completed') {
+            return;
+        }
+
         /** @var WC_Order $order */
         $order = wc_get_order(the_order: $orderId);
 
@@ -43,13 +47,17 @@ class Completed
         } catch (Throwable $error) {
             Config::getLogger()->error(message: $error);
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for capture.'
+                msg: 'Unable to load Resurs payment information for capture. Reverting to previous order status.'
             );
+            $order->update_status(new_status: $old);
             return;
         }
 
         if (!$resursPayment->canCapture()) {
-            MessageBag::addError(msg: 'Resurs order can not be captured.');
+            MessageBag::addError(
+                msg: 'Resurs order can not be captured. Reverting to previous order status.'
+            );
+            $order->update_status(new_status: $old);
             return;
         }
 
@@ -58,8 +66,9 @@ class Completed
         } catch (Throwable $error) {
             Config::getLogger()->error(message: $error);
             MessageBag::addError(
-                msg: 'Unable to perform capture: ' . $error->getMessage()
+                msg: 'Unable to perform capture: ' . $error->getMessage() . '. Reverting to previous order status'
             );
+            $order->update_status(new_status: $old);
         }
     }
 }

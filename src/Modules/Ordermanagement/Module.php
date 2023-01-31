@@ -17,10 +17,10 @@ class Module
     public static function setupActions(): void
     {
         add_action(
-            hook_name: 'woocommerce_order_status_completed',
+            hook_name: 'woocommerce_order_status_changed',
             callback: 'Resursbank\Woocommerce\Modules\Ordermanagement\Completed::capture',
             priority: 10,
-            accepted_args: 1
+            accepted_args: 3
         );
     }
 }
