@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -27,7 +26,6 @@ use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
-use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
@@ -158,7 +156,6 @@ class PartPayment
                     phraseId: 'limit-new-value-above-max'
                 )
             ));
-
         } elseif ($new < $minLimit) {
             MessageBag::addError(msg: str_replace(
                 search: '%1',

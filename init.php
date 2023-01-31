@@ -19,16 +19,18 @@ declare(strict_types=1);
 
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
+use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Settings\CustomElements;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order;
-use Resursbank\Woocommerce\Settings\Advanced;
-use Resursbank\Woocommerce\Settings\Api;
-use Resursbank\Woocommerce\Util\Route;
-
 
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
-    value: substr(__DIR__, strrpos(__DIR__, '/') + 1)
+    value: substr(
+        string: __DIR__,
+        offset: strrpos(haystack: __DIR__, needle: '/') + 1
+    )
 );
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
@@ -36,7 +38,10 @@ if (!defined(constant_name: 'ABSPATH')) {
 require_once(__DIR__ . '/autoload.php');
 
 // Using same path identifier as the rest of the plugin-verse.
-define(constant_name: 'RESURSBANK_GATEWAY_PATH', value: plugin_dir_path(__FILE__));
+define(
+    constant_name: 'RESURSBANK_GATEWAY_PATH',
+    value: plugin_dir_path(file: __FILE__)
+);
 define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 // Do not touch this just yet. Converting filters to something else than snake_cases has to be done
@@ -67,4 +72,8 @@ add_action(hook_name: 'plugins_loaded', callback: static function(): void {
     ResursBank\Service\WordPress::initializeWooCommerce();
     Order::init();
     MessageBag::init();
+
+    if (Admin::isAdmin()) {
+        InvalidateCacheButton::register();
+    }
 });

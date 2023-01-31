@@ -24,7 +24,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -73,9 +72,11 @@ class OrderStatus
         }
 
         // Silently handle statuses.
-        if ($order->has_status(
-            status: ['on-hold', 'processing', 'completed', 'cancelled']
-        )) {
+        if (
+            $order->has_status(
+                status: ['on-hold', 'processing', 'completed', 'cancelled']
+            )
+        ) {
             return;
         }
 
@@ -172,13 +173,15 @@ class OrderStatus
             );
         }
 
-        if ($resursPayment->status === PaymentStatus::ACCEPTED) {
-            $order->payment_complete();
-            Metadata::setOrderMeta(
-                order: $order,
-                metaDataKey: 'resurs_hold',
-                metaDataValue: '0'
-            );
+        if ($resursPayment->status !== PaymentStatus::ACCEPTED) {
+            return;
         }
+
+        $order->payment_complete();
+        Metadata::setOrderMeta(
+            order: $order,
+            metaDataKey: 'resurs_hold',
+            metaDataValue: '0'
+        );
     }
 }
