@@ -111,7 +111,7 @@ class Route
             ? (string) $_SERVER['HTTP_REFERER']
             : '';
 
-        if ($url !== '') {
+        if ($url === '') {
             return;
         }
 
