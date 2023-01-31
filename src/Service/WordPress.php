@@ -20,6 +20,7 @@ use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 use WP_Post;
+
 use function count;
 use function defined;
 use function func_get_args;
@@ -213,7 +214,6 @@ class WordPress
         add_action('woocommerce_thankyou', 'ResursBank\Module\OrderStatus::setOrderStatusOnThankYouSuccess');
         add_action('updated_option', 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
-
     }
 
     /**
