@@ -107,7 +107,13 @@ class Route
      */
     public static function redirectBack(): void
     {
-        header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
+        $url = isset($_SERVER['HTTP_REFERER'])
+            ? (string) $_SERVER['HTTP_REFERER']
+            : '';
+
+        if ($url !== '') {
+            header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
+        }
     }
 
     /**
