@@ -121,8 +121,8 @@ class WooCommerce
             } catch (Throwable $e) {
                 // Catch errors if something goes wrong during gateway fetching.
                 // If errors occurs in wp-admin, an error note will show up, instead of crashing the entire site.
-                MessageBag::addError(msg: 'Failed to apply payment gateways.');
-                Config::getLogger()->error($e);
+                MessageBag::addError(msg: 'Failed to get list of gateways.');
+                Config::getLogger()->error(message: $e);
             }
         }
 
