@@ -20,6 +20,7 @@ use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 use WP_Post;
+
 use function count;
 use function defined;
 use function func_get_args;
@@ -46,9 +47,6 @@ class WordPress
         // Register special routes (do not put this in init.php, but after WooCommerce init).
         // If executed in wrong order, the routes will instead crash the site (even from a plugins_loaded perspective).
         Route::exec();
-
-        // Make sure Ecom2 is loaded as soon as possible.
-        Connection::setup();
 
         // Initialize adaptions.
         new ResursPlugin();
@@ -205,7 +203,6 @@ class WordPress
     private static function setupActions()
     {
         $action = Url::getRequest('action');
-        add_action('admin_notices', '\ResursBank\Service\WordPress::getAdminNotices');
         add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
         add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
         add_action('wp_ajax_' . $action, '\ResursBank\Module\PluginApi::execApi');
@@ -249,111 +246,6 @@ class WordPress
                 }
             }
         }
-    }
-
-    /**
-     * Look for admin notices.
-     * @throws Exception
-     * @noinspection PhpUnused
-     */
-    public static function getAdminNotices(): void
-    {
-        global $current_tab, $parent_file;
-
-        $internalExceptions = self::applyFilters(
-            'getPluginAdminNotices',
-            (isset($_SESSION['exception']) && is_array($_SESSION['exception']) ? $_SESSION['exception'] : [])
-        );
-
-        if (count($internalExceptions)) {
-            $class = 'notice notice-error is-dismissible';
-            /** @noinspection PhpUnusedLocalVariableInspection */
-            foreach ($internalExceptions as $index => $item) {
-                printf(
-                    '<div class="%1$s"><p>%2$s</p></div>',
-                    esc_attr($class),
-                    esc_html($item->getMessage())
-                );
-            }
-            if (isset($_SESSION['exception'])) {
-                unset($_SESSION['exception']);
-            }
-        }
-
-        $requiredVersionNotice = sprintf(
-            __(
-                'The current plugin requires at least version %s - for the moment, you are running ' .
-                'on version %s. You should consider upgrading as soon as possible.',
-                'resurs-bank-payments-for-woocommerce'
-            ),
-            WooCommerce::getRequiredVersion(),
-            WooCommerce::getWooCommerceVersion()
-        );
-
-        if ($parent_file === 'woocommerce') {
-            try {
-                WooCommerce::testRequiredVersion(false);
-            } catch (Exception $e) {
-                Config::getLogger()->error(message: $e);
-                // @todo Rewrite this section to warn about lowest requirement of WooCommerce if current installation
-                // @todo is below that version. This code is temporarily changed to release the needs of the
-                // @todo Generic-class-renderer, and need to be fixed.
-                echo Data::getEscapedHtml(
-                    content: '<div class="notice notice-error is-dismissible" style="font-weight: bold; color: #6c0c0c; background: #fac5c5;">
-                      <p>' . $requiredVersionNotice . '</p></div>
-            '
-                );
-            }
-        }
-    }
-
-    /**
-     * @param Throwable $exception
-     */
-    public static function setGenericError(Throwable $exception): void
-    {
-        // This method can't use RESURSBANK_MODULE_PREFIX directly as it can be called before WooCommmerce initiation.
-        if (
-            !isset($_SESSION) ||
-            !is_array(value: $_SESSION)
-        ) {
-            $_SESSION['exception'] = [];
-        }
-        // Make sure the errors are not duplicated.
-        if (self::canAddException(exception: $exception)) {
-            // Add the exception to the session variable since that's where we can give it to WordPress in
-            // the easiest way on page reloads/changes.
-            $_SESSION['exception'][] = $exception;
-        }
-    }
-
-    /**
-     * Look for duplicate messages in session exceptions.
-     *
-     * @param Throwable $exception
-     * @return bool
-     * @since 0.0.1.4
-     */
-    private static function canAddException(Throwable $exception): bool
-    {
-        $return = true;
-
-        if (isset($_SESSION['exception']) && is_array(value: $_SESSION['exception'])) {
-            /** @var Exception $item */
-            foreach ($_SESSION['exception'] as $exceptionItem) {
-                if ($exceptionItem instanceof Exception) {
-                    $message = $exceptionItem->getMessage();
-                    if ($exception->getMessage() === $message) {
-                        $return = false;
-                        break;
-                    }
-                }
-            }
-        } else {
-            $return = false;
-        }
-
-        return $return;
     }
 
     /**
@@ -448,19 +340,6 @@ class WordPress
                 $resursStyleSheet
             );
         }
-    }
-
-    /**
-     * @param $scriptName
-     * @param $scriptFile
-     * @param $isAdmin
-     * @param array $localizeArray
-     * @since 0.0.1.0
-     * @noinspection ParameterDefaultValueIsNotNullInspection
-     */
-    public static function setEnqueue($scriptName, $scriptFile, $isAdmin, $localizeArray = [])
-    {
-        self::doAction('getLocalizedScripts', $scriptName, $isAdmin, $localizeArray);
     }
 
     /**

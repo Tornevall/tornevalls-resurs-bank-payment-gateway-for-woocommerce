@@ -21,7 +21,7 @@ class Settings
     /**
      * Register filters (event listeners).
      */
-    public static function setup(): void
+    public static function init(): void
     {
         InvalidateCacheButton::register();
     }

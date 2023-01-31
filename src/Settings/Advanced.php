@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -28,7 +27,6 @@ use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use ResursBank\Service\WordPress;
 use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\Advanced\CacheEnabled;
 use Resursbank\Woocommerce\Database\Options\ClientId;
@@ -38,6 +36,7 @@ use Resursbank\Woocommerce\Database\Options\LogDir;
 use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
 
 /**
@@ -150,12 +149,7 @@ class Advanced
             try {
                 $return = array_merge($return, self::getStores());
             } catch (Throwable $exception) {
-                WordPress::setGenericError(
-                    exception: new Exception(
-                        message: $exception->getMessage(),
-                        previous: $exception
-                    )
-                );
+                MessageBag::addError(msg: 'Failed to get available stores.');
                 // Make sure we give the options array a chance to render an error instead of the fields so ensure
                 // the setting won't be saved by mistake when APIs are down.
                 throw $exception;

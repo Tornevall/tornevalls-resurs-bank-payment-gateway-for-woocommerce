@@ -10,6 +10,9 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Cache\Controller\Admin;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Lib\Locale\Translator;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
 /**
@@ -19,26 +22,20 @@ class Invalidate
 {
     /**
      * Invalidate cache store.
-     *
-     * @todo We should add success and error messages using new MessageBag when available. WOO-1040
      */
     public static function exec(): void
     {
         try {
             Config::getCache()->invalidate();
 
-            // @todo Add success message when message bag has been implemented.
-//            $msg = Translator::translate(phraseId: 'cache-cleared');
+            MessageBag::addSuccess(
+                msg: Translator::translate(phraseId: 'cache-cleared')
+            );
         } catch (Throwable $e) {
-            // @todo Add error message when MessageBag has been implemented.
-//            $msg = 'Failed to invalidate cache.';
+            // @todo This should be phrased through ECom, but we should avoid all Exceptions here.
+            MessageBag::addError(msg: 'Failed to clear cache.');
 
-            try {
-                Config::getLogger()->error(message: $e);
-            } catch (Throwable) {
-                // @todo Add error message when MessageBag has been implemented.
-//                $msg .= ' Failed to log error. Config::setup not working?';
-            }
+            Log::error(error: $e);
         }
     }
 }
