@@ -41,7 +41,7 @@ class Message extends Model
     }
 
     /**
-     * Ensure message si not empty.
+     * Ensure message is not empty.
      *
      * @throws EmptyValueException
      */
