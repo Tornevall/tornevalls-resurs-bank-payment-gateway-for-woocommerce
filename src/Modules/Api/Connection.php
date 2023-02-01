@@ -15,15 +15,24 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\GrantType;
 use Resursbank\Ecom\Lib\Api\Scope;
+use Resursbank\Ecom\Lib\Cache\CacheInterface;
+use Resursbank\Ecom\Lib\Cache\None;
+use Resursbank\Ecom\Lib\Log\FileLogger;
+use Resursbank\Ecom\Lib\Log\LoggerInterface;
+use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use ResursBank\Exception\MapiCredentialsException;
+use Resursbank\Woocommerce\Database\Options\Advanced\CacheEnabled;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Environment;
+use Resursbank\Woocommerce\Database\Options\LogDir;
+use Resursbank\Woocommerce\Database\Options\LogLevel;
+use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Util\Language;
 use Throwable;
+use WC_Logger;
 
 use function function_exists;
 
@@ -45,9 +54,9 @@ class Connection
             }
 
             Config::setup(
-                logger: Advanced::getLogger(),
-                cache: Advanced::getCache(),
-                logLevel: Advanced::getLogLevel(),
+                logger: self::getLogger(),
+                cache: self::getCache(),
+                logLevel: LogLevel::getLogLevel(),
                 jwtAuth: self::hasCredentials() ? self::getJwt() : null,
                 language: Language::getSiteLanguage()
             );
@@ -88,5 +97,31 @@ class Connection
                 Scope::MOCK_MERCHANT_API,
             grantType: GrantType::CREDENTIALS
         );
+    }
+
+    /**
+     * Resolve log handler based on supplied setting value. Returns a dummy
+     * if the setting is empty.
+     */
+    public static function getLogger(): LoggerInterface
+    {
+        $result = new NoneLogger();
+
+        try {
+            $result = new FileLogger(path: LogDir::getData());
+        } catch (Throwable $e) {
+            if (class_exists(class: WC_Logger::class)) {
+                (new WC_Logger())->critical(
+                    message: 'Resurs Bank: ' . $e->getMessage()
+                );
+            }
+        }
+
+        return $result;
+    }
+
+    public static function getCache(): CacheInterface
+    {
+        return CacheEnabled::isEnabled() ? new Transient() : new None();
     }
 }

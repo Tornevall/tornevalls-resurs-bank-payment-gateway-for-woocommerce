@@ -31,7 +31,7 @@ use WC_Admin_Settings;
 use WC_Settings_Page;
 
 /**
- * Resurs Bank settings for WooCommerce.
+ * Render Resurs Bank settings page for WooCommerce.
  *
  * @SuppressWarnings(PHPMD.CamelCaseMethodName)
  * @SuppressWarnings(PHPMD.CamelCaseVariableName)

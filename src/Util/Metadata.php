@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use WC_Order;
+
 use function is_array;
 
 /**

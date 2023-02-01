@@ -51,7 +51,9 @@ class Product
             ),
             vatRate: self::getVatRate(product: $product),
             totalAmountIncludingVat: round(
-                num: self::getSubtotal(product: $product) + self::getVatAmount(
+                num: self::getSubtotal(
+                    product: $product
+                ) + self::getSubtotalVat(
                     product: $product
                 ),
                 precision: 2
@@ -135,10 +137,30 @@ class Product
      *
      * @throws IllegalValueException
      */
-    private static function getVatAmount(
+    public static function getTotalVat(
         WC_Order_Item_Product $product
     ): float {
         $result = $product->get_total_tax();
+
+        if (!is_numeric(value: $result)) {
+            throw new IllegalValueException(
+                message: 'Total tax amount is not a number.'
+            );
+        }
+
+        // Our API expects two decimals, WC will sometimes give us more.
+        return round(num: (float) $result, precision: 2);
+    }
+
+    /**
+     * Get product subtotal VAT amount.
+     *
+     * @throws IllegalValueException
+     */
+    public static function getSubtotalVat(
+        WC_Order_Item_Product $product
+    ): float {
+        $result = $product->get_subtotal_tax();
 
         if (!is_numeric(value: $result)) {
             throw new IllegalValueException(
