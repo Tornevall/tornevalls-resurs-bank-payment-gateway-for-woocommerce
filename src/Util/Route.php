@@ -17,6 +17,7 @@ use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
+use Resursbank\Woocommerce\Settings\Advanced;
 use Throwable;
 
 use function is_string;
@@ -89,7 +90,7 @@ class Route
 
                 case self::ROUTE_ADMIN_CACHE_INVALIDATE:
                     Invalidate::exec();
-                    self::redirectToSettings(tab: 'advanced');
+                    self::redirectToSettings(tab: Advanced::SECTION_ID);
                     break;
 
                 default:
@@ -108,7 +109,9 @@ class Route
     ): void {
         wp_safe_redirect(
             location: admin_url(
-                path: "admin.php?page=wc-settings&tab=resursbank&section=$tab"
+                path: 'admin.php?page=wc-settings&tab='
+                    . RESURSBANK_MODULE_PREFIX
+                    . "&section=$tab"
             )
         );
     }
