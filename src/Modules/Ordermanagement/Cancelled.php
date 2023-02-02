@@ -34,8 +34,6 @@ class Cancelled extends Status
     /**
      * Performs full refund of Resurs payment.
      *
-     * @param int $orderId
-     * @param string $old
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
@@ -92,16 +90,15 @@ class Cancelled extends Status
     /**
      * Performs the actual refund operation.
      *
-     * @param string $resursPaymentId
-     * @param WC_Order $order
-     * @param string $oldStatus
      * @throws ConfigException
      */
     private static function performFullCancel(string $resursPaymentId, WC_Order $order, string $oldStatus): void
     {
         try {
             Repository::cancel(paymentId: $resursPaymentId);
-            $order->add_order_note(note: Translator::translate(phraseId: 'cancel-success'));
+            $order->add_order_note(
+                note: Translator::translate(phraseId: 'cancel-success')
+            );
         } catch (Throwable $error) {
             $errorMessage = sprintf(
                 'Unable to perform cancel order %s: %s. Reverting to previous order status',
@@ -109,9 +106,7 @@ class Cancelled extends Status
                 $error->getMessage()
             );
             Config::getLogger()->error(message: $errorMessage);
-            MessageBag::addError(
-                msg: $errorMessage
-            );
+            MessageBag::addError(msg: $errorMessage);
             $order->update_status(new_status: $oldStatus, note: $errorMessage);
         }
     }

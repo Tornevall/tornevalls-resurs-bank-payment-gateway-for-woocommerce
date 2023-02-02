@@ -78,7 +78,9 @@ class Refunded extends Status
     {
         try {
             Repository::refund(paymentId: $resursPaymentId);
-            $order->add_order_note(note: Translator::translate(phraseId: 'refund-success'));
+            $order->add_order_note(
+                note: Translator::translate(phraseId: 'refund-success')
+            );
         } catch (Throwable $error) {
             $errorMessage = sprintf(
                 "Unable to perform refund order %s: %s. Reverting to previous order status",
@@ -86,9 +88,7 @@ class Refunded extends Status
                 $error->getMessage()
             );
             Config::getLogger()->error(message: $error);
-            MessageBag::addError(
-                msg: $errorMessage
-            );
+            MessageBag::addError(msg: $errorMessage);
             $order->update_status(new_status: $oldStatus, note: $errorMessage);
         }
     }
