@@ -16,6 +16,7 @@ use ResursBank\Module\PluginHooks;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
 use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
@@ -59,6 +60,7 @@ class WooCommerce
      */
     public static function getActiveState(): bool
     {
+        OrdermanagementModule::setupActions();
         return in_array(
             needle: 'woocommerce/woocommerce.php',
             haystack: apply_filters('active_plugins', get_option('active_plugins')),
