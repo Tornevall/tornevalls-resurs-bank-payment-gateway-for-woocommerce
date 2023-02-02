@@ -48,9 +48,6 @@ class WordPress
         // If executed in wrong order, the routes will instead crash the site (even from a plugins_loaded perspective).
         Route::exec();
 
-        // Initialize adaptions.
-        new ResursPlugin();
-
         GetAddress::setup();
         CustomerType::setup();
 
