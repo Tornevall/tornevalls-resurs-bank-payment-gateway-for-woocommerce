@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
@@ -35,15 +36,15 @@ class Completed extends Status
             return;
         }
 
-        $resursBankId = $order->get_meta(key: 'resursbank_payment_id');
+        $resursPaymentId = $order->get_meta(key: 'resursbank_payment_id');
 
-        if (empty($resursBankId)) {
+        if (empty($resursPaymentId)) {
             return;
         }
 
         try {
             $resursPayment = self::getResursPayment(
-                paymentId: $resursBankId,
+                paymentId: $resursPaymentId,
                 order: $order,
                 oldStatus: $old
             );
@@ -63,7 +64,7 @@ class Completed extends Status
         }
 
         self::performCapture(
-            resursBankId: $resursBankId,
+            resursPaymentId: $resursPaymentId,
             order: $order,
             oldStatus: $old
         );
@@ -74,16 +75,22 @@ class Completed extends Status
      *
      * @throws ConfigException
      */
-    private static function performCapture(string $resursBankId, WC_Order $order, string $oldStatus): void
+    private static function performCapture(string $resursPaymentId, WC_Order $order, string $oldStatus): void
     {
         try {
-            Repository::capture(paymentId: $resursBankId);
+            Repository::capture(paymentId: $resursPaymentId);
+            $order->add_order_note(note: Translator::translate(phraseId: 'capture-success'));
         } catch (Throwable $error) {
+            $errorMessage = sprintf(
+                'Unable to perform capture order %s: %s. Reverting to previous order status',
+                $order->get_id(),
+                $error->getMessage()
+            );
             Config::getLogger()->error(message: $error);
             MessageBag::addError(
-                msg: 'Unable to perform capture: ' . $error->getMessage() . '. Reverting to previous order status'
+                msg: $errorMessage
             );
-            $order->update_status(new_status: $oldStatus);
+            $order->update_status(new_status: $oldStatus, note: $errorMessage);
         }
     }
 }

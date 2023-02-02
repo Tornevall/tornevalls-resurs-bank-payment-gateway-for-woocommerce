@@ -9,8 +9,17 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -18,14 +27,25 @@ use Throwable;
 use WC_Order;
 
 /**
- * Contains code for handling order status change to "Refunded"
+ * Contains code for handling order status change to "Cancelled"
  */
-class Refunded extends Status
+class Cancelled extends Status
 {
     /**
      * Performs full refund of Resurs payment.
      *
+     * @param int $orderId
+     * @param string $old
+     * @throws ApiException
+     * @throws AuthException
      * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
      */
     public static function refund(int $orderId, string $old): void
     {
@@ -54,7 +74,7 @@ class Refunded extends Status
             return;
         }
 
-        if (!$resursPayment->canRefund()) {
+        if (!$resursPayment->canCancel()) {
             MessageBag::addError(
                 msg: 'Resurs order can not be refunded. Reverting to previous order status.'
             );
@@ -62,7 +82,7 @@ class Refunded extends Status
             return;
         }
 
-        self::performFullRefund(
+        self::performFullCancel(
             resursPaymentId: $resursPaymentId,
             order: $order,
             oldStatus: $old
@@ -72,20 +92,23 @@ class Refunded extends Status
     /**
      * Performs the actual refund operation.
      *
+     * @param string $resursPaymentId
+     * @param WC_Order $order
+     * @param string $oldStatus
      * @throws ConfigException
      */
-    private static function performFullRefund(string $resursPaymentId, WC_Order $order, string $oldStatus): void
+    private static function performFullCancel(string $resursPaymentId, WC_Order $order, string $oldStatus): void
     {
         try {
-            Repository::refund(paymentId: $resursPaymentId);
-            $order->add_order_note(note: Translator::translate(phraseId: 'refund-success'));
+            Repository::cancel(paymentId: $resursPaymentId);
+            $order->add_order_note(note: Translator::translate(phraseId: 'cancel-success'));
         } catch (Throwable $error) {
             $errorMessage = sprintf(
-                "Unable to perform refund order %s: %s. Reverting to previous order status",
+                'Unable to perform cancel order %s: %s. Reverting to previous order status',
                 $order->get_id(),
                 $error->getMessage()
             );
-            Config::getLogger()->error(message: $error);
+            Config::getLogger()->error(message: $errorMessage);
             MessageBag::addError(
                 msg: $errorMessage
             );
