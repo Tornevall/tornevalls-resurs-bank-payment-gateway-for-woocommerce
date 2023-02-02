@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
+
 /**
  * Sets up actions for order status change hooks. Called from PluginHooks::getActions.
  */
@@ -21,9 +24,25 @@ class Module
     {
         add_action(
             hook_name: 'woocommerce_order_status_changed',
-            callback: 'Resursbank\Woocommerce\Modules\Ordermanagement\Completed::capture',
+            callback: 'Resursbank\Woocommerce\Modules\Ordermanagement\Module::callback',
             priority: 10,
             accepted_args: 3
         );
+    }
+
+    /**
+     * Match new order status to the correct method.
+     *
+     * @throws ConfigException
+     */
+    public static function callback(int $orderId, string $old, string $new): void
+    {
+        match($new) {
+            'completed' => Completed::capture(orderId: $orderId, old: $old),
+            'refunded' => Refunded::refund(orderId: $orderId, old: $old),
+            default => Config::getLogger()->debug(
+                message: 'No matching status handler found'
+            )
+        };
     }
 }
