@@ -17,17 +17,16 @@ use Throwable;
 use WC_Order;
 
 /**
- * Contains code for handling order status change to "Completed"
+ * Contains code for handling order status change to "Refunded"
  */
-class Completed extends Status
+class Refunded extends Status
 {
     /**
-     * Perform capture of Resurs payment.
+     * Performs full refund of Resurs payment.
      *
-     * @param int $orderId WooCommerce order ID
      * @throws ConfigException
      */
-    public static function capture(int $orderId, string $old): void
+    public static function refund(int $orderId, string $old): void
     {
         try {
             $order = self::getWooCommerceOrder(orderId: $orderId);
@@ -49,20 +48,20 @@ class Completed extends Status
             );
         } catch (Throwable) {
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for capture. Reverting to previous order status.'
+                msg: 'Unable to load Resurs payment information for refund. Reverting to previous order status.'
             );
             return;
         }
 
-        if (!$resursPayment->canCapture()) {
+        if (!$resursPayment->canRefund()) {
             MessageBag::addError(
-                msg: 'Resurs order can not be captured. Reverting to previous order status.'
+                msg: 'Resurs order can not be refunded. Reverting to previous order status.'
             );
             $order->update_status(new_status: $old);
             return;
         }
 
-        self::performCapture(
+        self::performFullRefund(
             resursBankId: $resursBankId,
             order: $order,
             oldStatus: $old
@@ -70,18 +69,18 @@ class Completed extends Status
     }
 
     /**
-     * Performs the actual capture.
+     * Performs the actual refund operation.
      *
      * @throws ConfigException
      */
-    private static function performCapture(string $resursBankId, WC_Order $order, string $oldStatus): void
+    private static function performFullRefund(string $resursBankId, WC_Order $order, string $oldStatus): void
     {
         try {
-            Repository::capture(paymentId: $resursBankId);
+            Repository::refund(paymentId: $resursBankId);
         } catch (Throwable $error) {
             Config::getLogger()->error(message: $error);
             MessageBag::addError(
-                msg: 'Unable to perform capture: ' . $error->getMessage() . '. Reverting to previous order status'
+                msg: 'Unable to perform refund: ' . $error->getMessage() . '. Reverting to previous order status'
             );
             $order->update_status(new_status: $oldStatus);
         }
