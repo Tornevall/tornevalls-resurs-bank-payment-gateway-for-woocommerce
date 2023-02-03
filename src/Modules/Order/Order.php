@@ -115,13 +115,14 @@ class Order
      */
     private static function getFormattedAmount(float $amount): string
     {
-        $currencyFormat = Currency::getWooCommerceCurrencyFormat();
         $currencySymbol = Currency::getWooCommerceCurrencySymbol();
+        $currencyFormat = CurrencyFormat::SYMBOL_FIRST ?
+            preg_match(
+                pattern: '/\%1\$s.*\%2\$s/',
+                subject: Currency::getWooCommerceCurrencyFormat()
+            ) : CurrencyFormat::SYMBOL_LAST;
 
-        if ($currencyFormat === CurrencyFormat::SYMBOL_FIRST) {
-            return $currencyFormat . ' ' . $amount;
-        }
-
-        return $amount . ' ' . $currencySymbol;
+        return $currencyFormat === CurrencyFormat::SYMBOL_FIRST ?
+            $currencySymbol . ' ' . $amount : $amount . ' ' . $currencySymbol;
     }
 }

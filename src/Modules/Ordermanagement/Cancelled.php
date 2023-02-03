@@ -101,7 +101,7 @@ class Cancelled extends Status
                 note: Translator::translate(phraseId: 'cancel-success')
             );
             OrderModule::setConfirmedAmountNote(
-                actionType: 'Captured ',
+                actionType: 'Cancelled ',
                 order: $order,
                 resursPayment: $cancelResponse
             );
