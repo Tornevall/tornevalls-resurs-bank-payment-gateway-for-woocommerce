@@ -100,7 +100,11 @@ class Cancelled extends Status
             $order->add_order_note(
                 note: Translator::translate(phraseId: 'cancel-success')
             );
-            OrderModule::setConfirmedAmountNote(actionType: 'Captured ', order: $order, resursPayment: $cancelResponse);
+            OrderModule::setConfirmedAmountNote(
+                actionType: 'Captured ',
+                order: $order,
+                resursPayment: $cancelResponse
+            );
         } catch (Throwable $error) {
             $errorMessage = sprintf(
                 'Unable to perform cancel order %s: %s. Reverting to previous order status',

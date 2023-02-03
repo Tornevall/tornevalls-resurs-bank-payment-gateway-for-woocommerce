@@ -114,10 +114,15 @@ class DeleteItem
 
         try {
             // Make sure we are allowed to part cancel on this order before doing it.
-            $resursPayment = Repository::get(paymentId: Metadata::getPaymentId(order: $order));
+            $resursPayment = Repository::get(
+                paymentId: Metadata::getPaymentId(order: $order)
+            );
+
             if (!$resursPayment->canCancelPartially()) {
                 throw new Exception(
-                    message: Translator::translate(phraseId:  'part-cancel-not-allowed')
+                    message: Translator::translate(
+                        phraseId: 'part-cancel-not-allowed'
+                    )
                 );
             }
         } catch (Throwable $error) {
@@ -140,6 +145,10 @@ class DeleteItem
             paymentId: OrderModule::getPaymentId(order: $order),
             orderLines: $orderLineCollection
         );
-        OrderModule::setConfirmedAmountNote(actionType: 'Cancelled', order: $order, resursPayment: $resursResponse);
+        OrderModule::setConfirmedAmountNote(
+            actionType: 'Cancelled',
+            order: $order,
+            resursPayment: $resursResponse
+        );
     }
 }

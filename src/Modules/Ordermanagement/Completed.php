@@ -83,7 +83,11 @@ class Completed extends Status
             $order->add_order_note(
                 note: Translator::translate(phraseId: 'capture-success')
             );
-            OrderModule::setConfirmedAmountNote(actionType: 'Captured ', order: $order, resursPayment: $captureResponse);
+            OrderModule::setConfirmedAmountNote(
+                actionType: 'Captured ',
+                order: $order,
+                resursPayment: $captureResponse
+            );
         } catch (Throwable $error) {
             $errorMessage = sprintf(
                 'Unable to perform capture order %s: %s. Reverting to previous order status',

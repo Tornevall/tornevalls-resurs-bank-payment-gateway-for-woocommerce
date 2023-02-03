@@ -78,9 +78,39 @@ class Order
     }
 
     /**
+     * Confirm the cancelled amount with order note.
+     *
+     * @param string $actionType Simplified way to get the proper string in the order note as they all look the same.
+     */
+    public static function setConfirmedAmountNote(string $actionType, WC_Order $order, Payment $resursPayment): void
+    {
+        // Make sure there are valid entries set.
+        if (
+            !$resursPayment->order->actionLog->count() ||
+            !isset($resursPayment->order->actionLog[$resursPayment->order->actionLog->count() - 1])
+        ) {
+            return;
+        }
+
+        /** @var ActionLog $actionLog */
+        $actionLog = $resursPayment->order->actionLog[$resursPayment->order->actionLog->count() - 1];
+        $totalAmountIncludingVat = 0;
+
+        /** @var OrderLine $orderLine */
+        foreach ($actionLog->orderLines as $orderLine) {
+            $totalAmountIncludingVat += $orderLine->unitAmountIncludingVat;
+        }
+
+        $order->add_order_note(
+            note: $actionType . ' amount ' . self::getFormattedAmount(
+                amount: $totalAmountIncludingVat
+            ) . ' in Resurs Bank system.'
+        );
+    }
+
+    /**
      * Return amounts with proper currency.
-     * @param float $amount
-     * @return string
+     *
      * @todo Centralize and let PartPayment use this display too?
      */
     private static function getFormattedAmount(float $amount): string
@@ -93,31 +123,5 @@ class Order
         }
 
         return $amount . ' ' . $currencySymbol;
-    }
-
-    /**
-     * Confirm the cancelled amount with order note.
-     * @param string $actionType Simplified way to get the proper string in the order note as they all look the same.
-     * @param WC_Order $order
-     * @param Payment $resursPayment
-     * @return void
-     */
-    public static function setConfirmedAmountNote(string $actionType, WC_Order $order, Payment $resursPayment): void
-    {
-        // Make sure there are valid entries set.
-        if ($resursPayment->order->actionLog->count() &&
-            isset($resursPayment->order->actionLog[$resursPayment->order->actionLog->count() - 1])
-        ) {
-            /** @var ActionLog $actionLog */
-            $actionLog = $resursPayment->order->actionLog[$resursPayment->order->actionLog->count() - 1];
-            $totalAmountIncludingVat = 0;
-            /** @var OrderLine $orderLine */
-            foreach ($actionLog->orderLines as $orderLine) {
-                $totalAmountIncludingVat += $orderLine->unitAmountIncludingVat;
-            }
-            $order->add_order_note(
-                note: $actionType . ' amount ' . self::getFormattedAmount(amount: $totalAmountIncludingVat) . ' in Resurs Bank system.'
-            );
-        }
     }
 }
