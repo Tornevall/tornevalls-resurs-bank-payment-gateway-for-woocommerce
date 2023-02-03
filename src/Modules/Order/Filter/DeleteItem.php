@@ -136,9 +136,10 @@ class DeleteItem
             return;
         }
 
-        Repository::cancel(
+        $resursResponse = Repository::cancel(
             paymentId: OrderModule::getPaymentId(order: $order),
             orderLines: $orderLineCollection
         );
+        OrderModule::setConfirmedAmountNote(actionType: 'Cancelled', order: $order, resursPayment: $resursResponse);
     }
 }

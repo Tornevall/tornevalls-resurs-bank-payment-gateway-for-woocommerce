@@ -23,6 +23,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Throwable;
 use WC_Order;
 
@@ -95,10 +96,11 @@ class Cancelled extends Status
     private static function performFullCancel(string $resursPaymentId, WC_Order $order, string $oldStatus): void
     {
         try {
-            Repository::cancel(paymentId: $resursPaymentId);
+            $cancelResponse = Repository::cancel(paymentId: $resursPaymentId);
             $order->add_order_note(
                 note: Translator::translate(phraseId: 'cancel-success')
             );
+            OrderModule::setConfirmedAmountNote(actionType: 'Captured ', order: $order, resursPayment: $cancelResponse);
         } catch (Throwable $error) {
             $errorMessage = sprintf(
                 'Unable to perform cancel order %s: %s. Reverting to previous order status',
