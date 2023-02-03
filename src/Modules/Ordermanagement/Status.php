@@ -72,7 +72,7 @@ class Status
      * @throws EmptyValueException
      * @throws IllegalValueException
      */
-    protected static function getResursPayment(string $paymentId, WC_Order $order, string $oldStatus): Payment
+    protected static function updateOrderStatus(string $paymentId, WC_Order $order, string $oldStatus): Payment
     {
         try {
             return Repository::get(paymentId: $paymentId);

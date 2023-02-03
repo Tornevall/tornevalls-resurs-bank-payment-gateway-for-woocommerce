@@ -42,7 +42,7 @@ class Refunded extends Status
         }
 
         try {
-            $resursPayment = self::getResursPayment(
+            $resursPayment = self::updateOrderStatus(
                 paymentId: $resursPaymentId,
                 order: $order,
                 oldStatus: $old

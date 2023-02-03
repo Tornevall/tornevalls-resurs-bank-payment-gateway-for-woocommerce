@@ -27,6 +27,7 @@ use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
 use WC_Order_Item_Shipping;
@@ -101,6 +102,7 @@ class DeleteItem
      * @throws ValidationException
      * @throws EmptyValueException
      * @throws Exception
+     * @throws Throwable
      */
     private static function exec(int $itemId): void
     {
@@ -108,6 +110,19 @@ class DeleteItem
 
         if ($order === null) {
             return;
+        }
+
+        try {
+            // Make sure we are allowed to part cancel on this order before doing it.
+            $resursPayment = Repository::get(paymentId: Metadata::getPaymentId(order: $order));
+            if (!$resursPayment->canCancelPartially()) {
+                throw new Exception(
+                    message: Translator::translate(phraseId:  'part-cancel-not-allowed')
+                );
+            }
+        } catch (Throwable $error) {
+            Config::getLogger()->error(message: $error);
+            throw $error;
         }
 
         $isShipping = self::isShipping(order: $order, itemId: $itemId);
