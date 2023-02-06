@@ -17,6 +17,7 @@ use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
+use Resursbank\Woocommerce\Settings\Advanced;
 use Throwable;
 
 use function is_string;
@@ -89,7 +90,7 @@ class Route
 
                 case self::ROUTE_ADMIN_CACHE_INVALIDATE:
                     Invalidate::exec();
-                    self::redirectBack();
+                    self::redirectToSettings(tab: Advanced::SECTION_ID);
                     break;
 
                 default:
@@ -101,21 +102,18 @@ class Route
     }
 
     /**
-     * Redirect request back to previous page.
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
+     * Redirect request to WC Settings configuration tab for our plugin.
      */
-    public static function redirectBack(): void
-    {
-        $url = isset($_SERVER['HTTP_REFERER'])
-            ? (string) $_SERVER['HTTP_REFERER']
-            : '';
-
-        if ($url === '') {
-            return;
-        }
-
-        header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
+    public static function redirectToSettings(
+        string $tab = 'api_settings'
+    ): void {
+        wp_safe_redirect(
+            location: admin_url(
+                path: 'admin.php?page=wc-settings&tab='
+                    . RESURSBANK_MODULE_PREFIX
+                    . "&section=$tab"
+            )
+        );
     }
 
     /**
@@ -179,6 +177,9 @@ class Route
         exit;
     }
 
+    /**
+     * Respond to browser with an error based on Throwable.
+     */
     public static function respondWithError(
         Throwable $exception
     ): void {
