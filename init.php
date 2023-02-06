@@ -75,14 +75,13 @@ add_action(hook_name: 'plugins_loaded', callback: static function(): void {
 
     if (Admin::isAdmin()) {
         InvalidateCacheButton::register();
+
+        // Add custom configuration tab.
+        add_action(
+            hook_name: 'woocommerce_settings_page_init',
+            callback: static function (): void {
+                new Settings();
+            }
+        );
     }
 });
-
-/* Spawn instance of Settings to append our custom configuration tab to the WC
-   configuration page. Note this cannot be placed under plugins_loaded from WP
-   because the WC_Settings_Page class is not available yet. */
-if (Admin::isAdmin()) {
-    add_action(hook_name: 'woocommerce_get_settings_pages', callback: static function (): void {
-        new Settings();
-    });
-}
