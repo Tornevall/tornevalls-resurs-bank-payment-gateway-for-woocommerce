@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Settings\CustomElements;
@@ -66,8 +67,7 @@ if (!WooCommerce::getActiveState()) {
     return;
 }
 
-// This is the part where we usually initialized the plugin by a "plugins loaded"-hook,
-// or checking that we're in "WordPress mode" with if (function_exists('add_action')) {}.
+// Setup event listeners adn resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function(): void {
     ResursBank\Service\WordPress::initializeWooCommerce();
     Order::init();
@@ -77,3 +77,12 @@ add_action(hook_name: 'plugins_loaded', callback: static function(): void {
         InvalidateCacheButton::register();
     }
 });
+
+/* Spawn instance of Settings to append our custom configuration tab to the WC
+   configuration page. Note this cannot be placed under plugins_loaded from WP
+   because the WC_Settings_Page class is not available yet. */
+if (Admin::isAdmin()) {
+    add_action(hook_name: 'woocommerce_get_settings_pages', callback: static function (): void {
+        new Settings();
+    });
+}

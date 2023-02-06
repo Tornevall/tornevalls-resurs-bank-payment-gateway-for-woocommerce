@@ -39,8 +39,8 @@ use WC_Settings_Page;
 class Settings extends WC_Settings_Page
 {
     /**
-     * Initializes settings properties and registers WordPress actions for
-     * rendering content and saving settings.
+     * Create a custom tab for our configuration page within the WC
+     * configuration.
      */
     public function __construct()
     {
