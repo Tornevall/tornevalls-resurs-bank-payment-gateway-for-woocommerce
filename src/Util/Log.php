@@ -22,8 +22,14 @@ class Log
     /**
      * Log Exception. In case there is a problem, display an error if possible.
      */
-    public static function error(Throwable $error): void
-    {
+    public static function error(
+        Throwable $error,
+        string $msg = ''
+    ): void {
+        if ($msg !== '' && Admin::isAdmin()) {
+            MessageBag::addError(msg: $msg);
+        }
+
         try {
             Config::getLogger()->error(message: $error);
         } catch (ConfigException) {

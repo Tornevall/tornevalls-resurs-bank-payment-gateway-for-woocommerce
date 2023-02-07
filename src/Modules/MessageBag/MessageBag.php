@@ -31,6 +31,11 @@ class MessageBag
     public const SESSION_KEY = 'rb-msg-bag';
 
     /**
+     * Whether to clear the bag after rendering it.
+     */
+    private static bool $clear = true;
+
+    /**
      * Initialize this module.
      */
     public static function init(): void
@@ -93,10 +98,20 @@ class MessageBag
                 echo "<div class=\"$type notice\"><p>$msg</p></div>";
             }
 
-            self::updateBag(bag: new MessageCollection(data: []));
+            if (self::$clear) {
+                self::updateBag(bag: new MessageCollection(data: []));
+            }
         } catch (Throwable $e) {
             Log::error(error: $e);
         }
+    }
+
+    /**
+     * Do not clear bag after rendering it.
+     */
+    public static function keep(): void
+    {
+        self::$clear = false;
     }
 
     /**
