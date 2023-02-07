@@ -16,13 +16,10 @@ use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
@@ -32,6 +29,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as Payment
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
 /**
@@ -40,25 +38,22 @@ use Throwable;
 class PartPayment
 {
     public const SECTION_ID = 'partpayment';
-    public const SECTION_TITLE = 'Part payment';
 
     /**
-     * @return array<array>
-     * @throws ConfigException
-     * @throws EmptyValueException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
-     * @throws ValidationException
+     * Get translated title of API Settings tab on config page.
+     */
+    public static function getTitle(): string
+    {
+        return Translator::translate(phraseId: 'part-payment');
+    }
+
+    /**
+     * Get settings.
      */
     public static function getSettings(): array
     {
         return [
             self::SECTION_ID => [
-                'title' => self::SECTION_TITLE,
                 'enabled' => self::getEnabledSetting(),
                 'payment_method' => self::getPaymentMethodSetting(),
                 'period' => self::getPeriodSetting(),
@@ -70,18 +65,19 @@ class PartPayment
     /**
      * Validate Limit setting and show error messages if the user hasn't configured the widget correctly
      *
+     * @param mixed $option
+     * @param mixed $old
+     * @param mixed $new
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
      * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
-     * @throws FilesystemException
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws TranslationException
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
@@ -169,13 +165,6 @@ class PartPayment
 
     /**
      * Fetches the enabled setting.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      */
     private static function getEnabledSetting(): array
     {
@@ -191,13 +180,6 @@ class PartPayment
 
     /**
      * Fetches the payment_method setting.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      */
     private static function getPaymentMethodSetting(): array
     {
@@ -215,13 +197,6 @@ class PartPayment
 
     /**
      * Fetches the period setting.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      */
     private static function getPeriodSetting(): array
     {
@@ -239,13 +214,6 @@ class PartPayment
 
     /**
      * Fetches the limit setting.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      */
     private static function getLimitSetting(): array
     {
