@@ -43,7 +43,7 @@ class Status
         try {
             $order = wc_get_order(the_order: $orderId);
 
-            if ( !$order instanceof WC_Order) {
+            if (!$order instanceof WC_Order) {
                 throw new IllegalTypeException(
                     message: 'Returned object not of type WC_Order'
                 );

@@ -19,7 +19,9 @@ declare(strict_types=1);
 
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
-use Resursbank\Woocommerce\Settings;
+use Resursbank\Woocommerce\Settings\Settings;
+use Resursbank\Woocommerce\SettingsPage;
+use Resursbank\Woocommerce\Settings\Filter\InitConfig;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Settings\CustomElements;
@@ -75,13 +77,6 @@ add_action(hook_name: 'plugins_loaded', callback: static function(): void {
 
     if (Admin::isAdmin()) {
         InvalidateCacheButton::register();
-
-        // Add custom configuration tab.
-        add_action(
-            hook_name: 'woocommerce_settings_page_init',
-            callback: static function (): void {
-                new Settings();
-            }
-        );
+        Settings::register();
     }
 });

@@ -17,7 +17,7 @@ use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
-use Resursbank\Woocommerce\Settings;
+use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use stdClass;

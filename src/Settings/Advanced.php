@@ -14,15 +14,11 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Store\Models\Store;
@@ -35,8 +31,10 @@ use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\LogDir;
 use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Resursbank\Woocommerce\Database\Options\StoreId;
-use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 /**
@@ -48,58 +46,63 @@ use Throwable;
 class Advanced
 {
     public const SECTION_ID = 'advanced';
-    public const SECTION_TITLE = 'Advanced Settings';
+
+    /**
+     * Get translated title of API Settings tab on config page.
+     */
+    public static function getTitle(): string
+    {
+        return Translator::translate(phraseId: 'advanced');
+    }
 
     /**
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
-     *
-     * @return array<array>
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws TranslationException
-     * @throws IllegalTypeException
      */
     public static function getSettings(): array
     {
-        try {
-            $callbackUrlSetup = Advanced::getCallbackUrlSetup();
-        } catch (Throwable) {
-            $callbackUrlSetup = [];
-        }
-
         return [
             self::SECTION_ID => [
-                'title' => self::SECTION_TITLE,
                 'store_id' => self::getStoreIdSetting(),
                 'log_dir' => self::getLogDirSetting(),
                 'log_level' => self::getLogLevelSetting(),
                 'cache_enabled' => self::getCacheEnabled(),
                 'invalidate_cache' => self::getInvalidateCacheButton(),
-                'get_address_enabled' => self::getGetAddressEnabledSetting(),
-                'callback_url' => $callbackUrlSetup,
+                'get_address_enabled' => self::getGetAddressEnabled(),
+                'callback_url' => self::getCallbackUrlTemplate(),
             ],
         ];
     }
 
     /**
-     * @throws IllegalValueException
+     * Return field to display callback URL template.
      */
-    public static function getCallbackUrlSetup(): array
+    public static function getCallbackUrlTemplate(): array
     {
-        return [
-            'id' => 'callback_url',
-            'type' => 'text',
-            'title' => 'Callback URL Template',
-            'custom_attributes' => [
-                'readonly' => 'readonly',
-            ],
-            'default' => (new ResursDefault())->getCallbackUrl(
-                callbackType: CallbackType::AUTHORIZATION
-            ),
-        ];
+        $result = [];
+
+        try {
+            $result = [
+                'id' => 'callback_url',
+                'type' => 'text',
+                'title' => 'Callback URL Template',
+                'custom_attributes' => [
+                    'readonly' => 'readonly',
+                ],
+                'default' => Url::getCallbackUrl(
+                    callbackType: CallbackType::AUTHORIZATION
+                ),
+            ];
+        } catch (Throwable $e) {
+            Log::error(
+                error: $e,
+                msg: Translator::translate(
+                    phraseId: 'generate-callback-template-failed'
+                )
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -140,9 +143,9 @@ class Advanced
         $clientId = ClientId::getData();
         $clientSecret = ClientSecret::getData();
 
-        // Default for multiple stores: Never putting merchants on the first available choice.
+        // Default for multiple stores: avoid auto-selecting first store.
         $return = [
-            '' => 'Select Store',
+            '' => Translator::translate(phraseId: 'select-store'),
         ];
 
         if ($clientId !== '' && $clientSecret !== '') {
@@ -186,14 +189,7 @@ class Advanced
     }
 
     /**
-     * Fetches log_dir setting.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Return array for Log Dir/Path setting.
      */
     private static function getLogDirSetting(): array
     {
@@ -209,14 +205,7 @@ class Advanced
     }
 
     /**
-     * Fetches the log_level setting.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Return array for Log Level setting.
      */
     private static function getLogLevelSetting(): array
     {
@@ -231,12 +220,7 @@ class Advanced
     }
 
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Return array for Cache Enabled setting.
      */
     private static function getCacheEnabled(): array
     {
@@ -249,12 +233,7 @@ class Advanced
     }
 
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Return array for Invalidate Cache button setting.
      */
     private static function getInvalidateCacheButton(): array
     {
@@ -266,16 +245,9 @@ class Advanced
     }
 
     /**
-     * Fetches the get_address_enabled setting.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Return array for Get Address Enabled setting.
      */
-    private static function getGetAddressEnabledSetting(): array
+    private static function getGetAddressEnabled(): array
     {
         return [
             'id' => EnableGetAddress::getName(),
@@ -289,32 +261,35 @@ class Advanced
     }
 
     /**
-     * Fetches the store id setting.
+     * Get the array for Store ID selector setting.
      */
     private static function getStoreIdSetting(): array
     {
+        $result = [
+            'id' => StoreId::getName(),
+            'type' => 'select',
+            'title' => Translator::translate(phraseId: 'store-id'),
+        ];
+
         try {
-            $storeIdSetting = [
-                'id' => StoreId::getName(),
-                'title' => Translator::translate(phraseId: 'store-id'),
-                'type' => 'select',
-                'default' => StoreId::getDefault(),
-                'options' => self::getStoreSelector(),
-            ];
+            // Both can cause Throwable, do them one at a time.
+            $result['default'] = StoreId::getDefault();
+            $result['options'] = self::getStoreSelector();
         } catch (Throwable $e) {
-            $storeIdSetting = [
-                'id' => StoreId::getName(),
-                'title' => Translator::translate(phraseId: 'store-id'),
-                'type' => 'title',
-                'default' => StoreId::getDefault(),
-                'desc_tip' => true,
-                'desc' => sprintf(
-                    'Could not fetch stores from Resurs Bank: %s.',
-                    $e->getMessage()
-                ),
-            ];
+            $result = array_merge($result, [
+                'type' => 'text',
+                'custom_attributes' => [
+                    'readonly' => 'readonly',
+                ],
+            ]);
+
+            // @todo Error message displayed in admin trails one page load.
+            Log::error(
+                error: $e,
+                msg: Translator::translate(phraseId: 'get-stores-failed')
+            );
         }
 
-        return $storeIdSetting;
+        return $result;
     }
 }
