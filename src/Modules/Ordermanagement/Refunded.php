@@ -13,6 +13,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Refund;
 use Throwable;
 use WC_Order;
 
@@ -66,6 +67,24 @@ class Refunded extends Status
             order: $order,
             oldStatus: $old
         );
+    }
+
+    public static function partialRefund(int $orderId, int $refundId): void
+    {
+        $refundOrder = wc_get_order($refundId);
+        $order = wc_get_order($orderId);
+        $resursBankId = $order->get_meta(key: 'resursbank_payment_id');
+
+        // Does not work as refundOrder is of the wrong type, need to handle conversion in another way
+        // Have changed the allowed types. For Monday: Test and move on (hopefully)
+
+        $items = Refund::getOrderLines(order: $refundOrder);
+
+        if (empty($items)) {
+            Repository::refund(paymentId: $resursBankId);
+        } else {
+            Repository::refund(paymentId: $resursBankId, orderLines: $items);
+        }
     }
 
     /**
