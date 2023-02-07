@@ -11,7 +11,9 @@ namespace Resursbank\Woocommerce\Util;
 
 use Exception;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
+use ResursBank\Service\WooCommerce;
 use RuntimeException;
 
 use function is_string;
@@ -261,5 +263,21 @@ class Url
         }
 
         return $return;
+    }
+
+    /**
+     * Generate URL for MAPI callbacks.
+     *
+     * @throws IllegalValueException
+     */
+    public static function getCallbackUrl(CallbackType $callbackType): string
+    {
+        // @todo Switch getWcApiUrl to utils.
+        return self::getQueryArg(
+            baseUrl: WooCommerce::getWcApiUrl(),
+            arguments: [
+                'mapi-callback' => $callbackType->value,
+            ]
+        );
     }
 }

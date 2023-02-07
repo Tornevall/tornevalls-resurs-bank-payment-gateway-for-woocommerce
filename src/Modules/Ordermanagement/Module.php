@@ -43,7 +43,7 @@ class Module
      */
     public static function callback(int $orderId, string $old, string $new): void
     {
-        match($new) {
+        match ($new) {
             'completed' => Completed::capture(orderId: $orderId, old: $old),
             //'refunded' => Refunded::refund(orderId: $orderId, old: $old),
             default => Config::getLogger()->debug(

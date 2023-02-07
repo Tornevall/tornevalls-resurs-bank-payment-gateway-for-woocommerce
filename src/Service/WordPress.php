@@ -13,6 +13,7 @@ use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
+use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -47,9 +48,6 @@ class WordPress
         // Register special routes (do not put this in init.php, but after WooCommerce init).
         // If executed in wrong order, the routes will instead crash the site (even from a plugins_loaded perspective).
         Route::exec();
-
-        // Initialize adaptions.
-        new ResursPlugin();
 
         GetAddress::setup();
         CustomerType::setup();
@@ -140,11 +138,6 @@ class WordPress
         // Generic calls.
         add_filter('plugin_action_links', 'ResursBank\Service\WooCommerce::getPluginAdminUrl', 10, 2);
         add_filter('plugin_row_meta', 'ResursBank\Module\Data::getPluginRowMeta', 10, 2);
-        // Data calls.
-        add_filter('rbwc_get_plugin_information', 'ResursBank\Module\Data::getPluginInformation');
-        // Helper calls.
-        add_filter('woocommerce_get_settings_pages', 'ResursBank\Service\WooCommerce::getSettingsPages');
-        add_filter('is_protected_meta', 'ResursBank\Service\WooCommerce::getProtectedMetaData', 10, 3);
 
         if (Enabled::isEnabled()) {
             // Get list of current payment gateways (for admin parts).
@@ -622,32 +615,6 @@ class WordPress
         $return['can_import_deprecated_credentials'] = false;
         $return['deprecated_unixtime'] = 0;
 
-        if (!empty(Data::getResursOptionDeprecated('login'))) {
-            $importDeprecated = (int)Data::getResursOption('resursImportCredentials');
-
-            $return['deprecated_unixtime'] = $importDeprecated;
-            $return['deprecated_timestamp'] = Date('Y-m-d, H:i', $importDeprecated);
-            $return['can_import_deprecated_credentials'] = $importDeprecated === 0;
-            $return['imported_credentials'] = __(
-                'Credentials was imported from an older platform',
-                'resurs-bank-payments-for-woocommerce'
-            );
-
-            if (!$importDeprecated) {
-                $return['resurs_deprecated_credentials'] = __(
-                    'Import credentials from Resurs v2.x',
-                    'resurs-bank-payments-for-woocommerce'
-                );
-                $return['credential_import_success'] = __(
-                    'Import successful.',
-                    'resurs-bank-payments-for-woocommerce'
-                );
-                $return['credential_import_failed'] = __(
-                    'Import failed.',
-                    'resurs-bank-payments-for-woocommerce'
-                );
-            }
-        }
         return $return;
     }
 }

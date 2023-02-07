@@ -9,18 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Woocommerce\Database\Options\ClientId;
 use Resursbank\Woocommerce\Database\Options\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\Environment;
+use Resursbank\Woocommerce\Util\Translator;
 
 /**
  * API settings section.
@@ -31,13 +25,6 @@ class Api
 
     /**
      * Get translated title of API Settings tab on config page.
-     *
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws TranslationException
      */
     public static function getTitle(): string
     {
@@ -47,19 +34,11 @@ class Api
     /**
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
-     *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      */
     public static function getSettings(): array
     {
         return [
             self::SECTION_ID => [
-                'title' => self::getTitle(),
                 'enabled' => self::getEnabled(),
                 'environment' => self::getEnvironment(),
                 'client_id' => self::getClientId(),
@@ -69,12 +48,7 @@ class Api
     }
 
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Get Enabled setting array.
      */
     private static function getEnabled(): array
     {
@@ -87,12 +61,7 @@ class Api
     }
 
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Get Environment setting array.
      */
     private static function getEnvironment(): array
     {
@@ -114,12 +83,7 @@ class Api
     }
 
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Get Client ID setting array.
      */
     private static function getClientId(): array
     {
@@ -132,12 +96,7 @@ class Api
     }
 
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
+     * Get Client Secret setting array.
      */
     private static function getClientSecret(): array
     {

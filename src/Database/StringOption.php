@@ -28,6 +28,8 @@ class StringOption extends Option
 
     /**
      * Return default value.
+     *
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public static function getDefault(): string
     {
