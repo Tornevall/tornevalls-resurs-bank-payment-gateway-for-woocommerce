@@ -106,8 +106,9 @@ class SettingsPage extends WC_Settings_Page
                 options: Settings::getSection(section: $section)
             );
         } catch (Throwable $e) {
-            Log::error(
-                error: $e,
+            Log::error(error: $e);
+
+            $this->renderError(
                 msg: Translator::translate(phraseId: 'render-settings-failed')
             );
         }
@@ -137,14 +138,31 @@ class SettingsPage extends WC_Settings_Page
                 )
             );
         } catch (Throwable $e) {
-            echo Data::getEscapedHtml(content:
-                '<div style="border: 1px solid #590804; padding: 5px; color: #fff; background: #8a110a;">' .
-                'Failed to render payment methods. Please review logs for more information.' .
-                '<br />' .
-                '<b>Exception</b>' .
-                '<br />' .
-                $e->getMessage() .
-                '</div>');
+            Log::error(error: $e);
+
+            $this->renderError(
+                msg: Translator::translate(
+                    phraseId: 'payment-methods-widget-render-failed'
+                )
+            );
         }
+    }
+
+    /**
+     * Render an error message (cannot use the message bag since that has
+     * already been rendered).
+     */
+    private function renderError(
+        string $msg
+    ): void {
+        $seeLog = Translator::translate(phraseId: 'see-log');
+
+        echo <<<EX
+<div class="error notice">
+  $msg
+  <br />
+  $seeLog
+</div>
+EX;
     }
 }

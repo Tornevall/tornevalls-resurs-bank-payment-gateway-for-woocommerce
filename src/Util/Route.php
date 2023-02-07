@@ -15,6 +15,7 @@ use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Resursbank\Woocommerce\Settings\Advanced;
@@ -114,17 +115,21 @@ class Route
                     . "&section=$tab"
             )
         );
+
+        MessageBag::keep();
     }
 
     /**
      * Resolve full URL.
      *
      * @throws HttpException|IllegalValueException
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public static function getUrl(
-        string $route
+        string $route,
+        bool $admin = false
     ): string {
-        $url = get_site_url();
+        $url = !$admin ? get_site_url() : get_admin_url();
 
         if (!is_string(value: $url)) {
             throw new HttpException(

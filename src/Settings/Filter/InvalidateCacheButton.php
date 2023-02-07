@@ -9,9 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings\Filter;
 
-use Resursbank\Ecom\Lib\Locale\Translator;
+use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Sanitize;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
 /**
@@ -27,10 +28,16 @@ class InvalidateCacheButton
         add_action(
             hook_name: 'woocommerce_admin_field_rbinvalidatecachebutton',
             callback: static function (): void {
-                $url = Sanitize::sanitizeHtml(html: self::getUrl());
-                $title = Sanitize::sanitizeHtml(html: self::getTitle());
+                try {
+                    $url = Sanitize::sanitizeHtml(
+                        html: Route::getUrl(
+                            route: Route::ROUTE_ADMIN_CACHE_INVALIDATE,
+                            admin: true
+                        )
+                    );
+                    $title = Translator::translate(phraseId: 'clear-cache');
 
-                echo <<<EX
+                    echo <<<EX
 <tr>
   <th scope="row" class="titledesc" />
   <td class="forminp">
@@ -38,31 +45,14 @@ class InvalidateCacheButton
   </td>
 </tr>
 EX;
+                } catch (Throwable $e) {
+                    // @todo Trails one page load, message bag already rendered.
+                    Log::error(
+                        error: $e,
+                        msg: 'Failed rendering clear cache button. See log'
+                    );
+                }
             }
         );
-    }
-
-    /**
-     * Return button title.
-     */
-    private static function getTitle(): string
-    {
-        try {
-            return Translator::translate(phraseId: 'clear-cache');
-        } catch (Throwable) {
-            return 'Clear cache';
-        }
-    }
-
-    /**
-     * Return controller URL.
-     */
-    private static function getUrl(): string
-    {
-        try {
-            return Route::getUrl(route: Route::ROUTE_ADMIN_CACHE_INVALIDATE);
-        } catch (Throwable) {
-            return 'Failed to generate button to clear cache store.';
-        }
     }
 }

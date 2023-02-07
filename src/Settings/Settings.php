@@ -17,12 +17,15 @@ use Throwable;
 use function is_array;
 
 /**
- * Setup configuration page, related event listeners and resources.
+ * General business logic for settings.
+ *
+ * NOTE: This is not part of Resursbank\Woocommerce\SettingsPage because that
+ * class extends a WC class not available to us when we need to register events.
  */
 class Settings
 {
     /**
-     * Add event listener to render the custom button element.
+     * Setup event listeners to render our configuration page and save settings.
      */
     public static function register(): void
     {
