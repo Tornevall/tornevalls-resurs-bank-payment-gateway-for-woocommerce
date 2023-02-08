@@ -45,7 +45,11 @@ class Product
         WC_Order_Item_Product $product
     ): OrderLine {
         return new OrderLine(
-            quantity: -self::getQuantity(product: $product),
+            quantity: self::getQuantity(
+                product: $product
+            ) === 0 ? 1 : -self::getQuantity(
+                product: $product
+            ),
             quantityUnit: Translator::translate(
                 phraseId: 'default-quantity-unit'
             ),

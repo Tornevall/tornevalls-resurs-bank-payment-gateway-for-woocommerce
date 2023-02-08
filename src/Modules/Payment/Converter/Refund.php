@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Payment\Converter;
 
-use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 use Exception;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -21,6 +20,7 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Refund\Product;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Refund\Shipping;
 use WC_Order;
 use WC_Order_Item_Product;
+use WC_Order_Refund;
 
 use function array_merge;
 use function in_array;
@@ -37,7 +37,7 @@ class Refund
      * @throws Exception
      */
     public static function getOrderLines(
-        WC_Order|OrderRefund $order,
+        WC_Order_Refund $order,
         array $filter = [],
         bool $includeShipping = true
     ): OrderLineCollection {
@@ -92,7 +92,7 @@ class Refund
      * @return array<array-key, mixed>
      * @throws IllegalValueException
      */
-    private static function getOrderContent(WC_Order|OrderRefund $order): array
+    private static function getOrderContent(WC_Order|WC_Order_Refund $order): array
     {
         $result = $order->get_items();
 

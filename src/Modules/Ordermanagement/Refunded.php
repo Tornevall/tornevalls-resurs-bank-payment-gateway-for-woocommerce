@@ -11,11 +11,14 @@ namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Refund;
 use Throwable;
-use WC_Order;
+use WC_Order_Refund;
 
 /**
  * Contains code for handling order status change to "Refunded"
@@ -23,85 +26,153 @@ use WC_Order;
 class Refunded extends Status
 {
     /**
-     * Performs full refund of Resurs payment.
+     * Attempts to perform refund call to Resurs API.
      *
      * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws Throwable
      */
-    public static function refund(int $orderId, string $old): void
+    public static function performRefund(int $orderId, int $refundId): void
     {
-        try {
-            $order = self::getWooCommerceOrder(orderId: $orderId);
-        } catch (Throwable) {
-            return;
-        }
+        $refundOrder = self::getRefundOrder(refundId: $refundId);
 
-        $resursBankId = $order->get_meta(key: 'resursbank_payment_id');
-
-        if (empty($resursBankId)) {
-            return;
-        }
+        $resursBankId = self::getResursBankId(orderId: $orderId);
 
         try {
-            $resursPayment = self::getResursPayment(
-                paymentId: $resursBankId,
-                order: $order,
-                oldStatus: $old
-            );
-        } catch (Throwable) {
-            MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for refund. Reverting to previous order status.'
-            );
+            $resursBankPayment = Repository::get(paymentId: $resursBankId);
+        } catch (Throwable $error) {
+            Config::getLogger()->error(message: $error);
             return;
         }
 
-        if (!$resursPayment->canRefund()) {
-            MessageBag::addError(
-                msg: 'Resurs order can not be refunded. Reverting to previous order status.'
-            );
-            $order->update_status(new_status: $old);
-            return;
+        // Fetch items
+        $items = self::getRefundItems(refundOrder: $refundOrder);
+
+        // Confirm that we're not trying to refund too large an amount
+        $refundableAmount = $resursBankPayment->order->capturedAmount - $resursBankPayment->order->refundedAmount;
+
+        if ($refundOrder->get_amount() > $refundableAmount) {
+            $errorMessage = 'Refund amount (' . $refundOrder->get_amount() . ') is too great, must be ' .
+                            $refundableAmount . ' or less. Aborting refund.';
+            MessageBag::addError(msg: $errorMessage);
+            throw new IllegalValueException(message: $errorMessage);
         }
 
-        self::performFullRefund(
-            resursBankId: $resursBankId,
-            order: $order,
-            oldStatus: $old
-        );
-    }
-
-    public static function partialRefund(int $orderId, int $refundId): void
-    {
-        $refundOrder = wc_get_order($refundId);
-        $order = wc_get_order($orderId);
-        $resursBankId = $order->get_meta(key: 'resursbank_payment_id');
-
-        // Does not work as refundOrder is of the wrong type, need to handle conversion in another way
-        // Have changed the allowed types. For Monday: Test and move on (hopefully)
-
-        $items = Refund::getOrderLines(order: $refundOrder);
-
-        if (empty($items)) {
-            Repository::refund(paymentId: $resursBankId);
-        } else {
-            Repository::refund(paymentId: $resursBankId, orderLines: $items);
+        // Perform refund operation
+        try {
+            if (sizeof($items->getData()) === 0) {
+                Repository::refund(paymentId: $resursBankId);
+            } else {
+                Repository::refund(
+                    paymentId: $resursBankId,
+                    orderLines: $items
+                );
+            }
+        } catch (Throwable $error) {
+            MessageBag::addError(
+                msg: 'Unable to perform refund operation: ' . $error->getMessage() .
+                     ', please verify order state manually.'
+            );
+            Config::getLogger()->error(message: $error);
         }
     }
 
     /**
-     * Performs the actual refund operation.
+     * Fetches the refund order object or throws an exception if this fails.
      *
+     * @throws IllegalTypeException
+     * @throws Throwable
      * @throws ConfigException
      */
-    private static function performFullRefund(string $resursBankId, WC_Order $order, string $oldStatus): void
+    private static function getRefundOrder(int $refundId): WC_Order_Refund
     {
         try {
-            Repository::refund(paymentId: $resursBankId);
+            $order = wc_get_order($refundId);
+
+            if (!$order instanceof WC_Order_Refund) {
+                if (is_object(value: $order)) {
+                    $type = get_class(object: $order);
+                } else {
+                    $type = gettype(value: $order);
+                }
+
+                throw new IllegalTypeException(
+                    message: 'wc_get_order returned object of type ' . $type .
+                        ', WC_Order_Refund expected.'
+                );
+            }
+
+            return $order;
         } catch (Throwable $error) {
-            Config::getLogger()->error(message: $error);
             MessageBag::addError(
-                msg: 'Unable to perform refund: ' . $error->getMessage() . '. Reverting to previous order status'
+                msg: 'Unable to load refund information. Aborting refund.'
             );
-            $order->update_status(new_status: $oldStatus);
+            Config::getLogger()->error(message: $error);
+            throw $error;
+        }
+    }
+
+    /**
+     * Fetch Resurs Bank payment reference.
+     *
+     * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws Throwable
+     */
+    private static function getResursBankId(int $orderId): string
+    {
+        try {
+            $order = wc_get_order($orderId);
+
+            $resursBankId = $order->get_meta(key: 'resursbank_payment_id');
+
+            if (!is_string(value: $resursBankId)) {
+                MessageBag::addError(
+                    msg: 'Unable to load Resurs Bank payment reference from order. Aborting refund.'
+                );
+                throw new IllegalTypeException(
+                    message: 'Fetched Resurs Bank payment reference is not a string. Aborting refund.'
+                );
+            }
+
+            if ($resursBankId === '') {
+                MessageBag::addError(
+                    msg: 'Unable to load Resurs Bank payment reference from order. Aborting refund.'
+                );
+                throw new IllegalValueException(
+                    message: 'Fetched Resurs Bank payment reference is empty. Aborting refund.'
+                );
+            }
+
+            return $resursBankId;
+        } catch (Throwable $error) {
+            MessageBag::addError(
+                msg: 'Unable to load order information. Aborting refund.'
+            );
+            Config::getLogger()->error(message: $error);
+            throw $error;
+        }
+    }
+
+    /**
+     * Fetch refund order lines.
+     *
+     * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws Throwable
+     */
+    private static function getRefundItems(WC_Order_Refund $refundOrder): OrderLineCollection
+    {
+        try {
+            return Refund::getOrderLines(order: $refundOrder);
+        } catch(Throwable $error) {
+            MessageBag::addError(
+                msg: 'Error encountered while attempting to fetch order lines. Aborting refund.'
+            );
+            Config::getLogger()->error(message: $error);
+            throw $error;
         }
     }
 }

@@ -66,7 +66,9 @@ class Shipping
      */
     public static function hasShippingCredit(OrderRefund $order): bool
     {
-        return self::getTotal(order: $order) + self::getTax(order: $order) !== 0.0;
+        return self::getTotal(order: $order) + self::getTax(
+            order: $order
+        ) !== 0.0;
     }
 
     /**
