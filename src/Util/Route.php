@@ -12,7 +12,9 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
+use Resursbank\Woocommerce\Modules\Callback\Controller\Callback;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -157,7 +159,7 @@ class Route
     ): void {
         header(header: 'Content-Type: application/json');
         header(header: 'Content-Length: ' . strlen(string: $body));
-        http_response_code(response_code: $code);
+        header(header: 'Status: ' . $code);
 
         echo $body;
     }

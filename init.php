@@ -20,11 +20,8 @@ declare(strict_types=1);
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\SettingsPage;
-use Resursbank\Woocommerce\Settings\Filter\InitConfig;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Settings\CustomElements;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order;
 

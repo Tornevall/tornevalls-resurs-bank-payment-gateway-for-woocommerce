@@ -270,14 +270,21 @@ class Url
      *
      * @throws IllegalValueException
      */
-    public static function getCallbackUrl(CallbackType $callbackType): string
+    public static function getCallbackUrl(CallbackType $type): string
     {
-        // @todo Switch getWcApiUrl to utils.
         return self::getQueryArg(
-            baseUrl: WooCommerce::getWcApiUrl(),
+            baseUrl: self::getWcApiUrl(),
             arguments: [
-                'mapi-callback' => $callbackType->value,
+                'callback' => $type->value,
             ]
         );
+    }
+
+    /**
+     * Get URL for WC API.
+     */
+    public static function getWcApiUrl(): string
+    {
+        return sprintf('%s', WC()->api_request_url(request: 'resursbank'));
     }
 }

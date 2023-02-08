@@ -245,15 +245,6 @@ class WooCommerce
     }
 
     /**
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getWcApiUrl(): string
-    {
-        return sprintf('%s', WC()->api_request_url('ResursDefault'));
-    }
-
-    /**
      * @param $key
      * @return mixed
      * @throws Exception

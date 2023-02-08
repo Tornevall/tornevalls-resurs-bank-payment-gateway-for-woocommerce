@@ -15,6 +15,7 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -40,7 +41,6 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Participa
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use ResursBank\Module\Callback as CallbackModule;
 use ResursBank\Module\Data;
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Database\Options\Enabled;
@@ -239,55 +239,6 @@ class ResursDefault extends WC_Payment_Gateway
     }
 
     /**
-     * This is where we handle all API calls from the outside (Resurs).
-     *
-     * @throws Exception
-     */
-    public function getApiRequest(): void
-    {
-        if (
-            isset($_REQUEST['mapi-callback']) &&
-            is_string(value: $_REQUEST['mapi-callback'])
-        ) {
-            $response = [
-                'success' => false,
-                'message' => '',
-            ];
-
-            // Callback will respond and exit.
-            try {
-                // The way we handle callbacks now do not require a boolean the same way as before. Instead, we will
-                // just handle exceptions as errors.
-                CallbackModule::processCallback(
-                    callbackType: CallbackType::from(
-                        value: strtoupper(string: $_REQUEST['mapi-callback'])
-                    )
-                );
-                $response['success'] = true;
-            } catch (Throwable $e) {
-                Config::getLogger()->error(message: $e);
-                $response['message'] = $e->getMessage();
-            }
-
-            $responseCode = $response['success'] ? 202 : 408;
-
-            Config::getLogger()->debug(
-                message: 'Callback response, code ' . ($response['success'] ? 202 : 408) . '.'
-            );
-            Config::getLogger()->debug(
-                message: print_r(value: $response, return: true)
-            );
-
-            Route::respond(
-                body: json_encode(value: $response),
-                code: $responseCode
-            );
-        }
-
-        exit;
-    }
-
-    /**
      * Feature to check if payment method is still available in checkout after internal cart/method controls.
      */
     private function isAvailableInCheckout(bool $return): bool
@@ -410,8 +361,6 @@ class ResursDefault extends WC_Payment_Gateway
             // This is built up from "getPaymentMethods".
             $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
         }
-
-        $this->setActions();
     }
 
     /**
@@ -471,17 +420,6 @@ class ResursDefault extends WC_Payment_Gateway
         }
 
         return $return;
-    }
-
-    /**
-     * Prepare actions that WooCommerce may want to throw at us.
-     */
-    private function setActions(): void
-    {
-        add_action(
-            hook_name: 'woocommerce_api_resursdefault',
-            callback: [$this, 'getApiRequest']
-        );
     }
 
     /**
@@ -782,6 +720,7 @@ class ResursDefault extends WC_Payment_Gateway
 
     /**
      * @throws IllegalValueException
+     * @throws HttpException
      */
     private function getOptions(WC_Order $order): Options
     {
@@ -807,14 +746,10 @@ class ResursDefault extends WC_Payment_Gateway
             ),
             callbacks: new Callbacks(
                 authorization: new Callback(
-                    url: Url::getCallbackUrl(
-                        callbackType: CallbackType::AUTHORIZATION
-                    )
+                    url: Url::getCallbackUrl(type: CallbackType::AUTHORIZATION)
                 ),
                 management: new Callback(
-                    url: Url::getCallbackUrl(
-                        callbackType: CallbackType::MANAGEMENT
-                    )
+                    url: Url::getCallbackUrl(type: CallbackType::MANAGEMENT)
                 )
             ),
             timeToLiveInMinutes: 120
