@@ -75,6 +75,7 @@ class Refunded extends Status
                      ', please verify order state manually.'
             );
             Config::getLogger()->error(message: $error);
+            throw $error;
         }
     }
 
