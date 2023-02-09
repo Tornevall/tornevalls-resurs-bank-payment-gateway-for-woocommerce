@@ -11,9 +11,6 @@ namespace Resursbank\Woocommerce\Modules\Order;
 
 use Exception;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog;
-use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Woocommerce\Modules\Order\Filter\DeleteItem;
 use Resursbank\Woocommerce\Util\Currency;
@@ -75,38 +72,6 @@ class Order
         }
 
         return $id;
-    }
-
-    /**
-     * Confirm the cancelled amount with order note.
-     *
-     * @param string $actionType Simplified way to get the proper string in the order note as they all look the same.
-     * @todo Centralize feature for confirmed amount notes (WOO-1066 + ECP-400).
-     */
-    public static function setConfirmedAmountNote(string $actionType, WC_Order $order, Payment $resursPayment): void
-    {
-        // Make sure there are valid entries set.
-        if (
-            !$resursPayment->order->actionLog->count() ||
-            !isset($resursPayment->order->actionLog[$resursPayment->order->actionLog->count() - 1])
-        ) {
-            return;
-        }
-
-        /** @var ActionLog $actionLog */
-        $actionLog = $resursPayment->order->actionLog[$resursPayment->order->actionLog->count() - 1];
-        $totalAmountIncludingVat = 0;
-
-        /** @var OrderLine $orderLine */
-        foreach ($actionLog->orderLines as $orderLine) {
-            $totalAmountIncludingVat += $orderLine->unitAmountIncludingVat;
-        }
-
-        $order->add_order_note(
-            note: $actionType . ' amount ' . self::getFormattedAmount(
-                amount: $totalAmountIncludingVat
-            ) . ' in Resurs Bank system.'
-        );
     }
 
     /**

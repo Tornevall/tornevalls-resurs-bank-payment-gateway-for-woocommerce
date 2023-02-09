@@ -9,21 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
@@ -36,8 +26,6 @@ class Cancelled extends Status
     /**
      * Cancel full refund of Resurs payment.
      *
-     * @param int $orderId
-     * @param string $old
      * @throws ConfigException
      */
     public static function cancel(int $orderId, string $old): void
@@ -90,14 +78,9 @@ class Cancelled extends Status
     private static function performFullCancel(string $resursPaymentId, WC_Order $order, string $oldStatus): void
     {
         try {
-            $cancelResponse = Repository::cancel(paymentId: $resursPaymentId);
+            Repository::cancel(paymentId: $resursPaymentId);
             $order->add_order_note(
                 note: Translator::translate(phraseId: 'cancel-success')
-            );
-            OrderModule::setConfirmedAmountNote(
-                actionType: 'Cancelled ',
-                order: $order,
-                resursPayment: $cancelResponse
             );
         } catch (Throwable $error) {
             $errorMessage = sprintf(

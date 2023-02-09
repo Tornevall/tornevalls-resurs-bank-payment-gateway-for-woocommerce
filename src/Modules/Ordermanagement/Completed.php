@@ -14,7 +14,6 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
@@ -80,14 +79,9 @@ class Completed extends Status
     private static function performCapture(string $resursPaymentId, WC_Order $order, string $oldStatus): void
     {
         try {
-            $captureResponse = Repository::capture(paymentId: $resursPaymentId);
+            Repository::capture(paymentId: $resursPaymentId);
             $order->add_order_note(
                 note: Translator::translate(phraseId: 'capture-success')
-            );
-            OrderModule::setConfirmedAmountNote(
-                actionType: 'Captured ',
-                order: $order,
-                resursPayment: $captureResponse
             );
         } catch (Throwable $error) {
             $errorMessage = sprintf(

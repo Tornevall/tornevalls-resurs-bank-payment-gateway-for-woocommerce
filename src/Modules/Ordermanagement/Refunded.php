@@ -45,6 +45,7 @@ class Refunded extends Status
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws Throwable
+     * @noinspection PhpUnused
      */
     public static function performRefund(int $orderId, int $refundId): void
     {
@@ -193,11 +194,9 @@ class Refunded extends Status
             $order = wc_get_order(the_order: $refundId);
 
             if (!$order instanceof WC_Order_Refund) {
-                if (is_object(value: $order)) {
-                    $type = get_class(object: $order);
-                } else {
-                    $type = gettype(value: $order);
-                }
+                $type = is_object(value: $order) ? get_class(
+                    object: $order
+                ) : gettype(value: $order);
 
                 throw new IllegalTypeException(
                     message: str_replace(
