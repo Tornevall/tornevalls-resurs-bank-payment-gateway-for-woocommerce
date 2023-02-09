@@ -24,6 +24,7 @@ use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
+use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
 
@@ -47,7 +48,7 @@ class Cancelled extends Status
             return;
         }
 
-        $resursPaymentId = $order->get_meta(key: 'resursbank_payment_id');
+        $resursPaymentId = Metadata::getPaymentId(order: $order);
 
         if (empty($resursPaymentId)) {
             return;
