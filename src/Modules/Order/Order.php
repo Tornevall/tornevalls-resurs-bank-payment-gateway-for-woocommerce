@@ -114,7 +114,7 @@ class Order
      *
      * @todo Centralize and let PartPayment use this display too?
      */
-    private static function getFormattedAmount(float $amount): string
+    public static function getFormattedAmount(float $amount): string
     {
         $currencySymbol = Currency::getWooCommerceCurrencySymbol();
         $currencyFormat = CurrencyFormat::SYMBOL_FIRST ?
