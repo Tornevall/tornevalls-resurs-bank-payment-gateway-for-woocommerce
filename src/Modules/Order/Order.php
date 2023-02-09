@@ -112,7 +112,7 @@ class Order
     /**
      * Return amounts with proper currency.
      *
-     * @todo Centralize and let PartPayment use this display too?
+     * @todo Centralize and let PartPayment use this display too. See WOO-1067.
      */
     public static function getFormattedAmount(float $amount): string
     {
