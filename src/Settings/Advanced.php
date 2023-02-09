@@ -69,28 +69,60 @@ class Advanced
                 'cache_enabled' => self::getCacheEnabled(),
                 'invalidate_cache' => self::getInvalidateCacheButton(),
                 'get_address_enabled' => self::getGetAddressEnabled(),
-                'callback_url' => self::getCallbackUrlTemplate(),
+                'authorization_callback_url' => self::getAuthorizationCallbackUrl(),
+                'management_callback_url' => self::getManagementCallbackUrl(),
             ],
         ];
     }
 
     /**
-     * Return field to display callback URL template.
+     * Return field to display authorization callback URL template.
      */
-    public static function getCallbackUrlTemplate(): array
+    public static function getAuthorizationCallbackUrl(): array
     {
         $result = [];
 
         try {
             $result = [
-                'id' => 'callback_url',
+                'id' => 'authorization_callback_url',
                 'type' => 'text',
-                'title' => 'Callback URL Template',
+                'title' => 'Authorization Callback URL',
                 'custom_attributes' => [
                     'readonly' => 'readonly',
                 ],
                 'default' => Url::getCallbackUrl(
-                    callbackType: CallbackType::AUTHORIZATION
+                    type: CallbackType::AUTHORIZATION
+                ),
+            ];
+        } catch (Throwable $e) {
+            Log::error(
+                error: $e,
+                msg: Translator::translate(
+                    phraseId: 'generate-callback-template-failed'
+                )
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Return field to display management callback URL template.
+     */
+    public static function getManagementCallbackUrl(): array
+    {
+        $result = [];
+
+        try {
+            $result = [
+                'id' => 'management_callback_url',
+                'type' => 'text',
+                'title' => 'Management Callback URL',
+                'custom_attributes' => [
+                    'readonly' => 'readonly',
+                ],
+                'default' => Url::getCallbackUrl(
+                    type: CallbackType::MANAGEMENT
                 ),
             ];
         } catch (Throwable $e) {
