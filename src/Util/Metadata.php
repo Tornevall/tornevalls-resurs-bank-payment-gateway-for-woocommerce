@@ -20,7 +20,7 @@ use function is_array;
  */
 class Metadata
 {
-    public const KEY_PAYMENT_ID = 'payment_id';
+    public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
 
     /**
      * Store UUID of Resurs Bank payment on order.
@@ -58,21 +58,21 @@ class Metadata
     ): bool {
         $existingMeta = get_post_meta(
             post_id: $order->get_id(),
-            key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
+            key: $metaDataKey,
             single: true
         );
 
         if ($existingMeta) {
             return (bool)update_post_meta(
                 post_id: $order->get_id(),
-                meta_key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
+                meta_key: $metaDataKey,
                 meta_value: $metaDataValue
             );
         }
 
         return (bool)add_post_meta(
             post_id: $order->get_id(),
-            meta_key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
+            meta_key: $metaDataKey,
             meta_value: $metaDataValue,
             unique: true
         );
@@ -88,7 +88,7 @@ class Metadata
     ): string {
         return (string)get_post_meta(
             post_id: $order->get_id(),
-            key: RESURSBANK_MODULE_PREFIX . '_' . $metaDataKey,
+            key: $metaDataKey,
             single: true
         );
     }
@@ -116,5 +116,29 @@ class Metadata
             'order' => $order,
             'meta' => is_array(value: $meta) ? $meta : [],
         ];
+    }
+
+    /**
+     * Retrieve order associated with payment id.
+     */
+    public static function getOrderByPaymentId(string $paymentId): ?WC_Order
+    {
+        $result = null;
+
+        $orders = wc_get_orders(args: [
+            'meta_key' => self::KEY_PAYMENT_ID,
+            'meta_value' => $paymentId,
+            'meta_compare' => '=',
+        ]);
+
+        if (
+            is_array(value: $orders) &&
+            count($orders) === 1 &&
+            $orders[0] instanceof WC_Order
+        ) {
+            $result = $orders[0];
+        }
+
+        return $result;
     }
 }

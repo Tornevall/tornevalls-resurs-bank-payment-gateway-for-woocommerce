@@ -33,7 +33,6 @@ use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -122,7 +121,9 @@ class Advanced
                 'custom_attributes' => [
                     'readonly' => 'readonly',
                 ],
-                'default' => Url::getCallbackUrl(type: CallbackType::MANAGEMENT),
+                'default' => Url::getCallbackUrl(
+                    type: CallbackType::MANAGEMENT
+                ),
             ];
         } catch (Throwable $e) {
             Log::error(

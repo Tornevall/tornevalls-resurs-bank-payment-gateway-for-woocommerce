@@ -13,7 +13,6 @@ use Exception;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
-use ResursBank\Service\WooCommerce;
 use RuntimeException;
 
 use function is_string;
@@ -273,18 +272,10 @@ class Url
     public static function getCallbackUrl(CallbackType $type): string
     {
         return self::getQueryArg(
-            baseUrl: self::getWcApiUrl(),
+            baseUrl: WC()->api_request_url(request: Route::ROUTE_PARAM),
             arguments: [
                 'callback' => $type->value,
             ]
         );
-    }
-
-    /**
-     * Get URL for WC API.
-     */
-    public static function getWcApiUrl(): string
-    {
-        return sprintf('%s', WC()->api_request_url(request: 'resursbank'));
     }
 }

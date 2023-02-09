@@ -19,11 +19,13 @@ declare(strict_types=1);
 
 use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order;
+use Resursbank\Woocommerce\Util\Metadata;
 
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
@@ -71,6 +73,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function(): void {
     ResursBank\Service\WordPress::initializeWooCommerce();
     Order::init();
     MessageBag::init();
+    Callback::init();
 
     if (Admin::isAdmin()) {
         InvalidateCacheButton::register();

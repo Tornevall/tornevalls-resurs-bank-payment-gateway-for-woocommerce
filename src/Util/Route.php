@@ -12,9 +12,7 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
-use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
-use Resursbank\Woocommerce\Modules\Callback\Controller\Callback;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -33,7 +31,8 @@ use function strlen;
 class Route
 {
     /**
-     * Name of the $_GET parameter containing the routing name.
+     * Name of the $_GET parameter containing the routing name, and also the
+     * name of the API section utilised by WC:
      */
     public const ROUTE_PARAM = 'resursbank';
 
