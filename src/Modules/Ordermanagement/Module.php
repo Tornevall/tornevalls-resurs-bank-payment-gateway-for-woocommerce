@@ -45,7 +45,6 @@ class Module
     {
         match ($new) {
             'completed' => Completed::capture(orderId: $orderId, old: $old),
-            'refunded' => Refunded::refund(orderId: $orderId, old: $old),
             'cancelled' => Cancelled::cancel(orderId: $orderId, old: $old),
             default => Config::getLogger()->debug(
                 message: 'No matching status handler found'
