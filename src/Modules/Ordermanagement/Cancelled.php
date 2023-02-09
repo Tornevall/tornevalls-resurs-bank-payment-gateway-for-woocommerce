@@ -33,20 +33,13 @@ use WC_Order;
 class Cancelled extends Status
 {
     /**
-     * Performs full refund of Resurs payment.
+     * Cancel full refund of Resurs payment.
      *
-     * @throws ApiException
-     * @throws AuthException
+     * @param int $orderId
+     * @param string $old
      * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
      */
-    public static function refund(int $orderId, string $old): void
+    public static function cancel(int $orderId, string $old): void
     {
         try {
             $order = self::getWooCommerceOrder(orderId: $orderId);
