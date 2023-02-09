@@ -9,15 +9,28 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Locale\Translator;
+use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Refund;
+use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
+use WC_Order;
 use WC_Order_Refund;
 
 /**
@@ -35,48 +48,136 @@ class Refunded extends Status
      */
     public static function performRefund(int $orderId, int $refundId): void
     {
+        if (!self::isResursPayment(orderId: $orderId)) {
+            return;
+        }
+
         $refundOrder = self::getRefundOrder(refundId: $refundId);
 
         $resursBankId = self::getResursBankId(orderId: $orderId);
 
-        try {
-            $resursBankPayment = Repository::get(paymentId: $resursBankId);
-        } catch (Throwable $error) {
-            Config::getLogger()->error(message: $error);
-            return;
-        }
+        $resursBankPayment = self::getResursBankPayment(
+            resursBankPaymentId: $resursBankId
+        );
 
-        // Fetch items
         $items = self::getRefundItems(refundOrder: $refundOrder);
 
-        // Confirm that we're not trying to refund too large an amount
         $refundableAmount = $resursBankPayment->order->capturedAmount - $resursBankPayment->order->refundedAmount;
 
         if ($refundOrder->get_amount() > $refundableAmount) {
-            $errorMessage = 'Refund amount (' . $refundOrder->get_amount() . ') is too great, must be ' .
-                            $refundableAmount . ' or less. Aborting refund.';
+            $errorMessage = str_replace(
+                search: ['%1', '%2'],
+                replace: [
+                    $refundOrder->get_amount(),
+                    $refundableAmount,
+                ],
+                subject: Translator::translate(phraseId: 'refund-too-large')
+            );
             MessageBag::addError(msg: $errorMessage);
             throw new IllegalValueException(message: $errorMessage);
         }
 
-        // Perform refund operation
+        self::performActualRefund(
+            items: $items,
+            resursBankPaymentId: $resursBankId
+        );
+    }
+
+    /**
+     * Perform the actual refund operation.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws TranslationException
+     * @throws ValidationException
+     */
+    private static function performActualRefund(
+        OrderLineCollection $items,
+        string $resursBankPaymentId
+    ): void {
         try {
             if (sizeof($items->getData()) === 0) {
-                Repository::refund(paymentId: $resursBankId);
+                Repository::refund(paymentId: $resursBankPaymentId);
             } else {
                 Repository::refund(
-                    paymentId: $resursBankId,
+                    paymentId: $resursBankPaymentId,
                     orderLines: $items
                 );
             }
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to perform refund operation: ' . $error->getMessage() .
-                     ', please verify order state manually.'
+                msg: str_replace(
+                    search: ['%1'],
+                    replace: [
+                        $error->getMessage(),
+                    ],
+                    subject: Translator::translate(
+                        phraseId: 'refund-unable-to-perform-operation'
+                    )
+                )
             );
             Config::getLogger()->error(message: $error);
             throw $error;
         }
+    }
+
+    /**
+     * Wrapper method for fetching Resurs payment object.
+     *
+     * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     */
+    private static function getResursBankPayment(string $resursBankPaymentId): Payment
+    {
+        try {
+            return Repository::get(paymentId: $resursBankPaymentId);
+        } catch (Throwable $error) {
+            Config::getLogger()->error(message: $error);
+            throw $error;
+        }
+    }
+
+    /**
+     * Wrapper for Metadata::isValidResursPayment.
+     *
+     * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws FilesystemException
+     * @throws TranslationException
+     */
+    private static function isResursPayment(int $orderId): bool
+    {
+        $order = wc_get_order(the_order: $orderId);
+
+        if (!$order instanceof WC_Order) {
+            throw new IllegalTypeException(
+                message: Translator::translate(
+                    phraseId: 'refund-unable-to-load-order-information'
+                )
+            );
+        }
+
+        return Metadata::isValidResursPayment(order: $order);
     }
 
     /**
@@ -89,7 +190,7 @@ class Refunded extends Status
     private static function getRefundOrder(int $refundId): WC_Order_Refund
     {
         try {
-            $order = wc_get_order($refundId);
+            $order = wc_get_order(the_order: $refundId);
 
             if (!$order instanceof WC_Order_Refund) {
                 if (is_object(value: $order)) {
@@ -99,15 +200,24 @@ class Refunded extends Status
                 }
 
                 throw new IllegalTypeException(
-                    message: 'wc_get_order returned object of type ' . $type .
-                        ', WC_Order_Refund expected.'
+                    message: str_replace(
+                        search: ['%1'],
+                        replace: [
+                            $type,
+                        ],
+                        subject: Translator::translate(
+                            phraseId: 'refund-wrong-return-type-from-wc-get-order'
+                        )
+                    )
                 );
             }
 
             return $order;
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to load refund information. Aborting refund.'
+                msg: Translator::translate(
+                    phraseId: 'refund-unable-to-load-refund-information'
+                )
             );
             Config::getLogger()->error(message: $error);
             throw $error;
@@ -131,26 +241,36 @@ class Refunded extends Status
 
             if (!is_string(value: $resursBankId)) {
                 MessageBag::addError(
-                    msg: 'Unable to load Resurs Bank payment reference from order. Aborting refund.'
+                    msg: Translator::translate(
+                        phraseId: 'refund-payment-reference-not-a-string'
+                    )
                 );
                 throw new IllegalTypeException(
-                    message: 'Fetched Resurs Bank payment reference is not a string. Aborting refund.'
+                    message: Translator::translate(
+                        phraseId: 'refund-payment-reference-not-a-string'
+                    )
                 );
             }
 
             if ($resursBankId === '') {
                 MessageBag::addError(
-                    msg: 'Unable to load Resurs Bank payment reference from order. Aborting refund.'
+                    msg: Translator::translate(
+                        phraseId: 'refund-payment-reference-is-empty'
+                    )
                 );
                 throw new IllegalValueException(
-                    message: 'Fetched Resurs Bank payment reference is empty. Aborting refund.'
+                    message: Translator::translate(
+                        phraseId: 'refund-payment-reference-is-empty'
+                    )
                 );
             }
 
             return $resursBankId;
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to load order information. Aborting refund.'
+                msg: Translator::translate(
+                    phraseId: 'refund-unable-to-load-order-information'
+                )
             );
             Config::getLogger()->error(message: $error);
             throw $error;
@@ -168,9 +288,11 @@ class Refunded extends Status
     {
         try {
             return Refund::getOrderLines(order: $refundOrder);
-        } catch(Throwable $error) {
+        } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Error encountered while attempting to fetch order lines. Aborting refund.'
+                msg: Translator::translate(
+                    phraseId: 'refund-error-when-fetching-order-lines'
+                )
             );
             Config::getLogger()->error(message: $error);
             throw $error;
