@@ -28,6 +28,12 @@ class Module
             priority: 10,
             accepted_args: 3
         );
+        add_action(
+            hook_name: 'woocommerce_order_refunded',
+            callback: 'Resursbank\Woocommerce\Modules\Ordermanagement\Refunded::performRefund',
+            priority: 10,
+            accepted_args: 2
+        );
     }
 
     /**
@@ -39,7 +45,6 @@ class Module
     {
         match ($new) {
             'completed' => Completed::capture(orderId: $orderId, old: $old),
-            'refunded' => Refunded::refund(orderId: $orderId, old: $old),
             default => Config::getLogger()->debug(
                 message: 'No matching status handler found'
             )
