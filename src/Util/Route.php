@@ -31,7 +31,8 @@ use function strlen;
 class Route
 {
     /**
-     * Name of the $_GET parameter containing the routing name.
+     * Name of the $_GET parameter containing the routing name, and also the
+     * name of the API section utilised by WC:
      */
     public const ROUTE_PARAM = 'resursbank';
 
@@ -157,7 +158,7 @@ class Route
     ): void {
         header(header: 'Content-Type: application/json');
         header(header: 'Content-Length: ' . strlen(string: $body));
-        http_response_code(response_code: $code);
+        header(header: 'Status: ' . $code);
 
         echo $body;
     }

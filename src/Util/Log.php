@@ -40,4 +40,16 @@ class Log
             }
         }
     }
+
+    /**
+     * Log debug info.
+     */
+    public static function debug(string $msg): void
+    {
+        try {
+            Config::getLogger()->debug(message: $msg);
+        } catch (ConfigException $e) {
+            self::error(error: $e, msg: 'Debug logs are unavailable.');
+        }
+    }
 }
