@@ -9,17 +9,19 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options;
 
-use Resursbank\Woocommerce\Database\StringOption;
+use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
+use Resursbank\Woocommerce\Database\Option;
+
+use function is_string;
 
 /**
  * Database interface for environment in wp_options table.
- *
- * @todo Add value validation against Enum inside Ecom. See WOO-799 & ECP-203
  */
-class Environment extends StringOption
+class Environment extends Option
 {
     /**
      * @inheritdoc
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public static function getName(): string
     {
@@ -28,9 +30,25 @@ class Environment extends StringOption
 
     /**
      * Return default value.
+     *
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public static function getDefault(): string
     {
-        return 'test';
+        return EnvironmentEnum::TEST->value;
+    }
+
+    /**
+     * Get the data.
+     */
+    public static function getData(): EnvironmentEnum
+    {
+        $data = parent::getData();
+
+        if (!is_string(value: $data)) {
+            $data = self::getDefault();
+        }
+
+        return EnvironmentEnum::from(value: $data);
     }
 }

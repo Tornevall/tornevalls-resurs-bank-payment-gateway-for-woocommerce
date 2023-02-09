@@ -92,7 +92,7 @@ class Connection
         return new Jwt(
             clientId: ClientId::getData(),
             clientSecret: ClientSecret::getData(),
-            scope: Environment::getData() === EnvironmentEnum::PROD->value ?
+            scope: Environment::getData() === EnvironmentEnum::PROD ?
                 Scope::MERCHANT_API :
                 Scope::MOCK_MERCHANT_API,
             grantType: GrantType::CREDENTIALS

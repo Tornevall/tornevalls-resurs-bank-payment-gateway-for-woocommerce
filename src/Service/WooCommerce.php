@@ -16,7 +16,8 @@ use ResursBank\Module\PluginHooks;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Settings;
+use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
+use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
 use stdClass;
@@ -38,15 +39,6 @@ use function is_string;
 class WooCommerce
 {
     /**
-     * Key in session to mark whether customer is in checkout or not. This is now global since RCO will
-     * set that key on the backend request.
-     *
-     * @var string
-     * @since 0.0.1.0
-     */
-    public static string $inCheckoutKey = 'customerWasInCheckout';
-
-    /**
      * @var $basename
      * @since 0.0.1.0
      */
@@ -61,51 +53,28 @@ class WooCommerce
     private static $requiredVersion = '3.5.0';
 
     /**
+     * Return the active state of this plugin based on preloaded plugins.
+     * If WooCommerce is not found in the current list of WP-plugins, this
+     * feature will disable this plugin too.
      * @return bool
-     * @since 0.0.1.0
      */
     public static function getActiveState(): bool
     {
-        // Initialize plugin functions.
-        new PluginHooks();
-
-        add_filter('rbwc_is_available', 'ResursBank\Service\WooCommerce::rbwcIsAvailable', 999);
+        OrdermanagementModule::setupActions();
         return in_array(
-            'woocommerce/woocommerce.php',
-            apply_filters('active_plugins', get_option('active_plugins')),
-            true
+            needle: 'woocommerce/woocommerce.php',
+            haystack: apply_filters('active_plugins', get_option('active_plugins')),
+            strict: true
         );
     }
 
     /**
-     * @return bool
-     * @since 0.0.1.8
-     */
-    public static function rbwcIsAvailable(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param $settings
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getSettingsPages($settings)
-    {
-        if (is_admin()) {
-            $settings[] = new Settings();
-        }
-
-        return $settings;
-    }
-
-    /**
+     * Get available gateways (MAPI).
      * @param mixed $gateways
      * @return mixed
      * @throws ConfigException
      * @throws Throwable
-     * @since 0.0.1.0
+     * @todo Move.
      */
     public static function getAvailableGateways(mixed $gateways): mixed
     {
@@ -113,11 +82,11 @@ class WooCommerce
             return $gateways;
         }
 
-        if (is_array($gateways)) {
+        if (is_array(value: $gateways)) {
             // Payment methods here are listed for non-admin-pages only. In admin, the only gateway visible
             // should be ResursDefault in its default state.
             try {
-                $gateways += WooCommerce::getGatewaysFromPaymentMethods($gateways);
+                $gateways += WooCommerce::getGatewaysFromPaymentMethods(gateways: $gateways);
             } catch (Throwable $e) {
                 // Catch errors if something goes wrong during gateway fetching.
                 // If errors occurs in wp-admin, an error note will show up, instead of crashing the entire site.
@@ -130,13 +99,15 @@ class WooCommerce
     }
 
     /**
+     * Get list of all gateways regardless of availability (MAPI).
      * @param mixed $gateways
      * @return mixed
      * @see https://rudrastyh.com/woocommerce/get-and-hook-payment-gateways.html
+     * @todo Move.
      */
     public static function getGateways(mixed $gateways): mixed
     {
-        if (is_array($gateways)) {
+        if (is_array(value: $gateways)) {
             $gateways[] = ResursDefault::class;
         }
 
@@ -149,8 +120,8 @@ class WooCommerce
      *
      * @param array $gateways
      * @return array
-     * @since 0.0.1.0
-     * @todo Create payment method cache-driver based on transients via ecom2 (WOO-847).
+     * @throws ConfigException
+     * @todo Move.
      */
     private static function getGatewaysFromPaymentMethods(array $gateways = []): array
     {
@@ -178,38 +149,19 @@ class WooCommerce
     }
 
     /**
-     * @param bool $returnCart
-     * @return bool|array
-     * @since 0.0.1.0
-     */
-    public static function getValidCart(bool $returnCart = false): bool|array
-    {
-        $return = false;
-
-        if (isset(WC()->cart)) {
-            $cartContentCount = WC()->cart->get_cart_contents_count();
-            $return = $cartContentCount > 0;
-
-            if ($returnCart && $return && !empty(WC()->cart)) {
-                $return = WC()->cart->get_cart();
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Self-aware setup link. Used from filter, meaning this method looks unused.
+     * wp-admin plugin handler url-maker. Requested from filters that creates links that
+     * resides under the plugin information.
      *
      * @param $links
      * @param $file
      * @param null $section
      * @return mixed
      * @noinspection PhpUnused
+     * @todo Fix and move.
      */
     public static function getPluginAdminUrl($links, $file, $section = null): mixed
     {
-        if (strpos($file, self::getBaseName()) !== false) {
+        if (str_contains(haystack: $file, needle: self::getBaseName())) {
             /** @noinspection HtmlUnknownTarget */
             $links[] = sprintf(
                 '<a href="%s?page=wc-settings&tab=%s&section=api_settings">%s</a>',
@@ -224,29 +176,15 @@ class WooCommerce
     /**
      * @return string
      * @since 0.0.1.0
+     * @todo Fix and move or remove and make this request independent.
      */
     public static function getBaseName(): string
     {
         if (empty(self::$basename)) {
-            self::$basename = trim(plugin_basename(Data::getGatewayPath()));
+            self::$basename = trim(string: plugin_basename(file: Data::getGatewayPath()));
         }
 
         return self::$basename;
-    }
-
-    /**
-     * @param null $testException
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function testRequiredVersion($testException = null)
-    {
-        if ((bool)$testException || version_compare(self::getWooCommerceVersion(), self::$requiredVersion, '<')) {
-            throw new RuntimeException(
-                'Your WooCommerce release are too old. Please upgrade.',
-                500
-            );
-        }
     }
 
     /**
@@ -273,105 +211,6 @@ class WooCommerce
     public static function getRequiredVersion(): string
     {
         return self::$requiredVersion;
-    }
-
-    /**
-     * @param $order
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getAdminAfterOldCheck($order)
-    {
-        if (
-            $order->meta_exists('resursBankPaymentFlow') &&
-            !Data::hasOldGateway() &&
-            !Data::getResursOption('deprecated_interference')
-        ) {
-            echo Data::getEscapedHtml(
-                Data::getGenericClass()->getTemplate(
-                    'adminpage_woocommerce_version22',
-                    [
-                        'wooPlug22VersionInfo' => __(
-                            'Order has not been created by this plugin and the original plugin is currently unavailable.',
-                            'resurs-bank-payments-for-woocommerce'
-                        ),
-                    ]
-                )
-            );
-        }
-    }
-
-    /**
-     * @param array $ecomHolder
-     * @param array $metaArray
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getMetaDataFromOrder(array $ecomHolder, array $metaArray)
-    {
-        $metaPrefix = RESURSBANK_MODULE_PREFIX;
-        /** @var array $ecomMetaArray */
-        $ecomMetaArray = [];
-        foreach ($metaArray as $metaKey => $metaValue) {
-            if (preg_match(sprintf('/^%s/', $metaPrefix), $metaKey)) {
-                $metaKey = (string)preg_replace(sprintf('/^%s_/', $metaPrefix), '', $metaKey);
-                if (is_array($metaValue) && count($metaValue) === 1) {
-                    $metaValue = array_pop($metaValue);
-                }
-                if (is_string($metaValue) || is_array($metaValue)) {
-                    $ecomMetaArray[$metaKey] = $metaValue;
-                }
-            }
-        }
-
-        return array_merge((array)self::getPurgedMetaData($ecomHolder), (array)self::getPurgedMetaData($ecomMetaArray));
-    }
-
-    /**
-     * @param $metaDataContainer
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    private static function getPurgedMetaData($metaDataContainer): array
-    {
-        $purgeArray = WordPress::applyFilters('purgeMetaData', [
-            'orderSigningPayload',
-            'orderapi',
-            'apiDataId',
-            'cached',
-            'requestMethod',
-        ]);
-        // Not necessary for customer to view.
-        $metaPrefix = RESURSBANK_MODULE_PREFIX;
-        if (is_array($metaDataContainer) && count($metaDataContainer)) {
-            foreach ($purgeArray as $purgeKey) {
-                if (isset($metaDataContainer[$purgeKey])) {
-                    unset($metaDataContainer[$purgeKey]);
-                }
-                $prefixed = sprintf('%s_%s', $metaPrefix, $purgeKey);
-                if (isset($metaDataContainer[$prefixed])) {
-                    unset($metaDataContainer[$prefixed]);
-                }
-            }
-        }
-        return (array)$metaDataContainer;
-    }
-
-    /**
-     * @param $protected
-     * @param $metaKey
-     * @param $metaType
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getProtectedMetaData($protected, $metaKey, $metaType)
-    {
-        /** @noinspection NotOptimalRegularExpressionsInspection */
-        // Order meta that is protected against editing.
-        if (($metaType === 'post') && preg_match(sprintf('/^%s/i', RESURSBANK_MODULE_PREFIX), $metaKey)) {
-            $protected = true;
-        }
-        return $protected;
     }
 
     /**
@@ -406,169 +245,12 @@ class WooCommerce
     }
 
     /**
-     * @param WC_Product $product
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getProperArticleNumber($product)
-    {
-        $return = $product->get_id();
-        $productSkuValue = $product->get_sku();
-        if (
-            !empty($productSkuValue) &&
-            WordPress::applyFilters('preferArticleNumberSku', Data::getResursOption('product_sku'))
-        ) {
-            $return = $productSkuValue;
-        }
-
-        return WordPress::applyFilters('getArticleNumber', $return, $product);
-    }
-
-    /**
      * @return string
      * @since 0.0.1.0
      */
     public static function getWcApiUrl(): string
     {
         return sprintf('%s', WC()->api_request_url('ResursDefault'));
-    }
-
-    /**
-     * Set order note, but prefixed by plugin name.
-     *
-     * @param $order
-     * @param $orderNote
-     * @param int $is_customer_note
-     * @return bool
-     * @throws Exception
-     * @since 0.0.1.0
-     * @noinspection ParameterDefaultValueIsNotNullInspection
-     */
-    public static function setOrderNote($order, $orderNote, $is_customer_note = 0): bool
-    {
-        $return = false;
-
-        $properOrder = self::getProperOrder($order, 'order');
-        if (method_exists($properOrder, 'get_id') && $properOrder->get_id()) {
-            Config::getLogger()->debug(
-                message: sprintf(
-                    __(
-                        'setOrderNote for %s: %s'
-                    ),
-                    $properOrder->get_id(),
-                    $orderNote
-                )
-            );
-
-            $return = $properOrder->add_order_note(
-                self::getOrderNotePrefixed($orderNote),
-                $is_customer_note
-            );
-        }
-
-        return (bool)$return;
-    }
-
-    /**
-     * Centralized order retrieval.
-     * @param $orderContainer
-     * @param $returnAs
-     * @param bool $log
-     * @return int|WC_Order
-     * @since 0.0.1.0
-     */
-    public static function getProperOrder($orderContainer, $returnAs, $log = false)
-    {
-        if (is_object($orderContainer) && method_exists($orderContainer, 'get_id')) {
-            $orderId = $orderContainer->get_id();
-            $order = $orderContainer;
-        } elseif ((int)$orderContainer > 0) {
-            $order = new WC_Order($orderContainer);
-            $orderId = $orderContainer;
-        } elseif (is_object($orderContainer) && isset($orderContainer->id)) {
-            $orderId = $orderContainer->id;
-            $order = new WC_Order($orderId);
-        } else {
-            throw new RuntimeException(
-                sprintf('Order id not found when looked up in %s.', __FUNCTION__),
-                400
-            );
-        }
-
-        if ($log) {
-            Config::getLogger()->debug(message: sprintf(
-                __(
-                    'getProperOrder for %s (as %s).',
-                    'resurs-bank-payments-for-woocommerce'
-                ),
-                $orderId,
-                $returnAs
-            ));
-        }
-
-        return $returnAs === 'order' ? $order : $orderId;
-    }
-
-    /**
-     * Render prefixed order note.
-     *
-     * @param $orderNote
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getOrderNotePrefixed($orderNote): string
-    {
-        return sprintf(
-            '[%s] %s',
-            WordPress::applyFilters('getOrderNotePrefix', RESURSBANK_MODULE_PREFIX),
-            $orderNote
-        );
-    }
-
-    /**
-     * Create a mocked moment if test and allowed mocking is enabled.
-     * @param $mock
-     * @return mixed|void
-     * @since 0.0.1.0
-     */
-    public static function applyMock($mock)
-    {
-        if (Data::canMock($mock)) {
-            return WordPress::applyFilters(
-                sprintf('mock%s', ucfirst($mock)),
-                null
-            );
-        }
-    }
-
-    /**
-     * @param null $key
-     * @return mixed
-     * @since 0.0.1.0
-     * @noinspection PhpDeprecationInspection
-     */
-    public static function getOrderStatuses($key = null)
-    {
-        $returnStatusString = 'on-hold';
-        $autoFinalizationString = Data::getResursOption('order_instant_finalization_status');
-
-        $return = WordPress::applyFilters('getOrderStatuses', [
-            OrderStatus::PROCESSING => 'processing',
-            OrderStatus::CREDITED => 'refunded',
-            OrderStatus::COMPLETED => 'completed',
-            OrderStatus::AUTO_DEBITED => $autoFinalizationString !== 'default' ? $autoFinalizationString : 'completed',
-            OrderStatus::PENDING => 'on-hold',
-            OrderStatus::ANNULLED => 'cancelled',
-            OrderStatus::ERROR => 'on-hold',
-            OrderStatus::MANUAL_INSPECTION => 'on-hold',
-        ]);
-        if (isset($key, $return[$key])) {
-            $returnStatusString = $return[$key];
-        } elseif ($key & OrderStatus::AUTO_DEBITED) {
-            $returnStatusString = $return[OrderStatus::AUTO_DEBITED];
-        }
-
-        return $returnStatusString;
     }
 
     /**
@@ -589,17 +271,5 @@ class WooCommerce
         }
 
         return $return;
-    }
-
-    /**
-     * Since ecom2 does not want trailing slashes in its logger, we use this method to trim away
-     * all trailing slashes.
-     * @return string
-     */
-    public static function getPluginLogDir(): string
-    {
-        $pluginLogDir = preg_replace('/\/$/', '', Data::getResursOption('log_dir'));
-
-        return is_dir($pluginLogDir) ? $pluginLogDir : '';
     }
 }
