@@ -9,8 +9,17 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -20,17 +29,18 @@ use Throwable;
 use WC_Order;
 
 /**
- * Contains code for handling order status change to "Completed"
+ * Contains code for handling order status change to "Cancelled"
  */
-class Completed extends Status
+class Cancelled extends Status
 {
     /**
-     * Perform capture of Resurs payment.
+     * Cancel full refund of Resurs payment.
      *
-     * @param int $orderId WooCommerce order ID
+     * @param int $orderId
+     * @param string $old
      * @throws ConfigException
      */
-    public static function capture(int $orderId, string $old): void
+    public static function cancel(int $orderId, string $old): void
     {
         try {
             $order = self::getWooCommerceOrder(orderId: $orderId);
@@ -52,20 +62,20 @@ class Completed extends Status
             );
         } catch (Throwable) {
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for capture. Reverting to previous order status.'
+                msg: 'Unable to load Resurs payment information for refund. Reverting to previous order status.'
             );
             return;
         }
 
-        if (!$resursPayment->canCapture()) {
+        if (!$resursPayment->canCancel()) {
             MessageBag::addError(
-                msg: 'Resurs order can not be captured. Reverting to previous order status.'
+                msg: 'Resurs order can not be refunded. Reverting to previous order status.'
             );
             $order->update_status(new_status: $old);
             return;
         }
 
-        self::performCapture(
+        self::performFullCancel(
             resursPaymentId: $resursPaymentId,
             order: $order,
             oldStatus: $old
@@ -73,29 +83,29 @@ class Completed extends Status
     }
 
     /**
-     * Performs the actual capture.
+     * Performs the actual refund operation.
      *
      * @throws ConfigException
      */
-    private static function performCapture(string $resursPaymentId, WC_Order $order, string $oldStatus): void
+    private static function performFullCancel(string $resursPaymentId, WC_Order $order, string $oldStatus): void
     {
         try {
-            $captureResponse = Repository::capture(paymentId: $resursPaymentId);
+            $cancelResponse = Repository::cancel(paymentId: $resursPaymentId);
             $order->add_order_note(
-                note: Translator::translate(phraseId: 'capture-success')
+                note: Translator::translate(phraseId: 'cancel-success')
             );
             OrderModule::setConfirmedAmountNote(
-                actionType: 'Captured ',
+                actionType: 'Cancelled ',
                 order: $order,
-                resursPayment: $captureResponse
+                resursPayment: $cancelResponse
             );
         } catch (Throwable $error) {
             $errorMessage = sprintf(
-                'Unable to perform capture order %s: %s. Reverting to previous order status',
+                'Unable to perform cancel order %s: %s. Reverting to previous order status',
                 $order->get_id(),
                 $error->getMessage()
             );
-            Config::getLogger()->error(message: $error);
+            Config::getLogger()->error(message: $errorMessage);
             MessageBag::addError(msg: $errorMessage);
             $order->update_status(new_status: $oldStatus, note: $errorMessage);
         }
