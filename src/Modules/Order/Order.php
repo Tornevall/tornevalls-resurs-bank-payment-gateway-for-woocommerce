@@ -81,6 +81,7 @@ class Order
      * Confirm the cancelled amount with order note.
      *
      * @param string $actionType Simplified way to get the proper string in the order note as they all look the same.
+     * @todo Centralize feature for confirmed amount notes (WOO-1066 + ECP-400).
      */
     public static function setConfirmedAmountNote(string $actionType, WC_Order $order, Payment $resursPayment): void
     {
