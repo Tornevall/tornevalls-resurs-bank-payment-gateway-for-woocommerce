@@ -118,7 +118,7 @@ class DeleteItem
                 paymentId: Metadata::getPaymentId(order: $order)
             );
 
-            if (!$resursPayment->canCancelPartially()) {
+            if (!$resursPayment->canPartiallyCancel()) {
                 throw new Exception(
                     message: Translator::translate(
                         phraseId: 'part-cancel-not-allowed'
