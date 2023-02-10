@@ -98,10 +98,7 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order $order): bool
     {
-        return self::getOrderMeta(
-            order: $order,
-            metaDataKey: 'payment_id'
-        ) !== '';
+        return self::getPaymentId(order: $order) !== '';
     }
 
     /**
