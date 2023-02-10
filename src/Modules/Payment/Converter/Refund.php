@@ -38,8 +38,7 @@ class Refund
      */
     public static function getOrderLines(
         WC_Order_Refund $order,
-        array $filter = [],
-        bool $includeShipping = true
+        array $filter = []
     ): OrderLineCollection {
         $result = [];
         $items = self::getOrderContent(order: $order);
