@@ -20,8 +20,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
 use WC_Order;
@@ -72,13 +70,12 @@ class Status
      * @throws EmptyValueException
      * @throws IllegalValueException
      */
-    protected static function updateOrderStatus(string $paymentId, WC_Order $order, string $oldStatus): Payment
+    protected static function updateOrderStatus(WC_Order $order, string $oldStatus): void
     {
         try {
-            return Repository::get(paymentId: $paymentId);
+            $order->update_status(new_status: $oldStatus);
         } catch (Throwable $error) {
             Config::getLogger()->error(message: $error);
-            $order->update_status(new_status: $oldStatus);
             throw $error;
         }
     }

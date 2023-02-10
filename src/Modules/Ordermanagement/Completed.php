@@ -9,8 +9,18 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
+use Exception;
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -28,47 +38,50 @@ class Completed extends Status
      *
      * @param int $orderId WooCommerce order ID
      * @throws ConfigException
+     * @throws Throwable
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      */
     public static function capture(int $orderId, string $old): void
     {
-        try {
-            $order = self::getWooCommerceOrder(orderId: $orderId);
-        } catch (Throwable) {
+        // Prepare WooCommerce order.
+        $order = self::getWooCommerceOrder(orderId: $orderId);
+
+        if (!Metadata::isValidResursPayment(order: $order)) {
+            // If not ours, return silently.
             return;
         }
 
         $resursPaymentId = Metadata::getPaymentId(order: $order);
 
-        if (empty($resursPaymentId)) {
-            return;
-        }
-
         try {
-            $resursPayment = self::updateOrderStatus(
-                paymentId: $resursPaymentId,
+            $resursPayment = Repository::get(paymentId: $resursPaymentId);
+
+            if (!$resursPayment->canCapture()) {
+                $errorMessage = 'Resurs order can not be captured. Reverting to previous order status.';
+                MessageBag::addError(msg: $errorMessage);
+                throw new Exception(message: $errorMessage);
+            }
+
+            self::performCapture(
+                resursPaymentId: $resursPaymentId,
                 order: $order,
                 oldStatus: $old
             );
-        } catch (Throwable) {
+        } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for capture. Reverting to previous order status.'
+                msg: 'Unable to load Resurs payment information for capture.'
             );
-            return;
+            Config::getLogger()->error(message: $error);
+            throw $error;
         }
-
-        if (!$resursPayment->canCapture()) {
-            MessageBag::addError(
-                msg: 'Resurs order can not be captured. Reverting to previous order status.'
-            );
-            $order->update_status(new_status: $old);
-            return;
-        }
-
-        self::performCapture(
-            resursPaymentId: $resursPaymentId,
-            order: $order,
-            oldStatus: $old
-        );
     }
 
     /**
