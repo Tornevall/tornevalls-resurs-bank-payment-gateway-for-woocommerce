@@ -117,10 +117,7 @@ class OrderStatus
     {
         try {
             $order = new WC_Order(order: $order_id);
-            $resursPaymentId = Metadata::getOrderMeta(
-                order: $order,
-                metaDataKey: 'payment_id'
-            );
+            $resursPaymentId = Metadata::getPaymentId(order: $order);
             $thankYouTriggerCheck = (bool)Metadata::getOrderMeta(
                 order: $order,
                 metaDataKey: 'thankyou_trigger'
