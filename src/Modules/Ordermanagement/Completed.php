@@ -65,11 +65,14 @@ class Completed extends Status
             $resursPayment = Repository::get(paymentId: $resursPaymentId);
 
             if (!$resursPayment->canCapture()) {
+                // Throw own error based on prohibited action.
                 $errorMessage = 'Resurs order can not be captured. Reverting to previous order status.';
                 MessageBag::addError(msg: $errorMessage);
                 throw new Exception(message: $errorMessage);
             }
 
+            // On success, this is where order status and order notes are updated.
+            // On failures, an exception will be thrown from here and order status will be reverted.
             self::performCapture(
                 resursPaymentId: $resursPaymentId,
                 order: $order,

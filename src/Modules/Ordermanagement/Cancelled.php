@@ -50,9 +50,12 @@ class Cancelled extends Status
             if (!$resursPayment->canCancel()) {
                 $errorMessage = 'Resurs order can not be cancelled. Reverting to previous order status.';
                 MessageBag::addError(msg: $errorMessage);
+                // Throw own error based on prohibited action.
                 throw new Exception(message: $errorMessage);
             }
 
+            // On success, this is where order status and order notes are updated.
+            // On failures, an exception will be thrown from here and order status will be reverted.
             self::performFullCancel(
                 resursPaymentId: $resursPaymentId,
                 order: $order,
@@ -63,6 +66,7 @@ class Cancelled extends Status
                 msg: 'Unable to load Resurs payment information for refund.'
             );
             Config::getLogger()->error(message: $error);
+            // Throw error based on Resurs errors.
             throw $error;
         }
     }
