@@ -16,6 +16,7 @@ use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
 use ResursBank\Module\OrderStatus;
+use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -52,7 +53,10 @@ class Callback
                             );
                         }
 
-                        $order->add_order_note(note: $callback->getNote());
+                        CallbackModule::addOrderNote(
+                            order: $order,
+                            callback: $callback
+                        );
 
                         OrderStatus::setWcOrderStatus(
                             order: $order,
