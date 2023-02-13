@@ -83,6 +83,8 @@ class Completed extends Status
                 msg: 'Unable to load Resurs payment information for capture.'
             );
             Config::getLogger()->error(message: $error);
+            // Reverting must also occur at this point, if we don't reach the perform action.
+            $order->update_status(new_status: $old);
             throw $error;
         }
     }

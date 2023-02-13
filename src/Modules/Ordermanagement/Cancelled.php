@@ -66,7 +66,8 @@ class Cancelled extends Status
                 msg: 'Unable to load Resurs payment information for refund.'
             );
             Config::getLogger()->error(message: $error);
-            // Throw error based on Resurs errors.
+            // Reverting must also occur at this point, if we don't reach the perform action.
+            $order->update_status(new_status: $old);
             throw $error;
         }
     }

@@ -54,29 +54,4 @@ class Status
             throw $error;
         }
     }
-
-    /**
-     * Fetches Resurs payment object.
-     *
-     * @throws ConfigException
-     * @throws IllegalTypeException
-     * @throws Throwable
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalValueException
-     */
-    protected static function updateOrderStatus(WC_Order $order, string $oldStatus): void
-    {
-        try {
-            $order->update_status(new_status: $oldStatus);
-        } catch (Throwable $error) {
-            Config::getLogger()->error(message: $error);
-            throw $error;
-        }
-    }
 }
