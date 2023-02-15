@@ -9,11 +9,26 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Callback;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\Callback\CallbackInterface;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
+use Resursbank\Ecom\Lib\Model\Callback\Management;
+use Resursbank\Ecom\Module\Action\Repository as ActionRepository;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Callback as CallbackController;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
+use WC_Order;
 
 /**
  * Implementation of callback module.
@@ -45,5 +60,40 @@ class Callback
                 }
             }
         );
+    }
+
+    /**
+     * Add order notice on incoming callback.
+     *
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     */
+    public static function addOrderNote(
+        WC_Order $order,
+        CallbackInterface $callback
+    ): void {
+        $note = $callback->getNote();
+
+        if ($callback instanceof Management) {
+            $note .= ' ' . sprintf(
+                Translator::translate(
+                    phraseId: 'callback-amount'
+                ),
+                ActionRepository::getAction(
+                    paymentId: $callback->getPaymentId(),
+                    actionId: $callback->actionId
+                )->orderLines->getTotal()
+            );
+        }
+
+        $order->add_order_note(note: $note);
     }
 }
