@@ -83,8 +83,8 @@ class Completed extends Status
                 msg: 'Unable to load Resurs payment information for capture.'
             );
             Config::getLogger()->error(message: $error);
-            // Reverting must also occur at this point, if we don't reach the perform action.
-            $order->update_status(new_status: $old);
+            // Reverting of order statuses are not allowed if they are already finalized.
+            //self::revertStatus(order: $order, old: $old);
             throw $error;
         }
     }
@@ -103,13 +103,12 @@ class Completed extends Status
             );
         } catch (Throwable $error) {
             $errorMessage = sprintf(
-                'Unable to perform capture order %s: %s. Reverting to previous order status',
+                'Unable to perform capture order %s: %s.',
                 $order->get_id(),
                 $error->getMessage()
             );
             Config::getLogger()->error(message: $error);
             MessageBag::addError(msg: $errorMessage);
-            $order->update_status(new_status: $oldStatus, note: $errorMessage);
         }
     }
 }
