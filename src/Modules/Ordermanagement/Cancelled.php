@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
+use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -27,47 +29,45 @@ class Cancelled extends Status
      * Cancel full refund of Resurs payment.
      *
      * @throws ConfigException
+     * @throws Throwable
+     * @throws IllegalTypeException
      */
     public static function cancel(int $orderId, string $old): void
     {
-        try {
-            $order = self::getWooCommerceOrder(orderId: $orderId);
-        } catch (Throwable) {
+        // Prepare WooCommerce order.
+        $order = self::getWooCommerceOrder(orderId: $orderId);
+
+        if (!Metadata::isValidResursPayment(order: $order)) {
+            // If not ours, return silently.
             return;
         }
 
         $resursPaymentId = Metadata::getPaymentId(order: $order);
 
-        if (empty($resursPaymentId)) {
-            return;
-        }
-
         try {
-            $resursPayment = self::updateOrderStatus(
-                paymentId: $resursPaymentId,
+            $resursPayment = Repository::get(paymentId: $resursPaymentId);
+
+            if (!$resursPayment->canCancel()) {
+                $errorMessage = 'Resurs order can not be cancelled.';
+                MessageBag::addError(msg: $errorMessage);
+                // Throw own error based on prohibited action.
+                throw new Exception(message: $errorMessage);
+            }
+
+            // On success, this is where order status and order notes are updated.
+            // On failures, an exception will be thrown from here.
+            self::performFullCancel(
+                resursPaymentId: $resursPaymentId,
                 order: $order,
                 oldStatus: $old
             );
-        } catch (Throwable) {
+        } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for refund. Reverting to previous order status.'
+                msg: 'Unable to load Resurs payment information for refund.'
             );
-            return;
+            Config::getLogger()->error(message: $error);
+            throw $error;
         }
-
-        if (!$resursPayment->canCancel()) {
-            MessageBag::addError(
-                msg: 'Resurs order can not be refunded. Reverting to previous order status.'
-            );
-            $order->update_status(new_status: $old);
-            return;
-        }
-
-        self::performFullCancel(
-            resursPaymentId: $resursPaymentId,
-            order: $order,
-            oldStatus: $old
-        );
     }
 
     /**

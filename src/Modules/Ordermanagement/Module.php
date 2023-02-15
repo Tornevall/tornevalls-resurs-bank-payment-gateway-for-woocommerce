@@ -9,8 +9,18 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Throwable;
 
 /**
  * Sets up actions for order status change hooks. Called from PluginHooks::getActions.
@@ -39,7 +49,20 @@ class Module
     /**
      * Match new order status to the correct method.
      *
+     * @param int $orderId
+     * @param string $old
+     * @param string $new
      * @throws ConfigException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws Throwable
      */
     public static function callback(int $orderId, string $old, string $new): void
     {
