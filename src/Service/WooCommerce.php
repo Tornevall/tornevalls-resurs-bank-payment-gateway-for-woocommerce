@@ -60,7 +60,6 @@ class WooCommerce
      */
     public static function getActiveState(): bool
     {
-        OrdermanagementModule::setupActions();
         return in_array(
             needle: 'woocommerce/woocommerce.php',
             haystack: apply_filters('active_plugins', get_option('active_plugins')),
