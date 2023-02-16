@@ -42,13 +42,11 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Redirecti
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use ResursBank\Module\Data;
-use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Database\Options\Enabled;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
 use stdClass;
@@ -355,12 +353,14 @@ class ResursDefault extends WC_Payment_Gateway
         // in the checkout page.
         $this->has_fields = true;
 
-        if ($paymentMethod instanceof PaymentMethod) {
-            // Since this gateway is built to handle many payment methods from one class, we need to make sure that
-            // the specific payment method has their own properties that is not based on the gateway setup.
-            // This is built up from "getPaymentMethods".
-            $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
+        if (!($paymentMethod instanceof PaymentMethod)) {
+            return;
         }
+
+        // Since this gateway is built to handle many payment methods from one class, we need to make sure that
+        // the specific payment method has their own properties that is not based on the gateway setup.
+        // This is built up from "getPaymentMethods".
+        $this->setPaymentMethodInformation(paymentMethod: $paymentMethod);
     }
 
     /**
