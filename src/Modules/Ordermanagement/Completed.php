@@ -49,7 +49,7 @@ class Completed extends Status
      * @throws IllegalTypeException
      * @throws IllegalValueException
      */
-    public static function capture(int $orderId, string $old): void
+    public static function capture(int $orderId): void
     {
         // Prepare WooCommerce order.
         $order = self::getWooCommerceOrder(orderId: $orderId);
@@ -75,8 +75,7 @@ class Completed extends Status
             // On failures, an exception will be thrown from here and order status will be reverted.
             self::performCapture(
                 resursPaymentId: $resursPaymentId,
-                order: $order,
-                oldStatus: $old
+                order: $order
             );
         } catch (Throwable $error) {
             MessageBag::addError(
@@ -94,7 +93,7 @@ class Completed extends Status
      *
      * @throws ConfigException
      */
-    private static function performCapture(string $resursPaymentId, WC_Order $order, string $oldStatus): void
+    private static function performCapture(string $resursPaymentId, WC_Order $order): void
     {
         try {
             Repository::capture(paymentId: $resursPaymentId);

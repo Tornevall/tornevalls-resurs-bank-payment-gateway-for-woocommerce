@@ -65,9 +65,6 @@ class PartPayment
     /**
      * Validate Limit setting and show error messages if the user hasn't configured the widget correctly
      *
-     * @param mixed $option
-     * @param mixed $old
-     * @param mixed $new
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException

@@ -48,6 +48,7 @@ class Module
 
     /**
      * Match new order status to the correct method.
+     * No inspection added on $old since filter is built on this as a second parameter.
      *
      * @throws ConfigException
      * @throws JsonException
@@ -60,12 +61,14 @@ class Module
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws Throwable
+     * @noinspection PhpUnusedParameterInspection
      */
+    // phpcs:ignore
     public static function callback(int $orderId, string $old, string $new): void
     {
         match ($new) {
-            'completed' => Completed::capture(orderId: $orderId, old: $old),
-            'cancelled' => Cancelled::cancel(orderId: $orderId, old: $old),
+            'completed' => Completed::capture(orderId: $orderId),
+            'cancelled' => Cancelled::cancel(orderId: $orderId),
             default => Config::getLogger()->debug(
                 message: 'No matching status handler found'
             )
