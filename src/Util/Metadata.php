@@ -21,6 +21,7 @@ use function is_array;
 class Metadata
 {
     public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
+    public const KEY_THANK_YOU = RESURSBANK_MODULE_PREFIX . '_thankyou_trigger';
 
     /**
      * Store UUID of Resurs Bank payment on order.
@@ -31,8 +32,8 @@ class Metadata
     ): void {
         self::setOrderMeta(
             order: $order,
-            metaDataKey: self::KEY_PAYMENT_ID,
-            metaDataValue: $id
+            key: self::KEY_PAYMENT_ID,
+            value: $id
         );
     }
 
@@ -41,10 +42,7 @@ class Metadata
      */
     public static function getPaymentId(WC_Order $order): string
     {
-        return self::getOrderMeta(
-            order: $order,
-            metaDataKey: self::KEY_PAYMENT_ID
-        );
+        return self::getOrderMeta(order: $order, key: self::KEY_PAYMENT_ID);
     }
 
     /**
@@ -53,27 +51,27 @@ class Metadata
      */
     public static function setOrderMeta(
         WC_Order $order,
-        string $metaDataKey,
-        string $metaDataValue
+        string $key,
+        string $value
     ): bool {
         $existingMeta = get_post_meta(
             post_id: $order->get_id(),
-            key: $metaDataKey,
+            key: $key,
             single: true
         );
 
         if ($existingMeta) {
             return (bool)update_post_meta(
                 post_id: $order->get_id(),
-                meta_key: $metaDataKey,
-                meta_value: $metaDataValue
+                meta_key: $key,
+                meta_value: $value
             );
         }
 
         return (bool)add_post_meta(
             post_id: $order->get_id(),
-            meta_key: $metaDataKey,
-            meta_value: $metaDataValue,
+            meta_key: $key,
+            meta_value: $value,
             unique: true
         );
     }
@@ -84,11 +82,11 @@ class Metadata
      */
     public static function getOrderMeta(
         WC_Order $order,
-        string $metaDataKey
+        string $key
     ): string {
         return (string)get_post_meta(
             post_id: $order->get_id(),
-            key: $metaDataKey,
+            key: $key,
             single: true
         );
     }
@@ -137,5 +135,26 @@ class Metadata
         }
 
         return $result;
+    }
+
+    /**
+     * Add metadata to WC_Order indicating the "Thank You" page was reached.
+     */
+    public static function setThankYouTriggered(
+        WC_Order $order
+    ): void {
+        self::setOrderMeta(order: $order, key: self::KEY_THANK_YOU, value: '1');
+    }
+
+    /**
+     * Whether the "Thank You" page has been rendered for this order.
+     */
+    public static function isThankYouTriggered(
+        WC_Order $order
+    ): bool {
+        return self::getOrderMeta(
+            order: $order,
+            key: self::KEY_THANK_YOU
+        ) === '1';
     }
 }

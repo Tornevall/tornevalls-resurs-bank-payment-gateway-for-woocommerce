@@ -49,9 +49,6 @@ class Module
     /**
      * Match new order status to the correct method.
      *
-     * @param int $orderId
-     * @param string $old
-     * @param string $new
      * @throws ConfigException
      * @throws JsonException
      * @throws ReflectionException
