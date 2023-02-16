@@ -15,8 +15,8 @@ use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
-use ResursBank\Module\OrderStatus;
 use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
+use Resursbank\Woocommerce\Modules\Order\Status;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -58,10 +58,7 @@ class Callback
                             callback: $callback
                         );
 
-                        OrderStatus::setWcOrderStatus(
-                            order: $order,
-                            paymentId: $callback->getPaymentId()
-                        );
+                        Status::update(order: $order);
                     }
                 )
             );
