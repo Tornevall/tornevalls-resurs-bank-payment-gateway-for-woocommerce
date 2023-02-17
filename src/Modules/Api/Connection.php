@@ -31,6 +31,7 @@ use Resursbank\Woocommerce\Database\Options\LogLevel;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Language;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
 use WC_Logger;
 
@@ -58,7 +59,8 @@ class Connection
                 cache: self::getCache(),
                 logLevel: LogLevel::getLogLevel(),
                 jwtAuth: self::hasCredentials() ? self::getJwt() : null,
-                language: Language::getSiteLanguage()
+                language: Language::getSiteLanguage(),
+                userAgent: UserAgent::getUserAgent()
             );
         } catch (Throwable $e) {
             MessageBag::addError(msg: 'Failed to initiate ECom library.');

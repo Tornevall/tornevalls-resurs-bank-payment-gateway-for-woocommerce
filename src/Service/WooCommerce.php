@@ -16,7 +16,6 @@ use ResursBank\Module\PluginHooks;
 use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Url;
 use RuntimeException;
@@ -60,10 +59,9 @@ class WooCommerce
      */
     public static function getActiveState(): bool
     {
-        OrdermanagementModule::setupActions();
         return in_array(
             needle: 'woocommerce/woocommerce.php',
-            haystack: apply_filters('active_plugins', get_option('active_plugins')),
+            haystack: apply_filters(hook_name: 'active_plugins', value: get_option(option: 'active_plugins')),
             strict: true
         );
     }
@@ -185,23 +183,6 @@ class WooCommerce
         }
 
         return self::$basename;
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getWooCommerceVersion()
-    {
-        global $woocommerce;
-
-        $return = null;
-
-        if (isset($woocommerce)) {
-            $return = $woocommerce->version;
-        }
-
-        return $return;
     }
 
     /**
