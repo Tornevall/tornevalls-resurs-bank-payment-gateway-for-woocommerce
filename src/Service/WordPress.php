@@ -204,8 +204,6 @@ class WordPress
             'woocommerce_single_product_summary',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
         );
-        // Using woocomerce_thankyou rather than woocommerce_thankyou_<id> as we run dynamic methods.
-        add_action('woocommerce_thankyou', 'ResursBank\Module\OrderStatus::setOrderStatusOnThankYouSuccess');
         add_action('updated_option', 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
     }

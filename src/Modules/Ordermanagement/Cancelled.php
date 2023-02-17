@@ -32,7 +32,7 @@ class Cancelled extends Status
      * @throws Throwable
      * @throws IllegalTypeException
      */
-    public static function cancel(int $orderId, string $old): void
+    public static function cancel(int $orderId): void
     {
         // Prepare WooCommerce order.
         $order = self::getWooCommerceOrder(orderId: $orderId);
@@ -58,8 +58,7 @@ class Cancelled extends Status
             // On failures, an exception will be thrown from here.
             self::performFullCancel(
                 resursPaymentId: $resursPaymentId,
-                order: $order,
-                oldStatus: $old
+                order: $order
             );
         } catch (Throwable $error) {
             MessageBag::addError(
@@ -75,7 +74,7 @@ class Cancelled extends Status
      *
      * @throws ConfigException
      */
-    private static function performFullCancel(string $resursPaymentId, WC_Order $order, string $oldStatus): void
+    private static function performFullCancel(string $resursPaymentId, WC_Order $order): void
     {
         try {
             Repository::cancel(paymentId: $resursPaymentId);
@@ -84,13 +83,12 @@ class Cancelled extends Status
             );
         } catch (Throwable $error) {
             $errorMessage = sprintf(
-                'Unable to perform cancel order %s: %s. Reverting to previous order status',
+                'Unable to perform cancel order %s: %s.',
                 $order->get_id(),
                 $error->getMessage()
             );
             Config::getLogger()->error(message: $errorMessage);
             MessageBag::addError(msg: $errorMessage);
-            $order->update_status(new_status: $oldStatus, note: $errorMessage);
         }
     }
 }

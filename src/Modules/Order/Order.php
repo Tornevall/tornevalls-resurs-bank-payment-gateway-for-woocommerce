@@ -19,7 +19,7 @@ use Throwable;
 use WC_Order;
 
 /**
- * Part payment widget.
+ * WC_Order related business logic.
  */
 class Order
 {
