@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Resurs Bank Payments for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
@@ -21,17 +22,12 @@ use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
 use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
-use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
-use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
-use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Order\Order;
-use Resursbank\Woocommerce\Util\Metadata;
 
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
