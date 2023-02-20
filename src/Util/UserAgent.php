@@ -9,8 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use ResursBank\Exception\WooCommerceNotActiveException;
-use ResursBank\Service\WooCommerce;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Throwable;
 
 /**
@@ -21,22 +20,33 @@ class UserAgent
     /**
      * Get version from the current installed plugin (which potentially can be dynamically installed
      * with different slugs).
+     *
+     * @throws IllegalValueException
      */
     public static function getPluginVersion(): string
     {
-        // Using get_file_data here since WP's base function get_plugin_data is currently not available when
+        // Using get_file_data here since WordPress' base function get_plugin_data is currently not available when
         // this method is called.
         $pluginFileData = get_file_data(
             file: RESURSBANK_GATEWAY_PATH . '/readme.txt',
             default_headers: ['plugin_version' => 'Stable tag']
         );
 
-        return isset($pluginFileData['plugin_version']) &&
-        is_string(value: $pluginFileData['plugin_version'])
-            ? $pluginFileData['plugin_version']
-            : '';
+        if (
+            !isset($pluginFileData['plugin_version']) &&
+            !is_string(value: $pluginFileData['plugin_version'])
+        ) {
+            throw new IllegalValueException(
+                message: 'Plugin version is missing.'
+            );
+        }
+
+        return $pluginFileData['plugin_version'];
     }
 
+    /**
+     * Simplified method to fetch WooCommerce version from the current plugin data.
+     */
     public static function getWooCommerceVersion(): string
     {
         return self::getVersionFromPluginData(
@@ -47,36 +57,24 @@ class UserAgent
 
     /**
      * Generate a user agent string from internal components in WP.
-     *
-     * @throws WooCommerceNotActiveException
      */
     public static function getUserAgent(): string
     {
-        // Making sure that we don't communicate without unavailable plugins.
-        if (!WooCommerce::getActiveState()) {
-            throw new WooCommerceNotActiveException(
-                message: 'WooCommerce is not active or installed.'
-            );
-        }
-
         try {
-            // Only data required from this point is our own. ECom shows the rest. The only data not currently
-            // showing is the FQN, but should preferably be shown from ECom.
-            $renderedVersionString = [
+            $return = implode(separator: ' +', array: [
                 'WooCommerce-' . self::getWooCommerceVersion(),
                 'Resurs-' . self::getPluginVersion(),
-            ];
-
-            // Returned in standardized user-agent format.
-            return implode(separator: ' +', array: $renderedVersionString);
+            ]);
         } catch (Throwable) {
             // Fail silently, but with at least a source indicator.
-            return 'ResursBank-MAPI/WooCommerce';
+            $return = 'ResursBank-MAPI/WooCommerce';
         }
+
+        return $return;
     }
 
     /**
-     * @return array
+     * Fetch WooCommerce version information via the available plugin.
      */
     private static function getWooCommerceInformation(): array
     {
@@ -117,7 +115,6 @@ class UserAgent
      * Extract data from plugin registry naturally but validated.
      *
      * @param string $pluginMatch Case-sensitive matching.
-     * @param array $pluginData
      * @noinspection PhpSameParameterValueInspection
      */
     private static function getVersionFromPluginData(string $pluginMatch, array $pluginData): string

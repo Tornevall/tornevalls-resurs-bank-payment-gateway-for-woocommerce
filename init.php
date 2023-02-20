@@ -54,13 +54,6 @@ define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 // in one sweep - if necessary.
 define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
 
-// Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
-try {
-    Connection::setup();
-} catch (Throwable) {
-    return;
-}
-
 // Translation domain is used for all phrases that is not relying on ecom2.
 load_plugin_textdomain(
     domain: 'resurs-bank-payments-for-woocommerce',
@@ -71,6 +64,13 @@ load_plugin_textdomain(
 
 // Make sure there is an instance of WooCommerce among active plugins.
 if (!WooCommerce::getActiveState()) {
+    return;
+}
+
+// Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
+try {
+    Connection::setup();
+} catch (Throwable) {
     return;
 }
 
