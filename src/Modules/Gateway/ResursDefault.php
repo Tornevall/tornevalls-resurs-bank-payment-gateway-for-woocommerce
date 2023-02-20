@@ -42,8 +42,8 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Redirecti
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use ResursBank\Module\Data;
-use Resursbank\Woocommerce\Database\Options\Enabled;
-use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -347,7 +347,7 @@ class ResursDefault extends WC_Payment_Gateway
         //
         // WooCommerce validates this value internally with a "yes" as true, so at this stage we can't give the boolean
         // to the gateway.
-        $this->enabled = Enabled::getData();
+        $this->enabled = Enabled::getRawData();
 
         // The has-fields setup is normally used to indicate that more fields are available on the payment method
         // in the checkout page.

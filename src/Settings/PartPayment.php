@@ -23,11 +23,11 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -232,7 +232,9 @@ class PartPayment
     {
         $storeId = StoreId::getData();
         $paymentMethods = [];
-        $return = [];
+        $return = [
+            '' => Translator::translate(phraseId: 'please-select'),
+        ];
 
         try {
             $paymentMethods = $storeId !== '' ?
@@ -262,7 +264,9 @@ class PartPayment
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
         $annuityFactors = [];
-        $return = [];
+        $return = [
+            '' => Translator::translate(phraseId: 'please-select'),
+        ];
 
         try {
             if ($paymentMethodId !== '' && $storeId !== '') {
