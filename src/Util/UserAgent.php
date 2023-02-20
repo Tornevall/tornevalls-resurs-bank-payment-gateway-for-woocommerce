@@ -33,8 +33,11 @@ class UserAgent
         );
 
         if (
-            !isset($pluginFileData['plugin_version']) &&
-            !is_string(value: $pluginFileData['plugin_version'])
+            (
+                !isset($pluginFileData['plugin_version']) &&
+                !is_string(value: $pluginFileData['plugin_version']) ||
+                $pluginFileData['plugin_version'] === ''
+            )
         ) {
             throw new IllegalValueException(
                 message: 'Plugin version is missing.'
@@ -84,16 +87,6 @@ class UserAgent
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
-        /**
-         * Security note. Checking active plugins against their slug names are for our case safe
-         * since woocommerce has is a static registered slug. But we are still aware of the "wp plugin confusion"
-         * issues. The issue itself is however not affecting this section, since we only check if it is
-         * installed this way and the collects information about it. More information about the issue can be
-         * found in the following links.
-         *
-         * @see https://make.wordpress.org/plugins/2021/11/29/please-dont-test-submitting-other-peoples-plugins/
-         * @see https://vavkamil.cz/2021/11/25/wordpress-plugin-confusion-update-can-get-you-pwned/
-         */
         $pluginList = wp_get_active_and_valid_plugins();
 
         foreach ($pluginList as $pluginInit) {
