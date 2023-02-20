@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options\Advanced;
 
-use Resursbank\Woocommerce\Database\Datatype\StringOption;
+use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 
 use function is_array;

@@ -7,21 +7,25 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Datatype;
+namespace Resursbank\Woocommerce\Database\DataType;
 
 use Resursbank\Woocommerce\Database\Option;
 
+use function is_string;
+
 /**
- * Resolve value from options table and typecast to bool.
+ * Handle string values in database.
  */
-abstract class BoolOption extends Option
+abstract class StringOption extends Option
 {
     /**
-     * Booleans are stored in options table as 'yes' / 'no'.
+     * Get data.
      */
-    public static function isEnabled(): bool
+    public static function getData(): string
     {
-        return (self::getRawData() ?? static::getDefault()) === 'yes';
+        $result = parent::getRawData();
+
+        return is_string(value: $result) ? $result : '';
     }
 
     /**
@@ -29,6 +33,6 @@ abstract class BoolOption extends Option
      */
     public static function getDefault(): ?string
     {
-        return 'no';
+        return '';
     }
 }

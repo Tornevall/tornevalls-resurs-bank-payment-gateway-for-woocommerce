@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Datatype;
+namespace Resursbank\Woocommerce\Database\DataType;
 
 use Resursbank\Woocommerce\Database\Option;
 

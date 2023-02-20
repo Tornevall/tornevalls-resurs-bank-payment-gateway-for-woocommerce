@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options\Api;
 
-use Resursbank\Woocommerce\Database\Datatype\BoolOption;
+use Resursbank\Woocommerce\Database\DataType\BoolOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 
 /**

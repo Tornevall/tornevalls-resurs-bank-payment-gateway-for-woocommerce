@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Database\Options\Advanced;
 
 use Resursbank\Ecom\Module\Store\Repository;
-use Resursbank\Woocommerce\Database\Datatype\StringOption;
+use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
