@@ -7,21 +7,21 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\PartPayment;
+namespace Resursbank\Woocommerce\Database\Options\Api;
 
 use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 
 /**
- * Implementation of resursbank_part_payment_period value in options table.
+ * Implementation of resursbank_client_id value in options table.
  */
-class Period extends StringOption implements OptionInterface
+class ClientId extends StringOption implements OptionInterface
 {
     /**
      * @inheritdoc
      */
     public static function getName(): string
     {
-        return self::NAME_PREFIX . 'part_payment_period';
+        return self::NAME_PREFIX . 'client_id';
     }
 }
