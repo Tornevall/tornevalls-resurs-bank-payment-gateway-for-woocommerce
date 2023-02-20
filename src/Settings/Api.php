@@ -10,10 +10,10 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
-use Resursbank\Woocommerce\Database\Options\ClientId;
-use Resursbank\Woocommerce\Database\Options\ClientSecret;
-use Resursbank\Woocommerce\Database\Options\Enabled;
-use Resursbank\Woocommerce\Database\Options\Environment;
+use Resursbank\Woocommerce\Database\Options\Api\ClientId;
+use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Api\Enabled;
+use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Util\Translator;
 
 /**

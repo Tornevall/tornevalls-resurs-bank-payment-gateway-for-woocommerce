@@ -24,13 +24,13 @@ use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Option;
-use Resursbank\Woocommerce\Database\Options\Advanced\CacheEnabled;
-use Resursbank\Woocommerce\Database\Options\ClientId;
-use Resursbank\Woocommerce\Database\Options\ClientSecret;
-use Resursbank\Woocommerce\Database\Options\EnableGetAddress;
-use Resursbank\Woocommerce\Database\Options\LogDir;
-use Resursbank\Woocommerce\Database\Options\LogLevel;
-use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
+use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
+use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Database\Options\Api\ClientId;
+use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
@@ -177,7 +177,7 @@ class Advanced
 
         // Default for multiple stores: avoid auto-selecting first store.
         $return = [
-            '' => Translator::translate(phraseId: 'select-store'),
+            '' => Translator::translate(phraseId: 'please-select'),
         ];
 
         if ($clientId !== '' && $clientSecret !== '') {
@@ -257,10 +257,10 @@ class Advanced
     private static function getCacheEnabled(): array
     {
         return [
-            'id' => CacheEnabled::getName(),
+            'id' => EnableCache::getName(),
             'title' => Translator::translate(phraseId: 'cache-enabled'),
             'type' => 'checkbox',
-            'default' => CacheEnabled::getDefault(),
+            'default' => EnableCache::getDefault(),
         ];
     }
 

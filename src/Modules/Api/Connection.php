@@ -22,23 +22,26 @@ use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use ResursBank\Exception\MapiCredentialsException;
-use Resursbank\Woocommerce\Database\Options\Advanced\CacheEnabled;
-use Resursbank\Woocommerce\Database\Options\ClientId;
-use Resursbank\Woocommerce\Database\Options\ClientSecret;
-use Resursbank\Woocommerce\Database\Options\Environment;
-use Resursbank\Woocommerce\Database\Options\LogDir;
-use Resursbank\Woocommerce\Database\Options\LogLevel;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
+use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
+use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbank\Woocommerce\Database\Options\Api\ClientId;
+use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
+use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Language;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
+use ValueError;
 use WC_Logger;
 
 use function function_exists;
 
 /**
  * API connection adapter.
+ *
+ * @noinspection EfferentObjectCouplingInspection
  */
 class Connection
 {
@@ -57,7 +60,7 @@ class Connection
             Config::setup(
                 logger: self::getLogger(),
                 cache: self::getCache(),
-                logLevel: LogLevel::getLogLevel(),
+                logLevel: LogLevel::getData(),
                 jwtAuth: self::hasCredentials() ? self::getJwt() : null,
                 language: Language::getSiteLanguage(),
                 userAgent: UserAgent::getUserAgent()
@@ -82,6 +85,7 @@ class Connection
     /**
      * @throws MapiCredentialsException
      * @throws EmptyValueException
+     * @throws ValueError
      */
     public static function getJwt(): ?Jwt
     {
@@ -122,8 +126,11 @@ class Connection
         return $result;
     }
 
+    /**
+     * Resolve cache interface.
+     */
     public static function getCache(): CacheInterface
     {
-        return CacheEnabled::isEnabled() ? new Transient() : new None();
+        return EnableCache::isEnabled() ? new Transient() : new None();
     }
 }
