@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
@@ -208,15 +209,31 @@ class Product
     }
 
     /**
+     * Attempts to fetch SKU from product.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
      */
     private static function getSku(WC_Order_Item_Product $product): string
     {
         $result = self::getOriginalProduct(product: $product)->get_sku();
 
-        if (!is_string(value: $result)) {
+        if (!is_string(value: $result) || strlen(string: $result) === 0) {
+            Config::getLogger()->error(
+                message: 'Failed to resolve SKU from order line item.'
+            );
             throw new IllegalValueException(
-                message: 'Failed to resolve SKU from order item.'
+                message: Translator::translate(
+                    phraseId: 'failed-to-resolve-sku-from-order-line-object'
+                ) . '<br />' .
+                         Translator::translate(
+                             phraseId: 'could-not-complete-your-order-please-contact-support'
+                         )
             );
         }
 
