@@ -11,15 +11,16 @@ namespace Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Woocommerce\Util\Log;
 use WC_Order_Item_Product;
 use WC_Product;
 use WC_Tax;
@@ -223,10 +224,14 @@ class Product
     {
         $result = self::getOriginalProduct(product: $product)->get_sku();
 
-        if (!is_string(value: $result) || strlen(string: $result) === 0) {
-            Config::getLogger()->error(
-                message: 'Failed to resolve SKU from order line item.'
+        if (!is_string(value: $result) || $result === "") {
+            Log::error(error:
+                new EmptyValueException(
+                    message: 'Failed to resolve SKU from product with id ' . $product->get_id() .
+                             ' when parsing order line.'
+                )
             );
+
             throw new IllegalValueException(
                 message: Translator::translate(
                     phraseId: 'failed-to-resolve-sku-from-order-line-object'
