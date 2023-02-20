@@ -22,7 +22,6 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order;
@@ -49,8 +48,6 @@ class Status
     public static function update(
         WC_Order $order
     ): void {
-        Log::debug(msg: 'here');
-
         if (!Metadata::isValidResursPayment(order: $order)) {
             return;
         }
