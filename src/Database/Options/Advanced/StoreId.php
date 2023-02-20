@@ -29,6 +29,16 @@ class StoreId extends StringOption implements OptionInterface
     }
 
     /**
+     * Resolve data.
+     */
+    public static function getData(): string
+    {
+        $result = parent::getData();
+
+        return $result !== '' ? $result : self::getDefault();
+    }
+
+    /**
      * Resolve single store as default or '' when multiple stores are available.
      */
     public static function getDefault(): string

@@ -74,8 +74,8 @@ class Connection
      */
     public static function hasCredentials(): bool
     {
-        $clientId = ClientId::getRawData();
-        $clientSecret = ClientSecret::getRawData();
+        $clientId = ClientId::getData();
+        $clientSecret = ClientSecret::getData();
 
         return $clientId !== '' && $clientSecret !== '';
     }
@@ -94,8 +94,8 @@ class Connection
         }
 
         return new Jwt(
-            clientId: ClientId::getRawData(),
-            clientSecret: ClientSecret::getRawData(),
+            clientId: ClientId::getData(),
+            clientSecret: ClientSecret::getData(),
             scope: Environment::getData() === EnvironmentEnum::PROD ?
                 Scope::MERCHANT_API :
                 Scope::MOCK_MERCHANT_API,
@@ -112,7 +112,7 @@ class Connection
         $result = new NoneLogger();
 
         try {
-            $result = new FileLogger(path: LogDir::getRawData());
+            $result = new FileLogger(path: LogDir::getData());
         } catch (Throwable $e) {
             if (class_exists(class: WC_Logger::class)) {
                 (new WC_Logger())->critical(

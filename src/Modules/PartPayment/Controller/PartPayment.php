@@ -63,8 +63,8 @@ class PartPayment
         ];
 
         $paymentMethod = Repository::getById(
-            storeId: StoreId::getRawData(),
-            paymentMethodId: PaymentMethod::getRawData()
+            storeId: StoreId::getData(),
+            paymentMethodId: PaymentMethod::getData()
         );
 
         $requestAmount = Url::getHttpGet('amount');
@@ -75,9 +75,9 @@ class PartPayment
         ) {
             $currencySymbol = Currency::getWooCommerceCurrencySymbol();
             $widget = new PartPaymentWidget(
-                storeId: StoreId::getRawData(),
+                storeId: StoreId::getData(),
                 paymentMethod: $paymentMethod,
-                months: (int)Period::getRawData(),
+                months: (int)Period::getData(),
                 amount: (float)$requestAmount,
                 currencySymbol: $currencySymbol,
                 currencyFormat: Module::getEcomCurrencyFormat(),

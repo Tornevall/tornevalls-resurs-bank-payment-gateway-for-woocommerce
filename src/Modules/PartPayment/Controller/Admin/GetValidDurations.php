@@ -48,7 +48,7 @@ class GetValidDurations
         $controller = new DurationsByMonthController();
         $requestData = $controller->getRequestData();
         $paymentMethodId = $requestData->paymentMethodId;
-        $storeId = StoreId::getRawData();
+        $storeId = StoreId::getData();
 
         return $controller->exec(
             storeId: $storeId,

@@ -172,12 +172,12 @@ class Advanced
      */
     private static function getStoreSelector(): array
     {
-        $clientId = ClientId::getRawData();
-        $clientSecret = ClientSecret::getRawData();
+        $clientId = ClientId::getData();
+        $clientSecret = ClientSecret::getData();
 
         // Default for multiple stores: avoid auto-selecting first store.
         $return = [
-            '' => Translator::translate(phraseId: 'select-store'),
+            '' => Translator::translate(phraseId: 'please-select'),
         ];
 
         if ($clientId !== '' && $clientSecret !== '') {

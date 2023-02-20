@@ -90,9 +90,9 @@ class PartPayment
             return;
         }
 
-        $paymentMethodId = PaymentMethodOption::getRawData();
-        $storeId = StoreId::getRawData();
-        $period = Period::getRawData();
+        $paymentMethodId = PaymentMethodOption::getData();
+        $storeId = StoreId::getData();
+        $period = Period::getData();
 
         if (empty($storeId)) {
             MessageBag::addError(msg: Translator::translate(
@@ -230,9 +230,11 @@ class PartPayment
      */
     private static function getPaymentMethods(): array
     {
-        $storeId = StoreId::getRawData();
+        $storeId = StoreId::getData();
         $paymentMethods = [];
-        $return = [];
+        $return = [
+            '' => Translator::translate(phraseId: 'please-select'),
+        ];
 
         try {
             $paymentMethods = $storeId !== '' ?
@@ -259,10 +261,12 @@ class PartPayment
      */
     private static function getAnnuityPeriods(): array
     {
-        $paymentMethodId = PaymentMethodOption::getRawData();
-        $storeId = StoreId::getRawData();
+        $paymentMethodId = PaymentMethodOption::getData();
+        $storeId = StoreId::getData();
         $annuityFactors = [];
-        $return = [];
+        $return = [
+            '' => Translator::translate(phraseId: 'please-select'),
+        ];
 
         try {
             if ($paymentMethodId !== '' && $storeId !== '') {

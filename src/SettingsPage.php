@@ -124,7 +124,7 @@ class SettingsPage extends WC_Settings_Page
     public function renderPaymentMethodsPage(): void
     {
         try {
-            if (StoreId::getRawData() === '') {
+            if (StoreId::getData() === '') {
                 throw new RuntimeException(
                     message: Translator::translate(
                         phraseId: 'please-select-a-store'
@@ -134,7 +134,7 @@ class SettingsPage extends WC_Settings_Page
 
             echo Data::getEscapedHtml(
                 content: PaymentMethods::getOutput(
-                    storeId: StoreId::getRawData()
+                    storeId: StoreId::getData()
                 )
             );
         } catch (Throwable $e) {

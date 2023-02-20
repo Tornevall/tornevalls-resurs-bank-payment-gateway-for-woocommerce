@@ -71,8 +71,8 @@ class Module
         }
 
         $paymentMethod = Repository::getById(
-            storeId: StoreId::getRawData(),
-            paymentMethodId: PaymentMethod::getRawData()
+            storeId: StoreId::getData(),
+            paymentMethodId: PaymentMethod::getData()
         );
 
         if ($paymentMethod === null) {
@@ -80,9 +80,9 @@ class Module
         }
 
         $this->instance = new PartPayment(
-            storeId: StoreId::getRawData(),
+            storeId: StoreId::getData(),
             paymentMethod: $paymentMethod,
-            months: (int)Period::getRawData(),
+            months: (int)Period::getData(),
             amount: (float)$product->get_price(),
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: self::getEcomCurrencyFormat(),

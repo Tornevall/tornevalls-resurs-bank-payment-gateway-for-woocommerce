@@ -38,7 +38,7 @@ class GetAddress
             self::updateSessionData(data: $requestData);
 
             $return = $controller->exec(
-                storeId: StoreId::getRawData(),
+                storeId: StoreId::getData(),
                 data: $requestData
             );
         } catch (Throwable $e) {

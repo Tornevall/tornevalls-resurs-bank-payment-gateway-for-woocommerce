@@ -21,7 +21,7 @@ abstract class StringOption extends Option
     /**
      * Get data.
      */
-    public static function getRawData(): string
+    public static function getData(): string
     {
         $result = parent::getRawData();
 
