@@ -9,18 +9,19 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options\PartPayment;
 
-use Resursbank\Woocommerce\Database\IntOption;
+use Resursbank\Woocommerce\Database\Datatype\IntOption;
+use Resursbank\Woocommerce\Database\OptionInterface;
 
 /**
- * Setting for the duration to be used by the part payment widget.
+ * Implementation of resursbank_part_payment_limit value in options table.
  */
-class Limit extends IntOption
+class Limit extends IntOption implements OptionInterface
 {
     /**
      * @inheritdoc
      */
     public static function getName(): string
     {
-        return self::NAME_PREFIX . 'partpayment_limit';
+        return self::NAME_PREFIX . 'part_payment_limit';
     }
 }

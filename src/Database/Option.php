@@ -9,42 +9,29 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database;
 
-use RuntimeException;
+use function is_string;
 
 /**
- * Basic database interface for options in wp_options table.
+ * Basic database interface for options in options table.
  */
-class Option
+abstract class Option
 {
     /**
-     * Name prefix for entries in wp_options table.
+     * Name prefix for entries in options table.
      */
     public const NAME_PREFIX = 'resursbank_';
 
     /**
-     * Resolve name of entry in wp_options table. This method needs to be
-     * overwritten by extending classes.
-     *
-     * NOTE: Using a method instead of a property to ensure that the name is
-     * not left empty.
-     *
-     * @throws RuntimeException
+     * Resolve data from options table as string, defaults to NULL.
      */
-    public static function getName(): string
+    public static function getRawData(): ?string
     {
-        throw new RuntimeException(message: 'Not implemented');
-    }
-
-    /**
-     * @return mixed - By default this should give string|null, defining mixed
-     * to allow overriding classes to return other types.
-     */
-    public static function getData(): mixed
-    {
-        return get_option(
+        $val = get_option(
             option: static::getName(),
             default: null
-        ) ?? static::getDefault();
+        );
+
+        return is_string(value: $val) ? $val : null;
     }
 
     /**
@@ -56,13 +43,5 @@ class Option
             option: static::getName(),
             value: $value
         ) === true;
-    }
-
-    /**
-     * Gets the options default value.
-     */
-    public static function getDefault(): mixed
-    {
-        return false;
     }
 }

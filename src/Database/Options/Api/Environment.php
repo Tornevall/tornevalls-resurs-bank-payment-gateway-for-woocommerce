@@ -7,21 +7,20 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options;
+namespace Resursbank\Woocommerce\Database\Options\Api;
 
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Woocommerce\Database\Option;
-
-use function is_string;
+use Resursbank\Woocommerce\Database\OptionInterface;
+use ValueError;
 
 /**
- * Database interface for environment in wp_options table.
+ * Implementation of resursbank_environment value in options table.
  */
-class Environment extends Option
+class Environment extends Option implements OptionInterface
 {
     /**
      * @inheritdoc
-     * @noinspection PhpMissingParentCallCommonInspection
      */
     public static function getName(): string
     {
@@ -29,26 +28,22 @@ class Environment extends Option
     }
 
     /**
-     * Return default value.
-     *
-     * @noinspection PhpMissingParentCallCommonInspection
+     * @return string|null To be compliant with OptionInterface contact.
      */
-    public static function getDefault(): string
+    public static function getDefault(): ?string
     {
         return EnvironmentEnum::TEST->value;
     }
 
     /**
      * Get the data.
+     *
+     * @throws ValueError
      */
     public static function getData(): EnvironmentEnum
     {
-        $data = parent::getData();
-
-        if (!is_string(value: $data)) {
-            $data = self::getDefault();
-        }
-
-        return EnvironmentEnum::from(value: $data);
+        return EnvironmentEnum::from(
+            value: parent::getRawData() ?? self::getDefault()
+        );
     }
 }

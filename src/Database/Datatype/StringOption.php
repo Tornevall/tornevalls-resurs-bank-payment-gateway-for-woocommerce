@@ -7,31 +7,31 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database;
+namespace Resursbank\Woocommerce\Database\Datatype;
+
+use Resursbank\Woocommerce\Database\Option;
 
 use function is_string;
 
 /**
  * Handle string values in database.
  */
-class StringOption extends Option
+abstract class StringOption extends Option
 {
     /**
      * Get data.
      */
-    public static function getData(): string
+    public static function getRawData(): string
     {
-        $result = parent::getData();
+        $result = parent::getRawData();
 
         return is_string(value: $result) ? $result : '';
     }
 
     /**
-     * Return default value.
-     *
-     * @noinspection PhpMissingParentCallCommonInspection
+     * @return string|null To be compliant with OptionInterface contact.
      */
-    public static function getDefault(): string
+    public static function getDefault(): ?string
     {
         return '';
     }

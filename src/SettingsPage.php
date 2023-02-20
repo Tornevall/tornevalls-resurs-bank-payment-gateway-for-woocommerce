@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use ResursBank\Module\Data;
-use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\PartPayment;
@@ -124,7 +124,7 @@ class SettingsPage extends WC_Settings_Page
     public function renderPaymentMethodsPage(): void
     {
         try {
-            if (StoreId::getData() === '') {
+            if (StoreId::getRawData() === '') {
                 throw new RuntimeException(
                     message: Translator::translate(
                         phraseId: 'please-select-a-store'
@@ -134,7 +134,7 @@ class SettingsPage extends WC_Settings_Page
 
             echo Data::getEscapedHtml(
                 content: PaymentMethods::getOutput(
-                    storeId: StoreId::getData()
+                    storeId: StoreId::getRawData()
                 )
             );
         } catch (Throwable $e) {

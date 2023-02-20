@@ -28,11 +28,11 @@ use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment;
 use ResursBank\Module\Data;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -71,8 +71,8 @@ class Module
         }
 
         $paymentMethod = Repository::getById(
-            storeId: StoreId::getData(),
-            paymentMethodId: PaymentMethod::getData()
+            storeId: StoreId::getRawData(),
+            paymentMethodId: PaymentMethod::getRawData()
         );
 
         if ($paymentMethod === null) {
@@ -80,9 +80,9 @@ class Module
         }
 
         $this->instance = new PartPayment(
-            storeId: StoreId::getData(),
+            storeId: StoreId::getRawData(),
             paymentMethod: $paymentMethod,
-            months: (int)Period::getData(),
+            months: (int)Period::getRawData(),
             amount: (float)$product->get_price(),
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: self::getEcomCurrencyFormat(),

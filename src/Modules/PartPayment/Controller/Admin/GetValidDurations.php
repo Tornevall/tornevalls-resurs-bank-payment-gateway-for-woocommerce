@@ -22,7 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\AnnuityFactor\Http\DurationsByMonthController;
-use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 
 /**
  * Controller for fetching valid duration options for a specified payment method
@@ -48,7 +48,7 @@ class GetValidDurations
         $controller = new DurationsByMonthController();
         $requestData = $controller->getRequestData();
         $paymentMethodId = $requestData->paymentMethodId;
-        $storeId = StoreId::getData();
+        $storeId = StoreId::getRawData();
 
         return $controller->exec(
             storeId: $storeId,

@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\PartPayment;
+namespace Resursbank\Woocommerce\Database\Options\Api;
 
 use Resursbank\Woocommerce\Database\Datatype\BoolOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 
 /**
- * Implementation of resursbank_part_payment_enabled value in options table.
+ * Implementation of resursbank_enabled value in options table.
  */
 class Enabled extends BoolOption implements OptionInterface
 {
@@ -22,6 +22,16 @@ class Enabled extends BoolOption implements OptionInterface
      */
     public static function getName(): string
     {
-        return self::NAME_PREFIX . 'part_payment_enabled';
+        return self::NAME_PREFIX . 'enabled';
+    }
+
+    /**
+     * Return default value.
+     *
+     * @noinspection PhpMissingParentCallCommonInspection
+     */
+    public static function getDefault(): string
+    {
+        return 'yes';
     }
 }

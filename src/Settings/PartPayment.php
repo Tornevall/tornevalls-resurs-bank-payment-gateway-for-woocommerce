@@ -23,11 +23,11 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use ResursBank\Module\Data;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -90,9 +90,9 @@ class PartPayment
             return;
         }
 
-        $paymentMethodId = PaymentMethodOption::getData();
-        $storeId = StoreId::getData();
-        $period = Period::getData();
+        $paymentMethodId = PaymentMethodOption::getRawData();
+        $storeId = StoreId::getRawData();
+        $period = Period::getRawData();
 
         if (empty($storeId)) {
             MessageBag::addError(msg: Translator::translate(
@@ -230,7 +230,7 @@ class PartPayment
      */
     private static function getPaymentMethods(): array
     {
-        $storeId = StoreId::getData();
+        $storeId = StoreId::getRawData();
         $paymentMethods = [];
         $return = [];
 
@@ -259,8 +259,8 @@ class PartPayment
      */
     private static function getAnnuityPeriods(): array
     {
-        $paymentMethodId = PaymentMethodOption::getData();
-        $storeId = StoreId::getData();
+        $paymentMethodId = PaymentMethodOption::getRawData();
+        $storeId = StoreId::getRawData();
         $annuityFactors = [];
         $return = [];
 

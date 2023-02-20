@@ -25,9 +25,9 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Database\Options\StoreId;
 use Resursbank\Woocommerce\Modules\PartPayment\Module;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
@@ -63,8 +63,8 @@ class PartPayment
         ];
 
         $paymentMethod = Repository::getById(
-            storeId: StoreId::getData(),
-            paymentMethodId: PaymentMethod::getData()
+            storeId: StoreId::getRawData(),
+            paymentMethodId: PaymentMethod::getRawData()
         );
 
         $requestAmount = Url::getHttpGet('amount');
@@ -75,9 +75,9 @@ class PartPayment
         ) {
             $currencySymbol = Currency::getWooCommerceCurrencySymbol();
             $widget = new PartPaymentWidget(
-                storeId: StoreId::getData(),
+                storeId: StoreId::getRawData(),
                 paymentMethod: $paymentMethod,
-                months: (int)Period::getData(),
+                months: (int)Period::getRawData(),
                 amount: (float)$requestAmount,
                 currencySymbol: $currencySymbol,
                 currencyFormat: Module::getEcomCurrencyFormat(),

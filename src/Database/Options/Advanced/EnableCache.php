@@ -7,21 +7,21 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\PartPayment;
+namespace Resursbank\Woocommerce\Database\Options\Advanced;
 
 use Resursbank\Woocommerce\Database\Datatype\BoolOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 
 /**
- * Implementation of resursbank_part_payment_enabled value in options table.
+ * Implementation of resursbank_cache_enabled value in options table.
  */
-class Enabled extends BoolOption implements OptionInterface
+class EnableCache extends BoolOption implements OptionInterface
 {
     /**
      * @inheritdoc
      */
     public static function getName(): string
     {
-        return self::NAME_PREFIX . 'part_payment_enabled';
+        return self::NAME_PREFIX . 'cache_enabled';
     }
 }

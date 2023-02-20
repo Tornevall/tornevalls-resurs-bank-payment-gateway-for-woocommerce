@@ -16,7 +16,7 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
 use Resursbank\Ecom\Module\Customer\Models\GetAddressRequest;
 use Resursbank\Ecom\Module\Customer\Repository;
-use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
@@ -38,7 +38,7 @@ class GetAddress
             self::updateSessionData(data: $requestData);
 
             $return = $controller->exec(
-                storeId: StoreId::getData(),
+                storeId: StoreId::getRawData(),
                 data: $requestData
             );
         } catch (Throwable $e) {

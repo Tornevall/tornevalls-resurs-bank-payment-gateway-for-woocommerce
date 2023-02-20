@@ -8,7 +8,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use ResursBank\Module\Data;
 use ResursBank\ResursBank\ResursPlugin;
-use Resursbank\Woocommerce\Database\Options\Enabled;
+use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;

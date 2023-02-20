@@ -13,7 +13,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use ResursBank\Module\Data;
 use ResursBank\Module\PluginHooks;
-use Resursbank\Woocommerce\Database\Options\StoreId;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
@@ -125,7 +125,7 @@ class WooCommerce
     private static function getGatewaysFromPaymentMethods(array $gateways = []): array
     {
         try {
-            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(StoreId::getData());
+            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(StoreId::getRawData());
 
             /** @var PaymentMethod $paymentMethod */
             foreach ($paymentMethodList as $paymentMethod) {
