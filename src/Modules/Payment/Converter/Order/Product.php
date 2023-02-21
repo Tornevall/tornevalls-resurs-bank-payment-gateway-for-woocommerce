@@ -14,11 +14,13 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Woocommerce\Util\Log;
 use WC_Order_Item_Product;
 use WC_Product;
 use WC_Tax;
@@ -208,15 +210,35 @@ class Product
     }
 
     /**
+     * Attempts to fetch SKU from product.
+     *
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
      */
     private static function getSku(WC_Order_Item_Product $product): string
     {
         $result = self::getOriginalProduct(product: $product)->get_sku();
 
-        if (!is_string(value: $result)) {
+        if (!is_string(value: $result) || $result === "") {
+            Log::error(error:
+                new EmptyValueException(
+                    message: 'Failed to resolve SKU from product with id ' . $product->get_id() .
+                             ' when parsing order line.'
+                )
+            );
+
             throw new IllegalValueException(
-                message: 'Failed to resolve SKU from order item.'
+                message: Translator::translate(
+                    phraseId: 'failed-to-resolve-sku-from-order-line-object'
+                ) . '<br />' .
+                         Translator::translate(
+                             phraseId: 'could-not-complete-your-order-please-contact-support'
+                         )
             );
         }
 
