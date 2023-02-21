@@ -499,14 +499,10 @@ class ResursDefault extends WC_Payment_Gateway
                         returnType: $customerInfoFrom
                     )
                 ),
-                fullName: $sessionCustomerType === CustomerType::LEGAL ?
-                    $this->getCustomerData(
-                        key: 'company',
-                        returnType: $customerInfoFrom
-                    ) : $this->getCustomerData(
-                        key: 'full_name',
-                        returnType: $customerInfoFrom
-                    ),
+                fullName: $this->getCustomerData(
+                    key: 'full_name',
+                    returnType: $customerInfoFrom
+                ),
                 firstName: $this->getCustomerData(
                     key: 'first_name',
                     returnType: $customerInfoFrom
@@ -567,7 +563,7 @@ class ResursDefault extends WC_Payment_Gateway
 
         // Magic for full name.
         if ($key === 'full_name') {
-            // Full name is a merge from first and last name.
+            // Full name is a merge from first and last name. It's made up but sometimes necessary.
             $return = $customerInfo['first_name'] . ' ' . $customerInfo['last_name'];
         }
 
