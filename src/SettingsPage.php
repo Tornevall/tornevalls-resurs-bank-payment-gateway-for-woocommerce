@@ -13,6 +13,7 @@ use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
+use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
@@ -58,6 +59,7 @@ class SettingsPage extends WC_Settings_Page
             PaymentMethods::SECTION_ID => PaymentMethods::getTitle(),
             Advanced::SECTION_ID => Advanced::getTitle(),
             PartPayment::SECTION_ID => PartPayment::getTitle(),
+            OrderManagement::SECTION_ID => OrderManagement::getTitle(),
         ];
     }
 

@@ -26,6 +26,7 @@ use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Refund;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -49,7 +50,7 @@ class Refunded extends Status
      */
     public static function performRefund(int $orderId, int $refundId): void
     {
-        if (!self::isResursPayment(orderId: $orderId)) {
+        if (!self::isEnabled(orderId: $orderId)) {
             return;
         }
 
@@ -296,5 +297,19 @@ class Refunded extends Status
             Config::getLogger()->error(message: $error);
             throw $error;
         }
+    }
+
+    /**
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     */
+    private static function isEnabled(int $orderId): bool
+    {
+        return EnableRefund::isEnabled() &&
+            self::isResursPayment(orderId: $orderId);
     }
 }
