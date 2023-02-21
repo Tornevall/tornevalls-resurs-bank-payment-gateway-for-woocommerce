@@ -47,7 +47,7 @@ class Product
         return new OrderLine(
             quantity: self::getQuantity(
                 product: $product
-            ) == 0 ? 1 : -self::getQuantity(
+            ) === 0.0 ? 1 : -self::getQuantity(
                 product: $product
             ),
             quantityUnit: Translator::translate(
