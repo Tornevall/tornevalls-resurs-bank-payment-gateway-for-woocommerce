@@ -36,6 +36,7 @@ use function is_array;
 class WordPress
 {
     /**
+     * @throws ConfigException
      * @since 0.0.1.0
      */
     public static function initializeWooCommerce()

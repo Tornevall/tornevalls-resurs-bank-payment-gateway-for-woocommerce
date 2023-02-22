@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Resurs Bank Payments for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
@@ -28,7 +29,6 @@ use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order;
-use Resursbank\Woocommerce\Util\Metadata;
 
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
@@ -37,10 +37,12 @@ define(
         offset: strrpos(haystack: __DIR__, needle: '/') + 1
     )
 );
+
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
 }
-require_once(__DIR__ . '/autoload.php');
+
+require_once __DIR__ . '/autoload.php';
 
 // Using same path identifier as the rest of the plugin-verse.
 define(
@@ -53,17 +55,12 @@ define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 // in one sweep - if necessary.
 define(constant_name: 'RESURSBANK_SNAKE_CASE_FILTERS', value: true);
 
-// Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
-try {
-    Connection::setup();
-} catch (Throwable) {
-    return;
-}
-
 // Translation domain is used for all phrases that is not relying on ecom2.
 load_plugin_textdomain(
     domain: 'resurs-bank-payments-for-woocommerce',
-    plugin_rel_path: dirname(path: plugin_basename(file: __FILE__)) . '/language/'
+    plugin_rel_path: dirname(
+        path: plugin_basename(file: __FILE__)
+    ) . '/language/'
 );
 
 // Make sure there is an instance of WooCommerce among active plugins.
@@ -71,8 +68,15 @@ if (!WooCommerce::getActiveState()) {
     return;
 }
 
+// Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
+try {
+    Connection::setup();
+} catch (Throwable) {
+    return;
+}
+
 // Setup event listeners adn resources when WP has finished loading all modules.
-add_action(hook_name: 'plugins_loaded', callback: static function(): void {
+add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     ResursBank\Service\WordPress::initializeWooCommerce();
     Order::init();
     MessageBag::init();
