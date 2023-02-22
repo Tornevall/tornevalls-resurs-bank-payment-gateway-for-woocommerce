@@ -21,6 +21,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
+use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
@@ -62,9 +63,9 @@ class Status
 
         match ($payment->status) {
             PaymentStatus::ACCEPTED => $order->payment_complete(),
-            PaymentStatus::REJECTED => $order->update_status(
-                new_status: 'failed',
-                note: Translator::translate(phraseId: 'payment-status-failed')
+            PaymentStatus::REJECTED => self::updateRejected(
+                payment: $payment,
+                order: $order
             ),
             default => $order->update_status(
                 new_status: 'on-hold',
@@ -105,5 +106,33 @@ class Status
             PaymentStatus::REJECTED => 'failed',
             default => 'on-hold'
         };
+    }
+
+    /**
+     * Update WC_Order status based on reason for payment rejection.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    private static function updateRejected(
+        Payment $payment,
+        WC_Order $order
+    ): void {
+        $status = Repository::getTaskStatusDetails(
+            paymentId: $payment->id
+        )->completed ? 'cancelled' : 'failed';
+
+        $order->update_status(
+            new_status: $status,
+            note: Translator::translate(phraseId: "payment-status-$status")
+        );
     }
 }
