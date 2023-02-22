@@ -276,7 +276,11 @@ class PartPayment
                 )->content;
             }
         } catch (Throwable) {
-            MessageBag::addError(msg: 'Failed to get annuity periods.');
+            MessageBag::addError(
+                msg: Translator::translate(
+                    phraseId: 'get-annuity-periods-failed'
+                )
+            );
         }
 
         foreach ($annuityFactors as $annuityFactor) {
