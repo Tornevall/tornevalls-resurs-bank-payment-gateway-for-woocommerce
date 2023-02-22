@@ -45,6 +45,7 @@ class PartPaymentPeriod
         );
         $disabled = self::getPeriodDisabled() ? 'disabled' : '';
         $options = self::getPeriodOptionHtml();
+        $adminUrl = get_admin_url();
 
         echo <<<EOL
 <tr>
@@ -57,7 +58,7 @@ $options
         </select>       
         <img style="display:none;margin-top:8px;"
              id="resursbank_part_payment_period_spinner"
-             src="/wp-admin/images/loading.gif"/>
+             src="$adminUrl/images/loading.gif"/>
         <p class="description">$description</p>
 </td>
 </tr>
