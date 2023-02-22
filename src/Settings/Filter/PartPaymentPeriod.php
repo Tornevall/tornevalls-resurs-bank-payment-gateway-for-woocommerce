@@ -30,15 +30,23 @@ class PartPaymentPeriod
     {
         add_action(
             hook_name: 'woocommerce_admin_field_rbpartpaymentperiod',
-            callback: static function (): void {
-                $label = Translator::translate(phraseId: 'annuity-period');
-                $description = Translator::translate(
-                    phraseId: 'part-payment-annuity-period'
-                );
-                $disabled = self::getPeriodDisabled() ? 'disabled' : '';
-                $options = self::getPeriodOptionHtml();
+            callback: 'Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod::render'
+        );
+    }
 
-                echo <<<EOL
+    /**
+     * Render the HTML element.
+     */
+    public static function render(): void
+    {
+        $label = Translator::translate(phraseId: 'annuity-period');
+        $description = Translator::translate(
+            phraseId: 'part-payment-annuity-period'
+        );
+        $disabled = self::getPeriodDisabled() ? 'disabled' : '';
+        $options = self::getPeriodOptionHtml();
+
+        echo <<<EOL
 <tr>
     <th scope="row" class="titledesc">
         <label for="resursbank_part_payment_period">$label</label>
@@ -54,8 +62,6 @@ $options
 </td>
 </tr>
 EOL;
-            }
-        );
     }
 
     /**
