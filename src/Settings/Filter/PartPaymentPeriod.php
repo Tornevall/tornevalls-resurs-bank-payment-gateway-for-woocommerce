@@ -53,7 +53,7 @@ class PartPaymentPeriod
         <label for="resursbank_part_payment_period">$label</label>
     </th>
     <td class="forminp">
-        <select $disabled id="resursbank_part_payment_period" name="resursbank_part_payment_period" class="">
+        <select $disabled id="resursbank_part_payment_period" name="resursbank_part_payment_period">
 $options
         </select>       
         <img style="display:none;margin-top:8px;"
