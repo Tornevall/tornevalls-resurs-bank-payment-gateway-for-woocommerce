@@ -191,18 +191,12 @@ class Route
     ): void {
         $controller = new CoreController();
 
-        self::respond(
+        self::respondWithExit(
             body: $controller->respondWithError(
-                exception: new HttpException(
-                    message: $exception->getMessage(),
-                    previous: $exception
-                )
+                exception: $exception
             ),
             code: $controller->getErrorResponseCode(
-                exception: new HttpException(
-                    message: $exception->getMessage(),
-                    previous: $exception
-                )
+                exception: $exception
             )
         );
     }
