@@ -48,7 +48,7 @@ class Advanced
     public const SECTION_ID = 'advanced';
 
     /**
-     * Get translated title of API Settings tab on config page.
+     * Get translated title of tab.
      */
     public static function getTitle(): string
     {
