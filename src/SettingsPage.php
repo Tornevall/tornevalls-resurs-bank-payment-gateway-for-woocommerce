@@ -54,12 +54,13 @@ class SettingsPage extends WC_Settings_Page
      */
     public function get_sections(): array // phpcs:ignore
     {
+        // New sections should preferably be placed before the advanced section.
         return [
             Api::SECTION_ID => Api::getTitle(),
             PaymentMethods::SECTION_ID => PaymentMethods::getTitle(),
-            Advanced::SECTION_ID => Advanced::getTitle(),
             PartPayment::SECTION_ID => PartPayment::getTitle(),
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
+            Advanced::SECTION_ID => Advanced::getTitle(),
         ];
     }
 
