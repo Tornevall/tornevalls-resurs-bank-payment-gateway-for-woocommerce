@@ -22,6 +22,7 @@ use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
 use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
+use Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
@@ -80,6 +81,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function(): void {
     if (Admin::isAdmin()) {
         OrdermanagementModule::setupActions();
         InvalidateCacheButton::register();
+        PartPaymentPeriod::register();
         Settings::register();
     } else {
         ThankYou::register();
