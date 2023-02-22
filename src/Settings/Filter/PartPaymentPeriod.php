@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings\Filter;
 
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -36,6 +37,8 @@ class PartPaymentPeriod
 
     /**
      * Render the HTML element.
+     *
+     * @throws IllegalTypeException
      */
     public static function render(): void
     {
@@ -46,6 +49,9 @@ class PartPaymentPeriod
         $disabled = self::getPeriodDisabled() ? 'disabled' : '';
         $options = self::getPeriodOptionHtml();
         $adminUrl = get_admin_url();
+        if (!is_string(value: $adminUrl)) {
+            throw new IllegalTypeException(message: 'Fetched wp-admin URL is not a string');
+        }
 
         echo <<<EOL
 <tr>
