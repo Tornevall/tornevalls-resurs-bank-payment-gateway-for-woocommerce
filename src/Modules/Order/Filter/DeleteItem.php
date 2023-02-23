@@ -62,28 +62,6 @@ class DeleteItem
     }
 
     /**
-     * Find out if item is of type shipping.
-     */
-    private static function isShipping(WC_Order $order, int $itemId): bool
-    {
-        $shippingItems = $order->get_items(types: 'shipping');
-
-        if (is_array(value: $shippingItems)) {
-            foreach ($shippingItems as $shippingItem) {
-                if (!($shippingItem instanceof WC_Order_Item_Shipping)) {
-                    continue;
-                }
-
-                if ($shippingItem->get_id() === $itemId) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Cancel item on Resurs Bank payment.
      *
      * @throws IllegalTypeException
@@ -125,11 +103,9 @@ class DeleteItem
             throw $error;
         }
 
-        $isShipping = self::isShipping(order: $order, itemId: $itemId);
         $orderLineCollection = Order::getOrderLines(
             order: $order,
-            filter: [$itemId],
-            includeShipping: $isShipping
+            filter: [$itemId]
         );
 
         if (!$orderLineCollection->count()) {
