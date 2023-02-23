@@ -37,13 +37,17 @@ class Api
         return Translator::translate(phraseId: 'api-settings');
     }
 
+    /**
+     * Register actions for this config section.
+     */
     public static function register(): void
     {
         add_action(
             hook_name: 'updated_option',
             callback: 'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
-            accepted_args: 3,
-            priority: 100 // Set high so that our method is called after credentials are saved
+            accepted_args: 1,
+            // Set high so that our method is called after credentials are saved
+            priority: 100
         );
     }
 
@@ -63,10 +67,18 @@ class Api
         ];
     }
 
-    public static function verifyCredentials(mixed $option, mixed $old, mixed $new): void
+    /**
+     * Verifies that API credentials are valid and shows an error message if they're not.
+     */
+    public static function verifyCredentials(mixed $option): void
     {
         // Check if API section is what's being saved
-        if (!($option === 'resursbank_client_id' || $option === 'resursbank_client_secret')) {
+        if (
+            !(
+                $option === 'resursbank_client_id' ||
+                $option === 'resursbank_client_secret'
+            )
+        ) {
             return;
         }
 
@@ -74,14 +86,16 @@ class Api
         $clientId = ClientId::getData();
         $clientSecret = ClientSecret::getData();
         $environment = Environment::getData();
-        $scope = $environment->value === EnvironmentEnum::PROD->value ? Scope::MERCHANT_API : Scope::MOCK_MERCHANT_API;
+        $scope = $environment->value === EnvironmentEnum::PROD->value
+            ? Scope::MERCHANT_API
+            : Scope::MOCK_MERCHANT_API;
 
         try {
             $auth = new Jwt(
                 clientId: $clientId,
                 clientSecret: $clientSecret,
                 scope: $scope,
-                grantType: GrantType::CREDENTIALS,
+                grantType: GrantType::CREDENTIALS
             );
         } catch (Throwable $error) {
             MessageBag::addError(msg: $error->getMessage());
@@ -90,10 +104,9 @@ class Api
 
         // Check if we can fetch a token
         try {
-            $token = (new GenerateToken(auth: $auth))->call();
+            (new GenerateToken(auth: $auth))->call();
         } catch (Throwable $error) {
             MessageBag::addError(msg: $error->getMessage());
-            return;
         }
     }
 
