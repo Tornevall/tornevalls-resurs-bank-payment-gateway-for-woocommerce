@@ -200,7 +200,7 @@ class PartPayment
         return [
             'id' => Period::getName(),
             'title' => Translator::translate(phraseId: 'annuity-period'),
-            'type' => 'select',
+            'type' => 'rbpartpaymentperiod',
             'default' => Period::getDefault(),
             'options' => self::getAnnuityPeriods(),
             'desc' => Translator::translate(
