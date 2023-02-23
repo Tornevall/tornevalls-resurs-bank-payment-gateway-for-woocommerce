@@ -13,11 +13,11 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 
