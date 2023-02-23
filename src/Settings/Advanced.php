@@ -48,7 +48,7 @@ class Advanced
     public const SECTION_ID = 'advanced';
 
     /**
-     * Get translated title of API Settings tab on config page.
+     * Get translated title of tab.
      */
     public static function getTitle(): string
     {
@@ -86,7 +86,9 @@ class Advanced
             $result = [
                 'id' => 'authorization_callback_url',
                 'type' => 'text',
-                'title' => 'Authorization Callback URL',
+                'title' => Translator::translate(
+                    phraseId: 'callback-url-authorization'
+                ),
                 'custom_attributes' => [
                     'readonly' => 'readonly',
                 ],
@@ -117,7 +119,9 @@ class Advanced
             $result = [
                 'id' => 'management_callback_url',
                 'type' => 'text',
-                'title' => 'Management Callback URL',
+                'title' => Translator::translate(
+                    phraseId: 'callback-url-management'
+                ),
                 'custom_attributes' => [
                     'readonly' => 'readonly',
                 ],
@@ -184,7 +188,9 @@ class Advanced
             try {
                 $return = array_merge($return, self::getStores());
             } catch (Throwable $exception) {
-                MessageBag::addError(msg: 'Failed to get available stores.');
+                MessageBag::addError(
+                    msg: Translator::translate(phraseId: 'get-stores-failed')
+                );
                 // Make sure we give the options array a chance to render an error instead of the fields so ensure
                 // the setting won't be saved by mistake when APIs are down.
                 throw $exception;

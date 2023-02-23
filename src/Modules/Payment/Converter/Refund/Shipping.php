@@ -10,17 +10,11 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Payment\Converter\Refund;
 
 use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Utilities\Tax;
+use Resursbank\Woocommerce\Util\Translator;
 use WC_Order;
 
 /**
@@ -29,13 +23,7 @@ use WC_Order;
 class Shipping
 {
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      */
     public static function getOrderLine(WC_Order|OrderRefund $order): OrderLine
     {

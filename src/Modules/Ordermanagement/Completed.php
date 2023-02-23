@@ -21,10 +21,11 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 
@@ -54,8 +55,7 @@ class Completed extends Status
         // Prepare WooCommerce order.
         $order = self::getWooCommerceOrder(orderId: $orderId);
 
-        if (!Metadata::isValidResursPayment(order: $order)) {
-            // If not ours, return silently.
+        if (!self::isEnabled(order: $order)) {
             return;
         }
 
@@ -109,5 +109,14 @@ class Completed extends Status
             Config::getLogger()->error(message: $error);
             MessageBag::addError(msg: $errorMessage);
         }
+    }
+
+    /**
+     * Whether payment can be captured.
+     */
+    private static function isEnabled(WC_Order $order): bool
+    {
+        return EnableCapture::isEnabled() &&
+            Metadata::isValidResursPayment(order: $order);
     }
 }

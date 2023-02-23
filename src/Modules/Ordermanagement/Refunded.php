@@ -22,16 +22,21 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Refund;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 use WC_Order_Refund;
+
+use function get_class;
+use function is_object;
+use function is_string;
 
 /**
  * Contains code for handling order status change to "Refunded"
@@ -49,7 +54,7 @@ class Refunded extends Status
      */
     public static function performRefund(int $orderId, int $refundId): void
     {
-        if (!self::isResursPayment(orderId: $orderId)) {
+        if (!self::isEnabled(orderId: $orderId)) {
             return;
         }
 
@@ -159,12 +164,7 @@ class Refunded extends Status
     /**
      * Wrapper for Metadata::isValidResursPayment.
      *
-     * @throws ConfigException
      * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws FilesystemException
-     * @throws TranslationException
      */
     private static function isResursPayment(int $orderId): bool
     {
@@ -234,7 +234,7 @@ class Refunded extends Status
     private static function getResursBankId(int $orderId): string
     {
         try {
-            $order = wc_get_order($orderId);
+            $order = wc_get_order(the_order: $orderId);
 
             $resursBankId = $order->get_meta(key: 'resursbank_payment_id');
 
@@ -296,5 +296,14 @@ class Refunded extends Status
             Config::getLogger()->error(message: $error);
             throw $error;
         }
+    }
+
+    /**
+     * @throws IllegalTypeException
+     */
+    private static function isEnabled(int $orderId): bool
+    {
+        return EnableRefund::isEnabled() &&
+            self::isResursPayment(orderId: $orderId);
     }
 }

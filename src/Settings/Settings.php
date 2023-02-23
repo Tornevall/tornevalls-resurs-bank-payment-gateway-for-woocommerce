@@ -72,7 +72,8 @@ class Settings
         $data = match ($section) {
             Api::SECTION_ID => Api::getSettings(),
             Advanced::SECTION_ID => Advanced::getSettings(),
-            PartPayment::SECTION_ID => PartPayment::getSettings()
+            PartPayment::SECTION_ID => PartPayment::getSettings(),
+            OrderManagement::SECTION_ID => OrderManagement::getSettings()
         };
 
         if (isset($data[$section]) && is_array(value: $data[$section])) {
@@ -90,7 +91,8 @@ class Settings
         return array_merge(
             Api::getSettings(),
             Advanced::getSettings(),
-            PartPayment::getSettings()
+            PartPayment::getSettings(),
+            OrderManagement::getSettings()
         );
     }
 

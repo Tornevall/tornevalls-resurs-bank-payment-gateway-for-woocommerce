@@ -40,7 +40,7 @@ class PartPayment
     public const SECTION_ID = 'partpayment';
 
     /**
-     * Get translated title of API Settings tab on config page.
+     * Get translated title of tab.
      */
     public static function getTitle(): string
     {
@@ -276,7 +276,11 @@ class PartPayment
                 )->content;
             }
         } catch (Throwable) {
-            MessageBag::addError(msg: 'Failed to get annuity periods.');
+            MessageBag::addError(
+                msg: Translator::translate(
+                    phraseId: 'get-annuity-periods-failed'
+                )
+            );
         }
 
         foreach ($annuityFactors as $annuityFactor) {

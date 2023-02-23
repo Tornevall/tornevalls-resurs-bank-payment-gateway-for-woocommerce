@@ -9,18 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Translator;
 use WC_Order_Item_Product;
 use WC_Product;
 use WC_Tax;
@@ -35,12 +29,6 @@ use function is_string;
 class Product
 {
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      * @throws IllegalValueException
      */
     public static function toOrderLine(
@@ -212,19 +200,13 @@ class Product
     /**
      * Attempts to fetch SKU from product.
      *
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      */
     private static function getSku(WC_Order_Item_Product $product): string
     {
         $result = self::getOriginalProduct(product: $product)->get_sku();
 
-        if (!is_string(value: $result) || $result === "") {
+        if (!is_string(value: $result) || $result === '') {
             Log::error(error:
                 new EmptyValueException(
                     message: 'Failed to resolve SKU from product with id ' . $product->get_id() .
