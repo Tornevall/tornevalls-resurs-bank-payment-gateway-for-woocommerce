@@ -26,19 +26,19 @@ class Message extends Model
      * @throws EmptyValueException
      */
     public function __construct(
-        public readonly string $msg,
+        public readonly string $message,
         public readonly Type $type,
         private readonly StringValidation $stringValidation = new StringValidation()
     ) {
-        $this->validateMsg();
+        $this->validateMessage();
     }
 
     /**
      * Retrieved escaped message for rendering.
      */
-    public function getEscapedMsg(): string
+    public function getEscapedMessage(): string
     {
-        return Sanitize::sanitizeHtml(html: $this->msg);
+        return Sanitize::sanitizeHtml(html: $this->message);
     }
 
     /**
@@ -46,8 +46,8 @@ class Message extends Model
      *
      * @throws EmptyValueException
      */
-    private function validateMsg(): void
+    private function validateMessage(): void
     {
-        $this->stringValidation->notEmpty(value: $this->msg);
+        $this->stringValidation->notEmpty(value: $this->message);
     }
 }

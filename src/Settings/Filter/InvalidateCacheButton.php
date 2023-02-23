@@ -49,7 +49,7 @@ EX;
                     // @todo Trails one page load, message bag already rendered.
                     Log::error(
                         error: $e,
-                        msg: 'Failed rendering clear cache button. See log'
+                        message: 'Failed rendering clear cache button. See log'
                     );
                 }
             }

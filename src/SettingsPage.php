@@ -112,7 +112,7 @@ class SettingsPage extends WC_Settings_Page
             Log::error(error: $e);
 
             $this->renderError(
-                msg: Translator::translate(phraseId: 'render-settings-failed')
+                message: Translator::translate(phraseId: 'render-settings-failed')
             );
         }
 
@@ -144,7 +144,7 @@ class SettingsPage extends WC_Settings_Page
             Log::error(error: $e);
 
             $this->renderError(
-                msg: Translator::translate(
+                message: Translator::translate(
                     phraseId: 'payment-methods-widget-render-failed'
                 )
             );
@@ -156,13 +156,13 @@ class SettingsPage extends WC_Settings_Page
      * already been rendered).
      */
     private function renderError(
-        string $msg
+        string $message
     ): void {
         $seeLog = Translator::translate(phraseId: 'see-log');
 
         echo <<<EX
 <div class="error notice">
-  $msg
+  $message
   <br />
   $seeLog
 </div>

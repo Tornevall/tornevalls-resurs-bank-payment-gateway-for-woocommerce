@@ -29,12 +29,12 @@ class Invalidate
             Config::getCache()->invalidate();
 
             MessageBag::addSuccess(
-                msg: Translator::translate(phraseId: 'cache-cleared')
+                message: Translator::translate(phraseId: 'cache-cleared')
             );
         } catch (Throwable $e) {
             Log::error(
                 error: $e,
-                msg: Translator::translate(phraseId: 'clear-cache-failed')
+                message: Translator::translate(phraseId: 'clear-cache-failed')
             );
         }
     }

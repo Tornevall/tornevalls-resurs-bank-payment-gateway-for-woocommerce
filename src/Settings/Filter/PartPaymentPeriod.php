@@ -91,7 +91,7 @@ EOL;
                 )->content;
             }
         } catch (Throwable) {
-            MessageBag::addError(msg: 'Failed to get annuity periods.');
+            MessageBag::addError(message: 'Failed to get annuity periods.');
         }
 
         /** @var AnnuityInformation $annuityFactor */

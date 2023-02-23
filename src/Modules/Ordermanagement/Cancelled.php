@@ -49,7 +49,7 @@ class Cancelled extends Status
 
             if (!$resursPayment->canCancel()) {
                 $errorMessage = 'Resurs order can not be cancelled.';
-                MessageBag::addError(msg: $errorMessage);
+                MessageBag::addError(message: $errorMessage);
                 // Throw own error based on prohibited action.
                 throw new Exception(message: $errorMessage);
             }
@@ -62,7 +62,7 @@ class Cancelled extends Status
             );
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for cancel.'
+                message: 'Unable to load Resurs payment information for cancel.'
             );
             Config::getLogger()->error(message: $error);
             throw $error;
@@ -88,7 +88,7 @@ class Cancelled extends Status
                 $error->getMessage()
             );
             Config::getLogger()->error(message: $errorMessage);
-            MessageBag::addError(msg: $errorMessage);
+            MessageBag::addError(message: $errorMessage);
         }
     }
 
