@@ -13,10 +13,11 @@ use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 
@@ -26,7 +27,7 @@ use WC_Order;
 class Cancelled extends Status
 {
     /**
-     * Cancel full refund of Resurs payment.
+     * Cancel Resurs Bank payment.
      *
      * @throws ConfigException
      * @throws Throwable
@@ -37,8 +38,7 @@ class Cancelled extends Status
         // Prepare WooCommerce order.
         $order = self::getWooCommerceOrder(orderId: $orderId);
 
-        if (!Metadata::isValidResursPayment(order: $order)) {
-            // If not ours, return silently.
+        if (!self::isEnabled(order: $order)) {
             return;
         }
 
@@ -62,7 +62,7 @@ class Cancelled extends Status
             );
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for refund.'
+                msg: 'Unable to load Resurs payment information for cancel.'
             );
             Config::getLogger()->error(message: $error);
             throw $error;
@@ -70,7 +70,7 @@ class Cancelled extends Status
     }
 
     /**
-     * Performs the actual refund operation.
+     * Performs the actual cancel operation.
      *
      * @throws ConfigException
      */
@@ -90,5 +90,14 @@ class Cancelled extends Status
             Config::getLogger()->error(message: $errorMessage);
             MessageBag::addError(msg: $errorMessage);
         }
+    }
+
+    /**
+     * Whether payment can be cancelled.
+     */
+    private static function isEnabled(WC_Order $order): bool
+    {
+        return EnableCancel::isEnabled() &&
+            Metadata::isValidResursPayment(order: $order);
     }
 }

@@ -9,16 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Payment\Converter\Refund;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\TranslationException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Woocommerce\Util\Translator;
 use WC_Order_Item_Product;
 use WC_Product;
 use WC_Tax;
@@ -33,12 +27,6 @@ use function is_string;
 class Product
 {
     /**
-     * @throws ConfigException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
      * @throws IllegalValueException
      */
     public static function toOrderLine(
