@@ -79,7 +79,7 @@ class Refunded extends Status
                 ],
                 subject: Translator::translate(phraseId: 'refund-too-large')
             );
-            MessageBag::addError(msg: $errorMessage);
+            MessageBag::addError(message: $errorMessage);
             throw new IllegalValueException(message: $errorMessage);
         }
 
@@ -121,7 +121,7 @@ class Refunded extends Status
             }
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: str_replace(
+                message: str_replace(
                     search: ['%1'],
                     replace: [
                         $error->getMessage(),
@@ -214,7 +214,7 @@ class Refunded extends Status
             return $order;
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: Translator::translate(
+                message: Translator::translate(
                     phraseId: 'refund-unable-to-load-refund-information'
                 )
             );
@@ -240,7 +240,7 @@ class Refunded extends Status
 
             if (!is_string(value: $resursBankId)) {
                 MessageBag::addError(
-                    msg: Translator::translate(
+                    message: Translator::translate(
                         phraseId: 'refund-payment-reference-not-a-string'
                     )
                 );
@@ -253,7 +253,7 @@ class Refunded extends Status
 
             if ($resursBankId === '') {
                 MessageBag::addError(
-                    msg: Translator::translate(
+                    message: Translator::translate(
                         phraseId: 'refund-payment-reference-is-empty'
                     )
                 );
@@ -267,7 +267,7 @@ class Refunded extends Status
             return $resursBankId;
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: Translator::translate(
+                message: Translator::translate(
                     phraseId: 'refund-unable-to-load-order-information'
                 )
             );
@@ -289,7 +289,7 @@ class Refunded extends Status
             return Refund::getOrderLines(order: $refundOrder);
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: Translator::translate(
+                message: Translator::translate(
                     phraseId: 'refund-error-when-fetching-order-lines'
                 )
             );

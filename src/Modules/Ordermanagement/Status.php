@@ -42,7 +42,7 @@ class Status
             return $order;
         } catch (Throwable $error) {
             Config::getLogger()->error(message: $error);
-            MessageBag::addError(msg: $error->getMessage());
+            MessageBag::addError(message: $error->getMessage());
             throw $error;
         }
     }

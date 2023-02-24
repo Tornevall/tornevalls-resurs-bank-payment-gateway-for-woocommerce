@@ -95,21 +95,21 @@ class PartPayment
         $period = Period::getData();
 
         if (empty($storeId)) {
-            MessageBag::addError(msg: Translator::translate(
+            MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-store-id'
             ));
             return;
         }
 
         if (empty($paymentMethodId)) {
-            MessageBag::addError(msg: Translator::translate(
+            MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-payment-method'
             ));
             return;
         }
 
         if (empty($period)) {
-            MessageBag::addError(msg: Translator::translate(
+            MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-period'
             ));
             return;
@@ -121,7 +121,7 @@ class PartPayment
         );
 
         if ($paymentMethod === null) {
-            MessageBag::addError(msg: Translator::translate(
+            MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-failed-to-load-payment-method'
             ));
             return;
@@ -138,11 +138,11 @@ class PartPayment
         }
 
         if ($new < 0) {
-            MessageBag::addError(msg: Translator::translate(
+            MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-new-value-not-positive'
             ));
         } elseif ($new > $maxLimit) {
-            MessageBag::addError(msg: str_replace(
+            MessageBag::addError(message: str_replace(
                 search: '%1',
                 replace: (string)$maxLimit,
                 subject: Translator::translate(
@@ -150,7 +150,7 @@ class PartPayment
                 )
             ));
         } elseif ($new < $minLimit) {
-            MessageBag::addError(msg: str_replace(
+            MessageBag::addError(message: str_replace(
                 search: '%1',
                 replace: (string)$minLimit,
                 subject: Translator::translate(
@@ -240,7 +240,7 @@ class PartPayment
             $paymentMethods = $storeId !== '' ?
                 Repository::getPaymentMethods(storeId: $storeId) : [];
         } catch (Throwable) {
-            MessageBag::addError(msg: 'Failed to get payment methods.');
+            MessageBag::addError(message: 'Failed to get payment methods.');
         }
 
         foreach ($paymentMethods as $paymentMethod) {
@@ -277,7 +277,7 @@ class PartPayment
             }
         } catch (Throwable) {
             MessageBag::addError(
-                msg: Translator::translate(
+                message: Translator::translate(
                     phraseId: 'get-annuity-periods-failed'
                 )
             );
