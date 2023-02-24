@@ -99,7 +99,7 @@ class Advanced
         } catch (Throwable $e) {
             Log::error(
                 error: $e,
-                msg: Translator::translate(
+                message: Translator::translate(
                     phraseId: 'generate-callback-template-failed'
                 )
             );
@@ -132,7 +132,7 @@ class Advanced
         } catch (Throwable $e) {
             Log::error(
                 error: $e,
-                msg: Translator::translate(
+                message: Translator::translate(
                     phraseId: 'generate-callback-template-failed'
                 )
             );
@@ -189,7 +189,7 @@ class Advanced
                 $return = array_merge($return, self::getStores());
             } catch (Throwable $exception) {
                 MessageBag::addError(
-                    msg: Translator::translate(phraseId: 'get-stores-failed')
+                    message: Translator::translate(phraseId: 'get-stores-failed')
                 );
                 // Make sure we give the options array a chance to render an error instead of the fields so ensure
                 // the setting won't be saved by mistake when APIs are down.
@@ -324,7 +324,7 @@ class Advanced
             // @todo Error message displayed in admin trails one page load.
             Log::error(
                 error: $e,
-                msg: Translator::translate(phraseId: 'get-stores-failed')
+                message: Translator::translate(phraseId: 'get-stores-failed')
             );
         }
 

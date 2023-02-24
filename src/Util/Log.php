@@ -24,10 +24,10 @@ class Log
      */
     public static function error(
         Throwable $error,
-        string $msg = ''
+        string $message = ''
     ): void {
-        if ($msg !== '' && Admin::isAdmin()) {
-            MessageBag::addError(msg: $msg);
+        if ($message !== '' && Admin::isAdmin()) {
+            MessageBag::addError(message: $message);
         }
 
         try {
@@ -35,7 +35,7 @@ class Log
         } catch (ConfigException) {
             if (Admin::isAdmin()) {
                 MessageBag::addError(
-                    msg: 'Failed to log Exception. Did Config::setup execute?'
+                    message: 'Failed to log Exception. Did Config::setup execute?'
                 );
             }
         }
@@ -44,12 +44,12 @@ class Log
     /**
      * Log debug info.
      */
-    public static function debug(string $msg): void
+    public static function debug(string $message): void
     {
         try {
-            Config::getLogger()->debug(message: $msg);
+            Config::getLogger()->debug(message: $message);
         } catch (ConfigException $e) {
-            self::error(error: $e, msg: 'Debug logs are unavailable.');
+            self::error(error: $e, message: 'Debug logs are unavailable.');
         }
     }
 }
