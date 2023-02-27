@@ -67,7 +67,7 @@ class Completed extends Status
             if (!$resursPayment->canCapture()) {
                 // Throw own error based on prohibited action.
                 $errorMessage = 'Resurs order can not be captured. Reverting to previous order status.';
-                MessageBag::addError(msg: $errorMessage);
+                MessageBag::addError(message: $errorMessage);
                 throw new Exception(message: $errorMessage);
             }
 
@@ -79,7 +79,7 @@ class Completed extends Status
             );
         } catch (Throwable $error) {
             MessageBag::addError(
-                msg: 'Unable to load Resurs payment information for capture.'
+                message: 'Unable to load Resurs payment information for capture.'
             );
             Config::getLogger()->error(message: $error);
             // Reverting of order statuses are not allowed if they are already finalized.
@@ -107,7 +107,7 @@ class Completed extends Status
                 $error->getMessage()
             );
             Config::getLogger()->error(message: $error);
-            MessageBag::addError(msg: $errorMessage);
+            MessageBag::addError(message: $errorMessage);
         }
     }
 

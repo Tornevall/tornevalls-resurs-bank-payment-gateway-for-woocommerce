@@ -28,7 +28,7 @@ use function is_array;
  */
 class MessageBag
 {
-    public const SESSION_KEY = 'rb-msg-bag';
+    public const SESSION_KEY = 'rb-message-bag';
 
     /**
      * Whether to clear the bag after rendering it.
@@ -49,20 +49,20 @@ class MessageBag
     /**
      * Add message to bag.
      */
-    public static function add(string $msg, Type $type): void
+    public static function add(string $message, Type $type): void
     {
         try {
-            $message = new Message(msg: $msg, type: $type);
+            $messageInstance = new Message(message: $message, type: $type);
         } catch (EmptyValueException) {
-            $message = new Message(
-                msg: 'Empty message encountered.',
+            $messageInstance = new Message(
+                message: 'Empty message encountered.',
                 type: Type::ERROR
             );
         }
 
         try {
             $bag = self::getBag();
-            $bag->offsetSet(offset: null, value: $message);
+            $bag->offsetSet(offset: null, value: $messageInstance);
             self::updateBag(bag: $bag);
         } catch (Throwable $e) {
             Log::error(error: $e);
@@ -72,17 +72,17 @@ class MessageBag
     /**
      * Add error message.
      */
-    public static function addError(string $msg): void
+    public static function addError(string $message): void
     {
-        self::add(msg: $msg, type: Type::ERROR);
+        self::add(message: $message, type: Type::ERROR);
     }
 
     /**
      * Add error message.
      */
-    public static function addSuccess(string $msg): void
+    public static function addSuccess(string $message): void
     {
-        self::add(msg: $msg, type: Type::SUCCESS);
+        self::add(message: $message, type: Type::SUCCESS);
     }
 
     /**
@@ -91,11 +91,10 @@ class MessageBag
     public static function printMessages(): void
     {
         try {
+            /** @var Message $message */
             foreach (self::getBag() as $message) {
-                $msg = $message->getEscapedMsg();
-                $type = $message->type->value;
-
-                echo "<div class=\"$type notice\"><p>$msg</p></div>";
+                echo '<div class="' . $message->type->value . ' notice"><p>' .
+                     $message->getEscapedMessage() . '</p></div>';
             }
 
             if (self::$clear) {

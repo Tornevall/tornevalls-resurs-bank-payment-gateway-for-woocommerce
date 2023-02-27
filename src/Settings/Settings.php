@@ -52,7 +52,7 @@ class Settings
                 } catch (Throwable $e) {
                     Log::error(
                         error: $e,
-                        msg: Translator::translate(
+                        message: Translator::translate(
                             phraseId: 'save-settings-failed'
                         )
                     );

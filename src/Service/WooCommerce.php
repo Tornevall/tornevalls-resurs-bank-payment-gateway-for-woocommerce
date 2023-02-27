@@ -88,7 +88,7 @@ class WooCommerce
             } catch (Throwable $e) {
                 // Catch errors if something goes wrong during gateway fetching.
                 // If errors occurs in wp-admin, an error note will show up, instead of crashing the entire site.
-                MessageBag::addError(msg: 'Failed to get list of gateways.');
+                MessageBag::addError(message: 'Failed to get list of gateways.');
                 Config::getLogger()->error(message: $e);
             }
         }
@@ -137,7 +137,7 @@ class WooCommerce
             // If we run the above request live, when the APIs are down, we want to catch the exception silently
             // or the site will break. If we are located in admin, we also want to visualize the exception as
             // a message not a crash.
-            MessageBag::addError(msg: 'Failed to apply payment gateways.');
+            MessageBag::addError(message: 'Failed to apply payment gateways.');
             Config::getLogger()->error(message: $e);
         }
 
@@ -183,65 +183,5 @@ class WooCommerce
         }
 
         return self::$basename;
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.0
-     */
-    public static function getRequiredVersion(): string
-    {
-        return self::$requiredVersion;
-    }
-
-    /**
-     * Set up a session based on how WooCommerce has it initiated. Value types are several.
-     * @param string $key
-     * @param array|string|stdClass $value
-     * @since 0.0.1.0
-     */
-    public static function setSessionValue(string $key, array|string|stdClass $value): void
-    {
-        if (self::getSession()) {
-            WC()->session->set($key, $value);
-        } else {
-            $_SESSION[$key] = $value;
-        }
-    }
-
-    /**
-     * @return bool
-     * @since 0.0.1.0
-     */
-    private static function getSession(): bool
-    {
-        global $woocommerce;
-
-        $return = false;
-        if (isset($woocommerce->session) && !empty($woocommerce->session)) {
-            $return = true;
-        }
-
-        return $return;
-    }
-
-    /**
-     * @param $key
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getSessionValue($key): mixed
-    {
-        $return = null;
-        $session = Url::getSanitizedArray(isset($_SESSION) ? $_SESSION : []);
-
-        if (self::getSession()) {
-            $return = WC()->session->get($key);
-        } elseif (isset($_SESSION[$key])) {
-            $return = $session[$key] ?? '';
-        }
-
-        return $return;
     }
 }

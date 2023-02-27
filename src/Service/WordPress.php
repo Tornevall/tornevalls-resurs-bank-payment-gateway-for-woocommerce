@@ -161,7 +161,6 @@ class WordPress
      */
     private static function setupScripts()
     {
-        add_action('wp_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScripts');
         add_action(
             'wp_head',
             'Resursbank\Woocommerce\Modules\UniqueSellingPoint\Module::setCss'
@@ -185,8 +184,6 @@ class WordPress
             'admin_head',
             'Resursbank\Woocommerce\Modules\PaymentInformation\Module::setCss'
         );
-
-        add_action('admin_enqueue_scripts', 'ResursBank\Service\WordPress::setResursBankScriptsAdmin');
     }
 
     /**
@@ -196,10 +193,6 @@ class WordPress
      */
     private static function setupActions()
     {
-        $action = Url::getRequest('action');
-        add_action('rbwc_get_localized_scripts', '\ResursBank\Service\WordPress::getLocalizedScripts', 10, 3);
-        add_action('rbwc_localizations_admin', '\ResursBank\Service\WordPress::getLocalizedScriptsDeprecated', 10, 2);
-        add_action('wp_ajax_' . $action, '\ResursBank\Module\PluginApi::execApi');
         add_action(
             'woocommerce_single_product_summary',
             'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
@@ -305,36 +298,6 @@ class WordPress
     }
 
     /**
-     * @since 0.0.1.0
-     */
-    public static function setResursBankScriptsAdmin()
-    {
-        self::setResursBankScripts(true);
-    }
-
-    /**
-     * @param null $isAdmin
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function setResursBankScripts($isAdmin = null)
-    {
-        if (Url::getRequest('action') === 'resursbank_get_cost_of_purchase') {
-            $wooCommerceStyleSheet = get_stylesheet_directory_uri() . '/css/woocommerce.css';
-            $resursStyleSheet = Data::getGatewayUrl() . '/css/costofpurchase.css';
-
-            wp_enqueue_style(
-                'woocommerce_default_style',
-                $wooCommerceStyleSheet
-            );
-            wp_enqueue_style(
-                'resurs_annuity_style',
-                $resursStyleSheet
-            );
-        }
-    }
-
-    /**
      * @param $actionName
      * @param $value
      * @since 0.0.1.0
@@ -351,158 +314,6 @@ class WordPress
         ];
 
         do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * @param $scriptName
-     * @param null $isAdmin
-     * @param null $extraLocalizationData
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    public static function getLocalizedScripts($scriptName, $isAdmin = null, $extraLocalizationData = null)
-    {
-        $localizationData = self::getLocalizationData($scriptName, (bool)$isAdmin);
-        if ($localizationData) {
-            if (is_array($extraLocalizationData) && count($extraLocalizationData)) {
-                $localizationData = array_merge($localizationData, $extraLocalizationData);
-            }
-            wp_localize_script(
-                $scriptName,
-                sprintf('l_%s', $scriptName),
-                $localizationData
-            );
-        }
-    }
-
-    /**
-     * @param $scriptName
-     * @param $isAdmin
-     * @return array
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getLocalizationData($scriptName, $isAdmin): array
-    {
-        $return = [];
-
-        if ((bool)$isAdmin && preg_match('/_admin$/', $scriptName)) {
-            $return = self::getLocalizationDataAdmin($return);
-        } elseif (preg_match('/_all$/', $scriptName)) {
-            $return = self::getLocalizationDataGlobal($return);
-        } else {
-            $return = self::getLocalizationDataGeneric($return, $scriptName);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Localized variables shown in admin only.
-     *
-     * @param $return
-     * @return mixed
-     * @throws ConfigException
-     * @since 0.0.1.0
-     */
-    private static function getLocalizationDataAdmin($return)
-    {
-        global $current_tab, $current_section;
-        $return['prefix'] = RESURSBANK_MODULE_PREFIX;
-        $return['current_section'] = $current_section;
-        //$return['noncify'] = self::getNonce('admin');
-        $return['environment'] = Config::isProduction() ? 'prod' : 'test';
-        $return['translate_checkout_simplified'] = __(
-            'The integrated checkout (also known as the "simplified shop flow") is a direct integration with ' .
-            'WooCommerce which uses intended APIs to interact with your customers while finishing the orders.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['translate_checkout_hosted'] = __(
-            '"Resurs Hosted Checkout" works similarly as the integrated simplified checkout, but on the ' .
-            'checkout itself the customer are redirected to a hosted website to fulfill their payments. ' .
-            'It can be quite easily compared with a Paypal solution.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['resurs_test_credentials'] = __(
-            'Validate and save credentials',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['credential_failure_notice'] = __(
-            'The credential check failed. If you save the current data we can not guarantee ' .
-            'that your store will properly work.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['credential_success_notice'] = __(
-            'The credential check was successful. You may now save the rest of your data.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['requireFraudControl'] = __(
-            'This setting requires you to enable the fraud control.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['waiting_for_callback'] = __(
-            'Waiting for test callback to arrive.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['trigger_test_fail'] = __(
-            'Callback trigger is currently not working.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['callback_test_timeout'] = __(
-            'Callback trigger timeout. Aborted.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['remove_callback_confirm'] = __(
-            'Are you sure you want to remove callback',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['update_callbacks_required'] = __(
-            'Callback URLs for Resurs Bank may be outdated. Do you want to refresh the current data?',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['update_callbacks_refresh'] = __(
-            'Refresh has finished. Please check your new settings to confirm the update.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['current_tab'] = $current_tab;
-        $return['enable'] = __('Enable', 'resurs-bank-payments-for-woocommerce');
-        $return['disable'] = __('Disable', 'resurs-bank-payments-for-woocommerce');
-        $return['cleanup_warning'] = __(
-            'By accepting this, all your settings for this plugin will be restored to the absolute defaults. ' .
-            'The only thing that will be kept intact is encryption keys, so that you do not loose access to ' .
-            'prior order data if they exist encrypted. Are you sure?',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['old_cleanup_warning'] = __(
-            'This will remove all v2.2-based settings from the database. Are you sure?',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['cleanup_reload'] = __(
-            'Settings has been restored to default values. You may now reconfigure this plugin.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['cleanup_failed'] = __(
-            'Plugin configuration reset failed. You may want to reload the page and try again.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['old_cleanup_failed'] = __(
-            'Cleanup of v2.2 data failed. You may want to reload the page and try again.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['cleanup_aborted'] = __(
-            'Plugin configuration reset has been cancelled.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['old_cleanup_aborted'] = __(
-            'Cleanup of v2.2 data aborted.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['method_state_change_failure'] = __(
-            'Failed change payment method state.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-
-        return self::applyFilters('localizationsAdmin', $return);
     }
 
     /**
@@ -551,69 +362,5 @@ class WordPress
         ];
 
         return apply_filters(...array_merge($applyArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * Localized variables shown in all views.
-     *
-     * @param $return
-     * @return mixed
-     * @throws Exception
-     * @since 0.0.1.0
-     */
-    private static function getLocalizationDataGlobal($return)
-    {
-        // Set timeout to one second more than the backend timeout.
-        $defaultTimeout = ((Data::getDefaultApiTimeout() + 1) * 1000);
-        $setAjaxifyTimeout = self::applyFilters('ajaxifyTimeout', $defaultTimeout);
-        //$return['noncify'] = self::getNonce('all');
-        //$return['ajaxify'] = admin_url('admin-ajax.php');
-        //$return['ajaxifyTimeout'] = (int)$setAjaxifyTimeout ? $setAjaxifyTimeout : $defaultTimeout;
-        //$return['spin'] = WordPress::applyFilters('getImageSpinner', Data::getImage('spin.gif'));
-        $return['success'] = __('Successful.', 'resurs-bank-payments-for-woocommerce');
-        $return['failed'] = __('Failed.', 'resurs-bank-payments-for-woocommerce');
-        $return['fragmethod'] = Data::getMethodFromFragmentOrSession();
-
-        $return['reloading'] = __(
-            'Please wait while reloading...',
-            'resurs-bank-payments-for-woocommerce'
-        );
-        $return['nonce_error'] = __(
-            'The page security (nonce) is reportedly expired or wrong. This can also be caused by the ' .
-            'fact that you have already interacted with the page you are trying to update information on. ' .
-            'You may want to reload your browser before proceeding.',
-            'resurs-bank-payments-for-woocommerce'
-        );
-
-        return self::applyFilters('localizationsGlobal', $return);
-    }
-
-    /**
-     * Localized variables shown in front (customer) view only.
-     *
-     * @param $return
-     * @param null $scriptName
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    private static function getLocalizationDataGeneric($return, $scriptName = null)
-    {
-        $return['noncify'] = self::getNonce('simple');
-
-        return self::applyFilters('localizationsGeneric', $return, $scriptName);
-    }
-
-    /**
-     * @param $return
-     * @return mixed
-     * @since 0.0.1.0
-     */
-    public static function getLocalizedScriptsDeprecated($return)
-    {
-        // Setting defaults.
-        $return['can_import_deprecated_credentials'] = false;
-        $return['deprecated_unixtime'] = 0;
-
-        return $return;
     }
 }
