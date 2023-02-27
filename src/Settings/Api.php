@@ -86,7 +86,7 @@ class Api
         $clientId = ClientId::getData();
         $clientSecret = ClientSecret::getData();
         $environment = Environment::getData();
-        $scope = $environment->value === EnvironmentEnum::PROD->value
+        $scope = $environment === EnvironmentEnum::PROD
             ? Scope::MERCHANT_API
             : Scope::MOCK_MERCHANT_API;
 
@@ -98,7 +98,7 @@ class Api
                 grantType: GrantType::CREDENTIALS
             );
         } catch (Throwable $error) {
-            MessageBag::addError(msg: $error->getMessage());
+            MessageBag::addError(message: $error->getMessage());
             return;
         }
 
@@ -106,7 +106,7 @@ class Api
         try {
             (new GenerateToken(auth: $auth))->call();
         } catch (Throwable $error) {
-            MessageBag::addError(msg: $error->getMessage());
+            MessageBag::addError(message: $error->getMessage());
         }
     }
 
