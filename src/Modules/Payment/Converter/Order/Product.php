@@ -207,8 +207,8 @@ class Product
         $result = self::getOriginalProduct(product: $product)->get_sku();
 
         if (!is_string(value: $result) || $result === '') {
-            Log::error(error:
-                new EmptyValueException(
+            Log::error(
+                error: new EmptyValueException(
                     message: 'Failed to resolve SKU from product with id ' . $product->get_id() .
                              ' when parsing order line.'
                 )
