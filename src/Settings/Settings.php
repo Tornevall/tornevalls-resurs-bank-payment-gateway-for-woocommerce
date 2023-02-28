@@ -27,7 +27,7 @@ class Settings
     /**
      * Setup event listeners to render our configuration page and save settings.
      */
-    public static function register(): void
+    public static function init(): void
     {
         // Render configuration page.
         add_action(

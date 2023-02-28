@@ -27,7 +27,7 @@ class ThankYou
      *
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
-    public static function register(): void
+    public static function init(): void
     {
         add_action(
             hook_name: 'woocommerce_thankyou',
