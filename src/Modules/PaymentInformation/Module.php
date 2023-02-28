@@ -22,7 +22,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Util\Currency;
 
@@ -52,7 +51,7 @@ class Module
     public function __construct(string $paymentId)
     {
         $currencySymbol = Currency::getWooCommerceCurrencySymbol();
-        $currencyFormat = $this->getEcomCurrencyFormat();
+        $currencyFormat = Currency::getEcomCurrencyFormat();
         $this->widget = new PaymentInformation(
             paymentId: $paymentId,
             currencySymbol: $currencySymbol,
@@ -80,21 +79,5 @@ class Module
     public function getWidget(): void
     {
         echo Data::getEscapedHtml($this->widget->content);
-    }
-
-    /**
-     * Fetch currency format
-     */
-    public function getEcomCurrencyFormat(): CurrencyFormat
-    {
-        $wooFormat = Currency::getWooCommerceCurrencyFormat();
-
-        if (
-            preg_match(pattern: '/\%1\$s.*\%2\$s/', subject: $wooFormat)
-        ) {
-            return CurrencyFormat::SYMBOL_FIRST;
-        }
-
-        return CurrencyFormat::SYMBOL_LAST;
     }
 }
