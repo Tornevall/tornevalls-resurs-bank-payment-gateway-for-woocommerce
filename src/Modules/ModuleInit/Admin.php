@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Woocommerce\Modules\Ordermanagement\Ordermanagement;
+use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
+use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod;
 use Resursbank\Woocommerce\Settings\Settings;
@@ -26,7 +28,9 @@ class Admin
     {
         Ordermanagement::init();
         InvalidateCacheButton::init();
+        PartPayment::initAdmin();
         PartPaymentPeriod::init();
         Settings::init();
+        PaymentInformation::init();
     }
 }

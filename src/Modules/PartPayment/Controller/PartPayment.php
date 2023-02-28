@@ -28,7 +28,7 @@ use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Modules\PartPayment\Module;
+use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -80,7 +80,7 @@ class PartPayment
                 months: (int)Period::getData(),
                 amount: (float)$requestAmount,
                 currencySymbol: $currencySymbol,
-                currencyFormat: Module::getEcomCurrencyFormat(),
+                currencyFormat: PartPayment::getEcomCurrencyFormat(),
                 apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
             );
             $response['startingAt'] = $widget->getStartingAt();
