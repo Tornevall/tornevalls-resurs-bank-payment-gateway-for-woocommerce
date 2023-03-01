@@ -31,4 +31,12 @@ abstract class BoolOption extends Option
     {
         return 'no';
     }
+
+    /**
+     * Fetches stored option data as an actual boolean.
+     */
+    public static function getData(): bool
+    {
+        return self::getRawData() === 'yes';
+    }
 }
