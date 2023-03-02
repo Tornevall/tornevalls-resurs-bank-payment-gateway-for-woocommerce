@@ -22,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Repository;
+use ResursBank\Exception\IllegalStateException;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -122,7 +123,7 @@ class DeleteItem
             );
 
             if (!$resursPayment->canPartiallyCancel()) {
-                throw new Exception(
+                throw new IllegalStateException(
                     message: Translator::translate(
                         phraseId: 'part-cancel-not-allowed'
                     )
