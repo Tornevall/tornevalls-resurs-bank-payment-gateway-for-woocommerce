@@ -35,6 +35,8 @@ class Settings
             callback: 'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
+        Api::register();
+
         // Save changes to database.
         add_action(
             hook_name: 'woocommerce_settings_save_' . RESURSBANK_MODULE_PREFIX,
