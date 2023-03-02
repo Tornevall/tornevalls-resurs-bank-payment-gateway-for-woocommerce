@@ -17,7 +17,6 @@ use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Sanitize;
 use Resursbank\Woocommerce\Util\Translator;
 use RuntimeException;
 use Throwable;
@@ -137,11 +136,7 @@ class SettingsPage extends WC_Settings_Page
                 );
             }
 
-            echo Sanitize::sanitizeHtml(
-                html: PaymentMethods::getOutput(
-                    storeId: StoreId::getData()
-                )
-            );
+            echo PaymentMethods::getOutput(storeId: StoreId::getData());
         } catch (Throwable $e) {
             Log::error(error: $e);
 

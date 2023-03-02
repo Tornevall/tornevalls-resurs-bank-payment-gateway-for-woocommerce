@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
+use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
@@ -24,6 +26,8 @@ class Frontend
      */
     public static function init(): void
     {
+        Gateway::initFrontend();
+        CustomerType::init();
         ThankYou::init();
         PartPayment::initFrontend();
         GetAddress::setup();

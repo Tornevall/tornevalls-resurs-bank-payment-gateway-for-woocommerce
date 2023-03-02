@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Ordermanagement\Ordermanagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
@@ -26,11 +27,19 @@ class Admin
      */
     public static function init(): void
     {
+        Gateway::initAdmin();
         Ordermanagement::init();
         InvalidateCacheButton::init();
         PartPayment::initAdmin();
         PartPaymentPeriod::init();
         Settings::init();
         PaymentInformation::init();
+
+        add_action(
+            hook_name: 'updated_option',
+            callback: 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
+            priority: 10,
+            accepted_args: 3
+        );
     }
 }

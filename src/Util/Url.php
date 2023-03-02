@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
+use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
 use RuntimeException;
 
 use function is_string;
@@ -47,6 +48,24 @@ class Url
     ): string {
         return self::getUrl(
             path: RESURSBANK_MODULE_DIR_NAME . "/lib/ecom/$path"
+        );
+    }
+
+    /**
+     * Resolve payment method icon SVG based on type.
+     */
+    public static function getPaymentMethodIconUrl(
+        Type $type
+    ): string {
+        $file = match ($type) {
+            Type::DEBIT_CARD, Type::CREDIT_CARD, Type::CARD => 'card.svg',
+            Type::SWISH => 'swish.png',
+            Type::INTERNET => 'trustly.svg',
+            default => 'resurs.png'
+        };
+
+        return self::getEcomUrl(
+            path: "src/Module/PaymentMethod/Widget/Resources/Images/$file"
         );
     }
 

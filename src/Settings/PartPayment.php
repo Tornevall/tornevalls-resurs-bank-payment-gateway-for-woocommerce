@@ -22,7 +22,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -130,7 +129,7 @@ class PartPayment
         $maxLimit = $paymentMethod->maxPurchaseLimit;
 
         // @todo Find a better solution for this
-        $customerCountry = Data::getCustomerCountry();
+        $customerCountry = get_option(option: 'woocommerce_default_country');
         $minLimit = 150;
 
         if ($customerCountry === 'FI') {

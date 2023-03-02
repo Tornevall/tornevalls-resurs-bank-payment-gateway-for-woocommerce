@@ -109,7 +109,7 @@ class Route
     public static function redirectToSettings(
         string $tab = 'api_settings'
     ): void {
-        wp_safe_redirect(location: self::getSettingsUrl());
+        wp_safe_redirect(location: self::getSettingsUrl(tab: $tab));
 
         MessageBag::keep();
     }

@@ -41,7 +41,6 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Participa
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -378,48 +377,9 @@ class ResursDefault extends WC_Payment_Gateway
         $this->paymentMethodInformation = $paymentMethod;
         $this->id = RESURSBANK_MODULE_PREFIX . '_' . $this->paymentMethodInformation->id;
         $this->title = $this->paymentMethodInformation->name ?? '';
-        $this->icon = $this->getMethodIconUrl();
-    }
-
-    /**
-     * Decide how to use method icons in the checkout.
-     */
-    private function getMethodIconUrl(): ?string
-    {
-        $return = null;
-
-        // Make sure that the payment method is properly instantiated before using it.
-        if (!empty($this->paymentMethodInformation)) {
-            if ($this->paymentMethodInformation->isResursMethod()) {
-                $return = Data::getImage(imageName: 'resurs-logo.png');
-            } else {
-                switch ($this->paymentMethodInformation->type) {
-                    case Type::DEBIT_CARD:
-                    case Type::CREDIT_CARD:
-                    case Type::CARD:
-                        $return = Data::getImage(
-                            imageName: 'method_pspcard.svg'
-                        );
-                        break;
-
-                    case Type::SWISH:
-                        $return = Data::getImage(imageName: 'method_swish.png');
-                        break;
-
-                    case Type::INTERNET:
-                        // Yes, "INTERNET" is a type only used for Trustly (Source: WOO-736 comments)
-                        $return = Data::getImage(
-                            imageName: 'method_trustly.svg'
-                        );
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-
-        return $return;
+        $this->icon = Url::getPaymentMethodIconUrl(
+            type: $this->paymentMethodInformation->type
+        );
     }
 
     /**
