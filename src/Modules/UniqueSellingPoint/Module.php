@@ -14,8 +14,9 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
-use ResursBank\Module\Data;
 use Throwable;
+
+use function is_string;
 
 /**
  * Checkout Unique selling Point (USP) functionality
@@ -26,6 +27,7 @@ class Module
      * @throws IllegalTypeException
      * @throws ConfigException
      * @throws FilesystemException
+     * @todo
      */
     public static function setCss(): void
     {
@@ -47,7 +49,7 @@ class Module
                 );
             }
 
-            echo Data::getEscapedHtml($filtered);
+            echo $filtered;
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
         }

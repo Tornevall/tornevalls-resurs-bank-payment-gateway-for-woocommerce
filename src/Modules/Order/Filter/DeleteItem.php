@@ -27,10 +27,6 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-use WC_Order;
-use WC_Order_Item_Shipping;
-
-use function is_array;
 
 /**
  * Event executed when order item is deleted.

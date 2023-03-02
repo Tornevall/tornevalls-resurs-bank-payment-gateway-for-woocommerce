@@ -211,8 +211,7 @@ class Product
                 new EmptyValueException(
                     message: 'Failed to resolve SKU from product with id ' . $product->get_id() .
                              ' when parsing order line.'
-                )
-            );
+                ));
 
             throw new IllegalValueException(
                 message: Translator::translate(

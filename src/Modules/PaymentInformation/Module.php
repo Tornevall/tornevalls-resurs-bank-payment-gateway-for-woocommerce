@@ -23,8 +23,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation;
 use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Util\Currency;
+use Resursbank\Woocommerce\Util\Sanitize;
 
 /**
  * Handles the output of the order view payment information widget
@@ -69,9 +69,9 @@ class Module
             return;
         }
 
-        echo '<style>' . Data::getEscapedHtml(
-            PaymentInformation::getCss()
-        ) . '</style>';
+        echo '<style>' .
+            Sanitize::sanitizeHtml(html: PaymentInformation::getCss()) .
+            '</style>';
     }
 
     /**
@@ -79,7 +79,7 @@ class Module
      */
     public function getWidget(): void
     {
-        echo Data::getEscapedHtml($this->widget->content);
+        echo Sanitize::sanitizeHtml(html: $this->widget->content);
     }
 
     /**

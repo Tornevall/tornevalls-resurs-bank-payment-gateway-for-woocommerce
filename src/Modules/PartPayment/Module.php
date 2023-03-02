@@ -27,7 +27,6 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment;
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -35,6 +34,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\Sanitize;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Product;
@@ -180,7 +180,7 @@ class Module
                     propertyName: $propertyName,
                     widget: $widget
                 );
-                echo Data::getEscapedHtml(content: $filtered);
+                echo Sanitize::sanitizeHtml(html: $filtered);
             }
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
@@ -217,7 +217,7 @@ class Module
     private static function getOutputValue(string $propertyName, self $widget): string
     {
         if ($propertyName === 'content') {
-            return Data::getEscapedHtml($widget->instance->content);
+            return Sanitize::sanitizeHtml(html: $widget->instance->content);
         }
 
         if ($propertyName === 'css') {

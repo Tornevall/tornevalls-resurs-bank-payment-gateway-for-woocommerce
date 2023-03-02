@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\MissingKeyException;
 use Resursbank\Woocommerce\Modules\PaymentInformation\Module;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Sanitize;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
@@ -42,8 +43,8 @@ class OrderMetaBox
             $paymentInformation = new Module(
                 paymentId: self::getResursBankPaymentId(orderData: $orderData)
             );
-            echo Data::getEscapedHtml(
-                content: $paymentInformation->widget->content
+            echo Sanitize::sanitizeHtml(
+                html: $paymentInformation->widget->content
             );
         } catch (Throwable $error) {
             echo '<b>' . Translator::translate(

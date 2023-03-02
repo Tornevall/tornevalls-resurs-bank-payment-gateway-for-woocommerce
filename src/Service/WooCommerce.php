@@ -44,29 +44,6 @@ class WooCommerce
     private static $basename;
 
     /**
-     * By this plugin lowest required woocommerce version.
-     *
-     * @var string
-     * @since 0.0.1.0
-     */
-    private static $requiredVersion = '3.5.0';
-
-    /**
-     * Return the active state of this plugin based on preloaded plugins.
-     * If WooCommerce is not found in the current list of WP-plugins, this
-     * feature will disable this plugin too.
-     * @return bool
-     */
-    public static function getActiveState(): bool
-    {
-        return in_array(
-            needle: 'woocommerce/woocommerce.php',
-            haystack: apply_filters(hook_name: 'active_plugins', value: get_option(option: 'active_plugins')),
-            strict: true
-        );
-    }
-
-    /**
      * Get available gateways (MAPI).
      * @param mixed $gateways
      * @return mixed

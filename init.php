@@ -18,17 +18,21 @@
 
 declare(strict_types=1);
 
-use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
 use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Order\Order;
+use Resursbank\Woocommerce\Util\WooCommerce;
+
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
 
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
@@ -37,10 +41,6 @@ define(
         offset: strrpos(haystack: __DIR__, needle: '/') + 1
     )
 );
-
-if (!defined(constant_name: 'ABSPATH')) {
-    exit;
-}
 
 require_once __DIR__ . '/autoload.php';
 
@@ -64,7 +64,7 @@ load_plugin_textdomain(
 );
 
 // Make sure there is an instance of WooCommerce among active plugins.
-if (!WooCommerce::getActiveState()) {
+if (!WooCommerce::isAvailable()) {
     return;
 }
 

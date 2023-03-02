@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
@@ -57,6 +58,8 @@ class Settings
                 }
             }
         );
+
+        AddDocumentationLink::register();
     }
 
     /**

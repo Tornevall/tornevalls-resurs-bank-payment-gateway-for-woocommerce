@@ -20,8 +20,8 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Product;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
 use WC_Order;
 use WC_Order_Item_Product;
-
 use WC_Order_Item_Shipping;
+
 use function array_merge;
 use function in_array;
 use function is_array;
@@ -141,10 +141,12 @@ class Order
                     continue;
                 }
 
-                if (in_array(
-                    needle: (int) $shippingItem->get_id(),
-                    haystack: $filter,
-                    strict: true)
+                if (
+                    in_array(
+                        needle: (int) $shippingItem->get_id(),
+                        haystack: $filter,
+                        strict: true
+                    )
                 ) {
                     return true;
                 }

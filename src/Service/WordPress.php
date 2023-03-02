@@ -138,7 +138,6 @@ class WordPress
     {
         // Generic calls.
         add_filter('plugin_action_links', 'ResursBank\Service\WooCommerce::getPluginAdminUrl', 10, 2);
-        add_filter('plugin_row_meta', 'ResursBank\Module\Data::getPluginRowMeta', 10, 2);
 
         if (Enabled::isEnabled()) {
             // Get list of current payment gateways (for admin parts).

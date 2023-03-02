@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
@@ -18,6 +17,7 @@ use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Sanitize;
 use Resursbank\Woocommerce\Util\Translator;
 use RuntimeException;
 use Throwable;
@@ -112,7 +112,9 @@ class SettingsPage extends WC_Settings_Page
             Log::error(error: $e);
 
             $this->renderError(
-                message: Translator::translate(phraseId: 'render-settings-failed')
+                message: Translator::translate(
+                    phraseId: 'render-settings-failed'
+                )
             );
         }
 
@@ -135,8 +137,8 @@ class SettingsPage extends WC_Settings_Page
                 );
             }
 
-            echo Data::getEscapedHtml(
-                content: PaymentMethods::getOutput(
+            echo Sanitize::sanitizeHtml(
+                html: PaymentMethods::getOutput(
                     storeId: StoreId::getData()
                 )
             );
