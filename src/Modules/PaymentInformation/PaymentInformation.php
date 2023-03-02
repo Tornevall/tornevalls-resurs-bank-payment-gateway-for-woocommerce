@@ -21,8 +21,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
+use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation as EcomPaymentInformation;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Sanitize;
 
@@ -31,9 +30,9 @@ use Resursbank\Woocommerce\Util\Sanitize;
  *
  * @SuppressWarnings(PHPMD.CamelCaseVariableName)
  */
-class Module
+class PaymentInformation
 {
-    public PaymentInformation $widget;
+    public EcomPaymentInformation $widget;
 
     /**
      * @param string $paymentId Resurs payment ID
@@ -52,11 +51,22 @@ class Module
     public function __construct(string $paymentId)
     {
         $currencySymbol = Currency::getWooCommerceCurrencySymbol();
-        $currencyFormat = $this->getEcomCurrencyFormat();
-        $this->widget = new PaymentInformation(
+        $currencyFormat = Currency::getEcomCurrencyFormat();
+        $this->widget = new EcomPaymentInformation(
             paymentId: $paymentId,
             currencySymbol: $currencySymbol,
             currencyFormat: $currencyFormat
+        );
+    }
+
+    /**
+     * Init method for loading module CSS.
+     */
+    public static function init(): void
+    {
+        add_action(
+            hook_name: 'admin_head',
+            callback: 'Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
         );
     }
 
@@ -70,7 +80,7 @@ class Module
         }
 
         echo '<style>' .
-            Sanitize::sanitizeHtml(html: PaymentInformation::getCss()) .
+            Sanitize::sanitizeHtml(html: EcomPaymentInformation::getCss()) .
             '</style>';
     }
 
@@ -80,21 +90,5 @@ class Module
     public function getWidget(): void
     {
         echo Sanitize::sanitizeHtml(html: $this->widget->content);
-    }
-
-    /**
-     * Fetch currency format
-     */
-    public function getEcomCurrencyFormat(): CurrencyFormat
-    {
-        $wooFormat = Currency::getWooCommerceCurrencyFormat();
-
-        if (
-            preg_match(pattern: '/\%1\$s.*\%2\$s/', subject: $wooFormat)
-        ) {
-            return CurrencyFormat::SYMBOL_FIRST;
-        }
-
-        return CurrencyFormat::SYMBOL_LAST;
     }
 }

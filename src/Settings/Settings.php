@@ -28,38 +28,50 @@ class Settings
     /**
      * Setup event listeners to render our configuration page and save settings.
      */
-    public static function register(): void
+    public static function init(): void
     {
         // Render configuration page.
         add_action(
             hook_name: 'woocommerce_settings_page_init',
-            callback: static function (): void {
-                new SettingsPage();
-            }
+            callback: 'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
         // Save changes to database.
         add_action(
             hook_name: 'woocommerce_settings_save_' . RESURSBANK_MODULE_PREFIX,
-            callback: static function (): void {
-                try {
-                    woocommerce_update_options(
-                        options: self::getSection(
-                            section: self::getCurrentSectionId()
-                        )
-                    );
-                } catch (Throwable $e) {
-                    Log::error(
-                        error: $e,
-                        message: Translator::translate(
-                            phraseId: 'save-settings-failed'
-                        )
-                    );
-                }
-            }
+            callback: 'Resursbank\Woocommerce\Settings\Settings::saveSettings'
         );
 
         AddDocumentationLink::register();
+    }
+
+    /**
+     * Callback method for rendering the settings page.
+     */
+    public static function renderSettingsPage(): void
+    {
+        new SettingsPage();
+    }
+
+    /**
+     * Callback method that handles the saving of options.
+     */
+    public static function saveSettings(): void
+    {
+        try {
+            woocommerce_update_options(
+                options: self::getSection(
+                    section: self::getCurrentSectionId()
+                )
+            );
+        } catch (Throwable $e) {
+            Log::error(
+                error: $e,
+                message: Translator::translate(
+                    phraseId: 'save-settings-failed'
+                )
+            );
+        }
     }
 
     /**

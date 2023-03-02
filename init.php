@@ -19,16 +19,11 @@
 declare(strict_types=1);
 
 use Resursbank\Woocommerce\Modules\Api\Connection;
-use Resursbank\Woocommerce\Modules\Callback\Callback;
-use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
-use Resursbank\Woocommerce\Modules\Ordermanagement\Module as OrdermanagementModule;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Order\Order;
-use Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod;
-use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
+use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
+use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
 
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
@@ -77,17 +72,11 @@ try {
 
 // Setup event listeners adn resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
-    ResursBank\Service\WordPress::initializeWooCommerce();
-    Order::init();
-    MessageBag::init();
-    Callback::init();
+    Shared::init();
 
     if (Admin::isAdmin()) {
-        OrdermanagementModule::setupActions();
-        InvalidateCacheButton::register();
-        PartPaymentPeriod::register();
-        Settings::register();
+        AdminInit::init();
     } else {
-        ThankYou::register();
+        Frontend::init();
     }
 });

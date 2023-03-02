@@ -14,7 +14,7 @@ use Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout as Widget;
 /**
  * Implementation of get address widget in checkout.
  */
-class Module
+class GetAddress
 {
     /**
      * Initialize module.

@@ -27,7 +27,7 @@ class PartPaymentPeriod
     /**
      * Add event listener to render the custom select element.
      */
-    public static function register(): void
+    public static function init(): void
     {
         add_action(
             hook_name: 'woocommerce_admin_field_rbpartpaymentperiod',

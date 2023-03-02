@@ -25,16 +25,16 @@ use Throwable;
 /**
  * Sets up actions for order status change hooks. Called from PluginHooks::getActions.
  */
-class Module
+class Ordermanagement
 {
     /**
      * The actual method that sets up actions for order status change hooks.
      */
-    public static function setupActions(): void
+    public static function init(): void
     {
         add_action(
             hook_name: 'woocommerce_order_status_changed',
-            callback: 'Resursbank\Woocommerce\Modules\Ordermanagement\Module::callback',
+            callback: 'Resursbank\Woocommerce\Modules\Ordermanagement\Ordermanagement::callback',
             priority: 10,
             accepted_args: 3
         );

@@ -163,9 +163,9 @@ class Route
         string $body,
         int $code = 200
     ): void {
+        status_header(code: $code);
         header(header: 'Content-Type: application/json');
         header(header: 'Content-Length: ' . strlen(string: $body));
-        header(header: 'Status: ' . $code);
 
         echo $body;
     }

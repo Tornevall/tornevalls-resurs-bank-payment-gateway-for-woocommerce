@@ -21,8 +21,19 @@ use function is_string;
 /**
  * Checkout Unique selling Point (USP) functionality
  */
-class Module
+class UniqueSellingPoint
 {
+    /**
+     * Init method for styling on checkout view.
+     */
+    public static function init(): void
+    {
+        add_action(
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint::setCss'
+        );
+    }
+
     /**
      * @throws IllegalTypeException
      * @throws ConfigException

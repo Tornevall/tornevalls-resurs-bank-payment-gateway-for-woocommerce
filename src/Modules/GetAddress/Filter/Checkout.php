@@ -13,6 +13,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Customer\Widget\GetAddress;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -27,30 +28,40 @@ class Checkout
      */
     public static function register(): void
     {
+        if (!EnableGetAddress::getData()) {
+            return;
+        }
+
         add_filter(
             hook_name: 'woocommerce_before_checkout_form',
-            callback: static fn () => self::exec()
+            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::exec'
         );
 
         add_action(
             hook_name: 'wp_enqueue_scripts',
-            callback: static function (): void {
-                wp_enqueue_script(
-                    handle: 'rb-get-address',
-                    src: Url::getScriptUrl(
-                        module: 'GetAddress',
-                        file: 'populateForm.js'
-                    ),
-                    deps: ['rb-set-customertype']
-                );
+            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::loadScripts'
+        );
+    }
 
-                wp_enqueue_style(
-                    handle: 'rb-get-address-style',
-                    src: Url::getEcomUrl(
-                        path: 'src/Module/Customer/Widget/get-address.css'
-                    )
-                );
-            }
+    /**
+     * Loads script and stylesheet for form.
+     */
+    public static function loadScripts(): void
+    {
+        wp_enqueue_script(
+            handle: 'rb-get-address',
+            src: Url::getScriptUrl(
+                module: 'GetAddress',
+                file: 'populateForm.js'
+            ),
+            deps: ['rb-set-customertype']
+        );
+
+        wp_enqueue_style(
+            handle: 'rb-get-address-style',
+            src: Url::getEcomUrl(
+                path: 'src/Module/Customer/Widget/get-address.css'
+            )
         );
     }
 

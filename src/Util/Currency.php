@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
+
 /**
  * Wrapper method collection for WooCommerce's built-in currency methods
  */
@@ -42,5 +44,32 @@ class Currency
         }
 
         return $currencyFormat;
+    }
+
+    /**
+     * Fetches currency format as an Ecom CurrencyFormat object.
+     */
+    public static function getEcomCurrencyFormat(): CurrencyFormat
+    {
+        $wooFormat = self::getWooCommerceCurrencyFormat();
+
+        if (
+            preg_match(pattern: '/\%1\$s.*\%2\$s/', subject: $wooFormat)
+        ) {
+            return CurrencyFormat::SYMBOL_FIRST;
+        }
+
+        return CurrencyFormat::SYMBOL_LAST;
+    }
+
+    /**
+     * Format a number using configured price format and symbol.
+     */
+    public static function getFormattedAmount(float $amount): string
+    {
+        $currencySymbol = self::getWooCommerceCurrencySymbol();
+
+        return self::getEcomCurrencyFormat() === CurrencyFormat::SYMBOL_FIRST ?
+            $currencySymbol . ' ' . $amount : $amount . ' ' . $currencySymbol;
     }
 }

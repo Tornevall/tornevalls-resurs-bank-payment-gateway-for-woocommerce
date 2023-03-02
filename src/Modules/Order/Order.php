@@ -11,9 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Order;
 
 use Exception;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Woocommerce\Modules\Order\Filter\DeleteItem;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
@@ -72,23 +70,5 @@ class Order
         }
 
         return $id;
-    }
-
-    /**
-     * Return amounts with proper currency.
-     *
-     * @todo Centralize and let PartPayment use this display too. See WOO-1067.
-     */
-    public static function getFormattedAmount(float $amount): string
-    {
-        $currencySymbol = Currency::getWooCommerceCurrencySymbol();
-        $currencyFormat = CurrencyFormat::SYMBOL_FIRST ?
-            preg_match(
-                pattern: '/\%1\$s.*\%2\$s/',
-                subject: Currency::getWooCommerceCurrencyFormat()
-            ) : CurrencyFormat::SYMBOL_LAST;
-
-        return $currencyFormat === CurrencyFormat::SYMBOL_FIRST ?
-            $currencySymbol . ' ' . $amount : $amount . ' ' . $currencySymbol;
     }
 }
