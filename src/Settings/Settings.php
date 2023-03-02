@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Settings;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
@@ -40,6 +41,14 @@ class Settings
         add_action(
             hook_name: 'woocommerce_settings_save_' . RESURSBANK_MODULE_PREFIX,
             callback: 'Resursbank\Woocommerce\Settings\Settings::saveSettings'
+        );
+
+        // Add link to Settings page from Plugin page in WP admin.
+        add_filter(
+            hook_name: 'plugin_action_links',
+            callback: 'Resursbank\Woocommerce\Settings\Settings::addPluginActionLinks',
+            priority: 10,
+            accepted_args: 2
         );
 
         AddDocumentationLink::register();
@@ -120,5 +129,26 @@ class Settings
         global $current_section;
 
         return $current_section === '' ? Api::SECTION_ID : $current_section;
+    }
+
+    /**
+     * Add link to "Settings" page for our plugin in WP admin.
+     */
+    public static function addPluginActionLinks(
+        mixed $links,
+        mixed $file
+    ): array {
+        if (
+            is_array(value: $links) &&
+            $file === RESURSBANK_MODULE_DIR_NAME . '/init.php'
+        ) {
+            $links[] = sprintf(
+                '<a href="%s">%s</a>',
+                Route::getSettingsUrl(),
+                Translator::translate(phraseId: 'settings')
+            );
+        }
+
+        return $links;
     }
 }

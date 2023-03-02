@@ -122,43 +122,4 @@ class WooCommerce
         // gateways. Have in mind that this array may already have content from other plugins.
         return $gateways;
     }
-
-    /**
-     * wp-admin plugin handler url-maker. Requested from filters that creates links that
-     * resides under the plugin information.
-     *
-     * @param $links
-     * @param $file
-     * @param null $section
-     * @return mixed
-     * @noinspection PhpUnused
-     * @todo Fix and move.
-     */
-    public static function getPluginAdminUrl($links, $file, $section = null): mixed
-    {
-        if (str_contains(haystack: $file, needle: self::getBaseName())) {
-            /** @noinspection HtmlUnknownTarget */
-            $links[] = sprintf(
-                '<a href="%s?page=wc-settings&tab=%s&section=api_settings">%s</a>',
-                admin_url('admin.php'),
-                RESURSBANK_MODULE_PREFIX,
-                'Settings'
-            );
-        }
-        return $links;
-    }
-
-    /**
-     * @return string
-     * @since 0.0.1.0
-     * @todo Fix and move or remove and make this request independent.
-     */
-    public static function getBaseName(): string
-    {
-        if (empty(self::$basename)) {
-            self::$basename = trim(string: plugin_basename(file: Data::getGatewayPath()));
-        }
-
-        return self::$basename;
-    }
 }
