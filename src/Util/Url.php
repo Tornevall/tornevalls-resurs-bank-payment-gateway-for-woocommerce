@@ -9,10 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Exception;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
-use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use RuntimeException;
 
 use function is_string;

@@ -36,41 +36,47 @@ class CustomerType
     }
 
     /**
-     * Prepare the script used to handle customer type on getAddress updates.
+     * Loads customertype.js script.
      *
      * @throws ConfigException
+     */
+    public static function loadScripts(): void
+    {
+        wp_enqueue_script(
+            handle: 'rb-set-customertype',
+            src: Url::getScriptUrl(
+                module: 'CustomerType',
+                file: 'customertype.js'
+            ),
+            deps: [
+                'jquery',
+            ]
+        );
+
+        try {
+            wp_localize_script(
+                handle: 'rb-set-customertype',
+                object_name: 'rbCustomerTypeData',
+                l10n: [
+                    'currentCustomerType' => WcSession::getCustomerType(),
+                    'apiUrl' => Route::getUrl(
+                        route: Route::ROUTE_SET_CUSTOMER_TYPE
+                    ),
+                ]
+            );
+        } catch (Throwable $e) {
+            Config::getLogger()->error(message: $e);
+        }
+    }
+
+    /**
+     * Prepare the script used to handle customer type on getAddress updates.
      */
     private static function enqueueScript(): void
     {
         add_action(
             hook_name: 'wp_enqueue_scripts',
-            callback: static function (): void {
-                wp_enqueue_script(
-                    handle: 'rb-set-customertype',
-                    src: Url::getScriptUrl(
-                        module: 'CustomerType',
-                        file: 'customertype.js'
-                    ),
-                    deps: [
-                        'jquery',
-                    ]
-                );
-
-                try {
-                    wp_localize_script(
-                        handle: 'rb-set-customertype',
-                        object_name: 'rbCustomerTypeData',
-                        l10n: [
-                            'currentCustomerType' => WcSession::getCustomerType(),
-                            'apiUrl' => Route::getUrl(
-                                route: Route::ROUTE_SET_CUSTOMER_TYPE
-                            ),
-                        ]
-                    );
-                } catch (Throwable $e) {
-                    Config::getLogger()->error(message: $e);
-                }
-            }
+            callback: 'Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType::loadScripts'
         );
     }
 }

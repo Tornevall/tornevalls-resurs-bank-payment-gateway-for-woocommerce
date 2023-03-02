@@ -42,7 +42,7 @@ class MessageBag
     {
         add_action(
             hook_name: 'admin_notices',
-            callback: static fn () => MessageBag::printMessages()
+            callback: 'Resursbank\Woocommerce\Modules\MessageBag\MessageBag::printMessages'
         );
     }
 

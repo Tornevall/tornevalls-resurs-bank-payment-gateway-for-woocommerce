@@ -22,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Repository;
+use ResursBank\Exception\IllegalStateException;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -39,26 +40,34 @@ class DeleteItem
 {
     /**
      * Register action filter which executed when order item gets deleted.
-     *
-     * @throws ConfigException
      */
     public static function register(): void
     {
         add_action(
             hook_name: 'woocommerce_before_delete_order_item',
-            callback: static function (mixed $itemId): void {
-                try {
-                    self::exec(itemId: (int)$itemId);
-                } catch (Throwable $e) {
-                    Config::getLogger()->error(message: $e);
-                    wp_send_json_error(
-                        data: ['error' => Translator::translate(
-                            phraseId: 'cancel-article-row-fail'
-                        ) . ' ' . $e->getMessage()]
-                    );
-                }
-            }
+            callback: 'Resursbank\Woocommerce\Modules\Order\Filter\DeleteItem::execute',
+            accepted_args: 1
         );
+    }
+
+    /**
+     * Callback function for executing delete of line item.
+     *
+     * @throws ConfigException
+     */
+    public static function execute(mixed $itemId): void
+    {
+        try {
+            self::exec(itemId: (int)$itemId);
+        } catch (Throwable $e) {
+            Config::getLogger()->error(message: $e);
+            wp_send_json_error(
+                data: [
+                    'error' => Translator::translate(
+                        phraseId: 'cancel-article-row-fail'
+                    ) . ' ' . $e->getMessage()]
+            );
+        }
     }
 
     /**
@@ -114,7 +123,7 @@ class DeleteItem
             );
 
             if (!$resursPayment->canPartiallyCancel()) {
-                throw new Exception(
+                throw new IllegalStateException(
                     message: Translator::translate(
                         phraseId: 'part-cancel-not-allowed'
                     )

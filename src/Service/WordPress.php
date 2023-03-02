@@ -3,21 +3,12 @@
 namespace ResursBank\Service;
 
 use Automattic\WooCommerce\Admin\PageController;
-use Exception;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use ResursBank\Module\Data;
-use ResursBank\ResursBank\ResursPlugin;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\ResursDefault;
-use Resursbank\Woocommerce\Modules\GetAddress\Module as GetAddress;
-use Resursbank\Woocommerce\SettingsPage;
-use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 use WP_Post;
@@ -49,15 +40,12 @@ class WordPress
         // Register special routes (do not put this in init.php, but after WooCommerce init).
         // If executed in wrong order, the routes will instead crash the site (even from a plugins_loaded perspective).
         Route::exec();
-
-        GetAddress::setup();
         CustomerType::setup();
 
         // Always initialize defaults once on plugin loaded (performance saver).
         self::adminGatewayRedirect();
         self::setupAjaxActions();
         self::setupFilters();
-        self::setupScripts();
         self::setupActions();
         self::doAction(actionName: 'isLoaded', value: true);
     }
@@ -155,48 +143,12 @@ class WordPress
     }
 
     /**
-     * Script preparation.
-     *
-     * @since 0.0.1.0
-     */
-    private static function setupScripts()
-    {
-        add_action(
-            'wp_head',
-            'Resursbank\Woocommerce\Modules\UniqueSellingPoint\Module::setCss'
-        );
-        add_action(
-            'wp_head',
-            'Resursbank\Woocommerce\Modules\PartPayment\Module::setCss'
-        );
-        add_action(
-            'wp_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\PartPayment\Module::setJs'
-        );
-        if (Admin::isAdmin()) {
-            add_action(
-                'admin_enqueue_scripts',
-                'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
-            );
-        }
-
-        add_action(
-            'admin_head',
-            'Resursbank\Woocommerce\Modules\PaymentInformation\Module::setCss'
-        );
-    }
-
-    /**
      * Basic actions.
      *
      * @since 0.0.1.0
      */
     private static function setupActions()
     {
-        add_action(
-            'woocommerce_single_product_summary',
-            'Resursbank\Woocommerce\Modules\PartPayment\Module::getWidget'
-        );
         add_action('updated_option', 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit', 10, 3);
         add_action('add_meta_boxes', 'ResursBank\Service\WordPress::getMetaBoxes', 10);
     }
@@ -314,20 +266,6 @@ class WordPress
         ];
 
         do_action(...array_merge($actionArray, self::getFilterArgs(func_get_args())));
-    }
-
-    /**
-     * Makes nonces strict based on client ip address.
-     *
-     * @param $tag
-     * @param bool $strictify
-     * @return string
-     * @since 0.0.1.0
-     * @noinspection ParameterDefaultValueIsNotNullInspection
-     */
-    private static function getNonce($tag, $strictify = true): string
-    {
-        return (string)wp_create_nonce(self::getNonceTag($tag, $strictify));
     }
 
     /**
