@@ -23,21 +23,29 @@ class InvalidateCacheButton
     /**
      * Add event listener to render the custom button element.
      */
-    public static function register(): void
+    public static function init(): void
     {
         add_action(
             hook_name: 'woocommerce_admin_field_rbinvalidatecachebutton',
-            callback: static function (): void {
-                try {
-                    $url = Sanitize::sanitizeHtml(
-                        html: Route::getUrl(
-                            route: Route::ROUTE_ADMIN_CACHE_INVALIDATE,
-                            admin: true
-                        )
-                    );
-                    $title = Translator::translate(phraseId: 'clear-cache');
+            callback: 'Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton::render'
+        );
+    }
 
-                    echo <<<EX
+    /**
+     * Callback function for rendering the button.
+     */
+    public static function render(): void
+    {
+        try {
+            $url = Sanitize::sanitizeHtml(
+                html: Route::getUrl(
+                    route: Route::ROUTE_ADMIN_CACHE_INVALIDATE,
+                    admin: true
+                )
+            );
+            $title = Translator::translate(phraseId: 'clear-cache');
+
+            echo <<<EX
 <tr>
   <th scope="row" class="titledesc" />
   <td class="forminp">
@@ -45,14 +53,12 @@ class InvalidateCacheButton
   </td>
 </tr>
 EX;
-                } catch (Throwable $e) {
-                    // @todo Trails one page load, message bag already rendered.
-                    Log::error(
-                        error: $e,
-                        message: 'Failed rendering clear cache button. See log'
-                    );
-                }
-            }
-        );
+        } catch (Throwable $e) {
+            // @todo Trails one page load, message bag already rendered.
+            Log::error(
+                error: $e,
+                message: 'Failed rendering clear cache button. See log'
+            );
+        }
     }
 }

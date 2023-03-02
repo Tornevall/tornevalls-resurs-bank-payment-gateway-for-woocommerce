@@ -48,18 +48,24 @@ class Callback
     {
         add_action(
             hook_name: 'woocommerce_api_' . Route::ROUTE_PARAM,
-            callback: static function (): void {
-                try {
-                    CallbackController::exec(
-                        type: CallbackType::from(
-                            value: $_REQUEST['callback'] ?? ''
-                        )
-                    );
-                } catch (Throwable $e) {
-                    Log::error(error: $e);
-                }
-            }
+            callback: 'Resursbank\Woocommerce\Modules\Callback\Callback::execute'
         );
+    }
+
+    /**
+     * Performs callback processing.
+     */
+    public static function execute(): void
+    {
+        try {
+            CallbackController::exec(
+                type: CallbackType::from(
+                    value: $_REQUEST['callback'] ?? ''
+                )
+            );
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+        }
     }
 
     /**

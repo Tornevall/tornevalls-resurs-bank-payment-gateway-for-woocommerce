@@ -25,7 +25,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
@@ -41,9 +41,9 @@ use WC_Product;
 /**
  * Part payment widget
  */
-class Module
+class PartPayment
 {
-    private PartPayment $instance;
+    private EcomPartPayment $instance;
 
     /**
      * @throws JsonException
@@ -78,7 +78,7 @@ class Module
             throw new IllegalTypeException(message: 'Payment method is null');
         }
 
-        $this->instance = new PartPayment(
+        $this->instance = new EcomPartPayment(
             storeId: StoreId::getData(),
             paymentMethod: $paymentMethod,
             months: (int)Period::getData(),
@@ -86,6 +86,36 @@ class Module
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
+        );
+    }
+
+    /**
+     * Init method for frontend scripts and styling.
+     */
+    public static function initFrontend(): void
+    {
+        add_action(
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
+        );
+        add_action(
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
+        );
+        add_action(
+            'woocommerce_single_product_summary',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::getWidget'
+        );
+    }
+
+    /**
+     * Init method for admin script.
+     */
+    public static function initAdmin(): void
+    {
+        add_action(
+            'admin_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
         );
     }
 

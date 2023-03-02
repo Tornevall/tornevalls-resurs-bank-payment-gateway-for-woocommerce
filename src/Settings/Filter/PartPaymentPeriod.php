@@ -27,7 +27,7 @@ class PartPaymentPeriod
     /**
      * Add event listener to render the custom select element.
      */
-    public static function register(): void
+    public static function init(): void
     {
         add_action(
             hook_name: 'woocommerce_admin_field_rbpartpaymentperiod',
@@ -49,8 +49,11 @@ class PartPaymentPeriod
         $disabled = self::getPeriodDisabled() ? 'disabled' : '';
         $options = self::getPeriodOptionHtml();
         $adminUrl = get_admin_url();
+
         if (!is_string(value: $adminUrl)) {
-            throw new IllegalTypeException(message: 'Fetched wp-admin URL is not a string');
+            throw new IllegalTypeException(
+                message: 'Fetched wp-admin URL is not a string'
+            );
         }
 
         echo <<<EOL

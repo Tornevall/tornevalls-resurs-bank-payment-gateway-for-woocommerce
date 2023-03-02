@@ -12,7 +12,7 @@ namespace ResursBank\Module;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\MissingKeyException;
-use Resursbank\Woocommerce\Modules\PaymentInformation\Module;
+use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -39,7 +39,7 @@ class OrderMetaBox
         $orderData = Metadata::getOrderInfo(order: $order);
 
         try {
-            $paymentInformation = new Module(
+            $paymentInformation = new PaymentInformation(
                 paymentId: self::getResursBankPaymentId(orderData: $orderData)
             );
             echo Data::getEscapedHtml(

@@ -189,7 +189,9 @@ class Advanced
                 $return = array_merge($return, self::getStores());
             } catch (Throwable $exception) {
                 MessageBag::addError(
-                    message: Translator::translate(phraseId: 'get-stores-failed')
+                    message: Translator::translate(
+                        phraseId: 'get-stores-failed'
+                    )
                 );
                 // Make sure we give the options array a chance to render an error instead of the fields so ensure
                 // the setting won't be saved by mistake when APIs are down.
