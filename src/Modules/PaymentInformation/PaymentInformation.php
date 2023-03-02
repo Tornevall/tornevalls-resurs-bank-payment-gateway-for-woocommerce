@@ -52,7 +52,7 @@ class PaymentInformation
     public function __construct(string $paymentId)
     {
         $currencySymbol = Currency::getWooCommerceCurrencySymbol();
-        $currencyFormat = $this->getEcomCurrencyFormat();
+        $currencyFormat = Currency::getEcomCurrencyFormat();
         $this->widget = new EcomPaymentInformation(
             paymentId: $paymentId,
             currencySymbol: $currencySymbol,
@@ -91,21 +91,5 @@ class PaymentInformation
     public function getWidget(): void
     {
         echo Data::getEscapedHtml($this->widget->content);
-    }
-
-    /**
-     * Fetch currency format
-     */
-    public function getEcomCurrencyFormat(): CurrencyFormat
-    {
-        $wooFormat = Currency::getWooCommerceCurrencyFormat();
-
-        if (
-            preg_match(pattern: '/\%1\$s.*\%2\$s/', subject: $wooFormat)
-        ) {
-            return CurrencyFormat::SYMBOL_FIRST;
-        }
-
-        return CurrencyFormat::SYMBOL_LAST;
     }
 }

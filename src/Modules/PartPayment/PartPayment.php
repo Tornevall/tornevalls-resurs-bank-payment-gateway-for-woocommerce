@@ -24,7 +24,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use ResursBank\Module\Data;
@@ -85,7 +84,7 @@ class PartPayment
             months: (int)Period::getData(),
             amount: (float)$product->get_price(),
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
-            currencyFormat: self::getEcomCurrencyFormat(),
+            currencyFormat: Currency::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
         );
     }
@@ -118,19 +117,6 @@ class PartPayment
             'admin_enqueue_scripts',
             'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
         );
-    }
-
-    public static function getEcomCurrencyFormat(): CurrencyFormat
-    {
-        $wooFormat = Currency::getWooCommerceCurrencyFormat();
-
-        if (
-            preg_match(pattern: '/\%1\$s.*\%2\$s/', subject: $wooFormat)
-        ) {
-            return CurrencyFormat::SYMBOL_FIRST;
-        }
-
-        return CurrencyFormat::SYMBOL_LAST;
     }
 
     /**
