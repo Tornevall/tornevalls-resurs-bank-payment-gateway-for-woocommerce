@@ -13,6 +13,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Customer\Widget\GetAddress;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -27,6 +28,10 @@ class Checkout
      */
     public static function register(): void
     {
+        if (!EnableGetAddress::getData()) {
+            return;
+        }
+
         add_filter(
             hook_name: 'woocommerce_before_checkout_form',
             callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::exec'
