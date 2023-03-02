@@ -21,7 +21,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation;
+use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation as EcomPaymentInformation;
 use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Util\Currency;
@@ -31,9 +31,9 @@ use Resursbank\Woocommerce\Util\Currency;
  *
  * @SuppressWarnings(PHPMD.CamelCaseVariableName)
  */
-class Module
+class PaymentInformation
 {
-    public PaymentInformation $widget;
+    public EcomPaymentInformation $widget;
 
     /**
      * @param string $paymentId Resurs payment ID
@@ -53,10 +53,21 @@ class Module
     {
         $currencySymbol = Currency::getWooCommerceCurrencySymbol();
         $currencyFormat = $this->getEcomCurrencyFormat();
-        $this->widget = new PaymentInformation(
+        $this->widget = new EcomPaymentInformation(
             paymentId: $paymentId,
             currencySymbol: $currencySymbol,
             currencyFormat: $currencyFormat
+        );
+    }
+
+    /**
+     * Init method for loading module CSS.
+     */
+    public static function init(): void
+    {
+        add_action(
+            'admin_head',
+            'Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
         );
     }
 
@@ -70,7 +81,7 @@ class Module
         }
 
         echo '<style>' . Data::getEscapedHtml(
-            PaymentInformation::getCss()
+            EcomPaymentInformation::getCss()
         ) . '</style>';
     }
 

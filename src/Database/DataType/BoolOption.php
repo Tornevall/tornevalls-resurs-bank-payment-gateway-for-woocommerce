@@ -21,7 +21,7 @@ abstract class BoolOption extends Option
      */
     public static function isEnabled(): bool
     {
-        return (self::getRawData() ?? static::getDefault()) === 'yes';
+        return self::getData();
     }
 
     /**
@@ -30,5 +30,13 @@ abstract class BoolOption extends Option
     public static function getDefault(): ?string
     {
         return 'no';
+    }
+
+    /**
+     * Fetches stored option data as an actual boolean.
+     */
+    public static function getData(): bool
+    {
+        return (self::getRawData() ?? static::getDefault()) === 'yes';
     }
 }
