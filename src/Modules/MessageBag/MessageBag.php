@@ -74,6 +74,7 @@ class MessageBag
      */
     public static function addError(string $message): void
     {
+        wc_add_notice(message: $message, notice_type: Type::ERROR);
         self::add(message: $message, type: Type::ERROR);
     }
 
@@ -82,6 +83,7 @@ class MessageBag
      */
     public static function addSuccess(string $message): void
     {
+        wc_add_notice(message: $message, notice_type: Type::SUCCESS);
         self::add(message: $message, type: Type::SUCCESS);
     }
 

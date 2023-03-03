@@ -22,8 +22,6 @@ use function strlen;
  */
 class Url
 {
-    public const NAMESPACE = 'resursbank';
-
     /**
      * Helper to get script file from sub-module resource directory.
      *

@@ -35,7 +35,7 @@ class Gateway
         if (
             $page === 'wc-settings' &&
             $tab === 'checkout' &&
-            $section === (new ResursDefault())->id
+            $section === RESURSBANK_MODULE_PREFIX
         ) {
             Route::redirectToSettings();
         }
@@ -64,7 +64,7 @@ class Gateway
     public static function addGateway(mixed $gateways): mixed
     {
         if (is_array(value: $gateways)) {
-            $gateways[] = ResursDefault::class;
+            $gateways[] = Resursbank::class;
         }
 
         return $gateways;
@@ -85,9 +85,7 @@ class Gateway
             );
 
             foreach ($paymentMethodList as $paymentMethod) {
-                $gateway = new ResursDefault(
-                    resursPaymentMethod: $paymentMethod
-                );
+                $gateway = new Resursbank(method: $paymentMethod);
 
                 if (!$gateway->is_available()) {
                     continue;

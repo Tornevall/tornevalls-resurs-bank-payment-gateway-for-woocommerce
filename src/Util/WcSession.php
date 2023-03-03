@@ -13,6 +13,7 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use RuntimeException;
+use Throwable;
 use WC_Session_Handler;
 use WooCommerce;
 
@@ -61,21 +62,45 @@ class WcSession
 
     /**
      * Fetch customer type stored in session.
+     *
+     * @todo Not sure if we always want to default to NATURAL?
      */
     public static function getCustomerType(): CustomerType
     {
-        // Use default if not set in session or errors like this will occur when session is not yet configured:
-        // ERROR: "" is not a valid backing value for enum.
-        $customerTypeValue = self::get(
+        $type = self::get(
             key: (new Session())->getKey(
                 key: Repository::SESSION_KEY_CUSTOMER_TYPE
             )
         );
-        return CustomerType::from(
-            value: $customerTypeValue !== '' ? $customerTypeValue : 'NATURAL'
+
+        if ($type === '') {
+            $type = 'NATURAL';
+        }
+
+        try {
+            return CustomerType::from(value: $type);
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+
+            return CustomerType::NATURAL;
+        }
+    }
+
+    /**
+     * Get government ID stored in session.
+     */
+    public static function getGovernmentId(): ?string
+    {
+        return WC()->session->get(
+            key: (new Session())->getKey(
+                key: Repository::SESSION_KEY_SSN_DATA
+            )
         );
     }
 
+    /**
+     * Unset.
+     */
     public static function unset(string $key): void
     {
         try {

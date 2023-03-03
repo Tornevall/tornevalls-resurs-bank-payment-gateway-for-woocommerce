@@ -22,6 +22,7 @@ class Metadata
 {
     public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
     public const KEY_THANK_YOU = RESURSBANK_MODULE_PREFIX . '_thankyou_trigger';
+    public const KEY_PAYMENT_METHOD = RESURSBANK_MODULE_PREFIX . '_payment_method';
 
     /**
      * Store UUID of Resurs Bank payment on order.
@@ -97,20 +98,6 @@ class Metadata
     public static function isValidResursPayment(WC_Order $order): bool
     {
         return self::getPaymentId(order: $order) !== '';
-    }
-
-    /**
-     * Fetch order information and metadata.
-     *
-     * @return array
-     */
-    public static function getOrderInfo(WC_Order $order): array
-    {
-        $meta = get_post_custom(post_id: $order->get_id());
-        return [
-            'order' => $order,
-            'meta' => is_array(value: $meta) ? $meta : [],
-        ];
     }
 
     /**

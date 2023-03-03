@@ -11,7 +11,20 @@ namespace Resursbank\Woocommerce\Modules\Order;
 
 use Automattic\WooCommerce\Admin\PageController;
 use Exception;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\Order\Filter\DeleteItem;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Log;
@@ -138,5 +151,33 @@ class Order
         }
 
         echo $data;
+    }
+
+    /**
+     * @throws ValidationException
+     * @throws AuthException
+     * @throws EmptyValueException
+     * @throws CurlException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws CacheException
+     */
+    public static function getPaymentMethod(
+        WC_Order $order
+    ): ?PaymentMethod {
+        $method = (string) $order->get_payment_method();
+
+        if ($method === '') {
+            return null;
+        }
+
+        return Repository::getById(
+            storeId: StoreId::getData(),
+            paymentMethodId: $method
+        );
     }
 }
