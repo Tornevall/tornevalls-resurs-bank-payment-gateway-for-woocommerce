@@ -45,6 +45,7 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
+use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
 
@@ -154,28 +155,11 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function is_available(): bool
     {
-        $result = true;
-
         if ($this->method === null) {
             return true;
         }
 
-        try {
-            $total = (float) $this->get_order_total();
-
-            if (
-                $total < $this->method->minPurchaseLimit ||
-                $total > $this->method->maxPurchaseLimit
-            ) {
-                $result = false;
-            }
-        } catch (Throwable $e) {
-            $result = false;
-
-            Log::error(error: $e);
-        }
-
-        return $result && match (WcSession::getCustomerType()) {
+        return $this->validatePurchaseLimit() && match (WcSession::getCustomerType()) {
             CustomerType::LEGAL => $this->method->enabledForLegalCustomer,
             CustomerType::NATURAL => $this->method->enabledForNaturalCustomer
         };
@@ -322,5 +306,27 @@ class Resursbank extends WC_Payment_Gateway
             ),
             timeToLiveInMinutes: 120
         );
+    }
+
+    /**
+     * Whether total amount of order / cart is within min / max purchase limit.
+     */
+    private function validatePurchaseLimit(): bool
+    {
+        $total = 0.0;
+
+        /* We need to confirm we can resolve order / cart total manually,
+           otherwise calling $this->>get_order_total() can cause an error. */
+        if (
+            WC()->cart instanceof WC_Cart ||
+            (int) absint(maybeint: get_query_var(var: 'order-pay')) > 0
+        ) {
+            $total = (float) $this->get_order_total();
+        }
+
+        return
+            $total < $this->method->minPurchaseLimit ||
+            $total > $this->method->maxPurchaseLimit
+        ;
     }
 }

@@ -91,9 +91,7 @@ class Gateway
                     continue;
                 }
 
-                $gateways[
-                    RESURSBANK_MODULE_PREFIX . '_' . $paymentMethod->id
-                ] = $gateway;
+                $gateways[$paymentMethod->id] = $gateway;
             }
         } catch (Throwable $e) {
             Log::error(error: $e);
