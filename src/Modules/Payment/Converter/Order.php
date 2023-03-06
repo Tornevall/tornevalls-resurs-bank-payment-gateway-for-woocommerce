@@ -20,6 +20,7 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Product;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
 use WC_Order;
 use WC_Order_Item_Product;
+use WC_Order_Item_Shipping;
 
 use function array_merge;
 use function in_array;
@@ -37,8 +38,7 @@ class Order
      */
     public static function getOrderLines(
         WC_Order $order,
-        array $filter = [],
-        bool $includeShipping = true
+        array $filter = []
     ): OrderLineCollection {
         $result = [];
         $items = self::getOrderContent(order: $order);
@@ -76,7 +76,7 @@ class Order
         }
 
         // When we filter specific items we do not want to include this.
-        if ($includeShipping) {
+        if (self::validateShippingItem(order: $order, filter: $filter)) {
             $result[] = Shipping::getOrderLine(order: $order);
         }
 
@@ -120,5 +120,39 @@ class Order
                 )
             )
         ;
+    }
+
+    /**
+     * Find out if item is of type shipping.
+     */
+    private static function validateShippingItem(
+        WC_Order $order,
+        array $filter
+    ): bool {
+        if (empty($filter)) {
+            return true;
+        }
+
+        $shippingItems = $order->get_items(types: 'shipping');
+
+        if (is_array(value: $shippingItems)) {
+            foreach ($shippingItems as $shippingItem) {
+                if (!($shippingItem instanceof WC_Order_Item_Shipping)) {
+                    continue;
+                }
+
+                if (
+                    in_array(
+                        needle: (int) $shippingItem->get_id(),
+                        haystack: $filter,
+                        strict: true
+                    )
+                ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

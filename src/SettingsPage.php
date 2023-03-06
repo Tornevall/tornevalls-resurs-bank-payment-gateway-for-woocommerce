@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
@@ -137,11 +136,7 @@ class SettingsPage extends WC_Settings_Page
                 );
             }
 
-            echo Data::getEscapedHtml(
-                content: PaymentMethods::getOutput(
-                    storeId: StoreId::getData()
-                )
-            );
+            echo PaymentMethods::getOutput(storeId: StoreId::getData());
         } catch (Throwable $e) {
             Log::error(error: $e);
 

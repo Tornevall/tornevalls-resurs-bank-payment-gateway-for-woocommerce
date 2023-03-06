@@ -22,9 +22,8 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation as EcomPaymentInformation;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Util\Currency;
+use Resursbank\Woocommerce\Util\Sanitize;
 
 /**
  * Handles the output of the order view payment information widget
@@ -66,8 +65,8 @@ class PaymentInformation
     public static function init(): void
     {
         add_action(
-            'admin_head',
-            'Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
+            hook_name: 'admin_head',
+            callback: 'Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
         );
     }
 
@@ -80,9 +79,9 @@ class PaymentInformation
             return;
         }
 
-        echo '<style>' . Data::getEscapedHtml(
-            EcomPaymentInformation::getCss()
-        ) . '</style>';
+        echo '<style>' .
+            Sanitize::sanitizeHtml(html: EcomPaymentInformation::getCss()) .
+            '</style>';
     }
 
     /**
@@ -90,6 +89,6 @@ class PaymentInformation
      */
     public function getWidget(): void
     {
-        echo Data::getEscapedHtml($this->widget->content);
+        echo Sanitize::sanitizeHtml(html: $this->widget->content);
     }
 }

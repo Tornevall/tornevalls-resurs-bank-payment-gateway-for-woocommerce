@@ -109,15 +109,22 @@ class Route
     public static function redirectToSettings(
         string $tab = 'api_settings'
     ): void {
-        wp_safe_redirect(
-            location: admin_url(
-                path: 'admin.php?page=wc-settings&tab='
-                    . RESURSBANK_MODULE_PREFIX
-                    . "&section=$tab"
-            )
-        );
+        wp_safe_redirect(location: self::getSettingsUrl(tab: $tab));
 
         MessageBag::keep();
+    }
+
+    /**
+     * Get URL to settings page in admin.
+     */
+    public static function getSettingsUrl(
+        string $tab = 'api_settings'
+    ): string {
+        return admin_url(
+            path: 'admin.php?page=wc-settings&tab='
+                . RESURSBANK_MODULE_PREFIX
+                . "&section=$tab"
+        );
     }
 
     /**

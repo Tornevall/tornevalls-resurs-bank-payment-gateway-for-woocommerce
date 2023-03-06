@@ -26,7 +26,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
-use ResursBank\Module\Data;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -95,16 +94,16 @@ class PartPayment
     public static function initFrontend(): void
     {
         add_action(
-            'wp_head',
-            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
+            hook_name: 'wp_head',
+            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
         );
         add_action(
-            'wp_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
+            hook_name: 'wp_enqueue_scripts',
+            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
         );
         add_action(
-            'woocommerce_single_product_summary',
-            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::getWidget'
+            hook_name: 'woocommerce_single_product_summary',
+            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::getWidget'
         );
     }
 
@@ -114,8 +113,8 @@ class PartPayment
     public static function initAdmin(): void
     {
         add_action(
-            'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
+            hook_name: 'admin_enqueue_scripts',
+            callback: 'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
         );
     }
 
@@ -170,7 +169,10 @@ class PartPayment
                     handle: 'partpayment-script',
                     data: $widget->instance->js
                 );
-                add_action('wp_enqueue_scripts', 'partpayment-script');
+                add_action(
+                    hook_name: 'wp_enqueue_scripts',
+                    callback: 'partpayment-script'
+                );
             }
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
@@ -192,11 +194,10 @@ class PartPayment
             $widget = new self();
 
             if ($widget->visible()) {
-                $filtered = self::applyFiltersToOutput(
+                echo self::applyFiltersToOutput(
                     propertyName: $propertyName,
                     widget: $widget
                 );
-                echo Data::getEscapedHtml(content: $filtered);
             }
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
@@ -233,7 +234,7 @@ class PartPayment
     private static function getOutputValue(string $propertyName, self $widget): string
     {
         if ($propertyName === 'content') {
-            return Data::getEscapedHtml($widget->instance->content);
+            return $widget->instance->content;
         }
 
         if ($propertyName === 'css') {

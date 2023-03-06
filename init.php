@@ -18,12 +18,16 @@
 
 declare(strict_types=1);
 
-use ResursBank\Service\WooCommerce;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
-use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
+
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
 
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
@@ -32,10 +36,6 @@ define(
         offset: strrpos(haystack: __DIR__, needle: '/') + 1
     )
 );
-
-if (!defined(constant_name: 'ABSPATH')) {
-    exit;
-}
 
 require_once __DIR__ . '/autoload.php';
 
@@ -59,7 +59,7 @@ load_plugin_textdomain(
 );
 
 // Make sure there is an instance of WooCommerce among active plugins.
-if (!WooCommerce::getActiveState()) {
+if (!WooCommerce::isAvailable()) {
     return;
 }
 

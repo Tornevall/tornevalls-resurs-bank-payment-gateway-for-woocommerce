@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\CustomerType\Filter;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -23,15 +22,10 @@ use Throwable;
 class CustomerType
 {
     /**
-     * @throws ConfigException
+     * Setup.
      */
-    public static function setup(): void
+    public static function init(): void
     {
-        // Customer type scripts is only necessary outside admin, and if credentials are present.
-        if (Admin::isAdmin()) {
-            return;
-        }
-
         self::enqueueScript();
     }
 

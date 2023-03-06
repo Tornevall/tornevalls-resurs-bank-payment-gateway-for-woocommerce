@@ -28,10 +28,6 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-use WC_Order;
-use WC_Order_Item_Shipping;
-
-use function is_array;
 
 /**
  * Event executed when order item is deleted.
@@ -68,28 +64,6 @@ class DeleteItem
                     ) . ' ' . $e->getMessage()]
             );
         }
-    }
-
-    /**
-     * Find out if item is of type shipping.
-     */
-    private static function isShipping(WC_Order $order, int $itemId): bool
-    {
-        $shippingItems = $order->get_items(types: 'shipping');
-
-        if (is_array(value: $shippingItems)) {
-            foreach ($shippingItems as $shippingItem) {
-                if (!($shippingItem instanceof WC_Order_Item_Shipping)) {
-                    continue;
-                }
-
-                if ($shippingItem->get_id() === $itemId) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -134,11 +108,9 @@ class DeleteItem
             throw $error;
         }
 
-        $isShipping = self::isShipping(order: $order, itemId: $itemId);
         $orderLineCollection = Order::getOrderLines(
             order: $order,
-            filter: [$itemId],
-            includeShipping: $isShipping
+            filter: [$itemId]
         );
 
         if (!$orderLineCollection->count()) {
