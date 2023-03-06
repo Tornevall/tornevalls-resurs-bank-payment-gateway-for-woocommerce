@@ -9,11 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Ordermanagement;
 
-use Exception;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Module\Payment\Repository;
+use ResursBank\Exception\IllegalStateException;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -51,7 +51,7 @@ class Cancelled extends Status
                 $errorMessage = 'Resurs order can not be cancelled.';
                 MessageBag::addError(message: $errorMessage);
                 // Throw own error based on prohibited action.
-                throw new Exception(message: $errorMessage);
+                throw new IllegalStateException(message: $errorMessage);
             }
 
             // On success, this is where order status and order notes are updated.
