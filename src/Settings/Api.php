@@ -40,7 +40,7 @@ class Api
     /**
      * Register actions for this config section.
      */
-    public static function register(): void
+    public static function init(): void
     {
         add_action(
             hook_name: 'updated_option',

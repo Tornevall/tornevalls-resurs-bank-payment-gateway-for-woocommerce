@@ -35,7 +35,8 @@ class Settings
             callback: 'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
-        Api::register();
+        Api::init();
+        PartPayment::init();
 
         // Save changes to database.
         add_action(
