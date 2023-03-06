@@ -195,11 +195,10 @@ class PartPayment
             $widget = new self();
 
             if ($widget->visible()) {
-                $filtered = self::applyFiltersToOutput(
+                echo self::applyFiltersToOutput(
                     propertyName: $propertyName,
                     widget: $widget
                 );
-                echo Sanitize::sanitizeHtml(html: $filtered);
             }
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
@@ -236,7 +235,7 @@ class PartPayment
     private static function getOutputValue(string $propertyName, self $widget): string
     {
         if ($propertyName === 'content') {
-            return Sanitize::sanitizeHtml(html: $widget->instance->content);
+            return $widget->instance->content;
         }
 
         if ($propertyName === 'css') {
