@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
 use Resursbank\Woocommerce\Modules\MessageBag\Models\Message;
 use Resursbank\Woocommerce\Modules\MessageBag\Models\MessageCollection;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
@@ -71,20 +72,30 @@ class MessageBag
 
     /**
      * Add error message.
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public static function addError(string $message): void
     {
-        wc_add_notice(message: $message, notice_type: Type::ERROR);
-        self::add(message: $message, type: Type::ERROR);
+        if (Admin::isAdmin()) {
+            self::add(message: $message, type: Type::ERROR);
+        } else {
+            wc_add_notice(message: $message, notice_type: Type::ERROR);
+        }
     }
 
     /**
      * Add error message.
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public static function addSuccess(string $message): void
     {
-        wc_add_notice(message: $message, notice_type: Type::SUCCESS);
-        self::add(message: $message, type: Type::SUCCESS);
+        if (Admin::isAdmin()) {
+            self::add(message: $message, type: Type::SUCCESS);
+        } else {
+            wc_add_notice(message: $message, notice_type: Type::SUCCESS);
+        }
     }
 
     /**

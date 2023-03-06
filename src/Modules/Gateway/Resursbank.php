@@ -325,8 +325,8 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         return
-            $total < $this->method->minPurchaseLimit ||
-            $total > $this->method->maxPurchaseLimit
+            $total >= $this->method->minPurchaseLimit ||
+            $total <= $this->method->maxPurchaseLimit
         ;
     }
 }
