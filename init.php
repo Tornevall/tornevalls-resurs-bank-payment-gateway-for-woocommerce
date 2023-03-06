@@ -70,7 +70,7 @@ try {
     return;
 }
 
-// Setup event listeners adn resources when WP has finished loading all modules.
+// Setup event listeners and resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     Shared::init();
 

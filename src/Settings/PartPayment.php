@@ -47,6 +47,19 @@ class PartPayment
     }
 
     /**
+     * Register event handlers.
+     */
+    public static function init(): void
+    {
+        add_action(
+            'updated_option',
+            'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
+            10,
+            3
+        );
+    }
+
+    /**
      * Get settings.
      */
     public static function getSettings(): array

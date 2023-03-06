@@ -10,11 +10,17 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
+use Resursbank\Ecom\Lib\Api\GrantType;
+use Resursbank\Ecom\Lib\Api\Scope;
+use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
+use Resursbank\Ecom\Lib\Repository\Api\Mapi\GenerateToken;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Translator;
+use Throwable;
 
 /**
  * API settings section.
@@ -32,6 +38,20 @@ class Api
     }
 
     /**
+     * Register actions for this config section.
+     */
+    public static function init(): void
+    {
+        add_action(
+            hook_name: 'updated_option',
+            callback: 'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
+            accepted_args: 1,
+            // Set high so that our method is called after credentials are saved
+            priority: 100
+        );
+    }
+
+    /**
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      */
@@ -45,6 +65,49 @@ class Api
                 'client_secret' => self::getClientSecret(),
             ],
         ];
+    }
+
+    /**
+     * Verifies that API credentials are valid and shows an error message if they're not.
+     */
+    public static function verifyCredentials(mixed $option): void
+    {
+        // Check if API section is what's being saved
+        if (
+            !(
+                $option === 'resursbank_client_id' ||
+                $option === 'resursbank_client_secret'
+            )
+        ) {
+            return;
+        }
+
+        // Check if credentials have been properly entered
+        $clientId = ClientId::getData();
+        $clientSecret = ClientSecret::getData();
+        $environment = Environment::getData();
+        $scope = $environment === EnvironmentEnum::PROD
+            ? Scope::MERCHANT_API
+            : Scope::MOCK_MERCHANT_API;
+
+        try {
+            $auth = new Jwt(
+                clientId: $clientId,
+                clientSecret: $clientSecret,
+                scope: $scope,
+                grantType: GrantType::CREDENTIALS
+            );
+        } catch (Throwable $error) {
+            MessageBag::addError(message: $error->getMessage());
+            return;
+        }
+
+        // Check if we can fetch a token
+        try {
+            (new GenerateToken(auth: $auth))->call();
+        } catch (Throwable $error) {
+            MessageBag::addError(message: $error->getMessage());
+        }
     }
 
     /**

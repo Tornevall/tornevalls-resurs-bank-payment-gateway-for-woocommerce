@@ -33,7 +33,6 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Sanitize;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Product;
