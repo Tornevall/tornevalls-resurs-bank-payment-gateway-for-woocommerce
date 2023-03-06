@@ -122,8 +122,6 @@ class Resursbank extends WC_Payment_Gateway
 
         try {
             $payment = $this->createPayment(order: $order);
-
-            $order->set_payment_method(payment_method: $this->id);
         } catch (Throwable $e) {
             $this->handleCreatePaymentError(order: $order, error: $e);
         }

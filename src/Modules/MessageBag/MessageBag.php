@@ -22,10 +22,11 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
+use function function_exists;
 use function is_array;
 
 /**
- * Message bag utilised in admin.
+ * Message bag.
  */
 class MessageBag
 {
@@ -49,6 +50,8 @@ class MessageBag
 
     /**
      * Add message to bag.
+     *
+     * @todo If wc_add_notice does not exist we cannot dispaly frontend messages.
      */
     public static function add(string $message, Type $type): void
     {
@@ -62,9 +65,16 @@ class MessageBag
         }
 
         try {
-            $bag = self::getBag();
-            $bag->offsetSet(offset: null, value: $messageInstance);
-            self::updateBag(bag: $bag);
+            if (Admin::isAdmin()) {
+                $bag = self::getBag();
+                $bag->offsetSet(offset: null, value: $messageInstance);
+                self::updateBag(bag: $bag);
+            }
+
+            // Function availability depends on file load order.
+            if (function_exists(function: 'wc_add_notice')) {
+                wc_add_notice(message: $message, notice_type: $type->value);
+            }
         } catch (Throwable $e) {
             Log::error(error: $e);
         }
@@ -77,11 +87,7 @@ class MessageBag
      */
     public static function addError(string $message): void
     {
-        if (Admin::isAdmin()) {
-            self::add(message: $message, type: Type::ERROR);
-        } else {
-            wc_add_notice(message: $message, notice_type: Type::ERROR);
-        }
+        self::add(message: $message, type: Type::ERROR);
     }
 
     /**
@@ -91,11 +97,7 @@ class MessageBag
      */
     public static function addSuccess(string $message): void
     {
-        if (Admin::isAdmin()) {
-            self::add(message: $message, type: Type::SUCCESS);
-        } else {
-            wc_add_notice(message: $message, notice_type: Type::SUCCESS);
-        }
+        self::add(message: $message, type: Type::SUCCESS);
     }
 
     /**
