@@ -54,6 +54,8 @@ class Callback
 
     /**
      * Performs callback processing.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function execute(): void
     {
