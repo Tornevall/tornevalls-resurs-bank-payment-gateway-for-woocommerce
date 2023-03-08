@@ -13,7 +13,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Module\Payment\Repository;
-use ResursBank\Exception\IllegalStateException;
+use Resursbank\Exception\IllegalStateException;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Metadata;
