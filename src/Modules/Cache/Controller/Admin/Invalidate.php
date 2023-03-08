@@ -26,6 +26,13 @@ class Invalidate
     public static function exec(): void
     {
         try {
+            // Settings are automatically generated "per payment", but the callback url settings are saved due to
+            // how the configuration in WooCommerce works. To make all right again, the values should be removed
+            // if not automatically, but through the cache-cleaner.
+            // @todo Try not to store in db since the data is not fetched from there anyway.
+            delete_option(option: 'authorization_callback_url');
+            delete_option(option: 'management_callback_url');
+
             Config::getCache()->invalidate();
 
             MessageBag::addSuccess(
