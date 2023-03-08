@@ -65,6 +65,10 @@ class Callback
             );
         } catch (Throwable $e) {
             Log::error(error: $e);
+            Route::respondWithExit(
+                body: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 
