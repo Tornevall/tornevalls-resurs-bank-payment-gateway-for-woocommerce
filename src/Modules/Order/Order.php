@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Order;
 
 use Automattic\WooCommerce\Admin\PageController;
-use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -25,7 +24,6 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Modules\Order\Filter\DeleteItem;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -44,36 +42,10 @@ class Order
      */
     public static function init(): void
     {
-        DeleteItem::register();
         add_action(
             hook_name: 'add_meta_boxes',
             callback: 'Resursbank\Woocommerce\Modules\Order\Order::addPaymentInfo'
         );
-    }
-
-    /**
-     * Resolve order matching item id if it exists, implements WC_Order, and
-     * contains metadata indicating it was purchased through Resurs Bank.
-     *
-     * @return WC_Order|null WC_Order if paid using Resurs Bank.
-     * @throws Exception
-     */
-    public static function getOrder(int $itemId): ?WC_Order
-    {
-        $order = null;
-
-        try {
-            $order = wc_get_order(
-                the_order: wc_get_order_id_by_order_item_id(item_id: $itemId)
-            );
-        } catch (Throwable) {
-            // Do nothing. Next if-statement will exit anyway.
-        }
-
-        return (
-            $order instanceof WC_Order &&
-            Metadata::isValidResursPayment(order:$order)
-        ) ? $order : null;
     }
 
     /**

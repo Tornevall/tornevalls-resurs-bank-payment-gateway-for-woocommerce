@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
-use Resursbank\Woocommerce\Modules\Ordermanagement\Ordermanagement;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
@@ -28,7 +28,7 @@ class Admin
     public static function init(): void
     {
         Gateway::initAdmin();
-        Ordermanagement::init();
+        OrderManagement::init();
         InvalidateCacheButton::init();
         PartPayment::initAdmin();
         PartPaymentPeriod::init();

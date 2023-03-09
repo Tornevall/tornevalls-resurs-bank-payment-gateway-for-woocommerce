@@ -13,6 +13,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order_Item_Product;
@@ -24,7 +25,7 @@ use function is_array;
 use function is_string;
 
 /**
- * Basic methods to convert WC_Order_Item_Product to OrderLine.
+ * Convert WC_Order_Item_Product to OrderLine.
  */
 class Product
 {
@@ -55,23 +56,17 @@ class Product
     }
 
     /**
-     * Get total price of product excluding tax.
+     * Get quantity, defaults to 1 because manual refunds may specify 0 which
+     * our API will reject.
      *
      * @throws IllegalValueException
      */
-    public static function getTotal(
+    public static function getQuantity(
         WC_Order_Item_Product $product
     ): float {
-        $result = $product->get_total();
+        $result = Order::convertFloat(value: $product->get_quantity());
 
-        if (!is_numeric(value: $result)) {
-            throw new IllegalValueException(
-                message: 'Total amount is not a number.'
-            );
-        }
-
-        // Our API expects two decimals, WC will sometimes give us more.
-        return round(num: (float) $result, precision: 2);
+        return $result === 0.00 ? 1.00 : $result;
     }
 
     /**
@@ -84,16 +79,18 @@ class Product
     public static function getSubtotal(
         WC_Order_Item_Product $product
     ): float {
-        $result = $product->get_subtotal();
+        return Order::convertFloat(value: $product->get_subtotal());
+    }
 
-        if (!is_numeric(value: $result)) {
-            throw new IllegalValueException(
-                message: 'Total amount is not numeric.'
-            );
-        }
-
-        // Our API expects two decimals, WC will sometimes give us more.
-        return round(num: (float) $result, precision: 2);
+    /**
+     * Get product subtotal VAT amount.
+     *
+     * @throws IllegalValueException
+     */
+    public static function getSubtotalVat(
+        WC_Order_Item_Product $product
+    ): float {
+        return Order::convertFloat(value: $product->get_subtotal_tax());
     }
 
     /**
@@ -120,65 +117,6 @@ class Product
             isset($rates['rate']) &&
             is_numeric(value: $rates['rate'])
         ) ? round(num: (float) $rates['rate'], precision: 2) : 0.0;
-    }
-
-    /**
-     * Get product vat (tax) amount.
-     *
-     * @throws IllegalValueException
-     */
-    public static function getTotalVat(
-        WC_Order_Item_Product $product
-    ): float {
-        $result = $product->get_total_tax();
-
-        if (!is_numeric(value: $result)) {
-            throw new IllegalValueException(
-                message: 'Total tax amount is not a number.'
-            );
-        }
-
-        // Our API expects two decimals, WC will sometimes give us more.
-        return round(num: (float) $result, precision: 2);
-    }
-
-    /**
-     * Get product subtotal VAT amount.
-     *
-     * @throws IllegalValueException
-     */
-    public static function getSubtotalVat(
-        WC_Order_Item_Product $product
-    ): float {
-        $result = $product->get_subtotal_tax();
-
-        if (!is_numeric(value: $result)) {
-            throw new IllegalValueException(
-                message: 'Total tax amount is not a number.'
-            );
-        }
-
-        // Our API expects two decimals, WC will sometimes give us more.
-        return round(num: (float) $result, precision: 2);
-    }
-
-    /**
-     * Type-safe wrapper to resolve quantity from order item.
-     *
-     * @throws IllegalValueException
-     */
-    private static function getQuantity(WC_Order_Item_Product $product): float
-    {
-        $result = $product->get_quantity();
-
-        if (!is_numeric(value: $result)) {
-            throw new IllegalValueException(
-                message: 'Order item quantity is not a number.'
-            );
-        }
-
-        // Our API expects a float.
-        return (float) $result;
     }
 
     /**

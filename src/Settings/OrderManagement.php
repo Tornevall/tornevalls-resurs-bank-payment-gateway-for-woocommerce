@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
 use Resursbank\Woocommerce\Util\Translator;
 
@@ -40,6 +41,7 @@ class OrderManagement
                 'enable_capture' => self::getEnableCapture(),
                 'enable_cancel' => self::getEnableCancel(),
                 'enable_refund' => self::getEnableRefund(),
+                'enable_modify' => self::getEnableModify(),
             ],
         ];
     }
@@ -69,6 +71,22 @@ class OrderManagement
             'desc' => self::getDesc(action: 'cancel', status: 'cancelled'),
             'type' => 'checkbox',
             'default' => EnableCancel::getDefault(),
+        ];
+    }
+
+    /**
+     * Return array for Enable Modify setting.
+     */
+    private static function getEnableModify(): array
+    {
+        return [
+            'id' => EnableModify::getName(),
+            'title' => Translator::translate(phraseId: 'enable-modify'),
+            'desc' => Translator::translate(
+                phraseId: 'payment-action-modify-desc'
+            ),
+            'type' => 'checkbox',
+            'default' => EnableModify::getDefault(),
         ];
     }
 

@@ -22,6 +22,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
+use function defined;
 use function function_exists;
 use function is_array;
 
@@ -51,7 +52,7 @@ class MessageBag
     /**
      * Add message to bag.
      *
-     * @todo If wc_add_notice does not exist we cannot dispaly frontend messages.
+     * @todo If wc_add_notice does not exist we cannot display frontend messages.
      */
     public static function add(string $message, Type $type): void
     {
@@ -65,14 +66,14 @@ class MessageBag
         }
 
         try {
-            if (Admin::isAdmin()) {
+            if (self::isAjax()) {
+                // @todo This kills an AJAX process midstream, potentially causing unrecoverable JS errors on frontend.
+                wp_send_json_error(data: ['error' => $message]);
+            } elseif (Admin::isAdmin()) {
                 $bag = self::getBag();
                 $bag->offsetSet(offset: null, value: $messageInstance);
                 self::updateBag(bag: $bag);
-            }
-
-            // Function availability depends on file load order.
-            if (function_exists(function: 'wc_add_notice')) {
+            } elseif (function_exists(function: 'wc_add_notice')) {
                 wc_add_notice(message: $message, notice_type: $type->value);
             }
         } catch (Throwable $e) {
@@ -126,6 +127,17 @@ class MessageBag
     public static function keep(): void
     {
         self::$clear = false;
+    }
+
+    /**
+     * Whether the current request was executed using AJAX.
+     */
+    private static function isAjax(): bool
+    {
+        return
+            defined(constant_name: 'DOING_AJAX') &&
+            function_exists(function: 'wp_send_json_error')
+        ;
     }
 
     /**
