@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Cache\Controller\Admin;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -30,8 +31,8 @@ class Invalidate
             // how the configuration in WooCommerce works. To make all right again, the values should be removed
             // if not automatically, but through the cache-cleaner.
             // @todo Try not to store in db since the data is not fetched from there anyway.
-            delete_option(option: 'authorization_callback_url');
-            delete_option(option: 'management_callback_url');
+            delete_option(option: Advanced::NAME_PREFIX . 'authorization_callback_url');
+            delete_option(option: Advanced::NAME_PREFIX . 'management_callback_url');
 
             Config::getCache()->invalidate();
 
