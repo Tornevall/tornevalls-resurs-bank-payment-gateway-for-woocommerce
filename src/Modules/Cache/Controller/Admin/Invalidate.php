@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\Cache\Controller\Admin;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
