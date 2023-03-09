@@ -34,6 +34,10 @@ class Action
         ActionType $action,
         int $refundId = 0
     ): void {
+        Log::debug(
+            message: "Executing payment action $action->value for order $orderId"
+        );
+
         try {
             $order = OrderManagement::getOrder(id: $orderId);
             $payment = OrderManagement::getPayment(order: $order);
@@ -68,6 +72,10 @@ class Action
                 error: $error
             );
         }
+
+        Log::debug(
+            message: "Completed payment action $action->value for order $orderId"
+        );
     }
 
     /**
@@ -108,9 +116,9 @@ class Action
             }
 
             Repository::capture(paymentId: $payment->id);
-
-            $order->add_order_note(
-                note: Translator::translate(phraseId: 'capture-success')
+            OrderManagement::logSuccess(
+                order: $order,
+                message: Translator::translate(phraseId: 'capture-success')
             );
         } catch (Throwable $error) {
             OrderManagement::logError(
@@ -134,9 +142,9 @@ class Action
             }
 
             Repository::cancel(paymentId: $payment->id);
-
-            $order->add_order_note(
-                note: Translator::translate(phraseId: 'cancel-success')
+            OrderManagement::logSuccess(
+                order: $order,
+                message: Translator::translate(phraseId: 'cancel-success')
             );
         } catch (Throwable $error) {
             OrderManagement::logError(
@@ -175,6 +183,7 @@ class Action
      */
     private static function modify(Payment $payment, WC_Order $order): void
     {
+        /** @noinspection BadExceptionsProcessingInspection */
         try {
             if (!$payment->canCancel()) {
                 throw new PaymentActionException(
@@ -187,9 +196,9 @@ class Action
                 paymentId: $payment->id,
                 orderLines: Order::getOrderLines(order: $order)
             );
-
-            $order->add_order_note(
-                note: Translator::translate(phraseId: 'modify-success')
+            OrderManagement::logSuccess(
+                order: $order,
+                message: Translator::translate(phraseId: 'modify-success')
             );
         } catch (Throwable $error) {
             OrderManagement::logError(

@@ -74,12 +74,14 @@ class Refund
         );
 
         if ($orderLines->count() === 0) {
-            $order->add_order_note(
-                note: Translator::translate(phraseId: 'refund-success')
+            OrderManagement::logSuccess(
+                order: $order,
+                message: Translator::translate(phraseId: 'refund-success')
             );
         } else {
-            $order->add_order_note(
-                note: sprintf(
+            OrderManagement::logSuccess(
+                order: $order,
+                message: sprintf(
                     Translator::translate(
                         phraseId: 'partial-refund-success'
                     ),

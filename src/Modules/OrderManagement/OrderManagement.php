@@ -119,6 +119,18 @@ class OrderManagement
     }
 
     /**
+     * Add success message to order notes and message bag.
+     */
+    public static function logSuccess(
+        WC_Order $order,
+        string $message
+    ): void {
+        Log::debug(message: $message);
+        MessageBag::addSuccess(message: $message);
+        $order->add_order_note(note: $message);
+    }
+
+    /**
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
