@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Throwable;
 use WC_Order;
 
 use function is_array;
@@ -21,6 +26,7 @@ use function is_array;
 class Metadata
 {
     public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
+    public const KEY_LEGACY_ORDER_REFERENCE = 'paymentId';
     public const KEY_THANK_YOU = RESURSBANK_MODULE_PREFIX . '_thankyou_trigger';
     public const KEY_PAYMENT_METHOD = RESURSBANK_MODULE_PREFIX . '_payment_method';
 
@@ -43,7 +49,21 @@ class Metadata
      */
     public static function getPaymentId(WC_Order $order): string
     {
-        return self::getOrderMeta(order: $order, key: self::KEY_PAYMENT_ID);
+        $paymentId = self::getOrderMeta(
+            order: $order,
+            key: self::KEY_PAYMENT_ID
+        );
+
+        if (!$paymentId || $paymentId === '') {
+            $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
+            self::setOrderMeta(
+                order: $order,
+                key: self::KEY_PAYMENT_ID,
+                value: $paymentId
+            );
+        }
+
+        return $paymentId;
     }
 
     /**
@@ -55,13 +75,13 @@ class Metadata
         string $key,
         string $value
     ): bool {
-        $existingMeta = get_post_meta(
-            post_id: $order->get_id(),
-            key: $key,
-            single: true
+        $exists = metadata_exists(
+            meta_type: 'post',
+            object_id: $order->get_id(),
+            meta_key: $key
         );
 
-        if ($existingMeta) {
+        if ($exists) {
             return (bool)update_post_meta(
                 post_id: $order->get_id(),
                 meta_key: $key,
@@ -97,7 +117,12 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order $order): bool
     {
-        return self::getPaymentId(order: $order) !== '';
+        try {
+            return self::getPaymentId(order: $order) !== '';
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+            return false;
+        }
     }
 
     /**
@@ -143,5 +168,35 @@ class Metadata
             order: $order,
             key: self::KEY_THANK_YOU
         ) === '1';
+    }
+
+    /**
+     * Attempts to use stored order reference on legacy orders to find
+     */
+    private static function findPaymentIdForLegacyOrder(WC_Order $order): string
+    {
+        try {
+            $orderReference = self::getOrderMeta(
+                order: $order,
+                key: self::KEY_LEGACY_ORDER_REFERENCE
+            );
+            $result = Repository::search(
+                storeId: StoreId::getData(),
+                orderReference: $orderReference
+            );
+
+            if ($result->count() > 0) {
+                /** @var Payment $payment */
+                $payment = $result->getData()[0];
+                return $payment->id;
+            }
+
+            throw new EmptyValueException(
+                message: 'No results found when searching for legacy order.'
+            );
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+            throw $error;
+        }
     }
 }
