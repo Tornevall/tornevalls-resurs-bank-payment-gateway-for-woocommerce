@@ -124,7 +124,8 @@ class Order
         $order = new WC_Order(order: $post->ID);
 
         if (
-            !$order instanceof WC_Order
+            !$order instanceof WC_Order ||
+            !Metadata::isValidResursPayment(order: $order)
         ) {
             return;
         }
