@@ -9,11 +9,14 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 use function is_array;
@@ -54,7 +57,57 @@ class Settings
             accepted_args: 2
         );
 
+        add_action(
+            hook_name: 'woocommerce_admin_field_div_callback_management',
+            callback: 'Resursbank\Woocommerce\Settings\Settings::renderManagementCallbackUrl',
+            priority: 10,
+            accepted_args: 2
+        );
+
+        add_action(
+            hook_name: 'woocommerce_admin_field_div_callback_authorization',
+            callback: 'Resursbank\Woocommerce\Settings\Settings::renderAuthorizationCallbackUrl',
+            priority: 10,
+            accepted_args: 2
+        );
+
         AddDocumentationLink::register();
+    }
+
+    /**
+     * Render displayable url for callbacks properly without stored values in database.
+     *
+     * @param $settingArray
+     * @throws IllegalValueException
+     */
+    public static function renderManagementCallbackUrl($settingArray): void
+    {
+        // Not using Sanitize::sanitizeHtml() here since our html should not be escaped.
+        echo wp_kses(
+            string: '<table class="form-table"><th scope="row">' . ($settingArray['title'] ?? '') . '</th><td>' .
+            Url::getCallbackUrl(
+                type: CallbackType::MANAGEMENT
+            ) . '</td></table>',
+            allowed_html: ['table' => ['class' => []], 'th' => ['scope' => []], 'td' => []]
+        );
+    }
+
+    /**
+     * Render displayable url for callbacks properly without stored values in database.
+     *
+     * @param $settingArray
+     * @throws IllegalValueException
+     */
+    public static function renderAuthorizationCallbackUrl($settingArray): void
+    {
+        // Not using Sanitize::sanitizeHtml() here since our html should not be escaped.
+        echo wp_kses(
+            string: '<table class="form-table"><th scope="row">' . ($settingArray['title'] ?? '') . '</th><td>' .
+            Url::getCallbackUrl(
+                type: CallbackType::AUTHORIZATION
+            ) . '</td></table>',
+            allowed_html: ['table' => ['class' => []], 'th' => ['scope' => []], 'td' => []]
+        );
     }
 
     /**
