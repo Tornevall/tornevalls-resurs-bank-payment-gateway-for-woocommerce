@@ -51,11 +51,14 @@ class MessageBag
 
     /**
      * Add message to bag.
-     *
-     * @todo If wc_add_notice does not exist we cannot display frontend messages.
      */
     public static function add(string $message, Type $type): void
     {
+        if (self::isAjax()) {
+            // No way of handling messages in AJAX requests.
+            return;
+        }
+
         try {
             $messageInstance = new Message(message: $message, type: $type);
         } catch (EmptyValueException) {
@@ -66,10 +69,7 @@ class MessageBag
         }
 
         try {
-            if (self::isAjax()) {
-                // @todo This kills an AJAX process midstream, potentially causing unrecoverable JS errors on frontend.
-                wp_send_json_error(data: ['error' => $message]);
-            } elseif (Admin::isAdmin()) {
+            if (Admin::isAdmin()) {
                 $bag = self::getBag();
                 $bag->offsetSet(offset: null, value: $messageInstance);
                 self::updateBag(bag: $bag);

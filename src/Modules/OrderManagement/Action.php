@@ -183,19 +183,16 @@ class Action
      */
     private static function modify(Payment $payment, WC_Order $order): void
     {
-        /** @noinspection BadExceptionsProcessingInspection */
         try {
-            if (!$payment->canCancel()) {
-                throw new PaymentActionException(
-                    message: 'Cannot cancel payment before modifying it.'
-                );
+            if ($payment->canCancel()) {
+                Repository::cancel(paymentId: $payment->id);
             }
 
-            Repository::cancel(paymentId: $payment->id);
             Repository::addOrderLines(
                 paymentId: $payment->id,
                 orderLines: Order::getOrderLines(order: $order)
             );
+
             OrderManagement::logSuccess(
                 order: $order,
                 message: Translator::translate(phraseId: 'modify-success')

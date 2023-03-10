@@ -22,7 +22,6 @@ class Metadata
 {
     public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
     public const KEY_THANK_YOU = RESURSBANK_MODULE_PREFIX . '_thankyou_trigger';
-    public const KEY_PAYMENT_METHOD = RESURSBANK_MODULE_PREFIX . '_payment_method';
 
     /**
      * Store UUID of Resurs Bank payment on order.
