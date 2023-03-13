@@ -49,6 +49,12 @@ class Order
             hook_name: 'add_meta_boxes',
             callback: 'Resursbank\Woocommerce\Modules\Order\Order::addPaymentInfo'
         );
+        add_filter(
+            hook_name: 'is_protected_meta',
+            callback: 'Resursbank\Woocommerce\Modules\Order\Order::hideCustomFields',
+            priority: 10,
+            accepted_args: 2
+        );
     }
 
     /**
@@ -151,6 +157,23 @@ class Order
         }
 
         echo $data;
+    }
+
+    /**
+     * Hide the plugin's custom fields from view.
+     */
+    public static function hideCustomFields(mixed $protected, mixed $meta_key): mixed
+    {
+        if (
+            str_starts_with(
+                haystack: $meta_key,
+                needle: RESURSBANK_MODULE_PREFIX . '_'
+            )
+        ) {
+            return true;
+        }
+
+        return $protected;
     }
 
     /**
