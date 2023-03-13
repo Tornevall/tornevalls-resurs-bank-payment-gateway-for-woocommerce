@@ -54,7 +54,7 @@ class Metadata
             key: self::KEY_PAYMENT_ID
         );
 
-        if (!$paymentId || $paymentId === '') {
+        if ($paymentId === '') {
             $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
             self::setOrderMeta(
                 order: $order,
