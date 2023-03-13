@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace ResursBank\Exception;
+namespace Resursbank\Exception;
 
 use Exception;
 
