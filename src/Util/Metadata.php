@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -186,8 +187,13 @@ class Metadata
             );
 
             if ($result->count() > 0) {
-                /** @var Payment $payment */
                 $payment = $result->getData()[0];
+
+                if (!$payment instanceof Payment) {
+                    throw new IllegalTypeException(message: 'Fetched object type is ' . get_class(object: $payment) .
+                                                            ', expected ' . Payment::class);
+                }
+
                 return $payment->id;
             }
 
