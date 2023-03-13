@@ -47,6 +47,8 @@ class Metadata
 
     /**
      * Get UUID of Resurs Bank payment attached to order.
+     *
+     * @throws EmptyValueException
      */
     public static function getPaymentId(WC_Order $order): string
     {
@@ -61,6 +63,12 @@ class Metadata
                 order: $order,
                 key: self::KEY_PAYMENT_ID,
                 value: $paymentId
+            );
+        }
+
+        if ($paymentId === '') {
+            throw new EmptyValueException(
+                message: 'Unable to fetch payment ID'
             );
         }
 
@@ -205,7 +213,8 @@ class Metadata
             );
         } catch (Throwable $error) {
             Log::error(error: $error);
-            throw $error;
         }
+
+        return '';
     }
 }
