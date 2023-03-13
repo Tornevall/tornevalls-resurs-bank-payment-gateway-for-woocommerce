@@ -9,13 +9,15 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement;
 
+use Resursbank\Ecom\Exception\MissingPaymentException;
 use Resursbank\Ecom\Exception\PaymentActionException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Refund;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -39,8 +41,8 @@ class Action
         );
 
         try {
-            $order = OrderManagement::getOrder(id: $orderId);
-            $payment = OrderManagement::getPayment(order: $order);
+            $order = self::getOrder(id: $orderId);
+            $payment = self::getPayment(order: $order);
 
             match ($action) {
                 ActionType::CAPTURE => self::capture(
@@ -65,10 +67,11 @@ class Action
                 )
             };
         } catch (Throwable $error) {
-            self::handleError(
-                orderId: $orderId,
+            OrderManagement::logError(
+                message: Translator::translate(
+                    phraseId: 'failed-payment-action'
+                ),
                 order: $order ?? null,
-                payment: $payment ?? null,
                 error: $error
             );
         }
@@ -79,46 +82,24 @@ class Action
     }
 
     /**
-     * Handle errors from exec() method in this class. Separated to lessen
-     * cognitive complexity of exec().
-     */
-    private static function handleError(
-        Throwable $error,
-        int $orderId,
-        ?WC_Order $order,
-        ?Payment $payment
-    ): void {
-        if (!isset($order)) {
-            Log::error(error: $error);
-            MessageBag::addError(message: sprintf(
-                Translator::translate(phraseId: 'failed-resolving-order'),
-                "id $orderId"
-            ));
-        } elseif (!isset($payment)) {
-            OrderManagement::logError(
-                order: $order,
-                message: Translator::translate(
-                    phraseId: 'failed-resolving-payment'
-                ),
-                error: $error
-            );
-        }
-    }
-
-    /**
      * Capture payment.
      */
     private static function capture(Payment $payment, WC_Order $order): void
     {
-        try {
-            if (!$payment->canCapture()) {
-                throw new PaymentActionException(message: 'Cannot capture.');
-            }
+        if (!$payment->canCapture()) {
+            return;
+        }
 
+        try {
             Repository::capture(paymentId: $payment->id);
             OrderManagement::logSuccess(
                 order: $order,
-                message: Translator::translate(phraseId: 'capture-success')
+                message: sprintf(
+                    Translator::translate(phraseId: 'capture-success'),
+                    Currency::getFormattedAmount(
+                        amount: (float) $order->get_total()
+                    )
+                )
             );
         } catch (Throwable $error) {
             OrderManagement::logError(
@@ -136,15 +117,20 @@ class Action
      */
     private static function cancel(Payment $payment, WC_Order $order): void
     {
-        try {
-            if (!$payment->canCancel()) {
-                throw new PaymentActionException(message: 'Cannot cancel.');
-            }
+        if (!$payment->canCancel()) {
+            return;
+        }
 
+        try {
             Repository::cancel(paymentId: $payment->id);
             OrderManagement::logSuccess(
                 order: $order,
-                message: Translator::translate(phraseId: 'cancel-success')
+                message: sprintf(
+                    Translator::translate(phraseId: 'cancel-success'),
+                    Currency::getFormattedAmount(
+                        amount: (float) $order->get_total()
+                    )
+                )
             );
         } catch (Throwable $error) {
             OrderManagement::logError(
@@ -165,6 +151,10 @@ class Action
         WC_Order $order,
         int $refundId
     ): void {
+        if (!$payment->canRefund()) {
+            return;
+        }
+
         try {
             Refund::exec(payment: $payment, order: $order, refundId: $refundId);
         } catch (Throwable $error) {
@@ -184,19 +174,7 @@ class Action
     private static function modify(Payment $payment, WC_Order $order): void
     {
         try {
-            if ($payment->canCancel()) {
-                Repository::cancel(paymentId: $payment->id);
-            }
-
-            Repository::addOrderLines(
-                paymentId: $payment->id,
-                orderLines: Order::getOrderLines(order: $order)
-            );
-
-            OrderManagement::logSuccess(
-                order: $order,
-                message: Translator::translate(phraseId: 'modify-success')
-            );
+            Modify::exec(payment: $payment, order: $order);
         } catch (Throwable $error) {
             OrderManagement::logError(
                 order: $order,
@@ -206,5 +184,37 @@ class Action
                 error: $error
             );
         }
+    }
+
+    /**
+     * @throws MissingPaymentException
+     */
+    private static function getPayment(WC_Order $order): Payment
+    {
+        $payment = OrderManagement::getPayment(order: $order);
+
+        if ($payment === null) {
+            throw new MissingPaymentException(
+                message: (string) $order->get_id()
+            );
+        }
+
+        return $payment;
+    }
+
+    /**
+     * @throws IllegalValueException
+     */
+    private static function getOrder(int $id): WC_Order
+    {
+        $order = OrderManagement::getOrder(id: $id);
+
+        if ($order === null) {
+            throw new IllegalValueException(
+                message: "Failed to resolve WC_Order using $id"
+            );
+        }
+
+        return $order;
     }
 }

@@ -11,23 +11,22 @@ namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 
+use function is_string;
+
 /**
  * Wrapper method collection for WooCommerce's built-in currency methods
  */
 class Currency
 {
     /**
-     * Simple wrapper for get_woocommerce_currency_symbol to ensure we always get a string (even it is empty).
+     * Simple wrapper for get_woocommerce_currency_symbol to ensure we always
+     * get a string (even it is empty).
      */
     public static function getWooCommerceCurrencySymbol(): string
     {
         $currencySymbol = get_woocommerce_currency_symbol();
 
-        if (!is_string(value: $currencySymbol)) {
-            return '';
-        }
-
-        return $currencySymbol;
+        return !is_string(value: $currencySymbol) ? '' : $currencySymbol;
     }
 
     /**
@@ -69,7 +68,14 @@ class Currency
     {
         $currencySymbol = self::getWooCommerceCurrencySymbol();
 
+        $total = number_format(
+            num: $amount,
+            decimals: 2,
+            decimal_separator: ',',
+            thousands_separator: ''
+        );
+
         return self::getEcomCurrencyFormat() === CurrencyFormat::SYMBOL_FIRST ?
-            $currencySymbol . ' ' . $amount : $amount . ' ' . $currencySymbol;
+            $currencySymbol . ' ' . $total : $total . ' ' . $currencySymbol;
     }
 }

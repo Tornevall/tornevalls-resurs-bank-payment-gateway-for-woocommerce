@@ -54,7 +54,7 @@ class MessageBag
      */
     public static function add(string $message, Type $type): void
     {
-        if (self::isAjax()) {
+        if (defined(constant_name: 'DOING_AJAX')) {
             // No way of handling messages in AJAX requests.
             return;
         }
@@ -127,17 +127,6 @@ class MessageBag
     public static function keep(): void
     {
         self::$clear = false;
-    }
-
-    /**
-     * Whether the current request was executed using AJAX.
-     */
-    private static function isAjax(): bool
-    {
-        return
-            defined(constant_name: 'DOING_AJAX') &&
-            function_exists(function: 'wp_send_json_error')
-        ;
     }
 
     /**

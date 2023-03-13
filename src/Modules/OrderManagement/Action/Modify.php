@@ -28,87 +28,75 @@ use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
-use WC_Order_Refund;
 
 /**
- * Business logic to perform payment action REFUND.
+ * Business logic to perform payment action MODIFY.
  */
-class Refund
+class Modify
 {
     /**
-     * @throws PaymentActionException
-     * @throws Throwable
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
-     * @throws ValidationException
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @throws JsonException
+     * @throws PaymentActionException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws ValidationException
      */
     public static function exec(
         Payment $payment,
-        WC_Order $order,
-        int $refundId
+        WC_Order $order
     ): void {
-        if (!$payment->canRefund()) {
+        if (!self::validate(payment: $payment, order: $order)) {
             return;
         }
 
-        $refund = self::getRefund(id: $refundId);
-        $orderLines = Order::getOrderLines(order: $refund);
-
-        if (
-            !self::validate(payment: $payment, order: $order, refund: $refund)
-        ) {
-            return;
+        if ($payment->canCancel()) {
+            Repository::cancel(paymentId: $payment->id);
         }
 
-        Repository::refund(
+        Repository::addOrderLines(
             paymentId: $payment->id,
-            orderLines: $orderLines->count() > 0 ? $orderLines : null
+            orderLines: Order::getOrderLines(order: $order)
         );
-
-        $amount = $orderLines->count() === 0 ?
-            (float) $order->get_total() :
-            Order::convertFloat(
-                value: $refund->get_total()
-            );
 
         OrderManagement::logSuccess(
             order: $order,
-            message: sprintf(
-                Translator::translate(phraseId: 'refund-success'),
-                Currency::getFormattedAmount(amount: $amount)
-            )
+            message:
+                sprintf(
+                    Translator::translate(phraseId: 'modify-success'),
+                    Currency::getFormattedAmount(
+                        amount: (float) $order->get_total()
+                    )
+                )
         );
     }
 
     /**
-     * Whether requested refund amount is possible against Resurs Bank payment.
+     * Whether requested modify amount is possible against Resurs Bank payment.
      *
      * @throws PaymentActionException
      * @throws Throwable
      */
     private static function validate(
         Payment $payment,
-        WC_Order $order,
-        WC_Order_Refund $refund
+        WC_Order $order
     ): bool {
         $result = true;
 
-        $availableAmount = $payment->order->capturedAmount - $payment->order->refundedAmount;
+        $availableAmount = $payment->application->approvedCreditLimit;
 
         try {
-            $requestedAmount = $refund->get_amount();
+            $requestedAmount = $order->get_total();
 
             if (!is_numeric(value: $requestedAmount)) {
                 throw new PaymentActionException(
-                    message: 'Refund amount is not numeric.'
+                    message: 'Order amount is not numeric.'
                 );
             }
 
@@ -127,30 +115,14 @@ class Refund
             OrderManagement::logError(
                 order: $order,
                 message: sprintf(
-                    Translator::translate(phraseId: 'refund-too-large'),
-                    $requestedAmount,
-                    $availableAmount
+                    Translator::translate(phraseId: 'modify-too-large'),
+                    Currency::getFormattedAmount(amount: $requestedAmount),
+                    Currency::getFormattedAmount(amount: $availableAmount)
                 ),
                 error: $error
             );
         }
 
         return $result;
-    }
-
-    /**
-     * @throws IllegalTypeException
-     */
-    private static function getRefund(int $id): WC_Order_Refund
-    {
-        $order = wc_get_order(the_order: $id);
-
-        if (!$order instanceof WC_Order_Refund) {
-            throw new IllegalTypeException(
-                message: 'Returned object not of type WC_Order_Refund'
-            );
-        }
-
-        return $order;
     }
 }
