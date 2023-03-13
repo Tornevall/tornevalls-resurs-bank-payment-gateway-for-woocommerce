@@ -190,8 +190,11 @@ class Metadata
                 $payment = $result->getData()[0];
 
                 if (!$payment instanceof Payment) {
-                    throw new IllegalTypeException(message: 'Fetched object type is ' . get_class(object: $payment) .
-                                                            ', expected ' . Payment::class);
+                    throw new IllegalTypeException(
+                        message: 'Fetched object type is ' .
+                                 get_class(object: $payment) .
+                                 ', expected ' . Payment::class
+                    );
                 }
 
                 return $payment->id;
