@@ -54,6 +54,8 @@ class Callback
 
     /**
      * Performs callback processing.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function execute(): void
     {
@@ -65,6 +67,10 @@ class Callback
             );
         } catch (Throwable $e) {
             Log::error(error: $e);
+            Route::respondWithExit(
+                body: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 

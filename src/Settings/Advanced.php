@@ -20,7 +20,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
-use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Option;
@@ -34,7 +33,6 @@ use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 /**
@@ -46,6 +44,8 @@ use Throwable;
 class Advanced
 {
     public const SECTION_ID = 'advanced';
+
+    public const NAME_PREFIX = 'resursbank_';
 
     /**
      * Get translated title of tab.
@@ -84,16 +84,10 @@ class Advanced
 
         try {
             $result = [
-                'id' => 'authorization_callback_url',
-                'type' => 'text',
+                'id' => self::NAME_PREFIX . 'authorization_callback_url',
+                'type' => 'div_callback_authorization',
                 'title' => Translator::translate(
                     phraseId: 'callback-url-authorization'
-                ),
-                'custom_attributes' => [
-                    'readonly' => 'readonly',
-                ],
-                'default' => Url::getCallbackUrl(
-                    type: CallbackType::AUTHORIZATION
                 ),
             ];
         } catch (Throwable $e) {
@@ -117,16 +111,10 @@ class Advanced
 
         try {
             $result = [
-                'id' => 'management_callback_url',
-                'type' => 'text',
+                'id' => self::NAME_PREFIX . 'management_callback_url',
+                'type' => 'div_callback_management',
                 'title' => Translator::translate(
                     phraseId: 'callback-url-management'
-                ),
-                'custom_attributes' => [
-                    'readonly' => 'readonly',
-                ],
-                'default' => Url::getCallbackUrl(
-                    type: CallbackType::MANAGEMENT
                 ),
             ];
         } catch (Throwable $e) {
