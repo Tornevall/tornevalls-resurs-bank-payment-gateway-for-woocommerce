@@ -21,12 +21,12 @@ use WC_Order;
 use WC_Order_Refund;
 
 /**
- * Business logic to perform payment action REFUND.
+ * Business logic to refund Resurs Bank payment.
  */
 class Refund
 {
     /**
-     * Execute refund payment action.
+     * Refund Resurs Bank payment.
      */
     public static function exec(
         WC_Order $order,

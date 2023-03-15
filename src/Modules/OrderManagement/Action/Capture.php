@@ -18,12 +18,12 @@ use Throwable;
 use WC_Order;
 
 /**
- * Business logic to perform payment action CAPTURE.
+ * Business logic to capture Resurs Bank payment.
  */
 class Capture
 {
     /**
-     * Execute refund payment action.
+     * Capture Resurs Bank payment.
      */
     public static function exec(
         WC_Order $order

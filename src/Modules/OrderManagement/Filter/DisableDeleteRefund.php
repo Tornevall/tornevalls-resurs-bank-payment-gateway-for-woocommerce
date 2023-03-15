@@ -19,8 +19,6 @@ use Resursbank\Woocommerce\Util\Metadata;
 class DisableDeleteRefund
 {
     /**
-     * Event listener.
-     *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function exec(): void

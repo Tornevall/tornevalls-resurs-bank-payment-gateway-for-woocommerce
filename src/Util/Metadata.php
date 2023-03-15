@@ -9,9 +9,16 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
 
+use function get_class;
 use function is_array;
 
 /**
@@ -22,6 +29,7 @@ use function is_array;
 class Metadata
 {
     public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
+    public const KEY_LEGACY_ORDER_REFERENCE = 'paymentId';
     public const KEY_THANK_YOU = RESURSBANK_MODULE_PREFIX . '_thankyou_trigger';
 
     /**
@@ -40,10 +48,32 @@ class Metadata
 
     /**
      * Get UUID of Resurs Bank payment attached to order.
+     *
+     * @throws EmptyValueException
      */
     public static function getPaymentId(WC_Abstract_Order $order): string
     {
-        return self::getOrderMeta(order: $order, key: self::KEY_PAYMENT_ID);
+        $paymentId = self::getOrderMeta(
+            order: $order,
+            key: self::KEY_PAYMENT_ID
+        );
+
+        if ($paymentId === '') {
+            $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
+            self::setOrderMeta(
+                order: $order,
+                key: self::KEY_PAYMENT_ID,
+                value: $paymentId
+            );
+        }
+
+        if ($paymentId === '') {
+            throw new EmptyValueException(
+                message: 'Unable to fetch payment ID'
+            );
+        }
+
+        return $paymentId;
     }
 
     /**
@@ -51,17 +81,17 @@ class Metadata
      * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
      */
     public static function setOrderMeta(
-        WC_Order $order,
+        WC_Abstract_Order $order,
         string $key,
         string $value
     ): bool {
-        $existingMeta = get_post_meta(
-            post_id: $order->get_id(),
-            key: $key,
-            single: true
+        $exists = metadata_exists(
+            meta_type: 'post',
+            object_id: $order->get_id(),
+            meta_key: $key
         );
 
-        if ($existingMeta) {
+        if ($exists) {
             return (bool)update_post_meta(
                 post_id: $order->get_id(),
                 meta_key: $key,
@@ -95,10 +125,14 @@ class Metadata
     /**
      * Check if current order is a valid Resurs Payment.
      */
-    public static function isValidResursPayment(
-        WC_Abstract_Order $order
-    ): bool {
-        return self::getPaymentId(order: $order) !== '';
+    public static function isValidResursPayment(WC_Abstract_Order $order): bool
+    {
+        try {
+            return self::getPaymentId(order: $order) !== '';
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+            return false;
+        }
     }
 
     /**
@@ -144,5 +178,46 @@ class Metadata
             order: $order,
             key: self::KEY_THANK_YOU
         ) === '1';
+    }
+
+    /**
+     * Attempts to use stored order reference on legacy orders to find
+     */
+    private static function findPaymentIdForLegacyOrder(
+        WC_Abstract_Order $order
+    ): string {
+        /** @noinspection BadExceptionsProcessingInspection */
+        try {
+            $orderReference = self::getOrderMeta(
+                order: $order,
+                key: self::KEY_LEGACY_ORDER_REFERENCE
+            );
+            $result = Repository::search(
+                storeId: StoreId::getData(),
+                orderReference: $orderReference
+            );
+
+            if ($result->count() > 0) {
+                $payment = $result->getData()[0];
+
+                if (!$payment instanceof Payment) {
+                    throw new IllegalTypeException(
+                        message: 'Fetched object type is ' .
+                                 get_class(object: $payment) .
+                                 ', expected ' . Payment::class
+                    );
+                }
+
+                return $payment->id;
+            }
+
+            throw new EmptyValueException(
+                message: 'No results found when searching for legacy order.'
+            );
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+
+        return '';
     }
 }

@@ -24,4 +24,12 @@ class EnableCache extends BoolOption implements OptionInterface
     {
         return self::NAME_PREFIX . 'cache_enabled';
     }
+
+    /**
+     * Override standard behavior for BoolOption so that cache is enabled by default.
+     */
+    public static function getDefault(): ?string
+    {
+        return 'yes';
+    }
 }

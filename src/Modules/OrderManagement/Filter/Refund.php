@@ -19,7 +19,8 @@ use Throwable;
 use WC_Order_Refund;
 
 /**
- * Event triggered when order is refunded (partially or fully).
+ * Event triggered when a refund is applied on the order (partial refund), or
+ * the order status is changed to "Refunded" (full).
  */
 class Refund
 {

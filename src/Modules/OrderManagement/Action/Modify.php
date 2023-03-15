@@ -21,6 +21,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -30,11 +31,13 @@ use Throwable;
 use WC_Order;
 
 /**
- * Business logic to perform payment action MODIFY.
+ * Business logic to modify Resurs Bank payment.
  */
 class Modify
 {
     /**
+     * Modify content of Resurs Bank payment.
+     *
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
@@ -65,15 +68,9 @@ class Modify
             orderLines: Order::getOrderLines(order: $order)
         );
 
-        OrderManagement::logSuccess(
-            order: $order,
-            message:
-                sprintf(
-                    Translator::translate(phraseId: 'modify-order-success'),
-                    Currency::getFormattedAmount(
-                        amount: (float) $order->get_total()
-                    )
-                )
+        OrderManagement::logSuccessPaymentAction(
+            action: ActionType::MODIFY_ORDER,
+            order: $order
         );
     }
 

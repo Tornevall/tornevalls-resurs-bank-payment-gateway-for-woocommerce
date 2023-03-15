@@ -18,12 +18,12 @@ use Throwable;
 use WC_Order;
 
 /**
- * Business logic to perform payment action CANCEL.
+ * Business logic to cancel Resurs Bank payment.
  */
 class Cancel
 {
     /**
-     * Execute refund payment action.
+     * Cancel Resurs Bank payment.
      */
     public static function exec(
         WC_Order $order

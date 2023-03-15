@@ -67,8 +67,14 @@ class UpdateOrder
         }
     }
 
-    private static function handleError(Throwable $error, WC_Order $order): void
-    {
+    /**
+     * Log error that occurred while updating payment at Resurs Bank. This
+     * method will only track one single error instance.
+     */
+    private static function handleError(
+        Throwable $error,
+        WC_Order $order
+    ): void {
         if (self::$modificationError) {
             return;
         }
