@@ -37,9 +37,17 @@ class AfterOrderStatusChange
             return;
         }
 
-        match ($new) {
-            'completed' => Capture::exec(order: $order),
-            'cancelled' => Cancel::exec(order: $order)
-        };
+        switch ($new) {
+            case 'completed':
+                Capture::exec(order: $order);
+                break;
+
+            case 'cancelled':
+                Cancel::exec(order: $order);
+                break;
+
+            default:
+                break;
+        }
     }
 }
