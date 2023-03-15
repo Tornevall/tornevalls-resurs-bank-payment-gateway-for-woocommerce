@@ -18,9 +18,8 @@ use Resursbank\Ecom\Lib\Model\Payment\Converter\DiscountItemCollection;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Product;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
-use WC_Order;
+use WC_Abstract_Order;
 use WC_Order_Item_Product;
-use WC_Order_Refund;
 
 use function array_merge;
 use function is_array;
@@ -35,7 +34,7 @@ class Order
      * @throws Exception
      */
     public static function getOrderLines(
-        WC_Order|WC_Order_Refund $order
+        WC_Abstract_Order $order
     ): OrderLineCollection {
         $result = [];
         $items = self::getOrderContent(order: $order);
@@ -122,7 +121,7 @@ class Order
      * @throws IllegalValueException
      */
     private static function getOrderContent(
-        WC_Order|WC_Order_Refund $order
+        WC_Abstract_Order $order
     ): array {
         $result = $order->get_items();
 

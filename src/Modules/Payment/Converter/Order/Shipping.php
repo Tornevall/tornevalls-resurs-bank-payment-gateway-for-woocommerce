@@ -15,8 +15,7 @@ use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Utilities\Tax;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Translator;
-use WC_Order;
-use WC_Order_Refund;
+use WC_Abstract_Order;
 
 /**
  * Collect shipping data as OrderLine objects from WC_Order or WC_Order_Refund
@@ -26,9 +25,8 @@ class Shipping
     /**
      * @throws IllegalValueException
      */
-    public static function getOrderLine(
-        WC_Order|WC_Order_Refund $order
-    ): OrderLine {
+    public static function getOrderLine(WC_Abstract_Order $order): OrderLine
+    {
         $total = self::getTotal(order: $order);
         $tax = self::getTax(order: $order);
 
@@ -54,7 +52,7 @@ class Shipping
      *
      * @throws IllegalValueException
      */
-    public static function isAvailable(WC_Order|WC_Order_Refund $order): bool
+    public static function isAvailable(WC_Abstract_Order $order): bool
     {
         return self::getTotal(order: $order) + self::getTax(
             order: $order
@@ -66,7 +64,7 @@ class Shipping
      *
      * @throws IllegalValueException
      */
-    private static function getTotal(WC_Order|WC_Order_Refund $order): float
+    private static function getTotal(WC_Abstract_Order $order): float
     {
         return Order::convertFloat(value: $order->get_shipping_total());
     }
@@ -76,7 +74,7 @@ class Shipping
      *
      * @throws IllegalValueException
      */
-    private static function getTax(WC_Order|WC_Order_Refund $order): float
+    private static function getTax(WC_Abstract_Order $order): float
     {
         return Order::convertFloat(value: $order->get_shipping_tax());
     }

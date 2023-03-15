@@ -9,22 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\PaymentActionException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
@@ -36,56 +26,57 @@ use WC_Order_Refund;
 class Refund
 {
     /**
-     * @throws PaymentActionException
-     * @throws Throwable
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @SuppressWarnings(PHPMD.ElseExpression)
+     * Execute refund payment action.
      */
     public static function exec(
-        Payment $payment,
         WC_Order $order,
-        int $refundId
+        WC_Order_Refund $refund
     ): void {
-        if (!$payment->canRefund()) {
-            return;
-        }
+        /** @noinspection BadExceptionsProcessingInspection */
+        try {
+            $payment = OrderManagement::getPayment(order: $order);
 
-        $refund = self::getRefund(id: $refundId);
-        $orderLines = Order::getOrderLines(order: $refund);
+            if (!$payment->canRefund()) {
+                return;
+            }
 
-        if (
-            !self::validate(payment: $payment, order: $order, refund: $refund)
-        ) {
-            return;
-        }
+            $orderLines = Order::getOrderLines(order: $refund);
 
-        Repository::refund(
-            paymentId: $payment->id,
-            orderLines: $orderLines->count() > 0 ? $orderLines : null
-        );
+            if (
+                !self::validate(
+                    payment: $payment,
+                    order: $order,
+                    refund: $refund
+                )
+            ) {
+                return;
+            }
 
-        $amount = $orderLines->count() === 0 ?
-            (float) $order->get_total() :
-            Order::convertFloat(
-                value: $refund->get_total()
+            Repository::refund(
+                paymentId: $payment->id,
+                orderLines: $orderLines->count() > 0 ? $orderLines : null
             );
 
-        OrderManagement::logSuccess(
-            order: $order,
-            message: sprintf(
-                Translator::translate(phraseId: 'refund-success'),
-                Currency::getFormattedAmount(amount: $amount)
-            )
-        );
+            $amount = $orderLines->count() === 0 ?
+                (float) $order->get_total() :
+                Order::convertFloat(
+                    value: $refund->get_total()
+                );
+
+            OrderManagement::logSuccessPaymentAction(
+                order: $order,
+                action: ActionType::REFUND,
+                amount: $amount
+            );
+        } catch (Throwable $error) {
+            OrderManagement::logError(
+                message: Translator::translate(
+                    phraseId: 'refund-action-failed'
+                ),
+                error: $error,
+                order: $order
+            );
+        }
     }
 
     /**
@@ -136,21 +127,5 @@ class Refund
         }
 
         return $result;
-    }
-
-    /**
-     * @throws IllegalTypeException
-     */
-    private static function getRefund(int $id): WC_Order_Refund
-    {
-        $order = wc_get_order(the_order: $id);
-
-        if (!$order instanceof WC_Order_Refund) {
-            throw new IllegalTypeException(
-                message: 'Returned object not of type WC_Order_Refund'
-            );
-        }
-
-        return $order;
     }
 }

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use WC_Abstract_Order;
 use WC_Order;
 
 use function is_array;
@@ -40,7 +41,7 @@ class Metadata
     /**
      * Get UUID of Resurs Bank payment attached to order.
      */
-    public static function getPaymentId(WC_Order $order): string
+    public static function getPaymentId(WC_Abstract_Order $order): string
     {
         return self::getOrderMeta(order: $order, key: self::KEY_PAYMENT_ID);
     }
@@ -81,7 +82,7 @@ class Metadata
      * Normally metadata is returned as array, but currently we usually only save values once.
      */
     public static function getOrderMeta(
-        WC_Order $order,
+        WC_Abstract_Order $order,
         string $key
     ): string {
         return (string)get_post_meta(
@@ -94,8 +95,9 @@ class Metadata
     /**
      * Check if current order is a valid Resurs Payment.
      */
-    public static function isValidResursPayment(WC_Order $order): bool
-    {
+    public static function isValidResursPayment(
+        WC_Abstract_Order $order
+    ): bool {
         return self::getPaymentId(order: $order) !== '';
     }
 

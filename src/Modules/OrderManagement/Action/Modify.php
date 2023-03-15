@@ -69,7 +69,7 @@ class Modify
             order: $order,
             message:
                 sprintf(
-                    Translator::translate(phraseId: 'modify-success'),
+                    Translator::translate(phraseId: 'modify-order-success'),
                     Currency::getFormattedAmount(
                         amount: (float) $order->get_total()
                     )

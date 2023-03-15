@@ -12,45 +12,22 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Module\Payment\Enum\ActionType;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Throwable;
 use WC_Order;
 use WP_Post;
 
 use function strlen;
 
 /**
- * Business logic relating to order status manipulation.
+ * Event which executes just before order status is changed.
  */
-class OrderStatus
+class BeforeOrderStatusChange
 {
-    /**
-     * Event when order status changes.
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @noinspection PhpUnusedParameterInspection
-     */
-    public static function orderStatusChanged(
-        int $orderId,
-        string $old,
-        string $new
-    ): void {
-        if ($new === 'completed' && EnableCapture::isEnabled()) {
-            Action::exec(orderId: $orderId, action: ActionType::CAPTURE);
-        }
-
-        if ($new !== 'cancelled' || !EnableCancel::isEnabled()) {
-            return;
-        }
-
-        Action::exec(orderId: $orderId, action: ActionType::CANCEL);
-    }
-
     /**
      * Confirm action against Resurs Bank payment based on status change. If
      * changing the order status will cause an illegal action (for example,
@@ -61,11 +38,12 @@ class OrderStatus
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
      */
-    public static function validateStatusChange(
+    public static function exec(
         string $wpStatus,
         string $wcStatus,
         WP_Post $post
     ): void {
+        // Only execute for orders.
         if ($post->post_type !== 'shop_order') {
             return;
         }
@@ -75,9 +53,11 @@ class OrderStatus
             status: $_POST['order_status'] ?? ''
         );
 
+        // Only continue if order was paid through Resurs Bank.
         if (
-            $order !== null &&
-            $newStatus !== '' &&
+            $order === null ||
+            $newStatus === '' ||
+            !Metadata::isValidResursPayment(order: $order) ||
             self::validatePaymentAction(status: $newStatus, order: $order)
         ) {
             return;
@@ -99,68 +79,31 @@ class OrderStatus
     }
 
     /**
-     * Whether Resurs Bank payment is captured.
-     */
-    public static function isCaptured(WC_Order $order): bool
-    {
-        $payment = OrderManagement::getPayment(order: $order);
-
-        if ($payment === null) {
-            return false;
-        }
-
-        return $payment->isCaptured();
-    }
-
-    /**
-     * Whether Resurs Bank payment is refunded.
-     */
-    public static function isRefunded(WC_Order $order): bool
-    {
-        $payment = OrderManagement::getPayment(order: $order);
-
-        if ($payment === null) {
-            return false;
-        }
-
-        return $payment->isRefunded();
-    }
-
-    /**
-     * Whether Resurs Bank payment is cancelled.
-     */
-    public static function isCancelled(WC_Order $order): bool
-    {
-        $payment = OrderManagement::getPayment(order: $order);
-
-        if ($payment === null) {
-            return false;
-        }
-
-        return $payment->isCancelled();
-    }
-
-    /**
      * Validate payment action availability based on order status.
      */
     private static function validatePaymentAction(
         string $status,
         WC_Order $order
     ): bool {
-        return match ($status) {
-            'cancelled' => OrderManagement::canCancel(
-                order: $order
-            ) && !self::isCancelled(order: $order),
-            'completed' => OrderManagement::canCapture(
-                order: $order
-            ) || self::isCaptured(order: $order),
-            'refunded' => OrderManagement::canRefund(
-                result: false,
-                orderId: (int) $order->get_id(),
+        try {
+            $payment = OrderManagement::getPayment(order: $order);
+
+            return match ($status) {
+                'cancelled' => OrderManagement::canCancel(
                     order: $order
-            ) && !self::isRefunded(order: $order),
-            default => OrderManagement::canEdit(result: false, order: $order)
-        };
+                ) || $payment->isCancelled(),
+                'completed' => OrderManagement::canCapture(
+                    order: $order
+                ) || $payment->isCaptured(),
+                'refunded' => OrderManagement::canRefund(
+                    order: $order
+                ) || $payment->isRefunded(),
+                default => OrderManagement::canEdit(order: $order)
+            };
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+            return false;
+        }
     }
 
     /**
