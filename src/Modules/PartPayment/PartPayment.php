@@ -93,6 +93,9 @@ class PartPayment
 
     /**
      * Init method for frontend scripts and styling.
+     *
+     * NOTE: Cannot place isEnabled() check here to prevent hooks, product not
+     * available yet.
      */
     public static function initFrontend(): void
     {
@@ -126,6 +129,10 @@ class PartPayment
      */
     public static function renderWidget(): void
     {
+        if (!self::isEnabled()) {
+            return;
+        }
+
         try {
             echo self::getWidget()->content;
         } catch (Throwable $error) {
@@ -138,6 +145,10 @@ class PartPayment
      */
     public static function setCss(): void
     {
+        if (!self::isEnabled()) {
+            return;
+        }
+
         try {
             $css = self::getWidget()->css;
 
