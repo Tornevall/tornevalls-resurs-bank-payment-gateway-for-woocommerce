@@ -77,10 +77,10 @@ class Settings
     /**
      * Render displayable url for callbacks properly without stored values in database.
      *
-     * @param $settingArray
+     * @param array $settingArray
      * @throws IllegalValueException
      */
-    public static function renderManagementCallbackUrl($settingArray): void
+    public static function renderManagementCallbackUrl(array $settingArray): void
     {
         // Not using Sanitize::sanitizeHtml() here since our html should not be escaped.
         echo wp_kses(
@@ -95,10 +95,10 @@ class Settings
     /**
      * Render displayable url for callbacks properly without stored values in database.
      *
-     * @param $settingArray
+     * @param array $settingArray
      * @throws IllegalValueException
      */
-    public static function renderAuthorizationCallbackUrl($settingArray): void
+    public static function renderAuthorizationCallbackUrl(array $settingArray): void
     {
         // Not using Sanitize::sanitizeHtml() here since our html should not be escaped.
         echo wp_kses(

@@ -54,7 +54,9 @@ class OrderManagement
         return [
             'id' => EnableCapture::getName(),
             'title' => Translator::translate(phraseId: 'enable-capture'),
-            'desc' => Translator::translate(phraseId: 'automatic-order-management-on-complete'),
+            'desc' => Translator::translate(
+                phraseId: 'automatic-order-management-on-complete'
+            ),
             'type' => 'checkbox',
             'default' => EnableCapture::getDefault(),
         ];
@@ -68,7 +70,9 @@ class OrderManagement
         return [
             'id' => EnableCancel::getName(),
             'title' => Translator::translate(phraseId: 'enable-cancel'),
-            'desc' => Translator::translate(phraseId: 'automatic-order-management-on-cancel'),
+            'desc' => Translator::translate(
+                phraseId: 'automatic-order-management-on-cancel'
+            ),
             'type' => 'checkbox',
             'default' => EnableCancel::getDefault(),
         ];
@@ -98,7 +102,9 @@ class OrderManagement
         return [
             'id' => EnableRefund::getName(),
             'title' => Translator::translate(phraseId: 'enable-refund'),
-            'desc' => Translator::translate(phraseId: 'automatic-order-management-on-refund'),
+            'desc' => Translator::translate(
+                phraseId: 'automatic-order-management-on-refund'
+            ),
             'type' => 'checkbox',
             'default' => EnableRefund::getDefault(),
         ];
