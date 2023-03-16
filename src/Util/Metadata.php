@@ -15,8 +15,10 @@ use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
+use WC_Abstract_Order;
 use WC_Order;
 
+use function get_class;
 use function is_array;
 
 /**
@@ -29,7 +31,6 @@ class Metadata
     public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
     public const KEY_LEGACY_ORDER_REFERENCE = 'paymentId';
     public const KEY_THANK_YOU = RESURSBANK_MODULE_PREFIX . '_thankyou_trigger';
-    public const KEY_PAYMENT_METHOD = RESURSBANK_MODULE_PREFIX . '_payment_method';
 
     /**
      * Store UUID of Resurs Bank payment on order.
@@ -50,7 +51,7 @@ class Metadata
      *
      * @throws EmptyValueException
      */
-    public static function getPaymentId(WC_Order $order): string
+    public static function getPaymentId(WC_Abstract_Order $order): string
     {
         $paymentId = self::getOrderMeta(
             order: $order,
@@ -80,7 +81,7 @@ class Metadata
      * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
      */
     public static function setOrderMeta(
-        WC_Order $order,
+        WC_Abstract_Order $order,
         string $key,
         string $value
     ): bool {
@@ -111,7 +112,7 @@ class Metadata
      * Normally metadata is returned as array, but currently we usually only save values once.
      */
     public static function getOrderMeta(
-        WC_Order $order,
+        WC_Abstract_Order $order,
         string $key
     ): string {
         return (string)get_post_meta(
@@ -124,7 +125,7 @@ class Metadata
     /**
      * Check if current order is a valid Resurs Payment.
      */
-    public static function isValidResursPayment(WC_Order $order): bool
+    public static function isValidResursPayment(WC_Abstract_Order $order): bool
     {
         try {
             return self::getPaymentId(order: $order) !== '';
@@ -182,8 +183,10 @@ class Metadata
     /**
      * Attempts to use stored order reference on legacy orders to find
      */
-    private static function findPaymentIdForLegacyOrder(WC_Order $order): string
-    {
+    private static function findPaymentIdForLegacyOrder(
+        WC_Abstract_Order $order
+    ): string {
+        /** @noinspection BadExceptionsProcessingInspection */
         try {
             $orderReference = self::getOrderMeta(
                 order: $order,

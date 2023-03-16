@@ -209,6 +209,18 @@ class Route
     }
 
     /**
+     * Redirect back and exit.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.ExitExpression)
+     */
+    public static function redirectBack(): void
+    {
+        header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
+        exit;
+    }
+
+    /**
      * Fix trailing slashes for urls that is missing them out.
      */
     private static function getUrlWithProperTrailingSlash(string $url): string

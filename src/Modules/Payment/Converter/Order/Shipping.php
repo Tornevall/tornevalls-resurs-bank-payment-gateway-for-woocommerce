@@ -13,18 +13,19 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Ecom\Lib\Utilities\Tax;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Translator;
-use WC_Order;
+use WC_Abstract_Order;
 
 /**
- * Collect shipping data as OrderLine objects from WC_Order instance.
+ * Collect shipping data as OrderLine objects from WC_Order or WC_Order_Refund
  */
 class Shipping
 {
     /**
      * @throws IllegalValueException
      */
-    public static function getOrderLine(WC_Order $order): OrderLine
+    public static function getOrderLine(WC_Abstract_Order $order): OrderLine
     {
         $total = self::getTotal(order: $order);
         $tax = self::getTax(order: $order);
@@ -47,21 +48,25 @@ class Shipping
     }
 
     /**
+     * Check if WC_Order|WC_Order_Refund has any shipping cost applied.
+     *
+     * @throws IllegalValueException
+     */
+    public static function isAvailable(WC_Abstract_Order $order): bool
+    {
+        return self::getTotal(order: $order) + self::getTax(
+            order: $order
+        ) > 0.0;
+    }
+
+    /**
      * Type-safe wrapper to extract shipping total incl. tax.
      *
      * @throws IllegalValueException
      */
-    private static function getTotal(WC_Order $order): float
+    private static function getTotal(WC_Abstract_Order $order): float
     {
-        $total = $order->get_shipping_total();
-
-        if (!is_numeric(value: $total)) {
-            throw new IllegalValueException(
-                message: 'Result from calling "get_shipping_total()" is not numeric.'
-            );
-        }
-
-        return (float) $total;
+        return Order::convertFloat(value: $order->get_shipping_total());
     }
 
     /**
@@ -69,16 +74,8 @@ class Shipping
      *
      * @throws IllegalValueException
      */
-    private static function getTax(WC_Order $order): float
+    private static function getTax(WC_Abstract_Order $order): float
     {
-        $result = $order->get_shipping_tax();
-
-        if (!is_numeric(value: $result)) {
-            throw new IllegalValueException(
-                message: 'Result from calling "get_shipping_tax()" is not numeric.'
-            );
-        }
-
-        return (float) $result;
+        return Order::convertFloat(value: $order->get_shipping_tax());
     }
 }

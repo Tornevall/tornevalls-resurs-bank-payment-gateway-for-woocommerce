@@ -22,6 +22,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
+use function defined;
 use function function_exists;
 use function is_array;
 
@@ -50,11 +51,14 @@ class MessageBag
 
     /**
      * Add message to bag.
-     *
-     * @todo If wc_add_notice does not exist we cannot dispaly frontend messages.
      */
     public static function add(string $message, Type $type): void
     {
+        if (defined(constant_name: 'DOING_AJAX')) {
+            // No way of handling messages in AJAX requests.
+            return;
+        }
+
         try {
             $messageInstance = new Message(message: $message, type: $type);
         } catch (EmptyValueException) {
@@ -69,10 +73,7 @@ class MessageBag
                 $bag = self::getBag();
                 $bag->offsetSet(offset: null, value: $messageInstance);
                 self::updateBag(bag: $bag);
-            }
-
-            // Function availability depends on file load order.
-            if (function_exists(function: 'wc_add_notice')) {
+            } elseif (function_exists(function: 'wc_add_notice')) {
                 wc_add_notice(message: $message, notice_type: $type->value);
             }
         } catch (Throwable $e) {
