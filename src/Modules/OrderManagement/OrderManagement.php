@@ -126,7 +126,7 @@ class OrderManagement
             accepted_args: 2
         );
 
-        // Prevent order edit options from rendering if we can't modify payment.
+        // Prevent internal note indicating funds need to be manually returned.
         add_filter(
             hook_name: 'woocommerce_new_order_note_data',
             callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
