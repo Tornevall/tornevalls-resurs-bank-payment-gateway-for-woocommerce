@@ -167,7 +167,7 @@ EX;
      */
     public static function setJs(): void
     {
-        if (self::isEnabled()) {
+        if (!self::isEnabled()) {
             return;
         }
 
