@@ -77,14 +77,14 @@ class Settings
     /**
      * Render displayable url for callbacks properly without stored values in database.
      *
-     * @param $settingArray
+     * @param $settings
      * @throws IllegalValueException
      */
-    public static function renderManagementCallbackUrl($settingArray): void
+    public static function renderManagementCallbackUrl(array $settings): void
     {
         // Not using Sanitize::sanitizeHtml() here since our html should not be escaped.
         echo wp_kses(
-            string: '<table class="form-table"><th scope="row">' . ($settingArray['title'] ?? '') . '</th><td>' .
+            string: '<table class="form-table"><th scope="row">' . ($settings['title'] ?? '') . '</th><td>' .
             Url::getCallbackUrl(
                 type: CallbackType::MANAGEMENT
             ) . '</td></table>',
@@ -95,14 +95,14 @@ class Settings
     /**
      * Render displayable url for callbacks properly without stored values in database.
      *
-     * @param $settingArray
+     * @param $settings
      * @throws IllegalValueException
      */
-    public static function renderAuthorizationCallbackUrl($settingArray): void
+    public static function renderAuthorizationCallbackUrl(array $settings): void
     {
         // Not using Sanitize::sanitizeHtml() here since our html should not be escaped.
         echo wp_kses(
-            string: '<table class="form-table"><th scope="row">' . ($settingArray['title'] ?? '') . '</th><td>' .
+            string: '<table class="form-table"><th scope="row">' . ($settings['title'] ?? '') . '</th><td>' .
             Url::getCallbackUrl(
                 type: CallbackType::AUTHORIZATION
             ) . '</td></table>',
