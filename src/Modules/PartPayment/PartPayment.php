@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -32,6 +31,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Currency;
+use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -42,30 +42,31 @@ use WC_Product;
  */
 class PartPayment
 {
-    private EcomPartPayment $instance;
+    /**
+     * ECom Part Payment widget instance.
+     */
+    private static ?EcomPartPayment $instance = null;
 
     /**
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
      * @throws ConfigException
      * @throws CurlException
-     * @throws FilesystemException
-     * @throws TranslationException
-     * @throws ValidationException
      * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws HttpException
      * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @throws HttpException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
      */
-    public function __construct()
+    public static function getWidget(): EcomPartPayment
     {
-        global $product;
-
-        if (!$product instanceof WC_Product) {
-            throw new IllegalTypeException(message: 'Unable to fetch product');
+        if (self::$instance !== null) {
+            return self::$instance;
         }
 
         $paymentMethod = Repository::getById(
@@ -77,19 +78,24 @@ class PartPayment
             throw new IllegalTypeException(message: 'Payment method is null');
         }
 
-        $this->instance = new EcomPartPayment(
+        self::$instance = new EcomPartPayment(
             storeId: StoreId::getData(),
             paymentMethod: $paymentMethod,
             months: (int)Period::getData(),
-            amount: (float)$product->get_price(),
+            amount: (float)self::getProduct()->get_price(),
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
         );
+
+        return self::$instance;
     }
 
     /**
      * Init method for frontend scripts and styling.
+     *
+     * NOTE: Cannot place isEnabled() check here to prevent hooks, product not
+     * available yet.
      */
     public static function initFrontend(): void
     {
@@ -103,7 +109,7 @@ class PartPayment
         );
         add_action(
             hook_name: 'woocommerce_single_product_summary',
-            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::getWidget'
+            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'
         );
     }
 
@@ -120,139 +126,106 @@ class PartPayment
 
     /**
      * Output widget HTML if on single product page.
-     *
-     * @throws ConfigException
      */
-    public static function getWidget(): void
+    public static function renderWidget(): void
     {
-        self::displayWidgetProperty(propertyName: 'content');
+        if (!self::isEnabled()) {
+            return;
+        }
+
+        try {
+            echo self::getWidget()->content;
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
     }
 
     /**
      * Output widget CSS if on single product page.
-     *
-     * @throws ConfigException
      */
     public static function setCss(): void
     {
-        self::displayWidgetProperty(propertyName: 'css');
+        if (!self::isEnabled()) {
+            return;
+        }
+
+        try {
+            $css = self::getWidget()->css;
+
+            echo <<<EX
+<style id="rb-pp-styles">
+  $css
+</style>
+EX;
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
     }
 
     /**
      * Set Js if on single product page.
-     * Used from filters.
-     *
-     * @throws ConfigException
-     * @noinspection PhpUnused
      */
     public static function setJs(): void
     {
-        if (!is_product() || !Enabled::isEnabled()) {
+        if (!self::isEnabled()) {
             return;
         }
 
-        try {
-            $widget = new self();
-
-            if ($widget->visible()) {
-                /** @psalm-suppress UndefinedConstant */
-                $url = Url::getPluginUrl(
-                    path: RESURSBANK_MODULE_DIR_NAME . '/js',
-                    file: 'js/resursbank_partpayment.js'
-                );
-                wp_enqueue_script(
-                    handle: 'partpayment-script',
-                    src: $url,
-                    deps: ['jquery']
-                );
-                wp_add_inline_script(
-                    handle: 'partpayment-script',
-                    data: $widget->instance->js
-                );
-                add_action(
-                    hook_name: 'wp_enqueue_scripts',
-                    callback: 'partpayment-script'
-                );
-            }
-        } catch (Throwable $exception) {
-            Config::getLogger()->error(message: $exception);
-        }
-    }
-
-    /**
-     * Output widget content.
-     *
-     * @throws ConfigException
-     */
-    private static function displayWidgetProperty(string $propertyName): void
-    {
-        if (!is_product() || !Enabled::isEnabled()) {
-            return;
-        }
-
-        try {
-            $widget = new self();
-
-            if ($widget->visible()) {
-                echo self::applyFiltersToOutput(
-                    propertyName: $propertyName,
-                    widget: $widget
-                );
-            }
-        } catch (Throwable $exception) {
-            Config::getLogger()->error(message: $exception);
-        }
-    }
-
-    /**
-     * Apply filters to output.
-     *
-     * @throws IllegalTypeException
-     */
-    private static function applyFiltersToOutput(string $propertyName, self $widget): string
-    {
-        $filtered = apply_filters(
-            hook_name: 'resursbank_partpayment_' . $propertyName . '_display',
-            value: self::getOutputValue(
-                propertyName: $propertyName,
-                widget: $widget
-            )
+        $url = Url::getPluginUrl(
+            path: RESURSBANK_MODULE_DIR_NAME . '/js',
+            file: 'js/resursbank_partpayment.js'
         );
 
-        if (!is_string(value: $filtered)) {
-            throw new IllegalTypeException(
-                message: 'Filtered ' . $propertyName . ' is no longer a string'
+        try {
+            wp_enqueue_script(
+                handle: 'partpayment-script',
+                src: $url,
+                deps: ['jquery']
             );
+            wp_add_inline_script(
+                handle: 'partpayment-script',
+                data: self::getWidget()->js
+            );
+            add_action(
+                hook_name: 'wp_enqueue_scripts',
+                callback: 'partpayment-script'
+            );
+        } catch (Throwable $error) {
+            Log::error(error: $error);
         }
-
-        return $filtered;
-    }
-
-    /**
-     * Get output value.
-     */
-    private static function getOutputValue(string $propertyName, self $widget): string
-    {
-        if ($propertyName === 'content') {
-            return $widget->instance->content;
-        }
-
-        if ($propertyName === 'css') {
-            return '<style id="rb-pp-styles">' . $widget->instance->css . '</style>';
-        }
-
-        return '';
     }
 
     /**
      * Indicates whether widget should be visible or not.
-     *
-     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
-     * @noinspection PhpUnused
      */
-    private function visible(): bool
+    private static function isEnabled(): bool
     {
-        return Enabled::isEnabled() &&
-               $this->instance->getStartingAtCost() >= Limit::getData();
+        try {
+            return Enabled::isEnabled() &&
+                is_product() &&
+               self::getWidget()->getStartingAtCost() >= Limit::getData();
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+
+        return false;
+    }
+
+    /**
+     * @throws IllegalTypeException
+     */
+    private static function getProduct(): WC_Product
+    {
+        global $product;
+
+        if (!$product instanceof WC_Product) {
+            $product = wc_get_product();
+        }
+
+        if (!$product instanceof WC_Product) {
+            throw new IllegalTypeException(message: 'Unable to fetch product');
+        }
+
+        return $product;
     }
 }
