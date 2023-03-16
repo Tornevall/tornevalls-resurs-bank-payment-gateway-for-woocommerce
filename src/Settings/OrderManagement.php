@@ -54,7 +54,7 @@ class OrderManagement
         return [
             'id' => EnableCapture::getName(),
             'title' => Translator::translate(phraseId: 'enable-capture'),
-            'desc' => self::getDesc(action: 'capture', status: 'completed'),
+            'desc' => Translator::translate(phraseId: 'automatic-order-management-on-complete'),
             'type' => 'checkbox',
             'default' => EnableCapture::getDefault(),
         ];
@@ -68,7 +68,7 @@ class OrderManagement
         return [
             'id' => EnableCancel::getName(),
             'title' => Translator::translate(phraseId: 'enable-cancel'),
-            'desc' => self::getDesc(action: 'cancel', status: 'cancelled'),
+            'desc' => Translator::translate(phraseId: 'automatic-order-management-on-cancel'),
             'type' => 'checkbox',
             'default' => EnableCancel::getDefault(),
         ];
@@ -98,33 +98,9 @@ class OrderManagement
         return [
             'id' => EnableRefund::getName(),
             'title' => Translator::translate(phraseId: 'enable-refund'),
-            'desc' => self::getDesc(action: 'refund', status: 'refunded'),
+            'desc' => Translator::translate(phraseId: 'automatic-order-management-on-refund'),
             'type' => 'checkbox',
             'default' => EnableRefund::getDefault(),
         ];
-    }
-
-    /**
-     * Resolve setting description.
-     */
-    private static function getDesc(
-        string $action,
-        string $status
-    ): string {
-        $result = sprintf(
-            Translator::translate(
-                phraseId: 'automatic-order-management-on-status'
-            ),
-            Translator::translate(phraseId: $action),
-            wc_get_order_status_name(status: $status)
-        );
-
-        if ($status === 'refunded') {
-            $result .= ' ' . Translator::translate(
-                phraseId: 'payment-must-be-captured-to-be-refunded'
-            );
-        }
-
-        return $result;
     }
 }
