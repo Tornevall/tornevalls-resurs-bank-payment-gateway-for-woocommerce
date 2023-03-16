@@ -77,7 +77,7 @@ class Settings
     /**
      * Render displayable url for callbacks properly without stored values in database.
      *
-     * @param $settings
+     * @param array $settings
      * @throws IllegalValueException
      */
     public static function renderManagementCallbackUrl(array $settings): void
@@ -95,7 +95,7 @@ class Settings
     /**
      * Render displayable url for callbacks properly without stored values in database.
      *
-     * @param $settings
+     * @param array $settings
      * @throws IllegalValueException
      */
     public static function renderAuthorizationCallbackUrl(array $settings): void

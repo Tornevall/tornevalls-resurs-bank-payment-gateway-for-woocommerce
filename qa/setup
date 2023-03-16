@@ -75,27 +75,27 @@ do
   fi
 done
 
-#if [ -n "\$SRC_FILES" ]; then
-#  echo ""
-#  echo ""
-#  echo "---==( Automatically adjusting src files )==---"
-#  echo ""
-#  echo ""
-#  echo "[APPLYING PSR-12 RULESET]"
-#  echo ""
-#  $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=PSR12 \$SRC_FILES
-#  echo ""
-#  echo ""
-#  echo "[APPLYING CUSTOM RULESET]"
-#  echo ""
-#  $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=qa/phpcs/src.xml \$SRC_FILES
-#else
-#  echo ""
-#  echo ""
-#  echo "No fixable errors found."
-#  echo ""
-#  echo ""
-#fi
+if [ -n "\$SRC_FILES" ]; then
+  echo ""
+  echo ""
+  echo "---==( Automatically adjusting src files )==---"
+  echo ""
+  echo ""
+  echo "[APPLYING PSR-12 RULESET]"
+  echo ""
+  $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=PSR12 \$SRC_FILES
+  echo ""
+  echo ""
+  echo "[APPLYING CUSTOM RULESET]"
+  echo ""
+  $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=qa/phpcs/src.xml \$SRC_FILES
+else
+  echo ""
+  echo ""
+  echo "No fixable errors found."
+  echo ""
+  echo ""
+fi
 
 echo ""
 echo ""
