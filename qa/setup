@@ -70,7 +70,7 @@ SRC_FILES=""
 
 for file in \$(git diff --name-only --cached)
 do
-  if [ "\$(echo \$file | cut -d/ -f1)" = "src" ]; then
+  if [ "\$(echo \$file | cut -d/ -f1)" = "src" ] && [ -f "$dir/\$file" ]; then
       SRC_FILES="\$SRC_FILES $dir/\$file"
   fi
 done
