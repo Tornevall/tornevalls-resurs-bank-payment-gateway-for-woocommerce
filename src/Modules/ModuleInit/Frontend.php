@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
@@ -26,6 +27,10 @@ class Frontend
      */
     public static function init(): void
     {
+        if (!Enabled::isEnabled()) {
+            return;
+        }
+
         Gateway::initFrontend();
         CustomerType::init();
         ThankYou::init();
