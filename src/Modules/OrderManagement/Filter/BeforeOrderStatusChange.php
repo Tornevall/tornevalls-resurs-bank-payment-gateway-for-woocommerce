@@ -64,15 +64,17 @@ class BeforeOrderStatusChange
         }
 
         OrderManagement::logError(
-            order: $order,
             message: sprintf(
                 Translator::translate(phraseId: 'failed-order-status-change'),
-                self::stripStatusPrefix(status: $wcStatus),
-                $newStatus
+                wc_get_order_status_name(
+                    status: self::stripStatusPrefix(status: $wcStatus)
+                ),
+                wc_get_order_status_name(status: $newStatus)
             ),
             error: new IllegalValueException(
                 message: "Failed changing order status from $wcStatus to $newStatus for $post->ID"
-            )
+            ),
+            order: $order
         );
 
         Route::redirectBack();
