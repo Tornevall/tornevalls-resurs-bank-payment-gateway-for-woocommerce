@@ -56,6 +56,12 @@ class Gateway
             hook_name: 'woocommerce_available_payment_gateways',
             callback: 'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
         );
+        add_filter(
+            hook_name: 'woocommerce_gateway_icon',
+            callback: 'Resursbank\Woocommerce\Modules\Gateway\Gateway::modifyIcon',
+            accepted_args: 1,
+            priority: 10
+        );
     }
 
     /**
@@ -98,5 +104,21 @@ class Gateway
         }
 
         return $gateways;
+    }
+
+    /**
+     * Apply styling to payment method icons.
+     */
+    public static function modifyIcon(mixed $icon): string
+    {
+        if ($icon === '') {
+            return $icon;
+        }
+
+        return preg_replace(
+            pattern: '/>$/',
+            replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;">',
+            subject: $icon
+        );
     }
 }
