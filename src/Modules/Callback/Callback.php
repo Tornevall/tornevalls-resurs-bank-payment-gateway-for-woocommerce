@@ -9,26 +9,21 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Callback;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Exception\CallbackException;
 use Resursbank\Ecom\Lib\Model\Callback\CallbackInterface;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
-use Resursbank\Ecom\Lib\Model\Callback\Management;
-use Resursbank\Ecom\Module\Action\Repository as ActionRepository;
-use Resursbank\Woocommerce\Modules\Callback\Controller\Callback as CallbackController;
+use Resursbank\Ecom\Module\Callback\Repository;
+use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
+use Resursbank\Woocommerce\Modules\Callback\Controller\Authorization;
+use Resursbank\Woocommerce\Modules\Callback\Controller\Management;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
+
+use function is_string;
 
 /**
  * Implementation of callback module.
@@ -59,10 +54,37 @@ class Callback
      */
     public static function execute(): void
     {
+        $type = $_GET['callback'] ?? '';
+
+        /** @noinspection BadExceptionsProcessingInspection */
         try {
-            CallbackController::exec(
-                type: CallbackType::from(
-                    value: $_REQUEST['callback'] ?? ''
+            if ($type === '' || !is_string(value: $type)) {
+                throw new CallbackException(message: 'Unknown callback type.');
+            }
+
+            Log::debug(message: "Executing $type callback.");
+
+            $controller = $type === CallbackType::AUTHORIZATION->value ?
+                new Authorization() :
+                new Management();
+
+            Route::respondWithExit(
+                body: '',
+                code: Repository::process(
+                    callback: $controller->getRequestData(),
+                    process: static function (
+                        CallbackInterface $callback
+                    ) use ($controller): void {
+                        $order = CallbackModule::getOrder(
+                            paymentId: $callback->getPaymentId()
+                        );
+
+                        $order->add_order_note(
+                            note: $callback->getNote()
+                        );
+
+                        $controller->updateOrderStatus(order: $order);
+                    }
                 )
             );
         } catch (Throwable $e) {
@@ -75,37 +97,42 @@ class Callback
     }
 
     /**
-     * Add order notice on incoming callback.
-     *
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
+     * @throws CallbackException
      */
-    public static function addOrderNote(
-        WC_Order $order,
-        CallbackInterface $callback
-    ): void {
-        $note = $callback->getNote();
+    public static function getOrder(string $paymentId): WC_Order
+    {
+        $order = Metadata::getOrderByPaymentId(paymentId: $paymentId);
 
-        if ($callback instanceof Management) {
-            $note .= ' ' . sprintf(
-                Translator::translate(
-                    phraseId: 'callback-amount'
-                ),
-                ActionRepository::getAction(
-                    paymentId: $callback->getPaymentId(),
-                    actionId: $callback->actionId
-                )->orderLines->getTotal()
+        if (!$order instanceof WC_Order) {
+            throw new CallbackException(
+                message: "Unable to find order matching $paymentId"
             );
         }
 
-        $order->add_order_note(note: $note);
+        return $order;
+    }
+
+    /**
+     * Apply new status on order if the following conditions are met:
+     *
+     * 1. WC_Order may not have obtained a status which cannot be manipulated.
+     * 2. Converted WC_Order status from the Resurs Bank payment most differ.
+     */
+    public static function updateOrderStatus(
+        WC_Order $order,
+        string $status
+    ): void {
+        if (
+            $status === '' ||
+            $order->has_status(status: $status) ||
+            !$order->has_status(status: ['pending', 'processing', 'on-hold'])
+        ) {
+            return;
+        }
+
+        $order->update_status(
+            new_status: $status,
+            note: Translator::translate(phraseId: "payment-status-$status")
+        );
     }
 }
