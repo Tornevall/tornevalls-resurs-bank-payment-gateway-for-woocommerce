@@ -288,8 +288,8 @@ class Resursbank extends WC_Payment_Gateway
             handleFrozenPayments: true,
             redirectionUrls: new RedirectionUrls(
                 customer: new ParticipantRedirectionUrls(
-                    successUrl: $this->getSuccessUrl(order: $order),
-                    failUrl: $this->getFailureUrl(order: $order)
+                    failUrl: $this->getFailureUrl(order: $order),
+                    successUrl: $this->getSuccessUrl(order: $order)
                 ),
                 coApplicant: null,
                 merchant: null
@@ -323,7 +323,7 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         return
-            $total >= $this->method->minPurchaseLimit ||
+            $total >= $this->method->minPurchaseLimit &&
             $total <= $this->method->maxPurchaseLimit
         ;
     }
