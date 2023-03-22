@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\OrderManagement;
@@ -140,11 +141,7 @@ class SettingsPage extends WC_Settings_Page
         } catch (Throwable $e) {
             Log::error(error: $e);
 
-            $this->renderError(
-                message: Translator::translate(
-                    phraseId: 'payment-methods-widget-render-failed'
-                )
-            );
+            $this->renderError();
         }
     }
 
@@ -152,16 +149,27 @@ class SettingsPage extends WC_Settings_Page
      * Render an error message (cannot use the message bag since that has
      * already been rendered).
      */
-    private function renderError(
-        string $message
-    ): void {
-        $seeLog = Translator::translate(phraseId: 'see-log');
+    private function renderError(): void
+    {
+        $msg = Translator::translate(
+            phraseId: 'payment-methods-widget-render-failed'
+        );
+
+        $additional = Translator::translate(phraseId: 'see-log');
+
+        if (!Connection::hasCredentials()) {
+            $additional = Translator::translate(
+                phraseId: 'configure-credentials'
+            );
+        } elseif (StoreId::getData() === '') {
+            $additional = Translator::translate(phraseId: 'configure-store');
+        }
 
         echo <<<EX
 <div class="error notice">
-  $message
-  <br />
-  $seeLog
+  $msg
+  <br/>
+  $additional
 </div>
 EX;
     }

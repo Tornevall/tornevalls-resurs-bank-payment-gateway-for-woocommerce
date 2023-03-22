@@ -52,6 +52,7 @@ class MessageBag
     /**
      * Add message to bag.
      */
+    // phpcs:ignore
     public static function add(string $message, Type $type): void
     {
         if (defined(constant_name: 'DOING_AJAX')) {
@@ -72,7 +73,10 @@ class MessageBag
             if (Admin::isAdmin()) {
                 $bag = self::getBag();
                 $bag->offsetSet(offset: null, value: $messageInstance);
-                self::updateBag(bag: $bag);
+
+                if (!self::isInBag(message: $message, bag: $bag)) {
+                    self::updateBag(bag: $bag);
+                }
             } elseif (function_exists(function: 'wc_add_notice')) {
                 wc_add_notice(message: $message, notice_type: $type->value);
             }
@@ -127,6 +131,22 @@ class MessageBag
     public static function keep(): void
     {
         self::$clear = false;
+    }
+
+    /**
+     * Look for duplicate messages in the collection.
+     */
+    private static function isInBag(string $message, MessageCollection $bag): bool
+    {
+        /** @var Message $item */
+        foreach ($bag as $item) {
+            if ($item->message === $message) {
+                $return = true;
+                break;
+            }
+        }
+
+        return $return ?? false;
     }
 
     /**

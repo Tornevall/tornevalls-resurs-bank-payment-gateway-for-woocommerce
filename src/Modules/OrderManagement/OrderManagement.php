@@ -125,6 +125,13 @@ class OrderManagement
             callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\Refund::exec',
             accepted_args: 2
         );
+
+        // Prevent internal note indicating funds need to be manually returned.
+        add_filter(
+            hook_name: 'woocommerce_new_order_note_data',
+            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
+            accepted_args: 1
+        );
     }
 
     /**
