@@ -24,4 +24,9 @@ class EnableCapture extends BoolOption implements OptionInterface
     {
         return self::NAME_PREFIX . 'enable_capture';
     }
+
+    public static function getDefault(): ?string
+    {
+        return 'yes';
+    }
 }
