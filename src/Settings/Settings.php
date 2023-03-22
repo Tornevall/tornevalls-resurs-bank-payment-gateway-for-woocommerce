@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
@@ -129,6 +130,8 @@ class Settings
                     section: self::getCurrentSectionId()
                 )
             );
+
+            Config::getCache()->invalidate();
         } catch (Throwable $e) {
             Log::error(
                 error: $e,
