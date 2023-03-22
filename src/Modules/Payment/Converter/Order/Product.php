@@ -18,10 +18,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order_Item_Product;
 use WC_Product;
-use WC_Tax;
 
-use function array_shift;
-use function is_array;
 use function is_string;
 
 /**
@@ -40,7 +37,9 @@ class Product
             quantityUnit: Translator::translate(
                 phraseId: 'default-quantity-unit'
             ),
-            vatRate: self::getVatRate(product: $product),
+            vatRate: Order::getVatRate(
+                taxClass: (string) $product->get_tax_class()
+            ),
             totalAmountIncludingVat: round(
                 num: self::getSubtotal(
                     product: $product
@@ -91,32 +90,6 @@ class Product
         WC_Order_Item_Product $product
     ): float {
         return Order::convertFloat(value: $product->get_subtotal_tax());
-    }
-
-    /**
-     * Resolve order item vat (tax) rate.
-     *
-     * NOTE: This is also utilised by methods which compile discount data.
-     *
-     * @todo WC_Tax::get_rates returning an array suggests there can be several taxes per item, investigate.
-     */
-    public static function getVatRate(WC_Order_Item_Product $product): float
-    {
-        /* Passing get_tax_class() result without validation since anything it
-           can possibly return should be acceptable to get_rates() */
-        $rates = WC_Tax::get_rates(tax_class: $product->get_tax_class());
-
-        if (is_array(value: $rates)) {
-            $rates = array_shift(array: $rates);
-        }
-
-        /* Note that the value is rounded since we can sometimes receive values
-           with more than two decimals, but our API expects max two. */
-        return (
-            is_array(value: $rates) &&
-            isset($rates['rate']) &&
-            is_numeric(value: $rates['rate'])
-        ) ? round(num: (float) $rates['rate'], precision: 2) : 0.0;
     }
 
     /**
