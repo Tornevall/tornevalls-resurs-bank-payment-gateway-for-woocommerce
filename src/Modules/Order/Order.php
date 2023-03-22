@@ -84,13 +84,10 @@ class Order
         $order = new WC_Order(order: $post->ID);
 
         if (
-            !$order instanceof WC_Order ||
-            !Metadata::isValidResursPayment(order: $order)
+            !$order instanceof WC_Order
         ) {
             return;
         }
-
-        $data = '';
 
         try {
             $paymentInformation = new PaymentInformation(
@@ -104,7 +101,7 @@ class Order
                     phraseId: 'failed-to-fetch-order-data-from-the-server'
                 ) . ' ' .
                 Translator::translate(
-                    phraseId: 'server-response'
+                    phraseId: 'reason'
                 ) . ':</b> ' . $e->getMessage();
 
             Log::error(error: $e);
