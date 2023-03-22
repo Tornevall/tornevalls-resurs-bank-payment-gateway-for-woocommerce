@@ -26,7 +26,7 @@ class EnableCache extends BoolOption implements OptionInterface
     }
 
     /**
-     * Override standard behavior for BoolOption so that cache is enabled by default.
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public static function getDefault(): ?string
     {
