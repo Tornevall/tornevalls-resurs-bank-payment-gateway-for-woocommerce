@@ -24,4 +24,9 @@ class EnableRefund extends BoolOption implements OptionInterface
     {
         return self::NAME_PREFIX . 'enable_refund';
     }
+
+    public static function getDefault(): ?string
+    {
+        return 'yes';
+    }
 }
