@@ -28,8 +28,6 @@ use Resursbank\Woocommerce\Util\Translator;
 
 /**
  * Payment methods section.
- *
- * @todo Translations should be moved to ECom. See WOO-802 & ECP-205.
  */
 class PaymentMethods
 {
@@ -65,6 +63,10 @@ class PaymentMethods
     {
         // Hide the "Save changes" button since there are no fields here.
         $GLOBALS['hide_save_button'] = '1';
+
+        if ($storeId !== '') {
+            Repository::getCache(storeId: $storeId)->clear();
+        }
 
         return (new PaymentMethodsWidget(
             paymentMethods: Repository::getPaymentMethods(storeId: $storeId)
