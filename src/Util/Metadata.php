@@ -60,6 +60,13 @@ class Metadata
 
         if ($paymentId === '') {
             $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
+
+            if ($paymentId === '') {
+                throw new EmptyValueException(
+                    message: 'No results found when searching for legacy order.'
+                );
+            }
+
             self::setOrderMeta(
                 order: $order,
                 key: self::KEY_PAYMENT_ID,
