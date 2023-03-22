@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
@@ -27,19 +28,25 @@ class Admin
      */
     public static function init(): void
     {
-        Gateway::initAdmin();
-        OrderManagement::init();
+        // Settings-related init methods that need to run in order for the plugin to be configurable when
+        // it's inactivated.
+        Settings::init();
         InvalidateCacheButton::init();
         PartPayment::initAdmin();
         PartPaymentPeriod::init();
-        Settings::init();
-        PaymentInformation::init();
-
         add_action(
             hook_name: 'updated_option',
             callback: 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
             priority: 10,
             accepted_args: 3
         );
+
+        if (!Enabled::isEnabled()) {
+            return;
+        }
+
+        Gateway::initAdmin();
+        OrderManagement::init();
+        PaymentInformation::init();
     }
 }

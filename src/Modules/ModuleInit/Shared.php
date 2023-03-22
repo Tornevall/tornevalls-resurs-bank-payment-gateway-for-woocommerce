@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order;
@@ -24,6 +25,10 @@ class Shared
      */
     public static function init(): void
     {
+        if (!Enabled::isEnabled()) {
+            return;
+        }
+
         Route::exec();
         Order::init();
         MessageBag::init();
