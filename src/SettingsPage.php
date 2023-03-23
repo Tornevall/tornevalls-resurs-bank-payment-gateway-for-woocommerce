@@ -111,11 +111,7 @@ class SettingsPage extends WC_Settings_Page
         } catch (Throwable $e) {
             Log::error(error: $e);
 
-            $this->renderError(
-                message: Translator::translate(
-                    phraseId: 'render-settings-failed'
-                )
-            );
+            $this->renderError();
         }
 
         echo '</table>';
