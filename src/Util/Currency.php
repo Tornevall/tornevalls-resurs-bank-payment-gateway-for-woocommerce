@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 
 use function is_string;
 
@@ -70,7 +71,7 @@ class Currency
 
         $total = number_format(
             num: $amount,
-            decimals: 2,
+            decimals: Order::getConfiguredDecimalPoints(),
             decimal_separator: ',',
             thousands_separator: ''
         );
