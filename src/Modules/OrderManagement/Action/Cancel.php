@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
@@ -34,6 +35,7 @@ class Cancel
 
         /** @noinspection BadExceptionsProcessingInspection */
         try {
+            throw new IllegalValueException('asd');
             $payment = OrderManagement::getPayment(order: $order);
 
             if (!$payment->canCancel()) {
