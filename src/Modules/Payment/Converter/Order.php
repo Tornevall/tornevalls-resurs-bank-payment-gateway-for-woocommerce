@@ -24,8 +24,10 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Fee;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Product;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
 use WC_Abstract_Order;
+use WC_Order_Item;
 use WC_Order_Item_Fee;
 use WC_Order_Item_Product;
+use WC_Order_Item_Shipping;
 use WC_Tax;
 
 use function array_merge;
@@ -83,11 +85,15 @@ class Order
      *
      * @todo WC_Tax::get_rates returning an array suggests there can be several taxes per item, investigate.
      */
-    public static function getVatRate(string $taxClass): float
+    public static function getVatRate(WC_Order_Item $item): float
     {
+        $taxClass = (string) $item->get_tax_class();
+
         /* Passing get_tax_class() result without validation since anything it
            can possibly return should be acceptable to get_rates() */
-        $rates = WC_Tax::get_rates(tax_class: $taxClass);
+        $rates = $item instanceof WC_Order_Item_Shipping ?
+            WC_Tax::get_shipping_tax_rates(tax_class: $taxClass) :
+            WC_Tax::get_rates(tax_class: $taxClass);
 
         if (is_array(value: $rates)) {
             $rates = array_shift(array: $rates);
@@ -110,8 +116,21 @@ class Order
     ): array {
         $result = [];
 
-        if (Shipping::isAvailable(order: $order)) {
-            $result[] = Shipping::getOrderLine(order: $order);
+        $items = $order->get_items(types: 'shipping');
+
+        if (!is_array(value: $items)) {
+            throw new IllegalValueException(
+                message: 'Failed to resolve shipping from order.'
+            );
+        }
+
+        foreach ($items as $item) {
+            // Do not trust anonymous arrays.
+            if (!$item instanceof WC_Order_Item_Shipping) {
+                continue;
+            }
+
+            $result[] = Shipping::toOrderLine(item: $item);
         }
 
         return $result;
@@ -166,21 +185,21 @@ class Order
         WC_Abstract_Order $order
     ): array {
         $result = [];
-        $fees = $order->get_fees();
+        $items = $order->get_fees();
 
-        if (!is_array(value: $fees)) {
+        if (!is_array(value: $items)) {
             throw new IllegalValueException(
                 message: 'Failed to resolve fees from order.'
             );
         }
 
-        foreach ($fees as $fee) {
+        foreach ($items as $item) {
             // Do not trust anonymous arrays.
-            if (!$fee instanceof WC_Order_Item_Fee) {
+            if (!$item instanceof WC_Order_Item_Fee) {
                 continue;
             }
 
-            $result[] = Fee::toOrderLine(fee: $fee);
+            $result[] = Fee::toOrderLine(fee: $item);
         }
 
         return $result;
@@ -211,7 +230,7 @@ class Order
 
         // Create new rate group / append amount to existing rate group.
         $collection->addRateData(
-            rate: self::getVatRate(taxClass: $item->get_tax_class()),
+            rate: self::getVatRate(item: $item),
             amount: $subtotal + $subtotalVat - $total - $totalVat
         );
     }

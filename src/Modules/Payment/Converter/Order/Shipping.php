@@ -12,10 +12,9 @@ namespace Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
-use Resursbank\Ecom\Lib\Utilities\Tax;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Translator;
-use WC_Abstract_Order;
+use WC_Order_Item_Shipping;
 
 /**
  * Collect shipping data as OrderLine objects from WC_Order or WC_Order_Refund
@@ -25,57 +24,61 @@ class Shipping
     /**
      * @throws IllegalValueException
      */
-    public static function getOrderLine(WC_Abstract_Order $order): OrderLine
+    public static function toOrderLine(WC_Order_Item_Shipping $item): OrderLine
     {
-        $total = self::getTotal(order: $order);
-        $tax = self::getTax(order: $order);
-
         return new OrderLine(
             quantity: 1,
             quantityUnit: Translator::translate(
                 phraseId: 'default-quantity-unit'
             ),
-            vatRate: Tax::getRate(taxAmount: $tax, totalInclTax: $total),
-            totalAmountIncludingVat: round(num: $total + $tax, precision: 2),
-            description: Translator::translate(
-                phraseId: 'shipping-description'
+            vatRate: Order::getVatRate(item: $item),
+            totalAmountIncludingVat: round(
+                num: self::getSubtotal(item: $item) +
+                    self::getSubtotalVat(item: $item),
+                precision: 2
             ),
-            reference: Translator::translate(
-                phraseId: 'shipping-reference'
-            ),
+            description: (string) $item->get_method_title(),
+            reference: self::getReference(),
             type: OrderLineType::SHIPPING
         );
     }
 
     /**
-     * Check if WC_Order|WC_Order_Refund has any shipping cost applied.
+     * Since there is nothing unique guaranteed to us to separate shipping
+     * methods we will suffix the reference with a timestamp. For example, you
+     * could apply two Flat Rate options, with the same amount, and the item id
+     * is not available to us during checkout. Thus, none of these values can be
+     * utilised to create a unique payment line.
      *
-     * @throws IllegalValueException
+     * When we modify a payment we will cancel all existing lines, so it won't
+     * matter that we reference the payment line this way as we never need to
+     * identify the relationship between the WC order and the payment at
+     * Resurs Bank.
      */
-    public static function isAvailable(WC_Abstract_Order $order): bool
+    private static function getReference(): string
     {
-        return self::getTotal(order: $order) + self::getTax(
-            order: $order
-        ) > 0.0;
+        return 'shipping-' . time();
     }
 
     /**
-     * Type-safe wrapper to extract shipping total incl. tax.
+     * Get total of shipping item, excluding tax.
      *
      * @throws IllegalValueException
      */
-    private static function getTotal(WC_Abstract_Order $order): float
-    {
-        return Order::convertFloat(value: $order->get_shipping_total());
+    private static function getSubtotal(
+        WC_Order_Item_Shipping $item
+    ): float {
+        return Order::convertFloat(value: $item->get_total());
     }
 
     /**
-     * Type-safe wrapper to extract vat rate applied to shipping amount.
+     * Get item subtotal VAT amount.
      *
      * @throws IllegalValueException
      */
-    private static function getTax(WC_Abstract_Order $order): float
-    {
-        return Order::convertFloat(value: $order->get_shipping_tax());
+    private static function getSubtotalVat(
+        WC_Order_Item_Shipping $item
+    ): float {
+        return Order::convertFloat(value: $item->get_total_tax());
     }
 }

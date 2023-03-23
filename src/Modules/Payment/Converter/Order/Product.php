@@ -37,9 +37,7 @@ class Product
             quantityUnit: Translator::translate(
                 phraseId: 'default-quantity-unit'
             ),
-            vatRate: Order::getVatRate(
-                taxClass: (string) $product->get_tax_class()
-            ),
+            vatRate: Order::getVatRate(item: $product),
             totalAmountIncludingVat: round(
                 num: self::getSubtotal(
                     product: $product
@@ -52,20 +50,6 @@ class Product
             reference: self::getSku(product: $product),
             type: OrderLineType::NORMAL
         );
-    }
-
-    /**
-     * Get quantity, defaults to 1 because manual refunds may specify 0 which
-     * our API will reject.
-     *
-     * @throws IllegalValueException
-     */
-    public static function getQuantity(
-        WC_Order_Item_Product $product
-    ): float {
-        $result = Order::convertFloat(value: $product->get_quantity());
-
-        return $result === 0.00 ? 1.00 : $result;
     }
 
     /**
@@ -90,6 +74,20 @@ class Product
         WC_Order_Item_Product $product
     ): float {
         return Order::convertFloat(value: $product->get_subtotal_tax());
+    }
+
+    /**
+     * Get quantity, defaults to 1 because manual refunds may specify 0 which
+     * our API will reject.
+     *
+     * @throws IllegalValueException
+     */
+    private static function getQuantity(
+        WC_Order_Item_Product $product
+    ): float {
+        $result = Order::convertFloat(value: $product->get_quantity());
+
+        return $result === 0.00 ? 1.00 : $result;
     }
 
     /**

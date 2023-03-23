@@ -17,6 +17,8 @@ use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
@@ -182,17 +184,19 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
-     * @throws ValidationException
-     * @throws CurlException
-     * @throws IllegalValueException
-     * @throws IllegalTypeException
-     * @throws EmptyValueException
-     * @throws AuthException
-     * @throws JsonException
-     * @throws ConfigException
-     * @throws ReflectionException
      * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
      * @throws IllegalCharsetException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws FilesystemException
+     * @throws TranslationException
      */
     private function createPayment(
         WC_Order $order
