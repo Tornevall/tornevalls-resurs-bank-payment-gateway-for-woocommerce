@@ -18,7 +18,7 @@ use Resursbank\Woocommerce\Util\Translator;
 use WC_Abstract_Order;
 
 /**
- * Collect shipping data as OrderLine objects from WC_Order or WC_Order_Refund
+ * Convert WC_Order_Item_Shipping to OrderLine.
  */
 class Shipping
 {
