@@ -79,10 +79,6 @@ class Callback
                             paymentId: $callback->getPaymentId()
                         );
 
-                        $order->add_order_note(
-                            note: $callback->getNote()
-                        );
-
                         $controller->updateOrderStatus(order: $order);
                     }
                 )
