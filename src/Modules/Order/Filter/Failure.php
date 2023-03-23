@@ -20,14 +20,12 @@ use Throwable;
 use function is_string;
 
 /**
- * Event executed when "Thank You" page is rendered after completing checkout.
+ * Event executed when failure page is reached.
  */
 class Failure
 {
     /**
      * Register event listener.
-     *
-     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function init(): void
     {
