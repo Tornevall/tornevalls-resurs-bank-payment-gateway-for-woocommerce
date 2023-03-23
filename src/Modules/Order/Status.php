@@ -128,7 +128,7 @@ class Status
     ): void {
         $status = Repository::getTaskStatusDetails(
             paymentId: $payment->id
-        )->completed ? 'cancelled' : 'failed';
+        )->completed ? 'failed' : 'cancelled';
 
         $order->update_status(
             new_status: $status,

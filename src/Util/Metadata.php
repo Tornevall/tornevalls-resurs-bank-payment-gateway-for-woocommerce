@@ -130,7 +130,7 @@ class Metadata
     }
 
     /**
-     * Check if current order is a valid Resurs Payment.
+     * Check if order was paid through Resurs Bank.
      */
     public static function isValidResursPayment(WC_Abstract_Order $order): bool
     {
