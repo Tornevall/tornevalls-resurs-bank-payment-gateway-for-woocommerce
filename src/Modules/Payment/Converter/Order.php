@@ -85,7 +85,7 @@ class Order
      * Fetch configured number of decimals to use for prices. Will not accept values outside the 0-2 range. If no
      * configured value found the default response is 2.
      */
-    private static function getConfiguredDecimalPoints(): int
+    public static function getConfiguredDecimalPoints(): int
     {
         $configuredDecimalPoints = get_option(
             option: 'woocommerce_price_num_decimals'

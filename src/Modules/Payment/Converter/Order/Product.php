@@ -44,7 +44,7 @@ class Product
                 ) + self::getSubtotalVat(
                     product: $product
                 ),
-                precision: 2
+                precision: Order::getConfiguredDecimalPoints()
             ),
             description: self::getTitle(product: $product),
             reference: self::getSku(product: $product),
