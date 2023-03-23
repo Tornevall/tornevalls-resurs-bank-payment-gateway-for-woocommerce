@@ -91,7 +91,7 @@ class Order
             option: 'woocommerce_price_num_decimals'
         );
 
-        if (!$configuredDecimalPoints) {
+        if ($configuredDecimalPoints === false) {
             return 2;
         }
 
