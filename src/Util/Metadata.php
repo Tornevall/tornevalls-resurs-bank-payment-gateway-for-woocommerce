@@ -60,6 +60,13 @@ class Metadata
 
         if ($paymentId === '') {
             $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
+
+            if ($paymentId === '') {
+                throw new EmptyValueException(
+                    message: 'No results found when searching for legacy order.'
+                );
+            }
+
             self::setOrderMeta(
                 order: $order,
                 key: self::KEY_PAYMENT_ID,
@@ -123,7 +130,7 @@ class Metadata
     }
 
     /**
-     * Check if current order is a valid Resurs Payment.
+     * Check if order was paid through Resurs Bank.
      */
     public static function isValidResursPayment(WC_Abstract_Order $order): bool
     {

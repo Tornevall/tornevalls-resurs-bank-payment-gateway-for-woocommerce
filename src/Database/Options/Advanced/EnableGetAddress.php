@@ -24,4 +24,12 @@ class EnableGetAddress extends BoolOption implements OptionInterface
     {
         return self::NAME_PREFIX . 'get_address_enabled';
     }
+
+    /**
+     * @noinspection PhpMissingParentCallCommonInspection
+     */
+    public static function getDefault(): ?string
+    {
+        return 'yes';
+    }
 }

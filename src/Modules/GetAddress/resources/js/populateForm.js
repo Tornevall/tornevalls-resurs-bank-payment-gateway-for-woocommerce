@@ -185,7 +185,6 @@ const rbHandleFetchAddressResponse = (() => {
         fields?.billing.forEach((obj) => {
             const dataVal = data[obj.name];
             const newVal = typeof dataVal === 'string' ? dataVal : obj.el.value;
-
             // If-statement to avoid populating company field if customer type
             // is "NATURAL".
             if (obj.name === 'fullName') {
@@ -196,6 +195,13 @@ const rbHandleFetchAddressResponse = (() => {
                 }
             } else {
                 obj.el.value = newVal;
+            }
+
+            if (typeof obj.el.parentNode.parentNode.classList === 'object' &&
+                obj.el.parentNode.parentNode.classList.contains('woocommerce-invalid')
+            ) {
+                obj.el.parentNode.parentNode.classList.remove('woocommerce-invalid');
+                obj.el.parentNode.parentNode.classList.remove('woocommerce-invalid-required-field');
             }
         });
     };

@@ -18,10 +18,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order_Item_Product;
 use WC_Product;
-use WC_Tax;
 
-use function array_shift;
-use function is_array;
 use function is_string;
 
 /**
@@ -40,7 +37,7 @@ class Product
             quantityUnit: Translator::translate(
                 phraseId: 'default-quantity-unit'
             ),
-            vatRate: self::getVatRate(product: $product),
+            vatRate: Order::getVatRate(item: $product),
             totalAmountIncludingVat: round(
                 num: self::getSubtotal(
                     product: $product
@@ -53,20 +50,6 @@ class Product
             reference: self::getSku(product: $product),
             type: OrderLineType::NORMAL
         );
-    }
-
-    /**
-     * Get quantity, defaults to 1 because manual refunds may specify 0 which
-     * our API will reject.
-     *
-     * @throws IllegalValueException
-     */
-    public static function getQuantity(
-        WC_Order_Item_Product $product
-    ): float {
-        $result = Order::convertFloat(value: $product->get_quantity());
-
-        return $result === 0.00 ? 1.00 : $result;
     }
 
     /**
@@ -94,29 +77,17 @@ class Product
     }
 
     /**
-     * Resolve order item vat (tax) rate.
+     * Get quantity, defaults to 1 because manual refunds may specify 0 which
+     * our API will reject.
      *
-     * NOTE: This is also utilised by methods which compile discount data.
-     *
-     * @todo WC_Tax::get_rates returning an array suggests there can be several taxes per item, investigate.
+     * @throws IllegalValueException
      */
-    public static function getVatRate(WC_Order_Item_Product $product): float
-    {
-        /* Passing get_tax_class() result without validation since anything it
-           can possibly return should be acceptable to get_rates() */
-        $rates = WC_Tax::get_rates(tax_class: $product->get_tax_class());
+    private static function getQuantity(
+        WC_Order_Item_Product $product
+    ): float {
+        $result = Order::convertFloat(value: $product->get_quantity());
 
-        if (is_array(value: $rates)) {
-            $rates = array_shift(array: $rates);
-        }
-
-        /* Note that the value is rounded since we can sometimes receive values
-           with more than two decimals, but our API expects max two. */
-        return (
-            is_array(value: $rates) &&
-            isset($rates['rate']) &&
-            is_numeric(value: $rates['rate'])
-        ) ? round(num: (float) $rates['rate'], precision: 2) : 0.0;
+        return $result === 0.00 ? 1.00 : $result;
     }
 
     /**

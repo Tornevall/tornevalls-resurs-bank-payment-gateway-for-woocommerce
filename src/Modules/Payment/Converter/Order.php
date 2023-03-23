@@ -11,15 +11,24 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Payment\Converter;
 
-use Exception;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Converter\DiscountItemCollection;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
+use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Fee;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Product;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
 use WC_Abstract_Order;
+use WC_Order_Item;
+use WC_Order_Item_Fee;
 use WC_Order_Item_Product;
+use WC_Order_Item_Shipping;
+use WC_Tax;
 
 use function array_merge;
 use function is_array;
@@ -30,37 +39,22 @@ use function is_array;
 class Order
 {
     /**
+     * @throws ConfigException
+     * @throws FilesystemException
      * @throws IllegalTypeException
-     * @throws Exception
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
      */
     public static function getOrderLines(
         WC_Abstract_Order $order
     ): OrderLineCollection {
-        $result = [];
-        $items = self::getOrderContent(order: $order);
-        $discountCollection = new DiscountItemCollection(data: []);
-
-        /** @var WC_Order_Item_Product $item */
-        foreach ($items as $item) {
-            // Do not trust anonymous arrays.
-            if (!$item instanceof WC_Order_Item_Product) {
-                continue;
-            }
-
-            self::addDiscountData(item: $item, collection: $discountCollection);
-
-            $result[] = Product::toOrderLine(product: $item);
-        }
-
-        // When we filter specific items we do not want to include this.
-        if (Shipping::isAvailable(order: $order)) {
-            $result[] = Shipping::getOrderLine(order: $order);
-        }
-
         return new OrderLineCollection(
             data: array_merge(
-                $result,
-                $discountCollection->getOrderLines()->toArray()
+                self::getProductLines(order: $order),
+                self::getFeeLines(order: $order),
+                self::getShippingLines(order: $order)
             )
         );
     }
@@ -117,6 +111,132 @@ class Order
     }
 
     /**
+     * Resolve order item vat (tax) rate.
+     *
+     * NOTE: This is also utilised by methods which compile discount data.
+     *
+     * @todo WC_Tax::get_rates returning an array suggests there can be several taxes per item, investigate.
+     */
+    public static function getVatRate(WC_Order_Item $item): float
+    {
+        $taxClass = (string) $item->get_tax_class();
+
+        /* Passing get_tax_class() result without validation since anything it
+           can possibly return should be acceptable to get_rates() */
+        $rates = $item instanceof WC_Order_Item_Shipping ?
+            WC_Tax::get_shipping_tax_rates(tax_class: $taxClass) :
+            WC_Tax::get_rates(tax_class: $taxClass);
+
+        if (is_array(value: $rates)) {
+            $rates = array_shift(array: $rates);
+        }
+
+        /* Note that the value is rounded since we can sometimes receive values
+           with more than two decimals, but our API expects max two. */
+        return (
+            is_array(value: $rates) &&
+            isset($rates['rate']) &&
+            is_numeric(value: $rates['rate'])
+        ) ? round(num: (float) $rates['rate'], precision: 2) : 0.0;
+    }
+
+    /**
+     * @throws IllegalValueException
+     */
+    private static function getShippingLines(
+        WC_Abstract_Order $order
+    ): array {
+        $result = [];
+
+        $items = $order->get_items(types: 'shipping');
+
+        if (!is_array(value: $items)) {
+            throw new IllegalValueException(
+                message: 'Failed to resolve shipping from order.'
+            );
+        }
+
+        foreach ($items as $item) {
+            // Do not trust anonymous arrays.
+            if (!$item instanceof WC_Order_Item_Shipping) {
+                continue;
+            }
+
+            $result[] = Shipping::toOrderLine(item: $item);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws TranslationException
+     */
+    private static function getProductLines(
+        WC_Abstract_Order $order
+    ): array {
+        $result = [];
+
+        $items = $order->get_items();
+
+        if (!is_array(value: $items)) {
+            throw new IllegalValueException(
+                message: 'Failed to resolve items from order.'
+            );
+        }
+
+        $discountCollection = new DiscountItemCollection(data: []);
+
+        foreach ($items as $item) {
+            // Do not trust anonymous arrays.
+            if (!$item instanceof WC_Order_Item_Product) {
+                continue;
+            }
+
+            self::addDiscountData(item: $item, collection: $discountCollection);
+
+            $result[] = Product::toOrderLine(product: $item);
+        }
+
+        return array_merge(
+            $result,
+            $discountCollection->getOrderLines()->toArray()
+        );
+    }
+
+    /**
+     * @throws IllegalValueException
+     */
+    private static function getFeeLines(
+        WC_Abstract_Order $order
+    ): array {
+        $result = [];
+        $items = $order->get_fees();
+
+        if (!is_array(value: $items)) {
+            throw new IllegalValueException(
+                message: 'Failed to resolve fees from order.'
+            );
+        }
+
+        foreach ($items as $item) {
+            // Do not trust anonymous arrays.
+            if (!$item instanceof WC_Order_Item_Fee) {
+                continue;
+            }
+
+            $result[] = Fee::toOrderLine(fee: $item);
+        }
+
+        return $result;
+    }
+
+    /**
      * @throws IllegalTypeException
      * @throws IllegalValueException
      */
@@ -141,28 +261,8 @@ class Order
 
         // Create new rate group / append amount to existing rate group.
         $collection->addRateData(
-            rate: Product::getVatRate(product: $item),
+            rate: self::getVatRate(item: $item),
             amount: $subtotal + $subtotalVat - $total - $totalVat
         );
-    }
-
-    /**
-     * Wrapper to safely resolve order content.
-     *
-     * @return array<array-key, mixed>
-     * @throws IllegalValueException
-     */
-    private static function getOrderContent(
-        WC_Abstract_Order $order
-    ): array {
-        $result = $order->get_items();
-
-        if (!is_array(value: $result)) {
-            throw new IllegalValueException(
-                message: 'Failed to resolve items from order.'
-            );
-        }
-
-        return $result;
     }
 }

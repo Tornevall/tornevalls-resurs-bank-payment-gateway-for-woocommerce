@@ -14,41 +14,41 @@ use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Translator;
-use WC_Order_Item_Shipping;
+use WC_Order_Item_Fee;
 
 /**
- * Convert WC_Order_Item_Shipping to OrderLine.
+ * Convert WC_Order_Item_Fee to OrderLine.
  */
-class Shipping
+class Fee
 {
     /**
      * @throws IllegalValueException
      */
-    public static function toOrderLine(WC_Order_Item_Shipping $item): OrderLine
-    {
+    public static function toOrderLine(
+        WC_Order_Item_Fee $fee
+    ): OrderLine {
         return new OrderLine(
-            quantity: 1,
+            quantity: 1.00,
             quantityUnit: Translator::translate(
                 phraseId: 'default-quantity-unit'
             ),
-            vatRate: Order::getVatRate(item: $item),
+            vatRate: Order::getVatRate(item: $fee),
             totalAmountIncludingVat: round(
-                num: self::getSubtotal(item: $item) +
-                    self::getSubtotalVat(item: $item),
+                num: self::getSubtotal(fee: $fee) +
+                    self::getSubtotalVat(fee: $fee),
                 precision: 2
             ),
-            description: (string) $item->get_method_title(),
+            description: Translator::translate(phraseId: 'fee'),
             reference: self::getReference(),
-            type: OrderLineType::SHIPPING
+            type: OrderLineType::FEE
         );
     }
 
     /**
-     * Since there is nothing unique guaranteed to us to separate shipping
-     * methods we will suffix the reference with a timestamp. For example, you
-     * could apply two Flat Rate options, with the same amount, and the item id
-     * is not available to us during checkout. Thus, none of these values can be
-     * utilised to create a unique payment line.
+     * Since there is nothing unique guaranteed to us to separate fees, we will
+     * suffix the reference with a timestamp. For example, you could apply two
+     * fees with the same amount, thus there would nothing to help us separate
+     * them into unique lines of the payment.
      *
      * When we modify a payment we will cancel all existing lines, so it won't
      * matter that we reference the payment line this way as we never need to
@@ -57,28 +57,30 @@ class Shipping
      */
     private static function getReference(): string
     {
-        return 'shipping-' . time();
+        return 'fee-' . time();
     }
 
     /**
-     * Get total of shipping item, excluding tax.
+     * Get total of all fee prices, excluding tax.
+     *
+     * NOTE: This is also utilised by methods to compile discount.
      *
      * @throws IllegalValueException
      */
     private static function getSubtotal(
-        WC_Order_Item_Shipping $item
+        WC_Order_Item_Fee $fee
     ): float {
-        return Order::convertFloat(value: $item->get_total());
+        return Order::convertFloat(value: $fee->get_amount());
     }
 
     /**
-     * Get item subtotal VAT amount.
+     * Get fee subtotal VAT amount.
      *
      * @throws IllegalValueException
      */
     private static function getSubtotalVat(
-        WC_Order_Item_Shipping $item
+        WC_Order_Item_Fee $fee
     ): float {
-        return Order::convertFloat(value: $item->get_total_tax());
+        return Order::convertFloat(value: $fee->get_total_tax());
     }
 }

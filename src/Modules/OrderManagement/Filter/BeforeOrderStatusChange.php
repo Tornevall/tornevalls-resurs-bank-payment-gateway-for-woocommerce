@@ -64,15 +64,17 @@ class BeforeOrderStatusChange
         }
 
         OrderManagement::logError(
-            order: $order,
             message: sprintf(
                 Translator::translate(phraseId: 'failed-order-status-change'),
-                self::stripStatusPrefix(status: $wcStatus),
-                $newStatus
+                self::getOrderStatusName(
+                    status: self::stripStatusPrefix(status: $wcStatus)
+                ),
+                self::getOrderStatusName(status: $newStatus)
             ),
             error: new IllegalValueException(
                 message: "Failed changing order status from $wcStatus to $newStatus for $post->ID"
-            )
+            ),
+            order: $order
         );
 
         Route::redirectBack();
@@ -122,5 +124,19 @@ class BeforeOrderStatusChange
         }
 
         return $result;
+    }
+
+    /**
+     * Type-safe wrapper for wc_get_order_status_name.
+     */
+    private static function getOrderStatusName(string $status): string
+    {
+        $name = wc_get_order_status_name(status: $status);
+
+        if (!is_string(value: $name)) {
+            return $status;
+        }
+
+        return $name;
     }
 }
