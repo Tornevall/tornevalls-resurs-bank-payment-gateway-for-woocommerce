@@ -13,6 +13,7 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
+use Resursbank\Woocommerce\Modules\Order\Filter\Failure;
 use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint;
@@ -34,6 +35,7 @@ class Frontend
         Gateway::initFrontend();
         CustomerType::init();
         ThankYou::init();
+        Failure::init();
         PartPayment::initFrontend();
         GetAddress::setup();
         UniqueSellingPoint::init();
