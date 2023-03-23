@@ -160,7 +160,6 @@ class Order
 
         $discountCollection = new DiscountItemCollection(data: []);
 
-        /** @var WC_Order_Item_Product $item */
         foreach ($items as $item) {
             // Do not trust anonymous arrays.
             if (!$item instanceof WC_Order_Item_Product) {
