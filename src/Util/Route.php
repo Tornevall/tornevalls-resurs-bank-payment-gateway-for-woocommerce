@@ -213,10 +213,29 @@ class Route
      *
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.ExitExpression)
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
-    public static function redirectBack(): void
-    {
-        header(header: 'Location: ' . $_SERVER['HTTP_REFERER']);
+    public static function redirectBack(
+        bool $admin = true
+    ): void {
+        $url = $_SERVER['HTTP_REFERER'] ?? '';
+
+        try {
+            $default = self::getUrl(route: '', admin: $admin);
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+            $default = (string) get_site_url();
+        }
+
+        if (
+            !is_string(value: $url) ||
+            $url === '' ||
+            !filter_var(value: $url, filter: FILTER_VALIDATE_URL)
+        ) {
+            $url = $default;
+        }
+
+        header(header: 'Location: ' . $url);
         exit;
     }
 

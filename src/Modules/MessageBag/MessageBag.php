@@ -72,9 +72,9 @@ class MessageBag
         try {
             if (Admin::isAdmin()) {
                 $bag = self::getBag();
-                $bag->offsetSet(offset: null, value: $messageInstance);
 
                 if (!self::isInBag(message: $message, bag: $bag)) {
+                    $bag->offsetSet(offset: null, value: $messageInstance);
                     self::updateBag(bag: $bag);
                 }
             } elseif (function_exists(function: 'wc_add_notice')) {
