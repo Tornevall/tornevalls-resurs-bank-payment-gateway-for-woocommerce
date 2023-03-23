@@ -38,26 +38,9 @@ class Shipping
                 precision: 2
             ),
             description: (string) $item->get_method_title(),
-            reference: self::getReference(),
+            reference: 'shipping',
             type: OrderLineType::SHIPPING
         );
-    }
-
-    /**
-     * Since there is nothing unique guaranteed to us to separate shipping
-     * methods we will suffix the reference with a timestamp. For example, you
-     * could apply two Flat Rate options, with the same amount, and the item id
-     * is not available to us during checkout. Thus, none of these values can be
-     * utilised to create a unique payment line.
-     *
-     * When we modify a payment we will cancel all existing lines, so it won't
-     * matter that we reference the payment line this way as we never need to
-     * identify the relationship between the WC order and the payment at
-     * Resurs Bank.
-     */
-    private static function getReference(): string
-    {
-        return 'shipping-' . time();
     }
 
     /**
