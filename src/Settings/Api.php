@@ -14,11 +14,15 @@ use Resursbank\Ecom\Lib\Api\GrantType;
 use Resursbank\Ecom\Lib\Api\Scope;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Lib\Repository\Api\Mapi\GenerateToken;
+use Resursbank\Ecom\Module\Store\Models\Store;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
@@ -63,6 +67,7 @@ class Api
                 'environment' => self::getEnvironment(),
                 'client_id' => self::getClientId(),
                 'client_secret' => self::getClientSecret(),
+                'store_id' => self::getStoreIdSetting(),
             ],
         ];
     }
@@ -169,5 +174,45 @@ class Api
             'type' => 'password',
             'default' => ClientSecret::getDefault(),
         ];
+    }
+
+    /**
+     * Get the array for Store ID selector setting.
+     */
+    private static function getStoreIdSetting(): array
+    {
+        $result = [
+            'id' => StoreId::getName(),
+            'type' => 'select',
+            'title' => Translator::translate(phraseId: 'store-id'),
+        ];
+
+        $options = [
+            '' => Translator::translate(phraseId: 'please-select'),
+        ];
+
+        try {
+            /** @var Store $store */
+            foreach (StoreRepository::getStores() as $store) {
+                $options[$store->id] = $store->nationalStoreId . ': ' . $store->name;
+            }
+
+            // Both can cause Throwable, do them one at a time.
+            $result['default'] = StoreId::getDefault();
+            $result['options'] = $options;
+        } catch (Throwable $error) {
+            $result = array_merge($result, [
+                'type' => 'text',
+                'custom_attributes' => [
+                    'readonly' => 'readonly',
+                ],
+                'value' => Translator::translate(phraseId: 'get-stores-failed'),
+                'css' => 'border: none; width: 100%; background: transparent; color: #d63638; box-shadow: none;',
+            ]);
+
+            Log::error(error: $error);
+        }
+
+        return $result;
     }
 }

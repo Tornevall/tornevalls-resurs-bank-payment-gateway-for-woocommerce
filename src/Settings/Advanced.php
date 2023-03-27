@@ -9,31 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
-use Resursbank\Ecom\Module\Store\Models\Store;
-use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
-use Throwable;
 
 /**
  * Advanced settings section.
@@ -62,7 +44,6 @@ class Advanced
     {
         return [
             self::SECTION_ID => [
-                'store_id' => self::getStoreIdSetting(),
                 'log_dir' => self::getLogDirSetting(),
                 'log_level' => self::getLogLevelSetting(),
                 'cache_enabled' => self::getCacheEnabled(),
@@ -86,77 +67,6 @@ class Advanced
         }
 
         return $options;
-    }
-
-    /**
-     * Render an array with available stores for a merchant, based on their national store id as this is shorter
-     * than the full store uuid. The national id is a human-readable variant of the uuid.
-     *
-     * @return array
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws Throwable
-     * @throws ValidationException
-     */
-    private static function getStoreSelector(): array
-    {
-        $clientId = ClientId::getData();
-        $clientSecret = ClientSecret::getData();
-
-        // Default for multiple stores: avoid auto-selecting first store.
-        $return = [
-            '' => Translator::translate(phraseId: 'please-select'),
-        ];
-
-        if ($clientId !== '' && $clientSecret !== '') {
-            try {
-                $return = array_merge($return, self::getStores());
-            } catch (Throwable $exception) {
-                MessageBag::addError(
-                    message: Translator::translate(
-                        phraseId: 'get-stores-failed'
-                    )
-                );
-                // Make sure we give the options array a chance to render an error instead of the fields so ensure
-                // the setting won't be saved by mistake when APIs are down.
-                throw $exception;
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Fetch array of stores for store selector.
-     *
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
-     */
-    private static function getStores(): array
-    {
-        $stores = [];
-
-        /** @var Store $store */
-        foreach (StoreRepository::getStores() as $store) {
-            $stores[$store->id] = $store->nationalStoreId . ': ' . $store->name;
-        }
-
-        return $stores;
     }
 
     /**
@@ -229,38 +139,5 @@ class Advanced
             'desc' => '',
             'default' => EnableGetAddress::getDefault(),
         ];
-    }
-
-    /**
-     * Get the array for Store ID selector setting.
-     */
-    private static function getStoreIdSetting(): array
-    {
-        $result = [
-            'id' => StoreId::getName(),
-            'type' => 'select',
-            'title' => Translator::translate(phraseId: 'store-id'),
-        ];
-
-        try {
-            // Both can cause Throwable, do them one at a time.
-            $result['default'] = StoreId::getDefault();
-            $result['options'] = self::getStoreSelector();
-        } catch (Throwable $e) {
-            $result = array_merge($result, [
-                'type' => 'text',
-                'custom_attributes' => [
-                    'readonly' => 'readonly',
-                ],
-            ]);
-
-            // @todo Error message displayed in admin trails one page load. See SettingsPage.php :: renderButton for fix
-            Log::error(
-                error: $e,
-                message: Translator::translate(phraseId: 'get-stores-failed')
-            );
-        }
-
-        return $result;
     }
 }
