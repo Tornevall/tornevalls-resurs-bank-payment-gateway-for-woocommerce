@@ -47,7 +47,7 @@ class Order
      * @throws ReflectionException
      * @throws TranslationException
      */
-    public static function getOrderLines(
+    public static function geOrderLines(
         WC_Abstract_Order $order
     ): OrderLineCollection {
         return new OrderLineCollection(
@@ -75,7 +75,10 @@ class Order
             );
         }
 
-        return round(num: abs(num: (float) $value), precision: 2);
+        return round(
+            num: abs(num: (float) $value),
+            precision: 2
+        );
     }
 
     /**
