@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Callback;
 
 use Resursbank\Ecom\Exception\CallbackException;
+use Resursbank\Ecom\Lib\Model\Callback\Authorization as AuthorizationModel;
 use Resursbank\Ecom\Lib\Model\Callback\CallbackInterface;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Callback\Repository;
@@ -78,6 +79,10 @@ class Callback
                         $order = CallbackModule::getOrder(
                             paymentId: $callback->getPaymentId()
                         );
+
+                        if ($callback instanceof AuthorizationModel) {
+                            $order->add_order_note(note: $callback->getNote());
+                        }
 
                         $controller->updateOrderStatus(order: $order);
                     }
