@@ -38,8 +38,7 @@ use Throwable;
 /**
  * Advanced settings section.
  *
- * @todo Translations should be moved to ECom. See WOO-802 & ECP-205.
- * @todo Directory validation should be centralised in ECom. See WOO-803 & ECP-202.
+ ** @todo Directory validation should be centralised in ECom. See WOO-803 & ECP-202.
  */
 class Advanced
 {
@@ -69,64 +68,8 @@ class Advanced
                 'cache_enabled' => self::getCacheEnabled(),
                 'invalidate_cache' => self::getInvalidateCacheButton(),
                 'get_address_enabled' => self::getGetAddressEnabled(),
-                'authorization_callback_url' => self::getAuthorizationCallbackUrl(),
-                'management_callback_url' => self::getManagementCallbackUrl(),
             ],
         ];
-    }
-
-    /**
-     * Return field to display authorization callback URL template.
-     */
-    public static function getAuthorizationCallbackUrl(): array
-    {
-        $result = [];
-
-        try {
-            $result = [
-                'id' => self::NAME_PREFIX . 'authorization_callback_url',
-                'type' => 'div_callback_authorization',
-                'title' => Translator::translate(
-                    phraseId: 'callback-url-authorization'
-                ),
-            ];
-        } catch (Throwable $e) {
-            Log::error(
-                error: $e,
-                message: Translator::translate(
-                    phraseId: 'generate-callback-template-failed'
-                )
-            );
-        }
-
-        return $result;
-    }
-
-    /**
-     * Return field to display management callback URL template.
-     */
-    public static function getManagementCallbackUrl(): array
-    {
-        $result = [];
-
-        try {
-            $result = [
-                'id' => self::NAME_PREFIX . 'management_callback_url',
-                'type' => 'div_callback_management',
-                'title' => Translator::translate(
-                    phraseId: 'callback-url-management'
-                ),
-            ];
-        } catch (Throwable $e) {
-            Log::error(
-                error: $e,
-                message: Translator::translate(
-                    phraseId: 'generate-callback-template-failed'
-                )
-            );
-        }
-
-        return $result;
     }
 
     /**
@@ -311,7 +254,7 @@ class Advanced
                 ],
             ]);
 
-            // @todo Error message displayed in admin trails one page load.
+            // @todo Error message displayed in admin trails one page load. See SettingsPage.php :: renderButton for fix
             Log::error(
                 error: $e,
                 message: Translator::translate(phraseId: 'get-stores-failed')

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Api;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
@@ -21,7 +22,6 @@ use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
-use Resursbank\Exception\MapiCredentialsException;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
@@ -83,16 +83,14 @@ class Connection
     }
 
     /**
-     * @throws MapiCredentialsException
+     * @throws AuthException
      * @throws EmptyValueException
      * @throws ValueError
      */
     public static function getJwt(): ?Jwt
     {
         if (!self::hasCredentials()) {
-            throw new MapiCredentialsException(
-                message: 'Credentials are not set.'
-            );
+            throw new AuthException(message: 'Credentials are not set.');
         }
 
         return new Jwt(

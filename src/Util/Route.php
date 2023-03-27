@@ -13,12 +13,15 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
+use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
+use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Resursbank\Woocommerce\Settings\Advanced;
+use Resursbank\Woocommerce\Settings\Callback;
 use Throwable;
 
 use function is_string;
@@ -62,8 +65,19 @@ class Route
     public const ROUTE_ADMIN_CACHE_INVALIDATE = 'admin-cache-invalidate';
 
     /**
+     * Route to admin controller which triggers test callback.
+     */
+    public const ROUTE_ADMIN_TRIGGER_TEST_CALLBACK = 'admin-trigger-test-callback';
+
+    /**
+     * Route to controller accepting test callback from Resurs Bank.
+     */
+    public const ROUTE_TEST_CALLBACK_RECEIVED = 'test-callback-received';
+
+    /**
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.ExitExpression)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public static function exec(): void
     {
@@ -93,6 +107,16 @@ class Route
                 case self::ROUTE_ADMIN_CACHE_INVALIDATE:
                     Invalidate::exec();
                     self::redirectToSettings(tab: Advanced::SECTION_ID);
+                    break;
+
+                case self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK:
+                    TestTrigger::exec();
+                    self::redirectToSettings(tab: Callback::SECTION_ID);
+                    break;
+
+                case self::ROUTE_TEST_CALLBACK_RECEIVED:
+                    TestReceived::exec();
+                    self::respondWithExit(body: '');
                     break;
 
                 default:
