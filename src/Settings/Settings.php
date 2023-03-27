@@ -55,20 +55,6 @@ class Settings
             accepted_args: 2
         );
 
-        add_action(
-            hook_name: 'woocommerce_admin_field_div_callback_management',
-            callback: 'Resursbank\Woocommerce\Settings\Callback::renderManagementUrl',
-            priority: 10,
-            accepted_args: 2
-        );
-
-        add_action(
-            hook_name: 'woocommerce_admin_field_div_callback_authorization',
-            callback: 'Resursbank\Woocommerce\Settings\Callback::renderAuthorizationUrl',
-            priority: 10,
-            accepted_args: 2
-        );
-
         AddDocumentationLink::register();
     }
 

@@ -27,7 +27,7 @@ class TestTrigger
     {
         try {
             $response = Repository::triggerTest(
-                url: Route::ROUTE_TEST_CALLBACK_RECEIVED
+                url: Route::getUrl(route: Route::ROUTE_TEST_CALLBACK_RECEIVED)
             );
 
             if ($response->status !== TestStatus::OK) {

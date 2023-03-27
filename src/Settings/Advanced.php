@@ -38,8 +38,7 @@ use Throwable;
 /**
  * Advanced settings section.
  *
- * @todo Translations should be moved to ECom. See WOO-802 & ECP-205.
- * @todo Directory validation should be centralised in ECom. See WOO-803 & ECP-202.
+ ** @todo Directory validation should be centralised in ECom. See WOO-803 & ECP-202.
  */
 class Advanced
 {
@@ -255,7 +254,7 @@ class Advanced
                 ],
             ]);
 
-            // @todo Error message displayed in admin trails one page load.
+            // @todo Error message displayed in admin trails one page load. See SettingsPage.php :: renderButton for fix
             Log::error(
                 error: $e,
                 message: Translator::translate(phraseId: 'get-stores-failed')

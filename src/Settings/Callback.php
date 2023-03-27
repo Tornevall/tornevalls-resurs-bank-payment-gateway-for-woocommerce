@@ -27,24 +27,6 @@ class Callback
     public const NAME_PREFIX = 'resursbank_';
 
     /**
-     * Echo HTMl element displaying the URL template, utilized by Resurs Bank,
-     * for order management callbacks.
-     */
-    public static function renderManagementUrl(): void
-    {
-        self::renderCallbackUrl(type: CallbackType::MANAGEMENT);
-    }
-
-    /**
-     * Echo HTMl element displaying the URL template, utilized by Resurs Bank,
-     * for authorization (checkout) callbacks.
-     */
-    public static function renderAuthorizationUrl(): void
-    {
-        self::renderCallbackUrl(type: CallbackType::AUTHORIZATION);
-    }
-
-    /**
      * Get translated title of tab.
      */
     public static function getTitle(): string
@@ -62,82 +44,46 @@ class Callback
             self::SECTION_ID => [
                 'test_button' => self::getTestButton(),
                 'test_received_at' => self::getTestReceivedAt(),
-                'authorization_callback_url' => self::getAuthorizationUrl(),
-                'management_callback_url' => self::getManagementUrl(),
+                'authorization_callback_url' => self::getUrl(
+                    type: CallbackType::AUTHORIZATION
+                ),
+                'management_callback_url' => self::getUrl(
+                    type: CallbackType::MANAGEMENT
+                ),
             ],
         ];
     }
 
     /**
-     * Return field to display authorization callback URL template.
+     * Return URL utilised by Resurs Bank to execute callbacks.
      */
-    public static function getAuthorizationUrl(): array
-    {
-        $result = [];
-
-        try {
-            $result = [
-                'id' => self::NAME_PREFIX . 'authorization_callback_url',
-                'type' => 'div_callback_authorization',
-            ];
-        } catch (Throwable $e) {
-            Log::error(
-                error: $e,
-                message: Translator::translate(
-                    phraseId: 'generate-callback-template-failed'
-                )
-            );
-        }
-
-        return $result;
-    }
-
-    /**
-     * Return field to display management callback URL template.
-     */
-    public static function getManagementUrl(): array
-    {
-        $result = [];
-
-        try {
-            $result = [
-                'id' => self::NAME_PREFIX . 'management_callback_url',
-                'type' => 'div_callback_management',
-            ];
-        } catch (Throwable $e) {
-            Log::error(
-                error: $e,
-                message: Translator::translate(
-                    phraseId: 'generate-callback-template-failed'
-                )
-            );
-        }
-
-        return $result;
-    }
-
-    /**
-     * Render HTML element displaying URL template utilized for callbacks by
-     * Resurs Bank.
-     */
-    private static function renderCallbackUrl(
+    public static function getUrl(
         CallbackType $type
-    ): void {
+    ): array {
         try {
-            $title = Translator::translate(
-                phraseId: "callback-url-$type->value"
-            );
+            $typeValue = strtolower(string: $type->value);
+            $title = Translator::translate(phraseId: "callback-url-$typeValue");
 
-            echo wp_kses(
-                string: '<table class="form-table"><th scope="row">' . $title . '</th><td>' .
-                Url::getCallbackUrl(
-                    type: $type
-                ) . '</td></table>',
-                allowed_html: ['table' => ['class' => []], 'th' => ['scope' => []], 'td' => []]
-            );
+            return [
+                'id' => self::NAME_PREFIX . $typeValue . '_callback_url',
+                'type' => 'text',
+                'custom_attributes' => [
+                    'readonly' => 'readonly',
+                ],
+                'title' => $title,
+                'value' => Url::getCallbackUrl(type: $type),
+                'css' => 'border: none; width: 100%;',
+            ];
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Log::error(
+                error: $error,
+                message: Translator::translate(
+                    phraseId: 'generate-callback-template-failed'
+                )
+            );
         }
+
+        return [];
     }
 
     /**
@@ -157,6 +103,9 @@ class Callback
      */
     private static function getTestReceivedAt(): array
     {
+        $time = TestReceivedAt::getData();
+        $date = $time > 0 ? date(format: 'Y-m-d H:i:s', timestamp: $time) : '';
+
         return [
             'id' => TestReceivedAt::getName(),
             'type' => 'text',
@@ -166,6 +115,8 @@ class Callback
             'title' => Translator::translate(
                 phraseId: 'callback-test-received-at'
             ),
+            'value' => $date,
+            'css' => 'border: none; width: 100%;',
         ];
     }
 }
