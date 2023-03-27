@@ -35,7 +35,7 @@ class Shipping
             totalAmountIncludingVat: round(
                 num: self::getSubtotal(item: $item) +
                     self::getSubtotalVat(item: $item),
-                precision: Order::getConfiguredDecimalPoints()
+                precision: 2
             ),
             description: (string) $item->get_method_title(),
             reference: self::getReference(),

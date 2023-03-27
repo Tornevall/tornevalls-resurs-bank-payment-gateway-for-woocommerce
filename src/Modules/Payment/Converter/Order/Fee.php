@@ -36,7 +36,7 @@ class Fee
             totalAmountIncludingVat: round(
                 num: self::getSubtotal(fee: $fee) +
                     self::getSubtotalVat(fee: $fee),
-                precision: Order::getConfiguredDecimalPoints()
+                precision: 2
             ),
             description: Translator::translate(phraseId: 'fee'),
             reference: self::getReference(),
