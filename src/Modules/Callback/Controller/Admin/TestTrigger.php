@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Callback\Controller\Admin;
 
+use Resursbank\Ecom\Exception\CallbackException;
+use Resursbank\Ecom\Lib\Model\Callback\Enum\TestStatus;
 use Resursbank\Ecom\Module\Callback\Repository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
@@ -24,7 +26,15 @@ class TestTrigger
     public static function exec(): void
     {
         try {
-            Repository::triggerTest(url: Route::ROUTE_TEST_CALLBACK_RECEIVED);
+            $response = Repository::triggerTest(
+                url: Route::ROUTE_TEST_CALLBACK_RECEIVED
+            );
+
+            if ($response->status !== TestStatus::OK) {
+                throw new CallbackException(
+                    message: 'Test callback failed with status ' . $response->status->value . " ($response->code)"
+                );
+            }
 
             MessageBag::addSuccess(
                 message: Translator::translate(
