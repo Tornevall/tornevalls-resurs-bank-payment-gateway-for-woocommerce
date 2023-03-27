@@ -85,7 +85,8 @@ class PartPayment
             amount: (float)self::getProduct()->get_price(),
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
-            apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
+            apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
+            decimals: Currency::getConfiguredDecimalPoints()
         );
 
         return self::$instance;

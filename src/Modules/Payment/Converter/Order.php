@@ -75,7 +75,10 @@ class Order
             );
         }
 
-        return round(num: abs(num: (float) $value), precision: 2);
+        return round(
+            num: abs(num: (float) $value),
+            precision: 2
+        );
     }
 
     /**
