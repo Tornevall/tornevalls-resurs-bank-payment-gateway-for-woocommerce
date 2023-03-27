@@ -68,11 +68,11 @@ class Callback
                 'id' => self::NAME_PREFIX . $typeValue . '_callback_url',
                 'type' => 'text',
                 'custom_attributes' => [
-                    'readonly' => 'readonly',
+                    'disabled' => true,
                 ],
                 'title' => $title,
                 'value' => Url::getCallbackUrl(type: $type),
-                'css' => 'border: none; width: 100%;',
+                'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
             ];
         } catch (Throwable $error) {
             Log::error(
@@ -110,13 +110,13 @@ class Callback
             'id' => TestReceivedAt::getName(),
             'type' => 'text',
             'custom_attributes' => [
-                'readonly' => 'readonly',
+                'disabled' => true,
             ],
             'title' => Translator::translate(
                 phraseId: 'callback-test-received-at'
             ),
             'value' => $date,
-            'css' => 'border: none; width: 100%;',
+            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
         ];
     }
 }
