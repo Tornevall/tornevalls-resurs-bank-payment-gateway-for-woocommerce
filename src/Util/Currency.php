@@ -85,26 +85,24 @@ class Currency
      */
     public static function getConfiguredDecimalPoints(): int
     {
-        $configuredDecimalPoints = get_option(
-            option: 'woocommerce_price_num_decimals'
-        );
+        $points = get_option(option: 'woocommerce_price_num_decimals');
 
-        if ($configuredDecimalPoints === false) {
+        if ($points === false) {
             return 2;
         }
 
-        if (is_string(value: $configuredDecimalPoints)) {
-            $configuredDecimalPoints = (int)$configuredDecimalPoints;
+        if (is_string(value: $points)) {
+            $points = (int)$points;
         }
 
-        if ($configuredDecimalPoints < 0) {
+        if ($points < 0) {
             return 0;
         }
 
-        if ($configuredDecimalPoints > 2) {
+        if ($points > 2) {
             return 2;
         }
 
-        return $configuredDecimalPoints;
+        return $points;
     }
 }
