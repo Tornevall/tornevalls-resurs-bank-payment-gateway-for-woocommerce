@@ -71,7 +71,7 @@ class Currency
 
         $total = number_format(
             num: $amount,
-            decimals: Order::getConfiguredDecimalPoints(),
+            decimals: self::getConfiguredDecimalPoints(),
             decimal_separator: ',',
             thousands_separator: ''
         );

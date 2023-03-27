@@ -47,7 +47,7 @@ class Order
      * @throws ReflectionException
      * @throws TranslationException
      */
-    public static function getOrderLines(
+    public static function geOrderLines(
         WC_Abstract_Order $order
     ): OrderLineCollection {
         return new OrderLineCollection(
