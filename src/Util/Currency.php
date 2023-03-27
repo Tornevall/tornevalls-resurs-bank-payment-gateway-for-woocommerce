@@ -79,4 +79,33 @@ class Currency
         return self::getEcomCurrencyFormat() === CurrencyFormat::SYMBOL_FIRST ?
             $currencySymbol . ' ' . $total : $total . ' ' . $currencySymbol;
     }
+
+    /**
+     * Fetch configured number of decimals to use for prices. Will not accept values outside the 0-2 range. If no
+     * configured value found the default response is 2.
+     */
+    public static function getConfiguredDecimalPoints(): int
+    {
+        $configuredDecimalPoints = get_option(
+            option: 'woocommerce_price_num_decimals'
+        );
+
+        if ($configuredDecimalPoints === false) {
+            return 2;
+        }
+
+        if (is_string(value: $configuredDecimalPoints)) {
+            $configuredDecimalPoints = (int)$configuredDecimalPoints;
+        }
+
+        if ($configuredDecimalPoints < 0) {
+            return 0;
+        }
+
+        if ($configuredDecimalPoints > 2) {
+            return 2;
+        }
+
+        return $configuredDecimalPoints;
+    }
 }
