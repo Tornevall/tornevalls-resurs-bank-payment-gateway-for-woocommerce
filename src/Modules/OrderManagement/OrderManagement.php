@@ -19,10 +19,13 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
+use Resursbank\Ecom\Lib\Api\MerchantPortal;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
+use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -285,7 +288,17 @@ class OrderManagement
     ): void {
         Log::error(error: $error);
         MessageBag::addError(message: $message);
-        $order?->add_order_note(note: $message);
+
+        if ($order === null) {
+            return;
+        }
+
+        $url = Environment::getData() === EnvironmentEnum::PROD ?
+            MerchantPortal::PROD :
+            MerchantPortal::TEST;
+
+        $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
+        $order->add_order_note(note: $message);
     }
 
     /**
