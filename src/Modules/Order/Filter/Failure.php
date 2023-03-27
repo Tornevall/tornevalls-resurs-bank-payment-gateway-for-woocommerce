@@ -64,8 +64,8 @@ class Failure
 
             $message .= ' ';
             $message .= $task->completed ?
-                Translator::translate(phraseId: 'payment-cancelled-try-again') :
-                Translator::translate(phraseId: 'payment-failed-try-again');
+                Translator::translate(phraseId: 'payment-failed-try-again') :
+                Translator::translate(phraseId: 'payment-cancelled-try-again');
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
