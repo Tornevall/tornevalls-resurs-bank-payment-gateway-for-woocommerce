@@ -77,7 +77,7 @@ class Order
 
         return round(
             num: abs(num: (float) $value),
-            precision: self::getConfiguredDecimalPoints()
+            precision: 2
         );
     }
 
