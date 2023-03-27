@@ -1,11 +1,11 @@
 === Resurs Bank Payments for WooCommerce ===
-Contributors: Tornevall
+Contributors: RB-Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, checkout, hosted, simplified, hosted flow, simplified flow
 Requires at least: 5.5
 Tested up to: 6.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
-Plugin URI: https://github.com/Tornevall/tornevalls-resurs-bank-payment-gateway-for-woocommerce
+Stable tag: 0.0.1
+Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,7 @@ Resurs Bank Payment Gateway for WooCommerce.
 
 == Description ==
 
-Payment gateway for Resurs Bank in WooCommerce.
+Payment gateway for Resurs Bank in WooCommerce. MAPI Edition (meaning simplified-SOAP, hosted flow and RCO has been removed from this release). See below.
 
 *Please read the warning notes about testing and installing this plugin directly in a production environment below.*
 
@@ -62,7 +62,7 @@ In the documentation of Resurs.
 
 = Can I upgrade from version 2.2.x? =
 
-No.
+No. This plugin package is a separate new installation. The old plugin should, if you have it active, be disabled before this installation. Old payments from the prior plugin is however compatible in this release.
 
 == Screenshots ==
 

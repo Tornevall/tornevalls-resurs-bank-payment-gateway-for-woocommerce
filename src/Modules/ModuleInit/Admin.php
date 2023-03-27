@@ -16,6 +16,7 @@ use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod;
+use Resursbank\Woocommerce\Settings\Filter\TestCallbackButton;
 use Resursbank\Woocommerce\Settings\Settings;
 
 /**
@@ -32,6 +33,7 @@ class Admin
         // it's inactivated.
         Settings::init();
         InvalidateCacheButton::init();
+        TestCallbackButton::init();
         PartPayment::initAdmin();
         PartPaymentPeriod::init();
         add_action(

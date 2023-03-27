@@ -13,11 +13,13 @@ use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
+use Resursbank\Woocommerce\Settings\Callback;
 use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use RuntimeException;
 use Throwable;
@@ -45,6 +47,34 @@ class SettingsPage extends WC_Settings_Page
     }
 
     /**
+     * Callback function for rendering custom button element.
+     */
+    public static function renderButton(
+        string $route,
+        string $title,
+        string $error
+    ): void {
+        $element = '<div class="error notice" style="padding: 10px;">' . $error . '</div>';
+
+        try {
+            $element = '<a class="button-primary" href="' .
+                Route::getUrl(route: $route, admin: true) .
+                '">' . $title . '</a>';
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+
+        echo <<<EX
+<tr>
+  <th scope="row" class="titledesc" />
+  <td class="forminp">
+    $element
+  </td>
+</tr>
+EX;
+    }
+
+    /**
      * Method is required by Woocommerce to render tab sections.
      *
      * NOTE: Suppressing PHPCS because we cannot name method properly (parent).
@@ -61,6 +91,7 @@ class SettingsPage extends WC_Settings_Page
             PartPayment::SECTION_ID => PartPayment::getTitle(),
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
             Advanced::SECTION_ID => Advanced::getTitle(),
+            Callback::SECTION_ID => Callback::getTitle(),
         ];
     }
 

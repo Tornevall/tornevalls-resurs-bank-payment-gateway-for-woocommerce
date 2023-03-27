@@ -55,11 +55,6 @@ class MessageBag
     // phpcs:ignore
     public static function add(string $message, Type $type): void
     {
-        if (defined(constant_name: 'DOING_AJAX')) {
-            // No way of handling messages in AJAX requests.
-            return;
-        }
-
         try {
             $messageInstance = new Message(message: $message, type: $type);
         } catch (EmptyValueException) {
@@ -71,6 +66,11 @@ class MessageBag
 
         try {
             if (Admin::isAdmin()) {
+                if (defined(constant_name: 'DOING_AJAX')) {
+                    // No way of handling messages in AJAX requests.
+                    return;
+                }
+
                 $bag = self::getBag();
 
                 if (!self::isInBag(message: $message, bag: $bag)) {

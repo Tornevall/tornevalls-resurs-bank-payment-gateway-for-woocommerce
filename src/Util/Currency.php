@@ -70,12 +70,39 @@ class Currency
 
         $total = number_format(
             num: $amount,
-            decimals: 2,
+            decimals: self::getConfiguredDecimalPoints(),
             decimal_separator: ',',
             thousands_separator: ''
         );
 
         return self::getEcomCurrencyFormat() === CurrencyFormat::SYMBOL_FIRST ?
             $currencySymbol . ' ' . $total : $total . ' ' . $currencySymbol;
+    }
+
+    /**
+     * Fetch configured number of decimals to use for prices. Will not accept values outside the 0-2 range. If no
+     * configured value found the default response is 2.
+     */
+    public static function getConfiguredDecimalPoints(): int
+    {
+        $points = get_option(option: 'woocommerce_price_num_decimals');
+
+        if ($points === false) {
+            return 2;
+        }
+
+        if (is_string(value: $points)) {
+            $points = (int)$points;
+        }
+
+        if ($points < 0) {
+            return 0;
+        }
+
+        if ($points > 2) {
+            return 2;
+        }
+
+        return $points;
     }
 }

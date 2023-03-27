@@ -14,9 +14,9 @@ use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 
 /**
- * Filter (event listener) which adds custom button to invalidate cache store.
+ * Filter (event listener) which adds custom button to test callbacks.
  */
-class InvalidateCacheButton
+class TestCallbackButton
 {
     /**
      * Add event listener to render the custom button element.
@@ -24,8 +24,8 @@ class InvalidateCacheButton
     public static function init(): void
     {
         add_action(
-            hook_name: 'woocommerce_admin_field_rbinvalidatecachebutton',
-            callback: 'Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton::render'
+            hook_name: 'woocommerce_admin_field_rbtestcallbackbutton',
+            callback: 'Resursbank\Woocommerce\Settings\Filter\TestCallbackButton::render'
         );
     }
 
@@ -35,10 +35,10 @@ class InvalidateCacheButton
     public static function render(): void
     {
         SettingsPage::renderButton(
-            route: Route::ROUTE_ADMIN_CACHE_INVALIDATE,
-            title: Translator::translate(phraseId: 'clear-cache'),
+            route: Route::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+            title: Translator::translate(phraseId: 'test-callbacks'),
             error: Translator::translate(
-                phraseId: 'failed-to-render-clear-cache-button'
+                phraseId: 'failed-to-render-test-callbacks-button'
             )
         );
     }

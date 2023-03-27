@@ -1,4 +1,4 @@
-# Resurs Bank Plus Payment Gateway for WooCommerce #
+# Resurs Bank Payments for WooCommerce #
 
 This is a payment gateway for WooCommerce and WordPress. Do not run this plugin side by side with the prior releases of Resurs Bank plugins!
 Requires PHP 8.1

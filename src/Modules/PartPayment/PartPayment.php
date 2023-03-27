@@ -85,7 +85,8 @@ class PartPayment
             amount: (float)self::getProduct()->get_price(),
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
-            apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
+            apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
+            decimals: Currency::getConfiguredDecimalPoints()
         );
 
         return self::$instance;
@@ -171,15 +172,13 @@ EX;
             return;
         }
 
-        $url = Url::getPluginUrl(
-            path: RESURSBANK_MODULE_DIR_NAME . '/js',
-            file: 'js/resursbank_partpayment.js'
-        );
-
         try {
             wp_enqueue_script(
                 handle: 'partpayment-script',
-                src: $url,
+                src: Url::getScriptUrl(
+                    module: 'PartPayment',
+                    file: 'part-payment.js'
+                ),
                 deps: ['jquery']
             );
             wp_add_inline_script(

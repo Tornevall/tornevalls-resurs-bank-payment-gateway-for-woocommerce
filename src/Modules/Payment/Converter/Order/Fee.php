@@ -39,25 +39,9 @@ class Fee
                 precision: 2
             ),
             description: Translator::translate(phraseId: 'fee'),
-            reference: self::getReference(),
+            reference: 'fee',
             type: OrderLineType::FEE
         );
-    }
-
-    /**
-     * Since there is nothing unique guaranteed to us to separate fees, we will
-     * suffix the reference with a timestamp. For example, you could apply two
-     * fees with the same amount, thus there would nothing to help us separate
-     * them into unique lines of the payment.
-     *
-     * When we modify a payment we will cancel all existing lines, so it won't
-     * matter that we reference the payment line this way as we never need to
-     * identify the relationship between the WC order and the payment at
-     * Resurs Bank.
-     */
-    private static function getReference(): string
-    {
-        return 'fee-' . time();
     }
 
     /**
