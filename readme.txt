@@ -62,7 +62,7 @@ In the documentation of Resurs.
 
 = Can I upgrade from version 2.2.x? =
 
-
+No. This plugin package is a separate new installation. The old plugin should, if you have it active, be disabled before this installation. Old payments from the prior plugin is however compatible in this release.
 
 == Screenshots ==
 
