@@ -13,10 +13,10 @@ use Resursbank\Ecom\Exception\CallbackException;
 use Resursbank\Ecom\Lib\Model\Callback\Authorization as AuthorizationModel;
 use Resursbank\Ecom\Lib\Model\Callback\CallbackInterface;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
+use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
 use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Authorization;
-use Resursbank\Woocommerce\Modules\Callback\Controller\Management;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -67,7 +67,7 @@ class Callback
 
             $controller = $type === CallbackType::AUTHORIZATION->value ?
                 new Authorization() :
-                new Management();
+                new ManagementController();
 
             Route::respondWithExit(
                 body: '',
@@ -76,14 +76,15 @@ class Callback
                     process: static function (
                         CallbackInterface $callback
                     ) use ($controller): void {
+                        if (!($callback instanceof AuthorizationModel)) {
+                            return;
+                        }
+
                         $order = CallbackModule::getOrder(
                             paymentId: $callback->getPaymentId()
                         );
 
-                        if ($callback instanceof AuthorizationModel) {
-                            $order->add_order_note(note: $callback->getNote());
-                        }
-
+                        $order->add_order_note(note: $callback->getNote());
                         $controller->updateOrderStatus(order: $order);
                     }
                 )
