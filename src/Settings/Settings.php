@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
@@ -79,6 +80,7 @@ class Settings
             );
 
             Config::getCache()->invalidate();
+            Connection::setup();
         } catch (Throwable $e) {
             Log::error(
                 error: $e,
