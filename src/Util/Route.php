@@ -20,6 +20,7 @@ use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
+use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Callback;
 use Throwable;
@@ -75,6 +76,11 @@ class Route
     public const ROUTE_TEST_CALLBACK_RECEIVED = 'test-callback-received';
 
     /**
+     * Route to get JSON encoded list of stores (only in admin).
+     */
+    public const ROUTE_GET_STORES_ADMIN = 'get-stores-admin';
+
+    /**
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.ExitExpression)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
@@ -98,6 +104,10 @@ class Route
 
                 case self::ROUTE_PART_PAYMENT_ADMIN:
                     self::respondWithExit(body: GetValidDurations::exec());
+                    break;
+
+                case self::ROUTE_GET_STORES_ADMIN:
+                    self::respondWithExit(body: (new GetStores())->exec());
                     break;
 
                 case self::ROUTE_SET_CUSTOMER_TYPE:

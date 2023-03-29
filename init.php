@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use Resursbank\Ecom\Config;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\WooCommerce;
@@ -64,9 +65,10 @@ if (!WooCommerce::isAvailable()) {
 }
 
 // Early initiation. If this request catches an exception, it is mainly caused by unset credentials.
-try {
-    Connection::setup();
-} catch (Throwable) {
+Connection::setup();
+
+// Cannot continue without ECom library instance configured.
+if (!Config::hasInstance()) {
     return;
 }
 

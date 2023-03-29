@@ -66,7 +66,7 @@ class PartPayment
             paymentMethodId: PaymentMethod::getData()
         );
 
-        $requestAmount = Url::getHttpGet('amount');
+        $requestAmount = Url::getHttpGet(key: 'amount');
 
         if (
             is_numeric(value: $requestAmount) &&
