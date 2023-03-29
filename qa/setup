@@ -125,11 +125,6 @@ if ! $phpCmd $dir/vendor/bin/phpmd $dir/src text $dir/qa/phpmd/src.xml; then
 fi
 echo ""
 
-#echo "---==( Executing PHPStan for source files. )==---"
-#echo ""
-#$phpCmd $dir/vendor/bin/phpstan analyse -c $dir/qa/phpstan/src.neon -a $dir/autoload.php $dir/src
-#echo ""
-
 if [ "\${ERRORS}" = "1" ]; then
   exec < /dev/tty
   read -p "Continue commit despite remaining errors? (y/n)?" continueCommit
@@ -163,7 +158,6 @@ cat <<EOT >> ./composer.json
     "phpunit/phpunit": "^9",
     "phpmd/phpmd": "^2",
     "squizlabs/php_codesniffer": "^3",
-    "phpstan/phpstan": "^1",
     "slevomat/coding-standard": "~8.0"
   },
   "require": {
