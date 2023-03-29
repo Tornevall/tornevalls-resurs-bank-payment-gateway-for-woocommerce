@@ -14,7 +14,6 @@ use Resursbank\Ecom\Lib\Api\GrantType;
 use Resursbank\Ecom\Lib\Api\Scope;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Lib\Repository\Api\Mapi\GenerateToken;
-use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
@@ -187,19 +186,10 @@ class Api
             'title' => Translator::translate(phraseId: 'store-id'),
         ];
 
-        $options = [
-            '' => Translator::translate(phraseId: 'please-select'),
-        ];
-
         try {
-            /** @var Store $store */
-            foreach (StoreRepository::getStores() as $store) {
-                $options[$store->id] = $store->nationalStoreId . ': ' . $store->name;
-            }
-
             // Both can cause Throwable, do them one at a time.
             $result['default'] = StoreId::getDefault();
-            $result['options'] = $options;
+            $result['options'] = StoreRepository::getStores()->getSelectList();
         } catch (Throwable $error) {
             $result = array_merge($result, [
                 'type' => 'text',

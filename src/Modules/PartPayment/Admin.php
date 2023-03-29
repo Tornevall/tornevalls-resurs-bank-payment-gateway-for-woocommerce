@@ -26,6 +26,7 @@ class Admin
      */
     public static function setJs(): void
     {
+        /** @noinspection BadExceptionsProcessingInspection */
         try {
             $widget = new DurationByMonths(
                 endpointUrl: Route::getUrl(
@@ -46,7 +47,10 @@ class Admin
                 data: $widget->getScript(),
                 position: 'before'
             );
-            add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');
+            add_action(
+                hook_name: 'admin_enqueue_scripts',
+                callback: 'partpayment-admin-scripts'
+            );
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
         }
