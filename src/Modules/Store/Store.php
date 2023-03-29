@@ -20,6 +20,10 @@ use Throwable;
  */
 class Store
 {
+    /**
+     * Render JavaScript widget that will update the select element containing
+     * available stores as API credentials are modified.
+     */
     public static function initAdmin(): void
     {
         /** @noinspection BadExceptionsProcessingInspection */
