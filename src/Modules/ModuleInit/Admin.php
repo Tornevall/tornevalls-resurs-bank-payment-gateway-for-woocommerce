@@ -14,6 +14,7 @@ use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
+use Resursbank\Woocommerce\Modules\Store\Store;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod;
 use Resursbank\Woocommerce\Settings\Filter\TestCallbackButton;
@@ -36,6 +37,7 @@ class Admin
         TestCallbackButton::init();
         PartPayment::initAdmin();
         PartPaymentPeriod::init();
+        Store::initAdmin();
         add_action(
             hook_name: 'updated_option',
             callback: 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',

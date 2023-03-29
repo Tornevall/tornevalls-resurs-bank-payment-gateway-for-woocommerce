@@ -91,8 +91,8 @@ EX;
             PaymentMethods::SECTION_ID => PaymentMethods::getTitle(),
             PartPayment::SECTION_ID => PartPayment::getTitle(),
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
-            Advanced::SECTION_ID => Advanced::getTitle(),
             Callback::SECTION_ID => Callback::getTitle(),
+            Advanced::SECTION_ID => Advanced::getTitle(),
         ];
     }
 
