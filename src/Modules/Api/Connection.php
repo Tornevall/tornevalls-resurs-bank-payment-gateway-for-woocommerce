@@ -68,7 +68,7 @@ class Connection
                 userAgent: UserAgent::getUserAgent()
             );
         } catch (Throwable) {
-            MessageBag::addError(message: 'Failed to initiate ECom library.');
+            // Do nothing
         }
     }
 
