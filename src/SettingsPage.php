@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
+use Resursbank\Woocommerce\Settings\SupportInfo;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
@@ -91,6 +92,7 @@ EX;
             PartPayment::SECTION_ID => PartPayment::getTitle(),
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
             Advanced::SECTION_ID => Advanced::getTitle(),
+            SupportInfo::SECTION_ID => SupportInfo::getTitle(),
             Callback::SECTION_ID => Callback::getTitle(),
         ];
     }
@@ -117,6 +119,11 @@ EX;
 
         if ($section === 'payment_methods') {
             $this->renderPaymentMethodsPage();
+            return;
+        }
+
+        if ($section === 'support_info') {
+            $this->renderSupportInfoPage();
             return;
         }
 
@@ -170,6 +177,11 @@ EX;
 
             $this->renderError();
         }
+    }
+
+    public function renderSupportInfoPage(): void
+    {
+        echo SupportInfo::getWidget();
     }
 
     /**
