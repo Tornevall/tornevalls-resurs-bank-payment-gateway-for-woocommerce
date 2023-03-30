@@ -312,11 +312,6 @@ class OrderManagement
     ): void {
         try {
             $callback();
-
-            // Refund logs its own success message containing amount handled.
-            if ($action !== ActionType::REFUND) {
-                self::logSuccessPaymentAction(action: $action, order: $order);
-            }
         } catch (CurlException $error) {
             $trace = $error->getError();
 
@@ -376,10 +371,6 @@ class OrderManagement
         WC_Order $order,
         ?float $amount = null
     ): void {
-        if ($amount === null) {
-            $amount = (float) $order->get_total();
-        }
-
         $actionStr = str_replace(
             search: '_',
             replace: '-',
@@ -390,7 +381,7 @@ class OrderManagement
             order: $order,
             message: sprintf(
                 Translator::translate(phraseId: "$actionStr-success"),
-                Currency::getFormattedAmount(amount: $amount)
+                Currency::getFormattedAmount(amount: (float) $amount)
             )
         );
     }

@@ -196,6 +196,8 @@ EX;
     /**
      * Render an error message (cannot use the message bag since that has
      * already been rendered).
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function renderError(string $view = ''): void
     {
