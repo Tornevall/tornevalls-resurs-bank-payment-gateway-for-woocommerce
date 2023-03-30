@@ -11,11 +11,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
+use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 
@@ -79,10 +79,8 @@ class UpdateOrder
             return;
         }
 
-        OrderManagement::logError(
-            message: Translator::translate(
-                phraseId: 'modify-order-action-failed'
-            ),
+        OrderManagement::logActionError(
+            action: ActionType::MODIFY_ORDER,
             error: $error,
             order: $order
         );

@@ -39,6 +39,7 @@ use WC_Order;
 /**
  * Business logic relating to order management functionality.
  *
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  * @noinspection EfferentObjectCouplingInspection
  */
 class OrderManagement
@@ -299,6 +300,60 @@ class OrderManagement
 
         $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
         $order->add_order_note(note: $message);
+    }
+
+    /**
+     * Centralized method to execute a payment action and log potential errors.
+     */
+    public static function execAction(
+        ActionType $action,
+        WC_Order $order,
+        callable $callback
+    ): void {
+        try {
+            $callback();
+
+            // Refund logs its own success message containing amount handled.
+            if ($action !== ActionType::REFUND) {
+                self::logSuccessPaymentAction(action: $action, order: $order);
+            }
+        } catch (CurlException $error) {
+            $trace = $error->getError();
+
+            self::logActionError(
+                action: $action,
+                order: $order,
+                error: $error,
+                reason: $trace?->message ?? 'unknown reason'
+            );
+        } catch (Throwable $error) {
+            self::logActionError(action: $action, order: $order, error: $error);
+        }
+    }
+
+    /**
+     * Log error from a Payment Action request (cancel, debit, credit, modify).
+     */
+    public static function logActionError(
+        ActionType $action,
+        WC_Order $order,
+        Throwable $error,
+        string $reason = 'unknown reason'
+    ): void {
+        $actionStr = str_replace(
+            search: '_',
+            replace: '-',
+            subject: strtolower(string: $action->value)
+        );
+
+        self::logError(
+            message: sprintf(
+                Translator::translate(phraseId: "$actionStr-action-failed"),
+                strtolower(string: $reason)
+            ),
+            error: $error,
+            order: $order
+        );
     }
 
     /**
