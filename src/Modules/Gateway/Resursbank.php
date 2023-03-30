@@ -273,6 +273,10 @@ class Resursbank extends WC_Payment_Gateway
                 foreach ($error->getDetails() as $detail) {
                     MessageBag::addError(message: $detail);
                 }
+            } else {
+                // Only display relevant error messages on the order placement screen. CurlExceptions usually contains
+                // trace messages for which we do not need to show in the customer view.
+                wc_add_notice(message: $error->getMessage(), notice_type: 'error');
             }
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -321,7 +325,7 @@ class Resursbank extends WC_Payment_Gateway
            otherwise calling $this->>get_order_total() can cause an error. */
         if (
             WC()->cart instanceof WC_Cart ||
-            (int) absint(maybeint: get_query_var(var: 'order-pay')) > 0
+            (int) absint(maybeint: get_query_var(query_var: 'order-pay')) > 0
         ) {
             $total = (float) $this->get_order_total();
         }
