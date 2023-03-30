@@ -175,33 +175,48 @@ EX;
         } catch (Throwable $e) {
             Log::error(error: $e);
 
-            $this->renderError();
+            $this->renderError(view: 'payment_methods');
         }
     }
 
+    /**
+     * Render Support Info tab.
+     */
     public function renderSupportInfoPage(): void
     {
-        echo SupportInfo::getWidget();
+        try {
+            echo SupportInfo::getWidget();
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+
+            $this->renderError();
+        }
     }
 
     /**
      * Render an error message (cannot use the message bag since that has
      * already been rendered).
      */
-    private function renderError(): void
+    private function renderError(string $view = ''): void
     {
-        $msg = Translator::translate(
-            phraseId: 'payment-methods-widget-render-failed'
-        );
-
         $additional = Translator::translate(phraseId: 'see-log');
 
-        if (!Connection::hasCredentials()) {
-            $additional = Translator::translate(
-                phraseId: 'configure-credentials'
+        if ($view === 'payment_methods') {
+            $msg = Translator::translate(
+                phraseId: 'payment-methods-widget-render-failed'
             );
-        } elseif (StoreId::getData() === '') {
-            $additional = Translator::translate(phraseId: 'configure-store');
+
+            if (!Connection::hasCredentials()) {
+                $additional = Translator::translate(
+                    phraseId: 'configure-credentials'
+                );
+            } elseif (StoreId::getData() === '') {
+                $additional = Translator::translate(
+                    phraseId: 'configure-store'
+                );
+            }
+        } else {
+            $msg = Translator::translate(phraseId: 'content-render-failed');
         }
 
         echo <<<EX
