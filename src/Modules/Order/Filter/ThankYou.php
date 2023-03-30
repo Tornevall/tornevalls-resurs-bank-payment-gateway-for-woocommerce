@@ -51,7 +51,11 @@ class ThankYou
 
             $order = OrderManagement::getOrder(id: $orderId);
 
-            if (Metadata::isThankYouTriggered(order: $order)) {
+            // @todo Not sure if we want to throw an Exception instead if $order is null?
+            if (
+                $order === null ||
+                Metadata::isThankYouTriggered(order: $order)
+            ) {
                 return;
             }
 
