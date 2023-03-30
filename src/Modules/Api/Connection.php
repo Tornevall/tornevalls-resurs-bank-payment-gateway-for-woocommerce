@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Api;
 
+use Automattic\WooCommerce\Admin\PageController;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
@@ -31,6 +32,7 @@ use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Language;
 use Resursbank\Woocommerce\Util\UserAgent;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use ValueError;
 use WC_Logger;
@@ -61,7 +63,6 @@ class Connection
             if ($jwt === null && self::hasCredentials()) {
                 $jwt = self::getConfigJwt();
             }
-
             Config::setup(
                 logger: self::getLogger(),
                 cache: self::getCache(),
@@ -76,7 +77,7 @@ class Connection
             if (Admin::isAdmin()) {
                 add_action('admin_notices', static function () use ($e): void {
                     echo wp_kses(
-                        '<div class="notice notice-error"><p>Resurs Bank: ' . $e->getMessage() . '</p></div>',
+                        '<div class="notice notice-error"><p>Resurs Bank Error: ' . $e->getMessage() . '</p></div>',
                         ['div' => ['class' => true]]
                     );
                 });
