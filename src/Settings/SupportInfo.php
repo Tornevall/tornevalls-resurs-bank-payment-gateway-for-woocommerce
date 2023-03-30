@@ -15,6 +15,9 @@ use Resursbank\Ecom\Module\SupportInfo\Widget\SupportInfo as EcomSupportInfo;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\UserAgent;
 
+/**
+ * Support info section.
+ */
 class SupportInfo
 {
     public const SECTION_ID = 'support_info';
