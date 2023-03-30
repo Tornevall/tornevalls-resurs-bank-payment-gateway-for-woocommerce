@@ -29,6 +29,7 @@ use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Language;
+use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
 use ValueError;
@@ -66,8 +67,11 @@ class Connection
                 language: Language::getSiteLanguage(),
                 userAgent: UserAgent::getUserAgent()
             );
-        } catch (Throwable) {
-            // Nothing we can do.
+        } catch (Throwable $error) {
+            Log::error(
+                error: $error,
+                message: 'Failed to initiate ECom library.'
+            );
         }
     }
 
