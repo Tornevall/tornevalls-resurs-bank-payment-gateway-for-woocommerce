@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
+use Resursbank\Woocommerce\Settings\SupportInfo;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
@@ -90,6 +91,7 @@ EX;
             PaymentMethods::SECTION_ID => PaymentMethods::getTitle(),
             PartPayment::SECTION_ID => PartPayment::getTitle(),
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
+            SupportInfo::SECTION_ID => SupportInfo::getTitle(),
             Callback::SECTION_ID => Callback::getTitle(),
             Advanced::SECTION_ID => Advanced::getTitle(),
         ];
@@ -117,6 +119,11 @@ EX;
 
         if ($section === 'payment_methods') {
             $this->renderPaymentMethodsPage();
+            return;
+        }
+
+        if ($section === 'support_info') {
+            $this->renderSupportInfoPage();
             return;
         }
 
@@ -168,6 +175,20 @@ EX;
         } catch (Throwable $e) {
             Log::error(error: $e);
 
+            $this->renderError(view: 'payment_methods');
+        }
+    }
+
+    /**
+     * Render Support Info tab.
+     */
+    public function renderSupportInfoPage(): void
+    {
+        try {
+            echo SupportInfo::getWidget();
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+
             $this->renderError();
         }
     }
@@ -176,20 +197,26 @@ EX;
      * Render an error message (cannot use the message bag since that has
      * already been rendered).
      */
-    private function renderError(): void
+    private function renderError(string $view = ''): void
     {
-        $msg = Translator::translate(
-            phraseId: 'payment-methods-widget-render-failed'
-        );
-
         $additional = Translator::translate(phraseId: 'see-log');
 
-        if (!Connection::hasCredentials()) {
-            $additional = Translator::translate(
-                phraseId: 'configure-credentials'
+        if ($view === 'payment_methods') {
+            $msg = Translator::translate(
+                phraseId: 'payment-methods-widget-render-failed'
             );
-        } elseif (StoreId::getData() === '') {
-            $additional = Translator::translate(phraseId: 'configure-store');
+
+            if (!Connection::hasCredentials()) {
+                $additional = Translator::translate(
+                    phraseId: 'configure-credentials'
+                );
+            } elseif (StoreId::getData() === '') {
+                $additional = Translator::translate(
+                    phraseId: 'configure-store'
+                );
+            }
+        } else {
+            $msg = Translator::translate(phraseId: 'content-render-failed');
         }
 
         echo <<<EX
