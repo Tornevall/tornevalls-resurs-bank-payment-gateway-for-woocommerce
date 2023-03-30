@@ -9,18 +9,30 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\SupportInfo\Widget\SupportInfo as EcomSupportInfo;
+use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\UserAgent;
 
 class SupportInfo
 {
     public const SECTION_ID = 'support_info';
 
+    /**
+     * Get tab title
+     */
     public static function getTitle(): string
     {
-        return 'Support info';
+        return Translator::translate(phraseId: 'support-info');
     }
 
+    /**
+     * Create and return widget HTML.
+     *
+     * @throws FilesystemException
+     * @throws IllegalValueException
+     */
     public static function getWidget(): string
     {
         $GLOBALS['hide_save_button'] = '1';
