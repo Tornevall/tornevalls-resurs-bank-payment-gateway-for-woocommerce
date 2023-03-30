@@ -9,13 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Order\Filter;
 
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Woocommerce\Modules\Order\Status;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-use WC_Order;
 
 /**
  * Event executed when "Thank You" page is rendered after completing checkout.
@@ -45,13 +45,11 @@ class ThankYou
     {
         try {
             // @todo Not sure what happens here if $order_id is null, could we affect the wrong order?
-            $order = new WC_Order(order: $orderId);
-
-            if (!$order instanceof WC_Order) {
-                throw new IllegalTypeException(
-                    message: "Failed to resolve order from id $orderId"
-                );
+            if ($orderId === null) {
+                throw new EmptyValueException(message: 'Order ID is null');
             }
+
+            $order = OrderManagement::getOrder(id: $orderId);
 
             if (Metadata::isThankYouTriggered(order: $order)) {
                 return;
