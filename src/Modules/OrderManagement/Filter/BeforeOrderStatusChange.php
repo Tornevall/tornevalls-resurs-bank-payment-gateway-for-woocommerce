@@ -62,7 +62,7 @@ class BeforeOrderStatusChange
         ) {
             return;
         }
-
+return;
         OrderManagement::logError(
             message: sprintf(
                 Translator::translate(phraseId: 'failed-order-status-change'),
