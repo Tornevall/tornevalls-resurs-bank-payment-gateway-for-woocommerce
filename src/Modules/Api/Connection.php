@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\Api;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\GrantType;
@@ -47,27 +46,29 @@ class Connection
 {
     /**
      * Setup ECom API connection (creates a singleton to handle API calls).
-     *
-     * @throws ConfigException
      */
-    public static function setup(): void
-    {
+    public static function setup(
+        ?Jwt $jwt = null
+    ): void {
         try {
             if (function_exists(function: 'WC')) {
                 WC()->initialize_session();
+            }
+
+            if ($jwt === null && self::hasCredentials()) {
+                $jwt = self::getConfigJwt();
             }
 
             Config::setup(
                 logger: self::getLogger(),
                 cache: self::getCache(),
                 logLevel: LogLevel::getData(),
-                jwtAuth: self::hasCredentials() ? self::getJwt() : null,
+                jwtAuth: $jwt,
                 language: Language::getSiteLanguage(),
                 userAgent: UserAgent::getUserAgent()
             );
-        } catch (Throwable $e) {
-            MessageBag::addError(message: 'Failed to initiate ECom library.');
-            Config::getLogger()->error(message: $e);
+        } catch (Throwable) {
+            // Do nothing
         }
     }
 
@@ -87,7 +88,7 @@ class Connection
      * @throws EmptyValueException
      * @throws ValueError
      */
-    public static function getJwt(): ?Jwt
+    public static function getConfigJwt(): ?Jwt
     {
         if (!self::hasCredentials()) {
             throw new AuthException(message: 'Credentials are not set.');

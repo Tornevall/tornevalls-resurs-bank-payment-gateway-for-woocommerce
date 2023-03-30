@@ -58,7 +58,7 @@ class Authorization extends AuthorizationController
         $status = match ($payment->status) {
             PaymentStatus::REJECTED => PaymentRepository::getTaskStatusDetails(
                 paymentId: $payment->id
-            )->completed ? 'cancelled' : 'failed',
+            )->completed ? 'failed' : 'cancelled',
             default => 'on-hold',
         };
 

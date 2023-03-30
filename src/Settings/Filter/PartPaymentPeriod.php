@@ -19,6 +19,8 @@ use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
+use function is_string;
+
 /**
  * Filter to add a custom select element used for part payment period selection.
  */
