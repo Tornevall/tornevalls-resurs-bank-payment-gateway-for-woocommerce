@@ -10,17 +10,19 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Callback;
 
 use Resursbank\Ecom\Exception\CallbackException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Lib\Model\Callback\Authorization as AuthorizationModel;
 use Resursbank\Ecom\Lib\Model\Callback\CallbackInterface;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
+use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
 use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
-use Resursbank\Woocommerce\Modules\Callback\Controller\Authorization;
+use Resursbank\Woocommerce\Modules\Order\Status;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 
@@ -65,30 +67,7 @@ class Callback
 
             Log::debug(message: "Executing $type callback.");
 
-            $controller = $type === CallbackType::AUTHORIZATION->value ?
-                new Authorization() :
-                new ManagementController();
-
-            Route::respondWithExit(
-                body: '',
-                code: Repository::process(
-                    callback: $controller->getRequestData(),
-                    process: static function (
-                        CallbackInterface $callback
-                    ) use ($controller): void {
-                        if (!($callback instanceof AuthorizationModel)) {
-                            return;
-                        }
-
-                        $order = CallbackModule::getOrder(
-                            paymentId: $callback->getPaymentId()
-                        );
-
-                        $order->add_order_note(note: $callback->getNote());
-                        $controller->updateOrderStatus(order: $order);
-                    }
-                )
-            );
+            self::respond(type: $type);
         } catch (Throwable $e) {
             Log::error(error: $e);
             Route::respondWithExit(
@@ -115,26 +94,36 @@ class Callback
     }
 
     /**
-     * Apply new status on order if the following conditions are met:
-     *
-     * 1. WC_Order may not have obtained a status which cannot be manipulated.
-     * 2. Converted WC_Order status from the Resurs Bank payment most differ.
+     * @throws ConfigException
+     * @throws HttpException
      */
-    public static function updateOrderStatus(
-        WC_Order $order,
-        string $status
+    private static function respond(
+        string $type
     ): void {
-        if (
-            $status === '' ||
-            $order->has_status(status: $status) ||
-            !$order->has_status(status: ['pending', 'processing', 'on-hold'])
-        ) {
-            return;
-        }
+        $controller = $type === CallbackType::AUTHORIZATION->value ?
+            new AuthorizationController() :
+            new ManagementController();
 
-        $order->update_status(
-            new_status: $status,
-            note: Translator::translate(phraseId: "payment-status-$status")
+        Route::respondWithExit(
+            body: '',
+            code: Repository::process(
+                callback: $controller->getRequestData(),
+                process: static function (
+                    CallbackInterface $callback
+                ): void {
+                    if (!($callback instanceof AuthorizationModel)) {
+                        return;
+                    }
+
+                    $order = CallbackModule::getOrder(
+                        paymentId: $callback->getPaymentId()
+                    );
+
+                    $order->add_order_note(note: $callback->getNote());
+
+                    Status::update(order: $order);
+                }
+            )
         );
     }
 }
