@@ -111,10 +111,9 @@ class Order
             Log::error(error: $e);
         }
 
-        echo wp_kses(
-            $data,
-            ['b' => []]
-        );
+        // @todo This feature most definitely needs sanitizing but since it is fetched from Ecom we
+        // @todo need to figure out how the allowed tags should be handled.
+        echo $data;
     }
 
     /**

@@ -165,6 +165,7 @@ EX;
 
     /**
      * Set Js if on single product page.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setJs(): void
     {
