@@ -86,6 +86,7 @@ class Metadata
     /**
      * Set metadata to an order.
      * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setOrderMeta(
@@ -118,6 +119,7 @@ class Metadata
     /**
      * Return metadata from an order, as a single variable.
      * Normally metadata is returned as array, but currently we usually only save values once.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getOrderMeta(

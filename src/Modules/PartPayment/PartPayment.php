@@ -185,10 +185,7 @@ EX;
                 'partpayment-script',
                 self::getWidget()->js
             );
-            add_action(
-                'wp_enqueue_scripts',
-                'partpayment-script'
-            );
+            add_action('wp_enqueue_scripts', 'partpayment-script');
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

@@ -42,6 +42,7 @@ class Api
 
     /**
      * Register actions for this config section.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
@@ -51,7 +52,7 @@ class Api
             'updated_option',
             'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
             100,
-            1,
+            1
         );
     }
 

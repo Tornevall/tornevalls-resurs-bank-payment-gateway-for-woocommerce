@@ -23,6 +23,7 @@ class Store
     /**
      * Render JavaScript widget that will update the select element containing
      * available stores as API credentials are modified.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initAdmin(): void
@@ -55,10 +56,7 @@ class Store
             // All the below is required to render the inline JS.
             wp_register_script('rb-store-admin-scripts', '');
             wp_enqueue_script('rb-store-admin-scripts');
-            wp_add_inline_script(
-                'rb-store-admin-scripts',
-                $widget->content
-            );
+            wp_add_inline_script('rb-store-admin-scripts', $widget->content);
         } catch (Throwable $error) {
             Log::error(
                 error: $error,

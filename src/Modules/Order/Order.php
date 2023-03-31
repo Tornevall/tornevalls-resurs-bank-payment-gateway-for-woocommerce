@@ -39,6 +39,7 @@ class Order
 {
     /**
      * Initialize Order module.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
@@ -57,6 +58,7 @@ class Order
 
     /**
      * Add action which will render payment information on order view.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function addPaymentInfo(): void

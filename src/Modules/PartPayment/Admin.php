@@ -47,10 +47,7 @@ class Admin
                 $widget->getScript(),
                 'before'
             );
-            add_action(
-                'admin_enqueue_scripts',
-                'partpayment-admin-scripts'
-            );
+            add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
         }

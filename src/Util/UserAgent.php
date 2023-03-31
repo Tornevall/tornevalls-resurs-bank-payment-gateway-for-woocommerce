@@ -79,6 +79,7 @@ class UserAgent
 
     /**
      * Fetch WooCommerce version information via the available plugin.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function getWooCommerceInformation(): array

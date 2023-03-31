@@ -51,6 +51,7 @@ class OrderManagement
 
     /**
      * The actual method that sets up actions for order status change hooks.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
@@ -97,9 +98,9 @@ class OrderManagement
         // Prevent order edit options from rendering if we can't modify payment.
         add_filter(
             'wc_order_is_editable',
-             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
-             10,
-             2
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
+            10,
+            2
         );
 
         // Perform payment action to update payment when order content changes.
@@ -122,26 +123,26 @@ class OrderManagement
 
         // Prevent order refund options from rendering when unavailable.
         add_filter(
-             'woocommerce_admin_order_should_render_refunds',
-             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderRefundable::exec',
-             10,
-             3
+            'woocommerce_admin_order_should_render_refunds',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderRefundable::exec',
+            10,
+            3
         );
 
         // Execute refund payment action after refund has been created.
         add_action(
-             'woocommerce_order_refunded',
-             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\Refund::exec',
-             10,
-             2
+            'woocommerce_order_refunded',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\Refund::exec',
+            10,
+            2
         );
 
         // Prevent internal note indicating funds need to be manually returned.
         add_filter(
             'woocommerce_new_order_note_data',
-             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
-             10,
-             1
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
+            10,
+            1
         );
     }
 

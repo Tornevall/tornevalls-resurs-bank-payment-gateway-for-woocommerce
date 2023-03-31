@@ -49,6 +49,7 @@ class Gateway
 
     /**
      * Executes on frontend.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initFrontend(): void

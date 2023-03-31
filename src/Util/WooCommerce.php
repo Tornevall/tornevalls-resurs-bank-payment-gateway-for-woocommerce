@@ -18,6 +18,7 @@ class WooCommerce
 {
     /**
      * Safely confirm whether WC is loaded.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function isAvailable(): bool

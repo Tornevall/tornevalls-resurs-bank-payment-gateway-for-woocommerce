@@ -318,6 +318,7 @@ class Resursbank extends WC_Payment_Gateway
         $total = 0.0;
 
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+
         /* We need to confirm we can resolve order / cart total manually,
            otherwise calling $this->>get_order_total() can cause an error. */
         if (

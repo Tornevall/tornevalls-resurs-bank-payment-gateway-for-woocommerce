@@ -71,9 +71,7 @@ class Url
     /**
      * Generate a URL for a given endpoint, with a list of arguments.
      *
-     * @param string $baseUrl
      * @param array $arguments
-     * @return string
      * @throws IllegalValueException
      */
     public static function getQueryArg(string $baseUrl, array $arguments): string

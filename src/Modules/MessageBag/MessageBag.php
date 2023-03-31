@@ -119,7 +119,7 @@ class MessageBag
                     $message->getEscapedMessage() . '</p></div>',
                     [
                         'div' => ['class' => true],
-                        'p' => []
+                        'p' => [],
                     ]
                 );
             }

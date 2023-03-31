@@ -139,6 +139,7 @@ class Route
 
     /**
      * Redirect request to WC Settings configuration tab for our plugin.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function redirectToSettings(

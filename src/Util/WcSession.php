@@ -88,6 +88,7 @@ class WcSession
 
     /**
      * Get government ID stored in session.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getGovernmentId(): ?string
@@ -101,6 +102,7 @@ class WcSession
 
     /**
      * Unset.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function unset(string $key): void
