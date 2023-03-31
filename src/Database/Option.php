@@ -23,12 +23,14 @@ abstract class Option
 
     /**
      * Resolve data from options table as string, defaults to NULL.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getRawData(): ?string
     {
         $val = get_option(
-            option: static::getName(),
-            default: null
+            static::getName(),
+            null
         );
 
         return is_string(value: $val) ? $val : null;
@@ -36,12 +38,14 @@ abstract class Option
 
     /**
      * Sets option data.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setData(string $value): bool
     {
         return update_option(
-            option: static::getName(),
-            value: $value
+            static::getName(),
+            $value
         ) === true;
     }
 }
