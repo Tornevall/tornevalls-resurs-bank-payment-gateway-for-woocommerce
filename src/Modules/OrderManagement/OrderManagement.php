@@ -75,8 +75,8 @@ class OrderManagement
         add_action(
             'woocommerce_order_status_changed',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\AfterOrderStatusChange::exec',
-            3,
-            10
+            10,
+            3
         );
 
         // Add custom CSS rules relating to order view.
