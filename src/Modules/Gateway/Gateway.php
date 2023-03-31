@@ -42,25 +42,26 @@ class Gateway
 
         // Register event listener to append our gateway.
         add_filter(
-            hook_name: 'woocommerce_payment_gateways',
-            callback: 'Resursbank\Woocommerce\Modules\Gateway\Gateway::addGateway'
+            'woocommerce_payment_gateways',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::addGateway'
         );
     }
 
     /**
      * Executes on frontend.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initFrontend(): void
     {
         add_filter(
-            hook_name: 'woocommerce_available_payment_gateways',
-            callback: 'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
+            'woocommerce_available_payment_gateways',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
         );
         add_filter(
-            hook_name: 'woocommerce_gateway_icon',
-            callback: 'Resursbank\Woocommerce\Modules\Gateway\Gateway::modifyIcon',
-            accepted_args: 1,
-            priority: 10
+            'woocommerce_gateway_icon',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::modifyIcon',
+            10,
+            1
         );
     }
 

@@ -24,7 +24,7 @@ class Sanitize
         array $allowedTags = []
     ): string {
         return (string) wp_kses(
-            (string) esc_html(text: $html),
+            (string) esc_html($html),
             $allowedTags
         );
     }

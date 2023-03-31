@@ -43,8 +43,8 @@ class Callback
     public static function init(): void
     {
         add_action(
-            hook_name: 'woocommerce_api_' . Route::ROUTE_PARAM,
-            callback: 'Resursbank\Woocommerce\Modules\Callback\Callback::execute'
+            'woocommerce_api_' . Route::ROUTE_PARAM,
+            'Resursbank\Woocommerce\Modules\Callback\Callback::execute'
         );
     }
 

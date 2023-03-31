@@ -87,8 +87,9 @@ class Status
         // List of statuses which cannot be overwritten.
         $statuses = ['pending', 'processing', 'on-hold'];
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         return
-            $order->has_status(status: $statuses) &&
+            $order->has_status($statuses) &&
             !$order->has_status(
                 status: self::convertPaymentStatus(payment: $payment)
             )
@@ -130,9 +131,10 @@ class Status
             paymentId: $payment->id
         )->completed ? 'failed' : 'cancelled';
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         $order->update_status(
-            new_status: $status,
-            note: Translator::translate(phraseId: "payment-status-$status")
+            $status,
+            Translator::translate(phraseId: "payment-status-$status")
         );
     }
 }

@@ -312,13 +312,12 @@ class Resursbank extends WC_Payment_Gateway
 
     /**
      * Whether total amount of order / cart is within min / max purchase limit.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private function validatePurchaseLimit(): bool
     {
         $total = 0.0;
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         /* We need to confirm we can resolve order / cart total manually,
            otherwise calling $this->>get_order_total() can cause an error. */
         if (

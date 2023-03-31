@@ -24,8 +24,8 @@ class InvalidateCacheButton
     public static function init(): void
     {
         add_action(
-            hook_name: 'woocommerce_admin_field_rbinvalidatecachebutton',
-            callback: 'Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton::render'
+            'woocommerce_admin_field_rbinvalidatecachebutton',
+            'Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton::render'
         );
     }
 

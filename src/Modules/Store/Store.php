@@ -23,6 +23,7 @@ class Store
     /**
      * Render JavaScript widget that will update the select element containing
      * available stores as API credentials are modified.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initAdmin(): void
     {
@@ -43,20 +44,20 @@ class Store
             );
 
             // All the below is required to render the inline CSS.
-            wp_register_style(handle: 'rb-store-admin-css', src: '');
-            wp_enqueue_style(handle: 'rb-store-admin-css');
+            wp_register_style('rb-store-admin-css', '');
+            wp_enqueue_style('rb-store-admin-css');
             wp_add_inline_style(
-                handle: 'rb-store-admin-css',
-                data: '.rb-store-fetching select { background-image: url("' .
+                'rb-store-admin-css',
+                '.rb-store-fetching select { background-image: url("' .
                     get_admin_url() . '/images/loading.gif' . '") !important; }'
             );
 
             // All the below is required to render the inline JS.
-            wp_register_script(handle: 'rb-store-admin-scripts', src: '');
-            wp_enqueue_script(handle: 'rb-store-admin-scripts');
+            wp_register_script('rb-store-admin-scripts', '');
+            wp_enqueue_script('rb-store-admin-scripts');
             wp_add_inline_script(
-                handle: 'rb-store-admin-scripts',
-                data: $widget->content
+                'rb-store-admin-scripts',
+                $widget->content
             );
         } catch (Throwable $error) {
             Log::error(

@@ -88,11 +88,12 @@ class WcSession
 
     /**
      * Get government ID stored in session.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getGovernmentId(): ?string
     {
         return WC()->session->get(
-            key: (new Session())->getKey(
+            (new Session())->getKey(
                 key: Repository::SESSION_KEY_SSN_DATA
             )
         );
@@ -100,6 +101,7 @@ class WcSession
 
     /**
      * Unset.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function unset(string $key): void
     {

@@ -139,11 +139,12 @@ class Route
 
     /**
      * Redirect request to WC Settings configuration tab for our plugin.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function redirectToSettings(
         string $tab = 'api_settings'
     ): void {
-        wp_safe_redirect(location: self::getSettingsUrl(tab: $tab));
+        wp_safe_redirect(self::getSettingsUrl(tab: $tab));
 
         MessageBag::keep();
     }
