@@ -40,7 +40,7 @@ class Admin
             wp_enqueue_script(
                 'partpayment-admin-scripts',
                 $url,
-                ['jquery'],
+                ['jquery']
             );
             wp_add_inline_script(
                 'partpayment-admin-scripts',
