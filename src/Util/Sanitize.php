@@ -16,6 +16,7 @@ class Sanitize
 {
     /**
      * Shorthand method to properly escape strings.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function sanitizeHtml(
