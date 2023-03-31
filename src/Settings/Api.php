@@ -42,15 +42,17 @@ class Api
 
     /**
      * Register actions for this config section.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
+        // Set priority high so that our method is called after credentials are saved
         add_action(
-            hook_name: 'updated_option',
-            callback: 'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
-            accepted_args: 1,
-            // Set high so that our method is called after credentials are saved
-            priority: 100
+            'updated_option',
+            'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
+            100,
+            1
         );
     }
 
@@ -184,22 +186,14 @@ class Api
             'id' => StoreId::getName(),
             'type' => 'select',
             'title' => Translator::translate(phraseId: 'store-id'),
+            'default' => StoreId::getDefault(),
+            'options' => [],
         ];
 
         try {
             // Both can cause Throwable, do them one at a time.
-            $result['default'] = StoreId::getDefault();
             $result['options'] = StoreRepository::getStores()->getSelectList();
         } catch (Throwable $error) {
-            $result = array_merge($result, [
-                'type' => 'text',
-                'custom_attributes' => [
-                    'readonly' => 'readonly',
-                ],
-                'value' => Translator::translate(phraseId: 'get-stores-failed'),
-                'css' => 'border: none; width: 100%; background: transparent; color: #d63638; box-shadow: none;',
-            ]);
-
             Log::error(error: $error);
         }
 

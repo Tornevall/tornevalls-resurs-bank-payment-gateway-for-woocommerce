@@ -101,16 +101,16 @@ class PartPayment
     public static function initFrontend(): void
     {
         add_action(
-            hook_name: 'wp_head',
-            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
         );
         add_action(
-            hook_name: 'wp_enqueue_scripts',
-            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
         );
         add_action(
-            hook_name: 'woocommerce_single_product_summary',
-            callback: 'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'
+            'woocommerce_single_product_summary',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'
         );
     }
 
@@ -120,8 +120,8 @@ class PartPayment
     public static function initAdmin(): void
     {
         add_action(
-            hook_name: 'admin_enqueue_scripts',
-            callback: 'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
+            'admin_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
         );
     }
 
@@ -165,6 +165,8 @@ EX;
 
     /**
      * Set Js if on single product page.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setJs(): void
     {
@@ -174,21 +176,18 @@ EX;
 
         try {
             wp_enqueue_script(
-                handle: 'partpayment-script',
-                src: Url::getScriptUrl(
+                'partpayment-script',
+                Url::getScriptUrl(
                     module: 'PartPayment',
                     file: 'part-payment.js'
                 ),
-                deps: ['jquery']
+                ['jquery']
             );
             wp_add_inline_script(
-                handle: 'partpayment-script',
-                data: self::getWidget()->js
+                'partpayment-script',
+                self::getWidget()->js
             );
-            add_action(
-                hook_name: 'wp_enqueue_scripts',
-                callback: 'partpayment-script'
-            );
+            add_action('wp_enqueue_scripts', 'partpayment-script');
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

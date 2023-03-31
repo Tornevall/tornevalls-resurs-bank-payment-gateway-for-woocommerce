@@ -28,8 +28,9 @@ class Transient extends AbstractCache implements CacheInterface
     {
         $this->validateKey(key: $key);
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         $entry = $this->decodeEntry(
-            data: (string) get_transient(transient: $key)
+            data: (string) get_transient($key)
         );
 
          return (
@@ -47,10 +48,11 @@ class Transient extends AbstractCache implements CacheInterface
     {
         $this->validateKey(key: $key);
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         set_transient(
-            transient: $key,
-            value: $this->encodeEntry(data: $data, ttl: $ttl),
-            expiration: $ttl
+            $key,
+            $this->encodeEntry(data: $data, ttl: $ttl),
+            $ttl
         );
     }
 
@@ -62,6 +64,7 @@ class Transient extends AbstractCache implements CacheInterface
     {
         $this->validateKey(key: $key);
 
-        delete_transient(transient: $key);
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        delete_transient($key);
     }
 }

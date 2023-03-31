@@ -93,7 +93,6 @@ class PartPayment
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      * @noinspection PhpUnusedParameterInspection
-     * @todo Refactor, method is too large, complex, unused. WOO-980. Remove phpcs:ignore below when done.
      */
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
@@ -140,9 +139,7 @@ class PartPayment
         }
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
-
-        // @todo Find a better solution for this
-        $customerCountry = get_option(option: 'woocommerce_default_country');
+        $customerCountry = get_option('woocommerce_default_country');
         $minLimit = 150;
 
         if ($customerCountry === 'FI') {

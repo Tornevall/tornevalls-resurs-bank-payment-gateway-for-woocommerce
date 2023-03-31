@@ -32,14 +32,15 @@ class Checkout
             return;
         }
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         add_filter(
-            hook_name: 'woocommerce_before_checkout_form',
-            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::exec'
+            'woocommerce_before_checkout_form',
+            'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::exec'
         );
 
         add_action(
-            hook_name: 'wp_enqueue_scripts',
-            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::loadScripts'
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::loadScripts'
         );
     }
 
@@ -48,18 +49,20 @@ class Checkout
      */
     public static function loadScripts(): void
     {
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         wp_enqueue_script(
-            handle: 'rb-get-address',
-            src: Url::getScriptUrl(
+            'rb-get-address',
+            Url::getScriptUrl(
                 module: 'GetAddress',
                 file: 'populateForm.js'
             ),
-            deps: ['rb-set-customertype']
+            ['rb-set-customertype']
         );
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         wp_enqueue_style(
-            handle: 'rb-get-address-style',
-            src: Url::getEcomUrl(
+            'rb-get-address-style',
+            Url::getEcomUrl(
                 path: 'src/Module/Customer/Widget/get-address.css'
             )
         );
@@ -92,8 +95,6 @@ class Checkout
             }
         }
 
-        // @todo Reinstate sanitizer (see WOO-954 ECP-327).
-//        echo Data::getEscapedHtml($result);
         echo $result;
     }
 }

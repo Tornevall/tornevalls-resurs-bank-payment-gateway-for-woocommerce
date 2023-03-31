@@ -157,8 +157,6 @@ EX;
 
     /**
      * Render content of the payment method tab for our config page.
-     *
-     * @todo Translate error message WOO-1010
      */
     public function renderPaymentMethodsPage(): void
     {
@@ -196,6 +194,8 @@ EX;
     /**
      * Render an error message (cannot use the message bag since that has
      * already been rendered).
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     private function renderError(string $view = ''): void
     {

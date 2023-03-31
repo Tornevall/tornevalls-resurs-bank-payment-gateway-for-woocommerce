@@ -62,8 +62,6 @@ class WcSession
 
     /**
      * Fetch customer type stored in session.
-     *
-     * @todo Not sure if we always want to default to NATURAL?
      */
     public static function getCustomerType(): CustomerType
     {
@@ -88,11 +86,13 @@ class WcSession
 
     /**
      * Get government ID stored in session.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getGovernmentId(): ?string
     {
         return WC()->session->get(
-            key: (new Session())->getKey(
+            (new Session())->getKey(
                 key: Repository::SESSION_KEY_SSN_DATA
             )
         );
@@ -100,6 +100,8 @@ class WcSession
 
     /**
      * Unset.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function unset(string $key): void
     {

@@ -59,18 +59,27 @@ class Modify
             return;
         }
 
-        if ($payment->canCancel()) {
-            Repository::cancel(paymentId: $payment->id);
-        }
-
-        Repository::addOrderLines(
-            paymentId: $payment->id,
-            orderLines: Order::getOrderLines(order: $order)
-        );
-
-        OrderManagement::logSuccessPaymentAction(
+        OrderManagement::execAction(
+            order: $order,
             action: ActionType::MODIFY_ORDER,
-            order: $order
+            callback: static function () use ($order): void {
+                $payment = OrderManagement::getPayment(order: $order);
+
+                if ($payment->canCancel()) {
+                    Repository::cancel(paymentId: $payment->id);
+                }
+
+                Repository::addOrderLines(
+                    paymentId: $payment->id,
+                    orderLines: Order::getOrderLines(order: $order)
+                );
+
+                OrderManagement::logSuccessPaymentAction(
+                    action: ActionType::MODIFY_ORDER,
+                    order: $order,
+                    amount: (float) $order->get_total()
+                );
+            }
         );
     }
 

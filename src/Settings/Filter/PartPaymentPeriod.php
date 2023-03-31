@@ -32,8 +32,8 @@ class PartPaymentPeriod
     public static function init(): void
     {
         add_action(
-            hook_name: 'woocommerce_admin_field_rbpartpaymentperiod',
-            callback: 'Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod::render'
+            'woocommerce_admin_field_rbpartpaymentperiod',
+            'Resursbank\Woocommerce\Settings\Filter\PartPaymentPeriod::render'
         );
     }
 

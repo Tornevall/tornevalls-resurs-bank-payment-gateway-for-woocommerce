@@ -38,19 +38,16 @@ class Admin
                 file: 'admin/updateAnnuityPeriod.js'
             );
             wp_enqueue_script(
-                handle: 'partpayment-admin-scripts',
-                src: $url,
-                deps: ['jquery']
+                'partpayment-admin-scripts',
+                $url,
+                ['jquery']
             );
             wp_add_inline_script(
-                handle: 'partpayment-admin-scripts',
-                data: $widget->getScript(),
-                position: 'before'
+                'partpayment-admin-scripts',
+                $widget->getScript(),
+                'before'
             );
-            add_action(
-                hook_name: 'admin_enqueue_scripts',
-                callback: 'partpayment-admin-scripts'
-            );
+            add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
         }

@@ -24,9 +24,10 @@ class AddDocumentationLink
     public static function register(): void
     {
         add_filter(
-            hook_name: 'plugin_row_meta',
-            callback: 'Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink::exec',
-            accepted_args: 2
+            'plugin_row_meta',
+            'Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink::exec',
+            10,
+            2
         );
     }
 
@@ -39,9 +40,12 @@ class AddDocumentationLink
             is_array(value: $links) &&
             $file === RESURSBANK_MODULE_DIR_NAME . '/init.php'
         ) {
-            $links[] = '<a href="blank" target="_blank">' .
+            $links[] = wp_kses(
+                '<a href="blank" target="_blank">' .
                 Translator::translate(phraseId: 'documentation') .
-                '</a>';
+                '</a>',
+                ['a' => ['target' => true]]
+            );
         }
 
         return $links;

@@ -24,8 +24,8 @@ class TestCallbackButton
     public static function init(): void
     {
         add_action(
-            hook_name: 'woocommerce_admin_field_rbtestcallbackbutton',
-            callback: 'Resursbank\Woocommerce\Settings\Filter\TestCallbackButton::render'
+            'woocommerce_admin_field_rbtestcallbackbutton',
+            'Resursbank\Woocommerce\Settings\Filter\TestCallbackButton::render'
         );
     }
 

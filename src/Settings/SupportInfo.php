@@ -35,6 +35,7 @@ class SupportInfo
      *
      * @throws FilesystemException
      * @throws IllegalValueException
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function getWidget(): string
     {

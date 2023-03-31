@@ -32,51 +32,47 @@ class Refund
         WC_Order $order,
         WC_Order_Refund $refund
     ): void {
-        /** @noinspection BadExceptionsProcessingInspection */
-        try {
-            $payment = OrderManagement::getPayment(order: $order);
+        OrderManagement::execAction(
+            order: $order,
+            action: ActionType::REFUND,
+            callback: static function () use ($order, $refund): void {
+                $payment = OrderManagement::getPayment(order: $order);
 
-            if (!$payment->canRefund()) {
-                return;
-            }
+                if (!$payment->canRefund()) {
+                    return;
+                }
 
-            $orderLines = Order::getOrderLines(order: $refund);
+                $orderLines = Order::getOrderLines(order: $refund);
 
-            if (
-                !self::validate(
-                    payment: $payment,
-                    order: $order,
-                    refund: $refund
-                )
-            ) {
-                return;
-            }
+                if (
+                    !self::validate(
+                        payment: $payment,
+                        order: $order,
+                        refund: $refund
+                    )
+                ) {
+                    return;
+                }
 
-            Repository::refund(
-                paymentId: $payment->id,
-                orderLines: $orderLines->count() > 0 ? $orderLines : null
-            );
+                $transactionId = (string) (time() + mt_rand());
 
-            $amount = $orderLines->count() === 0 ?
-                (float) $order->get_total() :
-                Order::convertFloat(
-                    value: $refund->get_total()
+                $response = Repository::refund(
+                    paymentId: $payment->id,
+                    orderLines: $orderLines->count() > 0 ? $orderLines : null,
+                    transactionId: $transactionId
                 );
 
-            OrderManagement::logSuccessPaymentAction(
-                order: $order,
-                action: ActionType::REFUND,
-                amount: $amount
-            );
-        } catch (Throwable $error) {
-            OrderManagement::logError(
-                message: Translator::translate(
-                    phraseId: 'refund-action-failed'
-                ),
-                error: $error,
-                order: $order
-            );
-        }
+                $action = $response->order?->actionLog->getByTransactionId(
+                    id: $transactionId
+                );
+
+                OrderManagement::logSuccessPaymentAction(
+                    action: ActionType::REFUND,
+                    order: $order,
+                    amount: $action?->orderLines->getTotal()
+                );
+            }
+        );
     }
 
     /**

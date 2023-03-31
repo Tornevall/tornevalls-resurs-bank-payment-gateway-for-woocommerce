@@ -24,8 +24,8 @@ class UniqueSellingPoint
     public static function init(): void
     {
         add_action(
-            hook_name: 'wp_head',
-            callback: 'Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint::setCss'
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint::setCss'
         );
     }
 
