@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
 use Resursbank\Ecom\Exception\PaymentActionException;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Lib\Utilities\Strings;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -55,16 +54,16 @@ class Refund
                     return;
                 }
 
-                $uuid = Strings::getUuid();
+                $transactionId = (string) (time() + mt_rand());
 
                 $response = Repository::refund(
                     paymentId: $payment->id,
                     orderLines: $orderLines->count() > 0 ? $orderLines : null,
-                    transactionId: $uuid
+                    transactionId: $transactionId
                 );
 
                 $action = $response->order?->actionLog->getByTransactionId(
-                    id: $uuid
+                    id: $transactionId
                 );
 
                 OrderManagement::logSuccessPaymentAction(
