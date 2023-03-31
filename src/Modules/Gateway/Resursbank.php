@@ -309,6 +309,8 @@ class Resursbank extends WC_Payment_Gateway
 
     /**
      * Whether total amount of order / cart is within min / max purchase limit.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private function validatePurchaseLimit(): bool
     {
@@ -318,7 +320,7 @@ class Resursbank extends WC_Payment_Gateway
            otherwise calling $this->>get_order_total() can cause an error. */
         if (
             WC()->cart instanceof WC_Cart ||
-            (int) absint(maybeint: get_query_var(var: 'order-pay')) > 0
+            (int) absint(get_query_var('order-pay')) > 0
         ) {
             $total = (float) $this->get_order_total();
         }

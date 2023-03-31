@@ -16,14 +16,16 @@ class Sanitize
 {
     /**
      * Shorthand method to properly escape strings.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function sanitizeHtml(
         string $html,
         array $allowedTags = []
     ): string {
         return (string) wp_kses(
-            string: (string) esc_html(text: $html),
-            allowed_html: $allowedTags
+            (string) esc_html(text: $html),
+            $allowedTags
         );
     }
 }

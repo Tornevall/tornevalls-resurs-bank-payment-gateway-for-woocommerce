@@ -73,8 +73,9 @@ class Settings
     public static function saveSettings(): void
     {
         try {
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             woocommerce_update_options(
-                options: self::getSection(
+                self::getSection(
                     section: self::getCurrentSectionId()
                 )
             );

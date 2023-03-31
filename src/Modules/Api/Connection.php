@@ -28,6 +28,7 @@ use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Language;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
@@ -45,7 +46,10 @@ class Connection
 {
     /**
      * Setup ECom API connection (creates a singleton to handle API calls).
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
+    // phpcs:ignore
     public static function setup(
         ?Jwt $jwt = null
     ): void {
@@ -61,13 +65,22 @@ class Connection
             Config::setup(
                 logger: self::getLogger(),
                 cache: self::getCache(),
-                logLevel: LogLevel::getData(),
                 jwtAuth: $jwt,
-                language: Language::getSiteLanguage(),
-                userAgent: UserAgent::getUserAgent()
+                logLevel: LogLevel::getData(),
+                userAgent: UserAgent::getUserAgent(),
+                language: Language::getSiteLanguage()
             );
-        } catch (Throwable) {
-            // Do nothing
+        } catch (Throwable $e) {
+            // We are unable to use loggers here (neither WC_Logger nor ecom will be available in this state).
+            // If admin_notices are available we can however at least display such errors.
+            if (Admin::isAdmin()) {
+                add_action('admin_notices', static function () use ($e): void {
+                    echo wp_kses(
+                        '<div class="notice notice-error"><p>Resurs Bank Error: ' . $e->getMessage() . '</p></div>',
+                        ['div' => ['class' => true]]
+                    );
+                });
+            }
         }
     }
 
