@@ -85,7 +85,7 @@ class Currency
      */
     public static function getConfiguredDecimalPoints(): int
     {
-        $points = get_option(option: 'woocommerce_price_num_decimals');
+        $points = get_option('woocommerce_price_num_decimals');
 
         if ($points === false) {
             return 2;

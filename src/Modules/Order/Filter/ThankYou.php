@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Order\Filter;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Woocommerce\Modules\Order\Status;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
@@ -44,18 +45,19 @@ class ThankYou
     public static function exec(mixed $orderId = null): void
     {
         try {
-            // @todo Not sure what happens here if $order_id is null, could we affect the wrong order?
             if ($orderId === null) {
                 throw new EmptyValueException(message: 'Order ID is null');
             }
 
             $order = OrderManagement::getOrder(id: $orderId);
 
-            // @todo Not sure if we want to throw an Exception instead if $order is null?
-            if (
-                $order === null ||
-                Metadata::isThankYouTriggered(order: $order)
-            ) {
+            if ($order === null) {
+                throw new IllegalValueException(
+                    message: 'Failed to obtain order data.'
+                );
+            }
+
+            if (Metadata::isThankYouTriggered(order: $order)) {
                 return;
             }
 

@@ -92,8 +92,6 @@ class Checkout
             }
         }
 
-        // @todo Reinstate sanitizer (see WOO-954 ECP-327).
-//        echo Data::getEscapedHtml($result);
         echo $result;
     }
 }

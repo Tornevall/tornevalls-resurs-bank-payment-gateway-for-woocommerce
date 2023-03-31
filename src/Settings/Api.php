@@ -184,22 +184,14 @@ class Api
             'id' => StoreId::getName(),
             'type' => 'select',
             'title' => Translator::translate(phraseId: 'store-id'),
+            'default' => StoreId::getDefault(),
+            'options' => [],
         ];
 
         try {
             // Both can cause Throwable, do them one at a time.
-            $result['default'] = StoreId::getDefault();
             $result['options'] = StoreRepository::getStores()->getSelectList();
         } catch (Throwable $error) {
-            $result = array_merge($result, [
-                'type' => 'text',
-                'custom_attributes' => [
-                    'readonly' => 'readonly',
-                ],
-                'value' => Translator::translate(phraseId: 'get-stores-failed'),
-                'css' => 'border: none; width: 100%; background: transparent; color: #d63638; box-shadow: none;',
-            ]);
-
             Log::error(error: $error);
         }
 
