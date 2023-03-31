@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
-use Resursbank\Ecom\Lib\Utilities\Strings;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
@@ -41,15 +40,15 @@ class Capture
                     return;
                 }
 
-                $uuid = Strings::getUuid();
+                $transactionId = (string) (time() + mt_rand());
 
                 $response = Repository::capture(
                     paymentId: $payment->id,
-                    transactionId: $uuid
+                    transactionId: $transactionId
                 );
 
                 $action = $response->order?->actionLog->getByTransactionId(
-                    id: $uuid
+                    id: $transactionId
                 );
 
                 OrderManagement::logSuccessPaymentAction(

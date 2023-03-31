@@ -139,7 +139,6 @@ class Resursbank extends WC_Payment_Gateway
 
         Metadata::setPaymentId(order: $order, id: $payment->id);
 
-        // @todo customerUrl can be empty, so redirect can technically become empty, not sure if it matters.
         return [
             'result' => 'success',
             'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
@@ -284,8 +283,6 @@ class Resursbank extends WC_Payment_Gateway
      */
     private function getOptions(WC_Order $order): Options
     {
-        // @todo Defaults like manual inspection, frozen payments, etc should be changed to configurable options
-        // @todo through the admin panel.
         return new Options(
             initiatedOnCustomersDevice: true,
             handleManualInspection: false,
