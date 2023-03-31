@@ -62,8 +62,6 @@ class WcSession
 
     /**
      * Fetch customer type stored in session.
-     *
-     * @todo Not sure if we always want to default to NATURAL?
      */
     public static function getCustomerType(): CustomerType
     {

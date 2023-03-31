@@ -157,8 +157,6 @@ EX;
 
     /**
      * Render content of the payment method tab for our config page.
-     *
-     * @todo Translate error message WOO-1010
      */
     public function renderPaymentMethodsPage(): void
     {

@@ -55,8 +55,6 @@ class LogDir extends StringOption implements OptionInterface
 
     /**
      * Resolve path to WP upload directory.
-     *
-     * @todo This could perhaps be centralized in a Util class for Filesystem operations.
      */
     private static function getUploadDir(): ?string
     {

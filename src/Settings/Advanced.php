@@ -19,8 +19,6 @@ use Resursbank\Woocommerce\Util\Translator;
 
 /**
  * Advanced settings section.
- *
- ** @todo Directory validation should be centralised in ECom. See WOO-803 & ECP-202.
  */
 class Advanced
 {
