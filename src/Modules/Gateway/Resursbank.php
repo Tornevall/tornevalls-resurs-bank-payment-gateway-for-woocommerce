@@ -275,7 +275,10 @@ class Resursbank extends WC_Payment_Gateway
             } else {
                 // Only display relevant error messages on the order placement screen. CurlExceptions usually contains
                 // trace messages for which we do not need to show in the customer view.
-                wc_add_notice(message: $error->getMessage(), notice_type: 'error');
+                wc_add_notice(
+                    message: $error->getMessage(),
+                    notice_type: 'error'
+                );
             }
         } catch (Throwable $error) {
             Log::error(error: $error);
