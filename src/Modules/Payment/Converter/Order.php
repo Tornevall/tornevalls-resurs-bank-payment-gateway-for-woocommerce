@@ -85,8 +85,6 @@ class Order
      * Resolve order item vat (tax) rate.
      *
      * NOTE: This is also utilised by methods which compile discount data.
-     *
-     * @todo WC_Tax::get_rates returning an array suggests there can be several taxes per item, investigate.
      */
     public static function getVatRate(WC_Order_Item $item): float
     {
