@@ -52,7 +52,8 @@ class Refund
         $result = null;
 
         try {
-            $result = wc_get_order(the_order: $id);
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+            $result = wc_get_order($id);
 
             if (!$result instanceof WC_Order_Refund) {
                 throw new IllegalTypeException(

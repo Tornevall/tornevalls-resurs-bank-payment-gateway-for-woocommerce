@@ -86,6 +86,8 @@ class Metadata
     /**
      * Set metadata to an order.
      * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setOrderMeta(
         WC_Abstract_Order $order,
@@ -93,39 +95,41 @@ class Metadata
         string $value
     ): bool {
         $exists = metadata_exists(
-            meta_type: 'post',
-            object_id: $order->get_id(),
-            meta_key: $key
+            'post',
+            $order->get_id(),
+            $key
         );
 
         if ($exists) {
             return (bool)update_post_meta(
-                post_id: $order->get_id(),
-                meta_key: $key,
-                meta_value: $value
+                $order->get_id(),
+                $key,
+                $value
             );
         }
 
         return (bool)add_post_meta(
-            post_id: $order->get_id(),
-            meta_key: $key,
-            meta_value: $value,
-            unique: true
+            $order->get_id(),
+            $key,
+            $value,
+            true
         );
     }
 
     /**
      * Return metadata from an order, as a single variable.
      * Normally metadata is returned as array, but currently we usually only save values once.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getOrderMeta(
         WC_Abstract_Order $order,
         string $key
     ): string {
         return (string)get_post_meta(
-            post_id: $order->get_id(),
-            key: $key,
-            single: true
+            $order->get_id(),
+            $key,
+            true
         );
     }
 

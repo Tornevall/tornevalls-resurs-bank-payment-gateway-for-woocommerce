@@ -65,8 +65,8 @@ class PaymentInformation
     public static function init(): void
     {
         add_action(
-            hook_name: 'admin_head',
-            callback: 'Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
+            'admin_head',
+            'Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
         );
     }
 

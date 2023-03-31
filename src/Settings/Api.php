@@ -42,15 +42,17 @@ class Api
 
     /**
      * Register actions for this config section.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
+        // Set priority high so that our method is called after credentials are saved
         add_action(
-            hook_name: 'updated_option',
-            callback: 'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
-            accepted_args: 1,
-            // Set high so that our method is called after credentials are saved
-            priority: 100
+            'updated_option',
+            'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
+            100,
+            1
         );
     }
 

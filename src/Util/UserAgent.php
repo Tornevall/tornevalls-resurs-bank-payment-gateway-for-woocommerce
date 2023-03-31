@@ -25,11 +25,12 @@ class UserAgent
      */
     public static function getPluginVersion(): string
     {
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         // Using get_file_data here since WordPress' base function get_plugin_data is currently not available when
         // this method is called.
         $pluginFileData = get_file_data(
-            file: RESURSBANK_GATEWAY_PATH . '/readme.txt',
-            default_headers: ['plugin_version' => 'Stable tag']
+            RESURSBANK_GATEWAY_PATH . '/readme.txt',
+            ['plugin_version' => 'Stable tag']
         );
 
         if (
@@ -78,6 +79,8 @@ class UserAgent
 
     /**
      * Fetch WooCommerce version information via the available plugin.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function getWooCommerceInformation(): array
     {
@@ -92,13 +95,13 @@ class UserAgent
         foreach ($pluginList as $pluginInit) {
             if (
                 dirname(
-                    path: plugin_basename(file: $pluginInit)
+                    path: plugin_basename($pluginInit)
                 ) !== 'woocommerce'
             ) {
                 continue;
             }
 
-            $return = get_plugin_data(plugin_file: $pluginInit);
+            $return = get_plugin_data($pluginInit);
         }
 
         return is_array(value: $return) ? $return : [];

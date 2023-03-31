@@ -43,9 +43,10 @@ class MessageBag
      */
     public static function init(): void
     {
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         add_action(
-            hook_name: 'admin_notices',
-            callback: 'Resursbank\Woocommerce\Modules\MessageBag\MessageBag::printMessages'
+            'admin_notices',
+            'Resursbank\Woocommerce\Modules\MessageBag\MessageBag::printMessages'
         );
     }
 
@@ -113,8 +114,14 @@ class MessageBag
         try {
             /** @var Message $message */
             foreach (self::getBag() as $message) {
-                echo '<div class="' . $message->type->value . ' notice"><p>' .
-                     $message->getEscapedMessage() . '</p></div>';
+                echo wp_kses(
+                    '<div class="' . $message->type->value . ' notice"><p>' .
+                    $message->getEscapedMessage() . '</p></div>',
+                    [
+                        'div' => ['class' => true],
+                        'p' => [],
+                    ]
+                );
             }
 
             if (self::$clear) {

@@ -39,30 +39,34 @@ class Order
 {
     /**
      * Initialize Order module.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
         add_action(
-            hook_name: 'add_meta_boxes',
-            callback: 'Resursbank\Woocommerce\Modules\Order\Order::addPaymentInfo'
+            'add_meta_boxes',
+            'Resursbank\Woocommerce\Modules\Order\Order::addPaymentInfo'
         );
         add_filter(
-            hook_name: 'is_protected_meta',
-            callback: 'Resursbank\Woocommerce\Modules\Order\Order::hideCustomFields',
-            priority: 10,
-            accepted_args: 2
+            'is_protected_meta',
+            'Resursbank\Woocommerce\Modules\Order\Order::hideCustomFields',
+            10,
+            2
         );
     }
 
     /**
      * Add action which will render payment information on order view.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function addPaymentInfo(): void
     {
         add_meta_box(
-            id: 'resursbank_payment_info',
-            title: 'Resurs',
-            callback: 'Resursbank\Woocommerce\Modules\Order\Order::renderPaymentInfo'
+            'resursbank_payment_info',
+            'Resurs',
+            'Resursbank\Woocommerce\Modules\Order\Order::renderPaymentInfo'
         );
     }
 
@@ -107,6 +111,8 @@ class Order
             Log::error(error: $e);
         }
 
+        // @todo This feature most definitely needs sanitizing but since it is fetched from Ecom we
+        // @todo need to figure out how the allowed tags should be handled.
         echo $data;
     }
 

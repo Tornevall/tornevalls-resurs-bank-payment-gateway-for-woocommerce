@@ -33,25 +33,26 @@ class CustomerType
      * Loads customertype.js script.
      *
      * @throws ConfigException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function loadScripts(): void
     {
         wp_enqueue_script(
-            handle: 'rb-set-customertype',
-            src: Url::getScriptUrl(
+            'rb-set-customertype',
+            Url::getScriptUrl(
                 module: 'CustomerType',
                 file: 'customertype.js'
             ),
-            deps: [
+            [
                 'jquery',
             ]
         );
 
         try {
             wp_localize_script(
-                handle: 'rb-set-customertype',
-                object_name: 'rbCustomerTypeData',
-                l10n: [
+                'rb-set-customertype',
+                'rbCustomerTypeData',
+                [
                     'currentCustomerType' => WcSession::getCustomerType(),
                     'apiUrl' => Route::getUrl(
                         route: Route::ROUTE_SET_CUSTOMER_TYPE
@@ -69,8 +70,8 @@ class CustomerType
     private static function enqueueScript(): void
     {
         add_action(
-            hook_name: 'wp_enqueue_scripts',
-            callback: 'Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType::loadScripts'
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType::loadScripts'
         );
     }
 }

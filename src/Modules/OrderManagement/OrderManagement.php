@@ -51,6 +51,8 @@ class OrderManagement
 
     /**
      * The actual method that sets up actions for order status change hooks.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
@@ -63,23 +65,24 @@ class OrderManagement
 
         // Break status update if unavailable based on payment status.
         add_action(
-            hook_name: 'transition_post_status',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::exec',
-            accepted_args: 3
+            'transition_post_status',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::exec',
+            10,
+            3
         );
 
         // Execute payment action AFTER status has changed in WC.
         add_action(
-            hook_name: 'woocommerce_order_status_changed',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\AfterOrderStatusChange::exec',
-            priority: 10,
-            accepted_args: 3
+            'woocommerce_order_status_changed',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\AfterOrderStatusChange::exec',
+            3,
+            10
         );
 
         // Add custom CSS rules relating to order view.
         add_action(
-            hook_name: 'admin_head',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableDeleteRefund::exec'
+            'admin_head',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableDeleteRefund::exec'
         );
     }
 
@@ -94,16 +97,18 @@ class OrderManagement
 
         // Prevent order edit options from rendering if we can't modify payment.
         add_filter(
-            hook_name: 'wc_order_is_editable',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
-            accepted_args: 2
+            'wc_order_is_editable',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
+            10,
+            2
         );
 
         // Perform payment action to update payment when order content changes.
         add_action(
-            hook_name: 'woocommerce_update_order',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\UpdateOrder::exec',
-            accepted_args: 2
+            'woocommerce_update_order',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\UpdateOrder::exec',
+            10,
+            2
         );
     }
 
@@ -118,23 +123,26 @@ class OrderManagement
 
         // Prevent order refund options from rendering when unavailable.
         add_filter(
-            hook_name: 'woocommerce_admin_order_should_render_refunds',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderRefundable::exec',
-            accepted_args: 3
+            'woocommerce_admin_order_should_render_refunds',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderRefundable::exec',
+            10,
+            3
         );
 
         // Execute refund payment action after refund has been created.
         add_action(
-            hook_name: 'woocommerce_order_refunded',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\Refund::exec',
-            accepted_args: 2
+            'woocommerce_order_refunded',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\Refund::exec',
+            10,
+            2
         );
 
         // Prevent internal note indicating funds need to be manually returned.
         add_filter(
-            hook_name: 'woocommerce_new_order_note_data',
-            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
-            accepted_args: 1
+            'woocommerce_new_order_note_data',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
+            10,
+            1
         );
     }
 
@@ -299,7 +307,7 @@ class OrderManagement
             MerchantPortal::TEST;
 
         $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
-        $order->add_order_note(note: $message);
+        $order->add_order_note($message);
     }
 
     /**

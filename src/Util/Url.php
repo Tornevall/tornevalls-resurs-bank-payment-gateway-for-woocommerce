@@ -31,9 +31,10 @@ class Url
         string $module,
         string $file
     ): string {
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         // NOTE: plugin_dir_url returns everything up to the last slash.
         return plugin_dir_url(
-            file: RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/" .
+            RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/" .
                   str_replace(search: '/', replace: '', subject: $file)
         ) . $file;
     }
@@ -141,7 +142,8 @@ class Url
         string $path,
         string $file
     ): string {
-        $result = plugin_dir_url(file: $path) . $file;
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $result = plugin_dir_url($path) . $file;
 
         /** @noinspection PhpConditionAlreadyCheckedInspection */
         if (!is_string(value: $result)) {

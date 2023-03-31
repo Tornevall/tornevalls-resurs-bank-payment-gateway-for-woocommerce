@@ -35,8 +35,8 @@ class Settings
     {
         // Render configuration page.
         add_action(
-            hook_name: 'woocommerce_settings_page_init',
-            callback: 'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
+            'woocommerce_settings_page_init',
+            'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
         Api::init();
@@ -44,16 +44,16 @@ class Settings
 
         // Save changes to database.
         add_action(
-            hook_name: 'woocommerce_settings_save_' . RESURSBANK_MODULE_PREFIX,
-            callback: 'Resursbank\Woocommerce\Settings\Settings::saveSettings'
+            'woocommerce_settings_save_' . RESURSBANK_MODULE_PREFIX,
+            'Resursbank\Woocommerce\Settings\Settings::saveSettings'
         );
 
         // Add link to Settings page from Plugin page in WP admin.
         add_filter(
-            hook_name: 'plugin_action_links',
-            callback: 'Resursbank\Woocommerce\Settings\Settings::addPluginActionLinks',
-            priority: 10,
-            accepted_args: 2
+            'plugin_action_links',
+            'Resursbank\Woocommerce\Settings\Settings::addPluginActionLinks',
+            10,
+            2
         );
 
         AddDocumentationLink::register();

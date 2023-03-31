@@ -139,7 +139,6 @@ class PartPayment
         }
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
-
         $customerCountry = get_option('woocommerce_default_country');
         $minLimit = 150;
 
