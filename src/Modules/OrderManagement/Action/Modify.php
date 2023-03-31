@@ -73,6 +73,12 @@ class Modify
                     paymentId: $payment->id,
                     orderLines: Order::getOrderLines(order: $order)
                 );
+
+                OrderManagement::logSuccessPaymentAction(
+                    action: ActionType::MODIFY_ORDER,
+                    order: $order,
+                    amount: (float) $order->get_total()
+                );
             }
         );
     }

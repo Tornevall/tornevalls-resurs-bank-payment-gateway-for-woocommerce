@@ -41,6 +41,11 @@ class Cancel
                 }
 
                 Repository::cancel(paymentId: $payment->id);
+
+                OrderManagement::logSuccessPaymentAction(
+                    action: ActionType::CANCEL,
+                    order: $order
+                );
             }
         );
     }
