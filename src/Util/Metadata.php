@@ -191,17 +191,13 @@ class Metadata
         ) === '1';
     }
 
-    /**
-     * @param WC_Abstract_Order $order
-     * @return bool
-     */
     private static function isLegacyOrder(
         WC_Abstract_Order $order
     ): bool {
         return self::getOrderMeta(
             order: $order,
             key: self::KEY_LEGACY_ORDER_REFERENCE
-        ) !== '' ? true : false;
+        ) !== '';
     }
 
     /**
