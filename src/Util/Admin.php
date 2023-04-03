@@ -22,7 +22,7 @@ class Admin
     public static function isAdmin(): bool
     {
         try {
-            return (bool)(is_admin() ?? false);
+            return (bool)(wc_current_user_has_role('administrator') ?? false);
         } catch (Throwable) {
             return false;
         }
