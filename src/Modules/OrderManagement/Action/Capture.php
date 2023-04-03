@@ -12,13 +12,14 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use WC_Order;
 
 /**
  * Business logic to capture Resurs Bank payment.
  */
-class Capture
+class Capture extends Action
 {
     /**
      * Capture Resurs Bank payment.
@@ -31,8 +32,8 @@ class Capture
         }
 
         OrderManagement::execAction(
-            order: $order,
             action: ActionType::CAPTURE,
+            order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
@@ -40,7 +41,7 @@ class Capture
                     return;
                 }
 
-                $transactionId = (string) (time() + mt_rand());
+                $transactionId = self::generateTransactionId();
 
                 $response = Repository::capture(
                     paymentId: $payment->id,

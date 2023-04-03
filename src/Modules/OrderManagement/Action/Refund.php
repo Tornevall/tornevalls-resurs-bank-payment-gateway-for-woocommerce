@@ -13,6 +13,7 @@ use Resursbank\Ecom\Exception\PaymentActionException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Translator;
@@ -23,7 +24,7 @@ use WC_Order_Refund;
 /**
  * Business logic to refund Resurs Bank payment.
  */
-class Refund
+class Refund extends Action
 {
     /**
      * Refund Resurs Bank payment.
@@ -33,8 +34,8 @@ class Refund
         WC_Order_Refund $refund
     ): void {
         OrderManagement::execAction(
-            order: $order,
             action: ActionType::REFUND,
+            order: $order,
             callback: static function () use ($order, $refund): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
@@ -54,7 +55,7 @@ class Refund
                     return;
                 }
 
-                $transactionId = (string) (time() + mt_rand());
+                $transactionId = self::generateTransactionId();
 
                 $response = Repository::refund(
                     paymentId: $payment->id,

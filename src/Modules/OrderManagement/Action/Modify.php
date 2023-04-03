@@ -23,6 +23,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Currency;
@@ -33,7 +34,7 @@ use WC_Order;
 /**
  * Business logic to modify Resurs Bank payment.
  */
-class Modify
+class Modify extends Action
 {
     /**
      * Modify content of Resurs Bank payment.
@@ -60,8 +61,8 @@ class Modify
         }
 
         OrderManagement::execAction(
-            order: $order,
             action: ActionType::MODIFY_ORDER,
+            order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
