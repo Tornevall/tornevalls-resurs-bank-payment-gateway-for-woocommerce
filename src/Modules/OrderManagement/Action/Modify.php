@@ -122,8 +122,8 @@ class Modify
                 order: $order,
                 message: sprintf(
                     Translator::translate(phraseId: 'modify-too-large'),
-                    Currency::getFormattedAmount(amount: $requestedAmount),
-                    Currency::getFormattedAmount(amount: $availableAmount)
+                    Currency::getFormattedAmount(amount: (float)$requestedAmount),
+                    Currency::getFormattedAmount(amount: (float)$availableAmount)
                 ),
                 error: $error
             );
