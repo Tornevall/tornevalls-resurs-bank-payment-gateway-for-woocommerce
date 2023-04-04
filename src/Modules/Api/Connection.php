@@ -63,6 +63,7 @@ class Connection
             }
 
             Config::setup(
+                isProduction: $jwt->scope === Scope::MERCHANT_API,
                 logger: self::getLogger(),
                 cache: self::getCache(),
                 jwtAuth: $jwt,
