@@ -57,10 +57,6 @@ class Status
             paymentId: Metadata::getPaymentId(order: $order)
         );
 
-        if (!self::canUpdate(order: $order, payment: $payment)) {
-            return;
-        }
-
         match ($payment->status) {
             PaymentStatus::ACCEPTED => $order->payment_complete(),
             PaymentStatus::REJECTED => self::updateRejected(
@@ -72,28 +68,6 @@ class Status
                 note: Translator::translate(phraseId: 'payment-status-on-hold')
             ),
         };
-    }
-
-    /**
-     * Whether we may update the status of a WC_Order instance.
-     *
-     * 1. WC_Order may not have obtained a status which cannot be manipulated.
-     * 2. Converted WC_Order status from the Resurs Bank payment most differ.
-     */
-    public static function canUpdate(
-        WC_Order $order,
-        Payment $payment
-    ): bool {
-        // List of statuses which cannot be overwritten.
-        $statuses = ['pending', 'processing', 'on-hold'];
-
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        return
-            $order->has_status($statuses) &&
-            !$order->has_status(
-                status: self::convertPaymentStatus(payment: $payment)
-            )
-        ;
     }
 
     /**
