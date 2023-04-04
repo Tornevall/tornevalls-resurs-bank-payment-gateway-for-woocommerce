@@ -70,10 +70,14 @@ class Modify extends Action
                     Repository::cancel(paymentId: $payment->id);
                 }
 
-                Repository::addOrderLines(
-                    paymentId: $payment->id,
-                    orderLines: Order::getOrderLines(order: $order)
-                );
+                $orderLines = Order::getOrderLines(order: $order);
+
+                if (count($orderLines) > 0) {
+                    Repository::addOrderLines(
+                        paymentId: $payment->id,
+                        orderLines: $orderLines
+                    );
+                }
 
                 OrderManagement::logSuccessPaymentAction(
                     action: ActionType::MODIFY_ORDER,
@@ -120,13 +124,13 @@ class Modify extends Action
             }
 
             OrderManagement::logError(
-                order: $order,
                 message: sprintf(
                     Translator::translate(phraseId: 'modify-too-large'),
                     Currency::getFormattedAmount(amount: $requestedAmount),
                     Currency::getFormattedAmount(amount: $availableAmount)
                 ),
-                error: $error
+                error: $error,
+                order: $order
             );
         }
 
