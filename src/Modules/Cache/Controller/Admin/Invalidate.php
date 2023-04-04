@@ -10,9 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Cache\Controller\Admin;
 
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\PermissionException;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -28,10 +26,6 @@ class Invalidate
     public static function exec(): void
     {
         try {
-            if (!Admin::isAdmin()) {
-                throw new PermissionException(message: 'Must be admin.');
-            }
-
             Config::getCache()->invalidate();
 
             MessageBag::addSuccess(
