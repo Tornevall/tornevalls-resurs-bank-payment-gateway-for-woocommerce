@@ -126,8 +126,12 @@ class Modify extends Action
             OrderManagement::logError(
                 message: sprintf(
                     Translator::translate(phraseId: 'modify-too-large'),
-                    Currency::getFormattedAmount(amount: $requestedAmount),
-                    Currency::getFormattedAmount(amount: $availableAmount)
+                    Currency::getFormattedAmount(
+                        amount: (float)$requestedAmount
+                    ),
+                    Currency::getFormattedAmount(
+                        amount: (float)$availableAmount
+                    )
                 ),
                 error: $error,
                 order: $order

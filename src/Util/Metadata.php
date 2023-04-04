@@ -58,7 +58,7 @@ class Metadata
             key: self::KEY_PAYMENT_ID
         );
 
-        if ($paymentId === '') {
+        if ($paymentId === '' && self::isLegacyOrder(order: $order)) {
             $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
 
             if ($paymentId === '') {
@@ -189,6 +189,15 @@ class Metadata
             order: $order,
             key: self::KEY_THANK_YOU
         ) === '1';
+    }
+
+    private static function isLegacyOrder(
+        WC_Abstract_Order $order
+    ): bool {
+        return self::getOrderMeta(
+            order: $order,
+            key: self::KEY_LEGACY_ORDER_REFERENCE
+        ) !== '';
     }
 
     /**
