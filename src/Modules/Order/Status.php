@@ -57,29 +57,19 @@ class Status
             paymentId: Metadata::getPaymentId(order: $order)
         );
 
+        // We don't handle INSPECTION or TASK_REDIRECTION_REQUIRED as the former can't appear in the e-commerce flow
+        // and the latter should not be possible after we've received a callback.
         match ($payment->status) {
             PaymentStatus::ACCEPTED => $order->payment_complete(),
             PaymentStatus::REJECTED => self::updateRejected(
                 payment: $payment,
                 order: $order
             ),
-            default => self::setOnHold(order: $order),
+            PaymentStatus::FROZEN => $order->update_status(
+                new_status: 'on-hold',
+                note: Translator::translate(phraseId: 'payment-status-on-hold')
+            )
         };
-    }
-
-    /**
-     * Sets order to on hold if it's not already on hold.
-     */
-    private static function setOnHold(WC_Order $order): void
-    {
-        if ($order->get_status() === 'on-hold') {
-            return;
-        }
-
-        $order->update_status(
-            new_status: 'on-hold',
-            note: Translator::translate(phraseId: 'payment-status-on-hold')
-        );
     }
 
     /**
