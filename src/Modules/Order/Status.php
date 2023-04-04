@@ -68,19 +68,6 @@ class Status
     }
 
     /**
-     * Resolve expected WC_Order status based on the status of the Payment.
-     */
-    public static function convertPaymentStatus(
-        Payment $payment
-    ): string {
-        return match ($payment->status) {
-            PaymentStatus::ACCEPTED => 'completed',
-            PaymentStatus::REJECTED => 'failed',
-            default => 'on-hold'
-        };
-    }
-
-    /**
      * Sets order to on hold if it's not already on hold.
      */
     private static function setOnHold(WC_Order $order): void
