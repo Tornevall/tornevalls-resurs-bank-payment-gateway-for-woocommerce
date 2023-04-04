@@ -63,10 +63,7 @@ class Status
                 payment: $payment,
                 order: $order
             ),
-            default => $order->update_status(
-                new_status: 'on-hold',
-                note: Translator::translate(phraseId: 'payment-status-on-hold')
-            ),
+            default => self::setOnHold(order: $order),
         };
     }
 
@@ -81,6 +78,21 @@ class Status
             PaymentStatus::REJECTED => 'failed',
             default => 'on-hold'
         };
+    }
+
+    /**
+     * Sets order to on hold if it's not already on hold.
+     */
+    private static function setOnHold(WC_Order $order): void
+    {
+        if ($order->get_status() === 'on-hold') {
+            return;
+        }
+
+        $order->update_status(
+            new_status: 'on-hold',
+            note: Translator::translate(phraseId: 'payment-status-on-hold')
+        );
     }
 
     /**
