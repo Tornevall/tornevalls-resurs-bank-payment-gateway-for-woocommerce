@@ -99,15 +99,9 @@ class Modify extends Action
         $availableAmount = $payment->application->approvedCreditLimit;
 
         try {
-            $requestedAmount = $order->get_total();
+            $requestedAmount = (float) $order->get_total();
 
-            if (!is_numeric(value: $requestedAmount)) {
-                throw new PaymentActionException(
-                    message: 'Order amount is not numeric.'
-                );
-            }
-
-            if ((float) $requestedAmount > $availableAmount) {
+            if ($requestedAmount > $availableAmount) {
                 throw new PaymentActionException(
                     message: "Requested amount $requestedAmount exceeds $availableAmount on $payment->id"
                 );
