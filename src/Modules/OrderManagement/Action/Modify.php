@@ -128,8 +128,8 @@ class Modify extends Action
 
             self::handleValidationError(
                 error: $error,
-                requestedAmount: $requestedAmount,
-                availableAmount: $availableAmount,
+                requestedAmount: (float)$requestedAmount,
+                availableAmount: (float)$availableAmount,
                 order: $order
             );
             return false;
