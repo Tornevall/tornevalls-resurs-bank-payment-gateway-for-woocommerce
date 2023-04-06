@@ -125,7 +125,7 @@ class MessageBag
             }
 
             if (self::$clear) {
-                self::updateBag(bag: new MessageCollection(data: []));
+                self::clear();
             }
         } catch (Throwable $e) {
             Log::error(error: $e);
@@ -138,6 +138,15 @@ class MessageBag
     public static function keep(): void
     {
         self::$clear = false;
+    }
+
+    /**
+     * @throws IllegalTypeException
+     * @throws JsonException
+     */
+    public static function clear(): void
+    {
+        self::updateBag(bag: new MessageCollection(data: []));
     }
 
     /**
@@ -164,7 +173,7 @@ class MessageBag
      * @throws ReflectionException
      * @throws IllegalValueException
      */
-    private static function getBag(): MessageCollection
+    public static function getBag(): MessageCollection
     {
         $raw = WcSession::get(key: self::SESSION_KEY);
 

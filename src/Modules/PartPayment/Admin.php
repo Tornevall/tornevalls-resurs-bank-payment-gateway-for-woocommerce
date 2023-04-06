@@ -26,7 +26,6 @@ class Admin
      */
     public static function setJs(): void
     {
-        $asd = 'asd';
         /** @noinspection BadExceptionsProcessingInspection */
         try {
             $widget = new DurationByMonths(
@@ -49,16 +48,6 @@ class Admin
                 'before'
             );
             add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');
-
-
-
-            $url2 = Url::getScriptUrl(
-                module: 'PartPayment',
-                file: 'admin/test.js'
-            );
-            wp_register_script('rb-test-admin-scripts', $url2, ['jquery']);
-            wp_enqueue_script('rb-test-admin-scripts');
-            add_action('admin_enqueue_scripts', 'rb-test-admin-scripts');
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
         }

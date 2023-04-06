@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Order;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Error;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -27,10 +28,13 @@ use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 use WP_Post;
+use function get_current_screen;
 
 /**
  * WC_Order related business logic.
@@ -57,6 +61,59 @@ class Order
     }
 
     /**
+     * Add JavaScript to order view to update content when order is updated.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function initAdmin(): void
+    {
+        try {
+            $orderId = $_GET['post'] ?? null;
+
+            if ($orderId === null) {
+                return;
+            }
+
+            $orderId = (int) $orderId;
+
+            // @todo return null; if not on admin view, and $order !== null.
+//            if (!self::isOnAdminOrderView()) {
+//                return;
+//            }
+
+            $fetchUrl = Route::getUrl(
+                route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
+                admin: true
+            );
+
+            // Append JS code to observe order changes and fetch new content.
+            $url = Url::getScriptUrl(
+                module: 'Order',
+                file: 'admin/getOrderContent.js'
+            );
+            wp_enqueue_script(
+                'rb-get-order-content-admin-scripts',
+                $url,
+                ['jquery']
+            );
+
+            // Echo constant containing URL to get new order view content.
+            wp_register_script(
+                'rb-get-order-content-admin-inline-scripts',
+                '',
+                ['rb-get-order-content-admin-scripts']
+            );
+            wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
+            wp_add_inline_script(
+                'rb-get-order-content-admin-inline-scripts',
+                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$orderId');"
+            );
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+    }
+
+    /**
      * Add action which will render payment information on order view.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
@@ -75,25 +132,13 @@ class Order
      */
     public static function renderPaymentInfo(): void
     {
-        global $post;
-
-        if (
-            !$post instanceof WP_Post ||
-            $post->post_type !== 'shop_order' ||
-            (new PageController())->get_current_screen_id() !== 'shop_order'
-        ) {
-            return;
-        }
-
-        $order = new WC_Order(order: $post->ID);
-
-        if (
-            !$order instanceof WC_Order
-        ) {
-            return;
-        }
+        $order = self::getCurrentOrder();
 
         try {
+            if ($order === null || !self::isOnAdminOrderView()) {
+                return;
+            }
+
             $paymentInformation = new PaymentInformation(
                 paymentId: Metadata::getPaymentId(order: $order)
             );
@@ -162,5 +207,32 @@ class Order
             storeId: StoreId::getData(),
             paymentMethodId: $method
         );
+    }
+
+    /**
+     * Get currently viewed WP_Post as WP_Order instance, if any. For example,
+     * while on the order view in admin we can obtain the currently viewed order
+     * this way.
+     */
+    public static function getCurrentOrder(): ?WC_Order
+    {
+        global $post;
+
+        if (
+            !$post instanceof WP_Post ||
+            $post->post_type !== 'shop_order'
+        ) {
+            return null;
+        }
+
+        return new WC_Order(order: $post->ID);
+    }
+
+    /**
+     * Whether we are currently viewing order view in admin panel.
+     */
+    public static function isOnAdminOrderView(): bool
+    {
+        return get_current_screen()->id === 'shop_order';
     }
 }

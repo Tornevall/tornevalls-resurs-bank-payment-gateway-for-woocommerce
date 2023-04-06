@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement;
 
+use Automattic\WooCommerce\Admin\PageController;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -32,9 +33,12 @@ use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
+use WP_Post;
 
 /**
  * Business logic relating to order management functionality.
@@ -241,6 +245,8 @@ class OrderManagement
             $result = wc_get_order(the_order: $id);
 
             if (!$result instanceof WC_Order) {
+                $result = null;
+
                 throw new IllegalTypeException(
                     message: 'Returned object not of type WC_Order'
                 );
