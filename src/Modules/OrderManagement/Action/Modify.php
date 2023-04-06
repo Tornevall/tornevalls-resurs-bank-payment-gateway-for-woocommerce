@@ -37,6 +37,11 @@ use WC_Order;
 class Modify extends Action
 {
     /**
+     * Used to ensure that we don't make multiple attempts to modify the payment.
+     */
+    private static bool $hasAlreadyRun = false;
+
+    /**
      * Modify content of Resurs Bank payment.
      *
      * @throws ApiException
@@ -55,9 +60,15 @@ class Modify extends Action
     public static function exec(
         Payment $payment,
         WC_Order $order
-    ): void {
+    ): bool {
+        if (self::$hasAlreadyRun) {
+            return false;
+        }
+
+        self::$hasAlreadyRun = true;
+
         if (!self::validate(payment: $payment, order: $order)) {
-            return;
+            return false;
         }
 
         OrderManagement::execAction(
@@ -86,6 +97,8 @@ class Modify extends Action
                 );
             }
         );
+
+        return true;
     }
 
     /**
