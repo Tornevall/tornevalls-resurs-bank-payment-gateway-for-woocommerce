@@ -60,15 +60,15 @@ class Modify extends Action
     public static function exec(
         Payment $payment,
         WC_Order $order
-    ): bool {
+    ): void {
         if (self::$hasAlreadyRun) {
-            return false;
+            return;
         }
 
         self::$hasAlreadyRun = true;
 
         if (!self::validate(payment: $payment, order: $order)) {
-            return false;
+            return;
         }
 
         OrderManagement::execAction(
@@ -98,7 +98,7 @@ class Modify extends Action
             }
         );
 
-        return true;
+        return;
     }
 
     /**
