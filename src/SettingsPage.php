@@ -93,7 +93,7 @@ EX;
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
             Callback::SECTION_ID => Callback::getTitle(),
             Advanced::SECTION_ID => Advanced::getTitle(),
-            About::SECTION_ID => About::getTitle(),
+            About::SECTION_ID => About::getTitle()
         ];
     }
 
