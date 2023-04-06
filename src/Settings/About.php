@@ -18,16 +18,16 @@ use Resursbank\Woocommerce\Util\UserAgent;
 /**
  * Support info section.
  */
-class SupportInfo
+class About
 {
-    public const SECTION_ID = 'support_info';
+    public const SECTION_ID = 'about';
 
     /**
      * Get tab title
      */
     public static function getTitle(): string
     {
-        return Translator::translate(phraseId: 'support-info');
+        return Translator::translate(phraseId: 'about');
     }
 
     /**

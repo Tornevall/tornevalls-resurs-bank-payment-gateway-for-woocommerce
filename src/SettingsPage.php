@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce;
 
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Settings\About;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\Callback;
@@ -18,7 +19,6 @@ use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\Settings\SupportInfo;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
@@ -91,9 +91,9 @@ EX;
             PaymentMethods::SECTION_ID => PaymentMethods::getTitle(),
             PartPayment::SECTION_ID => PartPayment::getTitle(),
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
-            SupportInfo::SECTION_ID => SupportInfo::getTitle(),
             Callback::SECTION_ID => Callback::getTitle(),
             Advanced::SECTION_ID => Advanced::getTitle(),
+            About::SECTION_ID => About::getTitle(),
         ];
     }
 
@@ -122,8 +122,8 @@ EX;
             return;
         }
 
-        if ($section === 'support_info') {
-            $this->renderSupportInfoPage();
+        if ($section === 'about') {
+            $this->renderAboutPage();
             return;
         }
 
@@ -180,10 +180,10 @@ EX;
     /**
      * Render Support Info tab.
      */
-    public function renderSupportInfoPage(): void
+    public function renderAboutPage(): void
     {
         try {
-            echo SupportInfo::getWidget();
+            echo About::getWidget();
         } catch (Throwable $error) {
             Log::error(error: $error);
 
