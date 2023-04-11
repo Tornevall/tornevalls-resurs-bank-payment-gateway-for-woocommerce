@@ -200,8 +200,8 @@ EX;
     {
         try {
             return Enabled::isEnabled() &&
-                is_product() &&
-               self::getWidget()->getStartingAtCost() >= Limit::getData();
+                   is_product() &&
+                   self::getWidget()->cost->monthlyCost >= Limit::getData();
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
