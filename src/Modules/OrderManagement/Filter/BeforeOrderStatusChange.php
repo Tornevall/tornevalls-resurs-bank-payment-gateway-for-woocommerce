@@ -13,12 +13,9 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
-use Throwable;
-use WC_Order;
 use WP_Post;
 
 use function strlen;
@@ -58,7 +55,7 @@ class BeforeOrderStatusChange
             $order === null ||
             $newStatus === '' ||
             !Metadata::isValidResursPayment(order: $order) ||
-            self::validatePaymentAction(status: $newStatus, order: $order)
+            OrderManagement::validatePaymentAction(status: $newStatus, order: $order)
         ) {
             return;
         }
@@ -78,34 +75,6 @@ class BeforeOrderStatusChange
         );
 
         Route::redirectBack();
-    }
-
-    /**
-     * Validate payment action availability based on order status.
-     */
-    private static function validatePaymentAction(
-        string $status,
-        WC_Order $order
-    ): bool {
-        try {
-            $payment = OrderManagement::getPayment(order: $order);
-
-            return match ($status) {
-                'cancelled' => OrderManagement::canCancel(
-                    order: $order
-                ) || $payment->isCancelled(),
-                'completed' => OrderManagement::canCapture(
-                    order: $order
-                ) || $payment->isCaptured(),
-                'refunded' => OrderManagement::canRefund(
-                    order: $order
-                ) || $payment->isRefunded(),
-                default => OrderManagement::canEdit(order: $order)
-            };
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-            return false;
-        }
     }
 
     /**

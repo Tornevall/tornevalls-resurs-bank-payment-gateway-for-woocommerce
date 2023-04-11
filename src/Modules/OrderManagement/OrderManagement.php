@@ -386,11 +386,39 @@ class OrderManagement
         );
 
         self::logSuccess(
-            order: $order,
             message: sprintf(
                 Translator::translate(phraseId: "$actionStr-success"),
                 Currency::getFormattedAmount(amount: (float) $amount)
-            )
+            ),
+            order: $order
         );
+    }
+
+    /**
+     * Validate payment action availability based on order status.
+     */
+    public static function validatePaymentAction(
+        string $status,
+        WC_Order $order
+    ): bool {
+        try {
+            $payment = self::getPayment(order: $order);
+
+            return match ($status) {
+                'cancelled' => self::canCancel(
+                        order: $order
+                    ) || $payment->isCancelled(),
+                'completed' => self::canCapture(
+                        order: $order
+                    ) || $payment->isCaptured(),
+                'refunded' => self::canRefund(
+                        order: $order
+                    ) || $payment->isRefunded(),
+                default => self::canEdit(order: $order)
+            };
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+            return false;
+        }
     }
 }

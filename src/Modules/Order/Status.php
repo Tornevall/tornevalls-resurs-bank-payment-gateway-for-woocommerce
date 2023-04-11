@@ -20,9 +20,11 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order;
@@ -57,6 +59,14 @@ class Status
             paymentId: Metadata::getPaymentId(order: $order)
         );
 
+
+        if (!OrderManagement::validatePaymentAction(
+            status: '', // ????
+            order: $order
+        )) {
+            return;
+        }
+
         // We don't handle INSPECTION or TASK_REDIRECTION_REQUIRED as the former can't appear in the e-commerce flow
         // and the latter should not be possible after we've received a callback.
         match ($payment->status) {
@@ -70,6 +80,14 @@ class Status
                 note: Translator::translate(phraseId: 'payment-status-on-hold')
             )
         };
+    }
+
+    private static function wcStatusFromPaymentStatus(Payment $payment): string
+    {
+        return match ($payment->status) {
+            PaymentStatus::ACCEPTED => 'completed',
+            PaymentStatus::REJECTED =>
+        }
     }
 
     /**
