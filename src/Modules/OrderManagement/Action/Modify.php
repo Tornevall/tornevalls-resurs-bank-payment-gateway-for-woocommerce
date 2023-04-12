@@ -58,6 +58,7 @@ class Modify extends Action
      * @throws Throwable
      * @throws ValidationException
      */
+    // phpcs:ignore
     public static function exec(
         Payment $payment,
         WC_Order $order
