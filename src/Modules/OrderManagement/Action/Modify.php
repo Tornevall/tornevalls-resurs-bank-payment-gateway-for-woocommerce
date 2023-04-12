@@ -38,6 +38,11 @@ use WC_Order;
 class Modify extends Action
 {
     /**
+     * Used to ensure that we don't make multiple attempts to modify the payment.
+     */
+    private static bool $hasAlreadyLogged = false;
+
+    /**
      * Modify content of Resurs Bank payment.
      *
      * @throws ApiException
@@ -109,8 +114,6 @@ class Modify extends Action
         Payment $payment,
         WC_Order $order
     ): bool {
-        $result = true;
-
         $availableAmount = $payment->application->approvedCreditLimit;
 
         try {
@@ -127,28 +130,50 @@ class Modify extends Action
                     message: "Requested amount $requestedAmount exceeds $availableAmount on $payment->id"
                 );
             }
-        } catch (Throwable $error) {
-            $result = false;
 
+            return true;
+        } catch (Throwable $error) {
             if (!isset($requestedAmount)) {
                 throw $error;
             }
 
-            OrderManagement::logError(
-                message: sprintf(
-                    Translator::translate(phraseId: 'modify-too-large'),
-                    Currency::getFormattedAmount(
-                        amount: (float)$requestedAmount
-                    ),
-                    Currency::getFormattedAmount(
-                        amount: (float)$availableAmount
-                    )
-                ),
+            self::handleValidationError(
                 error: $error,
+                requestedAmount: (float)$requestedAmount,
+                availableAmount: (float)$availableAmount,
                 order: $order
             );
+            return false;
+        }
+    }
+
+    /**
+     * Handle logging of validation errors.
+     */
+    private static function handleValidationError(
+        Throwable $error,
+        float $requestedAmount,
+        float $availableAmount,
+        WC_Order $order
+    ): void {
+        if (self::$hasAlreadyLogged) {
+            return;
         }
 
-        return $result;
+        OrderManagement::logError(
+            message: sprintf(
+                Translator::translate(phraseId: 'modify-too-large'),
+                Currency::getFormattedAmount(
+                    amount: (float)$requestedAmount
+                ),
+                Currency::getFormattedAmount(
+                    amount: (float)$availableAmount
+                )
+            ),
+            error: $error,
+            order: $order
+        );
+
+        self::$hasAlreadyLogged = true;
     }
 }

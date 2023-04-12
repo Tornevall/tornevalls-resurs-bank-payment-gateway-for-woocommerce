@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
+use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
@@ -38,18 +39,13 @@ class Admin
         PartPayment::initAdmin();
         PartPaymentPeriod::init();
         Store::initAdmin();
-        add_action(
-            hook_name: 'updated_option',
-            callback: 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
-            priority: 10,
-            accepted_args: 3
-        );
 
         if (!Enabled::isEnabled()) {
             return;
         }
 
         Gateway::initAdmin();
+        Order::init();
         OrderManagement::init();
         PaymentInformation::init();
     }

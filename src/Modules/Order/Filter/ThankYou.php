@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Order\Filter;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Woocommerce\Modules\Order\Status;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -60,6 +61,7 @@ class ThankYou
                 return;
             }
 
+            Status::update(order: $order);
             Metadata::setThankYouTriggered(order: $order);
 
             $order->add_order_note(

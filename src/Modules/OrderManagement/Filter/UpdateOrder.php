@@ -81,8 +81,8 @@ class UpdateOrder
 
         OrderManagement::logActionError(
             action: ActionType::MODIFY_ORDER,
-            error: $error,
-            order: $order
+            order: $order,
+            error: $error
         );
 
         self::$modificationError = true;
