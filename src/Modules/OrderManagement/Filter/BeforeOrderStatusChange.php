@@ -94,17 +94,11 @@ class BeforeOrderStatusChange
             // If Resurs payment status is still in redirection, the order can not be cancelled, but for
             // cancels we must allow wooCommerce to cancel orders (especially those in pending), since
             // they tend to disappear if we throw exceptions.
-            if (
-                $status === 'cancelled' ||
-                $payment->status === Status::TASK_REDIRECTION_REQUIRED
-            ) {
-                return true;
-            }
 
             return match ($status) {
                 'cancelled' => OrderManagement::canCancel(
                     order: $order
-                ) || $payment->isCancelled(),
+                ) || ($payment->isCancelled() || $payment->status === Status::TASK_REDIRECTION_REQUIRED),
                 'completed' => OrderManagement::canCapture(
                     order: $order
                 ) || $payment->isCaptured(),
