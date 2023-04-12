@@ -39,7 +39,7 @@ class Cancel extends Action
                 $payment = OrderManagement::getPayment(order: $order);
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
-                // cancels we must allow wooCommerce to cancel orders (especially those in pending), since
+                // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
                 // they tend to disappear if we throw exceptions.
                 if (
                     !$payment->canCancel() ||
