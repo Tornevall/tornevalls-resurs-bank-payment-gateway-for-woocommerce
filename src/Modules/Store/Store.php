@@ -29,6 +29,18 @@ class Store
     public static function initAdmin(): void
     {
         /** @noinspection BadExceptionsProcessingInspection */
+            add_action(
+                'admin_enqueue_scripts',
+                'Resursbank\Woocommerce\Modules\Store\Store::onAdminEnqueueScripts'
+            );
+    }
+
+    /**
+     * Callback function because all of this needs to be done when an action runs, not just randomly called before
+     * the relevant hooks are triggered (this causes crashing, including wp-admin becoming inaccessible).
+     */
+    public static function onAdminEnqueueScripts(): void
+    {
         try {
             $url = Route::getUrl(
                 route: Route::ROUTE_GET_STORES_ADMIN,
@@ -45,16 +57,16 @@ class Store
             );
 
             // All the below is required to render the inline CSS.
-            wp_register_style('rb-store-admin-css', '');
+            wp_register_style('rb-store-admin-css', false);
             wp_enqueue_style('rb-store-admin-css');
             wp_add_inline_style(
                 'rb-store-admin-css',
                 '.rb-store-fetching select { background-image: url("' .
-                    get_admin_url() . '/images/loading.gif' . '") !important; }'
+                get_admin_url() . '/images/loading.gif' . '") !important; }'
             );
 
             // All the below is required to render the inline JS.
-            wp_register_script('rb-store-admin-scripts', '');
+            wp_register_script('rb-store-admin-scripts', false);
             wp_enqueue_script('rb-store-admin-scripts');
             wp_add_inline_script('rb-store-admin-scripts', $widget->content);
         } catch (Throwable $error) {
