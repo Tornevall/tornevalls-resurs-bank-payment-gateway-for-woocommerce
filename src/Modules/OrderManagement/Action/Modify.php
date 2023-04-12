@@ -75,6 +75,9 @@ class Modify extends Action
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
+                // If Resurs payment status is still in redirection, the order can not be cancelled, but for
+                // cancels we must allow wooCommerce to cancel orders (especially those in pending), since
+                // they tend to disappear if we throw exceptions.
                 if (
                     !$payment->canCancel() ||
                     $payment->status === Status::TASK_REDIRECTION_REQUIRED
