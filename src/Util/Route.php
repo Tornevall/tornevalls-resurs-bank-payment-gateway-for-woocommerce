@@ -93,6 +93,7 @@ class Route
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
         try {
+            //Log::debug(message: $route . ': ' . self::userIsAdmin());
             switch ($route) {
                 case self::ROUTE_GET_ADDRESS:
                     self::respondWithExit(body: GetAddress::exec());
@@ -273,6 +274,11 @@ class Route
 
         header(header: 'Location: ' . $url);
         exit;
+    }
+
+    public static function userIsAdmin(): bool
+    {
+        return is_user_logged_in() && current_user_can('administrator');
     }
 
     /**
