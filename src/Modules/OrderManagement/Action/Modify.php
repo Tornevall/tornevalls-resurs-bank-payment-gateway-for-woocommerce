@@ -22,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -56,7 +57,10 @@ class Modify extends Action
         Payment $payment,
         WC_Order $order
     ): void {
-        if (!self::validate(payment: $payment, order: $order)) {
+        if (
+            $payment->status === Status::TASK_REDIRECTION_REQUIRED ||
+            !self::validate(payment: $payment, order: $order)
+        ) {
             return;
         }
 
@@ -65,6 +69,13 @@ class Modify extends Action
             order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
+
+                if (
+                    !$payment->canCancel() ||
+                    $payment->status === Status::TASK_REDIRECTION_REQUIRED
+                ) {
+                    return;
+                }
 
                 if ($payment->canCancel()) {
                     Repository::cancel(paymentId: $payment->id);

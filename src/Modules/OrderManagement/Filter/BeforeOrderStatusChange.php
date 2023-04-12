@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -89,6 +90,13 @@ class BeforeOrderStatusChange
     ): bool {
         try {
             $payment = OrderManagement::getPayment(order: $order);
+
+            if (
+                $status === 'cancelled' ||
+                $payment->status === Status::TASK_REDIRECTION_REQUIRED
+            ) {
+                return true;
+            }
 
             return match ($status) {
                 'cancelled' => OrderManagement::canCancel(
