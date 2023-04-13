@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -90,10 +91,14 @@ class BeforeOrderStatusChange
         try {
             $payment = OrderManagement::getPayment(order: $order);
 
+            // If Resurs payment status is still in redirection, the order can not be cancelled, but for
+            // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
+            // they tend to disappear if we throw exceptions.
+
             return match ($status) {
                 'cancelled' => OrderManagement::canCancel(
                     order: $order
-                ) || $payment->isCancelled(),
+                ) || ($payment->isCancelled() || $payment->status === Status::TASK_REDIRECTION_REQUIRED),
                 'completed' => OrderManagement::canCapture(
                     order: $order
                 ) || $payment->isCaptured(),
