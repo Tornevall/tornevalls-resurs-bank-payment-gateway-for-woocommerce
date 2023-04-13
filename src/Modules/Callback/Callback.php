@@ -24,6 +24,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
+use WC_DateTime;
 use WC_Order;
 
 use function is_string;
@@ -33,6 +34,11 @@ use function is_string;
  */
 class Callback
 {
+    /**
+     * Minimum delay before callbacks are handled if the order confirmation page has not been loaded by the customer.
+     */
+    private const MINIMUM_RESPONSE_DELAY = 60;
+
     /**
      * Setup endpoint for incoming callbacks using the WC API.
      *
@@ -119,11 +125,40 @@ class Callback
                         paymentId: $callback->getPaymentId()
                     );
 
+                    self::checkIfReadyForCallback(order: $order);
+
                     $order->add_order_note(note: $callback->getNote());
 
                     Status::update(order: $order);
                 }
             )
         );
+    }
+
+    /**
+     * Check that order is ready for callbacks.
+     *
+     * @throws HttpException
+     */
+    private static function checkIfReadyForCallback(WC_Order $order): void
+    {
+        /** @var WC_DateTime|null $dateCreated */
+        $dateCreated = $order->get_date_created();
+
+        if (!$dateCreated) {
+            $dateCreated = new WC_DateTime();
+        }
+
+        $timeSince = time() - $dateCreated->format(format: 'U');
+
+        if (
+            $timeSince < self::MINIMUM_RESPONSE_DELAY &&
+            !Metadata::isThankYouTriggered(order: $order)
+        ) {
+            throw new HttpException(
+                message: 'Order not ready for callbacks yet',
+                code: 503
+            );
+        }
     }
 }
