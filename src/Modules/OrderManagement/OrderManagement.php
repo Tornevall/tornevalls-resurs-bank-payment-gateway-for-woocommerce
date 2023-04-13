@@ -406,14 +406,14 @@ class OrderManagement
 
             return match ($status) {
                 'cancelled' => self::canCancel(
-                        order: $order
-                    ) || $payment->isCancelled(),
+                    order: $order
+                ) || $payment->isCancelled(),
                 'completed' => self::canCapture(
-                        order: $order
-                    ) || $payment->isCaptured(),
+                    order: $order
+                ) || $payment->isCaptured(),
                 'refunded' => self::canRefund(
-                        order: $order
-                    ) || $payment->isRefunded(),
+                    order: $order
+                ) || $payment->isRefunded(),
                 default => self::canEdit(order: $order)
             };
         } catch (Throwable $error) {

@@ -55,7 +55,10 @@ class BeforeOrderStatusChange
             $order === null ||
             $newStatus === '' ||
             !Metadata::isValidResursPayment(order: $order) ||
-            OrderManagement::validatePaymentAction(status: $newStatus, order: $order)
+            OrderManagement::validatePaymentAction(
+                status: $newStatus,
+                order: $order
+            )
         ) {
             return;
         }

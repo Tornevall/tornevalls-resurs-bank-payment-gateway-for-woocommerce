@@ -20,7 +20,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
@@ -59,11 +58,13 @@ class Status
             paymentId: Metadata::getPaymentId(order: $order)
         );
 
-
-        if (!OrderManagement::validatePaymentAction(
-            status: '', // ????
-            order: $order
-        )) {
+        if (
+            !OrderManagement::validatePaymentAction(
+            // ????
+                status: '',
+                order: $order
+            )
+        ) {
             return;
         }
 
