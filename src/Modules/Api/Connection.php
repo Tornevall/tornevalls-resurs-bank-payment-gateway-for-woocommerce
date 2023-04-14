@@ -47,6 +47,8 @@ class Connection
     /**
      * Setup ECom API connection (creates a singleton to handle API calls).
      *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     // phpcs:ignore
@@ -172,6 +174,7 @@ class Connection
      * @throws EmptyValueException
      * @SuppressWarnings(PHPMD.Superglobals)
      */
+    // phpcs:ignore
     private static function getJwtFromPost(): ?Jwt
     {
         // WordPress usually deliver_wpnonces for us here, but we can't use it to verify the nonce in this early state
