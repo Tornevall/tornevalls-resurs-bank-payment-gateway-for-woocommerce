@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Resurs Bank Payments for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
- * WC Tested up to: 6.9.1
+ * WC Tested up to: 7.6.0
  * Requires PHP: 8.1
  * Version: 0.0.1
  * Author:
@@ -20,11 +20,11 @@ declare(strict_types=1);
 
 use Resursbank\Ecom\Config;
 use Resursbank\Woocommerce\Modules\Api\Connection;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
 use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
-use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
+use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\WooCommerce;
 
 if (!defined(constant_name: 'ABSPATH')) {
     exit;
