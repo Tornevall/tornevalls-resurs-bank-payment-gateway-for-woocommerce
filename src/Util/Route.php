@@ -281,6 +281,7 @@ class Route
      * @throws ValidationException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @SuppressWarnings(PHPMD.ExitExpression)
      */
     private static function route(string $route): void
     {
