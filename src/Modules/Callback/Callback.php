@@ -20,7 +20,6 @@ use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
 use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
 use Resursbank\Woocommerce\Modules\Order\Status;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
