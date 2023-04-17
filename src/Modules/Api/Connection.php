@@ -21,6 +21,7 @@ use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
+use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
@@ -32,7 +33,6 @@ use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Language;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
-use ValueError;
 use WC_Logger;
 
 use function function_exists;
@@ -47,6 +47,8 @@ class Connection
     /**
      * Setup ECom API connection (creates a singleton to handle API calls).
      *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     // phpcs:ignore
@@ -58,19 +60,39 @@ class Connection
                 WC()->initialize_session();
             }
 
+            // Marks the current JWT if it is used from _POST-vars or if it is used from a stored setup.
+            // Conditions is that data is saved from wp-admin under very specific circumstances.
+            $hasPostJwtInstance = false;
+
+            if ($jwt === null && self::getJwtFromPost() instanceof Jwt) {
+                // In the wc-save-section, options are only allowed to be saved if they are present in the options list.
+                // If we can't fetch credentials in an early "save" we can't generate a new store list properly.
+                $jwt = self::getJwtFromPost();
+                $hasPostJwtInstance = $jwt instanceof Jwt;
+            }
+
             if ($jwt === null && self::hasCredentials()) {
                 $jwt = self::getConfigJwt();
             }
 
             Config::setup(
-                isProduction: $jwt->scope === Scope::MERCHANT_API,
                 logger: self::getLogger(),
                 cache: self::getCache(),
                 jwtAuth: $jwt,
                 logLevel: LogLevel::getData(),
                 userAgent: UserAgent::getUserAgent(),
+                isProduction: isset($jwt->scope) && $jwt->scope === Scope::MERCHANT_API,
                 language: Language::getSiteLanguage()
             );
+
+            if ($hasPostJwtInstance) {
+                try {
+                    // We need to clear store list cache after ecom init, but before the getStores-request.
+                    // This is a requirement since the list of stores may be cached at this point.
+                    Repository::getCache()->clear();
+                } catch (Throwable) {
+                }
+            }
         } catch (Throwable $e) {
             // We are unable to use loggers here (neither WC_Logger nor ecom will be available in this state).
             // If admin_notices are available we can however at least display such errors.
@@ -99,7 +121,6 @@ class Connection
     /**
      * @throws AuthException
      * @throws EmptyValueException
-     * @throws ValueError
      */
     public static function getConfigJwt(): ?Jwt
     {
@@ -144,5 +165,48 @@ class Connection
     public static function getCache(): CacheInterface
     {
         return EnableCache::isEnabled() ? new Transient() : new None();
+    }
+
+    /**
+     * Get JWT from $_POST. Used on early update_option requests from where we need to try to fetch store lists
+     * with not-yet-set credentials.
+     *
+     * @throws EmptyValueException
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    // phpcs:ignore
+    private static function getJwtFromPost(): ?Jwt
+    {
+        // WordPress usually deliver_wpnonces for us here, but we can't use it to verify the nonce in this early state
+        // since WP is not a guarantee to be present. However, we can verify that users are admins and that the
+        // usual request variables for updating options is present. This access request must be limited to one section
+        // only.
+        if (
+            Admin::isAdmin() &&
+            isset(
+                $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
+                $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
+                $_POST[RESURSBANK_MODULE_PREFIX . '_environment'],
+                $_GET['tab'],
+                $_GET['page']
+            ) && (
+                $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
+                $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
+                $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
+                $_GET['tab'] === RESURSBANK_MODULE_PREFIX &&
+                $_GET['page'] === 'wc-settings'
+            )
+        ) {
+            $return = new Jwt(
+                clientId: $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
+                clientSecret: $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
+                scope: $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] === EnvironmentEnum::PROD ?
+                    Scope::MERCHANT_API :
+                    Scope::MOCK_MERCHANT_API,
+                grantType: GrantType::CREDENTIALS
+            );
+        }
+
+        return $return ?? null;
     }
 }
