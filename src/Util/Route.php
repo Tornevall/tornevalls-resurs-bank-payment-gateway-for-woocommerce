@@ -288,6 +288,7 @@ class Route
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @SuppressWarnings(PHPMD.ExitExpression)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private static function route(string $route): void
     {
@@ -332,7 +333,6 @@ class Route
                     body: GetOrderContentController::exec()
                 );
                 break;
-
 
             default:
                 break;

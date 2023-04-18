@@ -150,22 +150,6 @@ class MessageBag
     }
 
     /**
-     * Look for duplicate messages in the collection.
-     */
-    private static function isInBag(string $message, MessageCollection $bag): bool
-    {
-        /** @var Message $item */
-        foreach ($bag as $item) {
-            if ($item->message === $message) {
-                $return = true;
-                break;
-            }
-        }
-
-        return $return ?? false;
-    }
-
-    /**
      * Resolve MessageCollection instance from JSON in session.
      *
      * @throws IllegalTypeException
@@ -192,6 +176,22 @@ class MessageBag
         return $collection instanceof MessageCollection
             ? $collection
             : new MessageCollection(data: []);
+    }
+
+    /**
+     * Look for duplicate messages in the collection.
+     */
+    private static function isInBag(string $message, MessageCollection $bag): bool
+    {
+        /** @var Message $item */
+        foreach ($bag as $item) {
+            if ($item->message === $message) {
+                $return = true;
+                break;
+            }
+        }
+
+        return $return ?? false;
     }
 
     /**

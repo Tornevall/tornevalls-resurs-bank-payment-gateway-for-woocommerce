@@ -26,8 +26,6 @@ const RESURSBANK_GET_ORDER_CONTENT = (controllerUrl, orderId) => {
 
         const action = new URLSearchParams(settings.data).get('action');
 
-        console.log(action);
-
         if (actions.includes(action)) {
             fetch(url, {
                 method: 'GET',

@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Order;
 
-use Automattic\WooCommerce\Admin\PageController;
-use Error;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -34,6 +32,7 @@ use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 use WP_Post;
+
 use function get_current_screen;
 
 /**
@@ -63,6 +62,7 @@ class Order
     /**
      * Add JavaScript to order view to update content when order is updated.
      *
+     * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initAdmin(): void
