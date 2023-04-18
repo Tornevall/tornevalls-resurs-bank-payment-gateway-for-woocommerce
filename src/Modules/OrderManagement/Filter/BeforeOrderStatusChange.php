@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -83,7 +84,7 @@ class BeforeOrderStatusChange
     /**
      * Validate payment action availability based on order status.
      */
-    private static function validatePaymentAction(
+    public static function validatePaymentAction(
         string $status,
         WC_Order $order
     ): bool {
@@ -93,7 +94,7 @@ class BeforeOrderStatusChange
             return match ($status) {
                 'cancelled' => OrderManagement::canCancel(
                     order: $order
-                ) || $payment->isCancelled(),
+                ) || ($payment->isCancelled() || $payment->status === Status::TASK_REDIRECTION_REQUIRED),
                 'completed' => OrderManagement::canCapture(
                     order: $order
                 ) || $payment->isCaptured(),

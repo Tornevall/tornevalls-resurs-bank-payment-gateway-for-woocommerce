@@ -12,7 +12,6 @@ namespace Resursbank\Woocommerce\Modules\ModuleInit;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Util\Route;
 
 /**
@@ -30,7 +29,6 @@ class Shared
         }
 
         Route::exec();
-        Order::init();
         MessageBag::init();
         Callback::init();
     }

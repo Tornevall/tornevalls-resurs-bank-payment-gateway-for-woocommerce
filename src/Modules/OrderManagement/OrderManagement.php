@@ -392,11 +392,11 @@ class OrderManagement
         );
 
         self::logSuccess(
-            order: $order,
             message: sprintf(
                 Translator::translate(phraseId: "$actionStr-success"),
                 Currency::getFormattedAmount(amount: (float) $amount)
-            )
+            ),
+            order: $order
         );
     }
 }

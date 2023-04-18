@@ -22,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -36,6 +37,11 @@ use WC_Order;
  */
 class Modify extends Action
 {
+    /**
+     * Used to ensure that we don't make multiple attempts to modify the payment.
+     */
+    private static bool $hasAlreadyLogged = false;
+
     /**
      * Modify content of Resurs Bank payment.
      *
@@ -52,11 +58,15 @@ class Modify extends Action
      * @throws Throwable
      * @throws ValidationException
      */
+    // phpcs:ignore
     public static function exec(
         Payment $payment,
         WC_Order $order
     ): void {
-        if (!self::validate(payment: $payment, order: $order)) {
+        if (
+            $payment->status === Status::TASK_REDIRECTION_REQUIRED ||
+            !self::validate(payment: $payment, order: $order)
+        ) {
             return;
         }
 
@@ -66,14 +76,28 @@ class Modify extends Action
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
+                // If Resurs payment status is still in redirection, the order can not be cancelled, but for
+                // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
+                // they tend to disappear if we throw exceptions.
+                if (
+                    !$payment->canCancel() ||
+                    $payment->status === Status::TASK_REDIRECTION_REQUIRED
+                ) {
+                    return;
+                }
+
                 if ($payment->canCancel()) {
                     Repository::cancel(paymentId: $payment->id);
                 }
 
-                Repository::addOrderLines(
-                    paymentId: $payment->id,
-                    orderLines: Order::getOrderLines(order: $order)
-                );
+                $orderLines = Order::getOrderLines(order: $order);
+
+                if (count($orderLines) > 0 && $orderLines->getTotal() > 0) {
+                    Repository::addOrderLines(
+                        paymentId: $payment->id,
+                        orderLines: $orderLines
+                    );
+                }
 
                 OrderManagement::logSuccessPaymentAction(
                     action: ActionType::MODIFY_ORDER,
@@ -94,8 +118,6 @@ class Modify extends Action
         Payment $payment,
         WC_Order $order
     ): bool {
-        $result = true;
-
         $availableAmount = $payment->application->approvedCreditLimit;
 
         try {
@@ -106,24 +128,50 @@ class Modify extends Action
                     message: "Requested amount $requestedAmount exceeds $availableAmount on $payment->id"
                 );
             }
-        } catch (Throwable $error) {
-            $result = false;
 
+            return true;
+        } catch (Throwable $error) {
             if (!isset($requestedAmount)) {
                 throw $error;
             }
 
-            OrderManagement::logError(
-                order: $order,
-                message: sprintf(
-                    Translator::translate(phraseId: 'modify-too-large'),
-                    Currency::getFormattedAmount(amount: $requestedAmount),
-                    Currency::getFormattedAmount(amount: $availableAmount)
-                ),
-                error: $error
+            self::handleValidationError(
+                error: $error,
+                requestedAmount: (float)$requestedAmount,
+                availableAmount: (float)$availableAmount,
+                order: $order
             );
+            return false;
+        }
+    }
+
+    /**
+     * Handle logging of validation errors.
+     */
+    private static function handleValidationError(
+        Throwable $error,
+        float $requestedAmount,
+        float $availableAmount,
+        WC_Order $order
+    ): void {
+        if (self::$hasAlreadyLogged) {
+            return;
         }
 
-        return $result;
+        OrderManagement::logError(
+            message: sprintf(
+                Translator::translate(phraseId: 'modify-too-large'),
+                Currency::getFormattedAmount(
+                    amount: (float)$requestedAmount
+                ),
+                Currency::getFormattedAmount(
+                    amount: (float)$availableAmount
+                )
+            ),
+            error: $error,
+            order: $order
+        );
+
+        self::$hasAlreadyLogged = true;
     }
 }

@@ -23,6 +23,7 @@ use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order;
@@ -57,55 +58,41 @@ class Status
             paymentId: Metadata::getPaymentId(order: $order)
         );
 
-        if (!self::canUpdate(order: $order, payment: $payment)) {
+        if (
+            $order->get_status() !== 'pending' && !BeforeOrderStatusChange::validatePaymentAction(
+                status: self::orderStatusFromPaymentStatus(payment: $payment),
+                order: $order
+            )
+        ) {
             return;
         }
 
+        // We don't handle INSPECTION or TASK_REDIRECTION_REQUIRED as the former can't appear in the e-commerce flow
+        // and the latter should not be possible after we've received a callback.
         match ($payment->status) {
             PaymentStatus::ACCEPTED => $order->payment_complete(),
             PaymentStatus::REJECTED => self::updateRejected(
                 payment: $payment,
                 order: $order
             ),
-            default => $order->update_status(
+            PaymentStatus::FROZEN => $order->update_status(
                 new_status: 'on-hold',
                 note: Translator::translate(phraseId: 'payment-status-on-hold')
-            ),
+            )
         };
     }
 
     /**
-     * Whether we may update the status of a WC_Order instance.
-     *
-     * 1. WC_Order may not have obtained a status which cannot be manipulated.
-     * 2. Converted WC_Order status from the Resurs Bank payment most differ.
+     * Translates a Resurs payment status to a WooCommerce order status string.
      */
-    public static function canUpdate(
-        WC_Order $order,
-        Payment $payment
-    ): bool {
-        // List of statuses which cannot be overwritten.
-        $statuses = ['pending', 'processing', 'on-hold'];
-
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        return
-            $order->has_status($statuses) &&
-            !$order->has_status(
-                status: self::convertPaymentStatus(payment: $payment)
-            )
-        ;
-    }
-
-    /**
-     * Resolve expected WC_Order status based on the status of the Payment.
-     */
-    public static function convertPaymentStatus(
-        Payment $payment
-    ): string {
+    public static function orderStatusFromPaymentStatus(Payment $payment): string
+    {
         return match ($payment->status) {
-            PaymentStatus::ACCEPTED => 'completed',
-            PaymentStatus::REJECTED => 'failed',
-            default => 'on-hold'
+            PaymentStatus::ACCEPTED => 'processing',
+            PaymentStatus::REJECTED => static fn (): string => self::getFailedOrCancelled(
+                payment: $payment
+            ),
+            PaymentStatus::FROZEN => 'on-hold'
         };
     }
 
@@ -127,14 +114,33 @@ class Status
         Payment $payment,
         WC_Order $order
     ): void {
-        $status = Repository::getTaskStatusDetails(
-            paymentId: $payment->id
-        )->completed ? 'failed' : 'cancelled';
+        $status = self::getFailedOrCancelled(payment: $payment);
 
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         $order->update_status(
             $status,
             Translator::translate(phraseId: "payment-status-$status")
         );
+    }
+
+    /**
+     * Gets "failed" or "cancelled" based on task completion status.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    private static function getFailedOrCancelled(Payment $payment): string
+    {
+        return Repository::getTaskStatusDetails(
+            paymentId: $payment->id
+        )->completed ? 'failed' : 'cancelled';
     }
 }

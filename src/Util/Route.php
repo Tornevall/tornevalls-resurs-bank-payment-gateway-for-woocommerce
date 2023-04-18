@@ -9,8 +9,19 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use JsonException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
@@ -99,51 +110,23 @@ class Route
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
         try {
-            switch ($route) {
-                case self::ROUTE_GET_ADDRESS:
-                    self::respondWithExit(body: GetAddress::exec());
-                    break;
-
-                case self::ROUTE_PART_PAYMENT:
-                    self::respondWithExit(body: PartPayment::exec());
-                    break;
-
-                case self::ROUTE_PART_PAYMENT_ADMIN:
-                    self::respondWithExit(body: GetValidDurations::exec());
-                    break;
-
-                case self::ROUTE_GET_STORES_ADMIN:
-                    self::respondWithExit(body: (new GetStores())->exec());
-                    break;
-
-                case self::ROUTE_SET_CUSTOMER_TYPE:
-                    self::respondWithExit(body: SetCustomerType::exec());
-                    exit;
-
-                case self::ROUTE_ADMIN_CACHE_INVALIDATE:
-                    Invalidate::exec();
-                    self::redirectToSettings(tab: Advanced::SECTION_ID);
-                    break;
-
-                case self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK:
-                    TestTrigger::exec();
-                    self::redirectToSettings(tab: Callback::SECTION_ID);
-                    break;
-
-                case self::ROUTE_TEST_CALLBACK_RECEIVED:
-                    TestReceived::exec();
-                    self::respondWithExit(body: '');
-                    break;
-
-                case self::ROUTE_ADMIN_GET_ORDER_CONTENT:
-                    self::respondWithExit(
-                        body: GetOrderContentController::exec()
-                    );
-                    break;
-
-                default:
-                    break;
+            if (
+                in_array(
+                    needle: $route,
+                    haystack: self::getAdminRoutes(),
+                    strict: true
+                ) &&
+                !self::userIsAdmin()
+            ) {
+                self::respondWithError(
+                    exception: new HttpException(
+                        message: 'Forbidden',
+                        code: 403
+                    )
+                );
             }
+
+            self::route(route: $route);
         } catch (Throwable $exception) {
             self::respondWithError(exception: $exception);
         }
@@ -285,6 +268,96 @@ class Route
 
         header(header: 'Location: ' . $url);
         exit;
+    }
+
+    /**
+     * Perform actual execution of controller code.
+     *
+     * @throws HttpException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws \ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws FilesystemException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @SuppressWarnings(PHPMD.ExitExpression)
+     */
+    private static function route(string $route): void
+    {
+        switch ($route) {
+            case self::ROUTE_GET_ADDRESS:
+                self::respondWithExit(body: GetAddress::exec());
+                break;
+
+            case self::ROUTE_PART_PAYMENT:
+                self::respondWithExit(body: PartPayment::exec());
+                break;
+
+            case self::ROUTE_PART_PAYMENT_ADMIN:
+                self::respondWithExit(body: GetValidDurations::exec());
+                break;
+
+            case self::ROUTE_GET_STORES_ADMIN:
+                self::respondWithExit(body: (new GetStores())->exec());
+                break;
+
+            case self::ROUTE_SET_CUSTOMER_TYPE:
+                self::respondWithExit(body: SetCustomerType::exec());
+                exit;
+
+            case self::ROUTE_ADMIN_CACHE_INVALIDATE:
+                Invalidate::exec();
+                self::redirectToSettings(tab: Advanced::SECTION_ID);
+                break;
+
+            case self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK:
+                TestTrigger::exec();
+                self::redirectToSettings(tab: Callback::SECTION_ID);
+                break;
+
+            case self::ROUTE_TEST_CALLBACK_RECEIVED:
+                TestReceived::exec();
+                self::respondWithExit(body: '');
+                break;
+
+            case self::ROUTE_ADMIN_GET_ORDER_CONTENT:
+                self::respondWithExit(
+                    body: GetOrderContentController::exec()
+                );
+                break;
+
+
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Fetches all routes which are only available to admin users.
+     */
+    private static function getAdminRoutes(): array
+    {
+        return [
+            self::ROUTE_PART_PAYMENT_ADMIN,
+            self::ROUTE_ADMIN_CACHE_INVALIDATE,
+            self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+            self::ROUTE_GET_STORES_ADMIN,
+        ];
+    }
+
+    /**
+     * Check if user is logged in and has administrator capabilities.
+     */
+    private static function userIsAdmin(): bool
+    {
+        return is_user_logged_in() && current_user_can('administrator');
     }
 
     /**

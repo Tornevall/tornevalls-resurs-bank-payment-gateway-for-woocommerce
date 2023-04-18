@@ -113,7 +113,9 @@ class Product
      */
     private static function getSku(WC_Order_Item_Product $product): string
     {
-        $result = self::getOriginalProduct(product: $product)->get_sku();
+        $originalProduct = self::getOriginalProduct(product: $product);
+        $title = $originalProduct->get_title();
+        $result = $originalProduct->get_sku();
 
         if (!is_string(value: $result) || $result === '') {
             Log::error(
@@ -126,7 +128,7 @@ class Product
             throw new IllegalValueException(
                 message: Translator::translate(
                     phraseId: 'failed-to-resolve-sku-from-order-line-object'
-                ) . '<br />' .
+                ) . ' (' . $title . ')<br />' .
                          Translator::translate(
                              phraseId: 'could-not-complete-your-order-please-contact-support'
                          )

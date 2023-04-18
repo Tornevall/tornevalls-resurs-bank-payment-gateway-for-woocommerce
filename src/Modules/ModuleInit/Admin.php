@@ -39,18 +39,13 @@ class Admin
         PartPayment::initAdmin();
         PartPaymentPeriod::init();
         Store::initAdmin();
-        add_action(
-            hook_name: 'updated_option',
-            callback: 'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
-            priority: 10,
-            accepted_args: 3
-        );
 
         if (!Enabled::isEnabled()) {
             return;
         }
 
         Gateway::initAdmin();
+        Order::init();
         OrderManagement::init();
         PaymentInformation::init();
         Order::initAdmin();
