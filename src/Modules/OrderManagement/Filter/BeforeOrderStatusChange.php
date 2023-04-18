@@ -84,16 +84,12 @@ class BeforeOrderStatusChange
     /**
      * Validate payment action availability based on order status.
      */
-    private static function validatePaymentAction(
+    public static function validatePaymentAction(
         string $status,
         WC_Order $order
     ): bool {
         try {
             $payment = OrderManagement::getPayment(order: $order);
-
-            // If Resurs payment status is still in redirection, the order can not be cancelled, but for
-            // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
-            // they tend to disappear if we throw exceptions.
 
             return match ($status) {
                 'cancelled' => OrderManagement::canCancel(
