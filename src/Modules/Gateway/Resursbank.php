@@ -51,6 +51,8 @@ use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
 
+use function get_option;
+
 /**
  * Resurs Bank payment gateway.
  *
@@ -159,8 +161,8 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         return $this->validatePurchaseLimit() && match (WcSession::getCustomerType()) {
-            CustomerType::LEGAL => $this->method->enabledForLegalCustomer,
-            CustomerType::NATURAL => $this->method->enabledForNaturalCustomer
+                CustomerType::LEGAL => $this->method->enabledForLegalCustomer,
+                CustomerType::NATURAL => $this->method->enabledForNaturalCustomer
         };
     }
 
@@ -290,6 +292,13 @@ class Resursbank extends WC_Payment_Gateway
      */
     private function getOptions(WC_Order $order): Options
     {
+        // TTL default from WooCommerce. If stock reservations is enabled and over 0, we should use that value instead
+        // of our default.
+        $stockEnabled = ((string)get_option(
+            'woocommerce_manage_stock'
+        ) === 'yes');
+        $holdStockMinutes = (int)get_option('woocommerce_hold_stock_minutes');
+
         return new Options(
             initiatedOnCustomersDevice: true,
             handleManualInspection: false,
@@ -310,7 +319,9 @@ class Resursbank extends WC_Payment_Gateway
                     url: Url::getCallbackUrl(type: CallbackType::MANAGEMENT)
                 )
             ),
-            timeToLiveInMinutes: 120
+            timeToLiveInMinutes: $stockEnabled &&
+            $holdStockMinutes > 0 &&
+            $holdStockMinutes <= 43200 ? $holdStockMinutes : 120
         );
     }
 
@@ -327,14 +338,13 @@ class Resursbank extends WC_Payment_Gateway
            otherwise calling $this->>get_order_total() can cause an error. */
         if (
             WC()->cart instanceof WC_Cart ||
-            (int) absint(get_query_var('order-pay')) > 0
+            (int)absint(get_query_var('order-pay')) > 0
         ) {
-            $total = (float) $this->get_order_total();
+            $total = (float)$this->get_order_total();
         }
 
         return
             $total >= $this->method->minPurchaseLimit &&
-            $total <= $this->method->maxPurchaseLimit
-        ;
+            $total <= $this->method->maxPurchaseLimit;
     }
 }
