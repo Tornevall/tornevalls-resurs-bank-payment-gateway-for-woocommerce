@@ -1,7 +1,7 @@
 === Resurs Bank Payments for WooCommerce ===
 Contributors: RB-Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, checkout, hosted, simplified, hosted flow, simplified flow
-Requires at least: 5.5
+Requires at least: 6.0
 Tested up to: 6.2
 Requires PHP: 8.1
 Stable tag: 0.0.1
@@ -39,7 +39,7 @@ Primary new problems should be discovered in TEST rather than production since t
 Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
 
 * **Required**: PHP: 8.1 or later.
-* **Required**: WooCommerce: v3.5.0 or higher - preferably *always* the latest release!
+* **Required**: WooCommerce: At least v7.6.0
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
 * **Required**: CURL (php-curl).
 * WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
