@@ -14,6 +14,7 @@ use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
+use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Util\Translator;
 
@@ -42,12 +43,26 @@ class Advanced
     {
         return [
             self::SECTION_ID => [
+                'log_enabled' => self::getLogEnabledSetting(),
                 'log_dir' => self::getLogDirSetting(),
                 'log_level' => self::getLogLevelSetting(),
                 'cache_enabled' => self::getCacheEnabled(),
                 'invalidate_cache' => self::getInvalidateCacheButton(),
                 'get_address_enabled' => self::getGetAddressEnabled(),
             ],
+        ];
+    }
+
+    /**
+     * Return array for Enable log setting.
+     */
+    private static function getLogEnabledSetting(): array
+    {
+        return [
+            'id' => LogEnabled::getName(),
+            'type' => 'checkbox',
+            'title' => Translator::translate(phraseId: 'log-enabled'),
+            'default' => LogEnabled::getDefault(),
         ];
     }
 
