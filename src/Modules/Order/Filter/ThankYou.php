@@ -57,7 +57,10 @@ class ThankYou
                 );
             }
 
-            if (Metadata::isThankYouTriggered(order: $order)) {
+            if (
+                !Metadata::isValidResursPayment(order: $order) ||
+                Metadata::isThankYouTriggered(order: $order)
+            ) {
                 return;
             }
 
