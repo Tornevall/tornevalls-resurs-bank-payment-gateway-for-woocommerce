@@ -34,6 +34,7 @@ class GetOrderContentController
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
+    // phpcs:ignore
     public static function exec(): string
     {
         $orderId = $_GET['orderId'] ?? null;
@@ -43,8 +44,15 @@ class GetOrderContentController
             throw new HttpException(message: 'Missing order id.');
         }
 
+        // Look for order types set by WC. If none is set, WC will fail reading the order properly.
+        // abstract-wc-order-data-store-cpt.php
+        $orderTypes = wc_get_order_types();
+
+        if (!$orderTypes) {
+            add_filter('wc_order_types', static fn () => ['shop_order'], 10, 2);
+        }
+
         $order = OrderManagement::getOrder(id: $orderId);
-        $paymentId = Metadata::getPaymentId(order: $order);
 
         if ($order === null || !Metadata::isValidResursPayment(order: $order)) {
             throw new HttpException(message: 'Invalid order id.');
@@ -54,7 +62,7 @@ class GetOrderContentController
 
         try {
             $data['payment_info'] = (new PaymentInformation(
-                paymentId: $paymentId
+                paymentId: Metadata::getPaymentId(order: $order)
             ))->widget->content;
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -72,6 +80,8 @@ class GetOrderContentController
             }
 
             ob_start();
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+            // phpcs:ignore
             $notes = wc_get_order_notes(['order_id' => $order->get_id()]);
             include $file;
             $data['order_notes'] = ob_get_clean();
