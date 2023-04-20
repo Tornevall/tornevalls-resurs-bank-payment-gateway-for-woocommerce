@@ -349,6 +349,7 @@ class Route
             self::ROUTE_ADMIN_CACHE_INVALIDATE,
             self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
             self::ROUTE_GET_STORES_ADMIN,
+            self::ROUTE_ADMIN_GET_ORDER_CONTENT,
         ];
     }
 
