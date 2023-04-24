@@ -81,7 +81,7 @@ const RESURSBANK_GET_ORDER_CONTENT = (controllerUrl, orderId) => {
 
         // @todo This error is never set up through GetOrderContentController so the only
         // @todo way to fetch and alert in admin-front for the moment, is to catch it from here. Which is bad.
-        if (data.order_notes && data.order_notes.indexOf('Failed to update payment')) {
+        if (!data.error && data.order_notes && data.order_notes.indexOf('Failed to update payment')) {
             data.error = 'Failed to fetch updated order content. Please reload the page.';
         }
 
