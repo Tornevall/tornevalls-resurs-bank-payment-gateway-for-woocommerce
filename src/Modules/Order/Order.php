@@ -68,7 +68,6 @@ class Order
             'admin_enqueue_scripts',
             'Resursbank\Woocommerce\Modules\Order\Order::initAdminScripts'
         );
-        //self::initAdminScripts();
     }
 
     /**
