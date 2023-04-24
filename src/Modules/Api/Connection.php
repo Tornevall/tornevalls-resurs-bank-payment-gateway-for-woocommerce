@@ -24,6 +24,7 @@ use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
+use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
@@ -145,6 +146,10 @@ class Connection
     public static function getLogger(): LoggerInterface
     {
         $result = new NoneLogger();
+
+        if (!LogEnabled::getData()) {
+            return $result;
+        }
 
         try {
             $result = new FileLogger(path: LogDir::getData());
