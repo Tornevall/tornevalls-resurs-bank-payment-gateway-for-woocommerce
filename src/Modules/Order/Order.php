@@ -61,14 +61,26 @@ class Order
 
     /**
      * Add JavaScript to order view to update content when order is updated.
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initAdmin(): void
     {
+        add_action(
+            'admin_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\Order\Order::initAdminScripts'
+        );
+        //self::initAdminScripts();
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function initAdminScripts(): void
+    {
         try {
-            $orderId = $_GET['post'] ?? null;
+            // Can't guarantee that _GET contains the proper data, so we use _REQUEST instead.
+            // We also need to check further id's in the post request to get a proper order id.
+            $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
 
             if ($orderId === null) {
                 return;
@@ -77,9 +89,9 @@ class Order
             $orderId = (int) $orderId;
 
             // @todo return null; if not on admin view, and $order !== null.
-//            if (!self::isOnAdminOrderView()) {
-//                return;
-//            }
+            //if (!self::isOnAdminOrderView()) {
+            //    return;
+            //}
 
             $fetchUrl = Route::getUrl(
                 route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
@@ -91,6 +103,7 @@ class Order
                 module: 'Order',
                 file: 'admin/getOrderContent.js'
             );
+
             wp_enqueue_script(
                 'rb-get-order-content-admin-scripts',
                 $url,

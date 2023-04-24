@@ -113,13 +113,13 @@ class Refund extends Action
             }
 
             OrderManagement::logError(
-                order: $order,
                 message: sprintf(
                     Translator::translate(phraseId: 'refund-too-large'),
                     $requestedAmount,
                     $availableAmount
                 ),
-                error: $error
+                error: $error,
+                order: $order
             );
         }
 
