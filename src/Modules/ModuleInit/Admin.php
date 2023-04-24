@@ -48,5 +48,6 @@ class Admin
         Order::init();
         OrderManagement::init();
         PaymentInformation::init();
+        Order::initAdmin();
     }
 }

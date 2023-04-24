@@ -29,6 +29,7 @@ use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
@@ -90,6 +91,11 @@ class Route
      * Route to get JSON encoded list of stores (only in admin).
      */
     public const ROUTE_GET_STORES_ADMIN = 'get-stores-admin';
+
+    /**
+     * Route to get JSON encoded order view content.
+     */
+    public const ROUTE_ADMIN_GET_ORDER_CONTENT = 'get-order-content-admin';
 
     /**
      * @SuppressWarnings(PHPMD.Superglobals)
@@ -282,6 +288,7 @@ class Route
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @SuppressWarnings(PHPMD.ExitExpression)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private static function route(string $route): void
     {
@@ -321,6 +328,12 @@ class Route
                 self::respondWithExit(body: '');
                 break;
 
+            case self::ROUTE_ADMIN_GET_ORDER_CONTENT:
+                self::respondWithExit(
+                    body: GetOrderContentController::exec()
+                );
+                break;
+
             default:
                 break;
         }
@@ -336,6 +349,7 @@ class Route
             self::ROUTE_ADMIN_CACHE_INVALIDATE,
             self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
             self::ROUTE_GET_STORES_ADMIN,
+            self::ROUTE_ADMIN_GET_ORDER_CONTENT,
         ];
     }
 

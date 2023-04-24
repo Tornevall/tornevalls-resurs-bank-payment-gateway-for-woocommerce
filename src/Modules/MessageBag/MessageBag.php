@@ -125,7 +125,7 @@ class MessageBag
             }
 
             if (self::$clear) {
-                self::updateBag(bag: new MessageCollection(data: []));
+                self::clear();
             }
         } catch (Throwable $e) {
             Log::error(error: $e);
@@ -141,19 +141,12 @@ class MessageBag
     }
 
     /**
-     * Look for duplicate messages in the collection.
+     * @throws IllegalTypeException
+     * @throws JsonException
      */
-    private static function isInBag(string $message, MessageCollection $bag): bool
+    public static function clear(): void
     {
-        /** @var Message $item */
-        foreach ($bag as $item) {
-            if ($item->message === $message) {
-                $return = true;
-                break;
-            }
-        }
-
-        return $return ?? false;
+        self::updateBag(bag: new MessageCollection(data: []));
     }
 
     /**
@@ -164,7 +157,7 @@ class MessageBag
      * @throws ReflectionException
      * @throws IllegalValueException
      */
-    private static function getBag(): MessageCollection
+    public static function getBag(): MessageCollection
     {
         $raw = WcSession::get(key: self::SESSION_KEY);
 
@@ -183,6 +176,22 @@ class MessageBag
         return $collection instanceof MessageCollection
             ? $collection
             : new MessageCollection(data: []);
+    }
+
+    /**
+     * Look for duplicate messages in the collection.
+     */
+    private static function isInBag(string $message, MessageCollection $bag): bool
+    {
+        /** @var Message $item */
+        foreach ($bag as $item) {
+            if ($item->message === $message) {
+                $return = true;
+                break;
+            }
+        }
+
+        return $return ?? false;
     }
 
     /**

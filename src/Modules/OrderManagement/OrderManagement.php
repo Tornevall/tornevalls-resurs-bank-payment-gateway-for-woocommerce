@@ -238,9 +238,12 @@ class OrderManagement
         $result = null;
 
         try {
-            $result = wc_get_order(the_order: $id);
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+            $result = new WC_Order($id);
 
             if (!$result instanceof WC_Order) {
+                $result = null;
+
                 throw new IllegalTypeException(
                     message: 'Returned object not of type WC_Order'
                 );
