@@ -87,11 +87,6 @@ class Order
 
             $orderId = (int) $orderId;
 
-            // @todo return null; if not on admin view, and $order !== null.
-            //if (!self::isOnAdminOrderView()) {
-            //    return;
-            //}
-
             $fetchUrl = Route::getUrl(
                 route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
                 admin: true
