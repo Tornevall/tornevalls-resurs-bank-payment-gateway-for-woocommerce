@@ -13,10 +13,12 @@ use JsonException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
 use function constant;
@@ -33,6 +35,7 @@ class GetOrderContentController
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     // phpcs:ignore
     public static function exec(): string
@@ -92,6 +95,12 @@ class GetOrderContentController
         }
 
         try {
+            if (Modify::$modifyTooLarge) {
+                $data['error'] = Translator::translate(
+                    phraseId: 'modify-too-large'
+                );
+            }
+
             $data['messages'] = json_encode(
                 value: MessageBag::getBag(),
                 flags: JSON_THROW_ON_ERROR
