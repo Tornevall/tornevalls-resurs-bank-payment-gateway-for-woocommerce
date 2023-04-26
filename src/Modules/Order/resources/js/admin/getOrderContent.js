@@ -47,8 +47,9 @@ const RESURSBANK_GET_ORDER_CONTENT = (controllerUrl, orderId) => {
     const handleFetchFatalError = (error) => {
         if (error instanceof Error) {
             errorHandler(
-                'Failed to fetch updated order content. Please reload the page.'
+                'Fatal: Failed to fetch updated order content. Please reload the page.'
             );
+            console.log(error);
         }
     }
 
@@ -61,7 +62,7 @@ const RESURSBANK_GET_ORDER_CONTENT = (controllerUrl, orderId) => {
     const handleFetchResponse = (response) => {
         if (!response.ok) {
             errorHandler(
-                'Failed to fetch updated order content. Please reload the page.'
+                'Response Error: Failed to fetch updated order content. Please reload the page.'
             );
         } else {
             return response.json();
@@ -74,15 +75,22 @@ const RESURSBANK_GET_ORDER_CONTENT = (controllerUrl, orderId) => {
      * @param {any} data
      */
     const handleFetchData = (data) => {
-        console.log(data);
         if (typeof data === 'undefined') {
             return;
         }
 
-        // @todo This error is never set up through GetOrderContentController so the only
-        // @todo way to fetch and alert in admin-front for the moment, is to catch it from here. Which is bad.
-        if (data.order_notes && data.order_notes.indexOf('Failed to update payment')) {
-            data.error = 'Failed to fetch updated order content. Please reload the page.';
+        jQuery('#resursbank_payment_info').html(data.payment_info);
+        let orderNotes = jQuery('#woocommerce-order-notes').find('.inside');
+        orderNotes.empty();
+        orderNotes.append(data.order_notes);
+
+        let messages = "";
+        let messageBag = JSON.parse(data.messages);
+        for (let iMessage = 0; iMessage < messageBag.length ; iMessage ++) {
+            messages += messageBag[iMessage].message + "\r\n";
+        }
+        if (messages !== '') {
+            alert(messages);
         }
 
         if (data.error) {

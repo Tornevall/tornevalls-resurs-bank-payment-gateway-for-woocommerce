@@ -80,7 +80,7 @@ class Resursbank extends WC_Payment_Gateway
                     order: $this->getOrder()
                 );
             } catch (Throwable $e) {
-                Log::error(error: $e);
+                    Log::error(error: $e);
             }
         }
 

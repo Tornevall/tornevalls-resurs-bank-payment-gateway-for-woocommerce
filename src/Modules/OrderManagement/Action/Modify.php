@@ -38,11 +38,6 @@ use WC_Order;
 class Modify extends Action
 {
     /**
-     * Make sure this message reaches front-end when trigged.
-     */
-    public static bool $modifyTooLarge = false;
-
-    /**
      * Used to ensure that we don't make multiple attempts to modify the payment.
      */
     private static bool $hasAlreadyLogged = false;
@@ -176,7 +171,6 @@ class Modify extends Action
             error: $error,
             order: $order
         );
-        self::$modifyTooLarge = true;
         self::$hasAlreadyLogged = true;
     }
 }
