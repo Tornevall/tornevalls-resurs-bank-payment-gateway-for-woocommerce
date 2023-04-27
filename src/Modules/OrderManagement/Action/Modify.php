@@ -82,6 +82,9 @@ class Modify extends Action
 
         // Register action once, while we wait for all actions to finalized from WooCommerce.
         if (!self::$execModify) {
+            // WARNING! Do not centralize this feature! We don't want to run this randomly, but only in one
+            // specific scenario for final order line handling, for where WooCommerce updates orders several
+            // times.
             add_action(
                 'shutdown',
                 '\Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify::execModify',
@@ -100,7 +103,7 @@ class Modify extends Action
     // phpcs:ignore
     public static function execModify(): void
     {
-        if (!self::$execModify) {
+        if (!self::$execModify && !is_ajax()) {
             return;
         }
 
