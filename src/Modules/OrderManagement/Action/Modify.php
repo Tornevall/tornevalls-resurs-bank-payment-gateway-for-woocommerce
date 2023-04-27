@@ -138,7 +138,10 @@ class Modify extends Action
             }
 
             // No need to log failed removals, since nothing will be updated anyway.
-            if ($_REQUEST['action'] !== 'woocommerce_remove_order_item') {
+            if (
+                isset($_REQUEST['action']) &&
+                $_REQUEST['action'] !== 'woocommerce_remove_order_item'
+            ) {
                 self::handleValidationError(
                     error: $error,
                     requestedAmount: (float)$requestedAmount,
