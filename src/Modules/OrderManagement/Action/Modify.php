@@ -30,6 +30,7 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
+use WC_Abstract_Order;
 use WC_Order;
 
 /**
@@ -41,6 +42,16 @@ class Modify extends Action
      * Used to ensure that we don't make multiple attempts to modify the payment.
      */
     private static bool $hasAlreadyLogged = false;
+
+    /**
+     * Marker for modify actions on shutdown, when WP/WC finalized their own internal actions.
+     */
+    private static bool $execModify = false;
+
+    /**
+     * Temporary storage for order, to bring into the final execution.
+     */
+    private static null|WC_Abstract_Order|WC_Order $order = null;
 
     /**
      * Modify content of Resurs Bank payment.
@@ -58,7 +69,6 @@ class Modify extends Action
      * @throws Throwable
      * @throws ValidationException
      */
-    // phpcs:ignore
     public static function exec(
         Payment $payment,
         WC_Order $order
@@ -70,9 +80,41 @@ class Modify extends Action
             return;
         }
 
+        // Register action once, while we wait for all actions to finalized from WooCommerce.
+        if (!self::$execModify) {
+            /**
+             * WARNING! Do not centralize this feature! We don't want to run this randomly, but only in one
+             * specific scenario for final order line handling, for where WooCommerce updates orders several
+             * times.
+             *
+             * @see https://resursbankplugins.atlassian.net/browse/WOO-1243
+             */
+            add_action(
+                'shutdown',
+                '\Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify::execModify',
+                10,
+                3
+            );
+        }
+
+        self::$execModify = true;
+        self::$order = $order;
+    }
+
+    /**
+     * Final execution of modify, after an order has been entirely processed by WooCommerce.
+     */
+    // phpcs:ignore
+    public static function execModify(): void
+    {
+        if (!self::$execModify && !is_ajax()) {
+            return;
+        }
+
+        $order = self::$order;
         OrderManagement::execAction(
             action: ActionType::MODIFY_ORDER,
-            order: $order,
+            order: self::$order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
