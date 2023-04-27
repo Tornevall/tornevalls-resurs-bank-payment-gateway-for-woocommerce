@@ -107,7 +107,7 @@ class Modify extends Action
         $order = self::$order;
         OrderManagement::execAction(
             action: ActionType::MODIFY_ORDER,
-            order: self::$order,
+            order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
