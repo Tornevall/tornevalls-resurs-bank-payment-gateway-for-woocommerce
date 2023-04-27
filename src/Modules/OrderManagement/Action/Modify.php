@@ -113,7 +113,9 @@ class Modify extends Action
      *
      * @throws PaymentActionException
      * @throws Throwable
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
+    // phpcs:ignore
     private static function validate(
         Payment $payment,
         WC_Order $order
@@ -135,12 +137,19 @@ class Modify extends Action
                 throw $error;
             }
 
-            self::handleValidationError(
-                error: $error,
-                requestedAmount: (float)$requestedAmount,
-                availableAmount: (float)$availableAmount,
-                order: $order
-            );
+            // No need to log failed removals, since nothing will be updated anyway.
+            if (
+                isset($_REQUEST['action']) &&
+                $_REQUEST['action'] !== 'woocommerce_remove_order_item'
+            ) {
+                self::handleValidationError(
+                    error: $error,
+                    requestedAmount: (float)$requestedAmount,
+                    availableAmount: (float)$availableAmount,
+                    order: $order
+                );
+            }
+
             return false;
         }
     }
