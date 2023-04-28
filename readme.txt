@@ -4,7 +4,7 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.2
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -21,17 +21,7 @@ At checkout, your customer can choose between several flexible payment options, 
 
 Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/x/IoDhB).
 
-*Please read the warning notes about testing and installing this plugin directly in a production environment below.*
-
-= What we support =
-
-* [Merchant REST API](https://test.resurs.com/docs/display/ecom/Merchant+API).
-
 == WARNING ==
-
-**First time running should be a dedicated test environment!**
-
-Problems should be discovered in TEST rather than production.
 
 = System Requirements =
 
@@ -54,7 +44,7 @@ Preferred Method is to install and activate the plugin through the WordPress plu
 
 = Where can I get more information about this plugin? =
 
-Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/x/IoDhB).
+Find out more about the plugin [in our documentation](https://test.resurs.com/docs/x/IoDhB).
 
 = Can I upgrade from version 2.2.x? =
 
