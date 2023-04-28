@@ -19,7 +19,7 @@ At checkout, your customer can choose between several flexible payment options, 
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar)!
 
-Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/display/ecom/Resurs+Merchant+API+2.0+for+WooCommerce).
+Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/x/IoDhB).
 
 *Please read the warning notes about testing and installing this plugin directly in a production environment below.*
 
