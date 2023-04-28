@@ -54,11 +54,12 @@ Preferred Method is to install and activate the plugin through the WordPress plu
 
 = Where can I get more information about this plugin? =
 
-In the documentation of Resurs.
+Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/display/ecom/Resurs+Merchant+API+2.0+for+WooCommerce).
 
 = Can I upgrade from version 2.2.x? =
 
-No. This plugin package is a separate new installation. The old plugin should, if you have it active, be disabled before this installation. Old payments from the prior plugin is however compatible in this release.
+No. But if you've used the old version before, historical payments are transparent and can be handled by this new release.
+
 
 == Screenshots ==
 
