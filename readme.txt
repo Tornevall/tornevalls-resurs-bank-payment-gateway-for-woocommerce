@@ -33,6 +33,8 @@ Find out more in about the plugin [in our documentation](https://test.resurs.com
 
 Preferred Method is to install and activate the plugin through the WordPress plugin installer.
 
+Doing it manually? Look below.
+
 1. Upload the plugin archive to the "/wp-content/plugins/" directory.
 2. Activate the plugin through the "Plugins" menu in WordPress.
 3. Configure the plugin via Resurs Bank control panel in admin.
