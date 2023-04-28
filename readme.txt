@@ -13,30 +13,27 @@ Resurs Bank Payment Gateway for WooCommerce.
 
 == Description ==
 
-Payment gateway for Resurs Bank in WooCommerce. MAPI Edition (meaning simplified-SOAP, hosted flow and RCO has been removed from this release). See below.
+A payment is expected to be simple, secure and fast, regardless of whether it takes place in a physical store or online. With over 6 million customers around the Nordics, we make sure to be up-to-date with smart payment solutions where customers shop.
+
+At checkout, your customer can choose between several flexible payment options, something that not only provides a better shopping experience but also generates more and larger purchases.
+
+[Sign up for Resurs](https://www.resursbank.se/betallosningar)!
+
+Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/display/ecom/Resurs+Merchant+API+2.0+for+WooCommerce).
 
 *Please read the warning notes about testing and installing this plugin directly in a production environment below.*
 
-= Supported shop flows =
+= What we support =
 
-* [Merchant REST API](https://test.resurs.com/docs/display/ecom/Merchant+API). This is the new "simplified shop flow", rest based and entirely developed **without** SOAP/XML.
-
-The README you're reading right now is considered belonging to a brand new version, that can also potentially break something if
-you tend to handle it as an upgrade from the older plugin (that currently is at v2.2). Running them side by side can also break things badly.
+* [Merchant REST API](https://test.resurs.com/docs/display/ecom/Merchant+API).
 
 == WARNING ==
 
 **First time running should be a dedicated test environment!**
 
-The main responsibility that this product works properly with your system is yours. For **your** safety you should therefore **TEST the plugin** in a dedicated test environment **before using it** in a production.
+Problems should be discovered in TEST rather than production.
 
-If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is **equal** to your production environment. Never run any tests in production!
-
-Primary new problems should be discovered in TEST rather than production since the costs are way lower, where no real people are depending on failed orders or payments. If something fails in production it also means that you are the one that potentially looses traffic while your site is down.
-
-= System prerequisites =
-
-Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
+= System Requirements =
 
 * **Required**: PHP: 8.1 or later.
 * **Required**: WooCommerce: At least v7.6.0
@@ -44,7 +41,6 @@ Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/displ
 * **Required**: CURL (php-curl).
 * WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
-= Contribute =
 
 == Installation ==
 
