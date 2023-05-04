@@ -4,7 +4,7 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.2
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -13,30 +13,14 @@ Resurs Bank Payment Gateway for WooCommerce.
 
 == Description ==
 
-Payment gateway for Resurs Bank in WooCommerce. MAPI Edition (meaning simplified-SOAP, hosted flow and RCO has been removed from this release). See below.
+A payment is expected to be simple, secure and fast, regardless of whether it takes place in a physical store or online. With over 6 million customers around the Nordics, we make sure to be up-to-date with smart payment solutions where customers shop.
 
-*Please read the warning notes about testing and installing this plugin directly in a production environment below.*
+At checkout, your customer can choose between several flexible payment options, something that not only provides a better shopping experience but also generates more and larger purchases.
 
-= Supported shop flows =
+[Sign up for Resurs](https://www.resursbank.se/betallosningar)!
+Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/x/IoDhB).
 
-* [Merchant REST API](https://test.resurs.com/docs/display/ecom/Merchant+API). This is the new "simplified shop flow", rest based and entirely developed **without** SOAP/XML.
-
-The README you're reading right now is considered belonging to a brand new version, that can also potentially break something if
-you tend to handle it as an upgrade from the older plugin (that currently is at v2.2). Running them side by side can also break things badly.
-
-== WARNING ==
-
-**First time running should be a dedicated test environment!**
-
-The main responsibility that this product works properly with your system is yours. For **your** safety you should therefore **TEST the plugin** in a dedicated test environment **before using it** in a production.
-
-If you are entirely new to this plugin or WordPress overall, I'd suggest you to run it in a dedicated test environment that is **equal** to your production environment. Never run any tests in production!
-
-Primary new problems should be discovered in TEST rather than production since the costs are way lower, where no real people are depending on failed orders or payments. If something fails in production it also means that you are the one that potentially looses traffic while your site is down.
-
-= System prerequisites =
-
-Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/display/TORNEVALL/Code+of+Conduct+and+Migrations#CodeofConductandMigrations-PHPVersions) for an extended explanation about how PHP is used.
+= System Requirements =
 
 * **Required**: PHP: 8.1 or later.
 * **Required**: WooCommerce: At least v7.6.0
@@ -44,11 +28,12 @@ Take a look at [Code of Conduct and Migrations](https://docs.tornevall.net/displ
 * **Required**: CURL (php-curl).
 * WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
-= Contribute =
 
 == Installation ==
 
 Preferred Method is to install and activate the plugin through the WordPress plugin installer.
+
+Doing it manually? Look below.
 
 1. Upload the plugin archive to the "/wp-content/plugins/" directory.
 2. Activate the plugin through the "Plugins" menu in WordPress.
@@ -58,11 +43,12 @@ Preferred Method is to install and activate the plugin through the WordPress plu
 
 = Where can I get more information about this plugin? =
 
-In the documentation of Resurs.
+Find out more about the plugin [in our documentation](https://test.resurs.com/docs/x/IoDhB).
 
 = Can I upgrade from version 2.2.x? =
 
-No. This plugin package is a separate new installation. The old plugin should, if you have it active, be disabled before this installation. Old payments from the prior plugin is however compatible in this release.
+No (this is a breaking change). But if you've used the old version before, historical payments are transparent and can be handled by this new release.
+If you wish to upgrade from the old plugin release, you need to contact Resurs Bank for new credentials.
 
 == Screenshots ==
 
