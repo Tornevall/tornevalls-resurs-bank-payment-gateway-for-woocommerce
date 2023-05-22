@@ -1,4 +1,8 @@
-# 1.0.0
+# 1.0.2
+
+[WOO-1248](https://resursbankplugins.atlassian.net/browse/WOO-1248) Unable to switch to production
+
+# 1.0.0 - 1.0.1
 
 * [WOO-547](https://resursbankplugins.atlassian.net/browse/WOO-547) Replace method name in confirmation message on screen if possible
 * [WOO-640](https://resursbankplugins.atlassian.net/browse/WOO-640) Konflikter: Språkdomänen behöver ändras \(tornevall-resursbank-gateway-xxx\) till korrekt
