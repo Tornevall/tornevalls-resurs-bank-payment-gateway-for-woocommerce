@@ -2,9 +2,9 @@
 Contributors: RB-Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, checkout, hosted, simplified, hosted flow, simplified flow
 Requires at least: 6.0
-Tested up to: 6.2
+Tested up to: 6.2.2
 Requires PHP: 8.1
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -54,4 +54,13 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 == Changelog ==
 
+# 1.0.2
+
+[WOO-1248](https://resursbankplugins.atlassian.net/browse/WOO-1248) Unable to switch to production
+
+# 1.0.0 - 1.0.1
+
+[See here for full list](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md)
+
 == Upgrade Notice ==
+

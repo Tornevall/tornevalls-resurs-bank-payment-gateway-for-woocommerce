@@ -202,10 +202,13 @@ class Connection
                 $_GET['page'] === 'wc-settings'
             )
         ) {
+            $envValue = $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] ?? 'test';
             $return = new Jwt(
                 clientId: $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
                 clientSecret: $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                scope: $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] === EnvironmentEnum::PROD ?
+                scope: EnvironmentEnum::from(
+                    value: $envValue
+                ) === EnvironmentEnum::PROD ?
                     Scope::MERCHANT_API :
                     Scope::MOCK_MERCHANT_API,
                 grantType: GrantType::CREDENTIALS
