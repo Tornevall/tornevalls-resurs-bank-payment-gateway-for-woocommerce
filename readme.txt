@@ -4,7 +4,7 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.2.2
 Requires PHP: 8.1
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -54,9 +54,13 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 == Changelog ==
 
+# 1.0.3
+
+* [WOO-1250](https://resursbankplugins.atlassian.net/browse/WOO-1250) Extend logging on getStores errors
+
 # 1.0.2
 
-[WOO-1248](https://resursbankplugins.atlassian.net/browse/WOO-1248) Unable to switch to production
+* [WOO-1248](https://resursbankplugins.atlassian.net/browse/WOO-1248) Unable to switch to production
 
 # 1.0.0 - 1.0.1
 

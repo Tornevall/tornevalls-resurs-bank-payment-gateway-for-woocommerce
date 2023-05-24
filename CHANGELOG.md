@@ -1,6 +1,10 @@
+# 1.0.3
+
+* [WOO-1250](https://resursbankplugins.atlassian.net/browse/WOO-1250) Extend logging on getStores errors
+
 # 1.0.2
 
-[WOO-1248](https://resursbankplugins.atlassian.net/browse/WOO-1248) Unable to switch to production
+* [WOO-1248](https://resursbankplugins.atlassian.net/browse/WOO-1248) Unable to switch to production
 
 # 1.0.0 - 1.0.1
 
