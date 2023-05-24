@@ -64,7 +64,7 @@ class GetStores extends GetStoresController
             throw new HttpException(
                 message: Translator::translate(
                     phraseId: 'get-stores-could-not-fetch'
-                )
+                ) . ' Error: ' . $error->getMessage()
             );
         }
 
