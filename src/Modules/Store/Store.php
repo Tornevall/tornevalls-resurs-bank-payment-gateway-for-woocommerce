@@ -38,9 +38,20 @@ class Store
     /**
      * Callback function because all of this needs to be done when an action runs, not just randomly called before
      * the relevant hooks are triggered (this causes crashing, including wp-admin becoming inaccessible).
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function onAdminEnqueueScripts(): void
     {
+        if (
+            !is_admin() ||
+            !isset($_REQUEST['page']) ||
+            !isset($_REQUEST['tab']) ||
+            $_REQUEST['page'] !== 'wc-settings' ||
+            $_REQUEST['tab'] !== 'resursbank'
+        ) {
+            return;
+        }
+
         try {
             $url = Route::getUrl(
                 route: Route::ROUTE_GET_STORES_ADMIN,
@@ -49,10 +60,10 @@ class Store
 
             $widget = new GetStores(
                 fetchUrl: $url,
+                storeSelectId: 'resursbank_store_id',
                 environmentSelectId: 'resursbank_environment',
                 clientIdInputId: 'resursbank_client_id',
                 clientSecretInputId: 'resursbank_client_secret',
-                storeSelectId: 'resursbank_store_id',
                 spinnerClass: 'rb-store-fetching'
             );
 
