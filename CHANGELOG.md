@@ -1,9 +1,10 @@
-# 1.0.4
+# 1.0.4 (ECom Upgrade)
 
 * [WOO-1252](https://resursbankplugins.atlassian.net/browse/WOO-1252) Ändring av längd på description fr 50 till 100 för  i ecom
 * [WOO-1250](https://resursbankplugins.atlassian.net/browse/WOO-1250) Extend logging on getStores errors / Troubleshooting getStores and TLS \(?\)
 * [WOO-1253](https://resursbankplugins.atlassian.net/browse/WOO-1253) Error: Failed to obtain store selection box \(ecom-related\)
 * [WOO-1254](https://resursbankplugins.atlassian.net/browse/WOO-1254) Msgbox vid Resurs settings
+* [WOO-1255](https://resursbankplugins.atlassian.net/browse/WOO-1255) Store fetcher does not work
 
 # 1.0.3
 
