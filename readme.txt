@@ -4,7 +4,7 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.2.2
 Requires PHP: 8.1
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -53,6 +53,15 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Screenshots ==
 
 == Changelog ==
+
+[See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.4
+
+* [WOO-1252](https://resursbankplugins.atlassian.net/browse/WOO-1252) Ändring av längd på description fr 50 till 100 för  i ecom
+* [WOO-1250](https://resursbankplugins.atlassian.net/browse/WOO-1250) Extend logging on getStores errors / Troubleshooting getStores and TLS \(?\)
+* [WOO-1253](https://resursbankplugins.atlassian.net/browse/WOO-1253) Error: Failed to obtain store selection box \(ecom-related\)
+* [WOO-1254](https://resursbankplugins.atlassian.net/browse/WOO-1254) Msgbox vid Resurs settings
 
 # 1.0.3
 
