@@ -38,6 +38,7 @@ class Store
     /**
      * Callback function because all of this needs to be done when an action runs, not just randomly called before
      * the relevant hooks are triggered (this causes crashing, including wp-admin becoming inaccessible).
+     *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function onAdminEnqueueScripts(): void
@@ -49,7 +50,10 @@ class Store
             !isset($_REQUEST['section']) ||
             $_REQUEST['page'] !== 'wc-settings' ||
             $_REQUEST['tab'] !== 'resursbank' ||
-            ($_REQUEST['section'] !== '' && $_REQUEST['section'] !== 'api_settings')
+            (
+                $_REQUEST['section'] !== '' &&
+                $_REQUEST['section'] !== 'api_settings'
+            )
         ) {
             return;
         }
