@@ -47,11 +47,10 @@ class Store
             !is_admin() ||
             !isset($_REQUEST['page']) ||
             !isset($_REQUEST['tab']) ||
-            !isset($_REQUEST['section']) ||
             $_REQUEST['page'] !== 'wc-settings' ||
             $_REQUEST['tab'] !== 'resursbank' ||
             (
-                $_REQUEST['section'] !== '' &&
+                isset($_REQUEST['section']) &&
                 $_REQUEST['section'] !== 'api_settings'
             )
         ) {
