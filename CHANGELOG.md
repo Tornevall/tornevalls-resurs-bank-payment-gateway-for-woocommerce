@@ -1,3 +1,7 @@
+# 1.0.5 (ECom Upgrade)
+
+[WOO-1257](https://resursbankplugins.atlassian.net/browse/WOO-1257) USP strings with wrong notices when translations are missing
+
 # 1.0.4 (ECom Upgrade)
 
 * [WOO-1252](https://resursbankplugins.atlassian.net/browse/WOO-1252) Changed description length from 50 till 100 in ecom package
