@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Woocommerce\Database\Option;
+use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
@@ -48,8 +49,24 @@ class Advanced
                 'log_level' => self::getLogLevelSetting(),
                 'cache_enabled' => self::getCacheEnabled(),
                 'invalidate_cache' => self::getInvalidateCacheButton(),
-                'get_address_enabled' => self::getGetAddressEnabled()
+                'get_address_enabled' => self::getGetAddressEnabled(),
+                'api_timeout' => self::getApiTimeout()
             ]
+        ];
+    }
+
+    /**
+     * Timeout settings for API requests.
+     *
+     * @return array
+     */
+    private static function getApiTimeout(): array
+    {
+        return [
+            'id' => ApiTimeout::getName(),
+            'type' => 'text',
+            'title' => 'API Timeout',
+            'default' => ApiTimeout::getDefault()
         ];
     }
 

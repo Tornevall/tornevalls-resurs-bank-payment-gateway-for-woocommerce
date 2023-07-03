@@ -27,4 +27,41 @@ class Admin
             return false;
         }
     }
+
+    /**
+     * Return boolean on is_admin and a specific configuration tab.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function isTab(string $tabName): bool
+    {
+        return self::isAdmin() &&
+            isset($_GET['tab']) &&
+            isset($_GET['page']) &&
+            $_GET['page'] === 'wc-settings' &&
+            $_GET['tab'] === $tabName;
+    }
+
+    /**
+     * Return boolean on is_admin, resurs-plugin-tab and a specific section name.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function isSection(string $sectionName): bool
+    {
+        $return = false;
+
+        if (Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)) {
+            if (
+                isset($_GET['section']) &&
+                $_GET['section'] === $sectionName
+            ) {
+                $return = true;
+            } elseif ($sectionName === '' && !isset($_GET['section'])) {
+                $return = true;
+            }
+        }
+
+        return $return;
+    }
 }
