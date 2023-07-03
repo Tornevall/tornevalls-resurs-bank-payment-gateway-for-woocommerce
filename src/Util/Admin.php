@@ -35,9 +35,7 @@ class Admin
      */
     public static function isTab(string $tabName): bool
     {
-        return self::isAdmin() &&
-            isset($_GET['tab']) &&
-            isset($_GET['page']) &&
+        return isset($_GET['tab'], $_GET['page']) &&
             $_GET['page'] === 'wc-settings' &&
             $_GET['tab'] === $tabName;
     }
@@ -58,6 +56,7 @@ class Admin
             ) {
                 $return = true;
             } elseif ($sectionName === '' && !isset($_GET['section'])) {
+                // If requested section is empty and no section is requested, allow true booleans too.
                 $return = true;
             }
         }

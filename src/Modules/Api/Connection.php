@@ -201,15 +201,12 @@ class Connection
             isset(
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                $_POST[RESURSBANK_MODULE_PREFIX . '_environment'],
-                $_GET['tab'],
-                $_GET['page']
+                $_POST[RESURSBANK_MODULE_PREFIX . '_environment']
             ) && (
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
                 $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
-                $_GET['tab'] === RESURSBANK_MODULE_PREFIX &&
-                $_GET['page'] === 'wc-settings'
+                Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
             )
         ) {
             $envValue = $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] ?? 'test';
