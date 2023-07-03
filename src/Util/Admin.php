@@ -29,7 +29,7 @@ class Admin
     }
 
     /**
-     * Return boolean on is_admin and a specific configuration tab.
+     * Return boolean on specific admin configuration tab. This method does not check is_admin first.
      *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
@@ -41,7 +41,7 @@ class Admin
     }
 
     /**
-     * Return boolean on is_admin, resurs-plugin-tab and a specific section name.
+     * Return boolean when resurs-plugin-tab are requested. This method does not check is_admin first.
      *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
