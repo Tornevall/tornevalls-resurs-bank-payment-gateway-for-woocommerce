@@ -1,6 +1,10 @@
+# 1.0.6
+
+* [WOO-1249](https://resursbankplugins.atlassian.net/browse/WOO-1249) Timeouts in the store may block site access completely if misconfigured
+
 # 1.0.5 (ECom Upgrade)
 
-[WOO-1257](https://resursbankplugins.atlassian.net/browse/WOO-1257) USP strings with wrong notices when translations are missing
+* [WOO-1257](https://resursbankplugins.atlassian.net/browse/WOO-1257) USP strings with wrong notices when translations are missing
 
 # 1.0.4 (ECom Upgrade)
 
