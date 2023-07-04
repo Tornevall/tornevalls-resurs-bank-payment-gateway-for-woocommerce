@@ -22,6 +22,7 @@ use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Repository;
+use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
@@ -76,6 +77,14 @@ class Connection
                 $jwt = self::getConfigJwt();
             }
 
+            $timeout = (int)ApiTimeout::getData();
+
+            if ($timeout <= 0) {
+                $timeout = 30;
+            }
+
+            // Default to curl defaults if negative or 0.
+
             Config::setup(
                 logger: self::getLogger(),
                 cache: self::getCache(),
@@ -83,6 +92,7 @@ class Connection
                 logLevel: LogLevel::getData(),
                 userAgent: UserAgent::getUserAgent(),
                 isProduction: isset($jwt->scope) && $jwt->scope === Scope::MERCHANT_API,
+                timeout: $timeout,
                 language: Language::getSiteLanguage()
             );
 
@@ -191,15 +201,12 @@ class Connection
             isset(
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                $_POST[RESURSBANK_MODULE_PREFIX . '_environment'],
-                $_GET['tab'],
-                $_GET['page']
+                $_POST[RESURSBANK_MODULE_PREFIX . '_environment']
             ) && (
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
                 $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
                 $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
-                $_GET['tab'] === RESURSBANK_MODULE_PREFIX &&
-                $_GET['page'] === 'wc-settings'
+                Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
             )
         ) {
             $envValue = $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] ?? 'test';

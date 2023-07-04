@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
@@ -27,16 +29,7 @@ class Gateway
      */
     public static function initAdmin(): void
     {
-        // Clicking on the "Manage" btn for our gateway redirects to settings.
-        $page = $_GET['page'] ?? '';
-        $tab = $_GET['tab'] ?? '';
-        $section = $_GET['section'] ?? '';
-
-        if (
-            $page === 'wc-settings' &&
-            $tab === 'checkout' &&
-            $section === RESURSBANK_MODULE_PREFIX
-        ) {
+        if (Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
             Route::redirectToSettings();
         }
 
@@ -83,14 +76,20 @@ class Gateway
      */
     public static function addPaymentMethods(mixed $gateways): mixed
     {
+        // Making sure that cache-less solution only fetches payment methods once and reusing
+        // data if already fetched during a single threaded call.
+        global $paymentMethodList;
+
         if (!is_array(value: $gateways)) {
             return $gateways;
         }
 
         try {
-            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(
-                storeId: StoreId::getData()
-            );
+            if (!$paymentMethodList instanceof PaymentMethodCollection) {
+                $paymentMethodList = PaymentMethodRepository::getPaymentMethods(
+                    storeId: StoreId::getData()
+                );
+            }
 
             foreach ($paymentMethodList as $paymentMethod) {
                 $gateway = new Resursbank(method: $paymentMethod);

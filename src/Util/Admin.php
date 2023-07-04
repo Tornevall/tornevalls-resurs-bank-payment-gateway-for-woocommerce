@@ -27,4 +27,40 @@ class Admin
             return false;
         }
     }
+
+    /**
+     * Return boolean on specific admin configuration tab. This method does not check is_admin first.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function isTab(string $tabName): bool
+    {
+        return isset($_GET['tab'], $_GET['page']) &&
+            $_GET['page'] === 'wc-settings' &&
+            $_GET['tab'] === $tabName;
+    }
+
+    /**
+     * Return boolean when resurs-plugin-tab are requested. This method does not check is_admin first.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function isSection(string $sectionName): bool
+    {
+        $return = false;
+
+        if (Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)) {
+            if (
+                isset($_GET['section']) &&
+                $_GET['section'] === $sectionName
+            ) {
+                $return = true;
+            } elseif ($sectionName === '' && !isset($_GET['section'])) {
+                // If requested section is empty and no section is requested, allow true booleans too.
+                $return = true;
+            }
+        }
+
+        return $return;
+    }
 }
