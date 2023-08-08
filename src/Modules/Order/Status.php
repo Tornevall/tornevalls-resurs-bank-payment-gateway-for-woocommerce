@@ -75,7 +75,7 @@ class Status
                 payment: $payment,
                 order: $order
             ),
-            PaymentStatus::FROZEN => $order->update_status(
+            default => $order->update_status(
                 new_status: 'on-hold',
                 note: Translator::translate(phraseId: 'payment-status-on-hold')
             )
@@ -84,15 +84,24 @@ class Status
 
     /**
      * Translates a Resurs payment status to a WooCommerce order status string.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
      */
     public static function orderStatusFromPaymentStatus(Payment $payment): string
     {
         return match ($payment->status) {
             PaymentStatus::ACCEPTED => 'processing',
-            PaymentStatus::REJECTED => static fn (): string => self::getFailedOrCancelled(
-                payment: $payment
-            ),
-            PaymentStatus::FROZEN => 'on-hold'
+            PaymentStatus::REJECTED => self::getFailedOrCancelled(payment: $payment),
+            default => 'on-hold'
         };
     }
 
