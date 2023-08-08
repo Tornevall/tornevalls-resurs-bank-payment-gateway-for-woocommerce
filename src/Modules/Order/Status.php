@@ -101,7 +101,7 @@ class Status
         return match ($payment->status) {
             PaymentStatus::ACCEPTED => 'processing',
             PaymentStatus::REJECTED => self::getFailedOrCancelled(payment: $payment),
-            default=> 'on-hold'
+            default => 'on-hold'
         };
     }
 
