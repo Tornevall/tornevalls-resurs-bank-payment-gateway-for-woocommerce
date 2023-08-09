@@ -1,3 +1,7 @@
+# 1.0.7
+
+* [WOO-1260](https://resursbankplugins.atlassian.net/browse/WOO-1260) Fix inaccurate return type in \\Resursbank\\Woocommerce\\Modules\\Order\\Status::orderStatusFromPaymentStatus
+
 # 1.0.6
 
 * [WOO-1249](https://resursbankplugins.atlassian.net/browse/WOO-1249) Timeouts in the store may block site access completely if misconfigured
