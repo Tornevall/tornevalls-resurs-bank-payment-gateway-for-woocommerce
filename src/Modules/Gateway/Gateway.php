@@ -89,6 +89,9 @@ class Gateway
 
     /**
      * Add Resurs Bank payment methods to list of available methods in checkout.
+     *
+     * @param mixed $gateways Preferably an array with gateways but given as a mixed from WP/WC.
+     * @param bool $validateAvailable Ignored during normal filters. Use from a secondary will skip some validations.
      */
     public static function addPaymentMethods(mixed $gateways, bool $validateAvailable = true): mixed
     {
