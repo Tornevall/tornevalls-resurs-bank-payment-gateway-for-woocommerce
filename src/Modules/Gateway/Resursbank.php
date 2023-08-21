@@ -98,6 +98,14 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
+     * Get information about a payment method from Resurs Bank that is normally unavailable from the gateway.
+     */
+    public function getMethodInfo(): ?PaymentMethod
+    {
+        return $this->method;
+    }
+
+    /**
      * Render info about our payment methods in their section at checkout.
      *
      * @noinspection PhpMissingParentCallCommonInspection
@@ -330,15 +338,22 @@ class Resursbank extends WC_Payment_Gateway
      */
     private function validatePurchaseLimit(): bool
     {
+        // get_query_var is using a global of $wp_query. Sometimes, $wp_query is not properly initialized.
+        // We need to look for it before using ut.
+        global $wp_query;
         $total = 0.0;
 
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $orderPay = $wp_query !== null
+            ? (int)absint(
+                get_query_var('order-pay')
+            )
+            : 0;
 
         /* We need to confirm we can resolve order / cart total manually,
            otherwise calling $this->>get_order_total() can cause an error. */
         if (
             WC()->cart instanceof WC_Cart ||
-            (int)absint(get_query_var('order-pay')) > 0
+            $orderPay > 0
         ) {
             $total = (float)$this->get_order_total();
         }
