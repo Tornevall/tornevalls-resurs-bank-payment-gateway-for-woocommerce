@@ -60,7 +60,7 @@ use function get_option;
  */
 class Resursbank extends WC_Payment_Gateway
 {
-    public ?string $type;
+    public ?string $type = '';
 
     /**
      * Setup.
@@ -91,7 +91,9 @@ class Resursbank extends WC_Payment_Gateway
         // Override property values with PaymentMethod specific data.
         if ($this->method !== null) {
             $this->id = $this->method->id;
-            $this->type = $this->method->type->value;
+            $this->type = $this->method instanceof PaymentMethod
+                ? $this->method->type->value
+                : '';
             $this->title = $this->method->name;
             $this->icon = Url::getPaymentMethodIconUrl(
                 type: $this->method->type
