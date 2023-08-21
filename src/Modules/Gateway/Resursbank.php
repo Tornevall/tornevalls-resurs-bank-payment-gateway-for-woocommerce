@@ -60,6 +60,8 @@ use function get_option;
  */
 class Resursbank extends WC_Payment_Gateway
 {
+    public ?string $type;
+
     /**
      * Setup.
      */
@@ -68,10 +70,12 @@ class Resursbank extends WC_Payment_Gateway
     ) {
         // Assign default property values for this gateway.
         $this->id = RESURSBANK_MODULE_PREFIX;
+        $this->plugin_id = 'resursbank-mapi';
         $this->title = 'Resurs Bank';
         $this->method_description = 'Resurs Bank Gateway';
         $this->has_fields = true;
         $this->enabled = 'yes';
+        $this->type = null;
 
         // Load PaymentMethod from potential order, if not already supplied.
         if ($this->method === null) {
@@ -87,6 +91,7 @@ class Resursbank extends WC_Payment_Gateway
         // Override property values with PaymentMethod specific data.
         if ($this->method !== null) {
             $this->id = $this->method->id;
+            $this->type = $this->method->type->value;
             $this->title = $this->method->name;
             $this->icon = Url::getPaymentMethodIconUrl(
                 type: $this->method->type
@@ -99,6 +104,8 @@ class Resursbank extends WC_Payment_Gateway
 
     /**
      * Get information about a payment method from Resurs Bank that is normally unavailable from the gateway.
+     *
+     * @noinspection PhpUnused
      */
     public function getMethodInfo(): ?PaymentMethod
     {
