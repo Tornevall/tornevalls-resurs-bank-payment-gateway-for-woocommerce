@@ -60,6 +60,8 @@ use function get_option;
  */
 class Resursbank extends WC_Payment_Gateway
 {
+    public ?string $type = '';
+
     /**
      * Setup.
      */
@@ -68,10 +70,12 @@ class Resursbank extends WC_Payment_Gateway
     ) {
         // Assign default property values for this gateway.
         $this->id = RESURSBANK_MODULE_PREFIX;
+        $this->plugin_id = 'resursbank-mapi';
         $this->title = 'Resurs Bank';
         $this->method_description = 'Resurs Bank Gateway';
         $this->has_fields = true;
         $this->enabled = 'yes';
+        $this->type = null;
 
         // Load PaymentMethod from potential order, if not already supplied.
         if ($this->method === null) {
@@ -87,6 +91,9 @@ class Resursbank extends WC_Payment_Gateway
         // Override property values with PaymentMethod specific data.
         if ($this->method !== null) {
             $this->id = $this->method->id;
+            $this->type = $this->method instanceof PaymentMethod
+                ? $this->method->type->value
+                : '';
             $this->title = $this->method->name;
             $this->icon = Url::getPaymentMethodIconUrl(
                 type: $this->method->type
@@ -95,6 +102,16 @@ class Resursbank extends WC_Payment_Gateway
 
         // Mirror title to method_title.
         $this->method_title = $this->title;
+    }
+
+    /**
+     * Get information about a payment method from Resurs Bank that is normally unavailable from the gateway.
+     *
+     * @noinspection PhpUnused
+     */
+    public function getMethodInfo(): ?PaymentMethod
+    {
+        return $this->method;
     }
 
     /**
@@ -330,15 +347,22 @@ class Resursbank extends WC_Payment_Gateway
      */
     private function validatePurchaseLimit(): bool
     {
+        // get_query_var is using a global of $wp_query. Sometimes, $wp_query is not properly initialized.
+        // We need to look for it before using ut.
+        global $wp_query;
         $total = 0.0;
 
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $orderPay = $wp_query !== null
+            ? (int)absint(
+                get_query_var('order-pay')
+            )
+            : 0;
 
         /* We need to confirm we can resolve order / cart total manually,
            otherwise calling $this->>get_order_total() can cause an error. */
         if (
             WC()->cart instanceof WC_Cart ||
-            (int)absint(get_query_var('order-pay')) > 0
+            $orderPay > 0
         ) {
             $total = (float)$this->get_order_total();
         }

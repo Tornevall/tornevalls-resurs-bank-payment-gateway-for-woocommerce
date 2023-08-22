@@ -33,7 +33,7 @@ class Gateway
             Route::redirectToSettings();
         }
 
-        // Register event listener to append our gateway.
+        // Register event listeners to append our gateway.
         add_filter(
             'woocommerce_payment_gateways',
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::addGateway'
@@ -57,6 +57,22 @@ class Gateway
             10,
             1
         );
+        // Filter to fetch Resurs Bank payment methods unvalidated.
+        add_filter(
+            'resursbank_available_payment_gateways',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::getResursPaymentMethods'
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public static function getResursPaymentMethods(): array
+    {
+        return (array)self::addPaymentMethods(
+            gateways: [],
+            validateAvailable: false
+        );
     }
 
     /**
@@ -73,8 +89,11 @@ class Gateway
 
     /**
      * Add Resurs Bank payment methods to list of available methods in checkout.
+     *
+     * @param mixed $gateways Preferably an array with gateways but given as a mixed from WP/WC.
+     * @param bool $validateAvailable Ignored during normal filters. Use from a secondary will skip some validations.
      */
-    public static function addPaymentMethods(mixed $gateways): mixed
+    public static function addPaymentMethods(mixed $gateways, bool $validateAvailable = true): mixed
     {
         // Making sure that cache-less solution only fetches payment methods once and reusing
         // data if already fetched during a single threaded call.
@@ -94,7 +113,7 @@ class Gateway
             foreach ($paymentMethodList as $paymentMethod) {
                 $gateway = new Resursbank(method: $paymentMethod);
 
-                if (!$gateway->is_available()) {
+                if ($validateAvailable && !$gateway->is_available()) {
                     continue;
                 }
 
