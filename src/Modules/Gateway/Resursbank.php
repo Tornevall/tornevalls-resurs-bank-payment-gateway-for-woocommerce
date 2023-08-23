@@ -39,8 +39,10 @@ use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\ModuleInit\Admin;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbank\Woocommerce\Util\Admin as AdminUtility;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
@@ -94,7 +96,7 @@ class Resursbank extends WC_Payment_Gateway
             $this->type = $this->method instanceof PaymentMethod
                 ? $this->method->type->value
                 : '';
-            $this->title = $this->method->name;
+            $this->title = $this->method->name . ($this->isAdmin() ? ' (Resurs Bank)' : '');
             $this->icon = Url::getPaymentMethodIconUrl(
                 type: $this->method->type
             );
@@ -173,7 +175,7 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function is_available(): bool
     {
-        if ($this->method === null) {
+        if ($this->method === null && $this->isAdmin()) {
             return true;
         }
 
@@ -181,6 +183,17 @@ class Resursbank extends WC_Payment_Gateway
                 CustomerType::LEGAL => $this->method->enabledForLegalCustomer,
                 CustomerType::NATURAL => $this->method->enabledForNaturalCustomer
         };
+    }
+
+    /**
+     * Admin::isAdmin() won't always work, depending on section of admin panel
+     * being viewed. We also check whether the cart exists, as an additional
+     * way to check whether we are within the administration panel since there
+     * is currently no better way.
+     */
+    public function isAdmin(): bool
+    {
+        return AdminUtility::isAdmin() || WC()->cart === null;
     }
 
     /**
