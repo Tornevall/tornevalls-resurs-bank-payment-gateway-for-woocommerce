@@ -25,6 +25,17 @@ use function is_array;
 class Gateway
 {
     /**
+     * Add payment gateways.
+     */
+    public static function init(): void
+    {
+        add_filter(
+            'woocommerce_payment_gateways',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
+        );
+    }
+
+    /**
      * Executes in admin.
      */
     public static function initAdmin(): void
@@ -32,12 +43,6 @@ class Gateway
         if (Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
             Route::redirectToSettings();
         }
-
-        // Register event listeners to append our gateway.
-        add_filter(
-            'woocommerce_payment_gateways',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::addGateway'
-        );
     }
 
     /**
@@ -48,43 +53,11 @@ class Gateway
     public static function initFrontend(): void
     {
         add_filter(
-            'woocommerce_available_payment_gateways',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
-        );
-        add_filter(
             'woocommerce_gateway_icon',
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::modifyIcon',
             10,
             1
         );
-        // Filter to fetch Resurs Bank payment methods unvalidated.
-        add_filter(
-            'resursbank_available_payment_gateways',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::getResursPaymentMethods'
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public static function getResursPaymentMethods(): array
-    {
-        return (array)self::addPaymentMethods(
-            gateways: [],
-            validateAvailable: false
-        );
-    }
-
-    /**
-     * Add Resurs Bank payment gateway to list of payment methods in admin.
-     */
-    public static function addGateway(mixed $gateways): mixed
-    {
-        if (is_array(value: $gateways)) {
-            $gateways[] = Resursbank::class;
-        }
-
-        return $gateways;
     }
 
     /**
@@ -122,6 +95,10 @@ class Gateway
         } catch (Throwable $e) {
             Log::error(error: $e);
         }
+
+        // Add default method to payment gateways. Will only be reflected on
+        // gateway page, see \Resursbank\Woocommerce\Modules\Gateway\Resursbank::is_available
+        $gateways[] = Resursbank::class;
 
         return $gateways;
     }
