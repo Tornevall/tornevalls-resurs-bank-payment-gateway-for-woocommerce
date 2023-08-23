@@ -175,7 +175,6 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function is_available(): bool
     {
-        /*  */
         if ($this->method === null && $this->isAdmin()) {
             return true;
         }
