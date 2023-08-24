@@ -199,7 +199,9 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function getMinPurchaseLimit(): float
     {
-        return ($this->method !== null && $this->method->minPurchaseLimit) ? $this->method->minPurchaseLimit : 0.0;
+        return ($this->method !== null && $this->method->minPurchaseLimit)
+            ? $this->method->minPurchaseLimit
+            : 0.0;
     }
 
     /**
@@ -208,7 +210,9 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function getMaxPurchaseLimit(): float
     {
-        return ($this->method !== null && $this->method->maxPurchaseLimit) ? $this->method->maxPurchaseLimit : 0.0;
+        return ($this->method !== null && $this->method->maxPurchaseLimit)
+            ? $this->method->maxPurchaseLimit
+            : 0.0;
     }
 
     /**
