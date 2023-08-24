@@ -418,6 +418,7 @@ class Resursbank extends WC_Payment_Gateway
             if (
                 $total === 0.0 &&
                 isset($totals['total']) &&
+                is_array(value: $totals) &&
                 (float)$totals['total'] > 0
             ) {
                 $total = (float)$totals['total'];
