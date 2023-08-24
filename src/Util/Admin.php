@@ -49,7 +49,10 @@ class Admin
     {
         $return = false;
 
-        if (Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)) {
+        if (
+            Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX) ||
+            Admin::isTab(tabName: 'checkout')
+        ) {
             if (
                 isset($_GET['section']) &&
                 $_GET['section'] === $sectionName
