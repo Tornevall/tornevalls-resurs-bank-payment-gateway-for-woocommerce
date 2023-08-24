@@ -39,7 +39,6 @@ use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\ModuleInit\Admin;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin as AdminUtility;
@@ -175,14 +174,57 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function is_available(): bool
     {
-        if ($this->method === null && $this->isAdmin()) {
+        // Is in admin, but in the payment method configuration? Only show the gateway.
+        if (
+            AdminUtility::isAdmin() &&
+            AdminUtility::isTab(tabName: 'checkout')
+        ) {
+            return false;
+        }
+
+        // Not in checkout? Act like they are all there.
+        if (!is_checkout()) {
             return true;
         }
 
         return $this->validatePurchaseLimit() && match (WcSession::getCustomerType()) {
-                CustomerType::LEGAL => $this->method->enabledForLegalCustomer,
-                CustomerType::NATURAL => $this->method->enabledForNaturalCustomer
+                CustomerType::LEGAL => $this->isEnabledForLegalCustomer(),
+                CustomerType::NATURAL => $this->isEnabledForNaturalCustomer()
         };
+    }
+
+    /**
+     * Make sure an answer is returned for NATURAL even if the values don't exist (when in gateway mode).
+     */
+    public function isEnabledForNaturalCustomer(): bool
+    {
+        return $this->method->enabledForNaturalCustomer ?? false;
+    }
+
+    /**
+     * Make sure an answer is returned for LEGAL even if the values don't exist (when in gateway mode).
+     */
+    public function isEnabledForLegalCustomer(): bool
+    {
+        return $this->method->enabledForLegalCustomer ?? false;
+    }
+
+    /**
+     * Make sure an answer is returned, even if the values don't exist (when in gateway mode).
+     * This protects the storefront against warnings when wrong payment method is trying to validate.
+     */
+    public function getMinPurchaseLimit(): float
+    {
+        return $this->method->minPurchaseLimit ?? 0.0;
+    }
+
+    /**
+     * Make sure an answer is returned, even if the values don't exist (when in gateway mode).
+     * This protects the storefront against warnings when wrong payment method is trying to validate.
+     */
+    public function getMaxPurchaseLimit(): float
+    {
+        return $this->method->maxPurchaseLimit ?? 0.0;
     }
 
     /**
@@ -360,28 +402,20 @@ class Resursbank extends WC_Payment_Gateway
      */
     private function validatePurchaseLimit(): bool
     {
-        // get_query_var is using a global of $wp_query. Sometimes, $wp_query is not properly initialized.
-        // We need to look for it before using ut.
-        global $wp_query;
         $total = 0.0;
 
-        $orderPay = $wp_query !== null
-            ? (int)absint(
-                get_query_var('order-pay')
-            )
-            : 0;
+        /* We need to confirm that we have a cart with a total before validating the totals with
+            the allowed amount in the payment method. */
+        if (WC()->cart instanceof WC_Cart) {
+            $totals = WC()->cart->get_totals();
 
-        /* We need to confirm we can resolve order / cart total manually,
-           otherwise calling $this->>get_order_total() can cause an error. */
-        if (
-            WC()->cart instanceof WC_Cart ||
-            $orderPay > 0
-        ) {
-            $total = (float)$this->get_order_total();
+            if (isset($totals['subtotal']) && (float)$totals['subtotal'] > 0) {
+                $total = (float)$totals['subtotal'];
+            }
         }
 
         return
-            $total >= $this->method->minPurchaseLimit &&
-            $total <= $this->method->maxPurchaseLimit;
+            $total >= $this->getMinPurchaseLimit() &&
+            $total <= $this->getMaxPurchaseLimit();
     }
 }
