@@ -81,7 +81,7 @@ class Checkout
                 fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
             );
 
-            $result = preg_replace(pattern: '/\n/', replacement: '', subject: $address->content);
+            $result = $address->content;
         } catch (Throwable $e) {
             try {
                 Config::getLogger()->error(
