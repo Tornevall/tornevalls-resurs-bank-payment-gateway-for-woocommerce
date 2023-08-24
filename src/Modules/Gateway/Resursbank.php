@@ -408,7 +408,9 @@ class Resursbank extends WC_Payment_Gateway
             the allowed amount in the payment method. */
         if (WC()->cart instanceof WC_Cart) {
             $totals = WC()->cart->get_totals();
-
+            // The prior data fetched through get_order_total and/or order-pay (get_query_var) for some reason
+            // is only returning 0, even if there is a final order total to compare purchase limits with.
+            // As it seems, the subtotal is the best option there is, and is fetched from the active cart.
             if (isset($totals['subtotal']) && (float)$totals['subtotal'] > 0) {
                 $total = (float)$totals['subtotal'];
             }
