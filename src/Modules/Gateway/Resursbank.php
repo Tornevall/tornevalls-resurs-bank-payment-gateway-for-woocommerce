@@ -188,25 +188,9 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         return $this->validatePurchaseLimit() && match (WcSession::getCustomerType()) {
-                CustomerType::LEGAL => $this->isEnabledForLegalCustomer(),
-                CustomerType::NATURAL => $this->isEnabledForNaturalCustomer()
+                CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
+                CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
         };
-    }
-
-    /**
-     * Make sure an answer is returned for NATURAL even if the values don't exist (when in gateway mode).
-     */
-    public function isEnabledForNaturalCustomer(): bool
-    {
-        return $this->method->enabledForNaturalCustomer ?? false;
-    }
-
-    /**
-     * Make sure an answer is returned for LEGAL even if the values don't exist (when in gateway mode).
-     */
-    public function isEnabledForLegalCustomer(): bool
-    {
-        return $this->method->enabledForLegalCustomer ?? false;
     }
 
     /**
