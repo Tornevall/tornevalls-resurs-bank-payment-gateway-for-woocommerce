@@ -12,6 +12,8 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Module\AnnuityFactor\Widget\DurationByMonths;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
+use Resursbank\Woocommerce\Util\Admin as AdminUtil;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -26,6 +28,13 @@ class Admin
      */
     public static function setJs(): void
     {
+        if (
+            !Enabled::isEnabled() ||
+            !AdminUtil::isTab(tabName: RESURSBANK_MODULE_PREFIX)
+        ) {
+            return;
+        }
+
         /** @noinspection BadExceptionsProcessingInspection */
         try {
             $widget = new DurationByMonths(
