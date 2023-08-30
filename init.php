@@ -76,7 +76,7 @@ if (!Config::hasInstance()) {
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     Shared::init();
 
-    if (Admin::isAdmin()) {
+    if (Admin::isAdmin() || defined(constant_name: 'REST_REQUEST' )) {
         AdminInit::init();
     } else {
         Frontend::init();
