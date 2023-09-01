@@ -77,10 +77,6 @@ if (!Config::hasInstance()) {
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     Shared::init();
 
-    if (wp_is_json_request()) {
-        WpJson::init();
-    }
-
     if (Admin::isAdmin()) {
         AdminInit::init();
     } else {
