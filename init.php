@@ -23,6 +23,7 @@ use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
 use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
+use Resursbank\Woocommerce\Modules\ModuleInit\WpJson;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\WooCommerce;
 
@@ -76,7 +77,11 @@ if (!Config::hasInstance()) {
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     Shared::init();
 
-    if (Admin::isAdmin() || defined(constant_name: 'REST_REQUEST' )) {
+    if (wp_is_json_request()) {
+        WpJson::init();
+    }
+
+    if (Admin::isAdmin()) {
         AdminInit::init();
     } else {
         Frontend::init();

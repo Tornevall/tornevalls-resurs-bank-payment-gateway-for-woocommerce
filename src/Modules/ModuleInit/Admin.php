@@ -46,7 +46,12 @@ class Admin
 
         Gateway::initAdmin();
         Order::init();
-        OrderManagement::init();
+
+        // If wp_is_json_request is true, OrderManagement is already loaded.
+        if (!wp_is_json_request()) {
+            OrderManagement::init();
+        }
+
         PaymentInformation::init();
         Order::initAdmin();
     }
