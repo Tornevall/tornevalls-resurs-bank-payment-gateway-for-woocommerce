@@ -58,6 +58,11 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.0.9
+
+* [WOO-1269](https://resursbankplugins.atlassian.net/browse/WOO-1269) Add support in admin parts for json-api related to aftershop order handling
+* [WOO-1268](https://resursbankplugins.atlassian.net/browse/WOO-1268) Partpayment admin widget conflicts \(0059993\)
+
 # 1.0.8
 
 * [WOO-1261](https://resursbankplugins.atlassian.net/browse/WOO-1261) get\_query\_var: Call to a member function get\(\) on null
