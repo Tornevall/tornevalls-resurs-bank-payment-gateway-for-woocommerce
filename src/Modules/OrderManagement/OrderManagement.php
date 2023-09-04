@@ -388,9 +388,8 @@ class OrderManagement
             subject: strtolower(string: $action->value)
         );
 
-        $wpJson = wp_is_json_request() ? '[wp-json] ' : '';
         self::logSuccess(
-            message: $wpJson . sprintf(
+            message: sprintf(
                 Translator::translate(phraseId: "$actionStr-success"),
                 Currency::getFormattedAmount(amount: (float) $amount)
             ),
