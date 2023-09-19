@@ -29,7 +29,7 @@ jQuery(document).ready(function ($) {
 })
 
 /**
- * Show the current chosen customer type.
+ * Get the current chosen customer type.
  * @returns {string}
  */
 function getResursCustomerType() {
@@ -47,8 +47,8 @@ function rbUpdateCustomerType() {
             }
         ).done(
             function (result) {
-                handleResursCustomerTypeCompany();
                 if (typeof result === 'object' && result['update']) {
+                    handleResursCustomerTypeCompany();
                     jQuery('body').trigger('update_checkout');
                 } else {
                     alert("Unable to update customer type.");
@@ -69,6 +69,7 @@ function handleResursCustomerTypeCompany() {
         // payments it is no longer optional (see Gateway.php for more details).
         jQuery('#billing_resurs_government_id_field label > .optional').remove();
         if (getResursCustomerType() === 'LEGAL') {
+            // Making this field more noticeable to customers by animating it slightly.
             jQuery('#billing_resurs_government_id_field').show('fast');
         } else {
             jQuery('#billing_resurs_government_id_field').hide();

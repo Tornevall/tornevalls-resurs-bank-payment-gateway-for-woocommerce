@@ -81,7 +81,7 @@ class Resursbank extends WC_Payment_Gateway
         $this->type = null;
 
         // __constructor complexity solving.
-        $this->getNullableMethod();
+        $this->resolveNullableMethod();
 
         // Mirror title to method_title.
         $this->method_title = $this->title;
@@ -222,14 +222,15 @@ class Resursbank extends WC_Payment_Gateway
             $this->method->enabledForLegalCustomer &&
             empty($billingCompanyGovernmentId)
         ) {
-            // Using WooCommerce phrases to show woocommerce default.
+            // Using WooCommerce phrases (copied) to show woocommerce default, since this is how
+            // WooCommerce displays errors, with proper translations.
             wc_add_notice(
                 message: sprintf(
                     __('%s is a required field.', 'woocommerce'),
                     Translator::translate(phraseId: 'customer-type-legal')
                 ),
                 notice_type: 'error',
-                data: array('id' => 'billing_resurs_government_id')
+                data: ['id' => 'billing_resurs_government_id']
             );
 
             $return = false;
@@ -241,7 +242,7 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Make sure payment method is set up properly on null/not null.
      */
-    private function getNullableMethod(): void
+    private function resolveNullableMethod(): void
     {
         // Load PaymentMethod from potential order, if not already supplied.
         if ($this->method === null) {

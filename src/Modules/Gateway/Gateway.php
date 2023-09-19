@@ -68,6 +68,8 @@ class Gateway
     }
 
     /**
+     * Add custom field as helper to company payments.
+     *
      * @param null $fields Nullable. Fields may not necessarily be received properly initially.
      * @return array|null
      */
