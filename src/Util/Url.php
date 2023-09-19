@@ -167,6 +167,18 @@ class Url
     }
 
     /**
+     * @param string $key
+     * @return string|null
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function getHttpPost(string $key): ?string
+    {
+        return isset($_POST[$key]) && is_string(value: $_POST[$key])
+            ? $_POST[$key]
+            : null;
+    }
+
+    /**
      * Generate URL for MAPI callbacks.
      *
      * @throws IllegalValueException

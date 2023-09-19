@@ -209,7 +209,7 @@ const rbHandleFetchAddressResponse = (() => {
     return (data, customerType) => {
         try {
             updateAddressFields(data, customerType);
-            rbUpdateCustomerType(customerType);
+            rbUpdateCustomerType();
         } catch (e) {
             console.log(e);
         }

@@ -58,7 +58,7 @@ class Customer
             customerType: WcSession::getCustomerType(),
             contactPerson: $contactPerson,
             email: self::getAddressData(key: 'email', address: $address),
-            governmentId: WcSession::getGovernmentId(),
+            governmentId: WcSession::getGovernmentId(order: $order),
             mobilePhone: self::getAddressData(
                 key: 'mobile',
                 address: $address

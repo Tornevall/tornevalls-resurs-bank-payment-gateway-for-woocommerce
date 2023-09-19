@@ -386,6 +386,33 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
+     * @return void
+     */
+    public function validate_fields()
+    {
+        $billingCompanyId = Url::getHttpPost(key: 'billing_resurs_government_id');
+        if (!isset($this->method)) {
+            $return = true;
+        }
+
+        if ($this->method->enabledForLegalCustomer && empty($billingCompanyId)) {
+            // Using WooCommerce phrases to show woocommerce default.
+            wc_add_notice(
+                message: sprintf(
+                    __('%s is a required field.', 'woocommerce'),
+                    Translator::translate(phraseId: 'customer-type-legal')
+                ),
+                notice_type: 'error',
+                data: array('id' => 'billing_resurs_government_id')
+            );
+
+            $return = false;
+        }
+
+        return $return ?? true;
+    }
+
+    /**
      * Whether total amount of order / cart is within min / max purchase limit.
      */
     private function validatePurchaseLimit(): bool

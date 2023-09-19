@@ -14,6 +14,7 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use RuntimeException;
 use Throwable;
+use WC_Order;
 use WC_Session_Handler;
 use WooCommerce;
 
@@ -89,13 +90,21 @@ class WcSession
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function getGovernmentId(): ?string
+    public static function getGovernmentId(WC_Order $order): ?string
     {
-        return WC()->session->get(
+        $return = WC()->session->get(
             (new Session())->getKey(
                 key: Repository::SESSION_KEY_SSN_DATA
             )
         );
+
+        if (empty($return) && self::getCustomerType() === CustomerType::LEGAL &&
+            isset($_POST['billing_resurs_government_id'])
+        ) {
+            $return = $_POST['billing_resurs_government_id'];
+        }
+
+        return $return;
     }
 
     /**
