@@ -56,9 +56,11 @@ use function get_option;
 
 /**
  * Resurs Bank payment gateway.
+ * This class tend to be longer than necessary. We should ignore inspection warnings.
  *
  * @noinspection EfferentObjectCouplingInspection
  */
+// phpcs:ignore
 class Resursbank extends WC_Payment_Gateway
 {
     public ?string $type = '';
@@ -78,28 +80,8 @@ class Resursbank extends WC_Payment_Gateway
         $this->enabled = 'yes';
         $this->type = null;
 
-        // Load PaymentMethod from potential order, if not already supplied.
-        if ($this->method === null) {
-            try {
-                $this->method = OrderModule::getPaymentMethod(
-                    order: $this->getOrder()
-                );
-            } catch (Throwable $e) {
-                Log::error(error: $e);
-            }
-        }
-
-        // Override property values with PaymentMethod specific data.
-        if ($this->method !== null) {
-            $this->id = $this->method->id;
-            $this->type = $this->method instanceof PaymentMethod
-                ? $this->method->type->value
-                : '';
-            $this->title = $this->method->name . ($this->isAdmin() ? ' (Resurs Bank)' : '');
-            $this->icon = Url::getPaymentMethodIconUrl(
-                type: $this->method->type
-            );
-        }
+        // __constructor complexity solving.
+        $this->getNullableMethod();
 
         // Mirror title to method_title.
         $this->method_title = $this->title;
@@ -224,6 +206,65 @@ class Resursbank extends WC_Payment_Gateway
     public function isAdmin(): bool
     {
         return AdminUtility::isAdmin() || WC()->cart === null;
+    }
+
+    public function validate_fields(): bool
+    {
+        $billingCompanyGovernmentId = Url::getHttpPost(
+            key: 'billing_resurs_government_id'
+        );
+
+        if (!isset($this->method)) {
+            $return = true;
+        }
+
+        if (
+            $this->method->enabledForLegalCustomer &&
+            empty($billingCompanyGovernmentId)
+        ) {
+            // Using WooCommerce phrases to show woocommerce default.
+            wc_add_notice(
+                message: sprintf(
+                    __('%s is a required field.', 'woocommerce'),
+                    Translator::translate(phraseId: 'customer-type-legal')
+                ),
+                notice_type: 'error',
+                data: array('id' => 'billing_resurs_government_id')
+            );
+
+            $return = false;
+        }
+
+        return $return ?? true;
+    }
+
+    /**
+     * Make sure payment method is set up properly on null/not null.
+     */
+    private function getNullableMethod(): void
+    {
+        // Load PaymentMethod from potential order, if not already supplied.
+        if ($this->method === null) {
+            try {
+                $this->method = OrderModule::getPaymentMethod(
+                    order: $this->getOrder()
+                );
+            } catch (Throwable $e) {
+                Log::error(error: $e);
+            }
+        }
+
+        // Override property values with PaymentMethod specific data.
+        if ($this->method === null) {
+            return;
+        }
+
+        $this->id = $this->method->id;
+        $this->type = $this->method instanceof PaymentMethod
+            ? $this->method->type->value
+            : '';
+        $this->title = $this->method->name . ($this->isAdmin() ? ' (Resurs Bank)' : '');
+        $this->icon = Url::getPaymentMethodIconUrl(type: $this->method->type);
     }
 
     /**
@@ -383,33 +424,6 @@ class Resursbank extends WC_Payment_Gateway
             $holdStockMinutes > 0 &&
             $holdStockMinutes <= 43200 ? $holdStockMinutes : 120
         );
-    }
-
-    /**
-     * @return void
-     */
-    public function validate_fields()
-    {
-        $billingCompanyId = Url::getHttpPost(key: 'billing_resurs_government_id');
-        if (!isset($this->method)) {
-            $return = true;
-        }
-
-        if ($this->method->enabledForLegalCustomer && empty($billingCompanyId)) {
-            // Using WooCommerce phrases to show woocommerce default.
-            wc_add_notice(
-                message: sprintf(
-                    __('%s is a required field.', 'woocommerce'),
-                    Translator::translate(phraseId: 'customer-type-legal')
-                ),
-                notice_type: 'error',
-                data: array('id' => 'billing_resurs_government_id')
-            );
-
-            $return = false;
-        }
-
-        return $return ?? true;
     }
 
     /**
