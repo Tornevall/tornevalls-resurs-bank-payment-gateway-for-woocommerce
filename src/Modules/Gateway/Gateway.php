@@ -10,14 +10,12 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
-use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
 use function is_array;
@@ -43,9 +41,11 @@ class Gateway
      */
     public static function initAdmin(): void
     {
-        if (Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
-            Route::redirectToSettings();
+        if (!Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
+            return;
         }
+
+        Route::redirectToSettings();
     }
 
     /**
@@ -63,7 +63,7 @@ class Gateway
         );
         add_filter(
             'woocommerce_checkout_fields',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::checkoutFieldHandler',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::checkoutFieldHandler'
         );
     }
 
@@ -76,7 +76,9 @@ class Gateway
         // Validate that we really got the fields properly.
         if (isset($fields['billing']) && is_array(value: $fields['billing'])) {
             $fields['billing']['billing_resurs_government_id'] = [
-                'label' => Translator::translate(phraseId: 'customer-type-legal'),
+                'label' => Translator::translate(
+                    phraseId: 'customer-type-legal'
+                ),
                 'class' => '',
                 'required' => false,
                 'priority' => 31,

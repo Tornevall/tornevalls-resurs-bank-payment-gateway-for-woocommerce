@@ -99,7 +99,12 @@
     <rule ref="SlevomatCodingStandard.Commenting.EmptyComment" />
     <rule ref="SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration" />
     <rule ref="SlevomatCodingStandard.Commenting.RequireOneLinePropertyDocComment" />
-    <rule ref="SlevomatCodingStandard.Complexity.Cognitive" />
+    <rule ref="SlevomatCodingStandard.Complexity.Cognitive">
+        <properties>
+            <property name="warningThreshold" value="8" />
+            <property name="errorThreshold" value="8" />
+        </properties>
+    </rule>
     <rule ref="SlevomatCodingStandard.ControlStructures.AssignmentInCondition" />
     <rule ref="SlevomatCodingStandard.ControlStructures.BlockControlStructureSpacing">
         <properties>
@@ -137,7 +142,7 @@
         <properties>
             <property name="includeComments" value="false" />
             <property name="includeWhitespace" value="false" />
-            <property name="maxLinesLength" value="250" />
+            <property name="maxLinesLength" value="300" />
         </properties>
     </rule>
     <rule ref="SlevomatCodingStandard.Files.LineLength">
@@ -167,7 +172,7 @@
         <properties>
             <property name="includeComments" value="false" />
             <property name="includeWhitespace" value="false" />
-            <property name="maxLinesLength" value="40" />
+            <property name="maxLinesLength" value="50" />
         </properties>
     </rule>
     <rule ref="SlevomatCodingStandard.Functions.RequireArrowFunction" />

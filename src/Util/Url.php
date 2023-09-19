@@ -167,8 +167,6 @@ class Url
     }
 
     /**
-     * @param string $key
-     * @return string|null
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function getHttpPost(string $key): ?string
