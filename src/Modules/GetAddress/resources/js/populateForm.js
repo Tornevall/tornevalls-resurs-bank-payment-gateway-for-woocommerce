@@ -128,7 +128,7 @@ const rbHandleFetchAddressResponse = (() => {
      * @param {HTMLInputElement} el
      * @returns {Rb.GetAddress.MappedAddressEl}
      */
-    const mapResursField = (el) => ({ name: mapResursFieldName(el.name), el });
+    const mapResursField = (el) => ({name: mapResursFieldName(el.name), el});
 
     /**
      * A filter to remove address fields that are not used by Resurs Bank.
@@ -208,8 +208,17 @@ const rbHandleFetchAddressResponse = (() => {
 
     return (data, customerType) => {
         try {
+            if (customerType === 'LEGAL') {
+                // Prefill company government id if getAddress was used and we have the billing
+                // fields available.
+                if (jQuery('#rb-customer-widget-getAddress-input-govId').length > 0 &&
+                    jQuery('#billing_resurs_government_id').length > 0
+                ) {
+                    jQuery('#billing_resurs_government_id').val(jQuery('#rb-customer-widget-getAddress-input-govId').val());
+                }
+            }
             updateAddressFields(data, customerType);
-            rbUpdateCustomerType(customerType);
+            rbUpdateCustomerType();
         } catch (e) {
             console.log(e);
         }

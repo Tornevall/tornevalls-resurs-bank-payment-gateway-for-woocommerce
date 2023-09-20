@@ -167,6 +167,18 @@ class Url
     }
 
     /**
+     * Request similar to _GET, but for _POST (we won't handle _REQUEST).
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function getHttpPost(string $key): ?string
+    {
+        return isset($_POST[$key]) && is_string(value: $_POST[$key])
+            ? $_POST[$key]
+            : null;
+    }
+
+    /**
      * Generate URL for MAPI callbacks.
      *
      * @throws IllegalValueException

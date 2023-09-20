@@ -1,5 +1,13 @@
+# 1.0.10
+
+* [WOO-1270](https://resursbankplugins.atlassian.net/browse/WOO-1270) Enforce input field for companies \(company id\)
+
 # 1.0.9
 
+* [WOO-1264](https://resursbankplugins.atlassian.net/browse/WOO-1264) Change behaviour of how payment gateways/methods are displayed in admin and checkout pages
+* [WOO-1265](https://resursbankplugins.atlassian.net/browse/WOO-1265) Redirect from "payments" no longer works
+* [WOO-1261](https://resursbankplugins.atlassian.net/browse/WOO-1261) get\_query\_var: Call to a member function get\(\) on null
+* [WOO-1266](https://resursbankplugins.atlassian.net/browse/WOO-1266) Prevent min/max, etc to not show warnings when gateway methods is not present
 * [WOO-1268](https://resursbankplugins.atlassian.net/browse/WOO-1268) Partpayment admin widget conflicts \(0059993\)
 
 # 1.0.8

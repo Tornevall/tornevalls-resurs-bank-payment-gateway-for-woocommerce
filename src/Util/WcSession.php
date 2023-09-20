@@ -85,17 +85,30 @@ class WcSession
     }
 
     /**
-     * Get government ID stored in session.
+     * Get government ID stored in session (or company government ID during a payment).
+     * If govId is not present but LEGAL and company government id's.
      *
+     * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getGovernmentId(): ?string
     {
-        return WC()->session->get(
+        $return = WC()->session->get(
             (new Session())->getKey(
                 key: Repository::SESSION_KEY_SSN_DATA
             )
         );
+
+        if (
+            self::getCustomerType() === CustomerType::LEGAL &&
+            isset($_POST['billing_resurs_government_id'])
+        ) {
+            // POST data should have higher priority than the session not only for the getAddress
+            // widget, but also for security reason (so we won't use manipulated data from the session).
+            $return = $_POST['billing_resurs_government_id'];
+        }
+
+        return $return;
     }
 
     /**

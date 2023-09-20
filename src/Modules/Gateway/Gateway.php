@@ -15,6 +15,7 @@ use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
 use function is_array;
@@ -40,9 +41,11 @@ class Gateway
      */
     public static function initAdmin(): void
     {
-        if (Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
-            Route::redirectToSettings();
+        if (!Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
+            return;
         }
+
+        Route::redirectToSettings();
     }
 
     /**
@@ -58,6 +61,33 @@ class Gateway
             10,
             1
         );
+        add_filter(
+            'woocommerce_checkout_fields',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::checkoutFieldHandler'
+        );
+    }
+
+    /**
+     * Add custom field as helper to company payments.
+     *
+     * @param null $fields Nullable. Fields may not necessarily be received properly initially.
+     * @return array|null
+     */
+    public static function checkoutFieldHandler($fields = null): ?array
+    {
+        // Validate that we really got the fields properly.
+        if (isset($fields['billing']) && is_array(value: $fields['billing'])) {
+            $fields['billing']['billing_resurs_government_id'] = [
+                'label' => Translator::translate(
+                    phraseId: 'customer-type-legal'
+                ),
+                'class' => '',
+                'required' => false,
+                'priority' => 31,
+            ];
+        }
+
+        return $fields;
     }
 
     /**

@@ -56,9 +56,11 @@ use function get_option;
 
 /**
  * Resurs Bank payment gateway.
+ * This class tend to be longer than necessary. We should ignore inspection warnings.
  *
  * @noinspection EfferentObjectCouplingInspection
  */
+// phpcs:ignore
 class Resursbank extends WC_Payment_Gateway
 {
     public ?string $type = '';
@@ -78,28 +80,8 @@ class Resursbank extends WC_Payment_Gateway
         $this->enabled = 'yes';
         $this->type = null;
 
-        // Load PaymentMethod from potential order, if not already supplied.
-        if ($this->method === null) {
-            try {
-                $this->method = OrderModule::getPaymentMethod(
-                    order: $this->getOrder()
-                );
-            } catch (Throwable $e) {
-                Log::error(error: $e);
-            }
-        }
-
-        // Override property values with PaymentMethod specific data.
-        if ($this->method !== null) {
-            $this->id = $this->method->id;
-            $this->type = $this->method instanceof PaymentMethod
-                ? $this->method->type->value
-                : '';
-            $this->title = $this->method->name . ($this->isAdmin() ? ' (Resurs Bank)' : '');
-            $this->icon = Url::getPaymentMethodIconUrl(
-                type: $this->method->type
-            );
-        }
+        // __constructor complexity solving.
+        $this->resolveNullableMethod();
 
         // Mirror title to method_title.
         $this->method_title = $this->title;
@@ -226,6 +208,66 @@ class Resursbank extends WC_Payment_Gateway
         return AdminUtility::isAdmin() || WC()->cart === null;
     }
 
+    public function validate_fields(): bool
+    {
+        $billingCompanyGovernmentId = Url::getHttpPost(
+            key: 'billing_resurs_government_id'
+        );
+
+        if (!isset($this->method)) {
+            $return = true;
+        }
+
+        if (
+            $this->method->enabledForLegalCustomer &&
+            empty($billingCompanyGovernmentId)
+        ) {
+            // Using WooCommerce phrases (copied) to show woocommerce default, since this is how
+            // WooCommerce displays errors, with proper translations.
+            wc_add_notice(
+                message: sprintf(
+                    __('%s is a required field.', 'woocommerce'),
+                    Translator::translate(phraseId: 'customer-type-legal')
+                ),
+                notice_type: 'error',
+                data: ['id' => 'billing_resurs_government_id']
+            );
+
+            $return = false;
+        }
+
+        return $return ?? true;
+    }
+
+    /**
+     * Make sure payment method is set up properly on null/not null.
+     */
+    private function resolveNullableMethod(): void
+    {
+        // Load PaymentMethod from potential order, if not already supplied.
+        if ($this->method === null) {
+            try {
+                $this->method = OrderModule::getPaymentMethod(
+                    order: $this->getOrder()
+                );
+            } catch (Throwable $e) {
+                Log::error(error: $e);
+            }
+        }
+
+        // Override property values with PaymentMethod specific data.
+        if ($this->method === null) {
+            return;
+        }
+
+        $this->id = $this->method->id;
+        $this->type = $this->method instanceof PaymentMethod
+            ? $this->method->type->value
+            : '';
+        $this->title = $this->method->name . ($this->isAdmin() ? ' (Resurs Bank)' : '');
+        $this->icon = Url::getPaymentMethodIconUrl(type: $this->method->type);
+    }
+
     /**
      * Remove session data related to the checkout process.
      */
@@ -331,8 +373,12 @@ class Resursbank extends WC_Payment_Gateway
             );
 
             if ($error instanceof CurlException) {
-                foreach ($error->getDetails() as $detail) {
-                    MessageBag::addError(message: $detail);
+                if (count($error->getDetails())) {
+                    foreach ($error->getDetails() as $detail) {
+                        MessageBag::addError(message: $detail);
+                    }
+                } else {
+                    MessageBag::addError(message: $error->getMessage());
                 }
             } else {
                 // Only display relevant error messages on the order placement screen. CurlExceptions usually contains
