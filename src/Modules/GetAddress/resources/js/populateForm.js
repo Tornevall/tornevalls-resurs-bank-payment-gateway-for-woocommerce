@@ -216,6 +216,9 @@ const rbHandleFetchAddressResponse = (() => {
                 ) {
                     jQuery('#billing_resurs_government_id').val(jQuery('#rb-customer-widget-getAddress-input-govId').val());
                 }
+            } else {
+                // Empty value for LEGAL when switched.
+                jQuery('#billing_resurs_government_id').val('');
             }
             updateAddressFields(data, customerType);
             rbUpdateCustomerType();
