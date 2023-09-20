@@ -373,8 +373,12 @@ class Resursbank extends WC_Payment_Gateway
             );
 
             if ($error instanceof CurlException) {
-                foreach ($error->getDetails() as $detail) {
-                    MessageBag::addError(message: $detail);
+                if (count($error->getDetails())) {
+                    foreach ($error->getDetails() as $detail) {
+                        MessageBag::addError(message: $detail);
+                    }
+                } else {
+                    MessageBag::addError(message: $error->getMessage());
                 }
             } else {
                 // Only display relevant error messages on the order placement screen. CurlExceptions usually contains
