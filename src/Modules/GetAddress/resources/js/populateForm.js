@@ -208,17 +208,17 @@ const rbHandleFetchAddressResponse = (() => {
 
     return (data, customerType) => {
         try {
-            if (customerType === 'LEGAL') {
-                // Prefill company government id if getAddress was used and we have the billing
-                // fields available.
-                if (jQuery('#rb-customer-widget-getAddress-input-govId').length > 0 &&
-                    jQuery('#billing_resurs_government_id').length > 0
-                ) {
-                    jQuery('#billing_resurs_government_id').val(jQuery('#rb-customer-widget-getAddress-input-govId').val());
+            if (jQuery('#billing_resurs_government_id').length > 0) {
+                if (customerType === 'LEGAL') {
+                    // Prefill company government id if getAddress was used and we have the billing
+                    // fields available.
+                    if (jQuery('#rb-customer-widget-getAddress-input-govId').length > 0) {
+                        jQuery('#billing_resurs_government_id').val(jQuery('#rb-customer-widget-getAddress-input-govId').val());
+                    }
+                } else {
+                    // Empty value for LEGAL when switched.
+                    jQuery('#billing_resurs_government_id').val('');
                 }
-            } else {
-                // Empty value for LEGAL when switched.
-                jQuery('#billing_resurs_government_id').val('');
             }
             updateAddressFields(data, customerType);
             rbUpdateCustomerType();
