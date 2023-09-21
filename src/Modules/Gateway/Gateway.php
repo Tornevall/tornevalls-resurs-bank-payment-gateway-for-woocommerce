@@ -9,6 +9,16 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -76,7 +86,11 @@ class Gateway
     public static function checkoutFieldHandler($fields = null): ?array
     {
         // Validate that we really got the fields properly.
-        if (isset($fields['billing']) && is_array(value: $fields['billing'])) {
+        if (
+            self::hasPaymentMethodsLegal() &&
+            isset($fields['billing']) &&
+            is_array(value: $fields['billing'])
+        ) {
             $fields['billing']['billing_resurs_government_id'] = [
                 'label' => Translator::translate(
                     phraseId: 'customer-type-legal'
@@ -98,20 +112,12 @@ class Gateway
      */
     public static function addPaymentMethods(mixed $gateways, bool $validateAvailable = true): mixed
     {
-        // Making sure that cache-less solution only fetches payment methods once and reusing
-        // data if already fetched during a single threaded call.
-        global $paymentMethodList;
-
         if (!is_array(value: $gateways)) {
             return $gateways;
         }
 
         try {
-            if (!$paymentMethodList instanceof PaymentMethodCollection) {
-                $paymentMethodList = PaymentMethodRepository::getPaymentMethods(
-                    storeId: StoreId::getData()
-                );
-            }
+            $paymentMethodList = self::getPaymentMethodList();
 
             foreach ($paymentMethodList as $paymentMethod) {
                 $gateway = new Resursbank(method: $paymentMethod);
@@ -147,5 +153,57 @@ class Gateway
             replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;">',
             subject: $icon
         );
+    }
+
+    /**
+     * Returns a boolean value if payment method collection has LEGAL customer support.
+     */
+    private static function hasPaymentMethodsLegal(): bool
+    {
+        try {
+            $paymentMethodList = self::getPaymentMethodList();
+
+            if ($paymentMethodList->count()) {
+                /** @var Payment\PaymentMethod $paymentMethod */
+                foreach ($paymentMethodList as $paymentMethod) {
+                    if ($paymentMethod->enabledForLegalCustomer) {
+                        $return = true;
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+        }
+
+        return $return ?? false;
+    }
+
+    /**
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws AuthException
+     * @throws CurlException
+     * @throws IllegalValueException
+     * @throws \JsonException
+     * @throws ConfigException
+     * @throws IllegalTypeException
+     * @throws \ReflectionException
+     * @throws ApiException
+     * @throws CacheException
+     */
+    private static function getPaymentMethodList(): PaymentMethodCollection
+    {
+        // Making sure that cache-less solution only fetches payment methods once and reusing
+        // data if already fetched during a single threaded call.
+        global $paymentMethodList;
+
+        if (!$paymentMethodList instanceof PaymentMethodCollection) {
+            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(
+                storeId: StoreId::getData()
+            );
+        }
+
+        return $paymentMethodList;
     }
 }
