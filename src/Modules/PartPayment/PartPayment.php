@@ -201,6 +201,7 @@ EX;
         try {
             return Enabled::isEnabled() &&
                    is_product() &&
+                   (float)self::getProduct()->get_price() !== 0.0 &&
                    self::getWidget()->cost->monthlyCost >= Limit::getData();
         } catch (Throwable $error) {
             Log::error(error: $error);
