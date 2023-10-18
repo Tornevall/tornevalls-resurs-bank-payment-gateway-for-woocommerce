@@ -202,6 +202,10 @@ EX;
             return Enabled::isEnabled() &&
                    is_product() &&
                    (float)self::getProduct()->get_price() !== 0.0 &&
+                   self::getWidget()->getPaymentMethod()->maxApplicationLimit >=
+                        (float)self::getProduct()->get_price() &&
+                   self::getWidget()->getPaymentMethod()->minApplicationLimit <=
+                        (float)self::getProduct()->get_price() &&
                    self::getWidget()->cost->monthlyCost >= Limit::getData();
         } catch (Throwable $error) {
             Log::error(error: $error);
