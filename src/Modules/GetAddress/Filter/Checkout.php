@@ -81,7 +81,11 @@ class Checkout
                 fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
             );
 
-            $result = $address->content;
+            /**
+             * Become compatible with template paragraphing when wpautop is executed.
+             * wp-includes/formatting.php
+             */
+            $result = preg_replace(pattern: '/\n\s*\n/m', replacement: " ", subject: $address->content);
         } catch (Throwable $e) {
             try {
                 Config::getLogger()->error(
