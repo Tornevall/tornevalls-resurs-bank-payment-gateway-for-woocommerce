@@ -219,8 +219,9 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         if (
-            $this->method->enabledForLegalCustomer &&
-            empty($billingCompanyGovernmentId)
+                WcSession::getCustomerType() === CustomerType::LEGAL &&
+                $this->method->enabledForLegalCustomer &&
+                empty($billingCompanyGovernmentId)
         ) {
             // Using WooCommerce phrases (copied) to show woocommerce default, since this is how
             // WooCommerce displays errors, with proper translations.
