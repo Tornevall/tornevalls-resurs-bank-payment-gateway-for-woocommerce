@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use JsonException;
-use mysql_xdevapi\Exception;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
