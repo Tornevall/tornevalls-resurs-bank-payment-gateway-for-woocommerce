@@ -37,7 +37,7 @@ class Customer
     public static function getCustomer(WC_Order $order): CustomerModel
     {
         $address = isset($_POST['ship_to_different_address'])
-            ? $order->get_address(type: 'shipping')
+            ? $order->get_address('shipping')
             : $order->get_address();
         $customerType = WcSession::getCustomerType();
         $firstName = self::getAddressData(key: 'first_name', address: $address);

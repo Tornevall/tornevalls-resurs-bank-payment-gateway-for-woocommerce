@@ -117,7 +117,7 @@ class Order
     ): array {
         $result = [];
 
-        $items = $order->get_items(types: 'shipping');
+        $items = $order->get_items('shipping');
 
         if (!is_array(value: $items)) {
             throw new IllegalValueException(
