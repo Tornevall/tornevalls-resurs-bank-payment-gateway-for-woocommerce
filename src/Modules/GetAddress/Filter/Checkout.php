@@ -82,8 +82,14 @@ class Checkout
             );
 
             /**
-             * Become compatible with template paragraphing when wpautop is executed.
-             * wp-includes/formatting.php
+             * Create compatibility with template paragraphing when wpautop is executed.
+             * This script works properly when themes keeps the script code separate
+             * from other html-data. When this is not happening, our scripts
+             * will be treated as html, and the <p>-tags are wrongfully added to the code.
+             * When we merge the content by cleaning up the section that $paragraphs is using
+             * this is avoided.
+             *
+             * See wp-includes/formatting.php for where $paragraphs are split up.
              */
             $result = preg_replace(
                 pattern: '/\n\s*\n/m',
