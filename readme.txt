@@ -6,7 +6,7 @@ Tested up to: 6.3
 Requires PHP: 8.1
 WC Tested up to: 7.9.0
 WC requires at least: 7.6.0
-Stable tag: 1.0.10
+Stable tag: 1.0.11
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -57,6 +57,12 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.11
+
+* [WOO-1271](https://resursbankplugins.atlassian.net/browse/WOO-1271) /price\_signage?amount=0" tiggas 1000 ggr per dag
+* [WOO-1272](https://resursbankplugins.atlassian.net/browse/WOO-1272) Regler för paymentwidget
+* [WOO-1273](https://resursbankplugins.atlassian.net/browse/WOO-1273) Switching between customer types may confuse the platform customertype
 
 # 1.0.10
 

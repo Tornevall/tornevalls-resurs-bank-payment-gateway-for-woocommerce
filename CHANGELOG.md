@@ -1,3 +1,9 @@
+# 1.0.11
+
+* [WOO-1271](https://resursbankplugins.atlassian.net/browse/WOO-1271) /price\_signage?amount=0" tiggas 1000 ggr per dag
+* [WOO-1272](https://resursbankplugins.atlassian.net/browse/WOO-1272) Regler för paymentwidget
+* [WOO-1273](https://resursbankplugins.atlassian.net/browse/WOO-1273) Switching between customer types may confuse the platform customertype
+
 # 1.0.10
 
 * [WOO-1270](https://resursbankplugins.atlassian.net/browse/WOO-1270) Enforce input field for companies \(company id\)
