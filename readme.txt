@@ -6,7 +6,7 @@ Tested up to: 6.3
 Requires PHP: 8.1
 WC Tested up to: 7.9.0
 WC requires at least: 7.6.0
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -57,6 +57,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.12
+
+* [WOO-1275](https://resursbankplugins.atlassian.net/browse/WOO-1275) Variable products part payment script errors
 
 # 1.0.11
 
