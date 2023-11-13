@@ -1,3 +1,7 @@
+# 1.0.12
+
+* [WOO-1275](https://resursbankplugins.atlassian.net/browse/WOO-1275) Variable products part payment script errors
+
 # 1.0.11
 
 * [WOO-1271](https://resursbankplugins.atlassian.net/browse/WOO-1271) /price\_signage?amount=0" tiggas 1000 ggr per dag
