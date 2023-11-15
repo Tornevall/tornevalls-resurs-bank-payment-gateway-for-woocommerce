@@ -46,6 +46,8 @@ class Gateway
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
         );
 
+        // If you do something below this place, also make sure you handle the forced
+        // sorting correctly.
         if (!ForcePaymentMethodSortOrder::getData()) {
             return;
         }
