@@ -183,7 +183,7 @@ class Advanced
     {
         return [
             'id' => ForcePaymentMethodSortOrder::getName(),
-            'title' => 'Force payment method sort order',
+            'title' => 'Sort payment methods according to admin',
             'type' => 'checkbox',
             'default' => ForcePaymentMethodSortOrder::getDefault()
         ];
