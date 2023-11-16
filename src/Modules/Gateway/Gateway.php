@@ -171,9 +171,13 @@ class Gateway
             // Handle internal sort order by the order we get payment methods
             // from the API.
             $sortOrder = 0;
+
             foreach ($paymentMethodList as $paymentMethod) {
                 $sortOrder++;
-                $gateway = new Resursbank(method: $paymentMethod, sortOrder: $sortOrder);
+                $gateway = new Resursbank(
+                    method: $paymentMethod,
+                    sortOrder: $sortOrder
+                );
 
                 if ($validateAvailable && !$gateway->is_available()) {
                     continue;
