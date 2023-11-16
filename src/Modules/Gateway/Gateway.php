@@ -74,7 +74,7 @@ class Gateway
             }
 
             $sort = $gateway instanceof Resursbank
-                ? $ordering['resursbank'] . '_' . $id
+                ? $ordering['resursbank'] . '_' . $gateway->sortOrder . '_' . $id
                 : $ordering[$id];
             $sortGateways[$sort] = $gateway;
         }
@@ -168,8 +168,16 @@ class Gateway
         try {
             $paymentMethodList = self::getPaymentMethodList();
 
+            // Handle internal sort order by the order we get payment methods
+            // from the API.
+            $sortOrder = 0;
+
             foreach ($paymentMethodList as $paymentMethod) {
-                $gateway = new Resursbank(method: $paymentMethod);
+                $sortOrder++;
+                $gateway = new Resursbank(
+                    method: $paymentMethod,
+                    sortOrder: $sortOrder
+                );
 
                 if ($validateAvailable && !$gateway->is_available()) {
                     continue;
