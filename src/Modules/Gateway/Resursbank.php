@@ -65,11 +65,15 @@ class Resursbank extends WC_Payment_Gateway
 {
     public ?string $type = '';
 
+    /** @var int Internal sort order. */
+    public int $sortOrder = 0;
+
     /**
      * Setup.
      */
     public function __construct(
-        private ?PaymentMethod $method = null
+        private ?PaymentMethod $method = null,
+        int $sortOrder = 0
     ) {
         // Assign default property values for this gateway.
         $this->id = RESURSBANK_MODULE_PREFIX;
@@ -79,6 +83,7 @@ class Resursbank extends WC_Payment_Gateway
         $this->has_fields = true;
         $this->enabled = 'yes';
         $this->type = null;
+        $this->sortOrder = $sortOrder;
 
         // __constructor complexity solving.
         $this->resolveNullableMethod();
