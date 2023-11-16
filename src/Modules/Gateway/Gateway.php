@@ -79,7 +79,7 @@ class Gateway
             $sortGateways[$sort] = $gateway;
         }
 
-        ksort(array: $sortGateways);
+        ksort(array: $sortGateways, flags: SORT_NUMERIC);
 
         $backupAvailableGateways = $availableGateways;
         $availableGateways = [];
