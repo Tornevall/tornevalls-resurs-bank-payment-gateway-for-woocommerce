@@ -21,6 +21,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
+use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
@@ -44,6 +45,56 @@ class Gateway
             'woocommerce_payment_gateways',
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
         );
+
+        // If you do something below this place, also make sure you handle the forced
+        // sorting correctly.
+        if (!ForcePaymentMethodSortOrder::getData()) {
+            return;
+        }
+
+        add_filter(
+            'woocommerce_available_payment_gateways',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::getAvailablePaymentGatewaysSorted'
+        );
+    }
+
+    /**
+     * @param array $availableGateways
+     * @return array
+     */
+    public static function getAvailablePaymentGatewaysSorted(array $availableGateways = []): array
+    {
+        $ordering = (array)get_option('woocommerce_gateway_order');
+
+        $sortGateways = [];
+
+        foreach ($availableGateways as $id => $gateway) {
+            if (!isset($ordering[$id]) && !($gateway instanceof Resursbank)) {
+                continue;
+            }
+
+            $sort = $gateway instanceof Resursbank
+                ? $ordering['resursbank'] . '_' . $id
+                : $ordering[$id];
+            $sortGateways[$sort] = $gateway;
+        }
+
+        ksort(array: $sortGateways);
+
+        $backupAvailableGateways = $availableGateways;
+        $availableGateways = [];
+
+        // Create new sort order.
+        foreach ($sortGateways as $gateway) {
+            $availableGateways[$gateway->id] = $gateway;
+        }
+
+        // If something breaks, restore the original list.
+        if (count($availableGateways) !== count($backupAvailableGateways)) {
+            $availableGateways = $backupAvailableGateways;
+        }
+
+        return $availableGateways;
     }
 
     /**
@@ -60,8 +111,6 @@ class Gateway
 
     /**
      * Executes on frontend.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initFrontend(): void
     {
