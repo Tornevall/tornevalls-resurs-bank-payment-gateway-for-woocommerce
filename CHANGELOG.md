@@ -1,8 +1,12 @@
+# 1.0.14
+
+* Rebuilt commit.
+
 # 1.0.13
 
-[WOO-1274](https://resursbankplugins.atlassian.net/browse/WOO-1274) Handle gateway sort order in checkout based on wp-admin setup
-[WOO-1267](https://resursbankplugins.atlassian.net/browse/WOO-1267) Make "tested up to 8.0.x" work properly.
-[WOO-1276](https://resursbankplugins.atlassian.net/browse/WOO-1276) Read more CSS malfunction on custom themes
+* [WOO-1274](https://resursbankplugins.atlassian.net/browse/WOO-1274) Handle gateway sort order in checkout based on wp-admin setup
+* [WOO-1267](https://resursbankplugins.atlassian.net/browse/WOO-1267) Make "tested up to 8.0.x" work properly.
+* [WOO-1276](https://resursbankplugins.atlassian.net/browse/WOO-1276) Read more CSS malfunction on custom themes
 
 # 1.0.12
 

@@ -6,7 +6,7 @@ Tested up to: 6.3
 Requires PHP: 8.1
 WC Tested up to: 7.9.0
 WC requires at least: 7.6.0
-Stable tag: 1.0.13
+Stable tag: 1.0.14
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -58,17 +58,15 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
-# 1.0.13
+# 1.0.14
 
-# Release notes - WooCommerce - MAPI-1.0.13
-
-### Task
+* Rebuilt commit.
 
 # 1.0.13
 
-[WOO-1274](https://resursbankplugins.atlassian.net/browse/WOO-1274) Handle gateway sort order in checkout based on wp-admin setup
-[WOO-1267](https://resursbankplugins.atlassian.net/browse/WOO-1267) Make "tested up to 8.0.x" work properly.
-[WOO-1276](https://resursbankplugins.atlassian.net/browse/WOO-1276) Read more CSS malfunction on custom themes
+* [WOO-1274](https://resursbankplugins.atlassian.net/browse/WOO-1274) Handle gateway sort order in checkout based on wp-admin setup
+* [WOO-1267](https://resursbankplugins.atlassian.net/browse/WOO-1267) Make "tested up to 8.0.x" work properly.
+* [WOO-1276](https://resursbankplugins.atlassian.net/browse/WOO-1276) Read more CSS malfunction on custom themes
 
 # 1.0.12
 
