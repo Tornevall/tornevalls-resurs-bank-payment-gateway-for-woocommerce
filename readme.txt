@@ -27,8 +27,8 @@ Find out more in about the plugin [in our documentation](https://test.resurs.com
 * **Required**: PHP: 8.1 or later.
 * **Required**: WooCommerce: At least v7.6.0
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
-* **Required**: CURL (php-curl).
-* WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
+* **Required**: CURL (php-curl) with **CURLAUTH_BEARER**.
+* Preferably the **latest** release of WordPress. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
 
 == Installation ==
