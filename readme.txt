@@ -6,7 +6,7 @@ Tested up to: 6.3
 Requires PHP: 8.1
 WC Tested up to: 7.9.0
 WC requires at least: 7.6.0
-Stable tag: 1.0.11
+Stable tag: 1.0.14
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -27,8 +27,8 @@ Find out more in about the plugin [in our documentation](https://test.resurs.com
 * **Required**: PHP: 8.1 or later.
 * **Required**: WooCommerce: At least v7.6.0
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
-* **Required**: CURL (php-curl).
-* WordPress: Preferably simply the latest release. It is highly recommended to go for the latest version as soon as possible if you're not already there. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
+* **Required**: CURL (php-curl) with **CURLAUTH_BEARER**.
+* Preferably the **latest** release of WordPress. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
 
 == Installation ==
@@ -57,6 +57,20 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.14
+
+* Rebuilt commit.
+
+# 1.0.13
+
+* [WOO-1274](https://resursbankplugins.atlassian.net/browse/WOO-1274) Handle gateway sort order in checkout based on wp-admin setup
+* [WOO-1267](https://resursbankplugins.atlassian.net/browse/WOO-1267) Make "tested up to 8.0.x" work properly.
+* [WOO-1276](https://resursbankplugins.atlassian.net/browse/WOO-1276) Read more CSS malfunction on custom themes
+
+# 1.0.12
+
+* [WOO-1275](https://resursbankplugins.atlassian.net/browse/WOO-1275) Variable products part payment script errors
 
 # 1.0.11
 

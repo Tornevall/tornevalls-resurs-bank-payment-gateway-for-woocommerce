@@ -14,6 +14,7 @@ use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
+use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
@@ -50,6 +51,7 @@ class Advanced
                 'cache_enabled' => self::getCacheEnabled(),
                 'invalidate_cache' => self::getInvalidateCacheButton(),
                 'get_address_enabled' => self::getGetAddressEnabled(),
+                'force_payment_method_sort_order' => self::getForcePaymentMethodSortOrder(),
                 'api_timeout' => self::getApiTimeout()
             ]
         ];
@@ -168,6 +170,22 @@ class Advanced
             ),
             'desc' => '',
             'default' => EnableGetAddress::getDefault()
+        ];
+    }
+
+    /**
+     * Setting to force payment method sorting in checkout as we use uuids there
+     * instead of the gateway itself.
+     *
+     * @return array
+     */
+    private static function getForcePaymentMethodSortOrder(): array
+    {
+        return [
+            'id' => ForcePaymentMethodSortOrder::getName(),
+            'title' => 'Sort payment methods according to admin',
+            'type' => 'checkbox',
+            'default' => ForcePaymentMethodSortOrder::getDefault()
         ];
     }
 }
