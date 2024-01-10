@@ -65,6 +65,11 @@ class Gateway
     public static function getAvailablePaymentGatewaysSorted(array $availableGateways = []): array
     {
         $ordering = (array)get_option('woocommerce_gateway_order');
+        if (!isset($ordering['resursbank'])) {
+            // If this is not set, woocommerce currently has no sort order for Resurs, so we will
+            // place the payment methods in top order initially.
+            $ordering['resursbank'] = 0;
+        }
 
         $sortGateways = [];
 
@@ -79,7 +84,7 @@ class Gateway
             $sortGateways[$sort] = $gateway;
         }
 
-        ksort(array: $sortGateways, flags: SORT_NUMERIC);
+        ksort(array: $sortGateways, flags: SORT_NUMERIC & SORT_NATURAL);
 
         $backupAvailableGateways = $availableGateways;
         $availableGateways = [];
