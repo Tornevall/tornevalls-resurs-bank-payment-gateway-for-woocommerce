@@ -366,6 +366,7 @@ class Resursbank extends WC_Payment_Gateway
      * Attempts to extract and translate more detailed error message from
      * CurlException.
      */
+    // @phpcs:ignoreFile CognitiveComplexity
     private function handleCreatePaymentError(WC_Order $order, Throwable $error): void
     {
         Log::error(

@@ -1,3 +1,8 @@
+# 1.0.15
+
+[WOO-1279](https://resursbankplugins.atlassian.net/browse/WOO-1279) Verify the plugin with rcoplus branch and WooCommerce 8.5.0
+[WOO-1280](https://resursbankplugins.atlassian.net/browse/WOO-1280) Undefined array key warnings in checkout/wp-admin
+
 # 1.0.14
 
 * Rebuilt commit.
