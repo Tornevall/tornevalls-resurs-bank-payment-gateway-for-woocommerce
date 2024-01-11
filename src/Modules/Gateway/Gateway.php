@@ -158,12 +158,12 @@ class Gateway
             // gateway list at the end of the configuration, but at the top during the
             // checkout process. This section of code is intended to adjust the sort order
             // both in wp-admin and during the checkout process.
-            if ($ourId === 999 && count($availableGateways)) {
+            if ($ourId >= 999 && count($availableGateways)) {
                 // Create a temporary array containing our module's gateway at position 999
-                $resursArray = [$availableGateways[999]];
+                $resursArray = [$availableGateways[$ourId]];
 
                 // Remove our module's gateway from position 999 in the original list
-                unset($availableGateways[999]);
+                unset($availableGateways[$ourId]);
 
                 // Merge the temporary array containing our module's gateway with the original list
                 $availableGateways = array_merge($resursArray, $availableGateways);
