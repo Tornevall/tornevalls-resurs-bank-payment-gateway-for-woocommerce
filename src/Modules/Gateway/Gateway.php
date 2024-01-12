@@ -57,7 +57,7 @@ class Gateway
         // the payment gateways. If forced sorting are disabled, this will never occur.
         add_action(
             'wc_payment_gateways_initialized',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::handleInitializedGateways'
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::handleInitializedGatewaysSorting'
         );
 
         add_filter(
@@ -70,7 +70,7 @@ class Gateway
      * @param $wcPaymentGateways
      * @return void
      */
-    public static function handleInitializedGateways($wcPaymentGateways): void
+    public static function handleInitializedGatewaysSorting($wcPaymentGateways): void
     {
         try {
             // Check if there's an object to handle instead of an instance of
