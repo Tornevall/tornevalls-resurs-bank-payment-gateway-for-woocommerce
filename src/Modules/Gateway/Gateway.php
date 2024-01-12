@@ -53,7 +53,6 @@ class Gateway
         if (!ForcePaymentMethodSortOrder::getData()) {
             return;
         }
-        Config::getLogger()->debug('Force Payment Method Order enabled');
 
         // Perform a verification process for sorting after WooCommerce has initialized
         // the payment gateways. If forced sorting are disabled, this will never occur.
@@ -132,6 +131,9 @@ class Gateway
                 // Store our sort order position once.
                 $ourId = $id;
             }
+            Config::getLogger()->debug(
+                message: 'Gateway id: ' . $gateway->id . ', ourId: ' . $ourId
+            );
 
             $sort = $gateway instanceof Resursbank
                 ? $ordering['resursbank'] . '_' . $gateway->sortOrder . '_' . $id
@@ -155,6 +157,9 @@ class Gateway
         }
 
         try {
+            Config::getLogger()->debug(
+                message: 'Our id: ' . $ourId . ', available gateways: ' . count($availableGateways)
+            );
             // When our module is newly installed, it is assigned a sort order of 999 after
             // the initialization of the wc-gateway (wc_payment_gateways_initialized).
             // This also means that the variable $ordering['resursbank'] was not properly
