@@ -20,6 +20,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -46,11 +47,18 @@ class Gateway
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
         );
 
-        // If you do something below this place, also make sure you handle the forced
-        // sorting correctly.
+        // Ensure that if you make any changes below this point, you handle the sorting
+        // requirement correctly.
         if (!ForcePaymentMethodSortOrder::getData()) {
             return;
         }
+
+        // Perform a verification process for sorting after WooCommerce has initialized
+        // the payment gateways. If forced sorting are disabled, this will never occur.
+        add_action(
+            'wc_payment_gateways_initialized',
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::handleInitializedGatewaysSorting'
+        );
 
         add_filter(
             'woocommerce_available_payment_gateways',
@@ -59,6 +67,39 @@ class Gateway
     }
 
     /**
+     * @param $wcPaymentGateways
+     * @return void
+     */
+    public static function handleInitializedGatewaysSorting($wcPaymentGateways): void
+    {
+        try {
+            // Check if there's an object to handle instead of an instance of
+            // WC_Payment_Gateways, as the Gateway may execute before other
+            // initializations before WC. We also want to make sure that
+            // there are gateways available. This validation prevents that
+            // someone is handing over broken data.
+            if (!is_object(value: $wcPaymentGateways) ||
+                !property_exists(object_or_class: $wcPaymentGateways, property: 'payment_gateways') ||
+                !is_array(value: $wcPaymentGateways->payment_gateways) ||
+                !(new ArrayValidation())->isAssoc(data: $wcPaymentGateways->payment_gateways)
+            ) {
+                return;
+            }
+        } catch (Throwable) {
+            return;
+        }
+
+        // This call fixes payment gateway sorting immediately after
+        // initialization, when the Resurs gateway is placed on position 999 or
+        // higher and forced sorting is enabled.
+        $wcPaymentGateways->payment_gateways = self::getAvailablePaymentGatewaysSorted(
+            availableGateways: $wcPaymentGateways->payment_gateways
+        );
+    }
+
+    /**
+     * Adjust sort order for payment gateways. Can be used both on available/active gateways and all installed gateways.
+     *
      * @param array $availableGateways
      * @return array
      */
@@ -74,10 +115,16 @@ class Gateway
         }
 
         $sortGateways = [];
+        $ourId = -1;
 
         foreach ($availableGateways as $id => $gateway) {
             if (!isset($ordering[$id]) && !($gateway instanceof Resursbank)) {
                 continue;
+            }
+
+            if ($gateway->id === 'resursbank') {
+                // Store our sort order position once.
+                $ourId = $id;
             }
 
             $sort = $gateway instanceof Resursbank
@@ -100,6 +147,27 @@ class Gateway
         if (count($availableGateways) !== count($backupAvailableGateways)) {
             $availableGateways = $backupAvailableGateways;
         }
+
+        try {
+            // When our module is newly installed, it is assigned a sort order of 999 after
+            // the initialization of the wc-gateway (wc_payment_gateways_initialized).
+            // This also means that the variable $ordering['resursbank'] was not properly
+            // initialized within this method, but was forced to have an order of 0.
+            // When this occurs, the wp-admin/payments tab arranges our module's payment
+            // gateway list at the end of the configuration, but at the top during the
+            // checkout process. This section of code is intended to adjust the sort order
+            // both in wp-admin and during the checkout process.
+            if ($ourId >= 999 && count($availableGateways)) {
+                // Create a temporary array containing our module's gateway at position 999
+                $resursArray = [$availableGateways[$ourId]];
+
+                // Remove our module's gateway from position 999 in the original list
+                unset($availableGateways[$ourId]);
+
+                // Merge the temporary array containing our module's gateway with the original list
+                $availableGateways = array_merge($resursArray, $availableGateways);
+            }
+        } catch (Throwable) {}
 
         return $availableGateways;
     }
