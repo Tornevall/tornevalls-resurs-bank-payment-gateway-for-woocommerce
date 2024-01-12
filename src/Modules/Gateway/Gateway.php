@@ -57,7 +57,7 @@ class Gateway
         // the payment gateways. If forced sorting are disabled, this will never occur.
         add_action(
             'wc_payment_gateways_initialized',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::execPaymentGatewaysInitialized'
+            'Resursbank\Woocommerce\Modules\Gateway\Gateway::handleInitializedGateways'
         );
 
         add_filter(
@@ -69,9 +69,8 @@ class Gateway
     /**
      * @param $wcPaymentGateways
      * @return void
-     * @throws IllegalValueException
      */
-    public static function execPaymentGatewaysInitialized($wcPaymentGateways): void
+    public static function handleInitializedGateways($wcPaymentGateways): void
     {
         try {
             // Check if there's an object to handle instead of an instance of
@@ -90,9 +89,9 @@ class Gateway
             return;
         }
 
-        // This call verifies payment gateway sorting immediately after
-        // initialization, when the Resurs gateway is at the last index with a
-        // sort order of 999 (when forced sorting is enabled).
+        // This call fixes payment gateway sorting immediately after
+        // initialization, when the Resurs gateway is placed on position 999 or
+        // higher and forced sorting is enabled.
         $wcPaymentGateways->payment_gateways = self::getAvailablePaymentGatewaysSorted(
             availableGateways: $wcPaymentGateways->payment_gateways
         );
