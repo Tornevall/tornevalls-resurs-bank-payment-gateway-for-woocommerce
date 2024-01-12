@@ -172,9 +172,11 @@ class Gateway
                 // Merge the temporary array containing our module's gateway with the original list
                 $availableGateways = array_merge($resursArray, $availableGateways);
 
-                Config::getLogger()->debug(
-                    message: print_r($availableGateways, true)
-                );
+                foreach ($availableGateways as $id => $gw) {
+                    Config::getLogger()->debug(
+                        message: 'id ' . $id . ', ' . $gw->id
+                    );
+                }
 
                 Config::getLogger()->debug(message: 'Resurs gateway sort id found and rearranged.');
             }
