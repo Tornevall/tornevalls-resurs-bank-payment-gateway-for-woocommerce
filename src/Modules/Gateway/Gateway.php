@@ -30,7 +30,6 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-
 use function is_array;
 
 /**
@@ -121,6 +120,7 @@ class Gateway
 
         $sortGateways = [];
         $ourId = -1;
+        $hasId = false;
 
         foreach ($availableGateways as $id => $gateway) {
             if (!isset($ordering[$id]) && !($gateway instanceof Resursbank)) {
@@ -128,8 +128,8 @@ class Gateway
             }
 
             if ($gateway->id === 'resursbank') {
-                // Store our sort order position once.
                 $ourId = $id;
+                $hasId = true;
             }
 
             $sort = $gateway instanceof Resursbank
@@ -162,7 +162,11 @@ class Gateway
             // gateway list at the end of the configuration, but at the top during the
             // checkout process. This section of code is intended to adjust the sort order
             // both in wp-admin and during the checkout process.
-            if (((int)$ourId >= 999 || $ourId === -1) && count($availableGateways)) {
+            if (
+                (int)$ourId >= 999 &&
+                count($availableGateways) &&
+                $hasId
+            ) {
                 // Create a temporary array containing our module's gateway at position 999
                 $resursArray = [$availableGateways[$ourId]];
 
