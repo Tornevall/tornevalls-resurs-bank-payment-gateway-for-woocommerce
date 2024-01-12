@@ -130,9 +130,6 @@ class Gateway
             if ($gateway->id === 'resursbank') {
                 // Store our sort order position once.
                 $ourId = is_numeric(value: $id) ? $id : -1;
-                Config::getLogger()->debug(
-                    message: 'Gateway id: ' . $gateway->id . ', ourId: ' . $ourId
-                );
             }
 
             $sort = $gateway instanceof Resursbank
@@ -157,9 +154,6 @@ class Gateway
         }
 
         try {
-            Config::getLogger()->debug(
-                message: 'Our id: ' . $ourId . ', available gateways: ' . count($availableGateways)
-            );
             // When our module is newly installed, it is assigned a sort order of 999 after
             // the initialization of the wc-gateway (wc_payment_gateways_initialized).
             // This also means that the variable $ordering['resursbank'] was not properly
@@ -169,6 +163,16 @@ class Gateway
             // checkout process. This section of code is intended to adjust the sort order
             // both in wp-admin and during the checkout process.
             if (((int)$ourId >= 999 || $ourId === -1) && count($availableGateways)) {
+
+                // If passed in checks above with no change, push it to top since our
+                // -1 equals to 999.
+                if ($ourId === -1) {
+                    $ourId = 0;
+                }
+                Config::getLogger()->debug(
+                    message: 'Our id: ' . $ourId . ', available gateways: ' . count($availableGateways)
+                );
+
                 // Create a temporary array containing our module's gateway at position 999
                 $resursArray = [$availableGateways[$ourId]];
 
