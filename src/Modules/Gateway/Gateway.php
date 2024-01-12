@@ -173,7 +173,7 @@ class Gateway
                 $availableGateways = array_merge($resursArray, $availableGateways);
 
                 Config::getLogger()->debug(
-                    message: $availableGateways
+                    message: print_r($availableGateways, true)
                 );
 
                 Config::getLogger()->debug(message: 'Resurs gateway sort id found and rearranged.');
