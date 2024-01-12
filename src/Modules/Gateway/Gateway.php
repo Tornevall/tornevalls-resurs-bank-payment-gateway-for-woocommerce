@@ -51,9 +51,9 @@ class Gateway
         // Ensure that if you make any changes below this point, you handle the sorting
         // requirement correctly.
         if (!ForcePaymentMethodSortOrder::getData()) {
-            Config::getLogger()->debug('Force Payment Method Order disabled');
             return;
         }
+        Config::getLogger()->debug('Force Payment Method Order enabled');
 
         // Perform a verification process for sorting after WooCommerce has initialized
         // the payment gateways. If forced sorting are disabled, this will never occur.
