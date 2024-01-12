@@ -51,6 +51,7 @@ class Gateway
         // Ensure that if you make any changes below this point, you handle the sorting
         // requirement correctly.
         if (!ForcePaymentMethodSortOrder::getData()) {
+            Config::getLogger()->debug('Force Payment Method Order disabled');
             return;
         }
 
