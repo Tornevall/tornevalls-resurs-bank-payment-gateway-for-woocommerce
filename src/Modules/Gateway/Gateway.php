@@ -129,7 +129,7 @@ class Gateway
 
             if ($gateway->id === 'resursbank') {
                 // Store our sort order position once.
-                $ourId = $id;
+                $ourId = is_numeric(value: $id) ? $id : -1;
             }
             Config::getLogger()->debug(
                 message: 'Gateway id: ' . $gateway->id . ', ourId: ' . $ourId
@@ -168,7 +168,7 @@ class Gateway
             // gateway list at the end of the configuration, but at the top during the
             // checkout process. This section of code is intended to adjust the sort order
             // both in wp-admin and during the checkout process.
-            if ((int)$ourId >= 999 && count($availableGateways)) {
+            if (((int)$ourId >= 999 || $ourId === -1) && count($availableGateways)) {
                 // Create a temporary array containing our module's gateway at position 999
                 $resursArray = [$availableGateways[$ourId]];
 
