@@ -129,7 +129,7 @@ class Gateway
 
             if ($gateway->id === 'resursbank') {
                 // Store our sort order position once.
-                $ourId = is_numeric(value: $id) ? $id : -1;
+                $ourId = $id;
             }
 
             $sort = $gateway instanceof Resursbank
@@ -171,12 +171,6 @@ class Gateway
 
                 // Merge the temporary array containing our module's gateway with the original list
                 $availableGateways = array_merge($resursArray, $availableGateways);
-
-                foreach ($availableGateways as $id => $gw) {
-                    Config::getLogger()->debug(
-                        message: 'id ' . $id . ', ' . $gw->id
-                    );
-                }
 
                 Config::getLogger()->debug(message: 'Resurs gateway sort id found and rearranged.');
             }
