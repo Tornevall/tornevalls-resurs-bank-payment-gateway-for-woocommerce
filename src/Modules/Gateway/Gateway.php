@@ -99,7 +99,7 @@ class Gateway
     }
 
     /**
-     * Adjust sort order for payment gateways.
+     * Adjust sort order for payment gateways. Can be used both on available/active gateways and all installed gateways.
      *
      * @param array $availableGateways
      * @return array
