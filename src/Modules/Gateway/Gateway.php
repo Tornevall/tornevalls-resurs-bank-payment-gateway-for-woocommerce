@@ -130,10 +130,10 @@ class Gateway
             if ($gateway->id === 'resursbank') {
                 // Store our sort order position once.
                 $ourId = is_numeric(value: $id) ? $id : -1;
+                Config::getLogger()->debug(
+                    message: 'Gateway id: ' . $gateway->id . ', ourId: ' . $ourId
+                );
             }
-            Config::getLogger()->debug(
-                message: 'Gateway id: ' . $gateway->id . ', ourId: ' . $ourId
-            );
 
             $sort = $gateway instanceof Resursbank
                 ? $ordering['resursbank'] . '_' . $gateway->sortOrder . '_' . $id
