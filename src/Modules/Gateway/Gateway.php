@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -69,6 +70,7 @@ class Gateway
     /**
      * @param $wcPaymentGateways
      * @return void
+     * @throws ConfigException
      */
     public static function handleInitializedGatewaysSorting($wcPaymentGateways): void
     {
@@ -83,9 +85,11 @@ class Gateway
                 !is_array(value: $wcPaymentGateways->payment_gateways) ||
                 !(new ArrayValidation())->isAssoc(data: $wcPaymentGateways->payment_gateways)
             ) {
+                Config::getLogger()->debug(message: 'Handle initialized gateways sorting could not find a valid array.');
                 return;
             }
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            Config::getLogger()->error(message: $e);
             return;
         }
 
@@ -102,6 +106,7 @@ class Gateway
      *
      * @param array $availableGateways
      * @return array
+     * @throws ConfigException
      */
     // @phpcs:ignoreFile CognitiveComplexity
     public static function getAvailablePaymentGatewaysSorted(array $availableGateways = []): array
@@ -157,7 +162,7 @@ class Gateway
             // gateway list at the end of the configuration, but at the top during the
             // checkout process. This section of code is intended to adjust the sort order
             // both in wp-admin and during the checkout process.
-            if ($ourId >= 999 && count($availableGateways)) {
+            if ((int)$ourId >= 999 && count($availableGateways)) {
                 // Create a temporary array containing our module's gateway at position 999
                 $resursArray = [$availableGateways[$ourId]];
 
@@ -166,8 +171,12 @@ class Gateway
 
                 // Merge the temporary array containing our module's gateway with the original list
                 $availableGateways = array_merge($resursArray, $availableGateways);
+
+                Config::getLogger()->debug(message: 'Resurs gateway sort id found and rearranged.');
             }
-        } catch (Throwable) {}
+        } catch (Throwable $e) {
+            Config::getLogger()->error(message: $e);
+        }
 
         return $availableGateways;
     }
