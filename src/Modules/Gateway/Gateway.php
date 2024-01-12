@@ -76,8 +76,8 @@ class Gateway
             // Check if there's an object to handle instead of an instance of
             // WC_Payment_Gateways, as the Gateway may execute before other
             // initializations before WC. We also want to make sure that
-            // there are gateways available. This validation also prevents
-            // that someone gives us broken data.
+            // there are gateways available. This validation prevents that
+            // someone is handing over broken data.
             if (!is_object(value: $wcPaymentGateways) ||
                 !property_exists(object_or_class: $wcPaymentGateways, property: 'payment_gateways') ||
                 !is_array(value: $wcPaymentGateways->payment_gateways) ||
