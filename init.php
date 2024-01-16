@@ -6,7 +6,7 @@
  * WC Tested up to: 8.5.1
  * WC requires at least: 7.6.0
  * Requires PHP: 8.1
- * Version: 1.0.14
+ * Version: 1.0.15
  * Author: Resurs Bank AB
  * Author URI: https://test.resurs.com/docs/display/ecom/WooCommerce
  * Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
