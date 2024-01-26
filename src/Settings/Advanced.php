@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Util\Translator;
 
 /**
@@ -43,7 +44,7 @@ class Advanced
      */
     public static function getSettings(): array
     {
-        return [
+        $return = [
             self::SECTION_ID => [
                 'log_enabled' => self::getLogEnabledSetting(),
                 'log_dir' => self::getLogDirSetting(),
@@ -54,6 +55,57 @@ class Advanced
                 'force_payment_method_sort_order' => self::getForcePaymentMethodSortOrder(),
                 'api_timeout' => self::getApiTimeout()
             ]
+        ];
+
+        if (!EnableGetAddress::isCountryCodeSe()) {
+            $return[self::SECTION_ID]['get_address_enabled'] = self::getCountryRestrictionConfig();
+        }
+
+        // Disabling getAddress based on GDPR rules have higher priority than the country code.
+        if (!EnableGetAddress::isGetAddressAllowedByGdprRule()) {
+            $return[self::SECTION_ID]['get_address_enabled'] = self::getGdprRestrictionConfig();
+        }
+
+        return $return;
+    }
+
+    /**
+     * @return array
+     */
+    private static function getGdprRestrictionConfig(): array
+    {
+        return [
+            'id' => 'get_address',
+            'type' => 'text',
+            'custom_attributes' => [
+                'disabled' => true,
+            ],
+            'title' => Translator::translate(
+                phraseId: 'enable-widget-to-get-address'
+            ),
+            'value' => __('Disabled'),
+            'desc' => '<b>Setting is unavailable due to GDPR restrictions.</b>',
+            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private static function getCountryRestrictionConfig(): array
+    {
+        return [
+            'id' => 'get_address',
+            'type' => 'text',
+            'custom_attributes' => [
+                'disabled' => true,
+            ],
+            'title' => Translator::translate(
+                phraseId: 'enable-widget-to-get-address'
+            ),
+            'value' => __('Disabled'),
+            'desc' => '<b>Not available in this country (' . StoreCountryCode::getCurrentStoreCountry() . ')</b>',
+            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
         ];
     }
 
@@ -80,6 +132,7 @@ class Advanced
         return [
             'id' => LogEnabled::getName(),
             'type' => 'checkbox',
+            'desc' => __('Yes'),
             'title' => Translator::translate(phraseId: 'log-enabled'),
             'default' => LogEnabled::getDefault()
         ];
@@ -141,6 +194,7 @@ class Advanced
             'id' => EnableCache::getName(),
             'title' => Translator::translate(phraseId: 'cache-enabled'),
             'type' => 'checkbox',
+            'desc' => __('Yes'),
             'default' => EnableCache::getDefault()
         ];
     }
@@ -168,8 +222,9 @@ class Advanced
             'title' => Translator::translate(
                 phraseId: 'enable-widget-to-get-address'
             ),
-            'desc' => '',
-            'default' => EnableGetAddress::getDefault()
+            'desc' => __('Yes'),
+            'default' => EnableGetAddress::getData(),
+            'desc_tip' => 'Only available in Sweden',
         ];
     }
 
@@ -185,6 +240,7 @@ class Advanced
             'id' => ForcePaymentMethodSortOrder::getName(),
             'title' => 'Sort payment methods according to admin',
             'type' => 'checkbox',
+            'desc' => __('Yes'),
             'default' => ForcePaymentMethodSortOrder::getDefault()
         ];
     }
