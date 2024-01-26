@@ -41,7 +41,7 @@ class EnableGetAddress extends BoolOption implements OptionInterface
      */
     public static function isCountryCodeSe(): bool
     {
-        return StoreCountryCode::getCurrentStoreCountry() === 'DK';
+        return StoreCountryCode::getCurrentStoreCountry() === 'SE';
     }
 
     /**
