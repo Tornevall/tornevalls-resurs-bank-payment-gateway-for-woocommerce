@@ -85,6 +85,7 @@ class Advanced
             ),
             'value' => __('Disabled'),
             'desc' => '<b>Setting is unavailable due to GDPR restrictions.</b>',
+            // phpcs:ignore
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
         ];
     }
@@ -105,6 +106,7 @@ class Advanced
             ),
             'value' => __('Disabled'),
             'desc' => '<b>Not available in this country (' . StoreCountryCode::getCurrentStoreCountry() . ')</b>',
+            // phpcs:ignore
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
         ];
     }

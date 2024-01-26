@@ -29,22 +29,29 @@ class StoreCountryCode extends StringOption implements OptionInterface
         return self::NAME_PREFIX . 'store_country_code';
     }
 
+    /**
+     * Returning a country code based on the store used in current config.
+     */
     public static function getCurrentStoreCountry(): string
     {
         $currentStoreId = StoreId::getData();
 
-        if ($currentStoreId !== '') {
-            try {
-                $storeList = Repository::getStores();
+        // Tidig retur om det inte finns något aktuellt butiks-ID
+        if ($currentStoreId === '') {
+            return '';
+        }
 
-                /** @var Store $store */
-                foreach ($storeList->getData() as $store) {
-                    if ($store->id === $currentStoreId) {
-                        return $store->countryCode->value;
-                    }
+        try {
+            $storeList = Repository::getStores();
+
+            /** @var Store $store */
+            foreach ($storeList->getData() as $store) {
+                if ($store->id === $currentStoreId) {
+                    return $store->countryCode->value;
                 }
-            } catch (Throwable) {
             }
+        } catch (Throwable) {
+            // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         }
 
         return '';
