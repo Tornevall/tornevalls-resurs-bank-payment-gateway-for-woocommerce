@@ -23,8 +23,6 @@ class Store
     /**
      * Render JavaScript widget that will update the select element containing
      * available stores as API credentials are modified.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initAdmin(): void
     {

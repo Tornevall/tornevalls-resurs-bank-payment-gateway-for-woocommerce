@@ -23,7 +23,6 @@ use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
 use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
-use Resursbank\Woocommerce\Modules\ModuleInit\WpJson;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\WooCommerce;
 
@@ -38,6 +37,7 @@ define(
         offset: strrpos(haystack: __DIR__, needle: '/') + 1
     )
 );
+define(constant_name: 'ALLOW_GET_ADDRESS', value: true);
 
 require_once __DIR__ . '/autoload.php';
 

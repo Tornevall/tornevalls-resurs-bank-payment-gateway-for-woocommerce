@@ -20,6 +20,7 @@ use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
+use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
@@ -31,6 +32,7 @@ use Throwable;
 class Api
 {
     public const SECTION_ID = 'api_settings';
+    public const NAME_PREFIX = 'resursbank_';
 
     /**
      * Get translated title of tab.
@@ -69,6 +71,7 @@ class Api
                 'client_id' => self::getClientId(),
                 'client_secret' => self::getClientSecret(),
                 'store_id' => self::getStoreIdSetting(),
+                'store_country' => self::getStoreCountry(),
             ],
         ];
     }
@@ -148,6 +151,25 @@ class Api
             ],
             'custom_attributes' => ['size' => 1],
             'default' => Environment::getDefault(),
+        ];
+    }
+
+    /**
+     * Return config value for current store countryCode.
+     *
+     * @return array
+     */
+    private static function getStoreCountry(): array
+    {
+        return [
+            'id' => self::NAME_PREFIX . '_store_country',
+            'type' => 'text',
+            'custom_attributes' => [
+                'disabled' => true,
+            ],
+            'title' => __('Country'),
+            'value' => StoreCountryCode::getCurrentStoreCountry(),
+            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
         ];
     }
 
