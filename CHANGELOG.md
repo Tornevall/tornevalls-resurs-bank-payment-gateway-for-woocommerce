@@ -1,3 +1,7 @@
+# 1.0.16
+
+[WOO-1282](https://resursbankplugins.atlassian.net/browse/WOO-1282) Disabla getAddress-wiget om vald butik <> "countryCode": "SE"
+
 # 1.0.15
 
 [WOO-1279](https://resursbankplugins.atlassian.net/browse/WOO-1279) Verify the plugin with rcoplus branch and WooCommerce 8.5.0
