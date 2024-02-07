@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Lib\Locale\Language as EcomLanguage;
+use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 
 /**
  * Utility methods for language-related things.
@@ -25,26 +26,33 @@ class Language
      */
     public static function getSiteLanguage(): EcomLanguage
     {
-        $language = self::getLanguageFromLocaleString(locale: get_locale());
-
-        if (!$language) {
-            return self::DEFAULT_LANGUAGE;
-        }
-
-        foreach (EcomLanguage::cases() as $case) {
-            if ($language === $case->value) {
-                return $case;
-            }
-        }
-
-        return self::DEFAULT_LANGUAGE;
+        $language = strtolower(
+            string: StoreCountryCode::getCurrentStoreCountry() ?: self::getLanguageFromLocaleString(
+                locale: get_locale()
+            )
+        );
+        return EcomLanguage::tryFrom(
+            value: $language
+        ) ?? self::DEFAULT_LANGUAGE;
     }
 
     /**
-     * Crude way to split a locale string and give back just the language part.
+     * Maps Norwegian Bokmål ('nb') and Nynorsk ('nn') locale to 'no' as required by certain library.
+     */
+    private static function mapNbToNo(string $localeString): string
+    {
+        return $localeString === 'nb' || $localeString === 'nn'
+            ? 'no'
+            : $localeString;
+    }
+
+    /**
+     * Extracts the language part from a locale definition.
      */
     private static function getLanguageFromLocaleString(string $locale): string
     {
-        return explode(separator: '_', string: $locale)[0];
+        $languagePart = explode(separator: '_', string: $locale)[0];
+
+        return self::mapNbToNo(localeString: $languagePart);
     }
 }
