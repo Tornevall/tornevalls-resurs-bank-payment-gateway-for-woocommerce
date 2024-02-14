@@ -1,3 +1,7 @@
+# 1.0.17
+
+[WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) Findings: fi/no translations for checkout
+
 # 1.0.16
 
 [WOO-1282](https://resursbankplugins.atlassian.net/browse/WOO-1282) Disabla getAddress-wiget om vald butik <> "countryCode": "SE"
