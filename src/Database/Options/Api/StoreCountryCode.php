@@ -35,12 +35,28 @@ class StoreCountryCode extends StringOption implements OptionInterface
      */
     public static function getCurrentStoreCountry(): string
     {
-        $currentStoreId = StoreId::getData();
-        // Retrieve country code from cache for early response, updating only when we have new MAPI data.
         $return = (string)get_transient('resurs_merchant_country_code');
 
-        // Return cached country code if store ID is missing or configuration is uninitialized.
-        if ($currentStoreId === '' || !Config::hasInstance()) {
+        try {
+            // If site is missing a proper initial setup, StoreId request will throw an exception.
+            // Also, if that request goes wrong it may do the same, so we will first verify that there are
+            // credentials available.
+            if (
+                !Config::hasInstance() ||
+                ClientId::getData() === '' &&
+                ClientSecret::getData() === ''
+            ) {
+                return $return;
+            }
+
+            $currentStoreId = StoreId::getData();
+        } catch (Throwable) {
+            // All other errors should be suppressed.
+            return $return;
+        }
+
+        // Failures from above should return pre-fetched data even if there is a chance that there is no data set.
+        if ($currentStoreId === '') {
             return $return;
         }
 
