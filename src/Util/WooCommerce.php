@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Config;
+use Resursbank\Woocommerce\Database\Options\Api\ClientId;
+use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
+use Throwable;
+
 use function in_array;
 
 /**
@@ -18,8 +23,6 @@ class WooCommerce
 {
     /**
      * Safely confirm whether WC is loaded.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function isAvailable(): bool
     {
@@ -31,5 +34,17 @@ class WooCommerce
             ),
             strict: true
         );
+    }
+
+    /**
+     * Verify that the plugin has a valid setup ready.
+     */
+    public static function isValidSetup(): bool
+    {
+        try {
+            return Config::hasInstance() && ClientId::getData() !== '' && ClientSecret::getData() !== '';
+        } catch (Throwable) {
+            return false;
+        }
     }
 }

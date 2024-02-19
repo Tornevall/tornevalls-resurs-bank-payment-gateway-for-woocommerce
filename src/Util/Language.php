@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Lib\Locale\Language as EcomLanguage;
 use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
+use Throwable;
 
 /**
  * Utility methods for language-related things.
@@ -26,14 +27,20 @@ class Language
      */
     public static function getSiteLanguage(): EcomLanguage
     {
-        $language = strtolower(
-            string: StoreCountryCode::getCurrentStoreCountry() ?: self::getLanguageFromLocaleString(
-                locale: get_locale()
-            )
-        );
-        return EcomLanguage::tryFrom(
-            value: $language
-        ) ?? self::DEFAULT_LANGUAGE;
+        try {
+            $language = strtolower(
+                string: StoreCountryCode::getCurrentStoreCountry() ?: self::getLanguageFromLocaleString(
+                    locale: get_locale()
+                )
+            );
+            return EcomLanguage::tryFrom(
+                value: $language
+            ) ?? self::DEFAULT_LANGUAGE;
+        } catch (Throwable) {
+            // When internal checks from E-com fails due to other things than problematic settings,
+            // return default language.
+            return self::DEFAULT_LANGUAGE;
+        }
     }
 
     /**

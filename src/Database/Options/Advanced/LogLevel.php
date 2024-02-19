@@ -12,7 +12,6 @@ namespace Resursbank\Woocommerce\Database\Options\Advanced;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\OptionInterface;
-use ValueError;
 
 /**
  * Implementation of resursbank_log_level value in options table.
@@ -29,8 +28,6 @@ class LogLevel extends Option implements OptionInterface
 
     /**
      * Get configured LogLevel value.
-     *
-     * @throws ValueError
      */
     public static function getData(): EcomLogLevel
     {
