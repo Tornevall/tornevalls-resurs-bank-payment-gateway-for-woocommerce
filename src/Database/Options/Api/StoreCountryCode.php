@@ -31,6 +31,7 @@ class StoreCountryCode extends StringOption implements OptionInterface
 
     /**
      * Returning a country code based on the store used in current config.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getCurrentStoreCountry(): string
@@ -42,16 +43,17 @@ class StoreCountryCode extends StringOption implements OptionInterface
         }
 
         $currentStoreId = self::getCurrentStoreId();
+
         if ($currentStoreId === '') {
             return $return;
         }
 
-        return self::getAndSetStoreCountryCode(currentStoreId: $currentStoreId, defaultReturn: $return);
+        return self::getAndSetStoreCountryCode(
+            currentStoreId: $currentStoreId,
+            defaultReturn: $return
+        );
     }
 
-    /**
-     * @return string
-     */
     private static function getCurrentStoreId(): string
     {
         try {
@@ -62,24 +64,26 @@ class StoreCountryCode extends StringOption implements OptionInterface
     }
 
     /**
-     * @param string $currentStoreId
-     * @param string $defaultReturn
-     * @return string
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function getAndSetStoreCountryCode(string $currentStoreId, string $defaultReturn): string
     {
         try {
             $storeList = Repository::getStores();
+
             foreach ($storeList->getData() as $store) {
                 if ($store->id === $currentStoreId) {
-                    set_transient('resurs_merchant_country_code', $store->countryCode->value);
+                    set_transient(
+                        'resurs_merchant_country_code',
+                        $store->countryCode->value
+                    );
                     return $store->countryCode->value;
                 }
             }
         } catch (Throwable) {
             // Ignore errors.
         }
+
         return $defaultReturn;
     }
 }

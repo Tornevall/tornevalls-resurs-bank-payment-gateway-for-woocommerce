@@ -10,10 +10,10 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Config;
-use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Throwable;
+
 use function in_array;
 
 /**
@@ -38,7 +38,6 @@ class WooCommerce
 
     /**
      * Verify that the plugin has a valid setup ready.
-     * @return bool
      */
     public static function isValidSetup(): bool
     {
