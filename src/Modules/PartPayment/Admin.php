@@ -12,7 +12,6 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Module\AnnuityFactor\Widget\DurationByMonths;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Util\Admin as AdminUtil;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -28,11 +27,10 @@ class Admin
      */
     public static function setJs(): void
     {
-        if (
-            !Enabled::isEnabled() ||
-            !AdminUtil::isTab(tabName: RESURSBANK_MODULE_PREFIX)
-        ) {
-            return;
+        // Make sure the section for part payment handling are the only one that is allowed to load the script.
+        // It should be availabled regardless of its enabled state.
+        if (!AdminUtil::isSection(sectionName: 'partpayment')) {
+            return; // Exit if not in the correct section or tab.
         }
 
         /** @noinspection BadExceptionsProcessingInspection */

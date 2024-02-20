@@ -24,4 +24,14 @@ class Limit extends IntOption implements OptionInterface
     {
         return self::NAME_PREFIX . 'part_payment_limit';
     }
+
+    /**
+     * Default value for part payment limit, when nothing is yet configured.
+     * @return string|null
+     */
+    public static function getDefault(): ?string
+    {
+        $customerCountry = get_option('woocommerce_default_country');
+        return $customerCountry === 'FI' ? '15' : '150';
+    }
 }
