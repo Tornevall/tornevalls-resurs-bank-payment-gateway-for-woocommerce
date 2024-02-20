@@ -27,20 +27,29 @@ class Language
      */
     public static function getSiteLanguage(): EcomLanguage
     {
+        // Default language
+        $return = self::DEFAULT_LANGUAGE;
+
         try {
+            $storeCountryCode = StoreCountryCode::getCurrentStoreCountry();
+            $locale = get_locale();
+
+            // Try to retrieve the language from the country code, otherwise from the locale setting
             $language = strtolower(
-                string: StoreCountryCode::getCurrentStoreCountry() ?: self::getLanguageFromLocaleString(
-                    locale: get_locale()
+                string: $storeCountryCode ?: self::getLanguageFromLocaleString(
+                    locale: $locale
                 )
             );
-            return EcomLanguage::tryFrom(
+
+            // Try to convert to an EcomLanguage object
+            $return = EcomLanguage::tryFrom(
                 value: $language
             ) ?? self::DEFAULT_LANGUAGE;
         } catch (Throwable) {
-            // When internal checks from E-com fails due to other things than problematic settings,
-            // return default language.
-            return self::DEFAULT_LANGUAGE;
+            // If an error occurs, keep the default language
         }
+
+        return $return;
     }
 
     /**
