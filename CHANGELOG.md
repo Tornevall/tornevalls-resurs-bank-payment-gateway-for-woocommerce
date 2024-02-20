@@ -1,15 +1,20 @@
+# 1.0.18
+
+* [WOO-1285](https://resursbankplugins.atlassian.net/browse/WOO-1285) Typed static property Resursbank\\Ecom\\Config::$instance must not be accessed before initialization
+* [WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) locale_rework
+
 # 1.0.17
 
-[WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) Findings: fi/no translations for checkout
+* [WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) Findings: fi/no translations for checkout
 
 # 1.0.16
 
-[WOO-1282](https://resursbankplugins.atlassian.net/browse/WOO-1282) Disabla getAddress-wiget om vald butik <> "countryCode": "SE"
+* [WOO-1282](https://resursbankplugins.atlassian.net/browse/WOO-1282) Disabla getAddress-wiget om vald butik <> "countryCode": "SE"
 
 # 1.0.15
 
-[WOO-1279](https://resursbankplugins.atlassian.net/browse/WOO-1279) Verify the plugin with rcoplus branch and WooCommerce 8.5.0
-[WOO-1280](https://resursbankplugins.atlassian.net/browse/WOO-1280) Undefined array key warnings in checkout/wp-admin
+* [WOO-1279](https://resursbankplugins.atlassian.net/browse/WOO-1279) Verify the plugin with rcoplus branch and WooCommerce 8.5.0
+* [WOO-1280](https://resursbankplugins.atlassian.net/browse/WOO-1280) Undefined array key warnings in checkout/wp-admin
 
 # 1.0.14
 

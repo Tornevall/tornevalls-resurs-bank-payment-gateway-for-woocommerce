@@ -4,9 +4,9 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.4.3
 Requires PHP: 8.1
-WC Tested up to: 8.5.2
+WC Tested up to: 8.6.0
 WC requires at least: 7.6.0
-Stable tag: 1.0.17
+Stable tag: 1.0.18
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -58,18 +58,23 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.0.18
+
+* [WOO-1285](https://resursbankplugins.atlassian.net/browse/WOO-1285) Typed static property Resursbank\\Ecom\\Config::$instance must not be accessed before initialization
+* [WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) locale_rework
+
 # 1.0.17
 
-[WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) Findings: fi/no translations for checkout
+* [WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) Findings: fi/no translations for checkout
 
 # 1.0.16
 
-[WOO-1282](https://resursbankplugins.atlassian.net/browse/WOO-1282) Disabla getAddress-wiget om vald butik <> "countryCode": "SE"
+* [WOO-1282](https://resursbankplugins.atlassian.net/browse/WOO-1282) Disabla getAddress-wiget om vald butik <> "countryCode": "SE"
 
 # 1.0.15
 
-[WOO-1279](https://resursbankplugins.atlassian.net/browse/WOO-1279) Verify the plugin with rcoplus branch and WooCommerce 8.5.0
-[WOO-1280](https://resursbankplugins.atlassian.net/browse/WOO-1280) Undefined array key warnings in checkout/wp-admin
+* [WOO-1279](https://resursbankplugins.atlassian.net/browse/WOO-1279) Verify the plugin with rcoplus branch and WooCommerce 8.5.0
+* [WOO-1280](https://resursbankplugins.atlassian.net/browse/WOO-1280) Undefined array key warnings in checkout/wp-admin
 
 # 1.0.14
 
