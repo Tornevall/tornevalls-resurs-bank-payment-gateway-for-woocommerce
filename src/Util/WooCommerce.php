@@ -47,4 +47,14 @@ class WooCommerce
             return false;
         }
     }
+
+    public static function getEcomLocale(string $countryLocale): string
+    {
+        return match (strtolower(string: $countryLocale)) {
+            'se' => 'sv',
+            'dk' => 'da',
+            'nb', 'nn' => 'no',
+            default => $countryLocale
+        };
+    }
 }

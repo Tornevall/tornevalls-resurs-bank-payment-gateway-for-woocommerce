@@ -32,18 +32,22 @@ class Language
 
         try {
             $storeCountryCode = StoreCountryCode::getCurrentStoreCountry();
-            $locale = get_locale();
 
-            // Try to retrieve the language from the country code, otherwise from the locale setting
-            $language = strtolower(
-                string: $storeCountryCode ?: self::getLanguageFromLocaleString(
-                    locale: $locale
-                )
+            // Set default language locale.
+            $useLocale = self::getLanguageFromLocaleString(
+                locale: get_locale()
             );
+
+            // Use default locale if current store is not present or failing.
+            if ($storeCountryCode !== '') {
+                $useLocale = WooCommerce::getEcomLocale(
+                    countryLocale: $storeCountryCode
+                );
+            }
 
             // Try to convert to an EcomLanguage object
             $return = EcomLanguage::tryFrom(
-                value: $language
+                value: strtolower(string: $useLocale)
             ) ?? self::DEFAULT_LANGUAGE;
         } catch (Throwable) {
             // If an error occurs, keep the default language
