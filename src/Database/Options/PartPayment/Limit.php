@@ -27,7 +27,6 @@ class Limit extends IntOption implements OptionInterface
 
     /**
      * Default value for part payment limit, when nothing is yet configured.
-     * @return string|null
      */
     public static function getDefault(): ?string
     {
