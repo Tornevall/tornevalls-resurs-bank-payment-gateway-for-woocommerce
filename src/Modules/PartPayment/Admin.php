@@ -27,10 +27,8 @@ class Admin
      */
     public static function setJs(): void
     {
-        // Make sure the section for part payment handling are the only one that is allowed to load the script.
-        // It should be availabled regardless of its enabled state.
+        // End execution if not in 'partpayment' section. Allow script load regardless of enablement.
         if (!AdminUtil::isSection(sectionName: 'partpayment')) {
-            // Exit if not in the correct section or tab.
             return;
         }
 
