@@ -81,6 +81,7 @@ class Settings
             );
 
             Config::getCache()->invalidate();
+            delete_transient('resurs_merchant_country_code');
             Connection::setup();
         } catch (Throwable $e) {
             Log::error(

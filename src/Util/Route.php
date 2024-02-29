@@ -109,6 +109,8 @@ class Route
             is_string(value: $_GET[self::ROUTE_PARAM])
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
+        $userIsAdmin = self::userIsAdmin() ? self::userIsAdmin() : Admin::isAdmin();
+
         try {
             if (
                 in_array(
@@ -116,7 +118,7 @@ class Route
                     haystack: self::getAdminRoutes(),
                     strict: true
                 ) &&
-                !self::userIsAdmin()
+                !$userIsAdmin
             ) {
                 self::respondWithError(
                     exception: new HttpException(
