@@ -1,3 +1,7 @@
+# 1.0.19
+
+* [WOO-1288](https://resursbankplugins.atlassian.net/browse/WOO-1288) Partpayment infotext \(norwegian\)
+
 # 1.0.18
 
 * [WOO-1285](https://resursbankplugins.atlassian.net/browse/WOO-1285) Typed static property Resursbank\\Ecom\\Config::$instance must not be accessed before initialization
