@@ -109,7 +109,8 @@ class Route
             is_string(value: $_GET[self::ROUTE_PARAM])
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
-        $userIsAdmin = self::userIsAdmin() ? self::userIsAdmin() : Admin::isAdmin();
+        $userIsAdmin = self::userIsAdmin()
+            ?: Admin::isAdmin();
 
         try {
             if (
