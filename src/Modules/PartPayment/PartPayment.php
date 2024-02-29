@@ -86,7 +86,8 @@ class PartPayment
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
-            decimals: Currency::getConfiguredDecimalPoints()
+            decimals: Currency::getConfiguredDecimalPoints(),
+            displayInfoText: self::displayInfoText()
         );
 
         return self::$instance;
@@ -191,6 +192,15 @@ EX;
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
+    }
+
+    /**
+     * Programmatically control whether part payment info text should be shown or hidden. Default is to show.
+     */
+    private static function displayInfoText(): bool
+    {
+        $returnBool = apply_filters('display_part_payment_info_text', true);
+        return is_bool(value: $returnBool) ? $returnBool : false;
     }
 
     /**
