@@ -1,3 +1,7 @@
+# 1.0.20
+
+* [WOO-1289](https://resursbankplugins.atlassian.net/browse/WOO-1289) Payment information widget should have z-index 999999 \(linked issue for deploy in Woocommerce\)
+
 # 1.0.19
 
 * [WOO-1288](https://resursbankplugins.atlassian.net/browse/WOO-1288) Partpayment infotext \(norwegian\)
