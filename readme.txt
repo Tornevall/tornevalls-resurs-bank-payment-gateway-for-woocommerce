@@ -6,8 +6,8 @@ Tested up to: 6.4.3
 Requires PHP: 8.1
 WC Tested up to: 8.6.1
 WC requires at least: 7.6.0
-Plugin requires ecom: 1.0.7
-Stable tag: 1.0.20
+Plugin requires ecom: 1.0.8
+Stable tag: 1.0.21
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
