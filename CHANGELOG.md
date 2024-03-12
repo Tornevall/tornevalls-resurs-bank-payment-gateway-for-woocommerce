@@ -1,3 +1,7 @@
+# 1.0.21
+
+* [WOO-1290](https://resursbankplugins.atlassian.net/browse/WOO-1290) Mobile view for priceinfo may be broken depending on the width
+
 # 1.0.20
 
 * [WOO-1289](https://resursbankplugins.atlassian.net/browse/WOO-1289) Payment information widget should have z-index 999999 \(linked issue for deploy in Woocommerce\)
