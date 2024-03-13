@@ -10,14 +10,12 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer as CustomerModel;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
-use Resursbank\Ecom\Lib\Model\Payment\Metadata\EntryCollection;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -71,20 +69,22 @@ class Customer
     }
 
     /**
-     * Return customer user id as Resurs Bank Payment metadata.
+     * Return customer user id as a Resurs Bank Payment metadata entry.
      *
-     * @throws IllegalTypeException
+     * @throws IllegalValueException
      */
-    public static function getLoggedInCustomerIdMeta(WC_Order $order): ?Payment\Metadata
+    public static function getLoggedInCustomerIdMetaEntry(WC_Order $order): Payment\Metadata\Entry
     {
-        return (int) $order->get_user_id() > 0 ? new Payment\Metadata(
-            custom: new EntryCollection(data: [
-                new Entry(
-                    key: 'externalCustomerId',
-                    value: (string) $order->get_user_id()
-                ),
-            ])
-        ) : null;
+        if ((int) $order->get_user_id() > 0) {
+            return new Entry(
+                key: 'externalCustomerId',
+                value: (string) $order->get_user_id()
+            );
+        }
+
+        throw new IllegalValueException(
+            message: 'Attempting to fetch user id on customer who is not logged in!'
+        );
     }
 
     /**

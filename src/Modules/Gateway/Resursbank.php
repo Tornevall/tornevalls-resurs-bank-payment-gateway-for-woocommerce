@@ -344,10 +344,18 @@ class Resursbank extends WC_Payment_Gateway
             platformVersion: UserAgent::getWooCommerceVersion(),
             pluginVersion: UserAgent::getPluginVersion()
         );
-        $combinedData = $platformInformation->custom->toArray();
+        $data = $platformInformation->custom->toArray();
+
+        if ($order->get_user_id() > 0) {
+            try {
+                $data[] = Customer::getLoggedInCustomerIdMetaEntry(order: $order);
+            } catch (IllegalValueException $error) {
+                Log::error(error: $error);
+            }
+        }
 
         return new Payment\Metadata(
-            custom: new Payment\Metadata\EntryCollection(data: $combinedData)
+            custom: new Payment\Metadata\EntryCollection(data: $data)
         );
     }
 
