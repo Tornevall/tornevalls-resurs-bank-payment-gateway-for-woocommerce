@@ -31,7 +31,10 @@ class Language
         $return = self::DEFAULT_LANGUAGE;
 
         try {
-            $storeCountryCode = StoreCountryCode::getCurrentStoreCountry();
+            $storeCountryCode = apply_filters(
+                'resurs_store_country_code',
+                StoreCountryCode::getCurrentStoreCountry()
+            );
 
             // Set default language locale.
             $useLocale = self::getLanguageFromLocaleString(
