@@ -1,3 +1,7 @@
+# 1.0.22
+
+* [WOO-1292](https://resursbankplugins.atlassian.net/browse/WOO-1292) Norska basöversättningar för woocommerce
+
 # 1.0.21
 
 * [WOO-1290](https://resursbankplugins.atlassian.net/browse/WOO-1290) Mobile view for priceinfo may be broken depending on the width
