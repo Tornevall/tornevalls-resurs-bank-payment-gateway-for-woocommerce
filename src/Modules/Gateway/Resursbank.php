@@ -46,6 +46,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 use WC_Cart;
@@ -322,8 +323,39 @@ class Resursbank extends WC_Payment_Gateway
             orderLines: Order::getOrderLines(order: $order),
             orderReference: (string)$order->get_id(),
             customer: Customer::getCustomer(order: $order),
-            metadata: Customer::getLoggedInCustomerIdMeta(order: $order),
+            metadata: $this->getBaseMetadata(order: $order), //Customer::getLoggedInCustomerIdMeta(order: $order),
             options: $this->getOptions(order: $order)
+        );
+    }
+
+    /**
+     * Get metadata to attach to order.
+     *
+     * @param WC_Order $order
+     *
+     * @return Payment\Metadata
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     */
+    private function getBaseMetadata(WC_Order $order): Payment\Metadata
+    {
+        $platformInformation = PaymentRepository::getIntegrationInfoMetadata(
+            platform: 'WooCommerce',
+            platformVersion: UserAgent::getWooCommerceVersion(),
+            pluginVersion: UserAgent::getPluginVersion()
+        );
+        $data = $platformInformation->custom->toArray();
+
+        if ($order->get_user_id() > 0) {
+            try {
+                $data[] = Customer::getLoggedInCustomerIdMetaEntry(order: $order);
+            } catch (IllegalValueException $error) {
+                Log::error(error: $error);
+            }
+        }
+
+        return new Payment\Metadata(
+            custom: new Payment\Metadata\EntryCollection(data: $data)
         );
     }
 
