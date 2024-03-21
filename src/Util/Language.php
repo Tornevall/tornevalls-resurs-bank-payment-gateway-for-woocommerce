@@ -18,7 +18,7 @@ use Throwable;
  */
 class Language
 {
-    public const DEFAULT_LANGUAGE = EcomLanguage::en;
+    public const DEFAULT_LANGUAGE = EcomLanguage::EN;
 
     /**
      * Attempts to somewhat safely fetch the correct site language.
@@ -50,7 +50,7 @@ class Language
 
             // Try to convert to an EcomLanguage object
             $return = EcomLanguage::tryFrom(
-                value: strtolower(string: $useLocale)
+                value: strtoupper(string: $useLocale)
             ) ?? self::DEFAULT_LANGUAGE;
         } catch (Throwable) {
             // If an error occurs, keep the default language
