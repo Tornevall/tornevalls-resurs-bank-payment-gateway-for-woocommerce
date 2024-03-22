@@ -73,7 +73,6 @@ class Failure
     }
 
     /**
-     * @return string
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     private static function getOrderId(): string
