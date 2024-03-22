@@ -9,15 +9,24 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Order\Filter;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Lib\Model\Payment\TaskStatusDetails;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-
-use function is_string;
 
 /**
  * Event executed when failure page is reached.
@@ -45,43 +54,69 @@ class Failure
      */
     public static function exec(string $message = ''): string
     {
-        $orderId = $_GET['order_id'] ?? '';
+        $orderId = self::getOrderId();
 
-        if (!is_string(value: $orderId) || $orderId === '') {
+        if ($orderId === '') {
             return $message;
         }
 
-        $order = OrderManagement::getOrder(id: (int)$orderId);
-
-        /** @noinspection BadExceptionsProcessingInspection */
         try {
-            if ($order === null) {
-                throw new IllegalValueException(message: 'Missing order id.');
-            }
-
-            $paymentId = Metadata::getPaymentId(order: $order);
-            $task = Repository::getTaskStatusDetails(paymentId: $paymentId);
-            $payment = Repository::get(paymentId: $paymentId);
-
-            $message .= ' ';
-
-            if ($payment->isCreditDenied()) {
-                $message .= Translator::translate(
-                    phraseId: 'credit-denied-try-again'
-                );
-            } else {
-                $message .= $task->completed ?
-                    Translator::translate(
-                        phraseId: 'payment-failed-try-again'
-                    ) :
-                    Translator::translate(
-                        phraseId: 'payment-cancelled-try-again'
-                    );
-            }
+            $message = self::appendPaymentFailureMessage(
+                message: $message,
+                orderId: $orderId
+            );
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
 
         return $message;
+    }
+
+    private static function getOrderId(): string
+    {
+        return $_GET['order_id'] ?? '';
+    }
+
+    /**
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     */
+    private static function appendPaymentFailureMessage(string $message, string $orderId): string
+    {
+        $order = OrderManagement::getOrder(id: (int)$orderId);
+
+        if ($order === null) {
+            throw new IllegalValueException(message: 'Missing order id.');
+        }
+
+        $paymentId = Metadata::getPaymentId(order: $order);
+        $task = Repository::getTaskStatusDetails(paymentId: $paymentId);
+        $payment = Repository::get(paymentId: $paymentId);
+
+        return $message . ' ' . self::getFailureMessage(
+            payment: $payment,
+            task: $task
+        );
+    }
+
+    private static function getFailureMessage(
+        Payment $payment,
+        TaskStatusDetails $task
+    ): string {
+        if ($payment->isCreditDenied()) {
+            return Translator::translate(phraseId: 'credit-denied-try-again');
+        }
+
+        return $task->completed ?
+            Translator::translate(phraseId: 'payment-failed-try-again') :
+            Translator::translate(phraseId: 'payment-cancelled-try-again');
     }
 }
