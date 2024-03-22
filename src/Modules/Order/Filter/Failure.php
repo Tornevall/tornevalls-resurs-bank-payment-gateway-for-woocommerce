@@ -61,11 +61,23 @@ class Failure
 
             $paymentId = Metadata::getPaymentId(order: $order);
             $task = Repository::getTaskStatusDetails(paymentId: $paymentId);
+            $payment = Repository::get(paymentId: $paymentId);
 
             $message .= ' ';
-            $message .= $task->completed ?
-                Translator::translate(phraseId: 'payment-failed-try-again') :
-                Translator::translate(phraseId: 'payment-cancelled-try-again');
+
+            if ($payment->isCreditDenied()) {
+                $message .= Translator::translate(
+                    phraseId: 'credit-denied-try-again'
+                );
+            } else {
+                $message .= $task->completed ?
+                    Translator::translate(
+                        phraseId: 'payment-failed-try-again'
+                    ) :
+                    Translator::translate(
+                        phraseId: 'payment-cancelled-try-again'
+                    );
+            }
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
