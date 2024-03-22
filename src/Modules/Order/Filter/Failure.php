@@ -72,6 +72,10 @@ class Failure
         return $message;
     }
 
+    /**
+     * @return string
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
     private static function getOrderId(): string
     {
         return $_GET['order_id'] ?? '';
