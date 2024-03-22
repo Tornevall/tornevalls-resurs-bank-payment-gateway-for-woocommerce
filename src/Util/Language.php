@@ -50,7 +50,7 @@ class Language
 
             // Try to convert to an EcomLanguage object
             $return = EcomLanguage::tryFrom(
-                value: strtoupper(string: $useLocale)
+                value: strtolower(string: $useLocale)
             ) ?? self::DEFAULT_LANGUAGE;
         } catch (Throwable) {
             // If an error occurs, keep the default language
