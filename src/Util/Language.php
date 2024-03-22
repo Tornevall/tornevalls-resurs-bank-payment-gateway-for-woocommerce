@@ -18,7 +18,7 @@ use Throwable;
  */
 class Language
 {
-    public const DEFAULT_LANGUAGE = EcomLanguage::en;
+    public const DEFAULT_LANGUAGE = EcomLanguage::EN;
 
     /**
      * Attempts to somewhat safely fetch the correct site language.
