@@ -85,15 +85,6 @@ class PaymentInformation
     }
 
     /**
-     * @return string
-     */
-    private static function getCssLeftover(): string
-    {
-        return ".rb-pi table tr:nth-child(even) {background-color: #006464;}
-.rb-pi table tr:nth-child(odd) {background-color: #009b96;}";
-    }
-
-    /**
      * Outputs the actual widget HTML
      */
     public function getWidget(): void
