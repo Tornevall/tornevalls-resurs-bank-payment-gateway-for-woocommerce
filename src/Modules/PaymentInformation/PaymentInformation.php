@@ -80,7 +80,7 @@ class PaymentInformation
         }
 
         echo '<style>' .
-            Sanitize::sanitizeHtml(html: self::getCssLeftover()) .
+            Sanitize::sanitizeHtml(html: self::getCss()) .
             '</style>';
     }
 
@@ -92,7 +92,10 @@ class PaymentInformation
         echo Sanitize::sanitizeHtml(html: $this->widget->content);
     }
 
-    private static function getCssLeftover(): string
+    /**
+     * Required by css styling for some unknown reason, to make the logo correctly placed.
+     */
+    private static function getCss(): string
     {
         return ".rb-pi table tr:nth-child(even) {background-color: #006464;}
 .rb-pi table tr:nth-child(odd) {background-color: #009b96;}";
