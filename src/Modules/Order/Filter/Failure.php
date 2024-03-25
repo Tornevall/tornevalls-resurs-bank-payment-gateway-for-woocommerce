@@ -113,10 +113,6 @@ class Failure
 
     /**
      * Get the failure message based on either TaskStatusDetails or RejectedReasons.
-     *
-     * @param Payment $payment
-     * @param TaskStatusDetails $task
-     * @return string
      */
     private static function getFailureMessage(
         Payment $payment,
