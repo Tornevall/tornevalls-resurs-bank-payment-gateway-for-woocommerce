@@ -80,8 +80,17 @@ class PaymentInformation
         }
 
         echo '<style>' .
-            Sanitize::sanitizeHtml(html: EcomPaymentInformation::getCss()) .
+            Sanitize::sanitizeHtml(html: self::getCssLeftover()) .
             '</style>';
+    }
+
+    /**
+     * @return string
+     */
+    private static function getCssLeftover(): string
+    {
+        return ".rb-pi table tr:nth-child(even) {background-color: #006464;}
+.rb-pi table tr:nth-child(odd) {background-color: #009b96;}";
     }
 
     /**
@@ -90,5 +99,11 @@ class PaymentInformation
     public function getWidget(): void
     {
         echo Sanitize::sanitizeHtml(html: $this->widget->content);
+    }
+
+    private static function getCssLeftover(): string
+    {
+        return ".rb-pi table tr:nth-child(even) {background-color: #006464;}
+.rb-pi table tr:nth-child(odd) {background-color: #009b96;}";
     }
 }
