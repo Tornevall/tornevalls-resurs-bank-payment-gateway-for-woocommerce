@@ -94,7 +94,6 @@ class PaymentInformation
 
     /**
      * Required by css styling for some unknown reason, to make the logo correctly placed.
-     * @return string
      */
     private static function getCssLeftover(): string
     {
