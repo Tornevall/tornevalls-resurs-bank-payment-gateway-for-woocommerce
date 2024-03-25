@@ -20,6 +20,7 @@ use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
 use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
 use Resursbank\Woocommerce\Modules\Order\Status;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -132,7 +133,7 @@ class Callback
                     } catch (Throwable $e) {
                         // In case translations are lost in ecom transitions, we will
                         // push out the error message instead for which the phrase id will
-                        // be displayed instead. If this occurs and we do not do this,
+                        // be displayed instead. If this occurs, and we do not do this,
                         // callbacks will be rejected with an error instead.
                         $order->add_order_note(note: $e->getMessage());
                     }
@@ -147,6 +148,7 @@ class Callback
      * Check that order is ready for callbacks.
      *
      * @throws HttpException
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     private static function checkIfReadyForCallback(WC_Order $order): void
     {
@@ -158,13 +160,24 @@ class Callback
         }
 
         $timeSince = time() - $dateCreated->format(format: 'U');
+        $isRejected = false;
+
+        try {
+            $extendedOrderInfo = OrderManagement::getPayment(order: $order);
+            $isRejected = $extendedOrderInfo->isRejected();
+        } catch (Throwable) {
+        }
 
         if (
             $timeSince < self::MINIMUM_RESPONSE_DELAY &&
             !Metadata::isThankYouTriggered(order: $order)
         ) {
             throw new HttpException(
-                message: 'Order not ready for callbacks yet',
+                message: sprintf(
+                    'Order %s not ready for callbacks yet%s',
+                    $order->get_id(),
+                    $isRejected ? ' - Payment was rejected by Resurs.' : '.'
+                ),
                 code: 503
             );
         }
