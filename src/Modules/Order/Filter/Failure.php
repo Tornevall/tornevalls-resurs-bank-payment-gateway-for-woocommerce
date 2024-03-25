@@ -65,6 +65,7 @@ class Failure
                 message: $message,
                 orderId: $orderId
             );
+            Log::debug(message: sprintf('Order %s: %s.', $orderId, $message));
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
