@@ -86,6 +86,8 @@ class PaymentInformation
 
     /**
      * Outputs the actual widget HTML
+     *
+     * @noinspection PhpUnused
      */
     public function getWidget(): void
     {
