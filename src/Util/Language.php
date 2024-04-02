@@ -18,7 +18,7 @@ use Throwable;
  */
 class Language
 {
-    public const DEFAULT_LANGUAGE = EcomLanguage::EN;
+    public const DEFAULT_LANGUAGE = 'en';
 
     /**
      * Attempts to somewhat safely fetch the correct site language.
@@ -27,9 +27,6 @@ class Language
      */
     public static function getSiteLanguage(): EcomLanguage
     {
-        // Default language
-        $return = self::DEFAULT_LANGUAGE;
-
         try {
             $storeCountryCode = apply_filters(
                 'resurs_store_country_code',
@@ -51,9 +48,10 @@ class Language
             // Try to convert to an EcomLanguage object
             $return = EcomLanguage::tryFrom(
                 value: strtolower(string: $useLocale)
-            ) ?? self::DEFAULT_LANGUAGE;
+            ) ?? EcomLanguage::EN;
         } catch (Throwable) {
             // If an error occurs, keep the default language
+            $return = EcomLanguage::EN;
         }
 
         return $return;
