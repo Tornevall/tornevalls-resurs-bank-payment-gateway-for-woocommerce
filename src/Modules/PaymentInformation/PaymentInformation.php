@@ -79,9 +79,9 @@ class PaymentInformation
             return;
         }
 
-        echo '<style>' .
+/*        echo '<style>' .
             Sanitize::sanitizeHtml(html: self::getCss()) .
-            '</style>';
+            '</style>';*/
     }
 
     /**
@@ -91,7 +91,7 @@ class PaymentInformation
      */
     public function getWidget(): void
     {
-        echo Sanitize::sanitizeHtml(html: $this->widget->content);
+        echo $this->widget->content;
     }
 
     /**
