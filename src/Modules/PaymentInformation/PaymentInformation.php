@@ -91,7 +91,7 @@ class PaymentInformation
      */
     public function getWidget(): void
     {
-        echo $this->widget->content;
+        echo Sanitize::sanitizeHtml(html: $this->widget->content);
     }
 
     /**
