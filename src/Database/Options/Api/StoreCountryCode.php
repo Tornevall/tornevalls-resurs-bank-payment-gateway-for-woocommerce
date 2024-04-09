@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options\Api;
 
+use Resursbank\Ecom\Module\Store\Models\Store;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
@@ -71,6 +72,7 @@ class StoreCountryCode extends StringOption implements OptionInterface
         try {
             $storeList = Repository::getStores();
 
+            /** @var Store $store */
             foreach ($storeList->getData() as $store) {
                 if ($store->id === $currentStoreId) {
                     set_transient(

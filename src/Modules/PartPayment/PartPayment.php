@@ -147,10 +147,6 @@ class PartPayment
      */
     public static function setCss(): void
     {
-        if (!self::isEnabled()) {
-            return;
-        }
-
         try {
             $css = self::getWidget()->css;
 
