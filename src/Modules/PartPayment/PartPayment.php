@@ -62,6 +62,7 @@ class PartPayment
      * @throws ReflectionException
      * @throws TranslationException
      * @throws ValidationException
+     * @throws Throwable
      */
     public static function getWidget(): EcomPartPayment
     {
