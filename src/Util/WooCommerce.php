@@ -48,6 +48,14 @@ class WooCommerce
         }
     }
 
+    /**
+     * Fast way to get a cart total from WC.
+     */
+    public static function getCartTotals(): float
+    {
+        return (float) (WC()->cart?->get_totals()['total'] ?? 0.0);
+    }
+
     public static function getEcomLocale(string $countryLocale): string
     {
         return match (strtolower(string: $countryLocale)) {
