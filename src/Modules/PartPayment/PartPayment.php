@@ -34,6 +34,7 @@ use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Product;
 
@@ -79,11 +80,23 @@ class PartPayment
             throw new IllegalTypeException(message: 'Payment method is null');
         }
 
+        try {
+            // Fetch a calculated price from either a product or the cart.
+            $priceData = is_checkout()
+                ? WooCommerce::getCartTotals()
+                : (float) self::getProduct()?->get_price();
+        } catch (Throwable) {
+            // If fetching from getProduct fails or returns null, get data from the cart
+            $priceData = WooCommerce::getCartTotals();
+        }
+
+        // Try to find the product before rendering stuff.
+
         self::$instance = new EcomPartPayment(
             storeId: StoreId::getData(),
             paymentMethod: $paymentMethod,
             months: (int)Period::getData(),
-            amount: (float)self::getProduct()->get_price(),
+            amount: $priceData,
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
             apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),

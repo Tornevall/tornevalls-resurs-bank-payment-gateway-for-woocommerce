@@ -116,6 +116,10 @@ class Resursbank extends WC_Payment_Gateway
                 amount: $this->get_order_total()
             );
             echo $usp->content;
+        } catch (TranslationException $error) {
+            // Translation errors should rather go as debug messages since we
+            // translate with english fallbacks.
+            Log::debug(message: $error->getMessage());
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
