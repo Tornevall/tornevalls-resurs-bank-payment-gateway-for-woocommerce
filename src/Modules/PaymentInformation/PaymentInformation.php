@@ -72,6 +72,8 @@ class PaymentInformation
 
     /**
      * Sets CSS in header if the current page is the order view.
+     *
+     * @throws EmptyValueException
      */
     public static function setCss(): void
     {
@@ -80,7 +82,7 @@ class PaymentInformation
         }
 
         echo '<style>' .
-            Sanitize::sanitizeHtml(html: self::getCss()) .
+            Sanitize::sanitizeHtml(html: EcomPaymentInformation::getCss()) .
             '</style>';
     }
 
@@ -92,14 +94,5 @@ class PaymentInformation
     public function getWidget(): void
     {
         echo Sanitize::sanitizeHtml(html: $this->widget->content);
-    }
-
-    /**
-     * Required by css styling for some unknown reason, to make the logo correctly placed.
-     */
-    private static function getCss(): string
-    {
-        return ".rb-pi table tr:nth-child(even) {background-color: #006464;}
-.rb-pi table tr:nth-child(odd) {background-color: #009b96;}";
     }
 }
