@@ -7,7 +7,7 @@
  * WC requires at least: 7.6.0
  * Plugin requires ecom: 1.0.8
  * Requires PHP: 8.1
- * Version: 1.0.23
+ * Version: 1.0.27
  * Author: Resurs Bank AB
  * Author URI: https://test.resurs.com/docs/display/ecom/WooCommerce
  * Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce

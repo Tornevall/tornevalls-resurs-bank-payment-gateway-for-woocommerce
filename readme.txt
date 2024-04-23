@@ -4,10 +4,10 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.4.3
 Requires PHP: 8.1
-WC Tested up to: 8.6.1
+WC Tested up to: 8.8.2
 WC requires at least: 7.6.0
 Plugin requires ecom: 2.0.0
-Stable tag: 1.0.23
+Stable tag: 1.0.27
 Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -58,6 +58,18 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.27
+
+* [WOO-1302](https://resursbankplugins.atlassian.net/browse/WOO-1302) Implement revised changes from Payment Information module (ecom2-v2)
+
+# 1.0.24 - 1.0.26
+
+* [WOO-1305](https://resursbankplugins.atlassian.net/browse/WOO-1305) Finnish translation for part payment info.
+
+# 1.0.23
+
+* Only tag change.
 
 # 1.0.23
 

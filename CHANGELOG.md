@@ -1,3 +1,11 @@
+# 1.0.27
+
+* [WOO-1302](https://resursbankplugins.atlassian.net/browse/WOO-1302) Implement revised changes from Payment Information module (ecom2-v2)
+
+# 1.0.24 - 1.0.26
+
+* [WOO-1305](https://resursbankplugins.atlassian.net/browse/WOO-1305) Finnish translation for part payment info.
+
 # 1.0.23
 
 * Only tag change.
