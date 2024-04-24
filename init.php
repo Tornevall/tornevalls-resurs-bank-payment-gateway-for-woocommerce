@@ -9,8 +9,8 @@
  * Requires PHP: 8.1
  * Version: 1.0.27
  * Author: Resurs Bank AB
- * Author URI: https://test.resurs.com/docs/display/ecom/WooCommerce
- * Plugin URI: https://test.resurs.com/docs/display/ecom/WooCommerce
+ * Author URI: https://developers.resurs.com/
+ * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
  * Text Domain: resurs-bank-payments-for-woocommerce
  *
  * @noinspection PhpCSValidationInspection
