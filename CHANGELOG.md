@@ -1,6 +1,16 @@
-# 1.0.27
+# 1.0.27 (ECom2-2.x)
 
-* [WOO-1302](https://resursbankplugins.atlassian.net/browse/WOO-1302) Implement revised changes from Payment Information module (ecom2-v2)
+* [WOO-1291](https://resursbankplugins.atlassian.net/browse/WOO-1291) Add plugin and platform information to the metadata
+* [WOO-1293](https://resursbankplugins.atlassian.net/browse/WOO-1293) Verification of woo with ECP-636
+* [WOO-1295](https://resursbankplugins.atlassian.net/browse/WOO-1295) Complete credit-denied
+* [WOO-1299](https://resursbankplugins.atlassian.net/browse/WOO-1299) Add an X-close-modal at payment method level in checkout area
+* [WOO-1302](https://resursbankplugins.atlassian.net/browse/WOO-1302) Implement revised changes from Payment Information module \(ecom2-v2\)
+* [WOO-1305](https://resursbankplugins.atlassian.net/browse/WOO-1305) Release of single patch from  ECP-745 \(finnish translation for partpay string\)
+* [WOO-1294](https://resursbankplugins.atlassian.net/browse/WOO-1294) Ecom2 v2.0 locale/language changes
+* [WOO-1297](https://resursbankplugins.atlassian.net/browse/WOO-1297) Testing callbacks fails
+* [WOO-1298](https://resursbankplugins.atlassian.net/browse/WOO-1298) Layout issues in cost info
+* [WOO-1300](https://resursbankplugins.atlassian.net/browse/WOO-1300) Annuity after reload issues
+* [WOO-1304](https://resursbankplugins.atlassian.net/browse/WOO-1304) Read more/Priceinfovy i kassa: Unable to fetch product, #0 \[...\]PartPayment.php\(83\)
 
 # 1.0.24 - 1.0.26
 
