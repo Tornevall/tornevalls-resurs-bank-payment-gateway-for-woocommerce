@@ -1,3 +1,7 @@
+# 1.0.28
+
+* Translation hotfix.
+
 # 1.0.27 (ECom2-2.x)
 
 * [WOO-1291](https://resursbankplugins.atlassian.net/browse/WOO-1291) Add plugin and platform information to the metadata
