@@ -30,7 +30,7 @@ Configuration are made through the admin panel.
 
 ### Where can I get more information about this plugin? ###
 
-Find out more in about the plugin [in our documentation](https://test.resurs.com/docs/display/ecom/Resurs+Merchant+API+2.0+for+WooCommerce).
+Find out more in about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/).
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar).
 
