@@ -59,6 +59,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.0.31
+
+* [WOO-1306](https://resursbankplugins.atlassian.net/browse/WOO-1306) Payment methods by country limit
+
 # 1.0.29 - 1.0.30
 
 * Issues eventually discovered with composer.json
