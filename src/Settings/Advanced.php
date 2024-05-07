@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Util\Translator;
 
@@ -53,6 +54,7 @@ class Advanced
                 'invalidate_cache' => self::getInvalidateCacheButton(),
                 'get_address_enabled' => self::getGetAddressEnabled(),
                 'force_payment_method_sort_order' => self::getForcePaymentMethodSortOrder(),
+                'set_method_country_restriction' => self::setMethodCountryRestriction(),
                 'api_timeout' => self::getApiTimeout()
             ]
         ];
@@ -240,10 +242,26 @@ class Advanced
     {
         return [
             'id' => ForcePaymentMethodSortOrder::getName(),
-            'title' => 'Sort payment methods according to admin',
+            'title' => 'Restrict payment methods to API country',
             'type' => 'checkbox',
             'desc' => __('Yes'),
             'default' => ForcePaymentMethodSortOrder::getDefault()
+        ];
+    }
+
+    /**
+     * Make payment methods disappear when not in correct country.
+     *
+     * @return array
+     */
+    private static function setMethodCountryRestriction(): array
+    {
+        return [
+            'id' => SetMethodCountryRestriction::getName(),
+            'title' => 'Sort payment methods according to admin',
+            'type' => 'checkbox',
+            'desc' => __('Yes'),
+            'default' => SetMethodCountryRestriction::getDefault()
         ];
     }
 }

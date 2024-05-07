@@ -37,7 +37,9 @@ use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Participa
 use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
+use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -52,7 +54,6 @@ use Throwable;
 use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
-
 use function get_option;
 
 /**
@@ -154,8 +155,8 @@ class Resursbank extends WC_Payment_Gateway
         return [
             'result' => 'success',
             'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                order: $order
-            ),
+                    order: $order
+                ),
         ];
     }
 
@@ -179,10 +180,25 @@ class Resursbank extends WC_Payment_Gateway
             return true;
         }
 
-        return $this->validatePurchaseLimit() && match (WcSession::getCustomerType()) {
+        return $this->validatePurchaseLimit() &&
+            $this->validateCustomerCountry() &&
+            match (WcSession::getCustomerType()) {
                 CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
                 CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
-        };
+            };
+    }
+
+    /**
+     * Customer country validation.
+     *
+     * @return bool
+     */
+    public function validateCustomerCountry(): bool
+    {
+        // If country restrictions are enabled, we will validate that the customer is located in the
+        // same country as the API based country.
+        return !(SetMethodCountryRestriction::getData()) ||
+            (WC()?->cart && WC()?->customer?->get_billing_country() === StoreCountryCode::getCurrentStoreCountry());
     }
 
     /**
@@ -229,9 +245,9 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         if (
-                WcSession::getCustomerType() === CustomerType::LEGAL &&
-                $this->method->enabledForLegalCustomer &&
-                empty($billingCompanyGovernmentId)
+            WcSession::getCustomerType() === CustomerType::LEGAL &&
+            $this->method->enabledForLegalCustomer &&
+            empty($billingCompanyGovernmentId)
         ) {
             // Using WooCommerce phrases (copied) to show woocommerce default, since this is how
             // WooCommerce displays errors, with proper translations.
@@ -444,8 +460,8 @@ class Resursbank extends WC_Payment_Gateway
         // TTL default from WooCommerce. If stock reservations is enabled and over 0, we should use that value instead
         // of our default.
         $stockEnabled = ((string)get_option(
-            'woocommerce_manage_stock'
-        ) === 'yes');
+                'woocommerce_manage_stock'
+            ) === 'yes');
         $holdStockMinutes = (int)get_option('woocommerce_hold_stock_minutes');
 
         return new Options(

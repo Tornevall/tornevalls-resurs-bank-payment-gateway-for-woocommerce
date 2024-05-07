@@ -109,8 +109,11 @@ class Connection
             // If admin_notices are available we can however at least display such errors.
             if (Admin::isAdmin()) {
                 add_action('admin_notices', static function () use ($e): void {
+                    // As we're eventually also catching other errors at this point, we will also show a stack trace
+                    // for those who sees it as file loggers may miss it.
                     echo wp_kses(
-                        '<div class="notice notice-error"><p>Resurs Bank Error: ' . $e->getMessage() . '</p></div>',
+                        '<div class="notice notice-error"><p>Resurs Bank Error: ' . $e->getMessage() .
+                        ' (<pre>' . $e->getTraceAsString() . '</pre>)' . '</p></div>',
                         ['div' => ['class' => true]]
                     );
                 });
@@ -165,13 +168,32 @@ class Connection
             $result = new FileLogger(path: LogDir::getData());
         } catch (Throwable $e) {
             if (class_exists(class: WC_Logger::class)) {
-                (new WC_Logger())->critical(
+                self::getWcLoggerCritical(
                     message: 'Resurs Bank: ' . $e->getMessage()
                 );
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Make sure we only log our messages if WP/WC allows it.
+     *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     */
+    public static function getWcLoggerCritical(string $message): void
+    {
+        try {
+            // If WordPress/WooCommerce cannot handle their own logging errors when we attempt to log critical
+            // messages, we suppress them here.
+            //
+            // We've observed this issue with PHP 8.3 and errors that occurs in `class-wp-filesystem-ftpext.php`
+            // for where errors are only shown on screen and never logged. Improved error handling reveals previously
+            // unnoticed logging issues may be the problem.
+            (new WC_Logger())->critical(message: $message);
+        } catch (Throwable) {
+        }
     }
 
     /**

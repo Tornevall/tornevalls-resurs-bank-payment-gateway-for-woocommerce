@@ -71,13 +71,23 @@ class PartPayment
             return self::$instance;
         }
 
+        $paymentMethodSet = PaymentMethod::getData();
+
+        if ($paymentMethodSet === '') {
+            throw new EmptyValueException(
+                message: 'Payment method is not properly configured. Part payment view can not be used.'
+            );
+        }
+
         $paymentMethod = Repository::getById(
             storeId: StoreId::getData(),
             paymentMethodId: PaymentMethod::getData()
         );
 
         if ($paymentMethod === null) {
-            throw new IllegalTypeException(message: 'Payment method is null');
+            throw new IllegalTypeException(
+                message: "Payment method $paymentMethodSet not found."
+            );
         }
 
         try {
