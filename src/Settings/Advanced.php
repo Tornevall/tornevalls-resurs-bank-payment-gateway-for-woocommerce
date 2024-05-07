@@ -242,7 +242,7 @@ class Advanced
     {
         return [
             'id' => ForcePaymentMethodSortOrder::getName(),
-            'title' => 'Restrict payment methods to API country',
+            'title' => 'Sort payment methods according to admin',
             'type' => 'checkbox',
             'desc' => __('Yes'),
             'default' => ForcePaymentMethodSortOrder::getDefault()
@@ -258,7 +258,7 @@ class Advanced
     {
         return [
             'id' => SetMethodCountryRestriction::getName(),
-            'title' => 'Sort payment methods according to admin',
+            'title' => 'Restrict payment methods display in checkout to API country',
             'type' => 'checkbox',
             'desc' => __('Yes'),
             'default' => SetMethodCountryRestriction::getDefault()
