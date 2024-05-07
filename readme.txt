@@ -7,7 +7,7 @@ Requires PHP: 8.1
 WC Tested up to: 8.8.2
 WC requires at least: 7.6.0
 Plugin requires ecom: 2.0.3
-Stable tag: 1.0.30
+Stable tag: 1.0.31
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -25,7 +25,7 @@ Find out more in about the plugin [in our documentation](https://developers.resu
 
 = System Requirements =
 
-* **Required**: PHP: 8.1 or later.
+* **Required**: PHP 8.1 or higher.
 * **Required**: WooCommerce: At least v7.6.0
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
 * **Required**: CURL (php-curl) with **CURLAUTH_BEARER**.
@@ -61,7 +61,7 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 # 1.0.29 - 1.0.30
 
-* Issues with composer.json solved.
+* Issues eventually discovered with composer.json
 
 # 1.0.28
 

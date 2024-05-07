@@ -1,3 +1,7 @@
+# 1.0.29 - 1.0.39
+
+* Issues eventually discovered with composer.json
+
 # 1.0.28
 
 * Translation hotfix.
