@@ -1,6 +1,6 @@
 # 1.0.29 - 1.0.39
 
-* Issued eventually discovered with composer.json
+* Issues eventually discovered with composer.json
 
 # 1.0.28
 

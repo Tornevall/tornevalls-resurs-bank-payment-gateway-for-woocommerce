@@ -61,7 +61,7 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 # 1.0.29 - 1.0.30
 
-* Issues with composer.json solved.
+* Issues eventually discovered with composer.json
 
 # 1.0.28
 
