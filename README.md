@@ -16,7 +16,7 @@ you tend to handle it as an upgrade from the older plugin (that currently is at 
 
 ## REQUIREMENTS AND SECURITY CONSIDERATIONS ##
 
-* **Required**: PHP: Preferrably 8.1 or 8.2.
+* **Required**: PHP 8.1 or higher.
 * **Required**: WooCommerce: At least v7.6.0
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
 * **Required**: CURL (php-curl).
