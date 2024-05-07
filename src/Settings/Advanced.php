@@ -123,7 +123,7 @@ class Advanced
         return [
             'id' => ApiTimeout::getName(),
             'type' => 'text',
-            'title' => 'API Timeout',
+            'title' => 'API Timeout (in seconds)',
             'default' => ApiTimeout::getDefault()
         ];
     }
