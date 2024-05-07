@@ -1,4 +1,8 @@
-# 1.0.29 - 1.0.39
+# 1.0.31
+
+* [WOO-1306](https://resursbankplugins.atlassian.net/browse/WOO-1306) Payment methods by country limit
+
+# 1.0.29 - 1.0.30
 
 * Issues eventually discovered with composer.json
 
