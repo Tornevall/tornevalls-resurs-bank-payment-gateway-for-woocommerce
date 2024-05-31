@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Address;
@@ -29,8 +32,11 @@ class Customer
     /**
      * Retrieve Customer object for payment creation.
      *
-     * @throws IllegalValueException
+     * @throws AttributeCombinationException
      * @throws IllegalCharsetException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
      */
     public static function getCustomer(WC_Order $order): CustomerModel
     {
@@ -62,8 +68,8 @@ class Customer
                 address: $address
             ),
             deviceInfo: new DeviceInfo(
-                ip: $_SERVER['REMOTE_ADDR'] ?? '',
-                userAgent: $_SERVER['HTTP_USER_AGENT'] ?? ''
+                ip: DeviceInfo::getIp(),
+                userAgent: DeviceInfo::getUserAgent()
             )
         );
     }
@@ -72,6 +78,9 @@ class Customer
      * Return customer user id as a Resurs Bank Payment metadata entry.
      *
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws AttributeCombinationException
      */
     public static function getLoggedInCustomerIdMetaEntry(WC_Order $order): Payment\Metadata\Entry
     {
