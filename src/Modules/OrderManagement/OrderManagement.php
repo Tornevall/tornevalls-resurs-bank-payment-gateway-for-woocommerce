@@ -163,13 +163,33 @@ class OrderManagement
         $payment = self::getPayment(order: $order);
 
         return
-            self::canCapture(order: $order) ||
+        !self::isFrozen(order: $order) &&
+        (self::canCapture(order: $order) ||
             self::canCancel(order: $order) ||
             (
                 $payment->isCancelled() &&
                 $payment->application->approvedCreditLimit > 0.0
-            )
-        ;
+            ));
+    }
+
+    /**
+     * Check if order is FROZEN.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    public static function isFrozen(WC_Order $order): bool
+    {
+        $payment = self::getPayment(order: $order);
+        return $payment->isFrozen();
     }
 
     /**
