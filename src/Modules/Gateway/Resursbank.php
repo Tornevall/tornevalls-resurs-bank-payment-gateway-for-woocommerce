@@ -14,6 +14,7 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
@@ -314,19 +315,22 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
+     * @param WC_Order $order
+     * @return Payment
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
+     * @throws FilesystemException
      * @throws IllegalCharsetException
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws ValidationException
-     * @throws FilesystemException
      * @throws TranslationException
+     * @throws ValidationException
+     * @throws AttributeCombinationException
      */
     private function createPayment(
         WC_Order $order
@@ -354,8 +358,11 @@ class Resursbank extends WC_Payment_Gateway
      * @param WC_Order $order
      *
      * @return Payment\Metadata
+     * @throws AttributeCombinationException
      * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
      */
     private function getBaseMetadata(WC_Order $order): Payment\Metadata
     {
@@ -453,7 +460,12 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
+     * @param WC_Order $order
+     * @return Options
+     * @throws AttributeCombinationException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
      */
     private function getOptions(WC_Order $order): Options
     {

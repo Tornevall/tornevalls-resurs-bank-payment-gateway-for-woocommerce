@@ -11,7 +11,20 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\PaymentActionException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
+use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -33,6 +46,19 @@ class UpdateOrder
     private static bool $modificationError = false;
 
     /**
+     * @throws HttpException
+     * @throws Throwable
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws PaymentActionException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
      */
@@ -54,6 +80,13 @@ class UpdateOrder
             $payment = Repository::get(
                 paymentId: Metadata::getPaymentId(order: $order)
             );
+
+            // Resurs will not be able to modify FROZEN orders, so they must be ACCEPTED.
+            if ($payment->status !== Status::ACCEPTED) {
+                throw new HttpException(
+                    message: 'Invalid payment status: ' . $payment->status->value
+                );
+            }
 
             $handledAmount = $payment->order->authorizedAmount + $payment->order->capturedAmount;
 
@@ -82,7 +115,8 @@ class UpdateOrder
         OrderManagement::logActionError(
             action: ActionType::MODIFY_ORDER,
             order: $order,
-            error: $error
+            error: $error,
+            reason: $error->getMessage()
         );
 
         self::$modificationError = true;
