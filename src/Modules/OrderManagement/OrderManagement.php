@@ -161,15 +161,16 @@ class OrderManagement
     public static function canEdit(WC_Order $order): bool
     {
         $payment = self::getPayment(order: $order);
+        $frozenOrRejected = (self::isFrozen(order: $order) || self::isRejected(order: $order));
 
         return
-        !self::isFrozen(order: $order) &&
-        (self::canCapture(order: $order) ||
-            self::canCancel(order: $order) ||
-            (
-                $payment->isCancelled() &&
-                $payment->application->approvedCreditLimit > 0.0
-            ));
+            !$frozenOrRejected &&
+            (self::canCapture(order: $order) ||
+                self::canCancel(order: $order) ||
+                (
+                    $payment->isCancelled() &&
+                    $payment->application->approvedCreditLimit > 0.0
+                ));
     }
 
     /**
@@ -190,6 +191,28 @@ class OrderManagement
     {
         $payment = self::getPayment(order: $order);
         return $payment->isFrozen();
+    }
+
+    /**
+     * Is order rejected?
+     *
+     * @param WC_Order $order
+     * @return bool
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    public static function isRejected(WC_Order $order): bool
+    {
+        $payment = self::getPayment(order: $order);
+        return $payment->isRejected();
     }
 
     /**
@@ -295,7 +318,7 @@ class OrderManagement
      */
     public static function getPayment(WC_Order $order): Payment
     {
-        $id = (int) $order->get_id();
+        $id = (int)$order->get_id();
 
         if (isset(self::$payments[$id])) {
             return self::$payments[$id];
@@ -411,7 +434,7 @@ class OrderManagement
         self::logSuccess(
             message: sprintf(
                 Translator::translate(phraseId: "$actionStr-success"),
-                Currency::getFormattedAmount(amount: (float) $amount)
+                Currency::getFormattedAmount(amount: (float)$amount)
             ),
             order: $order
         );

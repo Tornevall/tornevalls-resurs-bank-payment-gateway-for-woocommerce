@@ -11,18 +11,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\PaymentActionException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
@@ -46,21 +35,9 @@ class UpdateOrder
     private static bool $modificationError = false;
 
     /**
-     * @throws HttpException
-     * @throws Throwable
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws PaymentActionException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
+     * @param mixed $orderId
+     * @param mixed $order
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @noinspection PhpUnusedParameterInspection
      */
     public static function exec(mixed $orderId, mixed $order): void
     {
@@ -90,11 +67,17 @@ class UpdateOrder
 
             $handledAmount = $payment->order->authorizedAmount + $payment->order->capturedAmount;
 
-            if ($handledAmount === (float) $order->get_total()) {
+            if ($handledAmount === (float)$order->get_total()) {
                 return;
             }
 
-            Modify::exec(payment: $payment, order: $order);
+            if ($payment->rejectedReason === null) {
+                Modify::exec(payment: $payment, order: $order);
+            } else {
+                $order->add_order_note(
+                    'Unabled to modify order: ' . $payment->rejectedReason->category->value
+                );
+            }
         } catch (Throwable $error) {
             self::handleError(error: $error, order: $order);
         }
