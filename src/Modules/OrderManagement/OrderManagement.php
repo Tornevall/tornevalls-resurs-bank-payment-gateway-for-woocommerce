@@ -40,6 +40,7 @@ use WC_Order;
  * Business logic relating to order management functionality.
  *
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.LongVariable)
  * @noinspection EfferentObjectCouplingInspection
  */
 class OrderManagement
@@ -196,6 +197,8 @@ class OrderManagement
      * @throws JsonException
      * @throws ReflectionException
      * @throws ValidationException
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @noinspection PhpUnusedParameterInspection
      */
     public static function getCanNotEditTranslation(WC_Order $order): void
     {

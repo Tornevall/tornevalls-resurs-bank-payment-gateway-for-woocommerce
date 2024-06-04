@@ -60,13 +60,14 @@ class UpdateOrder
                 return;
             }
 
-            if ($payment->rejectedReason === null) {
-                Modify::exec(payment: $payment, order: $order);
-            } else {
+            if ($payment->rejectedReason !== null) {
                 $order->add_order_note(
                     'Unable to modify order: ' . $payment->rejectedReason->category->value
                 );
+                return;
             }
+
+            Modify::exec(payment: $payment, order: $order);
         } catch (Throwable $error) {
             self::handleError(error: $error, order: $order);
         }

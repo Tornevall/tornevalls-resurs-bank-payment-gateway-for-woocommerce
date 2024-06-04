@@ -140,11 +140,12 @@ class Status
                 $status,
                 Translator::translate(phraseId: "payment-status-$status")
             );
-        } else {
-            $order->add_order_note(
-                "Order status is already $status, so we wont update it."
-            );
+            return;
         }
+
+        $order->add_order_note(
+            "Order status is already $status, so we wont update it."
+        );
     }
 
     /**

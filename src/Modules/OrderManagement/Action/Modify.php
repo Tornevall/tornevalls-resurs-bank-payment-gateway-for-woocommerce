@@ -126,14 +126,9 @@ class Modify extends Action
                  * primarily before making a new get request to the Resurs API, if it exists.
                  * This should not be confused with caching, though initially, we attempted to manage it with globals.
                  */
-                if (
-                    isset(OrderManagement::$onShutdownPreparedResursPayment) &&
-                    OrderManagement::$onShutdownPreparedResursPayment instanceof Payment
-                ) {
-                    $payment = OrderManagement::$onShutdownPreparedResursPayment;
-                } else {
-                    $payment = OrderManagement::getPayment(order: $order);
-                }
+                $payment = OrderManagement::$onShutdownPreparedResursPayment ?? OrderManagement::getPayment(
+                    order: $order
+                );
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
