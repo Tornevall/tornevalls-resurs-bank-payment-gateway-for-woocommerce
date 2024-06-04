@@ -6,8 +6,8 @@ Tested up to: 6.4.3
 Requires PHP: 8.1
 WC Tested up to: 8.8.2
 WC requires at least: 7.6.0
-Plugin requires ecom: 2.0.4
-Stable tag: 1.0.31
+Plugin requires ecom: 2.0.5
+Stable tag: 1.0.32
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html

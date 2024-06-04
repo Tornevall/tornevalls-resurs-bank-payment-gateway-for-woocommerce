@@ -45,6 +45,11 @@ use WC_Order;
 class OrderManagement
 {
     /**
+     * Race conditional stored payment.
+     */
+    public static Payment $onShutdownPreparedResursPayment;
+
+    /**
      * Track resolved payments to avoid additional API calls.
      */
     private static array $payments = [];
@@ -96,10 +101,11 @@ class OrderManagement
         }
 
         // Prevent order edit options from rendering if we can't modify payment.
+        // Try to put us last in the reply chain so our answer is the last to make the decision.
         add_filter(
             'wc_order_is_editable',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
-            10,
+            9999,
             2
         );
 
@@ -160,8 +166,12 @@ class OrderManagement
      */
     public static function canEdit(WC_Order $order): bool
     {
+        self::getCanNotEditTranslation(order: $order);
+
+        $frozenOrRejected = (self::isFrozen(order: $order) || self::isRejected(
+            order: $order
+        ));
         $payment = self::getPayment(order: $order);
-        $frozenOrRejected = (self::isFrozen(order: $order) || self::isRejected(order: $order));
 
         return
             !$frozenOrRejected &&
@@ -171,6 +181,72 @@ class OrderManagement
                     $payment->isCancelled() &&
                     $payment->application->approvedCreditLimit > 0.0
                 ));
+    }
+
+    /**
+     * Update translation in WooCommerce at editor level if Resurs has an order frozen or rejected.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     */
+    public static function getCanNotEditTranslation(WC_Order $order): void
+    {
+        $isFrozen = self::isFrozen(order: $order);
+        $isRejected = self::isRejected(order: $order);
+
+        // Skip translation filter if not frozen nor rejected.
+        if (!$isRejected && !$isFrozen) {
+            return;
+        }
+
+        add_filter(
+            'gettext',
+            static function ($translation, $text, $domain) use ($isFrozen, $isRejected) {
+                if (
+                    isset($text) &&
+                    is_string(
+                        value: $text
+                    ) &&
+                    $text === 'This order is no longer editable.'
+                ) {
+                    if ($isRejected) {
+                        $translation = Translator::translate(
+                            phraseId: 'can-not-edit-order-due-to-rejected'
+                        );
+                    }
+
+                    if ($isFrozen) {
+                        $translation = Translator::translate(
+                            phraseId: 'can-not-edit-order-due-to-frozen'
+                        );
+                    }
+
+                    // If translations are missing, use backup language.
+                    if (
+                        preg_match(
+                            pattern: '/^can-not-edit-order-due-to/i',
+                            subject: $translation
+                        )
+                    ) {
+                        $translation = __(
+                            'This order is not editable due to Resurs state.'
+                        );
+                    }
+                }
+
+                return $translation;
+            },
+            999,
+            3
+        );
     }
 
     /**
@@ -196,8 +272,6 @@ class OrderManagement
     /**
      * Is order rejected?
      *
-     * @param WC_Order $order
-     * @return bool
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
@@ -353,7 +427,7 @@ class OrderManagement
             MerchantPortal::TEST;
 
         $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
-        $order->add_order_note($message);
+        $order->add_order_note(note: $message);
     }
 
     /**

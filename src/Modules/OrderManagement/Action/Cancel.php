@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
+use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
@@ -36,7 +37,24 @@ class Cancel extends Action
             action: ActionType::CANCEL,
             order: $order,
             callback: static function () use ($order): void {
-                $payment = OrderManagement::getPayment(order: $order);
+                /**
+                 * If the order has primarily been handled by another action point at an earlier stage,
+                 * it will conflict with the shutdown filter. This filter does not have enough time
+                 * to make a new payment request to Resurs, leading to an incorrect response being used
+                 * as the basis for another cancel request (if that is what the order intends).
+                 * Since the order has not been updated in that scenario, the response is typically already
+                 * available in the action that last processed the order. Therefore, this response should be used
+                 * primarily before making a new get request to the Resurs API, if it exists.
+                 * This should not be confused with caching, though initially, we attempted to manage it with globals.
+                 */
+                if (
+                    isset(OrderManagement::$onShutdownPreparedResursPayment) &&
+                    OrderManagement::$onShutdownPreparedResursPayment instanceof Payment
+                ) {
+                    $payment = OrderManagement::$onShutdownPreparedResursPayment;
+                } else {
+                    $payment = OrderManagement::getPayment(order: $order);
+                }
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
@@ -48,8 +66,9 @@ class Cancel extends Action
                     return;
                 }
 
-                Repository::cancel(paymentId: $payment->id);
-
+                OrderManagement::$onShutdownPreparedResursPayment = Repository::cancel(
+                    paymentId: $payment->id
+                );
                 OrderManagement::logSuccessPaymentAction(
                     action: ActionType::CANCEL,
                     order: $order

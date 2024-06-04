@@ -116,7 +116,24 @@ class Modify extends Action
             action: ActionType::MODIFY_ORDER,
             order: self::$order,
             callback: static function () use ($order): void {
-                $payment = OrderManagement::getPayment(order: $order);
+                /**
+                 * If the order has primarily been handled by another action point at an earlier stage,
+                 * it will conflict with the shutdown filter. This filter does not have enough time
+                 * to make a new payment request to Resurs, leading to an incorrect response being used
+                 * as the basis for another cancel request (if that is what the order intends).
+                 * Since the order has not been updated in that scenario, the response is typically already
+                 * available in the action that last processed the order. Therefore, this response should be used
+                 * primarily before making a new get request to the Resurs API, if it exists.
+                 * This should not be confused with caching, though initially, we attempted to manage it with globals.
+                 */
+                if (
+                    isset(OrderManagement::$onShutdownPreparedResursPayment) &&
+                    OrderManagement::$onShutdownPreparedResursPayment instanceof Payment
+                ) {
+                    $payment = OrderManagement::$onShutdownPreparedResursPayment;
+                } else {
+                    $payment = OrderManagement::getPayment(order: $order);
+                }
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
@@ -129,7 +146,9 @@ class Modify extends Action
                 }
 
                 if ($payment->canCancel()) {
-                    Repository::cancel(paymentId: $payment->id);
+                    OrderManagement::$onShutdownPreparedResursPayment = Repository::cancel(
+                        paymentId: $payment->id
+                    );
                 }
 
                 $orderLines = Order::getOrderLines(order: $order);
@@ -144,7 +163,7 @@ class Modify extends Action
                 OrderManagement::logSuccessPaymentAction(
                     action: ActionType::MODIFY_ORDER,
                     order: $order,
-                    amount: (float) $order->get_total()
+                    amount: (float)$order->get_total()
                 );
             }
         );
@@ -165,7 +184,7 @@ class Modify extends Action
         $availableAmount = $payment->application->approvedCreditLimit;
 
         try {
-            $requestedAmount = (float) $order->get_total();
+            $requestedAmount = (float)$order->get_total();
 
             if ($requestedAmount > $availableAmount) {
                 throw new PaymentActionException(
