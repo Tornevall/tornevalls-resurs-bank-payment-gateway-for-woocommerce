@@ -156,8 +156,6 @@ class Api
 
     /**
      * Return config value for current store countryCode.
-     *
-     * @return array
      */
     private static function getStoreCountry(): array
     {

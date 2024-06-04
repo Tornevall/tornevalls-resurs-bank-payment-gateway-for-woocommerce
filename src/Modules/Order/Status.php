@@ -130,18 +130,20 @@ class Status
         // If Resurs status of the payment is set to cancellation and
         // woocommerce status is not yet cancelled, then we're allowed to
         // change the status of the order.
-        if ($status === 'cancelled' || $status === 'failed') {
-            if ($order->get_status() !== $status) {
-                /** @noinspection PhpArgumentWithoutNamedIdentifierInspection Keep WP compatibility. */
-                $order->update_status(
-                    $status,
-                    Translator::translate(phraseId: "payment-status-$status")
-                );
-            } else {
-                $order->add_order_note(
-                    "Order status is already $status, so we wont update it."
-                );
-            }
+        if ($status !== 'cancelled' && $status !== 'failed') {
+            return;
+        }
+
+        if ($order->get_status() !== $status) {
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection Keep WP compatibility. */
+            $order->update_status(
+                $status,
+                Translator::translate(phraseId: "payment-status-$status")
+            );
+        } else {
+            $order->add_order_note(
+                "Order status is already $status, so we wont update it."
+            );
         }
     }
 
