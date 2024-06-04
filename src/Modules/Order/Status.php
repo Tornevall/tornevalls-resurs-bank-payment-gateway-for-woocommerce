@@ -144,7 +144,7 @@ class Status
         }
 
         $order->add_order_note(
-            "Order status is already $status, so we wont update it."
+            "Order status is already $status."
         );
     }
 
