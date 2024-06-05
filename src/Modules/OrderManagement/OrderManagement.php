@@ -12,12 +12,14 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\MerchantPortal;
@@ -40,10 +42,16 @@ use WC_Order;
  * Business logic relating to order management functionality.
  *
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.LongVariable)
  * @noinspection EfferentObjectCouplingInspection
  */
 class OrderManagement
 {
+    /**
+     * Race conditional stored payment.
+     */
+    public static bool $hasActiveCancel = false;
+
     /**
      * Track resolved payments to avoid additional API calls.
      */
@@ -96,10 +104,11 @@ class OrderManagement
         }
 
         // Prevent order edit options from rendering if we can't modify payment.
+        // Try to put us last in the reply chain so our answer is the last to make the decision.
         add_filter(
             'wc_order_is_editable',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
-            10,
+            9999,
             2
         );
 
@@ -160,8 +169,12 @@ class OrderManagement
      */
     public static function canEdit(WC_Order $order): bool
     {
+        self::getCanNotEditTranslation(order: $order);
+
+        $frozenOrRejected = (self::isFrozen(order: $order) || self::isRejected(
+            order: $order
+        ));
         $payment = self::getPayment(order: $order);
-        $frozenOrRejected = (self::isFrozen(order: $order) || self::isRejected(order: $order));
 
         return
             !$frozenOrRejected &&
@@ -171,6 +184,63 @@ class OrderManagement
                     $payment->isCancelled() &&
                     $payment->application->approvedCreditLimit > 0.0
                 ));
+    }
+
+    /**
+     * Update translation in WooCommerce at editor level if Resurs has an order frozen or rejected.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @noinspection PhpUnusedParameterInspection
+     * @noinspection PhpConditionCheckedByNextConditionInspection
+     */
+    public static function getCanNotEditTranslation(WC_Order $order): void
+    {
+        $isFrozen = self::isFrozen(order: $order);
+        $isRejected = self::isRejected(order: $order);
+
+        // Skip translation filter if not frozen nor rejected.
+        if (!$isRejected && !$isFrozen) {
+            return;
+        }
+
+        add_filter(
+            'gettext',
+            static function ($translation, $text, $domain) use ($isFrozen, $isRejected) {
+                if (
+                    isset($text) &&
+                    is_string(
+                        value: $text
+                    ) &&
+                    $text === 'This order is no longer editable.'
+                ) {
+                    if ($isRejected) {
+                        $translation = Translator::translate(
+                            phraseId: 'can-not-edit-order-due-to-rejected'
+                        );
+                    }
+
+                    if ($isFrozen) {
+                        $translation = Translator::translate(
+                            phraseId: 'can-not-edit-order-due-to-frozen'
+                        );
+                    }
+                }
+
+                return $translation;
+            },
+            999,
+            3
+        );
     }
 
     /**
@@ -196,8 +266,6 @@ class OrderManagement
     /**
      * Is order rejected?
      *
-     * @param WC_Order $order
-     * @return bool
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
@@ -305,16 +373,18 @@ class OrderManagement
     }
 
     /**
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
-     * @throws ValidationException
      * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws AttributeCombinationException
+     * @throws NotJsonEncodedException
      */
     public static function getPayment(WC_Order $order): Payment
     {
@@ -353,7 +423,7 @@ class OrderManagement
             MerchantPortal::TEST;
 
         $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
-        $order->add_order_note($message);
+        $order->add_order_note(note: $message);
     }
 
     /**

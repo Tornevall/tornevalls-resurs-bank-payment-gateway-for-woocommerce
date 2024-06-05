@@ -116,12 +116,16 @@ class Modify extends Action
             action: ActionType::MODIFY_ORDER,
             order: self::$order,
             callback: static function () use ($order): void {
-                $payment = OrderManagement::getPayment(order: $order);
+                $payment = OrderManagement::getPayment(
+                    order: $order
+                );
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
-                // they tend to disappear if we throw exceptions.
+                // they tend to disappear if we throw exceptions. However, if orders are already cancelled
+                // we should avoid the update.
                 if (
+                    OrderManagement::$hasActiveCancel ||
                     !$payment->canCancel() ||
                     $payment->status === Status::TASK_REDIRECTION_REQUIRED
                 ) {
@@ -129,7 +133,9 @@ class Modify extends Action
                 }
 
                 if ($payment->canCancel()) {
-                    Repository::cancel(paymentId: $payment->id);
+                    Repository::cancel(
+                        paymentId: $payment->id
+                    );
                 }
 
                 $orderLines = Order::getOrderLines(order: $order);
@@ -144,7 +150,7 @@ class Modify extends Action
                 OrderManagement::logSuccessPaymentAction(
                     action: ActionType::MODIFY_ORDER,
                     order: $order,
-                    amount: (float) $order->get_total()
+                    amount: (float)$order->get_total()
                 );
             }
         );
@@ -165,7 +171,7 @@ class Modify extends Action
         $availableAmount = $payment->application->approvedCreditLimit;
 
         try {
-            $requestedAmount = (float) $order->get_total();
+            $requestedAmount = (float)$order->get_total();
 
             if ($requestedAmount > $availableAmount) {
                 throw new PaymentActionException(

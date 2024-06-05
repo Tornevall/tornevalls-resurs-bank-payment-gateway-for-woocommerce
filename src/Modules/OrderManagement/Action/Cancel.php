@@ -36,7 +36,9 @@ class Cancel extends Action
             action: ActionType::CANCEL,
             order: $order,
             callback: static function () use ($order): void {
-                $payment = OrderManagement::getPayment(order: $order);
+                $payment = OrderManagement::getPayment(
+                    order: $order
+                );
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
@@ -48,8 +50,10 @@ class Cancel extends Action
                     return;
                 }
 
-                Repository::cancel(paymentId: $payment->id);
-
+                OrderManagement::$hasActiveCancel = true;
+                Repository::cancel(
+                    paymentId: $payment->id
+                );
                 OrderManagement::logSuccessPaymentAction(
                     action: ActionType::CANCEL,
                     order: $order

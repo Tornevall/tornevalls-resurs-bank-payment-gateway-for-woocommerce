@@ -71,9 +71,6 @@ class Advanced
         return $return;
     }
 
-    /**
-     * @return array
-     */
     private static function getGdprRestrictionConfig(): array
     {
         return [
@@ -92,9 +89,6 @@ class Advanced
         ];
     }
 
-    /**
-     * @return array
-     */
     private static function getCountryRestrictionConfig(): array
     {
         return [
@@ -115,8 +109,6 @@ class Advanced
 
     /**
      * Timeout settings for API requests.
-     *
-     * @return array
      */
     private static function getApiTimeout(): array
     {
@@ -144,8 +136,6 @@ class Advanced
 
     /**
      * Fetch options for the log level selector
-     *
-     * @return array
      */
     private static function getLogLevelOptions(): array
     {
@@ -235,8 +225,6 @@ class Advanced
     /**
      * Setting to force payment method sorting in checkout as we use uuids there
      * instead of the gateway itself.
-     *
-     * @return array
      */
     private static function getForcePaymentMethodSortOrder(): array
     {
@@ -251,8 +239,6 @@ class Advanced
 
     /**
      * Make payment methods disappear when not in correct country.
-     *
-     * @return array
      */
     private static function setMethodCountryRestriction(): array
     {

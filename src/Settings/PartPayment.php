@@ -234,8 +234,6 @@ class PartPayment
 
     /**
      * Fetch available payment method options
-     *
-     * @return array
      */
     private static function getPaymentMethods(): array
     {
@@ -265,8 +263,6 @@ class PartPayment
 
     /**
      * Fetch annuity period options for configured payment method
-     *
-     * @return array
      */
     private static function getAnnuityPeriods(): array
     {

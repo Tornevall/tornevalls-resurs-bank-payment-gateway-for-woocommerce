@@ -11,9 +11,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
-use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
-use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -35,8 +33,6 @@ class UpdateOrder
     private static bool $modificationError = false;
 
     /**
-     * @param mixed $orderId
-     * @param mixed $order
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public static function exec(mixed $orderId, mixed $order): void
@@ -58,26 +54,20 @@ class UpdateOrder
                 paymentId: Metadata::getPaymentId(order: $order)
             );
 
-            // Resurs will not be able to modify FROZEN orders, so they must be ACCEPTED.
-            if ($payment->status !== Status::ACCEPTED) {
-                throw new HttpException(
-                    message: 'Invalid payment status: ' . $payment->status->value
-                );
-            }
-
             $handledAmount = $payment->order->authorizedAmount + $payment->order->capturedAmount;
 
             if ($handledAmount === (float)$order->get_total()) {
                 return;
             }
 
-            if ($payment->rejectedReason === null) {
-                Modify::exec(payment: $payment, order: $order);
-            } else {
+            if ($payment->rejectedReason !== null) {
                 $order->add_order_note(
-                    'Unabled to modify order: ' . $payment->rejectedReason->category->value
+                    'Unable to modify order: ' . $payment->rejectedReason->category->value
                 );
+                return;
             }
+
+            Modify::exec(payment: $payment, order: $order);
         } catch (Throwable $error) {
             self::handleError(error: $error, order: $order);
         }
