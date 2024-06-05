@@ -36,17 +36,7 @@ class Cancel extends Action
             action: ActionType::CANCEL,
             order: $order,
             callback: static function () use ($order): void {
-                /**
-                 * If the order has primarily been handled by another action point at an earlier stage,
-                 * it will conflict with the shutdown filter. This filter does not have enough time
-                 * to make a new payment request to Resurs, leading to an incorrect response being used
-                 * as the basis for another cancel request (if that is what the order intends).
-                 * Since the order has not been updated in that scenario, the response is typically already
-                 * available in the action that last processed the order. Therefore, this response should be used
-                 * primarily before making a new get request to the Resurs API, if it exists.
-                 * This should not be confused with caching, though initially, we attempted to manage it with globals.
-                 */
-                $payment = OrderManagement::$onShutdownPreparedResursPayment ?? OrderManagement::getPayment(
+                $payment = OrderManagement::getPayment(
                     order: $order
                 );
 
@@ -60,7 +50,8 @@ class Cancel extends Action
                     return;
                 }
 
-                OrderManagement::$onShutdownPreparedResursPayment = Repository::cancel(
+                OrderManagement::$hasActiveCancel = true;
+                Repository::cancel(
                     paymentId: $payment->id
                 );
                 OrderManagement::logSuccessPaymentAction(

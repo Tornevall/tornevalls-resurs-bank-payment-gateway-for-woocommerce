@@ -12,12 +12,14 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\MerchantPortal;
@@ -48,7 +50,7 @@ class OrderManagement
     /**
      * Race conditional stored payment.
      */
-    public static Payment $onShutdownPreparedResursPayment;
+    public static bool $hasActiveCancel = false;
 
     /**
      * Track resolved payments to avoid additional API calls.
@@ -199,6 +201,7 @@ class OrderManagement
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
+     * @noinspection PhpConditionCheckedByNextConditionInspection
      */
     public static function getCanNotEditTranslation(WC_Order $order): void
     {
@@ -229,18 +232,6 @@ class OrderManagement
                     if ($isFrozen) {
                         $translation = Translator::translate(
                             phraseId: 'can-not-edit-order-due-to-frozen'
-                        );
-                    }
-
-                    // If translations are missing, use backup language.
-                    if (
-                        preg_match(
-                            pattern: '/^can-not-edit-order-due-to/i',
-                            subject: $translation
-                        )
-                    ) {
-                        $translation = __(
-                            'This order is not editable due to Resurs state.'
                         );
                     }
                 }
@@ -382,16 +373,18 @@ class OrderManagement
     }
 
     /**
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
-     * @throws ValidationException
      * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws AttributeCombinationException
+     * @throws NotJsonEncodedException
      */
     public static function getPayment(WC_Order $order): Payment
     {
