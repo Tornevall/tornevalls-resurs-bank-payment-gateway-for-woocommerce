@@ -142,10 +142,6 @@ class Status
             );
             return;
         }
-
-        $order->add_order_note(
-            "Order status is already $status."
-        );
     }
 
     /**
