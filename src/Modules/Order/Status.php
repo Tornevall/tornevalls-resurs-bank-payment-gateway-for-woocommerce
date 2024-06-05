@@ -12,12 +12,14 @@ namespace Resursbank\Woocommerce\Modules\Order;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
@@ -36,16 +38,18 @@ class Status
     /**
      * Update WC_Order status based on Resurs Bank payment status.
      *
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
-     * @throws ValidationException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ValidationException
+     * @throws AttributeCombinationException
+     * @throws NotJsonEncodedException
      */
     public static function update(
         WC_Order $order
@@ -111,6 +115,7 @@ class Status
      * Update WC_Order status based on reason for payment rejection.
      *
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -134,20 +139,22 @@ class Status
             return;
         }
 
-        if ($order->get_status() !== $status) {
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection Keep WP compatibility. */
-            $order->update_status(
-                $status,
-                Translator::translate(phraseId: "payment-status-$status")
-            );
+        if ($order->get_status() === $status) {
             return;
         }
+
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection Keep WP compatibility. */
+        $order->update_status(
+            $status,
+            Translator::translate(phraseId: "payment-status-$status")
+        );
     }
 
     /**
      * Gets "failed" or "cancelled" based on task completion status.
      *
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -162,6 +169,6 @@ class Status
     {
         return Repository::getTaskStatusDetails(
             paymentId: $payment->id
-        )->completed ? 'failed' : 'cancelled';
+        )->completed && !$payment->isRejected() ? 'failed' : 'cancelled';
     }
 }

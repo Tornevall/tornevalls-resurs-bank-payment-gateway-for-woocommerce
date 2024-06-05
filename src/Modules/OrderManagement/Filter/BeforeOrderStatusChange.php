@@ -92,6 +92,9 @@ class BeforeOrderStatusChange
             $payment = OrderManagement::getPayment(order: $order);
 
             return match ($status) {
+                'failed' => OrderManagement::canCancel(
+                    order: $order
+                ) || (!$payment->isCancelled() || $payment->status === Status::REJECTED),
                 'cancelled' => OrderManagement::canCancel(
                     order: $order
                 ) || ($payment->isCancelled() || $payment->status === Status::TASK_REDIRECTION_REQUIRED),
