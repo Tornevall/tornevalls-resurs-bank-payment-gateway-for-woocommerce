@@ -157,6 +157,7 @@ class OrderManagement
 
     /**
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -164,6 +165,7 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
      */
