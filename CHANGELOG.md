@@ -1,3 +1,7 @@
+# 1.0.32
+
+[WOO-1310](https://resursbankplugins.atlassian.net/browse/WOO-1310) Frozen\+Rejected orders are cancelled twice
+
 # 1.0.31
 
 * [WOO-1306](https://resursbankplugins.atlassian.net/browse/WOO-1306) Payment methods by country limit
