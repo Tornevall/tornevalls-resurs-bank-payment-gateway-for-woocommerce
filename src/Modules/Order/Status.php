@@ -169,6 +169,6 @@ class Status
     {
         return Repository::getTaskStatusDetails(
             paymentId: $payment->id
-        )->completed && !$payment->isRejected() ? 'failed' : 'cancelled';
+        )->completed ? 'failed' : 'cancelled';
     }
 }

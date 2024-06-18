@@ -171,7 +171,7 @@ EX;
 
             echo PaymentMethods::getOutput(storeId: StoreId::getData());
         } catch (Throwable $e) {
-            Log::error(error: $e);
+            Log::error(error: $e, message: $e->getMessage());
 
             $this->renderError(view: 'payment_methods');
         }
