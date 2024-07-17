@@ -180,12 +180,14 @@ class OrderManagement
 
         return
             !$frozenOrRejected &&
-            (self::canCapture(order: $order) ||
+            (
+                self::canCapture(order: $order) ||
                 self::canCancel(order: $order) ||
                 (
                     $payment->isCancelled() &&
                     $payment->application->approvedCreditLimit > 0.0
-                ));
+                )
+            );
     }
 
     /**

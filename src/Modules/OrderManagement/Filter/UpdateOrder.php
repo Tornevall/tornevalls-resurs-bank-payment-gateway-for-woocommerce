@@ -16,6 +16,7 @@ use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 
@@ -41,6 +42,15 @@ class UpdateOrder
             !$order instanceof WC_Order ||
             !Metadata::isValidResursPayment(order: $order)
         ) {
+            return;
+        }
+
+        if (!OrderManagement::canEdit(order: $order)) {
+            $order->add_order_note(
+                note: Translator::translate(
+                    phraseId: 'order-changed-by-unknown-source'
+                )
+            );
             return;
         }
 
