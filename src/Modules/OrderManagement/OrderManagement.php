@@ -394,10 +394,6 @@ class OrderManagement
     {
         $id = (int)$order->get_id();
 
-        if (isset(self::$payments[$id])) {
-            return self::$payments[$id];
-        }
-
         $result = Repository::get(
             paymentId: Metadata::getPaymentId(order: $order)
         );
