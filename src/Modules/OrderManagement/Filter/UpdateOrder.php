@@ -115,6 +115,7 @@ class UpdateOrder
     {
         return !OrderManagement::canEdit(order: $order) &&
                !OrderManagement::canCapture(order: $order) &&
+               !OrderManagement::canCancel(order: $order) &&
                !OrderManagement::canRefund(order: $order);
     }
 
