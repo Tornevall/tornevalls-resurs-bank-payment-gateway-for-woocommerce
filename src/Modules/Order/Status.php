@@ -131,6 +131,7 @@ class Status
         WC_Order $order
     ): void {
         $status = self::getFailedOrCancelled(payment: $payment);
+        $orderStatus = $order->get_status();
 
         // If Resurs status of the payment is set to cancellation and
         // woocommerce status is not yet cancelled, then we're allowed to
@@ -139,7 +140,11 @@ class Status
             return;
         }
 
-        if ($order->get_status() === $status) {
+        if (
+            $orderStatus === 'cancelled' &&
+            $status === 'failed' ||
+            $orderStatus === $status
+        ) {
             return;
         }
 
