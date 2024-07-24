@@ -138,6 +138,13 @@ class OrderManagement
             3
         );
 
+        // Hide capture action on order list view.
+        add_filter(
+            hook_name: 'woocommerce_admin_order_actions',
+            callback: 'Resursbank\Woocommerce\Modules\OrderManagement\Filter\HideCaptureAction::exec',
+            accepted_args: 2
+        );
+
         // Execute refund payment action after refund has been created.
         add_action(
             'woocommerce_order_refunded',
