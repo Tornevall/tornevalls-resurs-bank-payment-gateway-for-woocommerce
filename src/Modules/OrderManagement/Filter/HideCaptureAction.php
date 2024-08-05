@@ -28,11 +28,13 @@ class HideCaptureAction
 
         foreach ($actions as $name => $action) {
             if (
-                $name !== 'on_hold' &&
-                OrderManagement::canCapture(order: $order)
+                $name === 'on_hold' ||
+                !OrderManagement::canCapture(order: $order)
             ) {
-                $result[$name] = $action;
+                continue;
             }
+
+            $result[$name] = $action;
         }
 
         return $result;
