@@ -19,7 +19,6 @@ use WC_Abstract_Order;
 use WC_Order;
 
 use function get_class;
-use function is_array;
 
 /**
  * Order metadata handler.
@@ -48,6 +47,7 @@ class Metadata
 
     /**
      * Get UUID of Resurs Bank payment attached to order.
+     * CRUD Compatible.
      *
      * @throws EmptyValueException
      */
@@ -86,6 +86,7 @@ class Metadata
     /**
      * Set metadata to an order.
      * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
+     * CRUD Compatible.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
@@ -94,31 +95,19 @@ class Metadata
         string $key,
         string $value
     ): bool {
-        $exists = metadata_exists(
-            'post',
-            $order->get_id(),
-            $key
-        );
-
-        if ($exists) {
-            return (bool)update_post_meta(
-                $order->get_id(),
-                $key,
-                $value
-            );
+        if ($order->meta_exists($key)) {
+            $order->update_meta_data($key, $value);
+        } else {
+            $order->add_meta_data($key, $value, true);
         }
 
-        return (bool)add_post_meta(
-            $order->get_id(),
-            $key,
-            $value,
-            true
-        );
+        return $order->save() > 0;
     }
 
     /**
      * Return metadata from an order, as a single variable.
      * Normally metadata is returned as array, but currently we usually only save values once.
+     * CRUD compatible.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
@@ -126,11 +115,7 @@ class Metadata
         WC_Abstract_Order $order,
         string $key
     ): string {
-        return (string)get_post_meta(
-            $order->get_id(),
-            $key,
-            true
-        );
+        return (string)$order->get_meta($key, true);
     }
 
     /**
@@ -147,7 +132,7 @@ class Metadata
     }
 
     /**
-     * Retrieve order associated with payment id.
+     * Retrieve order associated with payment id (CRUD compatible).
      */
     public static function getOrderByPaymentId(string $paymentId): ?WC_Order
     {
@@ -157,13 +142,10 @@ class Metadata
             'meta_key' => self::KEY_PAYMENT_ID,
             'meta_value' => $paymentId,
             'meta_compare' => '=',
+            'limit' => 1,
         ]);
 
-        if (
-            is_array(value: $orders) &&
-            count($orders) === 1 &&
-            $orders[0] instanceof WC_Order
-        ) {
+        if (!empty($orders) && $orders[0] instanceof WC_Order) {
             $result = $orders[0];
         }
 
@@ -191,6 +173,9 @@ class Metadata
         ) === '1';
     }
 
+    /**
+     * Check if order is from a legacy flow.
+     */
     private static function isLegacyOrder(
         WC_Abstract_Order $order
     ): bool {
@@ -223,8 +208,8 @@ class Metadata
                 if (!$payment instanceof Payment) {
                     throw new IllegalTypeException(
                         message: 'Fetched object type is ' .
-                                 get_class(object: $payment) .
-                                 ', expected ' . Payment::class
+                        get_class(object: $payment) .
+                        ', expected ' . Payment::class
                     );
                 }
 

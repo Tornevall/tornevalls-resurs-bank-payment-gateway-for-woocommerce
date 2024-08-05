@@ -31,7 +31,6 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
-use WP_Post;
 
 use function get_current_screen;
 
@@ -77,15 +76,16 @@ class Order
     public static function initAdminScripts(): void
     {
         try {
-            // Can't guarantee that _GET contains the proper data, so we use _REQUEST instead.
-            // We also need to check further id's in the post request to get a proper order id.
-            $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
+            // Fetching the order id this way has historically been the best way on
+            // sites where the normal way of doing it not works ("ecompress"). This however fails
+            // when in HPOS-mode. If the solution below does not work, then we have to
+            // reconsider the way this has been historically done,
+            // $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
+            $wcOrder = wc_get_order();
 
-            if ($orderId === null) {
+            if (!$wcOrder instanceof WC_Order) {
                 return;
             }
-
-            $orderId = (int) $orderId;
 
             $fetchUrl = Route::getUrl(
                 route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
@@ -204,7 +204,7 @@ class Order
     public static function getPaymentMethod(
         WC_Order $order
     ): ?PaymentMethod {
-        $method = (string) $order->get_payment_method();
+        $method = (string)$order->get_payment_method();
 
         if ($method === '') {
             return null;
@@ -223,23 +223,25 @@ class Order
      */
     public static function getCurrentOrder(): ?WC_Order
     {
-        global $post;
+        try {
+            $currentOrder = wc_get_order();
 
-        if (
-            !$post instanceof WP_Post ||
-            $post->post_type !== 'shop_order'
-        ) {
-            return null;
+            if ($currentOrder instanceof WC_Order) {
+                return $currentOrder;
+            }
+        } catch (Throwable) {
         }
 
-        return new WC_Order(order: $post->ID);
+        return null;
     }
 
     /**
      * Whether we are currently viewing order view in admin panel.
+     * In HPOS mode, the id won't be fetched properly, so we have to use the post_type
+     * to check the location.
      */
     public static function isOnAdminOrderView(): bool
     {
-        return get_current_screen()->id === 'shop_order';
+        return get_current_screen()->id === 'shop_order' || get_current_screen()->post_type === 'shop_order';
     }
 }

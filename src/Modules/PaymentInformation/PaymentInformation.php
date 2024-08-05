@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\PaymentInformation;
 
-use Automattic\WooCommerce\Admin\PageController;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -77,7 +76,10 @@ class PaymentInformation
      */
     public static function setCss(): void
     {
-        if ((new PageController())->get_current_screen_id() !== 'shop_order') {
+        if (
+            get_current_screen()->id !== 'shop_order' &&
+            get_current_screen()->post_type !== 'shop_order'
+        ) {
             return;
         }
 

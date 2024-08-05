@@ -19,6 +19,7 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Resursbank\Ecom\Config;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
@@ -77,6 +78,20 @@ if (!Config::hasInstance()) {
 // Setup event listeners and resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     Shared::init();
+    add_action(
+        'before_woocommerce_init',
+        static function (): void {
+            if (!class_exists(class: FeaturesUtil::class)) {
+                return;
+            }
+
+            FeaturesUtil::declare_compatibility(
+                'custom_order_tables',
+                __FILE__,
+                true
+            );
+        }
+    );
 
     if (Admin::isAdmin()) {
         AdminInit::init();
