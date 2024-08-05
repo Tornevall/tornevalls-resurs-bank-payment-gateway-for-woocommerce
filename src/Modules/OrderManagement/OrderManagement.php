@@ -138,6 +138,14 @@ class OrderManagement
             3
         );
 
+        // Hide capture action on order list view.
+        add_filter(
+            'woocommerce_admin_order_actions',
+            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\HideCaptureAction::exec',
+            10,
+            2
+        );
+
         // Execute refund payment action after refund has been created.
         add_action(
             'woocommerce_order_refunded',
@@ -180,12 +188,14 @@ class OrderManagement
 
         return
             !$frozenOrRejected &&
-            (self::canCapture(order: $order) ||
+            (
+                self::canCapture(order: $order) ||
                 self::canCancel(order: $order) ||
                 (
                     $payment->isCancelled() &&
                     $payment->application->approvedCreditLimit > 0.0
-                ));
+                )
+            );
     }
 
     /**
@@ -391,10 +401,6 @@ class OrderManagement
     public static function getPayment(WC_Order $order): Payment
     {
         $id = (int)$order->get_id();
-
-        if (isset(self::$payments[$id])) {
-            return self::$payments[$id];
-        }
 
         $result = Repository::get(
             paymentId: Metadata::getPaymentId(order: $order)

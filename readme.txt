@@ -7,7 +7,7 @@ Requires PHP: 8.1
 WC Tested up to: 8.9.3
 WC requires at least: 7.6.0
 Plugin requires ecom: 2.0.5
-Stable tag: 1.0.33
+Stable tag: 1.0.34
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -58,6 +58,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.34
+
+[WOO-1313](https://resursbankplugins.atlassian.net/browse/WOO-1313) Programmatic order updates will cancel FROZEN payments
 
 # 1.0.33
 
