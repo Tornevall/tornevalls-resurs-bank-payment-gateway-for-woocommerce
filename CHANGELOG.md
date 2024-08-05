@@ -1,3 +1,11 @@
+# 1.0.34
+
+[WOO-1313](https://resursbankplugins.atlassian.net/browse/WOO-1313) Programmatic order updates will cancel FROZEN payments
+
+# 1.0.33
+
+Reverted the failed-status setup from previous release.
+
 # 1.0.32
 
 [WOO-1310](https://resursbankplugins.atlassian.net/browse/WOO-1310) Frozen\+Rejected orders are cancelled twice
