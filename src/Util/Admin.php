@@ -29,6 +29,14 @@ class Admin
     }
 
     /**
+     * HPOS compatible method to find out if current screen is shop_order (wp-admin order view).
+     */
+    public static function isInShopOrder(): bool
+    {
+        return get_current_screen()->id === 'shop_order' || get_current_screen()->post_type === 'shop_order';
+    }
+
+    /**
      * Return boolean on specific admin configuration tab. This method does not check is_admin first.
      *
      * @SuppressWarnings(PHPMD.Superglobals)

@@ -24,6 +24,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -31,8 +32,6 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
-
-use function get_current_screen;
 
 /**
  * WC_Order related business logic.
@@ -113,7 +112,7 @@ class Order
             wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
             wp_add_inline_script(
                 'rb-get-order-content-admin-inline-scripts',
-                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$orderId');"
+                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrder->get_id()');"
             );
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -142,7 +141,7 @@ class Order
         $order = self::getCurrentOrder();
 
         try {
-            if ($order === null || !self::isOnAdminOrderView()) {
+            if ($order === null || !Admin::isInShopOrder()) {
                 return;
             }
 
@@ -233,15 +232,5 @@ class Order
         }
 
         return null;
-    }
-
-    /**
-     * Whether we are currently viewing order view in admin panel.
-     * In HPOS mode, the id won't be fetched properly, so we have to use the post_type
-     * to check the location.
-     */
-    public static function isOnAdminOrderView(): bool
-    {
-        return get_current_screen()->id === 'shop_order' || get_current_screen()->post_type === 'shop_order';
     }
 }

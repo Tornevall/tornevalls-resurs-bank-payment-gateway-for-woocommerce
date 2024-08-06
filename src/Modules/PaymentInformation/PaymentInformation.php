@@ -21,6 +21,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation as EcomPaymentInformation;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Sanitize;
 
@@ -76,10 +77,7 @@ class PaymentInformation
      */
     public static function setCss(): void
     {
-        if (
-            get_current_screen()->id !== 'shop_order' &&
-            get_current_screen()->post_type !== 'shop_order'
-        ) {
+        if (!Admin::isInShopOrder()) {
             return;
         }
 
