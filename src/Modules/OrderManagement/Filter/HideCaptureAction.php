@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbank\Woocommerce\Util\Metadata;
+use Throwable;
 use WC_Order;
 
 /**
@@ -26,15 +28,20 @@ class HideCaptureAction
     ): array {
         $result = [];
 
-        foreach ($actions as $name => $action) {
-            if (
-                $name === 'on_hold' ||
-                !OrderManagement::canCapture(order: $order)
-            ) {
-                continue;
-            }
+        if (Metadata::isValidResursPayment(order: $order)) {
+            foreach ($actions as $name => $action) {
+                try {
+                    $canCapture = OrderManagement::canCapture(order: $order);
+                } catch (Throwable) {
+                    $canCapture = false;
+                }
 
-            $result[$name] = $action;
+                if ($name === 'on_hold' || !$canCapture) {
+                    continue;
+                }
+
+                $result[$name] = $action;
+            }
         }
 
         return $result;

@@ -1,3 +1,7 @@
+# 1.0.35
+
+[WOO-1315](https://resursbankplugins.atlassian.net/browse/WOO-1315) Order list crashes when checking statuses with capturable orders
+
 # 1.0.34
 
 [WOO-1313](https://resursbankplugins.atlassian.net/browse/WOO-1313) Programmatic order updates will cancel FROZEN payments
