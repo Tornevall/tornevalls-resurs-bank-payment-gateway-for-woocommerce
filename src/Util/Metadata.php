@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
@@ -138,8 +139,17 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Abstract_Order $order): bool
     {
+        $canLoad = false;
+
         try {
-            return self::getPaymentId(order: $order) !== '';
+            OrderManagement::getPayment(order: $order);
+            $canLoad = true;
+        } catch (Throwable) {
+        }
+
+        try {
+            return self::getPaymentId(order: $order) !== '' &&
+                   $canLoad;
         } catch (Throwable $error) {
             Log::error(error: $error);
             return false;
