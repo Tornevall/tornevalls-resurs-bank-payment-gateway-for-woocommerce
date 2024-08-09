@@ -137,21 +137,25 @@ class Metadata
     /**
      * Check if order was paid through Resurs Bank.
      */
-    public static function isValidResursPayment(WC_Abstract_Order $order): bool
+    public static function isValidResursPayment(WC_Order|WC_Abstract_Order $order): bool
     {
-        $canLoad = false;
+        global $several;
+
+        $several++;
 
         try {
-            OrderManagement::getPayment(order: $order);
-            $canLoad = true;
+            // Validate stored id first. No id = Not Resurs.
+            // May occur in HPOS mode when orders are not in sync.
+            self::getPaymentId(order: $order);
         } catch (Throwable) {
+            return false;
         }
 
         try {
-            return self::getPaymentId(order: $order) !== '' &&
-                   $canLoad;
+            OrderManagement::getPayment(order: $order);
+            return true;
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Log::debug(message: $error->getMessage());
             return false;
         }
     }
