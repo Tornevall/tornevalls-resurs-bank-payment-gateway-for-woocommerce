@@ -139,10 +139,6 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order|WC_Abstract_Order $order): bool
     {
-        global $several;
-
-        $several++;
-
         try {
             // Validate stored id first. No id = Not Resurs.
             // May occur in HPOS mode when orders are not in sync.
@@ -152,12 +148,46 @@ class Metadata
         }
 
         try {
-            OrderManagement::getPayment(order: $order);
+            self::getPaymentByTransient(order: $order);
             return true;
         } catch (Throwable $error) {
             Log::debug(message: $error->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Transient payment fetching for when we live in a store order list rather than the direct order itself.
+     *
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws \JsonException
+     * @throws \ReflectionException
+     * @throws \Resursbank\Ecom\Exception\ApiException
+     * @throws \Resursbank\Ecom\Exception\AttributeCombinationException
+     * @throws \Resursbank\Ecom\Exception\AuthException
+     * @throws \Resursbank\Ecom\Exception\ConfigException
+     * @throws \Resursbank\Ecom\Exception\CurlException
+     * @throws \Resursbank\Ecom\Exception\ValidationException
+     * @throws \Resursbank\Ecom\Exception\Validation\IllegalValueException
+     * @throws \Resursbank\Ecom\Exception\Validation\NotJsonEncodedException
+     */
+    public static function getPaymentByTransient(WC_Order $order): Payment
+    {
+        // Make sure we don't use transients in the single-order-view, but only in the big list.
+        $useTransients = get_current_screen()->id === 'edit-shop_order';
+        $transientKey = 'tmp_resurs_payment_' . $order->get_id();
+
+        if ($useTransients) {
+            $paymentInfo = get_transient(
+                $transientKey
+            ) ?: OrderManagement::getPayment(order: $order);
+            set_transient($transientKey, $paymentInfo, 60);
+        } else {
+            $paymentInfo = OrderManagement::getPayment(order: $order);
+        }
+
+        return $paymentInfo;
     }
 
     /**
