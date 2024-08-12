@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
@@ -121,14 +122,34 @@ class Metadata
     /**
      * Check if order was paid through Resurs Bank.
      */
-    public static function isValidResursPayment(WC_Abstract_Order $order): bool
+    public static function isValidResursPayment(WC_Order|WC_Abstract_Order $order): bool
     {
+        global $resursPaymentValidation;
+
         try {
-            return self::getPaymentId(order: $order) !== '';
-        } catch (Throwable $error) {
-            Log::error(error: $error);
+            self::getPaymentId(order: $order);
+        } catch (Throwable) {
+            // Skip all checks if no Resurs id is present.
             return false;
         }
+
+        try {
+            // Several filters and actions are passing through here so to avoid multiple
+            // API requests we only will store the first success.
+            if (
+                !isset($resursPaymentValidation[$order->get_id()]) &&
+                Admin::isInShopOrder() &&
+                !Admin::isInOrderListView()
+            ) {
+                OrderManagement::getPayment(order: $order);
+                $resursPaymentValidation[$order->get_id()] = true;
+            }
+        } catch (Throwable $error) {
+            Log::debug(message: $error->getMessage());
+            $resursPaymentValidation[$order->get_id()] = false;
+        }
+
+        return $resursPaymentValidation[$order->get_id()] ?? true;
     }
 
     /**

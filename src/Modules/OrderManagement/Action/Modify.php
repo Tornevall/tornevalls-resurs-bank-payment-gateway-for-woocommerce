@@ -24,6 +24,7 @@ use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -81,7 +82,8 @@ class Modify extends Action
         }
 
         // Register action once, while we wait for all actions to finalized from WooCommerce.
-        if (!self::$execModify) {
+        // Make sure to only run this, if it is enabled from admin.
+        if (EnableModify::isEnabled() && !self::$execModify) {
             /**
              * WARNING! Do not centralize this feature! We don't want to run this randomly, but only in one
              * specific scenario for final order line handling, for where WooCommerce updates orders several
@@ -107,7 +109,7 @@ class Modify extends Action
     // phpcs:ignore
     public static function execModify(): void
     {
-        if (!self::$execModify && !is_ajax()) {
+        if (!self::$execModify && !is_ajax() || !EnableModify::isEnabled()) {
             return;
         }
 
