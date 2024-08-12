@@ -150,7 +150,10 @@ class Metadata
 
         $orderId = $order->get_id();
 
-        // If checkPaymentStatus is true, attempt to validate the payment.
+        // If checkPaymentStatus is requested, attempt to validate the payment by requesting it.
+        // Note that this method is called through several actions in the plugin which means
+        // each request will render a getPayment, unless we cache it the first time. We only
+        // need to know the first time, if the payment is valid.
         if ($checkPaymentStatus && !isset($resursPaymentValidation[$orderId])) {
             try {
                 OrderManagement::getPayment(order: $order);
