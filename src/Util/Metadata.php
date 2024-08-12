@@ -9,18 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AttributeCombinationException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -149,55 +139,32 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order|WC_Abstract_Order $order): bool
     {
+        global $resursPaymentValidation;
+
         try {
-            // Validate stored id first. No id = Not Resurs.
-            // May occur in HPOS mode when orders are not in sync.
             self::getPaymentId(order: $order);
         } catch (Throwable) {
+            // Skip all checks if no Resurs id is present.
             return false;
         }
 
         try {
-            self::getPaymentByTransient(order: $order);
-            return true;
+            // Several filters and actions are passing through here so to avoid multiple
+            // API requests we only will store the first success.
+            if (
+                !isset($resursPaymentValidation[$order->get_id()]) &&
+                Admin::isInShopOrder() &&
+                !Admin::isInOrderListView()
+            ) {
+                OrderManagement::getPayment(order: $order);
+                $resursPaymentValidation[$order->get_id()] = true;
+            }
         } catch (Throwable $error) {
             Log::debug(message: $error->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Transient payment fetching for when we live in a store order list, rather than the direct order itself.
-     *
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws IllegalValueException
-     * @throws NotJsonEncodedException
-     */
-    public static function getPaymentByTransient(WC_Order $order): Payment
-    {
-        // Make sure we don't use transients in the single-order-view, but only in the big list.
-        $useTransients = get_current_screen()->id === 'edit-shop_order';
-        $transientKey = 'tmp_resurs_payment_' . $order->get_id();
-
-        if ($useTransients) {
-            $paymentInfo = get_transient(
-                $transientKey
-            ) ?: OrderManagement::getPayment(order: $order);
-            set_transient($transientKey, $paymentInfo, 300);
-        } else {
-            $paymentInfo = OrderManagement::getPayment(order: $order);
+            $resursPaymentValidation[$order->get_id()] = false;
         }
 
-        return $paymentInfo;
+        return $resursPaymentValidation[$order->get_id()] ?? true;
     }
 
     /**
