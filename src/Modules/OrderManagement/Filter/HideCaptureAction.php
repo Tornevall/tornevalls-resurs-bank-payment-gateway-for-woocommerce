@@ -28,7 +28,12 @@ class HideCaptureAction
     ): array {
         $result = [];
 
-        if (Metadata::isValidResursPayment(order: $order)) {
+        if (
+            Metadata::isValidResursPayment(
+                order: $order,
+                checkPaymentStatus: false
+            )
+        ) {
             foreach ($actions as $name => $action) {
                 try {
                     $canCapture = OrderManagement::canCapture(order: $order);
