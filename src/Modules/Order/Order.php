@@ -158,7 +158,7 @@ class Order
             // or no longer available due to expiration.
             if ($e->httpCode === 403) {
                 $errorMessage = Translator::translate(
-                    phraseId: 'payment-denied-or-no-longer-available'
+                    phraseId: 'payment-info-denied-or-no-longer-available'
                 );
             }
 
