@@ -122,34 +122,33 @@ class Metadata
     /**
      * Check if order was paid through Resurs Bank.
      */
-    public static function isValidResursPayment(WC_Order|WC_Abstract_Order $order): bool
+    public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
         global $resursPaymentValidation;
 
         try {
+            // Attempt to retrieve the payment ID; if it fails, the order is invalid.
             self::getPaymentId(order: $order);
         } catch (Throwable) {
-            // Skip all checks if no Resurs id is present.
             return false;
         }
 
-        try {
-            // Several filters and actions are passing through here so to avoid multiple
-            // API requests we only will store the first success.
-            if (
-                !isset($resursPaymentValidation[$order->get_id()]) &&
-                Admin::isInShopOrder() &&
-                !Admin::isInOrderListView()
-            ) {
+        $orderId = $order->get_id();
+
+        // If checkPaymentStatus is true, attempt to validate the payment.
+        if ($checkPaymentStatus && !isset($resursPaymentValidation[$orderId])) {
+            try {
                 OrderManagement::getPayment(order: $order);
-                $resursPaymentValidation[$order->get_id()] = true;
+                $resursPaymentValidation[$orderId] = true;
+            } catch (Throwable $error) {
+                Log::debug(message: $error->getMessage());
+                $resursPaymentValidation[$orderId] = false;
+                return false;
             }
-        } catch (Throwable $error) {
-            Log::debug(message: $error->getMessage());
-            $resursPaymentValidation[$order->get_id()] = false;
         }
 
-        return $resursPaymentValidation[$order->get_id()] ?? true;
+        // If all checks pass, the order is valid.
+        return $resursPaymentValidation[$orderId];
     }
 
     /**
