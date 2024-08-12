@@ -162,8 +162,8 @@ class Metadata
             }
         }
 
-        // If all checks pass, the order is valid.
-        return $resursPaymentValidation[$orderId];
+        // If all checks passed or if checkPaymentStatus has not been requested.
+        return $resursPaymentValidation[$orderId] ?? true;
     }
 
     /**
