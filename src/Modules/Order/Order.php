@@ -156,7 +156,8 @@ class Order
             $httpCode = $e->httpCode ?? null;
 
             // According to APIs, code 403 means the payment is either denied due to the credentials
-            // or no longer available due to expiration.
+            // or no longer available due to expiration. By credentials, this means that the order
+            // exists but is inaccessible for the current service account.
             if ($httpCode === 403) {
                 $errorMessage = Translator::translate(
                     phraseId: 'payment-info-denied-or-no-longer-available'
