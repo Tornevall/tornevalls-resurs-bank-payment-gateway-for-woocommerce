@@ -9,8 +9,18 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -157,20 +167,20 @@ class Metadata
     }
 
     /**
-     * Transient payment fetching for when we live in a store order list rather than the direct order itself.
+     * Transient payment fetching for when we live in a store order list, rather than the direct order itself.
      *
      * @throws EmptyValueException
      * @throws IllegalTypeException
-     * @throws \JsonException
-     * @throws \ReflectionException
-     * @throws \Resursbank\Ecom\Exception\ApiException
-     * @throws \Resursbank\Ecom\Exception\AttributeCombinationException
-     * @throws \Resursbank\Ecom\Exception\AuthException
-     * @throws \Resursbank\Ecom\Exception\ConfigException
-     * @throws \Resursbank\Ecom\Exception\CurlException
-     * @throws \Resursbank\Ecom\Exception\ValidationException
-     * @throws \Resursbank\Ecom\Exception\Validation\IllegalValueException
-     * @throws \Resursbank\Ecom\Exception\Validation\NotJsonEncodedException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AttributeCombinationException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws IllegalValueException
+     * @throws NotJsonEncodedException
      */
     public static function getPaymentByTransient(WC_Order $order): Payment
     {
@@ -182,7 +192,7 @@ class Metadata
             $paymentInfo = get_transient(
                 $transientKey
             ) ?: OrderManagement::getPayment(order: $order);
-            set_transient($transientKey, $paymentInfo, 60);
+            set_transient($transientKey, $paymentInfo, 300);
         } else {
             $paymentInfo = OrderManagement::getPayment(order: $order);
         }
