@@ -154,6 +154,7 @@ class Order
             $errorMessage = $e->getMessage();
 
             $httpCode = $e->httpCode ?? null;
+
             // According to APIs, code 403 means the payment is either denied due to the credentials
             // or no longer available due to expiration.
             if ($httpCode === 403) {
