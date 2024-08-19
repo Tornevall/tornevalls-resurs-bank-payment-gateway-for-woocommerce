@@ -21,6 +21,7 @@ class HideCaptureAction
 {
     /**
      * Event listener.
+     * @phpcs:ignoreFile CognitiveComplexity
      */
     public static function exec(
         array $actions,
@@ -28,7 +29,12 @@ class HideCaptureAction
     ): array {
         $result = [];
 
-        if (Metadata::isValidResursPayment(order: $order)) {
+        if (
+            Metadata::isValidResursPayment(
+                order: $order,
+                checkPaymentStatus: false
+            )
+        ) {
             foreach ($actions as $name => $action) {
                 try {
                     $canCapture = OrderManagement::canCapture(order: $order);

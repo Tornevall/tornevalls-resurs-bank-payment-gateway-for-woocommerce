@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
@@ -136,14 +137,36 @@ class Metadata
     /**
      * Check if order was paid through Resurs Bank.
      */
-    public static function isValidResursPayment(WC_Abstract_Order $order): bool
+    public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
+        global $resursPaymentValidation;
+
         try {
-            return self::getPaymentId(order: $order) !== '';
-        } catch (Throwable $error) {
-            Log::error(error: $error);
+            // Attempt to retrieve the payment ID; if it fails, the order is invalid.
+            self::getPaymentId(order: $order);
+        } catch (Throwable) {
             return false;
         }
+
+        $orderId = $order->get_id();
+
+        // If checkPaymentStatus is requested, attempt to validate the payment by requesting it.
+        // Note that this method is called through several actions in the plugin which means
+        // each request will render a getPayment, unless we cache it the first time. We only
+        // need to know the first time, if the payment is valid.
+        if ($checkPaymentStatus && !isset($resursPaymentValidation[$orderId])) {
+            try {
+                OrderManagement::getPayment(order: $order);
+                $resursPaymentValidation[$orderId] = true;
+            } catch (Throwable $error) {
+                Log::debug(message: $error->getMessage());
+                $resursPaymentValidation[$orderId] = false;
+                return false;
+            }
+        }
+
+        // If all checks passed or if checkPaymentStatus has not been requested.
+        return $resursPaymentValidation[$orderId] ?? true;
     }
 
     /**

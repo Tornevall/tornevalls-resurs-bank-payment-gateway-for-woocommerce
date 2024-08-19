@@ -41,6 +41,7 @@ use WC_Order;
 /**
  * Business logic relating to order management functionality.
  *
+ * @phpcsSuppress SlevomatCodingStandard.Classes.ClassLength
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  * @SuppressWarnings(PHPMD.LongVariable)
  * @noinspection EfferentObjectCouplingInspection
@@ -202,6 +203,7 @@ class OrderManagement
      * Update translation in WooCommerce at editor level if Resurs has an order frozen or rejected.
      *
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -209,11 +211,10 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @noinspection PhpUnusedParameterInspection
-     * @noinspection PhpConditionCheckedByNextConditionInspection
      */
     public static function getCanNotEditTranslation(WC_Order $order): void
     {
@@ -225,6 +226,10 @@ class OrderManagement
             return;
         }
 
+        /**
+         * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
+         * @phpcs:ignoreFile CognitiveComplexity
+         */
         add_filter(
             'gettext',
             static function ($translation, $text, $domain) use ($isFrozen, $isRejected) {
@@ -259,6 +264,7 @@ class OrderManagement
      * Check if order is FROZEN.
      *
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -266,6 +272,7 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
      */
@@ -279,6 +286,7 @@ class OrderManagement
      * Is order rejected?
      *
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -286,6 +294,7 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
      */
@@ -297,6 +306,7 @@ class OrderManagement
 
     /**
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -304,6 +314,7 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
      */
@@ -316,6 +327,7 @@ class OrderManagement
 
     /**
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -323,6 +335,7 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
      */
@@ -335,6 +348,7 @@ class OrderManagement
 
     /**
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -342,6 +356,7 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
      */

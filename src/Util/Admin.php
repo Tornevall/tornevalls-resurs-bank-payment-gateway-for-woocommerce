@@ -66,4 +66,23 @@ class Admin
 
         return $return;
     }
+
+    /**
+     * HPOS compatible method to find out if current screen is shop_order (wp-admin order view).
+     */
+    public static function isInShopOrder(): bool
+    {
+        // id is used in legacy mode. post_type is used in HPOS mode.
+        return get_current_screen()->id === 'shop_order' || get_current_screen()->post_type === 'shop_order';
+    }
+
+    /**
+     * Check if user is currently located in the order list.
+     */
+    public static function isInOrderListView(): bool
+    {
+        // The list screen is held separately from the single order view and is regardless of HPOS
+        // always the id.
+        return self::isInShopOrder() && get_current_screen()->id === 'edit-shop_order';
+    }
 }

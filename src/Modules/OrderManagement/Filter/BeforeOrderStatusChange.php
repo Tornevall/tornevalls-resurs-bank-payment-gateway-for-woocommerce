@@ -13,6 +13,9 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -59,7 +62,8 @@ class BeforeOrderStatusChange
             $order === null ||
             $newStatus === '' ||
             !Metadata::isValidResursPayment(order: $order) ||
-            self::validatePaymentAction(status: $newStatus, order: $order)
+            self::validatePaymentAction(status: $newStatus, order: $order) ||
+            !self::validateEnabledPaymentAction(status: $newStatus)
         ) {
             return;
         }
@@ -109,6 +113,28 @@ class BeforeOrderStatusChange
         } catch (Throwable $error) {
             Log::error(error: $error);
             return false;
+        }
+    }
+
+    /**
+     * If we get positive on payment action validation, we need to make ensure the feature is enabled to proceed.
+     */
+    public static function validateEnabledPaymentAction(
+        string $status
+    ): bool {
+        switch ($status) {
+            case 'failed':
+            case 'cancelled':
+                return EnableCancel::isEnabled();
+
+            case 'completed':
+                return EnableCapture::isEnabled();
+
+            case 'refunded':
+                return EnableRefund::isEnabled();
+
+            default:
+                return false;
         }
     }
 
