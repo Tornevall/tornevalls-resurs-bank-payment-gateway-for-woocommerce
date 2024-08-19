@@ -154,9 +154,11 @@ class Order
         } catch (Throwable $e) {
             $errorMessage = $e->getMessage();
 
-            // According to APIs, code 403 means the payment is either denied due to the credentials
-            // or no longer available due to expiration.
-            if ($e->httpCode === 403) {
+            $httpCode = $e->httpCode ?? 0;
+
+            // According to APIs (when we get the codes), code 403 means the payment is either denied due to
+            // the credentials or no longer available due to expiration.
+            if ($httpCode === 403) {
                 $errorMessage = Translator::translate(
                     phraseId: 'payment-info-denied-or-no-longer-available'
                 );
