@@ -40,7 +40,7 @@ class Capture extends Action
                 $payment = OrderManagement::getPayment(order: $order);
                 $authorizedAmount = $payment->order?->authorizedAmount;
 
-                if ($authorizedAmount !== $order->get_total()) {
+                if ((float)$authorizedAmount !== (float)$order->get_total()) {
                     $mismatchError = Translator::translate(
                         phraseId: 'debitable-amount-does-not-match-authorized-amount'
                     );
