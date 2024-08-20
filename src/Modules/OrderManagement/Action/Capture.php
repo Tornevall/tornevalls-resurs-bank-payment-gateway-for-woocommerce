@@ -12,8 +12,10 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbank\Woocommerce\Util\Translator;
 use WC_Order;
 
 /**
@@ -36,6 +38,17 @@ class Capture extends Action
             order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
+                $authorizedAmount = $payment->order?->authorizedAmount;
+
+                if ($authorizedAmount !== $order->get_total()) {
+                    $mismatchError = Translator::translate(
+                        phraseId: 'debitable-amount-does-not-match-authorized-amount'
+                    );
+
+                    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                    $order->add_order_note($mismatchError);
+                    MessageBag::addError(message: $mismatchError);
+                }
 
                 if (!$payment->canCapture()) {
                     return;
