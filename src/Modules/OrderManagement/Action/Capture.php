@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
-use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
@@ -17,7 +16,6 @@ use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order;
 
@@ -49,9 +47,9 @@ class Capture extends Action
                     );
 
                     if (Admin::isInOrderListView()) {
-                        $mismatchError .= '[Order: ' . $order->get_id() . '] ' . $mismatchError;
+                        $mismatchError = '[Order: ' . $order->get_id() . '] ' . $mismatchError;
                     }
-                    
+
                     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
                     $order->add_order_note($mismatchError);
                     MessageBag::addError(message: $mismatchError);
