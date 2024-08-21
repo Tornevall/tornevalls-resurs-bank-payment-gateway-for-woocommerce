@@ -39,11 +39,12 @@ class Capture extends Action
             order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
-                $authorizedAmount = $payment->order?->authorizedAmount;
 
                 if (!$payment->canCapture()) {
                     return;
                 }
+
+                $authorizedAmount = $payment->order?->authorizedAmount;
 
                 if ((float)$authorizedAmount !== (float)$order->get_total()) {
                     $mismatchError = Translator::translate(

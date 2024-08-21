@@ -341,6 +341,9 @@ class Resursbank extends WC_Payment_Gateway
             );
         }
 
+        $order->add_order_note('Resurs initiated payment process.');
+        Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value:(string)time());
+
         return PaymentRepository::create(
             storeId: StoreId::getData(),
             paymentMethodId: $this->method->id,
