@@ -4,7 +4,7 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.4.3
 Requires PHP: 8.1
-WC Tested up to: 8.9.3
+WC Tested up to: 9.1.4
 WC requires at least: 7.6.0
 Plugin requires ecom: 2.0.7
 Stable tag: 1.0.36
