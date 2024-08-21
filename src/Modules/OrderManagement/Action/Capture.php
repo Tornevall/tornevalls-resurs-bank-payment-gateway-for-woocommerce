@@ -41,6 +41,10 @@ class Capture extends Action
                 $payment = OrderManagement::getPayment(order: $order);
                 $authorizedAmount = $payment->order?->authorizedAmount;
 
+                if (!$payment->canCapture()) {
+                    return;
+                }
+
                 if ((float)$authorizedAmount !== (float)$order->get_total()) {
                     $mismatchError = Translator::translate(
                         phraseId: 'debitable-amount-does-not-match-authorized-amount'
@@ -53,10 +57,6 @@ class Capture extends Action
                     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
                     $order->add_order_note($mismatchError);
                     MessageBag::addError(message: $mismatchError);
-                }
-
-                if (!$payment->canCapture()) {
-                    return;
                 }
 
                 $transactionId = self::generateTransactionId();
