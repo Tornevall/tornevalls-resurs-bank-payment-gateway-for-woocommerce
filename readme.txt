@@ -59,6 +59,14 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.0.36
+
+[WOO-1317](https://resursbankplugins.atlassian.net/browse/WOO-1317) Hantera orders som blivit rejected och den är äldre än 30 dgr
+[WOO-1319](https://resursbankplugins.atlassian.net/browse/WOO-1319) Check for hardcoded vatrates
+[WOO-1315](https://resursbankplugins.atlassian.net/browse/WOO-1315) Order list crashes when checking statuses with capturable orders
+[WOO-1318](https://resursbankplugins.atlassian.net/browse/WOO-1318) Går ej att ändra status på en order även om orderhantering mot resurs är avaktiverat
+[WOO-1321](https://resursbankplugins.atlassian.net/browse/WOO-1321) Disabled modify may cause wrong captures
+
 # 1.0.35
 
 [WOO-1315](https://resursbankplugins.atlassian.net/browse/WOO-1315) Order list crashes when checking statuses with capturable orders
