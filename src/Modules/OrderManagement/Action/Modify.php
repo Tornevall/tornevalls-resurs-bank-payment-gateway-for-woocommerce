@@ -119,12 +119,15 @@ class Modify extends Action
         OrderManagement::execAction(
             action: ActionType::MODIFY_ORDER,
             order: self::$order,
-            callback: static function () use ($order, $resursCheckBulkIds): void {
+            callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(
                     order: $order
                 );
 
-                $canBulkModify = self::canBulkModify(order: $order, payment: $payment);
+                $canBulkModify = self::canBulkModify(
+                    order: $order,
+                    payment: $payment
+                );
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
@@ -165,10 +168,6 @@ class Modify extends Action
 
     /**
      * Allow to modify as long as order is not in bulk mode and not frozen.
-     *
-     * @param WC_Order $order
-     * @param Payment $payment
-     * @return bool
      */
     public static function canBulkModify(WC_Order $order, Payment $payment): bool
     {
