@@ -3,11 +3,11 @@
 /**
  * Plugin Name: Resurs Bank Payments for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
- * WC Tested up to: 8.9.3
+ * WC Tested up to: 9.1.4
  * WC requires at least: 7.6.0
- * Plugin requires ecom: 2.0.6
+ * Plugin requires ecom: 2.0.7
  * Requires PHP: 8.1
- * Version: 1.0.35
+ * Version: 1.0.36
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
@@ -16,6 +16,11 @@
  * @noinspection PhpCSValidationInspection
  * @noinspection PhpDefineCanBeReplacedWithConstInspection
  */
+
+// @todo This is wordpress. SideEffects can not be handled properly while the init looks like this.
+// @todo Consider honoring this in the future another way.
+// phpcs:disable PSR1.Files.SideEffects
+
 
 declare(strict_types=1);
 

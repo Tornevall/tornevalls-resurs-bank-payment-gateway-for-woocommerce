@@ -40,6 +40,21 @@ class Settings
             'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
+        add_filter(
+            'handle_bulk_actions-edit-shop_order',
+            static function ($redirect, $action, $ids) {
+                global $resursCheckBulkIds;
+
+                foreach ($ids as $id) {
+                    $resursCheckBulkIds[$id] = $action;
+                }
+
+                return $redirect;
+            },
+            10,
+            3
+        );
+
         Api::init();
         PartPayment::init();
 

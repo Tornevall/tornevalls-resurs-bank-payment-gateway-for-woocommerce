@@ -9,11 +9,15 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
+use Exception;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\Translator;
 use WC_Order;
 
 /**
@@ -36,9 +40,44 @@ class Capture extends Action
             order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
+                $authorizedAmount = $payment->order?->authorizedAmount;
+
+                // Do not allow frozen orders to be captured from order list view, as this
+                // could trigger Modify, which we normally don't want.
+                if ($payment->isFrozen() && Admin::isInOrderListView()) {
+                    // Trying to scream on screen when this occurs.
+                    $frozenPreventionMessage = Translator::translate(
+                        phraseId: 'unable-to-capture-frozen-order'
+                    );
+                    OrderManagement::logActionError(
+                        action: ActionType::CAPTURE,
+                        order: $order,
+                        error: new Exception(message: $frozenPreventionMessage),
+                        reason: $frozenPreventionMessage
+                    );
+                    return;
+                }
 
                 if (!$payment->canCapture()) {
                     return;
+                }
+
+                if ((float)$authorizedAmount !== (float)$order->get_total()) {
+                    $mismatchError = Translator::translate(
+                        phraseId: 'debitable-amount-does-not-match-authorized-amount'
+                    );
+
+                    if (Admin::isInOrderListView()) {
+                        $mismatchError = '[Order: ' . $order->get_id() . '] ' . $mismatchError;
+                    }
+
+                    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                    $order->add_order_note($mismatchError);
+                    MessageBag::addError(message: $mismatchError);
+
+                    if (Admin::isInOrderListView() || is_ajax()) {
+                        throw new Exception(message: $mismatchError);
+                    }
                 }
 
                 $transactionId = self::generateTransactionId();

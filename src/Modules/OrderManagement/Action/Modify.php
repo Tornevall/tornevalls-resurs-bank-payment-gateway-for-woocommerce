@@ -109,6 +109,8 @@ class Modify extends Action
     // phpcs:ignore
     public static function execModify(): void
     {
+        global $resursCheckBulkIds;
+
         if (!self::$execModify && !is_ajax() || !EnableModify::isEnabled()) {
             return;
         }
@@ -122,6 +124,11 @@ class Modify extends Action
                     order: $order
                 );
 
+                $canBulkModify = self::canBulkModify(
+                    order: $order,
+                    payment: $payment
+                );
+
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
                 // they tend to disappear if we throw exceptions. However, if orders are already cancelled
@@ -129,7 +136,8 @@ class Modify extends Action
                 if (
                     OrderManagement::$hasActiveCancel ||
                     !$payment->canCancel() ||
-                    $payment->status === Status::TASK_REDIRECTION_REQUIRED
+                    $payment->status === Status::TASK_REDIRECTION_REQUIRED ||
+                    !$canBulkModify
                 ) {
                     return;
                 }
@@ -156,6 +164,18 @@ class Modify extends Action
                 );
             }
         );
+    }
+
+    /**
+     * Allow to modify as long as order is not in bulk mode and not frozen.
+     */
+    public static function canBulkModify(WC_Order $order, Payment $payment): bool
+    {
+        global $resursCheckBulkIds;
+
+        $bulkType = $resursCheckBulkIds[$order->get_id()] ?? '';
+
+        return $bulkType === 'mark_completed' && $payment->canCancel() && !$payment->isFrozen();
     }
 
     /**

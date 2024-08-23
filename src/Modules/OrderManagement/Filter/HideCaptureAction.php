@@ -21,6 +21,7 @@ class HideCaptureAction
 {
     /**
      * Event listener.
+     * @phpcs:ignoreFile CognitiveComplexity
      */
     public static function exec(
         array $actions,
