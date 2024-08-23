@@ -109,6 +109,8 @@ class Modify extends Action
     // phpcs:ignore
     public static function execModify(): void
     {
+        global $resursCheckBulkIds;
+
         if (!self::$execModify && !is_ajax() || !EnableModify::isEnabled()) {
             return;
         }
@@ -117,10 +119,12 @@ class Modify extends Action
         OrderManagement::execAction(
             action: ActionType::MODIFY_ORDER,
             order: self::$order,
-            callback: static function () use ($order): void {
+            callback: static function () use ($order, $resursCheckBulkIds): void {
                 $payment = OrderManagement::getPayment(
                     order: $order
                 );
+
+                $canBulkModify = self::canBulkModify(order: $order, payment: $payment);
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
@@ -129,7 +133,8 @@ class Modify extends Action
                 if (
                     OrderManagement::$hasActiveCancel ||
                     !$payment->canCancel() ||
-                    $payment->status === Status::TASK_REDIRECTION_REQUIRED
+                    $payment->status === Status::TASK_REDIRECTION_REQUIRED ||
+                    !$canBulkModify
                 ) {
                     return;
                 }
@@ -156,6 +161,22 @@ class Modify extends Action
                 );
             }
         );
+    }
+
+    /**
+     * Allow to modify as long as order is not in bulk mode and not frozen.
+     *
+     * @param WC_Order $order
+     * @param Payment $payment
+     * @return bool
+     */
+    public static function canBulkModify(WC_Order $order, Payment $payment): bool
+    {
+        global $resursCheckBulkIds;
+
+        $bulkType = $resursCheckBulkIds[$order->get_id()] ?? '';
+
+        return $bulkType === 'mark_completed' && $payment->canCancel() && !$payment->isFrozen();
     }
 
     /**
