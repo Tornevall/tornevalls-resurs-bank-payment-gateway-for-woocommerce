@@ -40,7 +40,6 @@ class Capture extends Action
             order: $order,
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
-                $authorizedAmount = $payment->order?->authorizedAmount;
 
                 // Do not allow frozen orders to be captured from order list view, as this
                 // could trigger Modify, which we normally don't want.
@@ -61,6 +60,8 @@ class Capture extends Action
                 if (!$payment->canCapture()) {
                     return;
                 }
+
+                $authorizedAmount = $payment->order?->authorizedAmount;
 
                 if ((float)$authorizedAmount !== (float)$order->get_total()) {
                     $mismatchError = Translator::translate(
