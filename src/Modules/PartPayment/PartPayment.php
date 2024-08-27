@@ -72,9 +72,11 @@ class PartPayment
         }
 
         $priceData = self::getPriceData();
+
         if ($priceData <= 0.0) {
             return null;
         }
+
         $paymentMethodSet = PaymentMethod::getData();
 
         if ($paymentMethodSet === '') {
@@ -94,7 +96,10 @@ class PartPayment
             );
         }
 
-        if ($priceData >= $paymentMethod->minPurchaseLimit && $priceData <= $paymentMethod->maxPurchaseLimit) {
+        if (
+            $priceData >= $paymentMethod->minPurchaseLimit &&
+            $priceData <= $paymentMethod->maxPurchaseLimit
+        ) {
             self::$instance = new EcomPartPayment(
                 storeId: StoreId::getData(),
                 paymentMethod: $paymentMethod,
@@ -120,20 +125,25 @@ class PartPayment
      */
     public static function initFrontend(): void
     {
-        if (PartPaymentOptions::isEnabled() && PaymentMethod::getData() !== '') {
-            add_action(
-                'wp_head',
-                'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
-            );
-            add_action(
-                'wp_enqueue_scripts',
-                'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
-            );
-            add_action(
-                'woocommerce_single_product_summary',
-                'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'
-            );
+        if (
+            !PartPaymentOptions::isEnabled() ||
+            PaymentMethod::getData() === ''
+        ) {
+            return;
         }
+
+        add_action(
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
+        );
+        add_action(
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
+        );
+        add_action(
+            'woocommerce_single_product_summary',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'
+        );
     }
 
     /**
@@ -161,24 +171,6 @@ class PartPayment
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
-    }
-
-    /**
-     * Get checkout or product price.
-     *
-     * @return float
-     */
-    private static function getPriceData(): float
-    {
-        try {
-            $priceData = is_checkout()
-                ? WooCommerce::getCartTotals()
-                : (float)self::getProduct()?->get_price();
-        } catch (Throwable) {
-            $priceData = WooCommerce::getCartTotals();
-        }
-
-        return $priceData;
     }
 
     /**
@@ -234,6 +226,22 @@ EX;
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
+    }
+
+    /**
+     * Get checkout or product price.
+     */
+    private static function getPriceData(): float
+    {
+        try {
+            $priceData = is_checkout()
+                ? WooCommerce::getCartTotals()
+                : (float)self::getProduct()?->get_price();
+        } catch (Throwable) {
+            $priceData = WooCommerce::getCartTotals();
+        }
+
+        return $priceData;
     }
 
     /**
