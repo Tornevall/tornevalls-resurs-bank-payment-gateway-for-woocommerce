@@ -72,8 +72,11 @@ class Admin
      */
     public static function isInShopOrder(): bool
     {
+        // Current screen can be null when is_ajax().
+        $currentScreen = get_current_screen();
         // id is used in legacy mode. post_type is used in HPOS mode.
-        return get_current_screen()->id === 'shop_order' || get_current_screen()->post_type === 'shop_order';
+        return isset($currentScreen) &&
+            ($currentScreen->id === 'shop_order' || $currentScreen->post_type === 'shop_order');
     }
 
     /**
@@ -81,8 +84,9 @@ class Admin
      */
     public static function isInOrderListView(): bool
     {
+        $currentScreen = get_current_screen();
         // The list screen is held separately from the single order view and is regardless of HPOS
         // always the id.
-        return self::isInShopOrder() && get_current_screen()->id === 'edit-shop_order';
+        return self::isInShopOrder() && isset($currentScreen) && $currentScreen->id === 'edit-shop_order';
     }
 }
