@@ -36,13 +36,22 @@ class HideCaptureAction
             )
         ) {
             foreach ($actions as $name => $action) {
+                if ($name !== 'on_hold') {
+                    continue;
+                }
+                /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                if (!$order->has_status('processing'))
+                {
+                    continue;
+                }
+
                 try {
                     $canCapture = OrderManagement::canCapture(order: $order);
                 } catch (Throwable) {
                     $canCapture = false;
                 }
 
-                if ($name === 'on_hold' || !$canCapture) {
+                if ($canCapture) {
                     continue;
                 }
 
