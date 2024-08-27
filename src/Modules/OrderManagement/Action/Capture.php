@@ -61,9 +61,20 @@ class Capture extends Action
                     return;
                 }
 
-                $authorizedAmount = $payment->order?->authorizedAmount;
+                $authorizedAmount = number_format(
+                    num: (float)$payment->order?->authorizedAmount,
+                    decimals: 2,
+                    decimal_separator: '.',
+                    thousands_separator: ''
+                );
+                $orderTotal = number_format(
+                    num: (float)$order->get_total(),
+                    decimals: 2,
+                    decimal_separator: '.',
+                    thousands_separator: ''
+                );
 
-                if ((float)$authorizedAmount !== (float)$order->get_total()) {
+                if ($authorizedAmount !== $orderTotal) {
                     $mismatchError = Translator::translate(
                         phraseId: 'debitable-amount-does-not-match-authorized-amount'
                     );
