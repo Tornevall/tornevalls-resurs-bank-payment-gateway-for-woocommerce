@@ -175,8 +175,6 @@ class PartPayment
 
     /**
      * Output widget CSS if on single product page.
-     *
-     * @throws ConfigException
      */
     public static function setCss(): void
     {
