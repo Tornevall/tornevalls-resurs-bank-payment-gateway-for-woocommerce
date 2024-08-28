@@ -109,7 +109,7 @@ class PartPayment
             amount: $priceData,
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
-            apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
+            fetchStartingCostUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
             decimals: Currency::getConfiguredDecimalPoints(),
             displayInfoText: self::displayInfoText()
         );
@@ -232,9 +232,9 @@ EX;
             return Enabled::isEnabled() &&
                    is_product() &&
                    (float)self::getProduct()->get_price() > 0.0 &&
-                   self::getWidget()->getPaymentMethod()->maxApplicationLimit >=
+                   self::getWidget()->paymentMethod->maxApplicationLimit >=
                         (float)self::getProduct()->get_price() &&
-                   self::getWidget()->getPaymentMethod()->minApplicationLimit <=
+                   self::getWidget()->paymentMethod->minApplicationLimit <=
                         (float)self::getProduct()->get_price() &&
                    self::getWidget()->cost->monthlyCost >= Limit::getData();
         } catch (Throwable $error) {
