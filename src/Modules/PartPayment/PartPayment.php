@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -24,7 +23,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Repository\Cache;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -177,6 +175,7 @@ class PartPayment
 
     /**
      * Output widget CSS if on single product page.
+     *
      * @throws ConfigException
      */
     public static function setCss(): void
