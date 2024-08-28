@@ -4,10 +4,11 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.4.3
 Requires PHP: 8.1
-WC Tested up to: 9.1.4
+WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: 2.0.7
-Stable tag: 1.0.36
+Requires Plugins: woocommerce
+Stable tag: 1.0.37
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
