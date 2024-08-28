@@ -109,8 +109,6 @@ class Modify extends Action
     // phpcs:ignore
     public static function execModify(): void
     {
-        global $resursCheckBulkIds;
-
         if (!self::$execModify && !is_ajax() || !EnableModify::isEnabled()) {
             return;
         }
