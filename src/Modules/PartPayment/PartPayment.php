@@ -109,7 +109,9 @@ class PartPayment
             amount: $priceData,
             currencySymbol: Currency::getWooCommerceCurrencySymbol(),
             currencyFormat: Currency::getEcomCurrencyFormat(),
-            fetchStartingCostUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
+            fetchStartingCostUrl: Route::getUrl(
+                route: Route::ROUTE_PART_PAYMENT
+            ),
             decimals: Currency::getConfiguredDecimalPoints(),
             displayInfoText: self::displayInfoText()
         );

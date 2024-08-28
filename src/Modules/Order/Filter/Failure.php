@@ -84,9 +84,6 @@ class Failure
     }
 
     /**
-     * @param string $message
-     * @param string $orderId
-     * @return string
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
