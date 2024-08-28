@@ -9,9 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Metadata;
-use Throwable;
 use WC_Order;
 
 /**
@@ -36,7 +34,14 @@ class HideCaptureAction
             )
         ) {
             foreach ($actions as $name => $action) {
-                if ($name !== 'on_hold') {
+                // Prevent the "complete" button from being added if the order or action is "on-hold".
+                // Also, don't allow changing an "on-hold" order to "processing" in the list view,
+                // as it might be frozen by Resurs. Forcing a status change could cause incorrect handling
+                // and potential cancellation of the order. Actions are limited to not block for other
+                // buttons.
+                if ($name === 'on_hold' ||
+                    ($order->has_status('on-hold') && ($name === 'complete' || $name === 'processing'))
+                ) {
                     continue;
                 }
 
