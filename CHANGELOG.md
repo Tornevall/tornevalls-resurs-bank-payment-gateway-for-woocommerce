@@ -1,9 +1,16 @@
+# 1.0.37
+
+[WOO-1324](https://resursbankplugins.atlassian.net/browse/WOO-1324) Investigate and Possibly Remove getPriceSignage false errors in the Log
+[WOO-1322](https://resursbankplugins.atlassian.net/browse/WOO-1322) Error Occurs When Attempting to Charge a Frozen Order via Bulk Update in the Order List
+[WOO-1323](https://resursbankplugins.atlassian.net/browse/WOO-1323) Prevent race conditions between "thankyou" and callbacks after order creation-retries
+[WOO-1326](https://resursbankplugins.atlassian.net/browse/WOO-1326) canCapture in orderlist still a performance issue
+
 # 1.0.36
 
-[WOO-1317](https://resursbankplugins.atlassian.net/browse/WOO-1317) Hantera orders som blivit rejected och den är äldre än 30 dgr
+[WOO-1317](https://resursbankplugins.atlassian.net/browse/WOO-1317) Handle Orders Marked as Rejected and Older Than 30 Days
 [WOO-1319](https://resursbankplugins.atlassian.net/browse/WOO-1319) Check for hardcoded vatrates
 [WOO-1315](https://resursbankplugins.atlassian.net/browse/WOO-1315) Order list crashes when checking statuses with capturable orders
-[WOO-1318](https://resursbankplugins.atlassian.net/browse/WOO-1318) Går ej att ändra status på en order även om orderhantering mot resurs är avaktiverat
+[WOO-1318](https://resursbankplugins.atlassian.net/browse/WOO-1318) Unable to Change Order Status Even When Order Management Against Resurs is Deactivated
 [WOO-1321](https://resursbankplugins.atlassian.net/browse/WOO-1321) Disabled modify may cause wrong captures
 
 # 1.0.35
