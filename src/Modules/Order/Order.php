@@ -200,8 +200,6 @@ class Order
     }
 
     /**
-     * @param WC_Order $order
-     * @return PaymentMethod|null
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
