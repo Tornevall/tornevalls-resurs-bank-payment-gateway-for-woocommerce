@@ -26,7 +26,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
@@ -65,10 +65,16 @@ class PartPayment
      * @throws ValidationException
      * @throws Throwable
      */
-    public static function getWidget(): EcomPartPayment
+    public static function getWidget(): ?EcomPartPayment
     {
         if (self::$instance !== null) {
             return self::$instance;
+        }
+
+        $priceData = self::getPriceData();
+
+        if ($priceData <= 0.0) {
+            return null;
         }
 
         $paymentMethodSet = PaymentMethod::getData();
@@ -90,31 +96,25 @@ class PartPayment
             );
         }
 
-        try {
-            // Fetch a calculated price from either a product or the cart.
-            $priceData = is_checkout()
-                ? WooCommerce::getCartTotals()
-                : (float) self::getProduct()?->get_price();
-        } catch (Throwable) {
-            // If fetching from getProduct fails or returns null, get data from the cart
-            $priceData = WooCommerce::getCartTotals();
+        if (
+            $priceData >= $paymentMethod->minPurchaseLimit &&
+            $priceData <= $paymentMethod->maxPurchaseLimit
+        ) {
+            self::$instance = new EcomPartPayment(
+                storeId: StoreId::getData(),
+                paymentMethod: $paymentMethod,
+                months: (int)Period::getData(),
+                amount: $priceData,
+                currencySymbol: Currency::getWooCommerceCurrencySymbol(),
+                currencyFormat: Currency::getEcomCurrencyFormat(),
+                apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
+                decimals: Currency::getConfiguredDecimalPoints(),
+                displayInfoText: self::displayInfoText()
+            );
+            return self::$instance;
         }
 
-        // Try to find the product before rendering stuff.
-
-        self::$instance = new EcomPartPayment(
-            storeId: StoreId::getData(),
-            paymentMethod: $paymentMethod,
-            months: (int)Period::getData(),
-            amount: $priceData,
-            currencySymbol: Currency::getWooCommerceCurrencySymbol(),
-            currencyFormat: Currency::getEcomCurrencyFormat(),
-            apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
-            decimals: Currency::getConfiguredDecimalPoints(),
-            displayInfoText: self::displayInfoText()
-        );
-
-        return self::$instance;
+        return null;
     }
 
     /**
@@ -125,6 +125,13 @@ class PartPayment
      */
     public static function initFrontend(): void
     {
+        if (
+            !PartPaymentOptions::isEnabled() ||
+            PaymentMethod::getData() === ''
+        ) {
+            return;
+        }
+
         add_action(
             'wp_head',
             'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
@@ -171,14 +178,21 @@ class PartPayment
      */
     public static function setCss(): void
     {
+        // No price, not widget.
+        if (self::getPriceData() <= 0.0) {
+            return;
+        }
+
         try {
-            $css = self::getWidget()->css;
+            $css = self::getWidget()->css ?? '';
 
             echo <<<EX
 <style id="rb-pp-styles">
   $css
 </style>
 EX;
+        } catch (EmptyValueException) {
+            // Take no action when payment method is not set.
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -215,6 +229,22 @@ EX;
     }
 
     /**
+     * Get checkout or product price.
+     */
+    private static function getPriceData(): float
+    {
+        try {
+            $priceData = is_checkout()
+                ? WooCommerce::getCartTotals()
+                : (float)self::getProduct()?->get_price();
+        } catch (Throwable) {
+            $priceData = WooCommerce::getCartTotals();
+        }
+
+        return $priceData;
+    }
+
+    /**
      * Programmatically control whether part payment info text should be shown or hidden. Default is to show.
      */
     private static function displayInfoText(): bool
@@ -229,14 +259,15 @@ EX;
     private static function isEnabled(): bool
     {
         try {
-            return Enabled::isEnabled() &&
-                   is_product() &&
-                   (float)self::getProduct()->get_price() > 0.0 &&
-                   self::getWidget()->getPaymentMethod()->maxApplicationLimit >=
-                        (float)self::getProduct()->get_price() &&
-                   self::getWidget()->getPaymentMethod()->minApplicationLimit <=
-                        (float)self::getProduct()->get_price() &&
-                   self::getWidget()->cost->monthlyCost >= Limit::getData();
+            return PartPaymentOptions::isEnabled() &&
+                PaymentMethod::getData() !== '' &&
+                is_product() &&
+                (float)self::getProduct()->get_price() > 0.0 &&
+                self::getWidget()->getPaymentMethod()->maxApplicationLimit >=
+                (float)self::getProduct()->get_price() &&
+                self::getWidget()->getPaymentMethod()->minApplicationLimit <=
+                (float)self::getProduct()->get_price() &&
+                self::getWidget()->cost->monthlyCost >= Limit::getData();
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

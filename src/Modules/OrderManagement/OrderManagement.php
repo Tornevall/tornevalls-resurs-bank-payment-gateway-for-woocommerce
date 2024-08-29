@@ -143,7 +143,7 @@ class OrderManagement
         add_filter(
             'woocommerce_admin_order_actions',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\HideCaptureAction::exec',
-            10,
+            999,
             2
         );
 

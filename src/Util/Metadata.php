@@ -122,10 +122,12 @@ class Metadata
 
     /**
      * Check if order was paid through Resurs Bank.
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
-        global $resursPaymentValidation;
+        global $rbPaymentIsValid;
 
         try {
             // Attempt to retrieve the payment ID; if it fails, the order is invalid.
@@ -140,19 +142,19 @@ class Metadata
         // Note that this method is called through several actions in the plugin which means
         // each request will render a getPayment, unless we cache it the first time. We only
         // need to know the first time, if the payment is valid.
-        if ($checkPaymentStatus && !isset($resursPaymentValidation[$orderId])) {
+        if ($checkPaymentStatus && !isset($rbPaymentIsValid[$orderId])) {
             try {
                 OrderManagement::getPayment(order: $order);
-                $resursPaymentValidation[$orderId] = true;
+                $rbPaymentIsValid[$orderId] = true;
             } catch (Throwable $error) {
                 Log::debug(message: $error->getMessage());
-                $resursPaymentValidation[$orderId] = false;
+                $rbPaymentIsValid[$orderId] = false;
                 return false;
             }
         }
 
         // If all checks passed or if checkPaymentStatus has not been requested.
-        return $resursPaymentValidation[$orderId] ?? true;
+        return $rbPaymentIsValid[$orderId] ?? true;
     }
 
     /**

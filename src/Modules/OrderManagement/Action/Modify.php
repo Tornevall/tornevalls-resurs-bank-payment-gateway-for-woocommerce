@@ -105,12 +105,12 @@ class Modify extends Action
 
     /**
      * Final execution of modify, after an order has been entirely processed by WooCommerce.
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     // phpcs:ignore
     public static function execModify(): void
     {
-        global $resursCheckBulkIds;
-
         if (!self::$execModify && !is_ajax() || !EnableModify::isEnabled()) {
             return;
         }
