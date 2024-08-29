@@ -81,6 +81,7 @@ class Order
             // reconsider the way this has been historically done,
             // $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
             $wcOrder = wc_get_order();
+            $wcOrderid = $wcOrder->get_id();
 
             if (!$wcOrder instanceof WC_Order) {
                 return;
@@ -112,7 +113,7 @@ class Order
             wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
             wp_add_inline_script(
                 'rb-get-order-content-admin-inline-scripts',
-                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrder->get_id()');"
+                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrderid');"
             );
         } catch (Throwable $error) {
             Log::error(error: $error);
