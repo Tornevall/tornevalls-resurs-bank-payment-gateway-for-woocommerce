@@ -200,17 +200,20 @@ class Order
     }
 
     /**
-     * @throws ValidationException
+     * @param WC_Order $order
+     * @return PaymentMethod|null
+     * @throws ApiException
      * @throws AuthException
-     * @throws EmptyValueException
+     * @throws CacheException
+     * @throws ConfigException
      * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
-     * @throws ConfigException
-     * @throws IllegalTypeException
      * @throws ReflectionException
-     * @throws ApiException
-     * @throws CacheException
+     * @throws Throwable
+     * @throws ValidationException
      */
     public static function getPaymentMethod(
         WC_Order $order

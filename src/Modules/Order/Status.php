@@ -89,7 +89,10 @@ class Status
     /**
      * Translates a Resurs payment status to a WooCommerce order status string.
      *
+     * @param Payment $payment
+     * @return string
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
