@@ -70,7 +70,7 @@ class Admin
     /**
      * HPOS compatible method to find out if current screen is shop_order (wp-admin order view).
      */
-    public static function isInShopOrder(): bool
+    public static function isInShopOrderEdit(): bool
     {
         // Current screen can be null when is_ajax().
         $currentScreen = get_current_screen();
@@ -87,6 +87,6 @@ class Admin
         $currentScreen = get_current_screen();
         // The list screen is held separately from the single order view and is regardless of HPOS
         // always the id.
-        return self::isInShopOrder() && isset($currentScreen) && $currentScreen->id === 'edit-shop_order';
+        return self::isInShopOrderEdit() && isset($currentScreen) && $currentScreen->id === 'edit-shop_order';
     }
 }

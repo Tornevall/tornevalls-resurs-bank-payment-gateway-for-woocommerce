@@ -79,7 +79,7 @@ class PaymentInformation
      */
     public static function setCss(): void
     {
-        if (!Admin::isInShopOrder()) {
+        if (!Admin::isInShopOrderEdit()) {
             return;
         }
 

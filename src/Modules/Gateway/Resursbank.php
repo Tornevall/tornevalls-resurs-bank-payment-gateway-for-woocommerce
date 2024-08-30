@@ -404,7 +404,7 @@ class Resursbank extends WC_Payment_Gateway
             return $theorder;
         }
 
-        // Legacy request.
+        // Legacy request. Version driven variables.
         $orderIdByRequest = $_GET['post'] ?? $_GET['id'] ?? null;
 
         // Return the order if valid ID is provided and it's a valid order.

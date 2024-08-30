@@ -81,12 +81,12 @@ class Order
             // reconsider the way this has been historically done,
             // $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
             $wcOrder = wc_get_order();
-            $wcOrderid = $wcOrder->get_id();
 
             if (!$wcOrder instanceof WC_Order) {
                 return;
             }
 
+            $wcOrderid = $wcOrder->get_id();
             $fetchUrl = Route::getUrl(
                 route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
                 admin: true
@@ -142,7 +142,7 @@ class Order
         $order = self::getCurrentOrder();
 
         try {
-            if ($order === null || !Admin::isInShopOrder()) {
+            if ($order === null || !Admin::isInShopOrderEdit()) {
                 return;
             }
 

@@ -35,7 +35,7 @@ class DisableDeleteRefund
 
         if (
             !is_numeric(value: $orderId) ||
-            !Admin::isInShopOrder()
+            !Admin::isInShopOrderEdit()
         ) {
             return;
         }
