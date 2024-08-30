@@ -1,3 +1,4 @@
+composer.json
 vendor
 composer.lock
 qa/bin
