@@ -9,9 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
-use Automattic\WooCommerce\Admin\PageController;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
+use WC_Order;
 
 /**
  * Disable control to delete applied refunds.
@@ -25,9 +26,16 @@ class DisableDeleteRefund
     {
         $orderId = $_GET['post'] ?? null;
 
+        // Prioritize HPOS for order id.
+        $testOrder = wc_get_order();
+
+        if ($testOrder instanceof WC_Order) {
+            $orderId = $testOrder->get_id();
+        }
+
         if (
             !is_numeric(value: $orderId) ||
-            (new PageController())->get_current_screen_id() !== 'shop_order'
+            !Admin::isInShopOrderEdit()
         ) {
             return;
         }

@@ -168,7 +168,10 @@ class Callback
         } catch (Throwable) {
         }
 
-        $rbCreated = $order->get_meta(Metadata::KEY_REPOSITORY_CREATED);
+        $rbCreated = Metadata::getOrderMeta(
+            order: $order,
+            key: Metadata::KEY_REPOSITORY_CREATED
+        );
 
         // Applies to new orders for which we added this metadata key. If this value
         // for some reason is missing, we will keep using the order creation date.

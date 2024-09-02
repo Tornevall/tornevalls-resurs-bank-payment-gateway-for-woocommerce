@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\PaymentInformation;
 
-use Automattic\WooCommerce\Admin\PageController;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -23,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation as EcomPaymentInformation;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Sanitize;
 
@@ -79,7 +79,7 @@ class PaymentInformation
      */
     public static function setCss(): void
     {
-        if ((new PageController())->get_current_screen_id() !== 'shop_order') {
+        if (!Admin::isInShopOrderEdit()) {
             return;
         }
 
