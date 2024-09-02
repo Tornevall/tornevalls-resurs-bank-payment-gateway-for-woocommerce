@@ -296,7 +296,7 @@ class Gateway
 
         return preg_replace(
             pattern: '/>$/',
-            replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;">',
+            replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;float:right">',
             subject: $icon
         );
     }
