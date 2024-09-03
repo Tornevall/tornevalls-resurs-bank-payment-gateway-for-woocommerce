@@ -293,10 +293,13 @@ class Gateway
         if ($icon === '') {
             return $icon;
         }
-
+        
         return preg_replace(
             pattern: '/>$/',
-            replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;float:right">',
+            replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;' . apply_filters(
+                'resursbank_icon_float',
+                'float:right'
+            ) . '">',
             subject: $icon
         );
     }
