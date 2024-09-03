@@ -36,5 +36,6 @@ Find out more in about the plugin [in our documentation](https://developers.resu
 
 ## Can I upgrade from version 2.2.x? ##
 
-No (this is a breaking change). But if you've used the old version before, historical payments are transparent and can be handled by this new release.
+No (this plugin is a breaking change). But if you've used the old version before, historical payments are transparent and can be handled by this new release.
 If you wish to upgrade from the old plugin release, you need to contact Resurs Bank for new credentials.
+Also be aware of that you need new credentials when switching from the "2.2-package".

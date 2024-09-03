@@ -1,3 +1,12 @@
+# 1.0.39
+
+[WOO-1312](https://resursbankplugins.atlassian.net/browse/WOO-1312) Required: High Performance Order Storage
+[WOO-1327](https://resursbankplugins.atlassian.net/browse/WOO-1327) Make icons/logotypes float right
+
+# 1.0.38
+
+getPayment MAPI overload Hotfix.
+
 # 1.0.37
 
 [WOO-1324](https://resursbankplugins.atlassian.net/browse/WOO-1324) Investigate and Possibly Remove getPriceSignage false errors in the Log
