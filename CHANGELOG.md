@@ -1,3 +1,7 @@
+# 1.0.40
+
+[WOO-1330](https://resursbankplugins.atlassian.net/browse/WOO-1330) Legacy post id's not null, but false, in exclusive occasions
+
 # 1.0.39
 
 [WOO-1312](https://resursbankplugins.atlassian.net/browse/WOO-1312) Required: High Performance Order Storage
