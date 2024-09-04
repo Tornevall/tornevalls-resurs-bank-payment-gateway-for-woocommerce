@@ -107,7 +107,7 @@ class PartPayment
                 amount: $priceData,
                 currencySymbol: Currency::getWooCommerceCurrencySymbol(),
                 currencyFormat: Currency::getEcomCurrencyFormat(),
-                apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
+                fetchStartingCostUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
                 decimals: Currency::getConfiguredDecimalPoints(),
                 displayInfoText: self::displayInfoText()
             );
@@ -167,7 +167,7 @@ class PartPayment
         }
 
         try {
-            echo self::getWidget()->content;
+            echo '<div id="rb-pp-widget-container">' . self::getWidget()->content . '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -187,7 +187,7 @@ class PartPayment
             $css = self::getWidget()->css ?? '';
 
             echo <<<EX
-<style id="rb-pp-styles">
+<style id=" rb-pp-styles">
   $css
 </style>
 EX;
@@ -263,9 +263,9 @@ EX;
                 PaymentMethod::getData() !== '' &&
                 is_product() &&
                 (float)self::getProduct()->get_price() > 0.0 &&
-                self::getWidget()->getPaymentMethod()->maxApplicationLimit >=
+                self::getWidget()->paymentMethod->maxApplicationLimit >=
                 (float)self::getProduct()->get_price() &&
-                self::getWidget()->getPaymentMethod()->minApplicationLimit <=
+                self::getWidget()->paymentMethod->minApplicationLimit <=
                 (float)self::getProduct()->get_price() &&
                 self::getWidget()->cost->monthlyCost >= Limit::getData();
         } catch (Throwable $error) {

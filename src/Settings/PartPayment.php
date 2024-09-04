@@ -20,7 +20,9 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\AnnuityFactor\AnnuityInformation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
+use Resursbank\Ecom\Module\AnnuityFactor\Widget\GetPeriods;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
@@ -266,8 +268,9 @@ class PartPayment
      */
     private static function getAnnuityPeriods(): array
     {
-        $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
+        $paymentMethodId = PaymentMethodOption::getData();
+
         $annuityFactors = [];
         $return = [
             '' => Translator::translate(phraseId: 'please-select'),
@@ -278,7 +281,7 @@ class PartPayment
                 $annuityFactors = AnnuityRepository::getAnnuityFactors(
                     storeId: $storeId,
                     paymentMethodId: $paymentMethodId
-                )->content;
+                )->getData();
             }
         } catch (Throwable) {
             MessageBag::addError(

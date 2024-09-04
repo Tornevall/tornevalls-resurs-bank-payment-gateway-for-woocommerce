@@ -62,7 +62,6 @@ class Store
             );
 
             $widget = new GetStores(
-                fetchUrl: $url,
                 storeSelectId: 'resursbank_store_id',
                 environmentSelectId: 'resursbank_environment',
                 clientIdInputId: 'resursbank_client_id',

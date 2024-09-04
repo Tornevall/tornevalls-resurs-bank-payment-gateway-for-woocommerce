@@ -53,6 +53,7 @@ class PartPayment
      * @throws TranslationException
      * @throws ValidationException
      * @throws HttpException
+     * @throws Throwable
      */
     public static function exec(): string
     {
@@ -80,7 +81,7 @@ class PartPayment
                 amount: (float)$requestAmount,
                 currencySymbol: $currencySymbol,
                 currencyFormat: Currency::getEcomCurrencyFormat(),
-                apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
+                fetchStartingCostUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
             );
             $response['startingAt'] = $widget->getStartingAt();
         }

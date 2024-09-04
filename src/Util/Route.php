@@ -304,10 +304,6 @@ class Route
                 self::respondWithExit(body: PartPayment::exec());
                 break;
 
-            case self::ROUTE_PART_PAYMENT_ADMIN:
-                self::respondWithExit(body: GetValidDurations::exec());
-                break;
-
             case self::ROUTE_GET_STORES_ADMIN:
                 self::respondWithExit(body: (new GetStores())->exec());
                 break;
