@@ -272,8 +272,9 @@ class Resursbank extends WC_Payment_Gateway
      */
     private function resolveNullableMethod(): void
     {
+        $curOrder = $this->getOrder();
         // Load PaymentMethod from potential order, if not already supplied.
-        if ($this->method === null && $this->getOrder() instanceof WC_Order) {
+        if ($this->method === null && $curOrder instanceof WC_Order) {
             try {
                 $this->method = OrderModule::getPaymentMethod(
                     order: $this->getOrder()
@@ -399,13 +400,24 @@ class Resursbank extends WC_Payment_Gateway
     {
         global $theorder;
 
+        $wcOrder = wc_get_order();
+
         // Non-HPOS mode (if order is already present).
         if ($theorder instanceof WC_Order) {
             return $theorder;
         }
+        if ($wcOrder instanceof WC_Order) {
+            return $wcOrder;
+        }
 
-        // Legacy request. Version driven variables.
-        $orderIdByRequest = $_GET['post'] ?? $_GET['id'] ?? null;
+        $orderIdByRequest = $_GET['id'] ?? null;
+
+        if (!$orderIdByRequest && isset($_GET['post']) && (int)$_GET['post']) {
+            $testOrderByPost = wc_get_order($_GET['post']);
+            if ($testOrderByPost instanceof WC_Order) {
+                $orderIdByRequest = $testOrderByPost->get_id();
+            }
+        }
 
         // Return the order if valid ID is provided and it's a valid order.
         return (int)$orderIdByRequest ? wc_get_order($orderIdByRequest) : null;

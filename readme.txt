@@ -8,7 +8,7 @@ WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: 2.0.7
 Requires Plugins: woocommerce
-Stable tag: 1.0.39
+Stable tag: 1.0.40
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -59,6 +59,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.40
+
+[WOO-1330](https://resursbankplugins.atlassian.net/browse/WOO-1330) Legacy post id's not null, but false, in exclusive occasions
 
 # 1.0.39
 
