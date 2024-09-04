@@ -81,7 +81,9 @@ class PartPayment
                 amount: (float)$requestAmount,
                 currencySymbol: $currencySymbol,
                 currencyFormat: Currency::getEcomCurrencyFormat(),
-                fetchStartingCostUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
+                fetchStartingCostUrl: Route::getUrl(
+                    route: Route::ROUTE_PART_PAYMENT
+                )
             );
             $response['startingAt'] = $widget->getStartingAt();
         }

@@ -12,8 +12,6 @@ namespace Resursbank\Woocommerce\Settings\Filter;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\AnnuityFactor\AnnuityInformation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository;
-use Resursbank\Ecom\Module\AnnuityFactor\Widget\GetPeriods;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
@@ -116,7 +114,6 @@ EOL;
     {
         $options = '';
         $annuityPeriodId = Period::getData();
-
 
         foreach (self::getAnnuityPeriods() as $k => $v) {
             $options .= '<option value="' . esc_attr(text: $k) . '"';

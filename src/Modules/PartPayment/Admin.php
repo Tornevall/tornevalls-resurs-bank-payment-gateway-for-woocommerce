@@ -12,12 +12,9 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Module\AnnuityFactor\Widget\DurationByMonths;
 use Resursbank\Ecom\Module\AnnuityFactor\Widget\GetPeriods;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\Admin as AdminUtil;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 /**
@@ -44,10 +41,7 @@ class Admin
 
         /** @noinspection BadExceptionsProcessingInspection */
         try {
-            wp_register_script(
-                'partpayment-admin-scripts',
-                false
-            );
+            wp_register_script('partpayment-admin-scripts', false);
             wp_enqueue_script('partpayment-admin-scripts');
             wp_add_inline_script(
                 'partpayment-admin-scripts',
