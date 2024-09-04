@@ -404,10 +404,25 @@ class Resursbank extends WC_Payment_Gateway
             return $theorder;
         }
 
-        // Legacy request. Version driven variables.
-        $orderIdByRequest = $_GET['post'] ?? $_GET['id'] ?? null;
+        // HPOS quick mode.
+        $wcOrder = wc_get_order();
+
+        if ($wcOrder instanceof WC_Order) {
+            return $wcOrder;
+        }
+
+        // Legacy order objects by post/id.
+        $orderIdByRequest = $_GET['id'] ?? null;
+
+        if (!$orderIdByRequest && isset($_GET['post']) && (int)$_GET['post']) {
+            $testOrderByPost = wc_get_order($_GET['post']);
+            if ($testOrderByPost instanceof WC_Order) {
+                $orderIdByRequest = $testOrderByPost->get_id();
+            }
+        }
 
         // Return the order if valid ID is provided and it's a valid order.
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         return (int)$orderIdByRequest ? wc_get_order($orderIdByRequest) : null;
     }
 
