@@ -9,9 +9,14 @@ jQuery(document).ready(function () {
             RB_PP_WIDGET_INSTANCE = Resursbank_PartPayment.createInstance(
                 document.getElementById('rb-pp-widget-container'),
                 {
-                    getAmount: function() {
+                    getAmount: function () {
                         alert(variation.display_price);
-                    }
+                    },
+                    getQty: function () {
+                        alert('ugg');
+                        //var qty = jQuery('input.qty').val();
+                        //return qty;
+                    },
                 }
             );
         });
