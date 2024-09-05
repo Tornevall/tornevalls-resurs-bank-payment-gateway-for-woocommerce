@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\Store;
 
 use Resursbank\Ecom\Module\Store\Widget\GetStores;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
@@ -56,11 +55,6 @@ class Store
         }
 
         try {
-            $url = Route::getUrl(
-                route: Route::ROUTE_GET_STORES_ADMIN,
-                admin: true
-            );
-
             $widget = new GetStores(
                 storeSelectId: 'resursbank_store_id',
                 environmentSelectId: 'resursbank_environment',
