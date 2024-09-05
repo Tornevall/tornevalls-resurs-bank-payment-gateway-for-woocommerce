@@ -216,6 +216,7 @@ class PartPayment
 
         try {
             echo '<div id="rb-pp-widget-container">' . self::getWidget()->content . '</div>';
+            echo '<div id="rb-pp-widget-container">' . self::getReadMoreWidget()->content . '</div>';
             //echo '<div id="rb-pp-readmore"><p><a onClick="document.getElementById(\'rb-pp-hidden\').style.display=\'block\';" href="#">' . self::getReadMoreWidget()->content . '</a></p></div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -234,10 +235,12 @@ class PartPayment
 
         try {
             $css = self::getWidget()->css ?? '';
+            $readMoreCss = self::getReadMoreWidget()->css ?? '';
 
             echo <<<EX
 <style id=" rb-pp-styles">
   $css
+  $readMoreCss
 </style>
 EX;
         } catch (EmptyValueException) {
