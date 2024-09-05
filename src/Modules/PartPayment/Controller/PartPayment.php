@@ -59,7 +59,9 @@ class PartPayment
     {
         $response = [
             'css' => '',
-            'html' => '',
+            'startingAt' => '',
+            'startingAtHtml' => '',
+            'readMoreWidget' => '',
         ];
 
         $paymentMethod = Repository::getById(
@@ -67,7 +69,7 @@ class PartPayment
             paymentMethodId: PaymentMethod::getData()
         );
 
-        $requestAmount = Url::getHttpGet(key: 'amount');
+        $requestAmount = Url::getHttpJson(key: 'amount');
 
         if (
             is_numeric(value: $requestAmount) &&
@@ -85,7 +87,8 @@ class PartPayment
                     route: Route::ROUTE_PART_PAYMENT
                 )
             );
-            $response['startingAt'] = $widget->getStartingAt();
+            $response['startingAtHtml'] = $widget->getStartingAt();
+            $response['startingAt'] = (float)$requestAmount;
         }
 
         try {
