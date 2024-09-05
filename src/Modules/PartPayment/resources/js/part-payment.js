@@ -19,9 +19,6 @@ jQuery(document).ready(function () {
             getObservableElements: function() {
                 return [];
             },
-            toggleLoader: function() {
-
-            }
         }
     );
     jQuery('.variations_form').each(function () {

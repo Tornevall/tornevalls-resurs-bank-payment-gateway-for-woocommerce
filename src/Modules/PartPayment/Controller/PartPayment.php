@@ -25,6 +25,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
@@ -87,8 +88,13 @@ class PartPayment
                     route: Route::ROUTE_PART_PAYMENT
                 )
             );
+            $readMoreWidget = new ReadMore(
+                paymentMethod: $paymentMethod,
+                amount: (float)$requestAmount
+            );
             $response['startingAtHtml'] = $widget->getStartingAt();
             $response['startingAt'] = (float)$requestAmount;
+            $response['readMoreWidget'] = $readMoreWidget->content;
         }
 
         try {
