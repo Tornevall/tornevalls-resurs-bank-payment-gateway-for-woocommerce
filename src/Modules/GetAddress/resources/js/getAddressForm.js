@@ -1,7 +1,60 @@
+// noinspection JSValidateJSDoc
+
 /**
  * Copyright © Resurs Bank AB. All rights reserved.
  * See LICENSE for license details.
  */
+
+/**
+ * Automatically set customer type.
+ */
+var getAddressCustomerType;
+
+/**
+ * Instant update of the customer type in the session using native trigger events, handled
+ * by jQuery. By doing this, we simplify customer type customization, and furthermore, we may
+ * no longer need the customertypehandler.js handler. This part is controlled by the widget.
+ *
+ * @param getAddressCustomerType
+ * @todo Evaluate customertypehandler.js, see if it can be entirely replaced.
+ */
+jQuery(document).on('update_resurs_customer_type', function (ev, customerType) {
+    // noinspection JSUnresolvedReference (rbCustomerTypeData are owned by other parts in the plugin)
+    jQuery.ajax(
+        {
+            url: rbCustomerTypeData['apiUrl'] + '&customerType=' + customerType,
+        }
+    )
+});
+jQuery(document).ready(function () {
+    if (typeof Resursbank_GetAddress !== 'function' ||
+        document.getElementById('rb-ga-widget') === null
+    ) {
+        return;
+    }
+
+    const getAddressWidget = new Resursbank_GetAddress(
+        {
+            updateAddress: function (data) {
+                getAddressCustomerType = this.getCustomerType();
+                rbHandleFetchAddressResponse(data, getAddressCustomerType);
+            }
+        }
+    );
+    try {
+        getAddressWidget.setupEventListeners();
+        var naturalEl = getAddressWidget.getCustomerTypeElNatural();
+        var legalEl = getAddressWidget.getCustomerTypeElLegal();
+        naturalEl.addEventListener('change', function () {
+            jQuery('body').trigger('update_resurs_customer_type', ['NATURAL']);
+        });
+        legalEl.addEventListener('change', function () {
+            jQuery('body').trigger('update_resurs_customer_type', ['LEGAL']);
+        });
+    } catch (e) {
+        console.log(e);
+    }
+});
 
 const rbHandleFetchAddressResponse = (() => {
     /**
@@ -208,16 +261,17 @@ const rbHandleFetchAddressResponse = (() => {
 
     return (data, customerType) => {
         try {
-            if (jQuery('#billing_resurs_government_id').length > 0) {
+            const billingResursGovId = jQuery('#billing_resurs_government_id');
+            if (billingResursGovId.length > 0) {
                 if (customerType === 'LEGAL') {
                     // Prefill company government id if getAddress was used and we have the billing
                     // fields available.
                     if (jQuery('#rb-customer-widget-getAddress-input-govId').length > 0) {
-                        jQuery('#billing_resurs_government_id').val(jQuery('#rb-customer-widget-getAddress-input-govId').val());
+                        billingResursGovId.val(jQuery('#rb-customer-widget-getAddress-input-govId').val());
                     }
                 } else {
                     // Empty value for LEGAL when switched.
-                    jQuery('#billing_resurs_government_id').val('');
+                    billingResursGovId.val('');
                 }
             }
             updateAddressFields(data, customerType);

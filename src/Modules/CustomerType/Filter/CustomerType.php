@@ -30,7 +30,7 @@ class CustomerType
     }
 
     /**
-     * Loads customertype.js script.
+     * Loads customertypehandler.js script.
      *
      * @throws ConfigException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
@@ -41,7 +41,7 @@ class CustomerType
             'rb-set-customertype',
             Url::getScriptUrl(
                 module: 'CustomerType',
-                file: 'customertype.js'
+                file: 'customertypehandler.js'
             ),
             [
                 'jquery',
