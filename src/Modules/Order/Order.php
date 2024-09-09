@@ -24,6 +24,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -31,9 +32,6 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
-use WP_Post;
-
-use function get_current_screen;
 
 /**
  * WC_Order related business logic.
@@ -77,16 +75,18 @@ class Order
     public static function initAdminScripts(): void
     {
         try {
-            // Can't guarantee that _GET contains the proper data, so we use _REQUEST instead.
-            // We also need to check further id's in the post request to get a proper order id.
-            $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
+            // Fetching the order id this way has historically been the best way on
+            // sites where the normal way of doing it not works ("ecompress"). This however fails
+            // when in HPOS-mode. If the solution below does not work, then we have to
+            // reconsider the way this has been historically done,
+            // $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
+            $wcOrder = wc_get_order();
 
-            if ($orderId === null) {
+            if (!$wcOrder instanceof WC_Order) {
                 return;
             }
 
-            $orderId = (int) $orderId;
-
+            $wcOrderid = $wcOrder->get_id();
             $fetchUrl = Route::getUrl(
                 route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
                 admin: true
@@ -113,7 +113,7 @@ class Order
             wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
             wp_add_inline_script(
                 'rb-get-order-content-admin-inline-scripts',
-                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$orderId');"
+                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrderid');"
             );
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -142,7 +142,7 @@ class Order
         $order = self::getCurrentOrder();
 
         try {
-            if ($order === null || !self::isOnAdminOrderView()) {
+            if ($order === null || !Admin::isInShopOrderEdit()) {
                 return;
             }
 
@@ -201,22 +201,23 @@ class Order
     }
 
     /**
-     * @throws ValidationException
+     * @throws ApiException
      * @throws AuthException
-     * @throws EmptyValueException
+     * @throws CacheException
+     * @throws ConfigException
      * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
-     * @throws ConfigException
-     * @throws IllegalTypeException
      * @throws ReflectionException
-     * @throws ApiException
-     * @throws CacheException
+     * @throws Throwable
+     * @throws ValidationException
      */
     public static function getPaymentMethod(
         WC_Order $order
     ): ?PaymentMethod {
-        $method = (string) $order->get_payment_method();
+        $method = (string)$order->get_payment_method();
 
         if ($method === '') {
             return null;
@@ -235,23 +236,15 @@ class Order
      */
     public static function getCurrentOrder(): ?WC_Order
     {
-        global $post;
+        try {
+            $currentOrder = wc_get_order();
 
-        if (
-            !$post instanceof WP_Post ||
-            $post->post_type !== 'shop_order'
-        ) {
-            return null;
+            if ($currentOrder instanceof WC_Order) {
+                return $currentOrder;
+            }
+        } catch (Throwable) {
         }
 
-        return new WC_Order(order: $post->ID);
-    }
-
-    /**
-     * Whether we are currently viewing order view in admin panel.
-     */
-    public static function isOnAdminOrderView(): bool
-    {
-        return get_current_screen()->id === 'shop_order';
+        return null;
     }
 }

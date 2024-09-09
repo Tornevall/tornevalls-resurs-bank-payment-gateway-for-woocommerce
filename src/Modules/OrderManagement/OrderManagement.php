@@ -143,7 +143,7 @@ class OrderManagement
         add_filter(
             'woocommerce_admin_order_actions',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\HideCaptureAction::exec',
-            10,
+            999,
             2
         );
 
@@ -415,7 +415,18 @@ class OrderManagement
      */
     public static function getPayment(WC_Order $order): Payment
     {
+        global $rbGetPaymentCount;
+        $rbGetPaymentCount ++;
+
         $id = (int)$order->get_id();
+
+        // Temporary stored payment. During one web request, several questions are pushed over to this segment
+        // as we validate several abilities for a payment (like canCapture, canCancel, etc). To avoid API
+        // overload, we'll use self if it has been already set once, instead of risking more than 10 API calls
+        // during that single web request.
+        if ($rbGetPaymentCount > 1 && self::$payments[$id] instanceof Payment) {
+            return self::$payments[$id];
+        }
 
         $result = Repository::get(
             paymentId: Metadata::getPaymentId(order: $order)

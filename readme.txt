@@ -4,10 +4,11 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.4.3
 Requires PHP: 8.1
-WC Tested up to: 9.1.4
+WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: 2.0.7
-Stable tag: 1.0.36
+Requires Plugins: woocommerce
+Stable tag: 1.0.40
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -59,12 +60,32 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.0.40
+
+[WOO-1330](https://resursbankplugins.atlassian.net/browse/WOO-1330) Legacy post id's not null, but false, in exclusive occasions
+
+# 1.0.39
+
+[WOO-1312](https://resursbankplugins.atlassian.net/browse/WOO-1312) Required: High Performance Order Storage
+[WOO-1327](https://resursbankplugins.atlassian.net/browse/WOO-1327) Make icons/logotypes float right
+
+# 1.0.38
+
+getPayment MAPI overload Hotfix.
+
+# 1.0.37
+
+[WOO-1324](https://resursbankplugins.atlassian.net/browse/WOO-1324) Investigate and Possibly Remove getPriceSignage false errors in the Log
+[WOO-1322](https://resursbankplugins.atlassian.net/browse/WOO-1322) Error Occurs When Attempting to Charge a Frozen Order via Bulk Update in the Order List
+[WOO-1323](https://resursbankplugins.atlassian.net/browse/WOO-1323) Prevent race conditions between "thankyou" and callbacks after order creation-retries
+[WOO-1326](https://resursbankplugins.atlassian.net/browse/WOO-1326) canCapture in orderlist still a performance issue
+
 # 1.0.36
 
-[WOO-1317](https://resursbankplugins.atlassian.net/browse/WOO-1317) Hantera orders som blivit rejected och den är äldre än 30 dgr
+[WOO-1317](https://resursbankplugins.atlassian.net/browse/WOO-1317) Handle Orders Marked as Rejected and Older Than 30 Days
 [WOO-1319](https://resursbankplugins.atlassian.net/browse/WOO-1319) Check for hardcoded vatrates
 [WOO-1315](https://resursbankplugins.atlassian.net/browse/WOO-1315) Order list crashes when checking statuses with capturable orders
-[WOO-1318](https://resursbankplugins.atlassian.net/browse/WOO-1318) Går ej att ändra status på en order även om orderhantering mot resurs är avaktiverat
+[WOO-1318](https://resursbankplugins.atlassian.net/browse/WOO-1318) Unable to Change Order Status Even When Order Management Against Resurs is Deactivated
 [WOO-1321](https://resursbankplugins.atlassian.net/browse/WOO-1321) Disabled modify may cause wrong captures
 
 # 1.0.35

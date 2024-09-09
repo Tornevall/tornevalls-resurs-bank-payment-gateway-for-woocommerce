@@ -3,25 +3,29 @@
 /**
  * Plugin Name: Resurs Bank Payments for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
- * WC Tested up to: 9.1.4
+ * WC Tested up to: 9.2.3
  * WC requires at least: 7.6.0
  * Plugin requires ecom: 2.0.7
  * Requires PHP: 8.1
- * Version: 1.0.36
+ * Version: 1.0.40
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
  * Text Domain: resurs-bank-payments-for-woocommerce
+ * Requires Plugins: woocommerce
  *
  * @noinspection PhpCSValidationInspection
  * @noinspection PhpDefineCanBeReplacedWithConstInspection
  */
+
 // @todo This is wordpress. SideEffects can not be handled properly while the init looks like this.
 // @todo Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
 
+
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Resursbank\Ecom\Config;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
@@ -80,6 +84,20 @@ if (!Config::hasInstance()) {
 // Setup event listeners and resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     Shared::init();
+    add_action(
+        'before_woocommerce_init',
+        static function (): void {
+            if (!class_exists(class: FeaturesUtil::class)) {
+                return;
+            }
+
+            FeaturesUtil::declare_compatibility(
+                'custom_order_tables',
+                __FILE__,
+                true
+            );
+        }
+    );
 
     if (Admin::isAdmin()) {
         AdminInit::init();

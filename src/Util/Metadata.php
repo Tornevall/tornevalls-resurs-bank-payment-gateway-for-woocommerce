@@ -20,7 +20,6 @@ use WC_Abstract_Order;
 use WC_Order;
 
 use function get_class;
-use function is_array;
 
 /**
  * Order metadata handler.
@@ -50,6 +49,7 @@ class Metadata
 
     /**
      * Get UUID of Resurs Bank payment attached to order.
+     * CRUD Compatible.
      *
      * @throws EmptyValueException
      */
@@ -88,6 +88,7 @@ class Metadata
     /**
      * Set metadata to an order.
      * Metadata is stored uniquely (meaning the returned data from getOrderMeta can be returned as $single=true).
+     * CRUD Compatible.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
@@ -96,31 +97,19 @@ class Metadata
         string $key,
         string $value
     ): bool {
-        $exists = metadata_exists(
-            'post',
-            $order->get_id(),
-            $key
-        );
-
-        if ($exists) {
-            return (bool)update_post_meta(
-                $order->get_id(),
-                $key,
-                $value
-            );
+        if ($order->meta_exists($key)) {
+            $order->update_meta_data($key, $value);
+        } else {
+            $order->add_meta_data($key, $value, true);
         }
 
-        return (bool)add_post_meta(
-            $order->get_id(),
-            $key,
-            $value,
-            true
-        );
+        return $order->save() > 0;
     }
 
     /**
      * Return metadata from an order, as a single variable.
      * Normally metadata is returned as array, but currently we usually only save values once.
+     * CRUD compatible.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
@@ -128,19 +117,17 @@ class Metadata
         WC_Abstract_Order $order,
         string $key
     ): string {
-        return (string)get_post_meta(
-            $order->get_id(),
-            $key,
-            true
-        );
+        return (string)$order->get_meta($key, true);
     }
 
     /**
      * Check if order was paid through Resurs Bank.
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
-        global $resursPaymentValidation;
+        global $rbPaymentIsValid;
 
         try {
             // Attempt to retrieve the payment ID; if it fails, the order is invalid.
@@ -155,23 +142,23 @@ class Metadata
         // Note that this method is called through several actions in the plugin which means
         // each request will render a getPayment, unless we cache it the first time. We only
         // need to know the first time, if the payment is valid.
-        if ($checkPaymentStatus && !isset($resursPaymentValidation[$orderId])) {
+        if ($checkPaymentStatus && !isset($rbPaymentIsValid[$orderId])) {
             try {
                 OrderManagement::getPayment(order: $order);
-                $resursPaymentValidation[$orderId] = true;
+                $rbPaymentIsValid[$orderId] = true;
             } catch (Throwable $error) {
                 Log::debug(message: $error->getMessage());
-                $resursPaymentValidation[$orderId] = false;
+                $rbPaymentIsValid[$orderId] = false;
                 return false;
             }
         }
 
         // If all checks passed or if checkPaymentStatus has not been requested.
-        return $resursPaymentValidation[$orderId] ?? true;
+        return $rbPaymentIsValid[$orderId] ?? true;
     }
 
     /**
-     * Retrieve order associated with payment id.
+     * Retrieve order associated with payment id (CRUD compatible).
      */
     public static function getOrderByPaymentId(string $paymentId): ?WC_Order
     {
@@ -181,13 +168,10 @@ class Metadata
             'meta_key' => self::KEY_PAYMENT_ID,
             'meta_value' => $paymentId,
             'meta_compare' => '=',
+            'limit' => 1,
         ]);
 
-        if (
-            is_array(value: $orders) &&
-            count($orders) === 1 &&
-            $orders[0] instanceof WC_Order
-        ) {
+        if (!empty($orders) && $orders[0] instanceof WC_Order) {
             $result = $orders[0];
         }
 
@@ -215,6 +199,9 @@ class Metadata
         ) === '1';
     }
 
+    /**
+     * Check if order is from a legacy flow.
+     */
     private static function isLegacyOrder(
         WC_Abstract_Order $order
     ): bool {
@@ -247,8 +234,8 @@ class Metadata
                 if (!$payment instanceof Payment) {
                     throw new IllegalTypeException(
                         message: 'Fetched object type is ' .
-                                 get_class(object: $payment) .
-                                 ', expected ' . Payment::class
+                        get_class(object: $payment) .
+                        ', expected ' . Payment::class
                     );
                 }
 
