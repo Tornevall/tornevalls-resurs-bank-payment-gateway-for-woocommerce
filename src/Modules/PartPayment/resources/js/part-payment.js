@@ -3,27 +3,37 @@
  * See LICENSE for license details.
  */
 
-let variationDisplayPrice = 0;
+var variationDisplayPrice = 0;
 
 jQuery(document).ready(function () {
+    const qtyElement = document.querySelector('input.qty');
+
     RB_PP_WIDGET_INSTANCE = Resursbank_PartPayment.createInstance(
         document.getElementById('rb-pp-widget-container'),
         {
             getAmount: function () {
-                return variationDisplayPrice;
+                // noinspection JSUnresolvedReference
+                const price = (
+                    typeof rbPpScript !== 'undefined' &&
+                    typeof rbPpScript.product_price !== 'undefined' &&
+                    variationDisplayPrice === 0
+                ) ? rbPpScript.product_price
+                    : variationDisplayPrice;
+
+                return price * this.getQty();
             },
-            getQty: function () {
-                var qty = jQuery('input.qty').val();
-                return qty;
+            getObservableElements: function () {
+                return [qtyElement];
             },
-            getObservableElements: function() {
-                return [];
-            },
+            getQtyElement: function() {
+                return qtyElement;
+            }
         }
     );
     jQuery('.variations_form').each(function () {
         jQuery(this).on('found_variation', function (event, variation) {
             variationDisplayPrice = variation.display_price;
+            // noinspection JSIgnoredPromiseFromCall
             RB_PP_WIDGET_INSTANCE.updateStartingCost();
         });
     });

@@ -273,6 +273,13 @@ EX;
                 self::getWidget()->js
             );
             add_action('wp_enqueue_scripts', 'partpayment-script');
+            wp_localize_script(
+                'partpayment-script',
+                'rbPpScript',
+                [
+                    'product_price' => self::getPriceData(),
+                ]
+            );
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
