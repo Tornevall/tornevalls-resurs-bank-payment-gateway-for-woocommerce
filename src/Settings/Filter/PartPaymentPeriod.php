@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Module\AnnuityFactor\Models\AnnuityInformation;
+use Resursbank\Ecom\Lib\Model\AnnuityFactor\AnnuityInformation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
@@ -93,7 +93,7 @@ EOL;
                 $annuityFactors = Repository::getAnnuityFactors(
                     storeId: $storeId,
                     paymentMethodId: $paymentMethodId
-                )->content;
+                )->getData();
             }
         } catch (Throwable) {
             MessageBag::addError(message: 'Failed to get annuity periods.');

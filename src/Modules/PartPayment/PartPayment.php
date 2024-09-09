@@ -25,6 +25,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -43,10 +44,55 @@ use WC_Product;
  */
 class PartPayment
 {
+    public static ?ReadMore $readMoreInstance = null;
+
     /**
      * ECom Part Payment widget instance.
      */
     private static ?EcomPartPayment $instance = null;
+
+    /**
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws CurlException
+     * @throws IllegalValueException
+     * @throws IllegalTypeException
+     * @throws Throwable
+     * @throws EmptyValueException
+     * @throws AuthException
+     * @throws JsonException
+     * @throws ConfigException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws CacheException
+     * @throws FilesystemException
+     */
+    public static function getReadMoreWidget(): ReadMore
+    {
+        if (self::$readMoreInstance !== null) {
+            return self::$readMoreInstance;
+        }
+
+        $paymentMethodSet = PaymentMethod::getData();
+
+        if ($paymentMethodSet === '') {
+            throw new EmptyValueException(
+                message: 'Payment method is not properly configured. Part payment view can not be used.'
+            );
+        }
+
+        $paymentMethod = Repository::getById(
+            storeId: StoreId::getData(),
+            paymentMethodId: PaymentMethod::getData()
+        );
+
+        self::$readMoreInstance = new ReadMore(
+            paymentMethod: $paymentMethod,
+            amount: self::getPriceData()
+        );
+
+        return self::$readMoreInstance;
+    }
 
     /**
      * @throws ApiException
@@ -170,7 +216,7 @@ class PartPayment
         }
 
         try {
-            echo self::getWidget()->content;
+            echo '<div id="rb-pp-widget-container">' . self::getWidget()->content . self::getReadMoreWidget()->content . '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -188,10 +234,12 @@ class PartPayment
 
         try {
             $css = self::getWidget()->css ?? '';
+            $readMoreCss = self::getReadMoreWidget()->css ?? '';
 
             echo <<<EX
-<style id="rb-pp-styles">
+<style id=" rb-pp-styles">
   $css
+  $readMoreCss
 </style>
 EX;
         } catch (EmptyValueException) {
@@ -226,6 +274,13 @@ EX;
                 self::getWidget()->js
             );
             add_action('wp_enqueue_scripts', 'partpayment-script');
+            wp_localize_script(
+                'partpayment-script',
+                'rbPpScript',
+                [
+                    'product_price' => self::getPriceData(),
+                ]
+            );
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -266,9 +321,9 @@ EX;
                 PaymentMethod::getData() !== '' &&
                 is_product() &&
                 (float)self::getProduct()->get_price() > 0.0 &&
-                self::getWidget()->getPaymentMethod()->maxApplicationLimit >=
+                self::getWidget()->paymentMethod->maxApplicationLimit >=
                 (float)self::getProduct()->get_price() &&
-                self::getWidget()->getPaymentMethod()->minApplicationLimit <=
+                self::getWidget()->paymentMethod->minApplicationLimit <=
                 (float)self::getProduct()->get_price() &&
                 self::getWidget()->cost->monthlyCost >= Limit::getData();
         } catch (Throwable $error) {

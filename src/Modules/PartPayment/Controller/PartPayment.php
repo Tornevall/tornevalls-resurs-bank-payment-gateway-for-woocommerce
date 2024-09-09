@@ -25,6 +25,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
@@ -53,12 +54,15 @@ class PartPayment
      * @throws TranslationException
      * @throws ValidationException
      * @throws HttpException
+     * @throws Throwable
      */
     public static function exec(): string
     {
         $response = [
             'css' => '',
-            'html' => '',
+            'startingAt' => '',
+            'startingAtHtml' => '',
+            'readMoreWidget' => '',
         ];
 
         $paymentMethod = Repository::getById(
@@ -66,7 +70,7 @@ class PartPayment
             paymentMethodId: PaymentMethod::getData()
         );
 
-        $requestAmount = Url::getHttpGet(key: 'amount');
+        $requestAmount = Url::getHttpJson(key: 'amount');
 
         if (
             is_numeric(value: $requestAmount) &&
@@ -80,9 +84,17 @@ class PartPayment
                 amount: (float)$requestAmount,
                 currencySymbol: $currencySymbol,
                 currencyFormat: Currency::getEcomCurrencyFormat(),
-                apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT)
+                fetchStartingCostUrl: Route::getUrl(
+                    route: Route::ROUTE_PART_PAYMENT
+                )
             );
-            $response['startingAt'] = $widget->getStartingAt();
+            $readMoreWidget = new ReadMore(
+                paymentMethod: $paymentMethod,
+                amount: (float)$requestAmount
+            );
+            $response['startingAtHtml'] = $widget->getStartingAt();
+            $response['startingAt'] = (float)$requestAmount;
+            $response['readMoreWidget'] = $readMoreWidget->content;
         }
 
         try {
