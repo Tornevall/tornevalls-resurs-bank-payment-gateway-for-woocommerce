@@ -122,7 +122,7 @@ class Failure
         Payment $payment,
         TaskStatusDetails $task
     ): string {
-        if ($payment->isCreditDenied()) {
+        if ($payment->isRejectionReasonCreditDenied()) {
             return Translator::translate(phraseId: 'credit-denied-try-again');
         }
 

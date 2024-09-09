@@ -159,6 +159,7 @@ class PartPayment
                 decimals: Currency::getConfiguredDecimalPoints(),
                 displayInfoText: self::displayInfoText()
             );
+
             return self::$instance;
         }
 
