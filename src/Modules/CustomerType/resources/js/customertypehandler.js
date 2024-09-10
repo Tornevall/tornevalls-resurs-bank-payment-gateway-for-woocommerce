@@ -6,9 +6,9 @@
 /**
  * Customer Type Handler.
  *
- * This handler is still in use. A rewrite could be considered since the customer type is stored within
- * the widget. However, as it's likely preferable to trust WooCommerce data fields over the getAddress widget,
- * we will continue to prioritize the WooCommerce fields.
+ * This handler is still in use. A rewrite could be considered since the customer type is stored and handled within
+ * the widget as of ecom v3. However, as it's likely preferable to trust WooCommerce data fields over the
+ * getAddress widget, we will continue to prioritize the WooCommerce fields.
  */
 
 /**
