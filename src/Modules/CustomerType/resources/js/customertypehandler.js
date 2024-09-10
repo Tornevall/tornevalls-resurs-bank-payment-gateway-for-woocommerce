@@ -12,7 +12,7 @@
  */
 
 /**
- * Preparing for stuff in checkout, possibly needed by Resurs getAddress widget.
+ * Preparing for stuff used by Resurs getAddress widget, in checkout.
  */
 jQuery(document).ready(function ($) {
     if (rbHasCompanyField()) {
