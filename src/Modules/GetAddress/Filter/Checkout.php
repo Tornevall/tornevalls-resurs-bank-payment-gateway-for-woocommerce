@@ -11,9 +11,14 @@ namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\GetAddressException;
+use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Customer\Widget\GetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
+use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -23,14 +28,41 @@ use Throwable;
  */
 class Checkout
 {
+    private static ?GetAddress $instance = null;
+
+    /**
+     * @throws HttpException
+     * @throws IllegalValueException
+     * @throws FilesystemException
+     */
+    public static function getWidget(): ?GetAddress
+    {
+        if (self::$instance !== null) {
+            return self::$instance;
+        }
+
+        self::$instance = new GetAddress(
+            url: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
+        );
+
+        return self::$instance;
+    }
+
     /**
      * Register filter subscribers
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function register(): void
     {
         if (!EnableGetAddress::getData()) {
             return;
         }
+
+        add_action(
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::setCss'
+        );
 
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         add_filter(
@@ -45,26 +77,46 @@ class Checkout
     }
 
     /**
+     * Sets up getAddress CSS.
+     */
+    public static function setCss(): void
+    {
+        try {
+            $css = self::getWidget()->css ?? '';
+            echo <<<EX
+<style id=" rb-getaddress-styles">
+  $css
+</style>
+EX;
+        } catch (EmptyValueException) {
+            // Take no action when payment method is not set.
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+    }
+
+    /**
      * Loads script and stylesheet for form.
+     *
+     * @throws FilesystemException
+     * @throws HttpException
+     * @throws IllegalValueException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function loadScripts(): void
     {
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         wp_enqueue_script(
             'rb-get-address',
             Url::getScriptUrl(
                 module: 'GetAddress',
-                file: 'populateForm.js'
+                file: 'getAddressForm.js'
             ),
             ['rb-set-customertype']
         );
 
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        wp_enqueue_style(
-            'rb-get-address-style',
-            Url::getEcomUrl(
-                path: 'src/Module/Customer/Widget/get-address.css'
-            )
+        wp_add_inline_script(
+            'rb-get-address',
+            self::getWidget()->js
         );
     }
 
@@ -78,7 +130,7 @@ class Checkout
 
         try {
             $address = new GetAddress(
-                fetchUrl: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
+                url: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
             );
 
             /**
@@ -105,7 +157,7 @@ class Checkout
                     )
                 );
             } catch (ConfigException) {
-                $result = 'Resursbank: failed to render get address widget.';
+                $result = 'ResursBank: failed to render get address widget.';
             }
         }
 

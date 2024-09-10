@@ -3,6 +3,17 @@
  * See LICENSE for license details.
  */
 
+/**
+ * Customer Type Handler.
+ *
+ * This handler is still in use. A rewrite could be considered since the customer type is stored and handled within
+ * the widget as of ecom v3. However, as it's likely preferable to trust WooCommerce data fields over the
+ * getAddress widget, we will continue to prioritize the WooCommerce fields.
+ */
+
+/**
+ * Preparing for stuff used by Resurs getAddress widget, in checkout.
+ */
 jQuery(document).ready(function ($) {
     if (rbHasCompanyField()) {
         // Handle our custom fields instantly, making sure things are displayed correctly for
