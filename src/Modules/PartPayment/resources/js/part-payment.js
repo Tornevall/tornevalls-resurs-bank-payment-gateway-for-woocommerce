@@ -50,10 +50,12 @@ jQuery(document).ready(function () {
     // Allow us to show and hide our part payment widget, based on allowed threshold.
     qtyElement.addEventListener('change', function () {
         var rbPpWidget = document.getElementById('rb-pp-widget-container');
-        if (isAllowedThreshold()) {
-            rbPpWidget.style.display = '';
-        } else {
-            rbPpWidget.style.display = 'none';
+        if (rbPpWidget !== null) {
+            if (isAllowedThreshold()) {
+                rbPpWidget.style.display = '';
+            } else {
+                rbPpWidget.style.display = 'none';
+            }
         }
     });
 
