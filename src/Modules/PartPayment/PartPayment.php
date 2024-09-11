@@ -28,6 +28,7 @@ use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Currency;
@@ -296,6 +297,7 @@ EX;
                     'product_price' => self::getPriceData(),
                     'maxApplicationLimit' => $maxApplicationLimit,
                     'minApplicationLimit' => $minApplicationLimit,
+                    'threshold' => Limit::getData()
                 ]
             );
         } catch (Throwable $error) {

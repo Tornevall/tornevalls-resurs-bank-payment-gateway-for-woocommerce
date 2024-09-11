@@ -9,7 +9,7 @@ var variationDisplayPrice = 0;
  * Get current price based on variation or single product prices.
  * @returns {*|number}
  */
-function getRbPpPrice() {
+function getRbPpPriceFromWooCom() {
     return (
         typeof rbPpScript !== 'undefined' &&
         typeof rbPpScript.product_price !== 'undefined' &&
@@ -36,12 +36,19 @@ function getRbPpMinApplicationLimit() {
     typeof rbPpScript.minApplicationLimit !== 'undefined' ? rbPpScript.minApplicationLimit : 0;
 }
 
+function getThreshold() {
+    return typeof rbPpScript !== 'undefined' &&
+    typeof rbPpScript.threshold !== 'undefined' ? rbPpScript.threshold : 0;
+}
+
 /**
  * Returns true if threshold are met.
  * @returns {boolean}
  */
 function isAllowedThreshold() {
-    return getRbPpPrice() >= getRbPpMinApplicationLimit() && getRbPpPrice() <= getRbPpMaxApplicationLimit();
+    return getRbPpPriceFromWooCom() >= getThreshold() &&
+        getRbPpPriceFromWooCom() >= getRbPpMinApplicationLimit() &&
+        getRbPpPriceFromWooCom() <= getRbPpMaxApplicationLimit();
 }
 
 jQuery(document).ready(function () {
@@ -65,7 +72,7 @@ jQuery(document).ready(function () {
         {
             getAmount: function () {
                 // noinspection JSUnresolvedReference
-                return getRbPpPrice() * this.getQty();
+                return getRbPpPriceFromWooCom() * this.getQty();
             },
             getObservableElements: function () {
                 return [qtyElement];
