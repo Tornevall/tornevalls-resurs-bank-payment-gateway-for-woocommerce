@@ -22,7 +22,7 @@ function getRbPpPrice() {
  * Max application limit.
  * @returns {*|number}
  */
-function getRbPpMax() {
+function getRbPpMaxApplicationLimit() {
     return typeof rbPpScript !== 'undefined' &&
     typeof rbPpScript.maxApplicationLimit !== 'undefined' ? rbPpScript.maxApplicationLimit : 0;
 }
@@ -31,7 +31,7 @@ function getRbPpMax() {
  * Min application limit.
  * @returns {*|number}
  */
-function getRbPpMin() {
+function getRbPpMinApplicationLimit() {
     return typeof rbPpScript !== 'undefined' &&
     typeof rbPpScript.minApplicationLimit !== 'undefined' ? rbPpScript.minApplicationLimit : 0;
 }
@@ -41,7 +41,7 @@ function getRbPpMin() {
  * @returns {boolean}
  */
 function isAllowedThreshold() {
-    return getRbPpPrice() >= getRbPpMin() && getRbPpPrice() <= getRbPpMax();
+    return getRbPpPrice() >= getRbPpMinApplicationLimit() && getRbPpPrice() <= getRbPpMaxApplicationLimit();
 }
 
 jQuery(document).ready(function () {
