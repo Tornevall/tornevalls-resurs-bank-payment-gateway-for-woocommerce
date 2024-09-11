@@ -157,7 +157,8 @@ class PartPayment
                     route: Route::ROUTE_PART_PAYMENT
                 ),
                 decimals: Currency::getConfiguredDecimalPoints(),
-                displayInfoText: self::displayInfoText()
+                displayInfoText: self::displayInfoText(),
+                threshold: Limit::getData()
             );
 
             return self::$instance;
@@ -171,6 +172,8 @@ class PartPayment
      *
      * NOTE: Cannot place isEnabled() check here to prevent hooks, product not
      * available yet.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initFrontend(): void
     {
@@ -197,6 +200,8 @@ class PartPayment
 
     /**
      * Init method for admin script.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initAdmin(): void
     {
@@ -215,12 +220,8 @@ class PartPayment
             return;
         }
 
-        $canDisplayStyle = self::isAllowedThreshold()
-            ? ''
-            : 'style="display:none"';
-
         try {
-            echo '<div id="rb-pp-widget-container" ' . $canDisplayStyle . '>' . self::getWidget()->content . self::getReadMoreWidget()->content . '</div>';
+            echo '<div id="rb-pp-widget-container">' . self::getWidget()->content . self::getReadMoreWidget()->content . '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

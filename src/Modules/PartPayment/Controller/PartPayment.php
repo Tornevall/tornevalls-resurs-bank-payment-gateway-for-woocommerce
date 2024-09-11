@@ -27,6 +27,7 @@ use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Currency;
@@ -87,7 +88,8 @@ class PartPayment
                 currencyFormat: Currency::getEcomCurrencyFormat(),
                 fetchStartingCostUrl: Route::getUrl(
                     route: Route::ROUTE_PART_PAYMENT
-                )
+                ),
+                threshold: Limit::getData()
             );
             $readMoreWidget = new ReadMore(
                 paymentMethod: $paymentMethod,
