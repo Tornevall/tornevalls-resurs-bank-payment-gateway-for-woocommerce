@@ -297,7 +297,8 @@ EX;
                     'product_price' => self::getPriceData(),
                     'maxApplicationLimit' => $maxApplicationLimit,
                     'minApplicationLimit' => $minApplicationLimit,
-                    'threshold' => Limit::getData()
+                    'thresholdLimit' => Limit::getData(),
+                    'monthlyCost' => self::getWidget()->getMonthlyCost()
                 ]
             );
         } catch (Throwable $error) {

@@ -63,6 +63,7 @@ class PartPayment
             'startingAt' => '',
             'startingAtHtml' => '',
             'readMoreWidget' => '',
+            'monthlyCost' => ''
         ];
 
         $paymentMethod = Repository::getById(
@@ -95,6 +96,7 @@ class PartPayment
             $response['startingAtHtml'] = $widget->getStartingAt();
             $response['startingAt'] = (float)$requestAmount;
             $response['readMoreWidget'] = $readMoreWidget->content;
+            $response['monthlyCost'] = $widget->getMonthlyCost();
         }
 
         try {
