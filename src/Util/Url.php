@@ -183,7 +183,7 @@ class Url
      *
      * @throws JsonException
      */
-    public static function getHttpJson(string $key): null|string|int
+    public static function getHttpJson(string $key): null|string|int|float
     {
         $jsonData = file_get_contents(filename: 'php://input');
         $data = json_decode(
