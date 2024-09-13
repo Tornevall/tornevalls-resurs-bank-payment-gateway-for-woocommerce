@@ -11,6 +11,11 @@
 var getAddressCustomerType;
 
 /**
+ * The getAddress widget.
+ */
+var getAddressWidget;
+
+/**
  * Instant update of the customer type in the session using native trigger events, handled
  * by jQuery. By doing this, we simplify customer type customization, and furthermore, we may
  * no longer need the customertypehandler.js handler. This part is controlled by the widget.
@@ -33,7 +38,7 @@ jQuery(document).ready(function () {
         return;
     }
 
-    const getAddressWidget = new Resursbank_GetAddress(
+    getAddressWidget = new Resursbank_GetAddress(
         {
             updateAddress: function (data) {
                 getAddressCustomerType = this.getCustomerType();
@@ -235,6 +240,15 @@ const rbHandleFetchAddressResponse = (() => {
     const updateAddressFields = (data, customerType) => {
         const fields = getAddressFields(getCheckoutForm());
 
+        const billingResursGovId = jQuery('#billing_resurs_government_id');
+
+        if (typeof getAddressWidget !== 'undefined' && customerType === 'LEGAL') {
+            const govIdElement = getAddressWidget.getGovIdElement();
+            if (billingResursGovId.length > 0) {
+                billingResursGovId.val(govIdElement.value);
+            }
+        }
+
         fields?.billing.forEach((obj) => {
             const dataVal = data[obj.name];
             const newVal = typeof dataVal === 'string' ? dataVal : obj.el.value;
@@ -245,6 +259,7 @@ const rbHandleFetchAddressResponse = (() => {
                     obj.el.value = newVal;
                 } else {
                     obj.el.value = '';
+                    billingResursGovId.val('');
                 }
             } else {
                 obj.el.value = newVal;
@@ -259,9 +274,10 @@ const rbHandleFetchAddressResponse = (() => {
         });
     };
 
+    const billingResursGovId = jQuery('#billing_resurs_government_id');
+
     return (data, customerType) => {
         try {
-            const billingResursGovId = jQuery('#billing_resurs_government_id');
             if (billingResursGovId.length > 0) {
                 if (customerType === 'LEGAL') {
                     // Prefill company government id if getAddress was used and we have the billing
