@@ -352,18 +352,6 @@ EX;
         return false;
     }
 
-    private static function isAllowedThreshold(): bool
-    {
-        try {
-            return (float)self::getProduct()->get_price() >= self::getWidget()->paymentMethod->minApplicationLimit &&
-                (float)self::getProduct()->get_price() <= self::getWidget()->paymentMethod->maxApplicationLimit;
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-
-        return false;
-    }
-
     /**
      * @throws IllegalTypeException
      */
