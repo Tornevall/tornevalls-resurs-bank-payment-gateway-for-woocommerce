@@ -25,6 +25,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -43,10 +44,55 @@ use WC_Product;
  */
 class PartPayment
 {
+    public static ?ReadMore $readMoreInstance = null;
+
     /**
      * ECom Part Payment widget instance.
      */
     private static ?EcomPartPayment $instance = null;
+
+    /**
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws CurlException
+     * @throws IllegalValueException
+     * @throws IllegalTypeException
+     * @throws Throwable
+     * @throws EmptyValueException
+     * @throws AuthException
+     * @throws JsonException
+     * @throws ConfigException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws CacheException
+     * @throws FilesystemException
+     */
+    public static function getReadMoreWidget(): ReadMore
+    {
+        if (self::$readMoreInstance !== null) {
+            return self::$readMoreInstance;
+        }
+
+        $paymentMethodSet = PaymentMethod::getData();
+
+        if ($paymentMethodSet === '') {
+            throw new EmptyValueException(
+                message: 'Payment method is not properly configured. Part payment view can not be used.'
+            );
+        }
+
+        $paymentMethod = Repository::getById(
+            storeId: StoreId::getData(),
+            paymentMethodId: PaymentMethod::getData()
+        );
+
+        self::$readMoreInstance = new ReadMore(
+            paymentMethod: $paymentMethod,
+            amount: self::getPriceData()
+        );
+
+        return self::$readMoreInstance;
+    }
 
     /**
      * @throws ApiException
@@ -107,10 +153,14 @@ class PartPayment
                 amount: $priceData,
                 currencySymbol: Currency::getWooCommerceCurrencySymbol(),
                 currencyFormat: Currency::getEcomCurrencyFormat(),
-                apiUrl: Route::getUrl(route: Route::ROUTE_PART_PAYMENT),
+                fetchStartingCostUrl: Route::getUrl(
+                    route: Route::ROUTE_PART_PAYMENT
+                ),
                 decimals: Currency::getConfiguredDecimalPoints(),
-                displayInfoText: self::displayInfoText()
+                displayInfoText: self::displayInfoText(),
+                threshold: Limit::getData()
             );
+
             return self::$instance;
         }
 
@@ -122,6 +172,8 @@ class PartPayment
      *
      * NOTE: Cannot place isEnabled() check here to prevent hooks, product not
      * available yet.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initFrontend(): void
     {
@@ -148,6 +200,8 @@ class PartPayment
 
     /**
      * Init method for admin script.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initAdmin(): void
     {
@@ -167,7 +221,7 @@ class PartPayment
         }
 
         try {
-            echo self::getWidget()->content;
+            echo '<div id="rb-pp-widget-container">' . self::getWidget()->content . self::getReadMoreWidget()->content . '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -185,10 +239,12 @@ class PartPayment
 
         try {
             $css = self::getWidget()->css ?? '';
+            $readMoreCss = self::getReadMoreWidget()->css ?? '';
 
             echo <<<EX
-<style id="rb-pp-styles">
+<style id=" rb-pp-styles">
   $css
+  $readMoreCss
 </style>
 EX;
         } catch (EmptyValueException) {
@@ -223,6 +279,29 @@ EX;
                 self::getWidget()->js
             );
             add_action('wp_enqueue_scripts', 'partpayment-script');
+
+            try {
+                $maxApplicationLimit = self::getWidget()->paymentMethod->maxApplicationLimit;
+                $minApplicationLimit = self::getWidget()->paymentMethod->minApplicationLimit;
+            } catch (Throwable $error) {
+                $minApplicationLimit = 0;
+                $maxApplicationLimit = 0;
+            }
+
+            // Allow max/min-application limits to render in front end, so
+            // that we can hide/show the part payment widget on demand (always rendering,
+            // regardless of the threshold).
+            wp_localize_script(
+                'partpayment-script',
+                'rbPpScript',
+                [
+                    'product_price' => self::getPriceData(),
+                    'maxApplicationLimit' => $maxApplicationLimit,
+                    'minApplicationLimit' => $minApplicationLimit,
+                    'thresholdLimit' => Limit::getData(),
+                    'monthlyCost' => self::getWidget()->getMonthlyCost()
+                ]
+            );
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -246,6 +325,8 @@ EX;
 
     /**
      * Programmatically control whether part payment info text should be shown or hidden. Default is to show.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function displayInfoText(): bool
     {
@@ -259,15 +340,23 @@ EX;
     private static function isEnabled(): bool
     {
         try {
+            // Enabled if there is a product and a price.
             return PartPaymentOptions::isEnabled() &&
                 PaymentMethod::getData() !== '' &&
                 is_product() &&
-                (float)self::getProduct()->get_price() > 0.0 &&
-                self::getWidget()->getPaymentMethod()->maxApplicationLimit >=
-                (float)self::getProduct()->get_price() &&
-                self::getWidget()->getPaymentMethod()->minApplicationLimit <=
-                (float)self::getProduct()->get_price() &&
-                self::getWidget()->cost->monthlyCost >= Limit::getData();
+                self::getPriceData() > 0.0;
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+
+        return false;
+    }
+
+    private static function isAllowedThreshold(): bool
+    {
+        try {
+            return (float)self::getProduct()->get_price() >= self::getWidget()->paymentMethod->minApplicationLimit &&
+                (float)self::getProduct()->get_price() <= self::getWidget()->paymentMethod->maxApplicationLimit;
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

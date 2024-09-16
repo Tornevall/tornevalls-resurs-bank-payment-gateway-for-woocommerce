@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use JsonException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
@@ -35,7 +36,7 @@ class Url
         // NOTE: plugin_dir_url returns everything up to the last slash.
         return plugin_dir_url(
             RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/" .
-                  str_replace(search: '/', replace: '', subject: $file)
+                str_replace(search: '/', replace: '', subject: $file)
         ) . $file;
     }
 
@@ -111,7 +112,7 @@ class Url
 
         /** @noinspection PhpCastIsUnnecessaryInspection */
         $file = $offset !== false ?
-            (string) substr(string: $path, offset: $offset + 1) : '';
+            (string)substr(string: $path, offset: $offset + 1) : '';
 
         if ($file === '') {
             if (
@@ -175,6 +176,22 @@ class Url
         return isset($_POST[$key]) && is_string(value: $_POST[$key])
             ? $_POST[$key]
             : null;
+    }
+
+    /**
+     * Get JSON requests the same way we do for _GET and _POST.
+     *
+     * @throws JsonException
+     */
+    public static function getHttpJson(string $key): null|string|int|float
+    {
+        $jsonData = file_get_contents(filename: 'php://input');
+        $data = json_decode(
+            $jsonData,
+            associative: true,
+            flags: JSON_THROW_ON_ERROR
+        );
+        return isset($data[$key]) && $data[$key] ? $data[$key] : null;
     }
 
     /**

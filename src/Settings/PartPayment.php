@@ -266,8 +266,9 @@ class PartPayment
      */
     private static function getAnnuityPeriods(): array
     {
-        $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
+        $paymentMethodId = PaymentMethodOption::getData();
+
         $annuityFactors = [];
         $return = [
             '' => Translator::translate(phraseId: 'please-select'),
@@ -278,7 +279,7 @@ class PartPayment
                 $annuityFactors = AnnuityRepository::getAnnuityFactors(
                     storeId: $storeId,
                     paymentMethodId: $paymentMethodId
-                )->content;
+                )->getData();
             }
         } catch (Throwable) {
             MessageBag::addError(

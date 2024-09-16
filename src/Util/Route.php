@@ -30,7 +30,6 @@ use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
-use Resursbank\Woocommerce\Modules\PartPayment\Controller\Admin\GetValidDurations;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
 use Resursbank\Woocommerce\Settings\Advanced;
@@ -302,10 +301,6 @@ class Route
 
             case self::ROUTE_PART_PAYMENT:
                 self::respondWithExit(body: PartPayment::exec());
-                break;
-
-            case self::ROUTE_PART_PAYMENT_ADMIN:
-                self::respondWithExit(body: GetValidDurations::exec());
                 break;
 
             case self::ROUTE_GET_STORES_ADMIN:
