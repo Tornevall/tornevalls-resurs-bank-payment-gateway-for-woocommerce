@@ -493,7 +493,7 @@ class OrderManagement
         Throwable $error,
         string $reason = 'unknown reason'
     ): void {
-        $actionStr = str_replace(
+        $actionString = str_replace(
             search: '_',
             replace: '-',
             subject: strtolower(string: $action->value)
@@ -501,7 +501,7 @@ class OrderManagement
 
         self::logError(
             message: sprintf(
-                Translator::translate(phraseId: "$actionStr-action-failed"),
+                Translator::translate(phraseId: "$actionString-action-failed"),
                 strtolower(string: $reason)
             ),
             error: $error,
