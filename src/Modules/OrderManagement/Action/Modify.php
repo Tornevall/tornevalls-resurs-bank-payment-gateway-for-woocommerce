@@ -69,6 +69,7 @@ class Modify extends Action
      * @throws ReflectionException
      * @throws Throwable
      * @throws ValidationException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         Payment $payment,
@@ -141,6 +142,7 @@ class Modify extends Action
                 ) {
                     return;
                 }
+
 
                 if ($payment->canCancel()) {
                     Repository::cancel(

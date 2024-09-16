@@ -183,8 +183,8 @@ class OrderManagement
         self::getCanNotEditTranslation(order: $order);
 
         $frozenOrRejected = (self::isFrozen(order: $order) || self::isRejected(
-            order: $order
-        ));
+                order: $order
+            ));
         $payment = self::getPayment(order: $order);
 
         return
@@ -215,6 +215,7 @@ class OrderManagement
      * @throws ReflectionException
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getCanNotEditTranslation(WC_Order $order): void
     {
@@ -416,7 +417,7 @@ class OrderManagement
     public static function getPayment(WC_Order $order): Payment
     {
         global $rbGetPaymentCount;
-        $rbGetPaymentCount ++;
+        $rbGetPaymentCount++;
 
         $id = (int)$order->get_id();
 
