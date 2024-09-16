@@ -39,3 +39,11 @@ Find out more in about the plugin [in our documentation](https://developers.resu
 No (this plugin is a breaking change). But if you've used the old version before, historical payments are transparent and can be handled by this new release.
 If you wish to upgrade from the old plugin release, you need to contact Resurs Bank for new credentials.
 Also be aware of that you need new credentials when switching from the "2.2-package".
+
+## For Developers
+
+To include qa's for Wordpress on commits, do this:
+
+composer require --dev wp-coding-standards/wpcs
+
+As we are using our own standard, this is not recommended.
