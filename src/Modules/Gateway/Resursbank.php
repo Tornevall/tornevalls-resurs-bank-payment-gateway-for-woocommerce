@@ -27,15 +27,15 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options;
+use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callback;
+use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callbacks;
+use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
+use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callback;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\Callbacks;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
-use Resursbank\Ecom\Module\Payment\Models\CreatePaymentRequest\Options\RedirectionUrls;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
@@ -342,7 +342,7 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         $order->add_order_note('Resurs initiated payment process.');
-        Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value:(string)time());
+        Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value: (string)time());
 
         return PaymentRepository::create(
             storeId: StoreId::getData(),

@@ -43,7 +43,7 @@ class GetAddress
             );
         } catch (Throwable $e) {
             // Do nothing.
-            Config::getLogger()->error(message: $e);
+            Config::getLogger()->debug(message: $e);
         }
 
         return $return ?? '{}';
