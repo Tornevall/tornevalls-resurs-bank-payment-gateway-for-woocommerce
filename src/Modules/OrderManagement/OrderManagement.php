@@ -529,7 +529,7 @@ class OrderManagement
         WC_Order $order,
         ?float $amount = null
     ): void {
-        $actionStr = str_replace(
+        $actionString = str_replace(
             search: '_',
             replace: '-',
             subject: strtolower(string: $action->value)
@@ -537,7 +537,7 @@ class OrderManagement
 
         self::logSuccess(
             message: sprintf(
-                Translator::translate(phraseId: "$actionStr-success"),
+                Translator::translate(phraseId: "$actionString-success"),
                 Currency::getFormattedAmount(amount: (float)$amount)
             ),
             order: $order
