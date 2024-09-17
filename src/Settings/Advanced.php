@@ -91,6 +91,7 @@ class Advanced
 
     private static function getCountryRestrictionConfig(): array
     {
+        $countryCode = trim(string: StoreCountryCode::getCurrentStoreCountry() ?? '') ?: 'Not configured';
         return [
             'id' => 'get_address',
             'type' => 'text',
@@ -101,7 +102,7 @@ class Advanced
                 phraseId: 'enable-widget-to-get-address'
             ),
             'value' => __('Disabled'),
-            'desc' => '<b>Not available in this country (' . StoreCountryCode::getCurrentStoreCountry() . ')</b>',
+            'desc' => '<b>Not available in this country (' . $countryCode . ')</b>',
             // phpcs:ignore
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
         ];
