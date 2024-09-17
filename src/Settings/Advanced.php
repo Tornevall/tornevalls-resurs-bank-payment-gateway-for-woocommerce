@@ -91,7 +91,9 @@ class Advanced
 
     private static function getCountryRestrictionConfig(): array
     {
-        $countryCode = trim(string: StoreCountryCode::getCurrentStoreCountry() ?? '') ?: 'Not configured';
+        $countryCode = trim(
+            string: StoreCountryCode::getCurrentStoreCountry() ?? ''
+        ) ?: 'Not configured';
         return [
             'id' => 'get_address',
             'type' => 'text',

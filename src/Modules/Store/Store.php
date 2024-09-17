@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Store;
 
 use Resursbank\Ecom\Module\Store\Widget\GetStores;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
@@ -82,10 +81,13 @@ class Store
             wp_enqueue_script('rb-store-admin-scripts');
             wp_add_inline_script('rb-store-admin-scripts', $widget->content);
 
-            wp_register_script('rb-store-admin-scripts-load', Url::getScriptUrl(
-                module: 'Store',
-                file: 'rb-store.js'
-            ));
+            wp_register_script(
+                'rb-store-admin-scripts-load',
+                Url::getScriptUrl(
+                    module: 'Store',
+                    file: 'rb-store.js'
+                )
+            );
 
             wp_enqueue_script(
                 'rb-store-admin-scripts-load',
