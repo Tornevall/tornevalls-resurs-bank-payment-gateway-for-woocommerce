@@ -34,12 +34,18 @@ class Settings
      */
     public static function init(): void
     {
+        /**
+         * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+         */
         // Render configuration page.
         add_action(
             'woocommerce_settings_page_init',
             'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
+        /**
+         * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+         */
         add_filter(
             'handle_bulk_actions-edit-shop_order',
             static function ($redirect, $action, $ids) {
@@ -58,12 +64,18 @@ class Settings
         Api::init();
         PartPayment::init();
 
+        /**
+         * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+         */
         // Save changes to database.
         add_action(
             'woocommerce_settings_save_' . RESURSBANK_MODULE_PREFIX,
             'Resursbank\Woocommerce\Settings\Settings::saveSettings'
         );
 
+        /**
+         * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+         */
         // Add link to Settings page from Plugin page in WP admin.
         add_filter(
             'plugin_action_links',

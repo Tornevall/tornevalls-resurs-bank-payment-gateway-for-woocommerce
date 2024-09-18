@@ -180,7 +180,7 @@ class Api
             'id' => ClientId::getName(),
             'title' => Translator::translate(phraseId: 'client-id'),
             'type' => 'text',
-            'default' => ClientId::getDefault(),
+            'default' => ClientId::getDefault()
         ];
     }
 
