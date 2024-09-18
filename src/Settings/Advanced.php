@@ -91,6 +91,7 @@ class Advanced
 
     private static function getCountryRestrictionConfig(): array
     {
+        // On new installs, countryCode tend to be empty until credentials are set.
         $countryCode = trim(
             string: StoreCountryCode::getCurrentStoreCountry() ?? ''
         ) ?: 'Not configured';
