@@ -15,6 +15,7 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Module\AnnuityFactor\Widget\GetPeriods;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\Admin as AdminUtil;
+use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 /**
@@ -25,6 +26,7 @@ class Admin
     /**
      * @throws ConfigException
      * @throws FilesystemException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setJs(): void
     {
@@ -49,6 +51,23 @@ class Admin
                 'before'
             );
             add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');
+
+            wp_register_script(
+                'rb-store-admin-scripts-load',
+                Url::getScriptUrl(
+                    module: 'PartPayment',
+                    file: 'rb-part-payment-admin.js'
+                )
+            );
+
+            wp_enqueue_script(
+                'rb-store-admin-scripts-load',
+                Url::getScriptUrl(
+                    module: 'PartPayment',
+                    file: 'rb-part-payment-admin.js'
+                ),
+                ['jquery']
+            );
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
         }
