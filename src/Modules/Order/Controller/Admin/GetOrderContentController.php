@@ -34,12 +34,13 @@ class GetOrderContentController
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     // phpcs:ignore
     public static function exec(): string
     {
         $orderId = $_GET['orderId'] ?? null;
-        $orderId = (int) $orderId;
+        $orderId = (int)$orderId;
 
         if ($orderId === 0) {
             throw new HttpException(message: 'Missing order id.');
@@ -50,7 +51,21 @@ class GetOrderContentController
         $orderTypes = wc_get_order_types();
 
         if (!$orderTypes) {
-            add_filter('wc_order_types', static fn () => ['shop_order'], 10, 2);
+            add_filter(
+                'wc_order_types',
+                static fn ($types) => array_merge($types, ['shop_order']),
+                10,
+                2
+            );
+        }
+
+        // Make sure we don't allow orde fetching before post types are registered.
+        if (!did_action('woocommerce_after_register_post_type')) {
+            $data = [
+                'payment_info' => null,
+                'error' => 'doing_it_wrong_woocommerce_after_register_post_type'
+            ];
+            return json_encode(value: $data, flags: JSON_THROW_ON_ERROR);
         }
 
         $order = OrderManagement::getOrder(id: $orderId);
