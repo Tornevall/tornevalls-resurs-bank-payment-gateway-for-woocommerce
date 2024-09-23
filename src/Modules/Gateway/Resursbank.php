@@ -421,9 +421,14 @@ class Resursbank extends WC_Payment_Gateway
             }
         }
 
-        // Return the order if valid ID is provided and it's a valid order.
+        // Validate that we have a proper order by first requesting it. Since we still get booleans in
+        // for example a bulk editing view, the order has to be validated before proceeding to the return.
+
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        return (int)$orderIdByRequest ? wc_get_order($orderIdByRequest) : null;
+        $validatedOrder = wc_get_order($orderIdByRequest);
+
+        // Return the order if valid ID is provided and it's a valid order.
+        return $validatedOrder instanceof WC_Order && (int)$orderIdByRequest ? $validatedOrder : null;
     }
 
     /**
