@@ -291,6 +291,7 @@ class Route
      * @throws IllegalTypeException
      * @SuppressWarnings(PHPMD.ExitExpression)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function route(string $route): void
     {
@@ -327,8 +328,14 @@ class Route
                 break;
 
             case self::ROUTE_ADMIN_GET_ORDER_CONTENT:
-                self::respondWithExit(
-                    body: GetOrderContentController::exec()
+                // We should not execute this until after post types are registered.
+                add_action(
+                    'woocommerce_after_register_post_type',
+                    static function (): void {
+                        Route::respondWithExit(
+                            body: GetOrderContentController::exec()
+                        );
+                    }
                 );
                 break;
 

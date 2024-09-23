@@ -374,11 +374,14 @@ class OrderManagement
      */
     public static function getOrder(int $id): ?WC_Order
     {
-        $result = null;
+        /**
+         * Will be either WC_Order or false.
+         */
+        $result = wc_get_order($id);
 
         try {
             /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            $result = new WC_Order($id);
+            $result = $result instanceof WC_Order ? $result : wc_get_order($id);
 
             if (!$result instanceof WC_Order) {
                 $result = null;

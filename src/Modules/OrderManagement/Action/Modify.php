@@ -125,10 +125,10 @@ class Modify extends Action
                     order: $order
                 );
 
-                $canBulkModify = self::canBulkModify(
+                $allowModify = self::canBulkModify(
                     order: $order,
                     payment: $payment
-                );
+                ) || is_ajax();
 
                 // If Resurs payment status is still in redirection, the order can not be cancelled, but for
                 // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
@@ -138,11 +138,10 @@ class Modify extends Action
                     OrderManagement::$hasActiveCancel ||
                     !$payment->canCancel() ||
                     $payment->status === Status::TASK_REDIRECTION_REQUIRED ||
-                    !$canBulkModify
+                    !$allowModify
                 ) {
                     return;
                 }
-
 
                 if ($payment->canCancel()) {
                     Repository::cancel(

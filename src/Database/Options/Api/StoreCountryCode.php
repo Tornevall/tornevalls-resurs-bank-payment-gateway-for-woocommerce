@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options\Api;
 
-use Resursbank\Ecom\Module\Store\Models\Store;
+use Resursbank\Ecom\Lib\Model\Store\Store;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
