@@ -9,11 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\SupportInfo\Widget\SupportInfo as EcomSupportInfo;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\UserAgent;
+use Throwable;
 
 /**
  * Support info section.
@@ -21,6 +20,17 @@ use Resursbank\Woocommerce\Util\UserAgent;
 class About
 {
     public const SECTION_ID = 'about';
+
+    public static ?EcomSupportInfo $widget = null;
+
+    /**
+     * Set up css for the About widget.
+     */
+    public static function setCss(): void
+    {
+        $widget = About::getWidget();
+        echo "<style>" . ($widget->css ?? '') . "</style>\n";
+    }
 
     /**
      * Get tab title
@@ -30,18 +40,28 @@ class About
         return Translator::translate(phraseId: 'about');
     }
 
+    public static function getWidget(): ?EcomSupportInfo
+    {
+        try {
+            if (self::$widget === null) {
+                self::$widget = new EcomSupportInfo(
+                    pluginVersion: UserAgent::getPluginVersion()
+                );
+            }
+        } catch (Throwable) {
+        }
+
+        return self::$widget;
+    }
+
     /**
      * Create and return widget HTML.
      *
-     * @throws FilesystemException
-     * @throws IllegalValueException
      * @SuppressWarnings(PHPMD.Superglobals)
      */
-    public static function getWidget(): string
+    public static function getWidgetHtml(): string
     {
         $GLOBALS['hide_save_button'] = '1';
-        return (new EcomSupportInfo(
-            pluginVersion: UserAgent::getPluginVersion()
-        ))->getHtml();
+        return self::getWidget()->html;
     }
 }
