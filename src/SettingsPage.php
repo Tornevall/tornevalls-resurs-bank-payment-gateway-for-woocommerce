@@ -183,7 +183,7 @@ EX;
     public function renderAboutPage(): void
     {
         try {
-            echo About::getWidget();
+            echo About::getWidgetHtml();
         } catch (Throwable $error) {
             Log::error(error: $error);
 

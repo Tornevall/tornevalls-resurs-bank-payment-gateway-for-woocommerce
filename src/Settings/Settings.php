@@ -31,6 +31,8 @@ class Settings
 {
     /**
      * Setup event listeners to render our configuration page and save settings.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
@@ -41,6 +43,11 @@ class Settings
         add_action(
             'woocommerce_settings_page_init',
             'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
+        );
+
+        add_action(
+            'in_admin_header',
+            'Resursbank\Woocommerce\Settings\About::setCss'
         );
 
         /**

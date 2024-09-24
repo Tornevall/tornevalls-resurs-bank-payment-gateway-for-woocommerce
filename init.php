@@ -7,7 +7,7 @@
  * WC requires at least: 7.6.0
  * Plugin requires ecom: 3.0.0
  * Requires PHP: 8.1
- * Version: 1.0.41
+ * Version: 1.0.42
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
@@ -84,6 +84,7 @@ if (!Config::hasInstance()) {
 // Setup event listeners and resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     Shared::init();
+    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     add_action(
         'before_woocommerce_init',
         static function (): void {
