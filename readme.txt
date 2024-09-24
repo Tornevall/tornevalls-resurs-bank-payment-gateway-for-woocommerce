@@ -60,189 +60,21 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
-# 1.0.40
+# 1.0.42
+
+[WOO-1308](https://resursbankplugins.atlassian.net/browse/WOO-1308) Upgrade to v3
+[WOO-1332](https://resursbankplugins.atlassian.net/browse/WOO-1332) getAddress don't show up
+[WOO-1333](https://resursbankplugins.atlassian.net/browse/WOO-1333) get use of rb-ga-gov-id to fill in company name on LEGAL
+[WOO-1337](https://resursbankplugins.atlassian.net/browse/WOO-1337) Raise woocommerce too ecom v3-tag
+[WOO-1329](https://resursbankplugins.atlassian.net/browse/WOO-1329) Fix annuity-factor widget in admin \(Breaking change for v3\).
+[WOO-1334](https://resursbankplugins.atlassian.net/browse/WOO-1334) createPaymentRequest classes moved to models
+[WOO-1335](https://resursbankplugins.atlassian.net/browse/WOO-1335) PPW: Period laddas inte vid val av betalmetod
+[WOO-1336](https://resursbankplugins.atlassian.net/browse/WOO-1336) Admin: Butiksval laddas inte in vi byte av credentials
+[WOO-1338](https://resursbankplugins.atlassian.net/browse/WOO-1338) Government id not submitted to createpayment
+[WOO-1339](https://resursbankplugins.atlassian.net/browse/WOO-1339) Modify seems to not work properly
+[WOO-1340](https://resursbankplugins.atlassian.net/browse/WOO-1340) Bulk finalization may still cause booleans instead of null when using getOrder
+[WOO-1342](https://resursbankplugins.atlassian.net/browse/WOO-1342) About-widget errors
 
-[WOO-1330](https://resursbankplugins.atlassian.net/browse/WOO-1330) Legacy post id's not null, but false, in exclusive occasions
-
-# 1.0.39
-
-[WOO-1312](https://resursbankplugins.atlassian.net/browse/WOO-1312) Required: High Performance Order Storage
-[WOO-1327](https://resursbankplugins.atlassian.net/browse/WOO-1327) Make icons/logotypes float right
-
-# 1.0.38
-
-getPayment MAPI overload Hotfix.
-
-# 1.0.37
-
-[WOO-1324](https://resursbankplugins.atlassian.net/browse/WOO-1324) Investigate and Possibly Remove getPriceSignage false errors in the Log
-[WOO-1322](https://resursbankplugins.atlassian.net/browse/WOO-1322) Error Occurs When Attempting to Charge a Frozen Order via Bulk Update in the Order List
-[WOO-1323](https://resursbankplugins.atlassian.net/browse/WOO-1323) Prevent race conditions between "thankyou" and callbacks after order creation-retries
-[WOO-1326](https://resursbankplugins.atlassian.net/browse/WOO-1326) canCapture in orderlist still a performance issue
-
-# 1.0.36
-
-[WOO-1317](https://resursbankplugins.atlassian.net/browse/WOO-1317) Handle Orders Marked as Rejected and Older Than 30 Days
-[WOO-1319](https://resursbankplugins.atlassian.net/browse/WOO-1319) Check for hardcoded vatrates
-[WOO-1315](https://resursbankplugins.atlassian.net/browse/WOO-1315) Order list crashes when checking statuses with capturable orders
-[WOO-1318](https://resursbankplugins.atlassian.net/browse/WOO-1318) Unable to Change Order Status Even When Order Management Against Resurs is Deactivated
-[WOO-1321](https://resursbankplugins.atlassian.net/browse/WOO-1321) Disabled modify may cause wrong captures
-
-# 1.0.35
-
-[WOO-1315](https://resursbankplugins.atlassian.net/browse/WOO-1315) Order list crashes when checking statuses with capturable orders
-
-# 1.0.34
-
-[WOO-1313](https://resursbankplugins.atlassian.net/browse/WOO-1313) Programmatic order updates will cancel FROZEN payments
-
-# 1.0.33
-
-Reverted the failed-status setup from previous release.
-
-# 1.0.32
-
-[WOO-1310](https://resursbankplugins.atlassian.net/browse/WOO-1310) Frozen\+Rejected orders are cancelled twice
-
-# 1.0.31
-
-* [WOO-1306](https://resursbankplugins.atlassian.net/browse/WOO-1306) Payment methods by country limit
-
-# 1.0.29 - 1.0.30
-
-* Issues eventually discovered with composer.json
-
-# 1.0.28
-
-* Translation hotfix.
-
-# 1.0.27 (ECom2-2.x)
-
-* [WOO-1291](https://resursbankplugins.atlassian.net/browse/WOO-1291) Add plugin and platform information to the metadata
-* [WOO-1293](https://resursbankplugins.atlassian.net/browse/WOO-1293) Verification of woo with ECP-636
-* [WOO-1295](https://resursbankplugins.atlassian.net/browse/WOO-1295) Complete credit-denied
-* [WOO-1299](https://resursbankplugins.atlassian.net/browse/WOO-1299) Add an X-close-modal at payment method level in checkout area
-* [WOO-1302](https://resursbankplugins.atlassian.net/browse/WOO-1302) Implement revised changes from Payment Information module \(ecom2-v2\)
-* [WOO-1305](https://resursbankplugins.atlassian.net/browse/WOO-1305) Release of single patch from  ECP-745 \(finnish translation for partpay string\)
-* [WOO-1294](https://resursbankplugins.atlassian.net/browse/WOO-1294) Ecom2 v2.0 locale/language changes
-* [WOO-1297](https://resursbankplugins.atlassian.net/browse/WOO-1297) Testing callbacks fails
-* [WOO-1298](https://resursbankplugins.atlassian.net/browse/WOO-1298) Layout issues in cost info
-* [WOO-1300](https://resursbankplugins.atlassian.net/browse/WOO-1300) Annuity after reload issues
-* [WOO-1304](https://resursbankplugins.atlassian.net/browse/WOO-1304) Read more/Priceinfovy i kassa: Unable to fetch product, #0 \[...\]PartPayment.php\(83\)
-
-# 1.0.24 - 1.0.26
-
-* [WOO-1305](https://resursbankplugins.atlassian.net/browse/WOO-1305) Finnish translation for part payment info.
-
-# 1.0.23
-
-* Only tag change.
-
-# 1.0.23
-
-* Only tag change.
-
-# 1.0.22
-
-* [WOO-1292](https://resursbankplugins.atlassian.net/browse/WOO-1292) Norska basöversättningar för woocommerce
-
-# 1.0.21
-
-* [WOO-1290](https://resursbankplugins.atlassian.net/browse/WOO-1290) Mobile view for priceinfo may be broken depending on the width
-
-# 1.0.20
-
-* [WOO-1289](https://resursbankplugins.atlassian.net/browse/WOO-1289) Payment information widget should have z-index 999999 \(linked issue for deploy in Woocommerce\)
-
-# 1.0.19
-
-* [WOO-1288](https://resursbankplugins.atlassian.net/browse/WOO-1288) Partpayment infotext \(norwegian\)
-
-# 1.0.18
-
-* [WOO-1285](https://resursbankplugins.atlassian.net/browse/WOO-1285) Typed static property Resursbank\\Ecom\\Config::$instance must not be accessed before initialization
-* [WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) locale_rework
-
-# 1.0.17
-
-* [WOO-1283](https://resursbankplugins.atlassian.net/browse/WOO-1283) Findings: fi/no translations for checkout
-
-# 1.0.16
-
-* [WOO-1282](https://resursbankplugins.atlassian.net/browse/WOO-1282) Disabla getAddress-wiget om vald butik <> "countryCode": "SE"
-
-# 1.0.15
-
-* [WOO-1279](https://resursbankplugins.atlassian.net/browse/WOO-1279) Verify the plugin with rcoplus branch and WooCommerce 8.5.0
-* [WOO-1280](https://resursbankplugins.atlassian.net/browse/WOO-1280) Undefined array key warnings in checkout/wp-admin
-
-# 1.0.14
-
-* Rebuilt commit.
-
-# 1.0.13
-
-* [WOO-1274](https://resursbankplugins.atlassian.net/browse/WOO-1274) Handle gateway sort order in checkout based on wp-admin setup
-* [WOO-1267](https://resursbankplugins.atlassian.net/browse/WOO-1267) Make "tested up to 8.0.x" work properly.
-* [WOO-1276](https://resursbankplugins.atlassian.net/browse/WOO-1276) Read more CSS malfunction on custom themes
-
-# 1.0.12
-
-* [WOO-1275](https://resursbankplugins.atlassian.net/browse/WOO-1275) Variable products part payment script errors
-
-# 1.0.11
-
-* [WOO-1271](https://resursbankplugins.atlassian.net/browse/WOO-1271) /price\_signage?amount=0" tiggas 1000 ggr per dag
-* [WOO-1272](https://resursbankplugins.atlassian.net/browse/WOO-1272) Regler för paymentwidget
-* [WOO-1273](https://resursbankplugins.atlassian.net/browse/WOO-1273) Switching between customer types may confuse the platform customertype
-
-# 1.0.10
-
-* [WOO-1270](https://resursbankplugins.atlassian.net/browse/WOO-1270) Enforce input field for companies \(company id\)
-
-# 1.0.9
-
-* [WOO-1264](https://resursbankplugins.atlassian.net/browse/WOO-1264) Change behaviour of how payment gateways/methods are displayed in admin and checkout pages
-* [WOO-1265](https://resursbankplugins.atlassian.net/browse/WOO-1265) Redirect from "payments" no longer works
-* [WOO-1261](https://resursbankplugins.atlassian.net/browse/WOO-1261) get\_query\_var: Call to a member function get\(\) on null
-* [WOO-1266](https://resursbankplugins.atlassian.net/browse/WOO-1266) Prevent min/max, etc to not show warnings when gateway methods is not present
-* [WOO-1268](https://resursbankplugins.atlassian.net/browse/WOO-1268) Partpayment admin widget conflicts \(0059993\)
-
-# 1.0.8
-
-* [WOO-1261](https://resursbankplugins.atlassian.net/browse/WOO-1261) get\_query\_var: Call to a member function get\(\) on null
-
-# 1.0.7
-
-* [WOO-1260](https://resursbankplugins.atlassian.net/browse/WOO-1260) Fix inaccurate return type in \\Resursbank\\Woocommerce\\Modules\\Order\\Status::orderStatusFromPaymentStatus
-
-# 1.0.6
-
-* [WOO-1249](https://resursbankplugins.atlassian.net/browse/WOO-1249) Timeouts in the store may block site access completely if misconfigured
-
-# 1.0.5 (ECom Upgrade)
-
-[WOO-1257](https://resursbankplugins.atlassian.net/browse/WOO-1257) USP strings with wrong notices when translations are missing
-
-# 1.0.4 (ECom Upgrade)
-
-* [WOO-1252](https://resursbankplugins.atlassian.net/browse/WOO-1252) Changed description length from 50 till 100 in ecom package
-* [WOO-1250](https://resursbankplugins.atlassian.net/browse/WOO-1250) Extend logging on getStores errors / Troubleshooting getStores and TLS \(?\)
-* [WOO-1253](https://resursbankplugins.atlassian.net/browse/WOO-1253) Error: Failed to obtain store selection box \(ecom-related\)
-* [WOO-1254](https://resursbankplugins.atlassian.net/browse/WOO-1254) Msgbox at Resurs settings
-* [WOO-1255](https://resursbankplugins.atlassian.net/browse/WOO-1255) Store fetcher does not work
-
-# 1.0.3
-
-* [WOO-1250](https://resursbankplugins.atlassian.net/browse/WOO-1250) Extend logging on getStores errors
-
-# 1.0.2
-
-* [WOO-1248](https://resursbankplugins.atlassian.net/browse/WOO-1248) Unable to switch to production
-
-# 1.0.0 - 1.0.1
-
-[See here for full list](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md)
 
 == Upgrade Notice ==
 
