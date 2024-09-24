@@ -7,7 +7,7 @@
  * WC requires at least: 7.6.0
  * Plugin requires ecom: 3.0.0
  * Requires PHP: 8.1
- * Version: 1.0.42
+ * Version: 1.0.43
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
