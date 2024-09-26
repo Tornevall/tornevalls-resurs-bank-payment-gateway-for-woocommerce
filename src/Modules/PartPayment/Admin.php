@@ -47,7 +47,7 @@ class Admin
             wp_enqueue_script('partpayment-admin-scripts');
             wp_add_inline_script(
                 'partpayment-admin-scripts',
-                $periods->content,
+                $periods->js,
                 'before'
             );
             add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');

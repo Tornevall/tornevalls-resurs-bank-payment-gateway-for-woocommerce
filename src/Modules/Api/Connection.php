@@ -20,6 +20,7 @@ use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Log\FileLogger;
 use Resursbank\Ecom\Lib\Log\LoggerInterface;
 use Resursbank\Ecom\Lib\Log\NoneLogger;
+use Resursbank\Ecom\Lib\Model\Config\Network;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
@@ -90,10 +91,12 @@ class Connection
                 cache: self::getCache(),
                 jwtAuth: $jwt,
                 logLevel: LogLevel::getData(),
-                userAgent: UserAgent::getUserAgent(),
                 isProduction: isset($jwt->scope) && $jwt->scope === Scope::MERCHANT_API,
-                timeout: $timeout,
-                language: Language::getSiteLanguage()
+                language: Language::getSiteLanguage(),
+                network: new Network(
+                    timeout: $timeout,
+                    userAgent: UserAgent::getUserAgent()
+                )
             );
 
             if ($hasPostJwtInstance) {
