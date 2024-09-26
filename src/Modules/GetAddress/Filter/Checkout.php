@@ -11,11 +11,8 @@ namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\GetAddressException;
-use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Customer\Widget\GetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Util\Log;
@@ -30,20 +27,22 @@ class Checkout
 {
     private static ?GetAddress $instance = null;
 
-    /**
-     * @throws HttpException
-     * @throws IllegalValueException
-     * @throws FilesystemException
-     */
     public static function getWidget(): ?GetAddress
     {
         if (self::$instance !== null) {
             return self::$instance;
         }
 
-        self::$instance = new GetAddress(
-            url: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
-        );
+        try {
+            $getAddressUrl = Route::getUrl(route: Route::ROUTE_GET_ADDRESS);
+
+            if ($getAddressUrl !== '') {
+                // Only instantiating if url is present.
+                self::$instance = new GetAddress(url: $getAddressUrl);
+            }
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+        }
 
         return self::$instance;
     }
@@ -98,9 +97,6 @@ EX;
     /**
      * Loads script and stylesheet for form.
      *
-     * @throws FilesystemException
-     * @throws HttpException
-     * @throws IllegalValueException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function loadScripts(): void
