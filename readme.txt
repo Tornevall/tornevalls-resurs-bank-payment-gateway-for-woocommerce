@@ -8,7 +8,7 @@ WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: master
 Requires Plugins: woocommerce
-Stable tag: 1.0.45
+Stable tag: 1.0.46
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,8 @@ At checkout, your customer can choose between several flexible payment options, 
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar)!
 Find out more in about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/).
+
+** Please note that there is a known problem with WooCommerce blocks for the checkout for which payment methods are not properly displayed. This can be fixed by removing the content in the checkout-page blocks and add the shortcode [woocommerce_checkout] instead.**
 
 = System Requirements =
 
@@ -60,20 +62,24 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.0.43 - 1.0.46
+
+* Hotfixes for various problems. One covers a "live" vs "coming soon"-pages issue. Another one is based on a misplaced script-tag.
+
 # 1.0.42
 
-[WOO-1308](https://resursbankplugins.atlassian.net/browse/WOO-1308) Upgrade to v3
-[WOO-1332](https://resursbankplugins.atlassian.net/browse/WOO-1332) getAddress don't show up
-[WOO-1333](https://resursbankplugins.atlassian.net/browse/WOO-1333) get use of rb-ga-gov-id to fill in company name on LEGAL
-[WOO-1337](https://resursbankplugins.atlassian.net/browse/WOO-1337) Raise woocommerce too ecom v3-tag
-[WOO-1329](https://resursbankplugins.atlassian.net/browse/WOO-1329) Fix annuity-factor widget in admin \(Breaking change for v3\).
-[WOO-1334](https://resursbankplugins.atlassian.net/browse/WOO-1334) createPaymentRequest classes moved to models
-[WOO-1335](https://resursbankplugins.atlassian.net/browse/WOO-1335) PPW: Period laddas inte vid val av betalmetod
-[WOO-1336](https://resursbankplugins.atlassian.net/browse/WOO-1336) Admin: Butiksval laddas inte in vi byte av credentials
-[WOO-1338](https://resursbankplugins.atlassian.net/browse/WOO-1338) Government id not submitted to createpayment
-[WOO-1339](https://resursbankplugins.atlassian.net/browse/WOO-1339) Modify seems to not work properly
-[WOO-1340](https://resursbankplugins.atlassian.net/browse/WOO-1340) Bulk finalization may still cause booleans instead of null when using getOrder
-[WOO-1342](https://resursbankplugins.atlassian.net/browse/WOO-1342) About-widget errors
+* [WOO-1308](https://resursbankplugins.atlassian.net/browse/WOO-1308) Upgrade to v3
+* [WOO-1332](https://resursbankplugins.atlassian.net/browse/WOO-1332) getAddress don't show up
+* [WOO-1333](https://resursbankplugins.atlassian.net/browse/WOO-1333) get use of rb-ga-gov-id to fill in company name on LEGAL
+* [WOO-1337](https://resursbankplugins.atlassian.net/browse/WOO-1337) Raise woocommerce too ecom v3-tag
+* [WOO-1329](https://resursbankplugins.atlassian.net/browse/WOO-1329) Fix annuity-factor widget in admin \(Breaking change for v3\).
+* [WOO-1334](https://resursbankplugins.atlassian.net/browse/WOO-1334) createPaymentRequest classes moved to models
+* [WOO-1335](https://resursbankplugins.atlassian.net/browse/WOO-1335) PPW: Period laddas inte vid val av betalmetod
+* [WOO-1336](https://resursbankplugins.atlassian.net/browse/WOO-1336) Admin: Butiksval laddas inte in vi byte av credentials
+* [WOO-1338](https://resursbankplugins.atlassian.net/browse/WOO-1338) Government id not submitted to createpayment
+* [WOO-1339](https://resursbankplugins.atlassian.net/browse/WOO-1339) Modify seems to not work properly
+* [WOO-1340](https://resursbankplugins.atlassian.net/browse/WOO-1340) Bulk finalization may still cause booleans instead of null when using getOrder
+* [WOO-1342](https://resursbankplugins.atlassian.net/browse/WOO-1342) About-widget errors
 
 
 == Upgrade Notice ==
