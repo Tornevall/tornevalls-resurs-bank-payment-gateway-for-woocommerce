@@ -125,7 +125,11 @@ EX;
         $result = '';
 
         try {
-            Log::debug(message: 'Initialize getAddress with URL: ' . Route::getUrl(route: Route::ROUTE_GET_ADDRESS));
+            Log::debug(
+                message: 'Initialize getAddress with URL: ' . Route::getUrl(
+                    route: Route::ROUTE_GET_ADDRESS
+                )
+            );
             $address = new GetAddress(
                 url: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)
             );
