@@ -1,4 +1,4 @@
-# 1.0.43 - 1.0.46
+# 1.0.43 - 1.0.48
 
 * Hotfixes for various problems. One covers a "live" vs "coming soon"-pages issue. Another one is based on a misplaced script-tag.
 
