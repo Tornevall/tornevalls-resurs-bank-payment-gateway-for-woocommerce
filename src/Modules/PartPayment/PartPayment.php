@@ -278,7 +278,7 @@ EX;
                 'partpayment-script',
                 self::getWidget()->js
             );
-            add_action('wp_enqueue_scripts', 'partpayment-script');
+            //add_action('wp_enqueue_scripts', 'partpayment-script');
 
             try {
                 $maxApplicationLimit = self::getWidget()->paymentMethod->maxApplicationLimit;
