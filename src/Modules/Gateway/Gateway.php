@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -334,14 +336,15 @@ class Gateway
      * @throws AuthException
      * @throws CurlException
      * @throws IllegalValueException
-     * @throws \JsonException
+     * @throws JsonException
      * @throws ConfigException
      * @throws IllegalTypeException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws ApiException
      * @throws CacheException
+     * @throws Throwable
      */
-    private static function getPaymentMethodList(): PaymentMethodCollection
+    public static function getPaymentMethodList(): PaymentMethodCollection
     {
         // Making sure that cache-less solution only fetches payment methods once and reusing
         // data if already fetched during a single threaded call.
