@@ -130,7 +130,10 @@ class Order
      */
     public static function addPaymentInfo(): void
     {
-        $order = wc_get_order();
+        try {
+            $order = wc_get_order();
+        } catch (Throwable) {
+        }
 
         if (
             !($order instanceof WC_Order) ||
