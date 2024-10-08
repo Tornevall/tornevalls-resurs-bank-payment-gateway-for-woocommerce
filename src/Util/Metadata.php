@@ -12,8 +12,11 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Throwable;
 use WC_Abstract_Order;
@@ -129,14 +132,33 @@ class Metadata
     {
         global $rbPaymentIsValid;
 
+        $orderId = $order->get_id() ?? 0;
+
+        // Early payment method validation.
+        if (
+            isset($rbPaymentIsValid[$orderId]) &&
+            $rbPaymentIsValid[$orderId] === false
+        ) {
+            return false;
+        }
+
+        try {
+            // Validate payment method on uuid first, then verify that the payment method
+            // is Resurs based. If it is not a UUID we can save performance by just not checking it further.
+            $stringValidation = (new StringValidation());
+            $stringValidation->isUuid(value: $order->get_payment_method());
+            self::isValidResursMethod(order: $order);
+        } catch (Throwable) {
+            $rbPaymentIsValid[$orderId] = false;
+            return false;
+        }
+
         try {
             // Attempt to retrieve the payment ID; if it fails, the order is invalid.
             self::getPaymentId(order: $order);
         } catch (Throwable) {
             return false;
         }
-
-        $orderId = $order->get_id();
 
         // If checkPaymentStatus is requested, attempt to validate the payment by requesting it.
         // Note that this method is called through several actions in the plugin which means
@@ -197,6 +219,34 @@ class Metadata
             order: $order,
             key: self::KEY_THANK_YOU
         ) === '1';
+    }
+
+    /**
+     * Validate the used payment method for an order, making sure that we "own" the payment before proceeding.
+     *
+     * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
+     */
+    private static function isValidResursMethod(WC_Order $order): bool
+    {
+        $return = false;
+
+        try {
+            $paymentMethods = Gateway::getPaymentMethodList();
+            $orderPaymentMethod = $order->get_payment_method();
+
+            if ($orderPaymentMethod !== '' && $paymentMethods->count()) {
+                /** @var PaymentMethod $paymentMethod */
+                foreach ($paymentMethods as $paymentMethod) {
+                    if ($paymentMethod->id === $orderPaymentMethod) {
+                        $return = true;
+                        break;
+                    }
+                }
+            }
+        } catch (Throwable) {
+        }
+
+        return $return;
     }
 
     /**

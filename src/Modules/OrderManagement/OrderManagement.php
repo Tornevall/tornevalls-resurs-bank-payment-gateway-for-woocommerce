@@ -428,7 +428,7 @@ class OrderManagement
         // as we validate several abilities for a payment (like canCapture, canCancel, etc). To avoid API
         // overload, we'll use self if it has been already set once, instead of risking more than 10 API calls
         // during that single web request.
-        if ($rbGetPaymentCount > 1 && self::$payments[$id] instanceof Payment) {
+        if ($rbGetPaymentCount > 1 && isset(self::$payments[$id]) && self::$payments[$id] instanceof Payment) {
             return self::$payments[$id];
         }
 

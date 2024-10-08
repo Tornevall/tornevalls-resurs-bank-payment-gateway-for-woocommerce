@@ -340,12 +340,12 @@ class Gateway
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @throws Throwable
-     * @throws ValidationException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws Throwable
+     * @throws ValidationException
      */
-    private static function getPaymentMethodList(): PaymentMethodCollection
+    public static function getPaymentMethodList(): PaymentMethodCollection
     {
         // Making sure that cache-less solution only fetches payment methods once and reusing
         // data if already fetched during a single threaded call.

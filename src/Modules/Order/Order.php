@@ -81,7 +81,10 @@ class Order
             // $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
             $wcOrder = wc_get_order();
 
-            if (!$wcOrder instanceof WC_Order) {
+            if (
+                !$wcOrder instanceof WC_Order ||
+                !Metadata::isValidResursPayment(order: $wcOrder)
+            ) {
                 return;
             }
 
@@ -126,6 +129,18 @@ class Order
      */
     public static function addPaymentInfo(): void
     {
+        try {
+            $order = wc_get_order();
+        } catch (Throwable) {
+        }
+
+        if (
+            !($order instanceof WC_Order) ||
+            !Metadata::isValidResursPayment(order: $order)
+        ) {
+            return;
+        }
+
         add_meta_box(
             'resursbank_payment_info',
             'Resurs',
