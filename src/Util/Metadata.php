@@ -224,8 +224,8 @@ class Metadata
                 key: self::KEY_LEGACY_ORDER_REFERENCE
             );
             $result = Repository::search(
-                storeId: StoreId::getData(),
-                orderReference: $orderReference
+                orderReference: $orderReference,
+                storeId: StoreId::getData()
             );
 
             if ($result->count() > 0) {

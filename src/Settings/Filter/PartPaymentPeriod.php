@@ -91,7 +91,6 @@ EOL;
         try {
             if ($paymentMethodId !== '' && $storeId !== '') {
                 $annuityFactors = Repository::getAnnuityFactors(
-                    storeId: $storeId,
                     paymentMethodId: $paymentMethodId
                 )->getData();
             }

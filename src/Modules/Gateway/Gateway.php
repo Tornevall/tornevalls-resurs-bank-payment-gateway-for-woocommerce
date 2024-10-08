@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -329,17 +331,19 @@ class Gateway
     }
 
     /**
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws AuthException
-     * @throws CurlException
-     * @throws IllegalValueException
-     * @throws \JsonException
-     * @throws ConfigException
-     * @throws IllegalTypeException
-     * @throws \ReflectionException
+     * @return PaymentMethodCollection
      * @throws ApiException
+     * @throws AuthException
      * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws Throwable
+     * @throws ValidationException
+     * @throws JsonException
+     * @throws ReflectionException
      */
     private static function getPaymentMethodList(): PaymentMethodCollection
     {
@@ -348,9 +352,7 @@ class Gateway
         global $paymentMethodList;
 
         if (!$paymentMethodList instanceof PaymentMethodCollection) {
-            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(
-                storeId: StoreId::getData()
-            );
+            $paymentMethodList = PaymentMethodRepository::getPaymentMethods();
         }
 
         return $paymentMethodList;
