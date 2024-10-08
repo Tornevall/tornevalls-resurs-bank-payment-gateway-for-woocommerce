@@ -331,18 +331,19 @@ class Gateway
     }
 
     /**
-     * @throws ValidationException
-     * @throws EmptyValueException
+     * @return PaymentMethodCollection
+     * @throws ApiException
      * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
      * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
-     * @throws ConfigException
-     * @throws IllegalTypeException
      * @throws ReflectionException
-     * @throws ApiException
-     * @throws CacheException
      * @throws Throwable
+     * @throws ValidationException
      */
     public static function getPaymentMethodList(): PaymentMethodCollection
     {
@@ -351,9 +352,7 @@ class Gateway
         global $paymentMethodList;
 
         if (!$paymentMethodList instanceof PaymentMethodCollection) {
-            $paymentMethodList = PaymentMethodRepository::getPaymentMethods(
-                storeId: StoreId::getData()
-            );
+            $paymentMethodList = PaymentMethodRepository::getPaymentMethods();
         }
 
         return $paymentMethodList;

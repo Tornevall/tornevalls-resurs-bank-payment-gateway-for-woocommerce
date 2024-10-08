@@ -345,7 +345,6 @@ class Resursbank extends WC_Payment_Gateway
         Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value: (string)time());
 
         return PaymentRepository::create(
-            storeId: StoreId::getData(),
             paymentMethodId: $this->method->id,
             orderLines: Order::getOrderLines(order: $order),
             orderReference: (string)$order->get_id(),

@@ -28,6 +28,7 @@ use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
@@ -96,7 +97,8 @@ class Connection
                 network: new Network(
                     timeout: $timeout,
                     userAgent: UserAgent::getUserAgent()
-                )
+                ),
+                storeId: StoreId::getData()
             );
 
             if ($hasPostJwtInstance) {
