@@ -14,7 +14,7 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
-use Resursbank\Ecom\Module\Customer\Models\GetAddressRequest;
+use Resursbank\Ecom\Lib\Model\Callback\GetAddressRequest;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
