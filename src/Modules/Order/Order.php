@@ -22,7 +22,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
@@ -223,10 +222,7 @@ class Order
             return null;
         }
 
-        return Repository::getById(
-            storeId: StoreId::getData(),
-            paymentMethodId: $method
-        );
+        return Repository::getById(paymentMethodId: $method);
     }
 
     /**

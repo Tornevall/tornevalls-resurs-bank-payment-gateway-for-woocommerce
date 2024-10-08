@@ -65,11 +65,11 @@ class PaymentMethods
         $GLOBALS['hide_save_button'] = '1';
 
         if ($storeId !== '') {
-            Repository::getCache(storeId: $storeId)->clear();
+            Repository::getCache()->clear();
         }
 
         return (new PaymentMethodsWidget(
-            paymentMethods: Repository::getPaymentMethods(storeId: $storeId)
+            paymentMethods: Repository::getPaymentMethods()
         ))->content;
     }
 }

@@ -68,7 +68,6 @@ class PartPayment
         ];
 
         $paymentMethod = Repository::getById(
-            storeId: StoreId::getData(),
             paymentMethodId: PaymentMethod::getData()
         );
 

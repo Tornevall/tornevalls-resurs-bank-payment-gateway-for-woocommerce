@@ -126,10 +126,7 @@ class PartPayment
             return;
         }
 
-        $paymentMethod = Repository::getById(
-            storeId: $storeId,
-            paymentMethodId: $paymentMethodId
-        );
+        $paymentMethod = Repository::getById(paymentMethodId: $paymentMethodId);
 
         if ($paymentMethod === null) {
             MessageBag::addError(message: Translator::translate(
@@ -245,7 +242,7 @@ class PartPayment
 
         try {
             $paymentMethods = $storeId !== '' ?
-                Repository::getPaymentMethods(storeId: $storeId) : [];
+                Repository::getPaymentMethods() : [];
         } catch (Throwable) {
             MessageBag::addError(message: 'Failed to get payment methods.');
         }
@@ -277,7 +274,6 @@ class PartPayment
         try {
             if ($paymentMethodId !== '' && $storeId !== '') {
                 $annuityFactors = AnnuityRepository::getAnnuityFactors(
-                    storeId: $storeId,
                     paymentMethodId: $paymentMethodId
                 )->getData();
             }
