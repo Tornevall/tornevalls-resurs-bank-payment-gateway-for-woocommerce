@@ -1,3 +1,9 @@
+# 1.0.49
+
+* [WOO-1343](https://resursbankplugins.atlassian.net/browse/WOO-1343) Adjust for ECP-855 changes
+* [WOO-1345](https://resursbankplugins.atlassian.net/browse/WOO-1345) Apply ECP-860 changes
+* [WOO-1351](https://resursbankplugins.atlassian.net/browse/WOO-1351) Unable to handle payments not belonging to Resurs in special circumstances
+
 # 1.0.43 - 1.0.48
 
 * Hotfixes for various problems. One covers a "live" vs "coming soon"-pages issue. Another one is based on a misplaced script-tag.

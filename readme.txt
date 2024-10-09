@@ -8,7 +8,7 @@ WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: master
 Requires Plugins: woocommerce
-Stable tag: 1.0.48
+Stable tag: 1.0.49
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -62,7 +62,13 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
-# 1.0.43 - 1.0.46
+# 1.0.49
+
+* [WOO-1343](https://resursbankplugins.atlassian.net/browse/WOO-1343) Adjust for ECP-855 changes
+* [WOO-1345](https://resursbankplugins.atlassian.net/browse/WOO-1345) Apply ECP-860 changes
+* [WOO-1351](https://resursbankplugins.atlassian.net/browse/WOO-1351) Unable to handle payments not belonging to Resurs in special circumstances
+
+# 1.0.43 - 1.0.48
 
 * Hotfixes for various problems. One covers a "live" vs "coming soon"-pages issue. Another one is based on a misplaced script-tag.
 
