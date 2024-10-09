@@ -21,10 +21,18 @@ class Currency
     /**
      * Simple wrapper for get_woocommerce_currency_symbol to ensure we always
      * get a string (even it is empty).
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getWooCommerceCurrencySymbol(): string
     {
-        $currencySymbol = get_woocommerce_currency_symbol();
+        // Feature used by ecom init, for where woocommerce in an early init is not available.
+        if (function_exists('get_woocommerce_currency_symbol')) {
+            $currencySymbol = get_woocommerce_currency_symbol();
+            set_transient('resurs_early_currency_symbol', $currencySymbol);
+        } else {
+            $currencySymbol = get_transient('resurs_early_currency_symbol');
+        }
 
         return !is_string(value: $currencySymbol) ? '' : $currencySymbol;
     }
@@ -36,7 +44,13 @@ class Currency
      */
     public static function getWooCommerceCurrencyFormat(): string
     {
-        $currencyFormat = get_woocommerce_price_format();
+        // Feature used by ecom init, for where woocommerce in an early init is not available.
+        if (function_exists('get_woocommerce_currency_symbol')) {
+            $currencyFormat = get_woocommerce_price_format();
+            set_transient('resurs_early_currency_format', $currencyFormat);
+        } else {
+            $currencyFormat = get_transient('resurs_early_currency_format');
+        }
 
         if (!is_string(value: $currencyFormat)) {
             return '%1$s&nbsp;%2$s';

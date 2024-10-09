@@ -34,6 +34,7 @@ use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Language;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
@@ -94,6 +95,8 @@ class Connection
                 logLevel: LogLevel::getData(),
                 isProduction: isset($jwt->scope) && $jwt->scope === Scope::MERCHANT_API,
                 language: Language::getSiteLanguage(),
+                currencySymbol: Currency::getWooCommerceCurrencySymbol(),
+                currencyFormat: Currency::getEcomCurrencyFormat(),
                 network: new Network(
                     timeout: $timeout,
                     userAgent: UserAgent::getUserAgent()
