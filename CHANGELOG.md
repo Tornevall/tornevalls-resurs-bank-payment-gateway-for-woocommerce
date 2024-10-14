@@ -1,3 +1,7 @@
+# 1.0.50
+
+* [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.
+
 # 1.0.49
 
 * [WOO-1343](https://resursbankplugins.atlassian.net/browse/WOO-1343) Adjust for ECP-855 changes
