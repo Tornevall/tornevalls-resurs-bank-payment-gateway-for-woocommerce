@@ -12,6 +12,8 @@ namespace Resursbank\Woocommerce\Database\Options\Advanced;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbank\Woocommerce\Database\Options\Api\ClientId;
+use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
@@ -43,6 +45,12 @@ class StoreId extends StringOption implements OptionInterface
      */
     public static function getDefault(): string
     {
+        // Don't bother to look up a store id if no credentials are set.
+        // This may for some reason cause early memory exhaustion.
+        if (ClientId::getData() === '' && ClientSecret::getData() === '') {
+            return '';
+        }
+
         $result = parent::getDefault();
 
         try {
