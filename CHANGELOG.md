@@ -1,3 +1,5 @@
+# 1.0.51
+
 # 1.0.50
 
 * [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.

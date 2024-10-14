@@ -62,6 +62,12 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.0.51
+
+# 1.0.50
+
+* [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.
+
 # 1.0.49
 
 * [WOO-1343](https://resursbankplugins.atlassian.net/browse/WOO-1343) Adjust for ECP-855 changes
