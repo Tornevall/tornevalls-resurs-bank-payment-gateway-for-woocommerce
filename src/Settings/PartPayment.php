@@ -21,7 +21,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
-use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
@@ -65,19 +64,28 @@ class PartPayment
         add_filter(
             'woocommerce_admin_settings_sanitize_option',
             static function ($value, $option, $raw_value) {
-                $allowedRawOptionIds = [Period::getName(), PaymentMethod::getName()];
-
-                // Use raw values for some options, making sure data are saved even if values are not allowed.
-                // As the id is bypassed from woocommerce, we should avoid strict checking.
                 if (
-                    in_array(
-                        $option['id'],
-                        $allowedRawOptionIds,
-                        strict: false
-                    ) &&
-                    self::isValidRawValue(rawValue: $raw_value)
+                    $option['id'] === Period::getName() &&
+                    (int)$raw_value > 0
                 ) {
                     return $raw_value;
+                }
+
+                if (
+                    $raw_value !== '' &&
+                    (
+                        $option['id'] === PaymentMethod::getName() ||
+                        $option['id'] === StoreId::getName()
+                    )
+                ) {
+                    try {
+                        $stringValidation = new StringValidation();
+
+                        if ($stringValidation->isUuid(value: $raw_value)) {
+                            return $raw_value;
+                        }
+                    } catch (Throwable) {
+                    }
                 }
 
                 return $value;
@@ -115,12 +123,12 @@ class PartPayment
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws Throwable
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     * @noinspection PhpUnusedParameterInspection
      */
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
@@ -251,7 +259,7 @@ class PartPayment
             'title' => Translator::translate(phraseId: 'annuity-period'),
             'type' => 'rbpartpaymentperiod',
             'default' => Period::getDefault(),
-            'options' => self::getAnnuityPeriods(),
+            'options' => [],
             'desc' => Translator::translate(
                 phraseId: 'part-payment-annuity-period'
             ),
@@ -270,39 +278,5 @@ class PartPayment
             'default' => Limit::getDefault(),
             'desc' => Translator::translate(phraseId: 'part-payment-limit'),
         ];
-    }
-
-    /**
-     * Fetch annuity period options for configured payment method
-     */
-    private static function getAnnuityPeriods(): array
-    {
-        $storeId = StoreId::getData();
-        $paymentMethodId = PaymentMethodOption::getData();
-
-        $annuityFactors = [];
-        $return = [
-            '' => Translator::translate(phraseId: 'please-select'),
-        ];
-
-        try {
-            if ($paymentMethodId !== '' && $storeId !== '') {
-                $annuityFactors = AnnuityRepository::getAnnuityFactors(
-                    paymentMethodId: $paymentMethodId
-                )->getData();
-            }
-        } catch (Throwable) {
-            MessageBag::addError(
-                message: Translator::translate(
-                    phraseId: 'get-annuity-periods-failed'
-                )
-            );
-        }
-
-        foreach ($annuityFactors as $annuityFactor) {
-            $return[$annuityFactor->durationMonths] = $annuityFactor->paymentPlanName;
-        }
-
-        return $return;
     }
 }
