@@ -212,7 +212,7 @@ class PartPayment
             'title' => Translator::translate(phraseId: 'payment-method'),
             'type' => 'select',
             'default' => PaymentMethodOption::getDefault(),
-            'options' => self::getPaymentMethods(),
+            'options' => [],
             'desc' => Translator::translate(
                 phraseId: 'part-payment-payment-method'
             ),
@@ -248,36 +248,6 @@ class PartPayment
             'default' => Limit::getDefault(),
             'desc' => Translator::translate(phraseId: 'part-payment-limit'),
         ];
-    }
-
-    /**
-     * Fetch available payment method options
-     */
-    private static function getPaymentMethods(): array
-    {
-        $storeId = StoreId::getData();
-
-        try {
-            $paymentMethods = $storeId !== '' ?
-                AnnuityRepository::filterMethods(
-                    paymentMethods: Repository::getPaymentMethods()
-                ) : [];
-        } catch (Throwable) {
-            MessageBag::addError(message: 'Failed to get payment methods.');
-            $paymentMethods = [];
-        }
-
-        $return = [];
-
-        foreach ($paymentMethods as $paymentMethod) {
-            if (isset($return[$paymentMethod->id])) {
-                continue;
-            }
-
-            $return[$paymentMethod->id] = $paymentMethod->name;
-        }
-
-        return $return;
     }
 
     /**
