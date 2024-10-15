@@ -201,7 +201,7 @@ class PartPayment
             ));
         }
     }
-    
+
     /**
      * Fetches the enabled setting.
      */
