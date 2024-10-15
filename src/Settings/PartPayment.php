@@ -48,12 +48,33 @@ class PartPayment
 
     /**
      * Register event handlers.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
         add_action(
             'updated_option',
             'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
+            10,
+            3
+        );
+
+        add_filter(
+            'woocommerce_admin_settings_sanitize_option',
+            static function ($value, $option, $raw_value) {
+                // This field should be resursbank_part_payment_period, but we are looking it up automatically.
+            $periodPaymentField = Period::getName();
+
+                if (
+                    $option['id'] === $periodPaymentField &&
+                    (int)$raw_value > 0
+                ) {
+                    return $raw_value;
+                }
+
+                return $value;
+            },
             10,
             3
         );
@@ -235,20 +256,21 @@ class PartPayment
     private static function getPaymentMethods(): array
     {
         $storeId = StoreId::getData();
-        $paymentMethods = [];
-        $return = [
-            '' => Translator::translate(phraseId: 'please-select'),
-        ];
 
         try {
             $paymentMethods = $storeId !== '' ?
-                Repository::getPaymentMethods() : [];
+                AnnuityRepository::filterMethods(
+                    paymentMethods: Repository::getPaymentMethods()
+                ) : [];
         } catch (Throwable) {
             MessageBag::addError(message: 'Failed to get payment methods.');
+            $paymentMethods = [];
         }
 
+        $return = [];
+
         foreach ($paymentMethods as $paymentMethod) {
-            if (!$paymentMethod->isPartPayment()) {
+            if (isset($return[$paymentMethod->id])) {
                 continue;
             }
 
