@@ -20,11 +20,13 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
+use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -63,12 +65,17 @@ class PartPayment
         add_filter(
             'woocommerce_admin_settings_sanitize_option',
             static function ($value, $option, $raw_value) {
-                // This field should be resursbank_part_payment_period, but we are looking it up automatically.
-                $periodPaymentField = Period::getName();
+                $allowedRawOptionIds = [Period::getName(), PaymentMethod::getName()];
 
+                // Use raw values for some options, making sure data are saved even if values are not allowed.
+                // As the id is bypassed from woocommerce, we should avoid strict checking.
                 if (
-                    $option['id'] === $periodPaymentField &&
-                    (int)$raw_value > 0
+                    in_array(
+                        $option['id'],
+                        $allowedRawOptionIds,
+                        strict: false
+                    ) &&
+                    self::isValidRawValue(rawValue: $raw_value)
                 ) {
                     return $raw_value;
                 }
@@ -185,6 +192,21 @@ class PartPayment
                 )
             ));
         }
+    }
+
+    /**
+     * Raw values when saving must be either uuid or integers.
+     */
+    private static function isValidRawValue(string $rawValue): bool
+    {
+        try {
+            $stringValidation = new StringValidation();
+            $isUuid = $stringValidation->isUuid(value: $rawValue);
+        } catch (ValidationException) {
+            $isUuid = false;
+        }
+
+        return $isUuid || (int)$rawValue > 0;
     }
 
     /**
