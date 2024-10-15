@@ -28,6 +28,7 @@ class PartPaymentPeriod
 {
     /**
      * Add event listener to render the custom select element.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
