@@ -201,22 +201,7 @@ class PartPayment
             ));
         }
     }
-
-    /**
-     * Raw values when saving must be either uuid or integers.
-     */
-    private static function isValidRawValue(string $rawValue): bool
-    {
-        try {
-            $stringValidation = new StringValidation();
-            $isUuid = $stringValidation->isUuid(value: $rawValue);
-        } catch (ValidationException) {
-            $isUuid = false;
-        }
-
-        return $isUuid || (int)$rawValue > 0;
-    }
-
+    
     /**
      * Fetches the enabled setting.
      */
