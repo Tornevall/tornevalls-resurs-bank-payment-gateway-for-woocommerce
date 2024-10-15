@@ -64,7 +64,7 @@ class PartPayment
             'woocommerce_admin_settings_sanitize_option',
             static function ($value, $option, $raw_value) {
                 // This field should be resursbank_part_payment_period, but we are looking it up automatically.
-            $periodPaymentField = Period::getName();
+                $periodPaymentField = Period::getName();
 
                 if (
                     $option['id'] === $periodPaymentField &&
