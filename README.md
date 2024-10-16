@@ -1,5 +1,7 @@
 # Resurs Bank Payments for WooCommerce #
 
+**Please note that there is a known problem with WooCommerce blocks for the checkout for which payment methods are not properly displayed. This can be fixed by removing the content in the checkout-page blocks and add the shortcode [woocommerce_checkout] instead.**
+
 This is a payment gateway for WooCommerce and WordPress. Do not run this plugin side by side with the prior releases of Resurs Bank plugins!
 Requires PHP 8.1
 

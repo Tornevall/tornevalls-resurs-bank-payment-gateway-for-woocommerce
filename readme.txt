@@ -8,7 +8,7 @@ WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: master
 Requires Plugins: woocommerce
-Stable tag: 1.0.51
+Stable tag: 1.0.52
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -17,14 +17,14 @@ Resurs Bank Payment Gateway for WooCommerce.
 
 == Description ==
 
+**Please note that there is a known problem with WooCommerce blocks for the checkout for which payment methods are not properly displayed. This can be fixed by removing the content in the checkout-page blocks and add the shortcode [woocommerce_checkout] instead.**
+
 A payment is expected to be simple, secure and fast, regardless of whether it takes place in a physical store or online. With over 6 million customers around the Nordics, we make sure to be up-to-date with smart payment solutions where customers shop.
 
 At checkout, your customer can choose between several flexible payment options, something that not only provides a better shopping experience but also generates more and larger purchases.
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar)!
 Find out more in about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/).
-
-** Please note that there is a known problem with WooCommerce blocks for the checkout for which payment methods are not properly displayed. This can be fixed by removing the content in the checkout-page blocks and add the shortcode [woocommerce_checkout] instead.**
 
 = System Requirements =
 
@@ -62,7 +62,11 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
-# 1.0.51
+# 1.0.50 - 1.0.52
+
+* Miscellaneous hotfixes.
+* [WOO-1355](https://resursbankplugins.atlassian.net/browse/WOO-1355) PPW renders duplicate payment \(and too many\) payment methods
+* [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.
 
 # 1.0.50
 
