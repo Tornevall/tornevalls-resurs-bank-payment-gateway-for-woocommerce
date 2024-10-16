@@ -22,4 +22,16 @@ jQuery(document).ready(function () {
         }
     );
     resursFetchStoresWidget.setupEventListeners();
+    var selectStoreElement = resursFetchStoresWidget.getSelectStoreElement();
+    var selectClientSecretElement = resursFetchStoresWidget.getClientSecretElement();
+
+    // In some rare cases when password helpers (like lastpass) updates passwords in text boxes
+    // but the element don't change, a double click may help refreshing stores with the
+    // correct password.
+    selectStoreElement.addEventListener('dblclick', function () {
+        resursFetchStoresWidget.fetchStores();
+    });
+    selectClientSecretElement.addEventListener('dblclick', function () {
+        resursFetchStoresWidget.fetchStores();
+    })
 })

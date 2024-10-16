@@ -116,6 +116,13 @@ class Api
             (new GenerateToken(auth: $auth))->call();
         } catch (Throwable $error) {
             MessageBag::addError(message: $error->getMessage());
+            return;
+        }
+
+        try {
+            // Clean up MessageBag on successful requests.
+            MessageBag::clear();
+        } catch (Throwable) {
         }
     }
 
