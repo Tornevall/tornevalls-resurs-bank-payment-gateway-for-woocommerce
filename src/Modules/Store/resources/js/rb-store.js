@@ -1,19 +1,12 @@
 jQuery(document).ready(function () {
     const resursFetchStoresWidget = new Resursbank_FetchStores(
         {
-            getInputElements: function () {
-                return [
-                    this.getSelectEnvironmentElement(),
-                    this.getClientIdElement(),
-                    this.getClientSecretElement()
-                ];
-            },
             getUrl: function () {
                 const returnUrl = typeof rbStoreAdminLocalize.url !== 'undefined' ?
                     rbStoreAdminLocalize.url : null;
 
                 if (returnUrl === null) {
-                    alert('Can not find fetch-url for stores.');
+                    alert(rbStoreAdminLocalize.no_fetch_url);
                     return;
                 }
 
@@ -21,5 +14,19 @@ jQuery(document).ready(function () {
             }
         }
     );
-    resursFetchStoresWidget.setupEventListeners();
-})
+
+    var storeSelector = document.getElementById('resursbank_store_id');
+    if (storeSelector !== null) {
+        var storeFetchButton = document.createElement('button');
+        storeFetchButton.textContent = rbStoreAdminLocalize.fetch_stores_translation;
+        storeFetchButton.type = 'button';
+        storeFetchButton.classList.add('button', 'button-primary');
+        storeFetchButton.style.marginLeft = '10px';
+
+        storeFetchButton.addEventListener('click', function() {
+            resursFetchStoresWidget.fetchStores();
+        });
+
+        storeSelector.parentNode.insertBefore(storeFetchButton, storeSelector.nextSibling);
+    }
+});

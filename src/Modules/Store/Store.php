@@ -98,13 +98,28 @@ class Store
                 ['jquery']
             );
 
+            try {
+                $fetchStoresString = Translator::translate(
+                    phraseId: 'fetch-stores'
+                );
+                $noFetchUrl = Translator::translate(
+                    phraseId: 'get-stores-missing-fetch-url'
+                );
+            } catch (Throwable) {
+                // Fail over to internal translations.
+                $fetchStoresString = __('Fetch Stores', 'woocommerce');
+                $noFetchUrl = __('Failed to obtain fetch URL.', 'woocommerce');
+            }
+
             wp_localize_script(
                 'rb-store-admin-scripts-load',
                 'rbStoreAdminLocalize',
                 [
                     'url' => Route::getUrl(
                         route: Route::ROUTE_GET_STORES_ADMIN
-                    )
+                    ),
+                    'fetch_stores_translation' => $fetchStoresString,
+                    'no_fetch_url' => $noFetchUrl
                 ]
             );
         } catch (Throwable $error) {
