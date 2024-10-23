@@ -1,9 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
-import React, { useEffect, useState } from 'react';
-import { dispatchRbPaymentMethodAdded } from './checkout';
 
 const settings = getSetting( 'resursbank2_data', {} );
 
@@ -13,7 +10,8 @@ settings.forEach( ( method ) => {
         'woo-gutenberg-products-block'
     );
 
-    const label = decodeEntities(method.title) || defaultLabel;
+    const label = method.title;
+
     /**
      * Content component
      */
@@ -58,6 +56,4 @@ settings.forEach( ( method ) => {
     };
 
     registerPaymentMethod(Dummy);
-
-    dispatchRbPaymentMethodAdded(Dummy);
 });
