@@ -1,1 +1,0 @@
-(()=>{"use strict";window.wp.i18n,alert(5)})();
