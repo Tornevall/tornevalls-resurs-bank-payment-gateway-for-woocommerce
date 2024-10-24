@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
@@ -20,6 +21,19 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodTyp
 final class GatewayBlocks extends AbstractPaymentMethodType
 {
     protected $name = 'resursbank';
+
+    public static function initFrontend()
+    {
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            fn(PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register((new self()))
+        );
+
+        wp_enqueue_style(
+            'resursbank-styles',
+            plugin_dir_url(__FILE__) . 'assets/css/style.css'
+        );
+    }
 
     // @todo Confirm we need this or remove it.
     public function initialize()
