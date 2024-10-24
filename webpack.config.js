@@ -1,25 +1,47 @@
+const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+const WooCommerceDependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extraction-webpack-plugin');
 const path = require('path');
-const DependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extraction-webpack-plugin');
 
+const wcDepMap = {
+    '@woocommerce/blocks-registry': ['wc', 'wcBlocksRegistry'],
+    '@woocommerce/settings'       : ['wc', 'wcSettings']
+};
+
+const wcHandleMap = {
+    '@woocommerce/blocks-registry': 'wc-blocks-registry',
+    '@woocommerce/settings'       : 'wc-settings'
+};
+
+const requestToExternal = (request) => {
+    if (wcDepMap[request]) {
+        return wcDepMap[request];
+    }
+};
+
+const requestToHandle = (request) => {
+    if (wcHandleMap[request]) {
+        return wcHandleMap[request];
+    }
+};
+
+// Export configuration.
 module.exports = {
-    entry: './src/index.tsx',
+    ...defaultConfig,
+    entry: {
+        'dist/payment-method': '/src/index.tsx'
+    },
     output: {
-        path: path.resolve(__dirname, 'assets/js/dist'),
-        filename: 'payment-method.js',
-    },
-    resolve: {
-        extensions: ['.ts', '.tsx', '.js']
-    },
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                exclude: /node_modules/,
-                use: 'ts-loader',
-            },
-        ],
+        path: path.resolve( __dirname, 'assets/js' ),
+        filename: '[name].js',
     },
     plugins: [
-        new DependencyExtractionWebpackPlugin(),
-    ],
+        ...defaultConfig.plugins.filter(
+            (plugin) =>
+                plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
+        ),
+        new WooCommerceDependencyExtractionWebpackPlugin({
+            requestToExternal,
+            requestToHandle
+        })
+    ]
 };
