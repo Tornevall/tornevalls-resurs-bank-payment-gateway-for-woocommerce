@@ -5,7 +5,6 @@ jQuery(document).ready(function () {
                 const returnUrl = typeof rbStoreAdminLocalize.url !== 'undefined' ?
                     rbStoreAdminLocalize.url : null;
 
-                alert('gugg');
                 if (returnUrl === null) {
                     alert(rbStoreAdminLocalize.no_fetch_url);
                     return;
