@@ -28,10 +28,10 @@ class Store
     public static function initAdmin(): void
     {
         /** @noinspection BadExceptionsProcessingInspection */
-            add_action(
-                'admin_enqueue_scripts',
-                'Resursbank\Woocommerce\Modules\Store\Store::onAdminEnqueueScripts'
-            );
+        add_action(
+            'admin_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\Store\Store::onAdminEnqueueScripts'
+        );
     }
 
     /**
@@ -106,9 +106,8 @@ class Store
                     phraseId: 'get-stores-missing-fetch-url'
                 );
             } catch (Throwable) {
-                // Fail over to internal translations.
-                $fetchStoresString = __('Fetch Stores', 'woocommerce');
-                $noFetchUrl = __('Failed to obtain fetch URL.', 'woocommerce');
+                $fetchStoresString = 'Fetch Stores';
+                $noFetchUrl = 'Failed to obtain fetch URL.';
             }
 
             wp_localize_script(
