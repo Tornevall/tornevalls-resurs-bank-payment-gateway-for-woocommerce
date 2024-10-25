@@ -28,10 +28,10 @@ class Store
     public static function initAdmin(): void
     {
         /** @noinspection BadExceptionsProcessingInspection */
-            add_action(
-                'admin_enqueue_scripts',
-                'Resursbank\Woocommerce\Modules\Store\Store::onAdminEnqueueScripts'
-            );
+        add_action(
+            'admin_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\Store\Store::onAdminEnqueueScripts'
+        );
     }
 
     /**
@@ -98,13 +98,27 @@ class Store
                 ['jquery']
             );
 
+            try {
+                $fetchStoresString = Translator::translate(
+                    phraseId: 'fetch-stores'
+                );
+                $noFetchUrl = Translator::translate(
+                    phraseId: 'get-stores-missing-fetch-url'
+                );
+            } catch (Throwable) {
+                $fetchStoresString = 'Fetch Stores';
+                $noFetchUrl = 'Failed to obtain fetch URL.';
+            }
+
             wp_localize_script(
                 'rb-store-admin-scripts-load',
                 'rbStoreAdminLocalize',
                 [
                     'url' => Route::getUrl(
                         route: Route::ROUTE_GET_STORES_ADMIN
-                    )
+                    ),
+                    'fetch_stores_translation' => $fetchStoresString,
+                    'no_fetch_url' => $noFetchUrl
                 ]
             );
         } catch (Throwable $error) {
