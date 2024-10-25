@@ -37,7 +37,6 @@ class WcSession
     {
         try {
             self::getWcSession();
-
             if (isset(self::$wooCom->session)) {
                 self::$wooCom->session->set(key: $key, value: $value);
                 $return = true;
