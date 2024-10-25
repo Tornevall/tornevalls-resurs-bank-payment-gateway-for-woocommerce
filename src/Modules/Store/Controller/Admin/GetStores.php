@@ -72,8 +72,10 @@ class GetStores extends GetStoresController
         }
 
         try {
+            // Clear the messageBag on all successful requests. Be aware of the AuthException that may pass
+            // error messages up to this point; we need to make sure to not clear the messageBag when this
+            // happens.
             if (!$skipMessageBag) {
-                // Clean up errors if any.
                 MessageBag::clear();
             }
         } catch (Throwable) {
