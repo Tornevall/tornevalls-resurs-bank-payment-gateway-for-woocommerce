@@ -39,6 +39,7 @@ class GetStores extends GetStoresController
         try {
             $data = $this->getRequestData();
             Repository::getCache()->clear();
+
             Connection::setup(
                 jwt: new Jwt(
                     clientId: $data->clientId,
