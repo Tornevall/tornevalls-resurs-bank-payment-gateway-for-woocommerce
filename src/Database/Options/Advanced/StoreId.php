@@ -14,6 +14,7 @@ use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
+use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
@@ -45,15 +46,24 @@ class StoreId extends StringOption implements OptionInterface
      */
     public static function getDefault(): string
     {
-        // Don't bother to look up a store id if no credentials are set.
-        // This may for some reason cause early memory exhaustion.
-        if (ClientId::getData() === '' && ClientSecret::getData() === '') {
+        // Avoid fetching store ID if credentials are missing somewhere to prevent unnecessary API
+        // calls and potential memory exhaustion, when no values are pre-saved in db.
+        if (ClientId::getData() === '' || ClientSecret::getData() === '') {
+            return '';
+        }
+
+        if (!Api::verifyAuthentication()) {
+            // Proceed without storeId set if authentication fails.
             return '';
         }
 
         $result = parent::getDefault();
 
         try {
+            // This should ensure we have at least one store id available on request, if the merchant
+            // hasn't already configured this properly. If no data are stored already, the first available
+            // store will be returned. Just beware, since this is an early init request, we have to make sure
+            // that this is only fetched when there are proper and verified credentials set.
             $collection = Repository::getStores();
 
             if (count($collection) === 1) {

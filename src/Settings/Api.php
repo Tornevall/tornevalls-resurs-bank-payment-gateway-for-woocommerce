@@ -21,7 +21,9 @@ use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -91,6 +93,38 @@ class Api
             return;
         }
 
+        self::verifyAuthentication(getJwtFromPost: true);
+    }
+
+    /**
+     * Verify MAPI credentials.
+     */
+    public static function verifyAuthentication(bool $getJwtFromPost = false): bool
+    {
+        global $resursHasAuthProblems;
+
+        $postAuth = null;
+
+        try {
+            // This section should only occur during data saving in wp-admin. Used to make sure tokens
+            // are properly set up during save for which we verify credentials before they are stored in db.
+            if (
+                $getJwtFromPost &&
+                Admin::isAdmin() &&
+                Connection::getJwtFromPost() instanceof Jwt
+            ) {
+                $postAuth = Connection::getJwtFromPost();
+                // Restore prior issues with authentication failures.
+                $resursHasAuthProblems = false;
+            }
+        } catch (Throwable) {
+        }
+
+        // Do not try this twice during same window session.
+        if ($resursHasAuthProblems) {
+            return false;
+        }
+
         // Check if credentials have been properly entered
         $clientId = ClientId::getData();
         $clientSecret = ClientSecret::getData();
@@ -100,23 +134,25 @@ class Api
             : Scope::MOCK_MERCHANT_API;
 
         try {
-            $auth = new Jwt(
+            $auth = !$postAuth instanceof Jwt ? new Jwt(
                 clientId: $clientId,
                 clientSecret: $clientSecret,
                 scope: $scope,
                 grantType: GrantType::CREDENTIALS
-            );
+            ) : $postAuth;
         } catch (Throwable $error) {
+            $resursHasAuthProblems = true;
             MessageBag::addError(message: $error->getMessage());
-            return;
+            return false;
         }
 
         // Check if we can fetch a token
         try {
             (new GenerateToken(auth: $auth))->call();
         } catch (Throwable $error) {
+            $resursHasAuthProblems = true;
             MessageBag::addError(message: $error->getMessage());
-            return;
+            return false;
         }
 
         try {
@@ -124,6 +160,8 @@ class Api
             MessageBag::clear();
         } catch (Throwable) {
         }
+
+        return true;
     }
 
     /**

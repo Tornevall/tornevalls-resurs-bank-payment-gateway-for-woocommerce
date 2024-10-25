@@ -18,6 +18,7 @@ use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -33,10 +34,11 @@ class GetStores extends GetStoresController
     public function exec(): string
     {
         $result = '';
+        $skipMessageBag = false;
 
         try {
             $data = $this->getRequestData();
-
+            Repository::getCache()->clear();
             Connection::setup(
                 jwt: new Jwt(
                     clientId: $data->clientId,
@@ -58,6 +60,7 @@ class GetStores extends GetStoresController
                     phraseId: 'api-connection-failed-bad-credentials'
                 ) .
                 '"}';
+            $skipMessageBag = true;
         } catch (Throwable $error) {
             Log::error(error: $error);
 
@@ -66,6 +69,14 @@ class GetStores extends GetStoresController
                     phraseId: 'get-stores-could-not-fetch'
                 ) . ' Error: ' . $error->getMessage()
             );
+        }
+
+        try {
+            if (!$skipMessageBag) {
+                // Clean up errors if any.
+                MessageBag::clear();
+            }
+        } catch (Throwable) {
         }
 
         return $result;

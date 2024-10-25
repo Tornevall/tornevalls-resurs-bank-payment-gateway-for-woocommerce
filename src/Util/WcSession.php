@@ -37,14 +37,16 @@ class WcSession
     {
         try {
             self::getWcSession();
-            self::$wooCom->session->set(key: $key, value: $value);
-            $return = true;
+
+            if (isset(self::$wooCom->session)) {
+                self::$wooCom->session->set(key: $key, value: $value);
+                $return = true;
+            }
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
-            $return = false;
         }
 
-        return $return;
+        return $return ?? false;
     }
 
     public static function get(string $key): string
@@ -52,7 +54,9 @@ class WcSession
         try {
             self::getWcSession();
 
-            $return = (string)self::$wooCom->session->get(key: $key);
+            if (isset(self::$wooCom->session)) {
+                $return = (string)self::$wooCom->session->get(key: $key);
+            }
         } catch (RuntimeException) {
             // If WC()->session is not available, we can't use it.
         }
@@ -142,6 +146,10 @@ class WcSession
             throw new RuntimeException(
                 message: 'WooCommerce is not available.'
             );
+        }
+
+        if (!function_exists(function: 'WC')) {
+            return;
         }
 
         self::$wooCom = WC();
