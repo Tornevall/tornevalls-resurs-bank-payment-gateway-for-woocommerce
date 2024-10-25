@@ -220,7 +220,7 @@ class Connection
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     // phpcs:ignore
-    public static function getJwtFromPost(): ?Jwt
+    private static function getJwtFromPost(): ?Jwt
     {
         // WordPress usually deliver_wpnonces for us here, but we can't use it to verify the nonce in this early state
         // since WP is not a guarantee to be present. However, we can verify that users are admins and that the
