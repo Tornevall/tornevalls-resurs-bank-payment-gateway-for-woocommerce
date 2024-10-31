@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
@@ -27,7 +30,12 @@ use function is_string;
 class Product
 {
     /**
+     * @param WC_Order_Item_Product $product
+     * @return OrderLine
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws AttributeCombinationException
      */
     public static function toOrderLine(
         WC_Order_Item_Product $product
