@@ -30,8 +30,6 @@ use function is_string;
 class Product
 {
     /**
-     * @param WC_Order_Item_Product $product
-     * @return OrderLine
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
