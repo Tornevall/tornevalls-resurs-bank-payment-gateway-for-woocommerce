@@ -35,6 +35,7 @@ use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 
@@ -374,9 +375,8 @@ class OrderManagement
      */
     public static function getOrder(int $id): ?WC_Order
     {
-        /**
-         * Will be either WC_Order or false.
-         */
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        // Will be either WC_Order or false.
         $result = wc_get_order($id);
 
         try {
@@ -385,6 +385,11 @@ class OrderManagement
 
             if (!$result instanceof WC_Order) {
                 $result = null;
+
+                if (WooCommerce::isAdminOrderCreateTool()) {
+                    // Use no errors in this tool.
+                    return null;
+                }
 
                 throw new IllegalTypeException(
                     message: 'Returned object not of type WC_Order'

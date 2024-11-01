@@ -53,7 +53,7 @@ class WooCommerce
      */
     public static function getCartTotals(): float
     {
-        return (float) (WC()->cart?->get_totals()['total'] ?? 0.0);
+        return (float)(WC()->cart?->get_totals()['total'] ?? 0.0);
     }
 
     public static function getEcomLocale(string $countryLocale): string
@@ -64,5 +64,34 @@ class WooCommerce
             'nb', 'nn' => 'no',
             default => $countryLocale
         };
+    }
+
+    /**
+     * Check if WooCommerce supports HPOS or not, and if it is enabled.
+     */
+    public static function isUsingHpos(): bool
+    {
+        try {
+            // Throws exceptions on unexistent classes,
+            $return = wc_get_container()->get(
+                'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController'
+            )->custom_orders_table_usage_is_enabled();
+        } catch (Throwable) {
+            $return = false;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Do a control whether we are in the manual order creation tool or not.
+     * HPOS/Legacy friendly.
+     */
+    public static function isAdminOrderCreateTool(): bool
+    {
+        return Admin::isAdmin() && (
+                (self::isUsingHpos() && isset($_GET['page'], $_GET['action']) && $_GET['page'] === 'wc-orders' && $_GET['action'] === 'new') ||
+                (!self::isUsingHpos() && isset($_GET['post_type'], $_GET['action']) && $_GET['post_type'] === 'shop_order' && $_GET['action'] === 'add')
+            );
     }
 }
