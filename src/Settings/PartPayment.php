@@ -50,6 +50,7 @@ class PartPayment
     /**
      * Register event handlers.
      *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
@@ -65,8 +66,7 @@ class PartPayment
             'woocommerce_admin_settings_sanitize_option',
             static function ($value, $option, $raw_value) {
                 if (
-                    $option['id'] === Period::getName() &&
-                    (int)$raw_value > 0
+                    $option['id'] === Period::getName() && (int)$raw_value > 0
                 ) {
                     return $raw_value;
                 }

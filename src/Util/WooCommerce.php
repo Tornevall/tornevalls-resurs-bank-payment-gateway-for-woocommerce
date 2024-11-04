@@ -86,6 +86,8 @@ class WooCommerce
     /**
      * Do a control whether we are in the manual order creation tool or not.
      * HPOS/Legacy friendly.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function isAdminOrderCreateTool(): bool
     {

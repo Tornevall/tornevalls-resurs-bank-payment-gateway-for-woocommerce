@@ -30,6 +30,7 @@ class GetStores extends GetStoresController
 {
     /**
      * @throws HttpException
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public function exec(): string
     {
@@ -80,6 +81,7 @@ class GetStores extends GetStoresController
                 MessageBag::clear();
             }
         } catch (Throwable) {
+            // Silently escape if MessageBag is failing. It is not critical that this eventually happens.
         }
 
         return $result;
