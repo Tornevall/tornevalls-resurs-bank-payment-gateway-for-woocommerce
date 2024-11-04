@@ -13,6 +13,7 @@ use JsonException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
+use Resursbank\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
 use RuntimeException;
 
 use function is_string;
@@ -77,6 +78,10 @@ class Url
     public static function getQueryArg(string $baseUrl, array $arguments): string
     {
         $queryArgument = $baseUrl;
+
+        if (XDebugSessionValue::getData() !== '') {
+            $arguments['XDEBUG_SESSION'] = XDebugSessionValue::getData();
+        }
 
         foreach ($arguments as $argumentKey => $argumentValue) {
             if (!is_string(value: $argumentValue)) {
