@@ -150,6 +150,8 @@ class Order
 
     /**
      * Render payment information box on order view.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function renderPaymentInfo(): void
     {
@@ -159,6 +161,20 @@ class Order
             if ($order === null || !Admin::isInShopOrderEdit()) {
                 return;
             }
+
+            add_action('admin_footer', static function (): void {
+                if (!Admin::isInShopOrderEdit()) {
+                    return;
+                }
+
+                ?>
+                <script type="text/javascript">
+                    jQuery(document).ready(function($) {
+                        $('select#_payment_method').prop('disabled', true);
+                    });
+                </script>
+                <?php
+            });
 
             $paymentInformation = new PaymentInformation(
                 paymentId: Metadata::getPaymentId(order: $order)
