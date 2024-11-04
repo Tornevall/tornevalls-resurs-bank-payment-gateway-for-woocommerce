@@ -125,6 +125,7 @@ class Order
     /**
      * Add action which will render payment information on order view.
      *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function addPaymentInfo(): void
@@ -132,6 +133,8 @@ class Order
         try {
             $order = wc_get_order();
         } catch (Throwable) {
+            // wc_get_order is a WooCommerce owned method that normally returns false on errors.
+            // They should not be necessary to log.
         }
 
         if (
@@ -168,11 +171,11 @@ class Order
                 }
 
                 ?>
-                <script type="text/javascript">
-                    jQuery(document).ready(function($) {
-                        $('select#_payment_method').prop('disabled', true);
-                    });
-                </script>
+              <script type="text/javascript">
+                  jQuery(document).ready(function ($) {
+                      $('select#_payment_method').prop('disabled', true);
+                  });
+              </script>
                 <?php
             });
 
@@ -260,6 +263,8 @@ class Order
      * Get currently viewed WP_Post as WP_Order instance, if any. For example,
      * while on the order view in admin we can obtain the currently viewed order
      * this way.
+     *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public static function getCurrentOrder(): ?WC_Order
     {
@@ -270,6 +275,8 @@ class Order
                 return $currentOrder;
             }
         } catch (Throwable) {
+            // wc_get_order is a WooCommerce owned method that normally returns false on errors.
+            // They should not be necessary to log.
         }
 
         return null;

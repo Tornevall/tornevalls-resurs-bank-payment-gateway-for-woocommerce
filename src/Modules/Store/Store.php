@@ -43,17 +43,7 @@ class Store
      */
     public static function onAdminEnqueueScripts(): void
     {
-        if (
-            !is_admin() ||
-            !isset($_REQUEST['page']) ||
-            !isset($_REQUEST['tab']) ||
-            $_REQUEST['page'] !== 'wc-settings' ||
-            $_REQUEST['tab'] !== 'resursbank' ||
-            (
-                isset($_REQUEST['section']) &&
-                $_REQUEST['section'] !== 'api_settings'
-            )
-        ) {
+        if (!self::isOnResursBankSettingsPage()) {
             return;
         }
 
@@ -129,5 +119,19 @@ class Store
                 )
             );
         }
+    }
+
+    /**
+     * Checks if we are on the WooCommerce settings page and the Resurs Bank tab.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    private static function isOnResursBankSettingsPage(): bool
+    {
+        return is_admin() &&
+            isset($_REQUEST['page'], $_REQUEST['tab']) &&
+            $_REQUEST['page'] === 'wc-settings' &&
+            $_REQUEST['tab'] === 'resursbank' &&
+            (!isset($_REQUEST['section']) || $_REQUEST['section'] === 'api_settings');
     }
 }
