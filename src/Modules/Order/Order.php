@@ -150,6 +150,7 @@ class Order
 
     /**
      * Render payment information box on order view.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function renderPaymentInfo(): void
@@ -161,10 +162,11 @@ class Order
                 return;
             }
 
-            add_action('admin_footer', function () {
+            add_action('admin_footer', static function (): void {
                 if (!Admin::isInShopOrderEdit()) {
                     return;
                 }
+
                 ?>
                 <script type="text/javascript">
                     jQuery(document).ready(function($) {
