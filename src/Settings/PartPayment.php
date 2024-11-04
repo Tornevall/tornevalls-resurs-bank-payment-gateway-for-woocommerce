@@ -53,7 +53,6 @@ class PartPayment
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    // phpcs:ignore
     public static function init(): void
     {
         add_action(
@@ -65,7 +64,6 @@ class PartPayment
 
         add_filter(
             'woocommerce_admin_settings_sanitize_option',
-            // phpcs:ignore
             static function ($value, $option, $raw_value) {
                 if (
                     $option['id'] === Period::getName() && (int)$raw_value > 0
