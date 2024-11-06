@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\CustomerType\Controller;
 
 use Resursbank\Ecom\Lib\Order\CustomerType;
-use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -34,16 +33,13 @@ class SetCustomerType
         $customerType = Url::getHttpGet(key: 'customerType');
 
         if (function_exists(function: 'WC') && $customerType) {
-            $ecomSession = new Session();
             WC()->initialize_session();
             $customerType = CustomerType::from(value: $customerType);
 
             if ($customerType instanceof CustomerType) {
                 // Report back if successful or not.
                 $response['update'] = WcSession::set(
-                    key: $ecomSession->getKey(
-                        key: CustomerRepository::SESSION_KEY_CUSTOMER_TYPE
-                    ),
+                    key: RESURSBANK_MODULE_PREFIX . '_' . CustomerRepository::SESSION_KEY_CUSTOMER_TYPE,
                     value: $customerType->value
                 );
             }
