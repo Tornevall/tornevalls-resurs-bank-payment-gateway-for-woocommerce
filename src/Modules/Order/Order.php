@@ -174,7 +174,7 @@ class Order
                 ?>
               <script type="text/javascript">
                   jQuery(document).ready(function ($) {
-                      $('select#_payment_method').prop('disabled', true);
+                      $('select#_payment_method option:not(:selected)').attr('disabled', true);
                   });
               </script>
                 <?php
