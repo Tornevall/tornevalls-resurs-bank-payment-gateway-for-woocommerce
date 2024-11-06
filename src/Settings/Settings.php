@@ -10,13 +10,11 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Config;
-use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 use function is_array;
@@ -104,6 +102,8 @@ class Settings
 
     /**
      * Callback method that handles the saving of options.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function saveSettings(): void
     {
@@ -115,36 +115,7 @@ class Settings
                 )
             );
 
-            if (self::getCurrentSectionId() === Api::SECTION_ID) {
-                $lastTransientStore = get_transient('resurs_merchant_store_id');
-                $requestedStoreId = Url::getHttpPost(
-                    key: sprintf("%s_store_id", RESURSBANK_MODULE_PREFIX)
-                );
-
-                // Making sure we can keep track on current store id without making something crash
-                // on new setups or other corner cases, we will use transient to reset the annutiy
-                // setup on each changed store id.
-                if ($lastTransientStore !== $requestedStoreId) {
-                    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-                    woocommerce_update_options(
-                        self::getSection(
-                            section: PartPayment::SECTION_ID
-                        )
-                    );
-                    // Saving a new transient if we reside in the API credential section.
-                    // This makes sure that we can get fresh annuities when stores are changed.
-                    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-                    set_transient(
-                        'resurs_merchant_store_id',
-                        $requestedStoreId
-                    );
-                }
-            }
-
             Config::getCache()->invalidate();
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            delete_transient('resurs_merchant_country_code');
-            Connection::setup();
         } catch (Throwable $e) {
             Log::error(
                 error: $e,

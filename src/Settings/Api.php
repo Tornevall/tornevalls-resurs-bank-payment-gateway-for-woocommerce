@@ -10,16 +10,17 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
+use Resursbank\Ecom\Lib\Model\Store\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
-use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -60,7 +61,7 @@ class Api
                 'client_id' => self::getClientId(),
                 'client_secret' => self::getClientSecret(),
                 'store_id' => self::getStoreIdSetting(),
-                'store_country' => self::getStoreCountry(),
+                'store_country' => self::getStoreCountrySetting(),
             ],
         ];
     }
@@ -103,7 +104,7 @@ class Api
     /**
      * Return config value for current store countryCode.
      */
-    private static function getStoreCountry(): array
+    private static function getStoreCountrySetting(): array
     {
         return [
             'id' => self::NAME_PREFIX . '_store_country',
@@ -112,7 +113,7 @@ class Api
                 'disabled' => true,
             ],
             'title' => __('Country'),
-            'value' => StoreCountryCode::getCurrentStoreCountry(),
+            'value' => WooCommerce::getStoreCountry(),
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
         ];
     }
@@ -157,13 +158,25 @@ class Api
         ];
 
         try {
-            // Both can cause Throwable, do them one at a time.
-            $result['options'] = StoreRepository::getStores()->getSelectList();
+            // Do not fetch stores until credentials are present.
+            if (ClientId::getData() !== '' && ClientSecret::getData() !== '') {
+                $result['options'] = StoreRepository::getStores()->getSelectList();
+
+                // If no store has been selected in the configuration, default to the first store,
+                // as this will be displayed in the dropdown after saving. This ensures the merchant
+                // has a value saved, even if no store was selected initially.
+                if (StoreId::getData() === '') {
+                    $firstStore = StoreRepository::getStores()->getFirst();
+
+                    if ($firstStore instanceof Store) {
+                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                        update_option(StoreId::getName(), $firstStore->id);
+                    }
+                }
+            }
         } catch (Throwable $error) {
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            add_action('admin_notices', static function () use ($error): void {
-                Admin::getAdminErrorNote(message: $error->getMessage());
-            });
+            // Some errors cannot be rendered through the admin_notices. Avoid that action.
+            Admin::getAdminErrorNote(message: $error->getMessage());
 
             Log::error(error: $error);
         }

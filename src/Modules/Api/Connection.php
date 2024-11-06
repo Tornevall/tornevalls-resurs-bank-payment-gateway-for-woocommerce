@@ -35,7 +35,6 @@ use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
-use Resursbank\Woocommerce\Util\Language;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
 use WC_Logger;
@@ -83,10 +82,9 @@ class Connection
             $timeout = (int)ApiTimeout::getData();
 
             if ($timeout <= 0) {
+                // Default to curl defaults if negative or 0.
                 $timeout = 30;
             }
-
-            // Default to curl defaults if negative or 0.
 
             Config::setup(
                 logger: self::getLogger(),
@@ -94,7 +92,6 @@ class Connection
                 jwtAuth: $jwt,
                 logLevel: LogLevel::getData(),
                 isProduction: isset($jwt->scope) && $jwt->scope === Scope::MERCHANT_API,
-                language: Language::getSiteLanguage(),
                 currencySymbol: Currency::getWooCommerceCurrencySymbol(),
                 currencyFormat: Currency::getEcomCurrencyFormat(),
                 network: new Network(

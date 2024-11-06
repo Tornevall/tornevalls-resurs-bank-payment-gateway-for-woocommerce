@@ -20,8 +20,8 @@ use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
-use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 
 /**
  * Advanced settings section.
@@ -94,9 +94,7 @@ class Advanced
     private static function getCountryRestrictionConfig(): array
     {
         // On new installs, countryCode tend to be empty until credentials are set.
-        $countryCode = trim(
-            string: StoreCountryCode::getCurrentStoreCountry() ?? ''
-        ) ?: 'Not configured';
+        $countryCode = WooCommerce::getStoreCountry();
         return [
             'id' => 'get_address',
             'type' => 'text',

@@ -9,9 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Resursbank\Ecom\Config;
-use Resursbank\Woocommerce\Database\Options\Api\ClientId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
+use Resursbank\Ecom\Module\Store\Repository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
 
 use function in_array;
@@ -37,18 +36,6 @@ class WooCommerce
     }
 
     /**
-     * Verify that the plugin has a valid setup ready.
-     */
-    public static function isValidSetup(): bool
-    {
-        try {
-            return Config::hasInstance() && ClientId::getData() !== '' && ClientSecret::getData() !== '';
-        } catch (Throwable) {
-            return false;
-        }
-    }
-
-    /**
      * Fast way to get a cart total from WC.
      */
     public static function getCartTotals(): float
@@ -56,18 +43,26 @@ class WooCommerce
         return (float)(WC()->cart?->get_totals()['total'] ?? 0.0);
     }
 
-    public static function getEcomLocale(string $countryLocale): string
+    /**
+     * Return country as string, by the value returned from the current set store.
+     */
+    public static function getStoreCountry(): string
     {
-        return match (strtolower(string: $countryLocale)) {
-            'se' => 'sv',
-            'dk' => 'da',
-            'nb', 'nn' => 'no',
-            default => $countryLocale
-        };
+        try {
+            $configuredStore = Repository::getConfiguredStore();
+
+            return StoreId::getData() !== '' && isset($configuredStore->countryCode)
+                ? strtoupper(string: $configuredStore->countryCode->name)
+                : 'EN';
+        } catch (Throwable) {
+            return 'EN';
+        }
     }
 
     /**
      * Check if WooCommerce supports HPOS or not, and if it is enabled.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function isUsingHpos(): bool
     {
