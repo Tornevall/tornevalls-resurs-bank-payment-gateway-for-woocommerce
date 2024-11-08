@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
@@ -45,6 +47,8 @@ class WooCommerce
 
     /**
      * Return country as string, by the value returned from the current set store.
+     *
+     * @throws ConfigException
      */
     public static function getStoreCountry(): string
     {
@@ -54,7 +58,10 @@ class WooCommerce
             return StoreId::getData() !== '' && isset($configuredStore->countryCode)
                 ? strtoupper(string: $configuredStore->countryCode->name)
                 : 'EN';
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+            Config::getLogger()->debug(
+                message: 'No store country code could be configured: ' . $exception->getMessage()
+            );
             return 'EN';
         }
     }
@@ -67,7 +74,7 @@ class WooCommerce
     public static function isUsingHpos(): bool
     {
         try {
-            // Throws exceptions on unexistent classes,
+            // Throws exceptions on nonexistent classes,
             $return = wc_get_container()->get(
                 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController'
             )->custom_orders_table_usage_is_enabled();
