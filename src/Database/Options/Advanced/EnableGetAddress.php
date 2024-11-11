@@ -11,7 +11,7 @@ namespace Resursbank\Woocommerce\Database\Options\Advanced;
 
 use Resursbank\Woocommerce\Database\DataType\BoolOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
-use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
+use Resursbank\Woocommerce\Util\WooCommerce;
 
 /**
  * Implementation of resursbank_get_address_enabled value in options table.
@@ -41,7 +41,7 @@ class EnableGetAddress extends BoolOption implements OptionInterface
      */
     public static function isCountryCodeSe(): bool
     {
-        return StoreCountryCode::getCurrentStoreCountry() === 'SE';
+        return WooCommerce::getStoreCountry() === 'SE';
     }
 
     /**

@@ -10,8 +10,9 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Config;
-use Resursbank\Woocommerce\Database\Options\Api\ClientId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Module\Store\Repository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
 
 use function in_array;
@@ -37,18 +38,6 @@ class WooCommerce
     }
 
     /**
-     * Verify that the plugin has a valid setup ready.
-     */
-    public static function isValidSetup(): bool
-    {
-        try {
-            return Config::hasInstance() && ClientId::getData() !== '' && ClientSecret::getData() !== '';
-        } catch (Throwable) {
-            return false;
-        }
-    }
-
-    /**
      * Fast way to get a cart total from WC.
      */
     public static function getCartTotals(): float
@@ -56,23 +45,39 @@ class WooCommerce
         return (float)(WC()->cart?->get_totals()['total'] ?? 0.0);
     }
 
-    public static function getEcomLocale(string $countryLocale): string
+    /**
+     * Return country as string, by the value returned from the current set store.
+     *
+     * @throws ConfigException
+     */
+    public static function getStoreCountry(): string
     {
-        return match (strtolower(string: $countryLocale)) {
-            'se' => 'sv',
-            'dk' => 'da',
-            'nb', 'nn' => 'no',
-            default => $countryLocale
-        };
+        $return = 'EN';
+
+        try {
+            if (StoreId::getData() !== '') {
+                $return = strtoupper(
+                    string: Repository::getConfiguredStore()?->countryCode->value
+                ) ?? 'EN';
+            }
+        } catch (Throwable $exception) {
+            Config::getLogger()->debug(
+                message: 'Store country code fallback to EN. Could be configured: ' . $exception->getMessage()
+            );
+        }
+
+        return $return;
     }
 
     /**
      * Check if WooCommerce supports HPOS or not, and if it is enabled.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function isUsingHpos(): bool
     {
         try {
-            // Throws exceptions on unexistent classes,
+            // Throws exceptions on nonexistent classes,
             $return = wc_get_container()->get(
                 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController'
             )->custom_orders_table_usage_is_enabled();

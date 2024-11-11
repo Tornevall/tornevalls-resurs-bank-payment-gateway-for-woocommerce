@@ -135,6 +135,7 @@ class Order
         } catch (Throwable) {
             // wc_get_order is a WooCommerce owned method that normally returns false on errors.
             // They should not be necessary to log.
+            return;
         }
 
         if (

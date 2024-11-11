@@ -24,14 +24,4 @@ class StoreId extends StringOption implements OptionInterface
     {
         return self::NAME_PREFIX . 'store_id';
     }
-
-    /**
-     * Resolve data.
-     */
-    public static function getData(): string
-    {
-        $result = parent::getData();
-
-        return $result !== '' ? $result : self::getDefault();
-    }
 }
