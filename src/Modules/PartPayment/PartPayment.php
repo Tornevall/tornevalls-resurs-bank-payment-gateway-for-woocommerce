@@ -266,7 +266,7 @@ EX;
         try {
             wp_enqueue_script(
                 'partpayment-script',
-                Url::getScriptUrl(
+                Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'part-payment.js'
                 ),

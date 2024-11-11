@@ -1,0 +1,34 @@
+/* assets/css/style.css */
+.rb-payment-method-title {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.rb-payment-method-title span {
+    width: auto;
+    flex-grow: 1;
+}
+
+.rb-payment-method-title .rb-payment-method-logo {
+    margin-left: auto;
+    width: 25%;
+}
+
+.rb-payment-method-title .rb-logo-type-trustly {
+    width: 18%;
+    margin-left: 5px;
+}
+
+.rb-payment-method-title .rb-payment-method-logo .rb-logo {
+    float: right;
+}
+
+.rb-payment-method-title .rb-logo-type-trustly .rb-logo {
+    float: none;
+}
+
+.rb-payment-method-title .rb-logo-type-trustly .rb-logo svg {
+    position: relative;
+    left: 10px;
+}

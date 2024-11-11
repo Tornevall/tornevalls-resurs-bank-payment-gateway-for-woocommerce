@@ -83,7 +83,7 @@ class Store
 
             wp_register_script(
                 'rb-store-admin-scripts-load',
-                Url::getScriptUrl(
+                Url::getResourceUrl(
                     module: 'Store',
                     file: 'rb-store.js'
                 )
@@ -91,7 +91,7 @@ class Store
 
             wp_enqueue_script(
                 'rb-store-admin-scripts-load',
-                Url::getScriptUrl(
+                Url::getResourceUrl(
                     module: 'Store',
                     file: 'rb-store.js'
                 ),

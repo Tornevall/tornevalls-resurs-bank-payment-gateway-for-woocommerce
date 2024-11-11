@@ -39,7 +39,7 @@ class CustomerType
     {
         wp_enqueue_script(
             'rb-set-customertype',
-            Url::getScriptUrl(
+            Url::getResourceUrl(
                 module: 'CustomerType',
                 file: 'customertypehandler.js'
             ),

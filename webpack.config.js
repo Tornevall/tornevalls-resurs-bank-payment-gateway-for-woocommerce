@@ -4,11 +4,13 @@ const path = require('path');
 
 const wcDepMap = {
     '@woocommerce/blocks-registry': ['wc', 'wcBlocksRegistry'],
+    '@woocommerce/blocks-checkout': ['wc', 'blocksCheckout'],
     '@woocommerce/settings'       : ['wc', 'wcSettings']
 };
 
 const wcHandleMap = {
     '@woocommerce/blocks-registry': 'wc-blocks-registry',
+    '@woocommerce/blocks-checkout': 'blocks-checkout',
     '@woocommerce/settings'       : 'wc-settings'
 };
 
@@ -28,7 +30,7 @@ const requestToHandle = (request) => {
 module.exports = {
     ...defaultConfig,
     entry: {
-        'dist/payment-method': '/src/index.tsx'
+        'dist/gateway': path.resolve(__dirname, 'src/Modules/Gateway/resources/ts/gateway.tsx'),
     },
     output: {
         path: path.resolve( __dirname, 'assets/js' ),

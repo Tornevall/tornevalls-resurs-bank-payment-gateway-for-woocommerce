@@ -144,7 +144,7 @@ class Settings
             Config::getCache()->invalidate();
             /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             delete_transient('resurs_merchant_country_code');
-            Connection::setup();
+            //Connection::setup();
         } catch (Throwable $e) {
             Log::error(
                 error: $e,

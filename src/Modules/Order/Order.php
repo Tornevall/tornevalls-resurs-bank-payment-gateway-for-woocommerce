@@ -95,7 +95,7 @@ class Order
             );
 
             // Append JS code to observe order changes and fetch new content.
-            $url = Url::getScriptUrl(
+            $url = Url::getResourceUrl(
                 module: 'Order',
                 file: 'admin/getOrderContent.js'
             );

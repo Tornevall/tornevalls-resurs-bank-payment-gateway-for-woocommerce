@@ -103,7 +103,7 @@ EX;
     {
         wp_enqueue_script(
             'rb-get-address',
-            Url::getScriptUrl(
+            Url::getResourceUrl(
                 module: 'GetAddress',
                 file: 'getAddressForm.js'
             ),

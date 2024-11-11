@@ -32,6 +32,7 @@ use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
 use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 
 if (!defined(constant_name: 'ABSPATH')) {
