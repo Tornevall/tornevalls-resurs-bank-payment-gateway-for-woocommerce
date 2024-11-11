@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Model\Store\Store;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
@@ -52,18 +53,19 @@ class WooCommerce
      */
     public static function getStoreCountry(): string
     {
-        try {
-            $configuredStore = Repository::getConfiguredStore();
+        $return = 'EN';
 
-            return StoreId::getData() !== '' && isset($configuredStore->countryCode)
-                ? strtoupper(string: $configuredStore->countryCode->name)
-                : 'EN';
+        try {
+            if (StoreId::getData() !== '') {
+                $return = strtoupper(string: Repository::getConfiguredStore()?->countryCode->name) ?? 'EN';
+            }
         } catch (Throwable $exception) {
             Config::getLogger()->debug(
-                message: 'No store country code could be configured: ' . $exception->getMessage()
+                message: 'Store country code fallback to EN. Could be configured: ' . $exception->getMessage()
             );
-            return 'EN';
         }
+
+        return $return;
     }
 
     /**
