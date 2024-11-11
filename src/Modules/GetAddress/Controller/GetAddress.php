@@ -56,6 +56,12 @@ class GetAddress
     ): void {
         $ecomSession = new Session();
 
+        if (!$ecomSession->isAvailable()) {
+            // ECom sessions in this request are practically never available initially, so we need to set it up
+            // if we want to store data in them.
+            session_start();
+        }
+
         WcSession::set(
             key: $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
             value: $data->govId
