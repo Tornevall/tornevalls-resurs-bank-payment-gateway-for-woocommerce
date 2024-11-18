@@ -53,11 +53,9 @@ define(constant_name: 'ALLOW_GET_ADDRESS', value: true);
 // process will fail if ecom2 is unavailable.
 if (!file_exists(__DIR__ . '/lib/ecom/composer.json')) {
     add_action('admin_notices', function () {
-        echo <<<EX
-<div class="error notice">
-ECom2 library is missing in the plugin.
-</div>
-EX;
+        echo '<div class="notice notice-error is-dismissible">';
+        echo '<p><strong>ECom2:</strong> Dependencies are missing from the plugin structure. Please verify your Resurs installation.</p>';
+        echo '</div>';
     });
     return;
 }
