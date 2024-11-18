@@ -47,6 +47,10 @@ define(
 );
 define(constant_name: 'ALLOW_GET_ADDRESS', value: true);
 
+// Do not remove this! It ensures the plugin does not crash the entire site if ecom2
+// has not been checked out properly. This issue typically occurs during a manual
+// checkout when ecom2 is missing. We cannot move this into a class, as the autoload
+// process will fail if ecom2 is unavailable.
 if (!file_exists(__DIR__ . '/lib/ecom/composer.json')) {
     add_action('admin_notices', function () {
         echo <<<EX
