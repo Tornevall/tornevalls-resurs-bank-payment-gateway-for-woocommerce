@@ -47,7 +47,7 @@ define(
 );
 define(constant_name: 'ALLOW_GET_ADDRESS', value: true);
 
-if (!file_exists(__DIR__ . '/lib/ecom/autoload.php')) {
+if (!file_exists(__DIR__ . '/lib/ecom/composer.json')) {
     add_action('admin_notices', function () {
         echo <<<EX
 <div class="error notice">
