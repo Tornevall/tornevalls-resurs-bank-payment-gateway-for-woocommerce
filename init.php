@@ -47,6 +47,16 @@ define(
 );
 define(constant_name: 'ALLOW_GET_ADDRESS', value: true);
 
+if (!file_exists(__DIR__ . '/lib/ecom/autoload.php')) {
+    add_action('admin_notices', function () {
+        echo <<<EX
+<div class="error notice">
+ECom2 library is missing in the plugin.
+</div>
+EX;
+    });
+    return;
+}
 require_once __DIR__ . '/autoload.php';
 
 // Using same path identifier as the rest of the plugin-verse.
