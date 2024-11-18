@@ -68,11 +68,6 @@ class Checkout
             'woocommerce_before_checkout_form',
             'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::exec'
         );
-
-        add_action(
-            'wp_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::loadScripts'
-        );
     }
 
     /**
@@ -83,7 +78,7 @@ class Checkout
         try {
             $css = self::getWidget()->css ?? '';
             echo <<<EX
-<style id=" rb-getaddress-styles">
+<style id="rb-getaddress-styles">
   $css
 </style>
 EX;
@@ -92,28 +87,6 @@ EX;
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
-    }
-
-    /**
-     * Loads script and stylesheet for form.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function loadScripts(): void
-    {
-        wp_enqueue_script(
-            'rb-get-address',
-            Url::getResourceUrl(
-                module: 'GetAddress',
-                file: 'getAddressForm.js'
-            ),
-            ['rb-set-customertype']
-        );
-
-        wp_add_inline_script(
-            'rb-get-address',
-            self::getWidget()->js
-        );
     }
 
     /**

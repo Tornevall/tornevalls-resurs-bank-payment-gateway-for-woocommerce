@@ -1,15 +1,15 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["dom", "es2015"],
-    "jsx": "react",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true
-  },
-  "include": ["src"]
+	"compilerOptions": {
+		"baseUrl": ".",
+		"target": "es5",
+		"module": "commonjs",
+		"lib": [ "dom", "es2015" ],
+		"jsx": "react",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true
+	},
+	"include": [ "src" ]
 }

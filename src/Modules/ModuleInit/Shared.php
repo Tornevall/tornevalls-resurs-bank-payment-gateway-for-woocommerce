@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Modules\ModuleInit;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
+use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Route;
 
@@ -33,5 +34,6 @@ class Shared
         Gateway::init();
         MessageBag::init();
         Callback::init();
+        GetAddress::init();
     }
 }

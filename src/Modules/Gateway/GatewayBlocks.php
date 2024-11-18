@@ -87,7 +87,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
             ['react', 'wc-blocks-registry', 'wc-settings', 'wp-data'],
-	        '1b5584f1490710f2be9b'
+	        '1b5584f1490710f2be9b',
+	        true // Load script in footer.
         );
 
         wp_script_add_data('rb-wc-blocks-js', 'type', 'module');

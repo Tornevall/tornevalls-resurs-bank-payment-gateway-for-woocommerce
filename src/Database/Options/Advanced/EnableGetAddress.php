@@ -31,9 +31,10 @@ class EnableGetAddress extends BoolOption implements OptionInterface
      */
     public static function getData(): bool
     {
-        return self::isGetAddressAllowedByGdprRule() &&
+        return (
             self::isCountryCodeSe() &&
-            parent::getData();
+            parent::getData()
+        );
     }
 
     /**
@@ -42,14 +43,6 @@ class EnableGetAddress extends BoolOption implements OptionInterface
     public static function isCountryCodeSe(): bool
     {
         return StoreCountryCode::getCurrentStoreCountry() === 'SE';
-    }
-
-    /**
-     * Quick fix for entirely disable getAddress widget when gdpr rules are applied.
-     */
-    public static function isGetAddressAllowedByGdprRule(): bool
-    {
-        return defined(constant_name: 'ALLOW_GET_ADDRESS') && ALLOW_GET_ADDRESS;
     }
 
     /**
