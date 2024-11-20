@@ -28,6 +28,7 @@ use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
 use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
@@ -55,6 +56,11 @@ class Route
      * Route to get address controller.
      */
     public const ROUTE_GET_ADDRESS = 'get-address';
+
+	/**
+	 * Route to controller injecting get address css.
+	 */
+	public const ROUTE_GET_ADDRESS_CSS = 'get-address-css';
 
     /**
      * Route to update current customer type in session.
@@ -194,10 +200,11 @@ class Route
      */
     public static function respond(
         string $body,
-        int $code = 200
+        int $code = 200,
+	    $contentType = 'application/json'
     ): void {
         status_header(code: $code);
-        header(header: 'Content-Type: application/json');
+        header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
         echo $body;
@@ -217,9 +224,10 @@ class Route
      */
     public static function respondWithExit(
         string $body,
-        int $code = 200
+        int $code = 200,
+	    $contentType = 'application/json'
     ): void {
-        self::respond(body: $body, code: $code);
+        self::respond(body: $body, code: $code, contentType: $contentType);
         exit;
     }
 
@@ -299,6 +307,13 @@ class Route
             case self::ROUTE_GET_ADDRESS:
                 self::respondWithExit(body: GetAddress::exec());
                 break;
+
+	        case self::ROUTE_GET_ADDRESS_CSS:
+		        self::respondWithExit(
+					body: GetAddressCss::exec(),
+					contentType: 'text/css'
+		        );
+		        break;
 
             case self::ROUTE_PART_PAYMENT:
                 self::respondWithExit(body: PartPayment::exec());

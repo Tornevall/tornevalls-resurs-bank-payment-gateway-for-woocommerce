@@ -34,10 +34,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
 
     /**
      * Register custom CSS and
-     *
-     * @return void
      */
-    public static function initFrontend()
+    public static function initFrontend(): void
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
@@ -86,8 +84,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         wp_register_script(
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
-            ['react', 'wc-blocks-registry', 'wc-settings', 'wp-data'],
-	        '1b5584f1490710f2be9b',
+            ['react', 'wc-blocks-data-store', 'wc-blocks-registry', 'wc-settings', 'wp-data'],
+	        '101f57a1921624052624',
 	        true // Load script in footer.
         );
 

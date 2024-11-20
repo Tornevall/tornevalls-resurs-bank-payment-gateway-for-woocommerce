@@ -1,108 +1,83 @@
-import { __ } from '@wordpress/i18n';
+import React from 'react';
+import { select } from '@wordpress/data';
+
+// @ts-ignore
+import { CART_STORE_KEY } from '@woocommerce/block-data';
 // @ts-ignore
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 // @ts-ignore
 import { getSetting } from '@woocommerce/settings';
-import React from 'react';
 
 const settings = getSetting( 'resursbank_data', {} );
 
-import { select, dispatch } from '@wordpress/data';
-// @ts-ignore
-import { CART_STORE_KEY } from '@woocommerce/block-data';
+( () => {
+	if (
+		! Array.isArray( settings.payment_methods ) ||
+		settings.payment_methods.length === 0
+	) {
+		return;
+	}
 
-// Log the entire state of the stores
-/*const logStoreData = () => {
-    const storeData = select('core').getStore();
-    console.log('Store Data:', storeData);
-};
-
-// Call the function to log the store data
-logStoreData();*/
-
-/*const updateCartTotal = () => {
-    console.log('asdasdasdasd');
-    //console.log('oboy!');
-    /*const cart = select('wc/store/cart').getCart();
-    if (cart) {
-        cart_total = cart.totals.total_price / Math.pow(10, cart.totals.currency_minor_unit);
-    }*/
-/*};*/
-
-
-let data = select(CART_STORE_KEY).getCartData();
-data.extensions['resursbank'] = {
-	whatever: 'epic'
-};
-
-dispatch(CART_STORE_KEY).setCartData(data);
-
-console.log(select(CART_STORE_KEY).getCartData());
-
-const storeName = window.wc.wcBlocksData.CART_STORE_KEY;
-
-if (
-	Array.isArray( settings.payment_methods ) &&
-	settings.payment_methods.length > 0
-) {
 	settings.payment_methods.forEach( ( method: any ) => {
 		const label = method.title;
+
+		/**
+		 * Calculate the cart total.
+		 *
+		 * @param cartData The cart data from the store.
+		 * @returns The cart total.
+		 */
+		const calculateCartTotal = ( cartData: any ): number => {
+			return (
+				parseInt( cartData.totals.total_price, 10 ) /
+				Math.pow( 10, cartData.totals.currency_minor_unit )
+			);
+		};
+
+		/**
+		 * Update the iframe source with the new cart total.
+		 *
+		 * @param iframe The iframe element to update.
+		 * @param cartTotal The new cart total.
+		 */
+		const updateIframeSource = (
+			iframe: HTMLIFrameElement,
+			cartTotal: number
+		): void => {
+			let src = iframe.getAttribute( 'src' );
+			if ( src ) {
+				const lastEqualIndex = src.lastIndexOf( '=' );
+				if ( lastEqualIndex !== -1 ) {
+					src = src.substring( 0, lastEqualIndex + 1 ) + cartTotal;
+					iframe.setAttribute( 'src', src );
+				}
+			}
+		};
 
 		/**
 		 * Content component
 		 */
 		const Content = () => {
-			const div = document.createElement( 'div' );
-			const style = document.createElement( 'style' );
-			style.textContent = method.read_more_css;
+			const cartData = select( CART_STORE_KEY ).getCartData();
+			const cartTotal = calculateCartTotal( cartData );
 
-			const total_price = wp.data.select( storeName ).getCartData()
-				.totals.total_price;
-			const currency_minor_unit = wp.data
-				.select( storeName )
-				.getCartData().totals.currency_minor_unit;
-			const cart_total =
-				parseInt( total_price, 10 ) /
-				Math.pow( 10, currency_minor_unit );
-
-			div.innerHTML = method.description;
-
-			const iframe = div.querySelector( 'iframe.rb-rm-iframe' );
-			if ( iframe ) {
-				let src = iframe.getAttribute( 'src' );
-				if ( src ) {
-					const lastEqualIndex = src.lastIndexOf( '=' );
-					if ( lastEqualIndex !== -1 ) {
-						src = src.substring( 0, lastEqualIndex + 1 );
-						src += cart_total;
-						iframe.setAttribute( 'src', src );
-					}
+			React.useEffect( () => {
+				const iframe = document.querySelector(
+					'iframe.rb-rm-iframe'
+				) as HTMLIFrameElement;
+				if ( iframe ) {
+					updateIframeSource( iframe, cartTotal );
 				}
-			}
-
-			div.appendChild( style );
-
-			/*
-            * {method.enabled_for_legal_customer && (
-                        <div>
-                            <label htmlFor="billing_resurs_government_id">Government ID:</label>
-                            <ValidatedTextInput
-                                id="billing_resurs_government_id"
-                                type="number"
-                                required={false}
-                                className={'government-id'}
-                                label={'Government ID'}
-                                value={governmentId}
-                            />
-                            {error && <p style={{ color: 'red' }}>{error}</p>}
-                        </div>
-                    )}*/
+			}, [ cartTotal ] );
 
 			return (
 				<div>
 					<div
-						dangerouslySetInnerHTML={ { __html: div.innerHTML } }
+						dangerouslySetInnerHTML={ {
+							__html: method.description,
+						} }
 					/>
+					<style>{ method.read_more_css }</style>
 				</div>
 			);
 		};
@@ -114,8 +89,8 @@ if (
 		 */
 		const Label = ( props: any ) => {
 			const { PaymentMethodLabel } = props.components;
-			// @ts-ignore
-			const labelWithLogo = (
+
+			return (
 				<div className="rb-payment-method-title">
 					<PaymentMethodLabel text={ label } />
 					<div
@@ -124,7 +99,6 @@ if (
 					/>
 				</div>
 			);
-			return labelWithLogo;
 		};
 
 		registerPaymentMethod( {
@@ -171,4 +145,4 @@ if (
 			ariaLabel: label,
 		} );
 	} );
-}
+} )();

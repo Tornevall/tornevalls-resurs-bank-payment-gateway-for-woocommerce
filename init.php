@@ -27,14 +27,11 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Module\Customer\Widget\GetAddress;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
 use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 
 if (!defined(constant_name: 'ABSPATH')) {
@@ -106,23 +103,3 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
         Frontend::init();
     }
 });
-
-
-
-
-
-
-add_filter('the_content', 'check_for_woocommerce_checkout_block');
-
-function check_for_woocommerce_checkout_block($content) {
-	if (preg_match('/<div[^>]*data-block-name="woocommerce\/checkout"[^>]*>/', $content)) {
-		$pattern = '/(<div[^>]*data-block-name="woocommerce\/checkout-contact-information-block"[^>]*><\/div>)/';
-
-		$widget = \Resursbank\Woocommerce\Modules\GetAddress\Filter\Checkout::getWidget();
-
-		$replacement = '$1' . $widget->content;
-		$content = preg_replace($pattern, $replacement, $content);
-		return $content;
-	}
-	return $content;
-}

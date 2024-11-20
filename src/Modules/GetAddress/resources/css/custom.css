@@ -61,9 +61,10 @@
     transform: rotate(0deg); }
   100% {
     transform: rotate(360deg); } }
-    #rb-ga-widget .rb-ga-ssn-area #rb-ga-btn:disabled {
+    #rb-ga-widget .rb-ga-ssn-area #rb-ga-btn:hover, #rb-ga-widget .rb-ga-ssn-area #rb-ga-btn:disabled {
       background-color: #666666;
-      border-color: #666666;
+      border-color: #666666; }
+    #rb-ga-widget .rb-ga-ssn-area #rb-ga-btn:disabled {
       cursor: not-allowed; }
   #rb-ga-widget .rb-ga-ssn-area #rb-ga-gov-id {
     background-color: #fff;
@@ -96,4 +97,4 @@
   100% {
     transform: rotate(360deg); } }
 
-/*# sourceMappingURL=blocks.css.map */
+/*# sourceMappingURL=custom.css.map */
