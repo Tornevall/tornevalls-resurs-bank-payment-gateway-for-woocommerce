@@ -18,10 +18,9 @@
  * @noinspection PhpDefineCanBeReplacedWithConstInspection
  */
 
-// @todo This is wordpress. SideEffects can not be handled properly while the init looks like this.
-// @todo Consider honoring this in the future another way.
+// Welcome to WordPress. SideEffects can not be handled properly while the init looks like this.
+// Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
-
 
 declare(strict_types=1);
 
@@ -47,18 +46,21 @@ define(
 );
 define(constant_name: 'ALLOW_GET_ADDRESS', value: true);
 
+require_once __DIR__ . '/src/Autoloader/requirements.php';
+
 // Do not remove this! It ensures the plugin does not crash the entire site if ecom2
 // has not been checked out properly. This issue typically occurs during a manual
 // checkout when ecom2 is missing. We cannot move this into a class, as the autoload
 // process will fail if ecom2 is unavailable.
 if (!file_exists(__DIR__ . '/lib/ecom/composer.json')) {
-    add_action('admin_notices', function () {
-        echo '<div class="notice notice-error is-dismissible">';
-        echo '<p><strong>ECom2:</strong> Dependencies are missing from the plugin structure. Please verify your Resurs installation.</p>';
-        echo '</div>';
-    });
+    resursBankHasNoEcom();
     return;
 }
+if (PHP_VERSION_ID < 80100) {
+    resursBankHasOldPhp();
+    return;
+}
+
 require_once __DIR__ . '/autoload.php';
 
 // Using same path identifier as the rest of the plugin-verse.
