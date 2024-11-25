@@ -30,6 +30,6 @@ class SetMethodCountryRestriction extends BoolOption implements OptionInterface
      */
     public static function getDefault(): ?string
     {
-        return 'no';
+        return 'yes';
     }
 }

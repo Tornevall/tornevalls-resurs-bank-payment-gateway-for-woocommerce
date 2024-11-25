@@ -15,7 +15,7 @@ This is a payment gateway for WooCommerce and WordPress.
 # Configuration
 
 Configuration are made through the admin panel.
-KommKKkkkkKoertertdhfghfghf
+
 # FAQ
 
 ### Where can I get more information about this plugin?
@@ -24,13 +24,9 @@ Find out more in about the plugin [in our documentation](https://developers.resu
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar).
 
-### Can I upgrade from version 2.2.x? ##
+### Can I upgrade from the "payment-gateway-2.2"?
 
-No (this plugin is a breaking change). But if you've used the old version
-before, historical payments are transparent and can be handled by this new
-release. If you wish to upgrade from the old plugin release, you need to contact
-Resurs Bank for new credentials. Also be aware of that you need new credentials
-when switching from the "2.2-package".
+No. Running this plugin means you have to remove the prior package.
 
 # Developer notes
 

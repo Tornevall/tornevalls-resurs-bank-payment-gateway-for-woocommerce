@@ -40,6 +40,9 @@ class About
         return Translator::translate(phraseId: 'about');
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     */
     public static function getWidget(): ?EcomSupportInfo
     {
         try {

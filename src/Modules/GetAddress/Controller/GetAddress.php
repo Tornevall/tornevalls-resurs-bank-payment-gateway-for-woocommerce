@@ -20,7 +20,7 @@ use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
 /**
- * Get customer address.
+ * Controller to fetch address content.
  */
 class GetAddress
 {
@@ -56,10 +56,16 @@ class GetAddress
 	): void {
 		$ecomSession = new Session();
 
-		WcSession::set(
-			key: $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
-			value: $data->govId
-		);
+        if (!$ecomSession->isAvailable()) {
+            // ECom sessions in this request are practically never available initially, so we need to set it up
+            // if we want to store data in them.
+            session_start();
+        }
+
+        WcSession::set(
+            key: $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
+            value: $data->govId
+        );
 
 		WcSession::set(
 			key: $ecomSession->getKey(

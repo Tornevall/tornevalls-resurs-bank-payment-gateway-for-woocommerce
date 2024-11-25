@@ -1,5 +1,7 @@
-# 1.0.50
+# 1.0.50 - 1.0.52
 
+* Miscellaneous hotfixes.
+* [WOO-1355](https://resursbankplugins.atlassian.net/browse/WOO-1355) PPW renders duplicate payment \(and too many\) payment methods
 * [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.
 
 # 1.0.49

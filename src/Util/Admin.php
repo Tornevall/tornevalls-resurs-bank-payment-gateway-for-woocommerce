@@ -29,6 +29,24 @@ class Admin
     }
 
     /**
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function getAdminErrorNote(string $message, string $additional = ''): void
+    {
+        if (!self::isAdmin()) {
+            return;
+        }
+
+        echo <<<EX
+<div class="error notice">
+  $message
+  <br/>
+  $additional
+</div>
+EX;
+    }
+
+    /**
      * Return boolean on specific admin configuration tab. This method does not check is_admin first.
      *
      * @SuppressWarnings(PHPMD.Superglobals)

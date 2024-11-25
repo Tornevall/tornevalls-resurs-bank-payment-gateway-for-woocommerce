@@ -19,6 +19,7 @@ use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
@@ -219,12 +220,6 @@ EX;
             $msg = Translator::translate(phraseId: 'content-render-failed');
         }
 
-        echo <<<EX
-<div class="error notice">
-  $msg
-  <br/>
-  $additional
-</div>
-EX;
+        Admin::getAdminErrorNote(message: $msg, additional: $additional);
     }
 }

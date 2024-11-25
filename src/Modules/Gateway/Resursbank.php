@@ -39,7 +39,6 @@ use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
@@ -51,6 +50,7 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WcSession;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Cart;
 use WC_Order;
@@ -199,7 +199,7 @@ class Resursbank extends WC_Payment_Gateway
         // If country restrictions are enabled, we will validate that the customer is located in the
         // same country as the API based country.
         return !(SetMethodCountryRestriction::getData()) ||
-            (WC()?->cart && WC()?->customer?->get_billing_country() === StoreCountryCode::getCurrentStoreCountry());
+            (WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry());
     }
 
     /**

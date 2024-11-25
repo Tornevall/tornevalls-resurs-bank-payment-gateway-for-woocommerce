@@ -10,20 +10,17 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
-use Resursbank\Ecom\Lib\Api\GrantType;
-use Resursbank\Ecom\Lib\Api\Scope;
-use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
-use Resursbank\Ecom\Lib\Repository\Api\Mapi\GenerateToken;
+use Resursbank\Ecom\Lib\Model\Store\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientId;
 use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
-use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -49,13 +46,6 @@ class Api
      */
     public static function init(): void
     {
-        // Set priority high so that our method is called after credentials are saved
-        add_action(
-            'updated_option',
-            'Resursbank\Woocommerce\Settings\Api::verifyCredentials',
-            100,
-            1
-        );
     }
 
     /**
@@ -71,52 +61,9 @@ class Api
                 'client_id' => self::getClientId(),
                 'client_secret' => self::getClientSecret(),
                 'store_id' => self::getStoreIdSetting(),
-                'store_country' => self::getStoreCountry(),
+                'store_country' => self::getStoreCountrySetting(),
             ],
         ];
-    }
-
-    /**
-     * Verifies that API credentials are valid and shows an error message if they're not.
-     */
-    public static function verifyCredentials(mixed $option): void
-    {
-        // Check if API section is what's being saved
-        if (
-            !(
-                $option === 'resursbank_client_id' ||
-                $option === 'resursbank_client_secret'
-            )
-        ) {
-            return;
-        }
-
-        // Check if credentials have been properly entered
-        $clientId = ClientId::getData();
-        $clientSecret = ClientSecret::getData();
-        $environment = Environment::getData();
-        $scope = $environment === EnvironmentEnum::PROD
-            ? Scope::MERCHANT_API
-            : Scope::MOCK_MERCHANT_API;
-
-        try {
-            $auth = new Jwt(
-                clientId: $clientId,
-                clientSecret: $clientSecret,
-                scope: $scope,
-                grantType: GrantType::CREDENTIALS
-            );
-        } catch (Throwable $error) {
-            MessageBag::addError(message: $error->getMessage());
-            return;
-        }
-
-        // Check if we can fetch a token
-        try {
-            (new GenerateToken(auth: $auth))->call();
-        } catch (Throwable $error) {
-            MessageBag::addError(message: $error->getMessage());
-        }
     }
 
     /**
@@ -157,7 +104,7 @@ class Api
     /**
      * Return config value for current store countryCode.
      */
-    private static function getStoreCountry(): array
+    private static function getStoreCountrySetting(): array
     {
         return [
             'id' => self::NAME_PREFIX . '_store_country',
@@ -166,7 +113,7 @@ class Api
                 'disabled' => true,
             ],
             'title' => __('Country'),
-            'value' => StoreCountryCode::getCurrentStoreCountry(),
+            'value' => WooCommerce::getStoreCountry(),
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
         ];
     }
@@ -211,9 +158,26 @@ class Api
         ];
 
         try {
-            // Both can cause Throwable, do them one at a time.
-            $result['options'] = StoreRepository::getStores()->getSelectList();
+            // Do not fetch stores until credentials are present.
+            if (ClientId::getData() !== '' && ClientSecret::getData() !== '') {
+                $result['options'] = StoreRepository::getStores()->getSelectList();
+
+                // If no store has been selected in the configuration, default to the first store,
+                // as this will be displayed in the dropdown after saving. This ensures the merchant
+                // has a value saved, even if no store was selected initially.
+                if (StoreId::getData() === '') {
+                    $firstStore = StoreRepository::getStores()->getFirst();
+
+                    if ($firstStore instanceof Store) {
+                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                        update_option(StoreId::getName(), $firstStore->id);
+                    }
+                }
+            }
         } catch (Throwable $error) {
+            // Some errors cannot be rendered through the admin_notices. Avoid that action.
+            Admin::getAdminErrorNote(message: $error->getMessage());
+
             Log::error(error: $error);
         }
 
