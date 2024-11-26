@@ -293,7 +293,7 @@ class Gateway
      */
     public static function modifyIcon(mixed $icon): string
     {
-        if ($icon === '') {
+        if (gettype($icon) !== 'string' || $icon === '') {
             return $icon;
         }
         
