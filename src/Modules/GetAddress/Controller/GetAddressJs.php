@@ -18,14 +18,14 @@ use Throwable;
  */
 class GetAddressCss
 {
-	public static function exec(): string
-	{
-		try {
-			return GetAddressWidget::getWidget()->js;
-		} catch ( Throwable $error) {
-			Log::error(error: $error);
-		}
+    public static function exec(): string
+    {
+        try {
+            return GetAddressWidget::getWidget()->js;
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
 
-		return '';
-	}
+        return '';
+    }
 }

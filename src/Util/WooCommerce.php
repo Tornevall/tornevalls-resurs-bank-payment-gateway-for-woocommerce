@@ -97,8 +97,17 @@ class WooCommerce
     public static function isAdminOrderCreateTool(): bool
     {
         return Admin::isAdmin() && (
-                (self::isUsingHpos() && isset($_GET['page'], $_GET['action']) && $_GET['page'] === 'wc-orders' && $_GET['action'] === 'new') ||
-                (!self::isUsingHpos() && isset($_GET['post_type'], $_GET['action']) && $_GET['post_type'] === 'shop_order' && $_GET['action'] === 'add')
+                (
+                    self::isUsingHpos() &&
+                    isset($_GET['page'], $_GET['action']) &&
+                    $_GET['page'] === 'wc-orders' && $_GET['action'] === 'new'
+                ) ||
+                (
+                    !self::isUsingHpos() &&
+                    isset($_GET['post_type'], $_GET['action']) &&
+                    $_GET['post_type'] === 'shop_order' &&
+                    $_GET['action'] === 'add'
+                )
             );
     }
 }

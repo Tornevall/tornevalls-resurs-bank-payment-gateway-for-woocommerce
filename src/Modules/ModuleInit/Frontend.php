@@ -13,7 +13,6 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
-use Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks\InjectFetchAddressWidget;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\Order\Filter\Failure;
 use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
@@ -40,7 +39,7 @@ class Frontend
         ThankYou::init();
         Failure::init();
         PartPayment::initFrontend();
-		GetAddress::init();
+        GetAddress::init();
         UniqueSellingPoint::init();
     }
 }

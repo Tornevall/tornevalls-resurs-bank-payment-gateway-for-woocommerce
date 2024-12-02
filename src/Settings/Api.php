@@ -46,6 +46,7 @@ class Api
      */
     public static function init(): void
     {
+        // Required for the loading to act properly.
     }
 
     /**

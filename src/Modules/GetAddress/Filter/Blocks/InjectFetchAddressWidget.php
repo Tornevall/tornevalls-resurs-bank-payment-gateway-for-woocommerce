@@ -40,26 +40,31 @@ class InjectFetchAddressWidget
 {
     public static function exec($content): string
     {
-	    try {
-		    if (!is_string($content)) {
-			    throw new IllegalTypeException(
-				    message: 'Content is not a string.'
-			    );
-		    }
+        try {
+            if (!is_string($content)) {
+                throw new IllegalTypeException(
+                    message: 'Content is not a string.'
+                );
+            }
 
-		    if (!preg_match( pattern: '/<div[^>]*data-block-name="woocommerce\/checkout"[^>]*>/', subject: $content)) {
-			    return $content;
-		    }
+            if (
+                !preg_match(
+                    pattern: '/<div[^>]*data-block-name="woocommerce\/checkout"[^>]*>/',
+                    subject: $content
+                )
+            ) {
+                return $content;
+            }
 
-		    $content = preg_replace(
-			    pattern: '/(<div[^>]*data-block-name="woocommerce\/checkout-contact-information-block"[^>]*><\/div>)/',
-			    replacement: '$1' . (GetAddress::getWidget())->content,
-			    subject: $content
-		    );
-	    } catch (Throwable $error) {
-		    Log::error(error: $error);
-	    }
+            $content = preg_replace(
+                pattern: '/(<div[^>]*data-block-name="woocommerce\/checkout-contact-information-block"[^>]*><\/div>)/',
+                replacement: '$1' . GetAddress::getWidget()->content,
+                subject: $content
+            );
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
 
-	    return $content;
+        return $content;
     }
 }

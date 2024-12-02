@@ -50,7 +50,7 @@ class InjectFetchAddressWidget
             $result = preg_replace(
                 pattern: '/\n\s*\n/m',
                 replacement: " ",
-                subject: (GetAddressWidget::getWidget())->content
+                subject: GetAddressWidget::getWidget()->content
             );
         } catch (Throwable $e) {
             try {
