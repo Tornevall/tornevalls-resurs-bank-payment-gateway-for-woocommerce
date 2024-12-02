@@ -9,6 +9,16 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Model\Store\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
@@ -166,22 +176,62 @@ class Api
                 // If no store has been selected in the configuration, default to the first store,
                 // as this will be displayed in the dropdown after saving. This ensures the merchant
                 // has a value saved, even if no store was selected initially.
-                if (StoreId::getData() === '') {
-                    $firstStore = StoreRepository::getStores()->getFirst();
-
-                    if ($firstStore instanceof Store) {
-                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-                        update_option(StoreId::getName(), $firstStore->id);
-                    }
+                if (self::credentialsAreSet()) {
+                    $result['options'] = StoreRepository::getStores()->getSelectList();
+                    self::setDefaultStoreIfNoneSelected();
                 }
             }
         } catch (Throwable $error) {
-            // Some errors cannot be rendered through the admin_notices. Avoid that action.
-            Admin::getAdminErrorNote(message: $error->getMessage());
-
-            Log::error(error: $error);
+            self::logAndHandleError(error: $error);
         }
 
         return $result;
+    }
+
+    /**
+     * Are credentials set?
+     */
+    private static function credentialsAreSet(): bool
+    {
+        return ClientId::getData() !== '' && ClientSecret::getData() !== '';
+    }
+
+    /**
+     * @throws Throwable
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     */
+    private static function setDefaultStoreIfNoneSelected(): void
+    {
+        if (StoreId::getData() !== '') {
+            return;
+        }
+
+        $firstStore = StoreRepository::getStores()->getFirst();
+
+        if (!($firstStore instanceof Store)) {
+            return;
+        }
+
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        update_option(StoreId::getName(), $firstStore->id);
+    }
+
+    /**
+     * Log and handle visible error messages.
+     */
+    private static function logAndHandleError(Throwable $error): void
+    {
+        // Some errors cannot be rendered through the admin_notices. Avoid that action.
+        Admin::getAdminErrorNote(message: $error->getMessage());
+        Log::error(error: $error);
     }
 }

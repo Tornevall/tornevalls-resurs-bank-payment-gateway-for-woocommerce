@@ -136,11 +136,8 @@ class Metadata
 
         $orderId = $order->get_id() ?? 0;
 
-        // Early payment method validation.
-        if (
-            isset($rbPaymentIsValid[$orderId]) &&
-            $rbPaymentIsValid[$orderId] === false
-        ) {
+        // Early validation of cached payment status.
+        if (self::isCachedPaymentInvalid(orderId: $orderId)) {
             return false;
         }
 
@@ -222,6 +219,15 @@ class Metadata
             order: $order,
             key: self::KEY_THANK_YOU
         ) === '1';
+    }
+
+    /**
+     * Early validation of cached payment status.
+     */
+    private static function isCachedPaymentInvalid(int $orderId): bool
+    {
+        global $rbPaymentIsValid;
+        return isset($rbPaymentIsValid[$orderId]) && $rbPaymentIsValid[$orderId] === false;
     }
 
     /**
