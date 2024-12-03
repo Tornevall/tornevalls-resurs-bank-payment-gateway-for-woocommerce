@@ -41,8 +41,9 @@ class InjectFetchAddressWidget
     {
         try {
             // Since this is a filter hook executed by the_content, we cannot be sure that the
-            // content is really is string and throw errors back to the front end here. If we get anything
-            // but a string, we will therefore only silently return it.
+            // content really is string and throw errors back to the frontend from here.
+            // If we get anything but a string, we will therefore only silently return it.
+            // We don't know what's installed here, beyond WooCommerce and the rest of the platform.
             if (!is_string(value: $content)) {
                 return $content;
             }
