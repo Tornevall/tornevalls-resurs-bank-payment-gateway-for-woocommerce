@@ -31,8 +31,7 @@ use Throwable;
  */
 final class GatewayBlocks extends AbstractPaymentMethodType
 {
-    /** @inerhitDoc */
-    protected $name = 'resursbank';
+    protected string $name = 'resursbank';
 
     /**
      * Register custom CSS and
