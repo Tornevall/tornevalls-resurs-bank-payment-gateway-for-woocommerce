@@ -1,5 +1,8 @@
 # Resurs Bank Payments for WooCommerce
 
+This is a payment gateway for WooCommerce and WordPress. Do not run this plugin side by side with the prior releases of Resurs Bank plugins!
+Requires PHP 8.1
+
 This is a payment gateway for WooCommerce and WordPress.
 
 # System requirements
@@ -24,7 +27,7 @@ Find out more in about the plugin [in our documentation](https://developers.resu
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar).
 
-### Can I upgrade from the "payment-gateway-2.2"?
+### Can I upgrade from version 2.2.x?
 
 No. Running this plugin means you have to remove the prior package.
 

@@ -37,22 +37,13 @@ if (!defined(constant_name: 'ABSPATH')) {
     exit;
 }
 
-// Name of plugin directory.
-define(
-    constant_name: 'RESURSBANK_MODULE_DIR_NAME',
-    value: substr(
-        string: __DIR__,
-        offset: strrpos(haystack: __DIR__, needle: '/') + 1
-    )
-);
-
 require_once __DIR__ . '/src/Autoloader/requirements.php';
 
 // Do not remove this! It ensures the plugin does not crash the entire site if ecom2
 // has not been checked out properly. This issue typically occurs during a manual
 // checkout when ecom2 is missing. We cannot move this into a class, as the autoload
 // process will fail if ecom2 is unavailable.
-if (!file_exists(__DIR__ . '/lib/ecom/composer.json')) {
+if (!file_exists(filename: __DIR__ . '/lib/ecom/composer.json')) {
     resursBankHasNoEcom();
     return;
 }
@@ -61,7 +52,17 @@ if (PHP_VERSION_ID < 80100) {
     return;
 }
 
-// Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<repository>"
+
+// Name of plugin directory; normally the slug name.
+define(
+    constant_name: 'RESURSBANK_MODULE_DIR_NAME',
+    value: substr(
+        string: __DIR__,
+        offset: strrpos(haystack: __DIR__, needle: '/') + 1
+    )
+);
+
+// Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>"
 define(
 	constant_name: 'RESURSBANK_MODULE_DIR_PATH',
 	value: plugin_dir_path(file: __FILE__)
@@ -103,6 +104,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
                 return;
             }
 
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             FeaturesUtil::declare_compatibility(
                 'custom_order_tables',
                 __FILE__,
