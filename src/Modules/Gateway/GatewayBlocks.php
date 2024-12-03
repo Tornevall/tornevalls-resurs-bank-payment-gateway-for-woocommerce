@@ -1,18 +1,22 @@
 <?php
+
 /**
  * Copyright © Resurs Bank AB. All rights reserved.
  * See LICENSE for license details.
  */
 
+// phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
+
 declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
-use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
@@ -27,19 +31,22 @@ use Throwable;
  */
 final class GatewayBlocks extends AbstractPaymentMethodType
 {
-    /**
-     * @inerhitDoc
-     */
+    /** @inheritdoc */
+    // phpcs:ignore
     protected $name = 'resursbank';
 
     /**
      * Register custom CSS and
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initFrontend(): void
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            fn(PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register((new self()))
+            static fn (PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
+                (new self())
+            )
         );
 
         wp_register_style(
@@ -48,7 +55,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 module: 'Gateway',
                 file: 'checkout-blocks.css',
                 type: ResourceType::CSS
-            ),
+            )
         );
 
         wp_enqueue_style('rb-wc-blocks-css');
@@ -56,10 +63,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
 
     /**
      * Initialize block. Method is required by WooCommerce.
-     *
-     * @return void
      */
-    public function initialize()
+    public function initialize(): void
     {
         // WooCommerce requires this method to be implemented.
     }
@@ -67,9 +72,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     /**
      * Gateway is active if the plugin is enabled.
      *
-     * @return bool
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
-    public function is_active()
+    public function is_active(): bool
     {
         return Enabled::isEnabled();
     }
@@ -77,16 +83,20 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     /**
      * Register JavaScript code for our gateway.
      *
-     * @return string[]
+     * @return array<string>
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public function get_payment_method_script_handles()
+    public function get_payment_method_script_handles(): array
     {
         wp_register_script(
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
             ['react', 'wc-blocks-data-store', 'wc-blocks-registry', 'wc-settings', 'wp-data'],
-	        '101f57a1921624052624',
-	        true // Load script in footer.
+            '101f57a1921624052624',
+            // Load script in footer.
+            true
         );
 
         wp_script_add_data('rb-wc-blocks-js', 'type', 'module');
@@ -97,19 +107,23 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     /**
      * Get data for payment gateway, will render to JS.
      *
-     * @return array
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
-    public function get_payment_method_data()
+    public function get_payment_method_data(): array
     {
         $result = [
-			'allowed_country' => $this->getAllowedCountry(),
-	        'payment_methods' => [],
+            'allowed_country' => $this->getAllowedCountry(),
+            'payment_methods' => [],
         ];
 
         try {
             /** @var PaymentMethod $paymentMethod */
             foreach (Repository::getPaymentMethods() as $paymentMethod) {
-                $usp = Repository::getUniqueSellingPoint($paymentMethod, (float) WC()?->cart?->total);
+                $usp = Repository::getUniqueSellingPoint(
+                    paymentMethod: $paymentMethod,
+                    amount: (float)WC()?->cart?->total
+                );
                 $logo = new Widget($paymentMethod);
 
                 $result['payment_methods'][] = [
@@ -119,11 +133,11 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'read_more_css' => $usp->readMore->css,
                     'logo' => $logo->html,
                     'logo_type' => $logo->getIdentifier(),
-	                'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
-	                'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,
-	                'enabled_for_legal_customer' => $paymentMethod->enabledForLegalCustomer,
-	                'enabled_for_natural_customer' => $paymentMethod->enabledForNaturalCustomer,
-	                'read_more_url' => $usp->readMore->url,
+                    'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
+                    'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,
+                    'enabled_for_legal_customer' => $paymentMethod->enabledForLegalCustomer,
+                    'enabled_for_natural_customer' => $paymentMethod->enabledForNaturalCustomer,
+                    'read_more_url' => $usp->readMore->url,
                 ];
             }
         } catch (Throwable $error) {
@@ -133,17 +147,14 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         return $result;
     }
 
-	/**
-	 * @return Country
-	 */
-	private function getAllowedCountry()
-	{
-		try {
-			return StoreRepository::getConfiguredStore()?->countryCode ?? Country::UNKNOWN;
-		} catch (Throwable $error) {
-			Log::error(error: $error);
-		}
+    private function getAllowedCountry(): Country
+    {
+        try {
+            return StoreRepository::getConfiguredStore()?->countryCode ?? Country::UNKNOWN;
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
 
-		return Country::UNKNOWN;
-	}
+        return Country::UNKNOWN;
+    }
 }

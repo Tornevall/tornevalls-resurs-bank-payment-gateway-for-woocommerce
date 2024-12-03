@@ -26,7 +26,6 @@ use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
@@ -296,7 +295,7 @@ class Gateway
         if (gettype($icon) !== 'string' || $icon === '') {
             return $icon;
         }
-        
+
         return preg_replace(
             pattern: '/>$/',
             replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;' . apply_filters(

@@ -21,41 +21,42 @@ use Throwable;
  */
 class FrontendAssets
 {
-	public static function exec(): void
-	{
-		wp_enqueue_script(
-			'rb-get-address',
-			Url::getAssetUrl(file: 'update-address.js'),
-			['wp-data', 'jquery', 'wc-blocks-data-store'],
-			'504af982799bff4fb6eb',
-			true // Load script in footer.
-		);
+    public static function exec(): void
+    {
+        wp_enqueue_script(
+            'rb-get-address',
+            Url::getAssetUrl(file: 'update-address.js'),
+            ['wp-data', 'jquery', 'wc-blocks-data-store'],
+            '504af982799bff4fb6eb',
+            // Load script in footer.
+            true
+        );
 
-		wp_add_inline_script(
-			'rb-get-address',
-			(string) GetAddress::getWidget()?->js
-		);
+        wp_add_inline_script(
+            'rb-get-address',
+            (string) GetAddress::getWidget()?->js
+        );
 
-		try {
-			wp_enqueue_style(
-				'rb-ga-basic-css',
-				Route::getUrl( 'get-address-css' ),
-				[],
-				'1.0.0'
-			);
-		} catch (Throwable $error) {
-			Log::error(error: $error);
-		}
+        try {
+            wp_enqueue_style(
+                'rb-ga-basic-css',
+                Route::getUrl('get-address-css'),
+                [],
+                '1.0.0'
+            );
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
 
-		wp_enqueue_style(
-			'rb-ga-css',
-			Url::getResourceUrl(
-				module: 'GetAddress',
-				file: 'custom.css',
-				type: ResourceType::CSS
-			),
-			[],
-			'1.0.0'
-		);
-	}
+        wp_enqueue_style(
+            'rb-ga-css',
+            Url::getResourceUrl(
+                module: 'GetAddress',
+                file: 'custom.css',
+                type: ResourceType::CSS
+            ),
+            [],
+            '1.0.0'
+        );
+    }
 }

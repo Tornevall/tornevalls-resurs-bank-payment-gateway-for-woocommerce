@@ -20,58 +20,56 @@ use Throwable;
  */
 class GetAddress
 {
-	private static ?Widget $instance = null;
+    private static ?Widget $instance = null;
 
-	/**
-	 * Register frontend related actions and filters.
-	 */
-	public static function init(): void
-	{
-		add_action(
-			hook_name: 'wp_enqueue_scripts',
-			callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\FrontendAssets::exec'
-		);
+    /**
+     * Register frontend related actions and filters.
+     */
+    public static function init(): void
+    {
+        add_action(
+            hook_name: 'wp_enqueue_scripts',
+            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\FrontendAssets::exec'
+        );
 
-		// Inject Get Address widget in blocked based checkout.
-		add_filter(
-			hook_name: 'the_content',
-			callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks\InjectFetchAddressWidget::exec'
-		);
+        // Inject Get Address widget in blocked based checkout.
+        add_filter(
+            hook_name: 'the_content',
+            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks\InjectFetchAddressWidget::exec'
+        );
 
-		// Inject Get Address widget in legacy checkout.
-		add_filter(
-			hook_name: 'woocommerce_before_checkout_form',
-			callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Legacy\InjectFetchAddressWidget::exec'
-		);
-	}
+        // Inject Get Address widget in legacy checkout.
+        add_filter(
+            hook_name: 'woocommerce_before_checkout_form',
+            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Legacy\InjectFetchAddressWidget::exec'
+        );
+    }
 
-	/**
-	 * Create and return Get Address Widget instance. We store it locally to
-	 * improve performance since we will need to call the widget from several
-	 * locations during the checkout page rendering.
-	 *
-	 * @return Widget|null
-	 */
-	public static function getWidget(): ?Widget
-	{
-		if (self::$instance !== null) {
-			return self::$instance;
-		}
+    /**
+     * Create and return Get Address Widget instance. We store it locally to
+     * improve performance since we will need to call the widget from several
+     * locations during the checkout page rendering.
+     */
+    public static function getWidget(): ?Widget
+    {
+        if (self::$instance !== null) {
+            return self::$instance;
+        }
 
-		try {
-			$getAddressUrl = Route::getUrl(route: Route::ROUTE_GET_ADDRESS);
+        try {
+            $getAddressUrl = Route::getUrl(route: Route::ROUTE_GET_ADDRESS);
 
-			if ($getAddressUrl === '') {
-				throw new IllegalValueException(
-					message: 'Failed to obtain get address widget URL.'
-				);
-			}
+            if ($getAddressUrl === '') {
+                throw new IllegalValueException(
+                    message: 'Failed to obtain get address widget URL.'
+                );
+            }
 
-			self::$instance = new Widget(url: $getAddressUrl);
-		} catch (Throwable $e) {
-			Log::error(error: $e);
-		}
+            self::$instance = new Widget(url: $getAddressUrl);
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+        }
 
-		return self::$instance;
-	}
+        return self::$instance;
+    }
 }

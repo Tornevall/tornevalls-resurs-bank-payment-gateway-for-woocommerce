@@ -57,10 +57,10 @@ class Route
      */
     public const ROUTE_GET_ADDRESS = 'get-address';
 
-	/**
-	 * Route to controller injecting get address css.
-	 */
-	public const ROUTE_GET_ADDRESS_CSS = 'get-address-css';
+    /**
+     * Route to controller injecting get address css.
+     */
+    public const ROUTE_GET_ADDRESS_CSS = 'get-address-css';
 
     /**
      * Route to update current customer type in session.
@@ -201,7 +201,7 @@ class Route
     public static function respond(
         string $body,
         int $code = 200,
-	    $contentType = 'application/json'
+        string $contentType = 'application/json'
     ): void {
         status_header(code: $code);
         header(header: 'Content-Type: ' . $contentType);
@@ -225,7 +225,7 @@ class Route
     public static function respondWithExit(
         string $body,
         int $code = 200,
-	    $contentType = 'application/json'
+        string $contentType = 'application/json'
     ): void {
         self::respond(body: $body, code: $code, contentType: $contentType);
         exit;
@@ -308,12 +308,12 @@ class Route
                 self::respondWithExit(body: GetAddress::exec());
                 break;
 
-	        case self::ROUTE_GET_ADDRESS_CSS:
-		        self::respondWithExit(
-					body: GetAddressCss::exec(),
-					contentType: 'text/css'
-		        );
-		        break;
+            case self::ROUTE_GET_ADDRESS_CSS:
+                self::respondWithExit(
+                    body: GetAddressCss::exec(),
+                    contentType: 'text/css'
+                );
+                break;
 
             case self::ROUTE_PART_PAYMENT:
                 self::respondWithExit(body: PartPayment::exec());

@@ -20,7 +20,7 @@ use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
 /**
- * Get customer address.
+ * Controller to fetch address content.
  */
 class GetAddress
 {

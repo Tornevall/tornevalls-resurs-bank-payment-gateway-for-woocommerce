@@ -38,6 +38,7 @@ if (!defined(constant_name: 'ABSPATH')) {
 }
 
 require_once __DIR__ . '/src/Autoloader/requirements.php';
+
 // Do not remove this! It ensures the plugin does not crash the entire site if ecom2
 // has not been checked out properly. This issue typically occurs during a manual
 // checkout when ecom2 is missing. We cannot move this into a class, as the autoload
@@ -61,7 +62,7 @@ define(
     )
 );
 
-// Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>>"
+// Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>"
 define(
 	constant_name: 'RESURSBANK_MODULE_DIR_PATH',
 	value: plugin_dir_path(file: __FILE__)

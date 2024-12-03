@@ -64,35 +64,35 @@ class PartPayment
 
         add_filter(
             'woocommerce_admin_settings_sanitize_option',
-            static function ($value, $option, $raw_value) {
-                if (
-                    $option['id'] === Period::getName() && (int)$raw_value > 0
-                ) {
-                    return $raw_value;
-                }
-
-                if (
-                    $raw_value !== '' &&
-                    (
-                        $option['id'] === PaymentMethod::getName() ||
-                        $option['id'] === StoreId::getName()
-                    )
-                ) {
-                    try {
-                        $stringValidation = new StringValidation();
-
-                        if ($stringValidation->isUuid(value: $raw_value)) {
-                            return $raw_value;
-                        }
-                    } catch (Throwable) {
-                    }
-                }
-
-                return $value;
-            },
+            [self::class, 'sanitizeResursPartPaymentValues'],
             10,
             3
         );
+    }
+
+    /**
+     * Sanitize values relating to part payment widget values.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     */
+    public static function sanitizeResursPartPaymentValues(mixed $value, mixed $option, mixed $raw_value): mixed
+    {
+        if (self::isValidPeriodOption(option: $option, raw_value: $raw_value)) {
+            return $raw_value;
+        }
+
+        if (
+            self::isValidPaymentOrStoreIdOption(
+                option: $option,
+                raw_value: $raw_value
+            )
+        ) {
+            return $raw_value;
+        }
+
+        return $value;
     }
 
     /**
@@ -199,6 +199,53 @@ class PartPayment
                     phraseId: 'limit-new-value-below-min'
                 )
             ));
+        }
+    }
+
+
+    /**
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     */
+    private static function isValidPeriodOption(mixed $option, mixed $raw_value): bool
+    {
+        return $option['id'] === Period::getName() && (int)$raw_value > 0;
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     */
+    private static function isValidPaymentOrStoreIdOption(mixed $option, mixed $raw_value): bool
+    {
+        if (
+            $raw_value !== '' &&
+            (
+                $option['id'] === PaymentMethod::getName() ||
+                $option['id'] === StoreId::getName()
+            )
+        ) {
+            return self::isValidUuid(raw_value: $raw_value);
+        }
+
+        return false;
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     */
+    private static function isValidUuid(mixed $raw_value): bool
+    {
+        try {
+            $stringValidation = new StringValidation();
+            return $stringValidation->isUuid(value: $raw_value);
+        } catch (Throwable) {
+            // Log error or handle exception if needed
+            return false;
         }
     }
 
