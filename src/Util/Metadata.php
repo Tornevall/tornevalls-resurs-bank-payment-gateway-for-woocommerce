@@ -13,6 +13,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -245,18 +246,27 @@ class Metadata
             $orderPaymentMethod = $order->get_payment_method();
 
             if ($orderPaymentMethod !== '' && $paymentMethods->count()) {
-                /** @var PaymentMethod $paymentMethod */
-                foreach ($paymentMethods as $paymentMethod) {
-                    if ($paymentMethod->id === $orderPaymentMethod) {
-                        $return = true;
-                        break;
-                    }
-                }
+                $return = self::isInMethodList(
+                    paymentMethods: $paymentMethods,
+                    orderPaymentMethod: $orderPaymentMethod
+                );
             }
         } catch (Throwable) {
         }
 
         return $return;
+    }
+
+    private static function isInMethodList(PaymentMethodCollection $paymentMethods, string $orderPaymentMethod): bool
+    {
+        /** @var PaymentMethod $paymentMethod */
+        foreach ($paymentMethods as $paymentMethod) {
+            if ($paymentMethod->id === $orderPaymentMethod) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
