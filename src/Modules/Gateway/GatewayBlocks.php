@@ -7,6 +7,7 @@
 
 // phpcs:disable PSR1.Methods.CamelCapsMethodName.NotCamelCaps
 
+
 declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
