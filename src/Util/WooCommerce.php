@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
+
 use function in_array;
 
 /**

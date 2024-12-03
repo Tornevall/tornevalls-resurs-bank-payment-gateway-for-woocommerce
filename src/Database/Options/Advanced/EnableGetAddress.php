@@ -31,10 +31,10 @@ class EnableGetAddress extends BoolOption implements OptionInterface
      */
     public static function getData(): bool
     {
-        return (
+        return
             self::isCountryCodeSe() &&
             parent::getData()
-        );
+        ;
     }
 
     /**

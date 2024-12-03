@@ -45,16 +45,16 @@ class GetAddress
         return $return ?? '{}';
     }
 
-	/**
-	 * Update selected customer type and submitted SSN (supplied when using the
-	 * fetch address widget at checkout). These values will later be submitted
-	 * to Resurs Bank to speed up the gateway procedure. Note that submitting
-	 * these values to Resurs Bank is not a requirement for everything to work.
-	 */
-	private static function updateSessionData(
-		GetAddressRequest $data
-	): void {
-		$ecomSession = new Session();
+    /**
+     * Update selected customer type and submitted SSN (supplied when using the
+     * fetch address widget at checkout). These values will later be submitted
+     * to Resurs Bank to speed up the gateway procedure. Note that submitting
+     * these values to Resurs Bank is not a requirement for everything to work.
+     */
+    private static function updateSessionData(
+        GetAddressRequest $data
+    ): void {
+        $ecomSession = new Session();
 
         if (!$ecomSession->isAvailable()) {
             // ECom sessions in this request are practically never available initially, so we need to set it up
@@ -67,11 +67,11 @@ class GetAddress
             value: $data->govId
         );
 
-		WcSession::set(
-			key: $ecomSession->getKey(
-				key: Repository::SESSION_KEY_CUSTOMER_TYPE
-			),
-			value: $data->customerType->value
-		);
-	}
+        WcSession::set(
+            key: $ecomSession->getKey(
+                key: Repository::SESSION_KEY_CUSTOMER_TYPE
+            ),
+            value: $data->customerType->value
+        );
+    }
 }
