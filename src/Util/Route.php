@@ -201,7 +201,7 @@ class Route
     public static function respond(
         string $body,
         int $code = 200,
-        $contentType = 'application/json'
+        string $contentType = 'application/json'
     ): void {
         status_header(code: $code);
         header(header: 'Content-Type: ' . $contentType);
@@ -225,7 +225,7 @@ class Route
     public static function respondWithExit(
         string $body,
         int $code = 200,
-        $contentType = 'application/json'
+        string $contentType = 'application/json'
     ): void {
         self::respond(body: $body, code: $code, contentType: $contentType);
         exit;

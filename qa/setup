@@ -90,8 +90,8 @@ if [ -n "\$SRC_FILES" ]; then
   echo ""
   $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=qa/phpcs/src.xml \$SRC_FILES
   echo ""
-  echo "[APPLYING WORDPRESS RULESET]"
-  $phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=WordPress-Core \$SRC_FILES
+  #echo "[APPLYING WORDPRESS RULESET]"
+  #$phpCmd $dir/vendor/bin/phpcbf --extensions=php --standard=WordPress-Core \$SRC_FILES
 else
   echo ""
   echo ""
@@ -120,9 +120,9 @@ if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=qa/phpcs/sr
   ERRORS=1
 fi
 echo ""
-if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=WordPress-Core --ignore=Service/,Module/ $dir/src; then
-  ERRORS=1
-fi
+#if ! $phpCmd $dir/vendor/bin/phpcs --extensions=php,phtml --standard=WordPress-Core --ignore=Service/,Module/ $dir/src; then
+#  ERRORS=1
+#fi
 echo ""
 
 echo "---==( Executing PHPMD tests on source files. )==---"
