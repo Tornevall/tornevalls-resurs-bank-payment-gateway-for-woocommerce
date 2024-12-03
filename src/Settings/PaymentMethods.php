@@ -25,6 +25,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PaymentMethods as PaymentMethodsWidget;
 use Resursbank\Woocommerce\Util\Translator;
+use Throwable;
 
 /**
  * Payment methods section.
@@ -44,19 +45,20 @@ class PaymentMethods
     /**
      * Outputs a template string of a table with listed payment methods.
      *
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
      * @throws ConfigException
      * @throws CurlException
-     * @throws FilesystemException
-     * @throws TranslationException
-     * @throws ValidationException
      * @throws EmptyValueException
+     * @throws FilesystemException
      * @throws IllegalTypeException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws Throwable
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function getOutput(string $storeId): string

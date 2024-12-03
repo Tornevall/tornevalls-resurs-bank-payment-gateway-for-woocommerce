@@ -1,5 +1,15 @@
-# 1.0.50
+# 1.0.56
 
+* [WOO-1246](https://resursbankplugins.atlassian.net/browse/WOO-1246) Resolve default store id by using ECom method instead
+* [WOO-1359](https://resursbankplugins.atlassian.net/browse/WOO-1359) Remove getSiteLanguage and \\Resursbank\\Woocommerce\\Database\\Options\\Api\\StoreCountryCode
+* [WOO-1366](https://resursbankplugins.atlassian.net/browse/WOO-1366) 1359/1246: Clean up Language/Country/Default Store transient handling.
+* [WOO-1364](https://resursbankplugins.atlassian.net/browse/WOO-1364) Error in ecom.log when fetchAddress in checkout
+* [WOO-1381](https://resursbankplugins.atlassian.net/browse/WOO-1381) Missing type check in Modules\\Gateway\\Gateway::modifyIcon
+
+# 1.0.50 - 1.0.55
+
+* Miscellaneous hotfixes.
+* [WOO-1355](https://resursbankplugins.atlassian.net/browse/WOO-1355) PPW renders duplicate payment \(and too many\) payment methods
 * [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.
 
 # 1.0.49

@@ -24,26 +24,26 @@ use Throwable;
  */
 class GetAddress
 {
-	/**
-	 * @throws ConfigException
-	 * @throws HttpException
-	 */
-	public static function exec(): string
-	{
-		$controller = new GetAddressController();
-		$requestData = $controller->getRequestData();
+    /**
+     * @throws ConfigException
+     * @throws HttpException
+     */
+    public static function exec(): string
+    {
+        $controller = new GetAddressController();
+        $requestData = $controller->getRequestData();
 
-		try {
-			self::updateSessionData(data: $requestData);
+        try {
+            self::updateSessionData(data: $requestData);
 
-			$return = $controller->exec(data: $requestData);
-		} catch (Throwable $e) {
-			// Do nothing.
-			Config::getLogger()->debug(message: $e);
-		}
+            $return = $controller->exec(data: $requestData);
+        } catch (Throwable $e) {
+            // Do nothing.
+            Config::getLogger()->debug(message: $e);
+        }
 
-		return $return ?? '{}';
-	}
+        return $return ?? '{}';
+    }
 
 	/**
 	 * Update selected customer type and submitted SSN (supplied when using the
@@ -56,10 +56,16 @@ class GetAddress
 	): void {
 		$ecomSession = new Session();
 
-		WcSession::set(
-			key: $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
-			value: $data->govId
-		);
+        if (!$ecomSession->isAvailable()) {
+            // ECom sessions in this request are practically never available initially, so we need to set it up
+            // if we want to store data in them.
+            session_start();
+        }
+
+        WcSession::set(
+            key: $ecomSession->getKey(key: Repository::SESSION_KEY_SSN_DATA),
+            value: $data->govId
+        );
 
 		WcSession::set(
 			key: $ecomSession->getKey(

@@ -20,11 +20,12 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
+use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
+use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -48,12 +49,47 @@ class PartPayment
 
     /**
      * Register event handlers.
+     *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
         add_action(
             'updated_option',
             'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
+            10,
+            3
+        );
+
+        add_filter(
+            'woocommerce_admin_settings_sanitize_option',
+            static function ($value, $option, $raw_value) {
+                if (
+                    $option['id'] === Period::getName() && (int)$raw_value > 0
+                ) {
+                    return $raw_value;
+                }
+
+                if (
+                    $raw_value !== '' &&
+                    (
+                        $option['id'] === PaymentMethod::getName() ||
+                        $option['id'] === StoreId::getName()
+                    )
+                ) {
+                    try {
+                        $stringValidation = new StringValidation();
+
+                        if ($stringValidation->isUuid(value: $raw_value)) {
+                            return $raw_value;
+                        }
+                    } catch (Throwable) {
+                    }
+                }
+
+                return $value;
+            },
             10,
             3
         );
@@ -87,12 +123,12 @@ class PartPayment
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws Throwable
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     * @noinspection PhpUnusedParameterInspection
      */
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
@@ -191,7 +227,7 @@ class PartPayment
             'title' => Translator::translate(phraseId: 'payment-method'),
             'type' => 'select',
             'default' => PaymentMethodOption::getDefault(),
-            'options' => self::getPaymentMethods(),
+            'options' => [],
             'desc' => Translator::translate(
                 phraseId: 'part-payment-payment-method'
             ),
@@ -206,9 +242,9 @@ class PartPayment
         return [
             'id' => Period::getName(),
             'title' => Translator::translate(phraseId: 'annuity-period'),
-            'type' => 'rbpartpaymentperiod',
+            'type' => 'select',
             'default' => Period::getDefault(),
-            'options' => self::getAnnuityPeriods(),
+            'options' => [],
             'desc' => Translator::translate(
                 phraseId: 'part-payment-annuity-period'
             ),
@@ -227,68 +263,5 @@ class PartPayment
             'default' => Limit::getDefault(),
             'desc' => Translator::translate(phraseId: 'part-payment-limit'),
         ];
-    }
-
-    /**
-     * Fetch available payment method options
-     */
-    private static function getPaymentMethods(): array
-    {
-        $storeId = StoreId::getData();
-        $paymentMethods = [];
-        $return = [
-            '' => Translator::translate(phraseId: 'please-select'),
-        ];
-
-        try {
-            $paymentMethods = $storeId !== '' ?
-                Repository::getPaymentMethods() : [];
-        } catch (Throwable) {
-            MessageBag::addError(message: 'Failed to get payment methods.');
-        }
-
-        foreach ($paymentMethods as $paymentMethod) {
-            if (!$paymentMethod->isPartPayment()) {
-                continue;
-            }
-
-            $return[$paymentMethod->id] = $paymentMethod->name;
-        }
-
-        return $return;
-    }
-
-    /**
-     * Fetch annuity period options for configured payment method
-     */
-    private static function getAnnuityPeriods(): array
-    {
-        $storeId = StoreId::getData();
-        $paymentMethodId = PaymentMethodOption::getData();
-
-        $annuityFactors = [];
-        $return = [
-            '' => Translator::translate(phraseId: 'please-select'),
-        ];
-
-        try {
-            if ($paymentMethodId !== '' && $storeId !== '') {
-                $annuityFactors = AnnuityRepository::getAnnuityFactors(
-                    paymentMethodId: $paymentMethodId
-                )->getData();
-            }
-        } catch (Throwable) {
-            MessageBag::addError(
-                message: Translator::translate(
-                    phraseId: 'get-annuity-periods-failed'
-                )
-            );
-        }
-
-        foreach ($annuityFactors as $annuityFactor) {
-            $return[$annuityFactor->durationMonths] = $annuityFactor->paymentPlanName;
-        }
-
-        return $return;
     }
 }

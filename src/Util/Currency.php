@@ -22,6 +22,7 @@ class Currency
      * Simple wrapper for get_woocommerce_currency_symbol to ensure we always
      * get a string (even it is empty).
      *
+     * @SuppressWarnings(PHPMD.ElseExpression)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getWooCommerceCurrencySymbol(): string
@@ -41,6 +42,7 @@ class Currency
      * Wrapper for get_woocommerce_price_format to ensure we always get a string
      *
      * @return string Defaults to "[symbol] [price]" if return value from WC is not a string
+     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public static function getWooCommerceCurrencyFormat(): string
     {

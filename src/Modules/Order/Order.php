@@ -125,6 +125,7 @@ class Order
     /**
      * Add action which will render payment information on order view.
      *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function addPaymentInfo(): void
@@ -132,6 +133,9 @@ class Order
         try {
             $order = wc_get_order();
         } catch (Throwable) {
+            // wc_get_order is a WooCommerce owned method that normally returns false on errors.
+            // They should not be necessary to log.
+            return;
         }
 
         if (
@@ -150,6 +154,8 @@ class Order
 
     /**
      * Render payment information box on order view.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function renderPaymentInfo(): void
     {
@@ -159,6 +165,20 @@ class Order
             if ($order === null || !Admin::isInShopOrderEdit()) {
                 return;
             }
+
+            add_action('admin_footer', static function (): void {
+                if (!Admin::isInShopOrderEdit()) {
+                    return;
+                }
+
+                ?>
+              <script type="text/javascript">
+                  jQuery(document).ready(function ($) {
+                      $('select#_payment_method option:not(:selected)').attr('disabled', true);
+                  });
+              </script>
+                <?php
+            });
 
             $paymentInformation = new PaymentInformation(
                 paymentId: Metadata::getPaymentId(order: $order)
@@ -244,6 +264,8 @@ class Order
      * Get currently viewed WP_Post as WP_Order instance, if any. For example,
      * while on the order view in admin we can obtain the currently viewed order
      * this way.
+     *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public static function getCurrentOrder(): ?WC_Order
     {
@@ -254,6 +276,8 @@ class Order
                 return $currentOrder;
             }
         } catch (Throwable) {
+            // wc_get_order is a WooCommerce owned method that normally returns false on errors.
+            // They should not be necessary to log.
         }
 
         return null;

@@ -19,8 +19,9 @@ use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
-use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
+use Resursbank\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 
 /**
  * Advanced settings section.
@@ -55,7 +56,8 @@ class Advanced
                 'get_address_enabled' => self::getGetAddressEnabled(),
                 'force_payment_method_sort_order' => self::getForcePaymentMethodSortOrder(),
                 'set_method_country_restriction' => self::setMethodCountryRestriction(),
-                'api_timeout' => self::getApiTimeout()
+                'api_timeout' => self::getApiTimeout(),
+                'xdebug_session_value' => self::getXDebugSessionValue()
             ]
         ];
 
@@ -92,9 +94,7 @@ class Advanced
     private static function getCountryRestrictionConfig(): array
     {
         // On new installs, countryCode tend to be empty until credentials are set.
-        $countryCode = trim(
-            string: StoreCountryCode::getCurrentStoreCountry() ?? ''
-        ) ?: 'Not configured';
+        $countryCode = WooCommerce::getStoreCountry();
         return [
             'id' => 'get_address',
             'type' => 'text',
@@ -252,6 +252,22 @@ class Advanced
             'type' => 'checkbox',
             'desc' => __('Yes'),
             'default' => SetMethodCountryRestriction::getDefault()
+        ];
+    }
+
+    /**
+     * Enabling xdebug where xdebug are usually hard to reach (like callbacks and other backend sessions).
+     */
+    private static function getXDebugSessionValue(): array
+    {
+        return [
+            'id' => XDebugSessionValue::getName(),
+            'title' => Translator::translate(phraseId: 'xdebug-session-value'),
+            'type' => 'text',
+            'default' => XDebugSessionValue::getDefault(),
+            'desc' => Translator::translate(
+                phraseId: 'enable-developer-mode-comment'
+            )
         ];
     }
 }

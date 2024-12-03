@@ -31,6 +31,7 @@ use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use function is_array;
 
@@ -252,7 +253,7 @@ class Gateway
      */
     public static function addPaymentMethods(mixed $gateways, bool $validateAvailable = true): mixed
     {
-        if (!is_array(value: $gateways)) {
+        if (!is_array(value: $gateways) || WooCommerce::isAdminOrderCreateTool()) {
             return $gateways;
         }
 
@@ -290,9 +291,9 @@ class Gateway
     /**
      * Apply styling to payment method icons.
      */
-    public static function modifyIcon(mixed $icon): string
+    public static function modifyIcon(mixed $icon): mixed
     {
-        if ($icon === '') {
+        if (gettype($icon) !== 'string' || $icon === '') {
             return $icon;
         }
         

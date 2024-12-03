@@ -100,11 +100,12 @@ class Metadata
         string $key,
         string $value
     ): bool {
-        if ($order->meta_exists($key)) {
-            $order->update_meta_data($key, $value);
-        } else {
-            $order->add_meta_data($key, $value, true);
-        }
+        $order->meta_exists($key) ?
+            $order->update_meta_data($key, $value) : $order->add_meta_data(
+                $key,
+                $value,
+                true
+            );
 
         return $order->save() > 0;
     }
@@ -127,6 +128,7 @@ class Metadata
      * Check if order was paid through Resurs Bank.
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
@@ -144,7 +146,8 @@ class Metadata
 
         try {
             // Validate payment method on uuid first, then verify that the payment method
-            // is Resurs based. If it is not a UUID we can save performance by just not checking it further.
+            // is Resurs based. If it is not a UUID we can save performance by just not checking
+            // it further.
             $stringValidation = (new StringValidation());
             $stringValidation->isUuid(value: $order->get_payment_method());
             self::isValidResursMethod(order: $order);
@@ -224,6 +227,7 @@ class Metadata
     /**
      * Validate the used payment method for an order, making sure that we "own" the payment before proceeding.
      *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
      */
     private static function isValidResursMethod(WC_Order $order): bool

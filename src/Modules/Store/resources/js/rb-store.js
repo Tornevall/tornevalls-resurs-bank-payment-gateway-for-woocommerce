@@ -1,25 +1,36 @@
-jQuery( document ).ready( function () {
-	const resursFetchStoresWidget = new Resursbank_FetchStores( {
-		getInputElements: function () {
-			return [
-				this.getSelectEnvironmentElement(),
-				this.getClientIdElement(),
-				this.getClientSecretElement(),
-			];
-		},
-		getUrl: function () {
-			const returnUrl =
-				typeof rbStoreAdminLocalize.url !== 'undefined'
-					? rbStoreAdminLocalize.url
-					: null;
+jQuery(document).ready(function () {
+    const resursFetchStoresWidget = new Resursbank_FetchStores(
+        {
+            getUrl: function () {
+                const returnUrl = typeof rbStoreAdminLocalize.url !== 'undefined' ?
+                    rbStoreAdminLocalize.url : null;
 
-			if ( returnUrl === null ) {
-				alert( 'Can not find fetch-url for stores.' );
-				return;
-			}
+                if (returnUrl === null) {
+                    alert(rbStoreAdminLocalize.no_fetch_url);
+                    return;
+                }
 
-			return returnUrl;
-		},
-	} );
-	resursFetchStoresWidget.setupEventListeners();
-} );
+                return returnUrl;
+            },
+            handleFetchData: function (data) {
+                Resursbank_FetchStores.prototype.handleFetchData.call(this, data);
+            }
+        }
+    );
+
+    const storeSelector = document.getElementById('resursbank_store_id');
+
+    if (storeSelector !== null) {
+        var storeFetchButton = document.createElement('button');
+        storeFetchButton.textContent = rbStoreAdminLocalize.fetch_stores_translation;
+        storeFetchButton.type = 'button';
+        storeFetchButton.classList.add('button', 'button-primary');
+        storeFetchButton.style.marginLeft = '10px';
+
+        storeFetchButton.addEventListener('click', function () {
+            resursFetchStoresWidget.fetchStores();
+        });
+
+        storeSelector.parentNode.insertBefore(storeFetchButton, storeSelector.nextSibling);
+    }
+});
