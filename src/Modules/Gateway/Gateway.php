@@ -290,9 +290,9 @@ class Gateway
     /**
      * Apply styling to payment method icons.
      */
-    public static function modifyIcon(mixed $icon): string
+    public static function modifyIcon(mixed $icon): mixed
     {
-        if ($icon === '') {
+        if (gettype($icon) !== 'string' || $icon === '') {
             return $icon;
         }
 

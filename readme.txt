@@ -8,7 +8,7 @@ WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: 3.1.1
 Requires Plugins: woocommerce
-Stable tag: 1.0.53
+Stable tag: 1.0.56
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -62,7 +62,15 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
-# 1.0.50 - 1.0.52
+# 1.0.56
+
+* [WOO-1246](https://resursbankplugins.atlassian.net/browse/WOO-1246) Resolve default store id by using ECom method instead
+* [WOO-1359](https://resursbankplugins.atlassian.net/browse/WOO-1359) Remove getSiteLanguage and \\Resursbank\\Woocommerce\\Database\\Options\\Api\\StoreCountryCode
+* [WOO-1366](https://resursbankplugins.atlassian.net/browse/WOO-1366) 1359/1246: Clean up Language/Country/Default Store transient handling.
+* [WOO-1364](https://resursbankplugins.atlassian.net/browse/WOO-1364) Error in ecom.log when fetchAddress in checkout
+* [WOO-1381](https://resursbankplugins.atlassian.net/browse/WOO-1381) Missing type check in Modules\\Gateway\\Gateway::modifyIcon
+
+# 1.0.50 - 1.0.55
 
 * Miscellaneous hotfixes.
 * [WOO-1355](https://resursbankplugins.atlassian.net/browse/WOO-1355) PPW renders duplicate payment \(and too many\) payment methods
