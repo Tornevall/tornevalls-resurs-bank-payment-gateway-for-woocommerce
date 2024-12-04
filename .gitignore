@@ -5,3 +5,4 @@ qa/bin
 qa/psalm/cache
 qa/php-cs-fixer/.php-cs-fixer.cache
 lib/cbf
+Makefile
