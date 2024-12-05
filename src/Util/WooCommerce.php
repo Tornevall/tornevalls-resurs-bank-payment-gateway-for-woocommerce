@@ -30,8 +30,8 @@ class WooCommerce
         return in_array(
             needle: 'woocommerce/woocommerce.php',
             haystack: apply_filters(
-                hook_name: 'active_plugins',
-                value: get_option(option: 'active_plugins')
+                'active_plugins',
+                get_option(option: 'active_plugins')
             ),
             strict: true
         );
