@@ -30,8 +30,8 @@ class WooCommerce
         return in_array(
             needle: 'woocommerce/woocommerce.php',
             haystack: apply_filters(
-                hook_name: 'active_plugins',
-                value: get_option('active_plugins')
+                'active_plugins',
+                get_option(option: 'active_plugins')
             ),
             strict: true
         );
@@ -86,6 +86,24 @@ class WooCommerce
         }
 
         return $return;
+    }
+
+    /**
+     * Get version from assets file.
+     */
+    public static function getAssetVersion(): string
+    {
+        if (
+            !file_exists(
+                RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/gateway.asset.php'
+            )
+        ) {
+            return '';
+        }
+
+        $assets = include RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/gateway.asset.php';
+
+        return $assets['version'] ?? '';
     }
 
     /**
