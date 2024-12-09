@@ -121,12 +121,13 @@ const settings = getSetting( 'resursbank_data', {} );
 					( data.billingAddress.company !== '' &&
 						! method.enabled_for_legal_customer ) ||
 					( data.billingAddress.company === '' &&
-						! method.enabled_for_natural_customer )
+						! method.enabled_for_natural_customer
+					)
 				) {
 					return false;
 				}
 
-				// List all properties and methods of the dat)a object
+				// List all properties and methods of the data object
 				const cart_total =
 					parseInt( data.cartTotals.total_price, 10 ) /
 					Math.pow( 10, data.cartTotals.currency_minor_unit );

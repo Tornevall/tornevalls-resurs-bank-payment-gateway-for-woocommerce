@@ -23,6 +23,7 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -94,7 +95,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
             ['react', 'wc-blocks-data-store', 'wc-blocks-registry', 'wc-settings', 'wp-data'],
-            '101f57a1921624052624',
+            WooCommerce::getAssetVersion(),
             // Load script in footer.
             true
         );

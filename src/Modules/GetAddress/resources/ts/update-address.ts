@@ -20,10 +20,25 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		return;
 	}
 
-	// Initialize blocks.
-	if ( document.querySelector( '.wc-block-components-form' ) ) {
+	// Check if blocks exist and initialize, otherwise observe until it appears.
+	// This is normally limited to the checkout parts only.
+	if (document.querySelector('.wc-block-components-form')) {
 		new BlocksAddressUpdater().initialize();
-		return;
+	} else {
+		// When blocks are not present, we need to observe the DOM for changes.
+		const observer = new MutationObserver((mutations, obs) => {
+			// Check if the required element has been added to the DOM.
+			if (document.querySelector('.wc-block-components-form')) {
+				new BlocksAddressUpdater().initialize();
+				obs.disconnect(); // Stop observing once initialized.
+			}
+		});
+
+		// Observe changes in the checkout page for dynamically added elements.
+		observer.observe(document.body, {
+			childList: true,
+			subtree: true,
+		});
 	}
 
 	// Initialize legacy.
