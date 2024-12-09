@@ -52,7 +52,6 @@ if (PHP_VERSION_ID < 80100) {
     return;
 }
 
-
 // Name of plugin directory; normally the slug name.
 define(
     constant_name: 'RESURSBANK_MODULE_DIR_NAME',
@@ -100,13 +99,19 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     add_action(
         'before_woocommerce_init',
         static function (): void {
-            if (!class_exists(class: FeaturesUtil::class)) {
+            if (!class_exists(class: 'Automattic\WooCommerce\Utilities\FeaturesUtil')) {
                 return;
             }
 
             /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             FeaturesUtil::declare_compatibility(
                 'custom_order_tables',
+                __FILE__,
+                true
+            );
+
+            FeaturesUtil::declare_compatibility(
+                'cart_checkout_blocks',
                 __FILE__,
                 true
             );
