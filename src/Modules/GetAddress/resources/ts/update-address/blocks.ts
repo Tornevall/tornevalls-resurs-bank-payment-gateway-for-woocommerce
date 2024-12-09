@@ -72,7 +72,6 @@ export class BlocksAddressUpdater {
     }
 
     setBillingAndShipping(cartData: any, value: any) {
-        // @todo This should not be happening, but it does. Investigate why.
         if (value === 'Not A Company') {
             // Unset the value when this is happening.
             value = '';
@@ -106,30 +105,13 @@ export class BlocksAddressUpdater {
      */
     getCartData() {
         const data = select(CART_STORE_KEY).getCartData();
-
-        // Validate presence of shippingAddress and all required fields.
-        if (!data.shippingAddress) {
-            throw new Error('Missing shipping address data in cart.');
-        }
-
-        // Loop through all required fields and ensure they are present.
         const requiredFields = [
-            'first_name',
-            'last_name',
-            'address_1',
-            'address_2',
-            'postcode',
-            'city',
-            'country',
-            'company',
+            'first_name', 'last_name', 'address_1', 'address_2',
+            'postcode', 'city', 'country', 'company'
         ];
 
-        for (const field of requiredFields) {
-            if (data.shippingAddress[field] === undefined) {
-                throw new Error(
-                    `Missing required field "${field}" in shipping address data.`
-                );
-            }
+        if (!data.shippingAddress || requiredFields.some(field => data.shippingAddress[field] === undefined)) {
+            throw new Error('Missing required shipping address data in cart.');
         }
 
         return data;
