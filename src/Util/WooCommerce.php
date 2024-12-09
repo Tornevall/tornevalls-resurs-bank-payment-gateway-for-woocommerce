@@ -91,17 +91,17 @@ class WooCommerce
     /**
      * Get version from assets file.
      */
-    public static function getAssetVersion(): string
+    public static function getAssetVersion(string $assetFile = 'gateway'): string
     {
         if (
             !file_exists(
-                RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/gateway.asset.php'
+                RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/' . $assetFile . '.asset.php'
             )
         ) {
             return '';
         }
 
-        $assets = include RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/gateway.asset.php';
+        $assets = include RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/' . $assetFile . '.asset.php';
 
         return $assets['version'] ?? '';
     }
