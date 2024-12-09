@@ -14,6 +14,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -27,7 +28,7 @@ class FrontendAssets
             'rb-get-address',
             Url::getAssetUrl(file: 'update-address.js'),
             ['wp-data', 'jquery', 'wc-blocks-data-store'],
-            '504af982799bff4fb6eb',
+            WooCommerce::getAssetVersion(assetFile: 'update-address'),
             // Load script in footer.
             true
         );
