@@ -52,21 +52,14 @@ export class BlocksAddressUpdater {
                     }
 
                     if (key === 'company') {
-                        if (
-                            typeof data[value] === 'string' &&
-                            this.widget.getCustomerType() === 'LEGAL'
-                        ) {
-                            this.setBillingAndShipping(cartData, data[value]);
-                        } else {
-                            this.setBillingAndShipping(cartData, '');
-                        }
+                        this.setBillingAndShipping(cartData,
+                            typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : '');
                         continue;
                     }
 
-                    cartData.shippingAddress[key] =
-                        typeof data[value] === 'string' ? data[value] : '';
-                    cartData.billingAddress[key] =
-                        typeof data[value] === 'string' ? data[value] : '';
+                    const addressValue = typeof data[value] === 'string' ? data[value] : '';
+                    cartData.shippingAddress[key] = addressValue;
+                    cartData.billingAddress[key] = addressValue;
                 }
 
                 // Dispatch the updated cart data back to the store
