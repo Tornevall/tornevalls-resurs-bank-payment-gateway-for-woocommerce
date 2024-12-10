@@ -14,6 +14,8 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
@@ -46,9 +48,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            static fn (PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
-                (new self())
-            )
+            static function (PaymentMethodRegistry $payment_method_registry): void {
+                $payment_method_registry->register(new self());
+            }
         );
 
         wp_register_style(
@@ -79,10 +81,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      */
     public function is_active(): bool
     {
-        if (Admin::isAdmin()) {
-            return true;
-        }
-
         return Enabled::isEnabled();
     }
 
@@ -90,6 +88,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      * Register JavaScript code for our gateway.
      *
      * @return array<string>
+     * @throws FilesystemException
+     * @throws EmptyValueException
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection

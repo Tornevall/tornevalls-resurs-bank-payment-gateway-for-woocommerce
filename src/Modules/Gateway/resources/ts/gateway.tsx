@@ -11,7 +11,6 @@ import { getSetting } from '@woocommerce/settings';
 // @ts-ignore
 import { ExternalLink } from '@wordpress/components';
 
-
 const settings = getSetting( 'resursbank_data', {} );
 
 ( () => {
@@ -21,6 +20,7 @@ const settings = getSetting( 'resursbank_data', {} );
 	) {
 		return;
 	}
+
 	if (typeof getSetting !== 'function') {
 		console.error('WooCommerce: getSetting is not available.');
 		return;
