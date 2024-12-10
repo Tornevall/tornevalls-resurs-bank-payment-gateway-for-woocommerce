@@ -21,7 +21,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	}
 
 	// Check if blocks exist and initialize, otherwise observe until it appears.
-	// This is normally limited to the checkout parts only.
+	// Limited to the checkout section. Occurs randomly depending on load speed.
 	if (document.querySelector('.wc-block-components-form')) {
 		new BlocksAddressUpdater().initialize();
 	} else {

@@ -7,6 +7,7 @@ import { CART_STORE_KEY } from '@woocommerce/block-data';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 // @ts-ignore
 import { getSetting } from '@woocommerce/settings';
+// ExternalLink may still be a problem for us.
 // @ts-ignore
 import { ExternalLink } from '@wordpress/components';
 

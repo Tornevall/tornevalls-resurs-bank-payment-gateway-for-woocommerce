@@ -57,6 +57,7 @@ export class BlocksAddressUpdater {
                         continue;
                     }
 
+                    // Update both shipping and billing.
                     const addressValue = typeof data[value] === 'string' ? data[value] : '';
                     cartData.shippingAddress[key] = addressValue;
                     cartData.billingAddress[key] = addressValue;
@@ -72,10 +73,12 @@ export class BlocksAddressUpdater {
     }
 
     setBillingAndShipping(cartData: any, value: any) {
+        // Unset the value when this is happening.
         if (value === 'Not A Company') {
-            // Unset the value when this is happening.
             value = '';
         }
+
+        // Update both shipping and billing.
         cartData.shippingAddress.company = value;
         cartData.billingAddress.company = value;
     }
