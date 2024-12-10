@@ -43,7 +43,6 @@ use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Admin as AdminUtility;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -95,7 +94,13 @@ class Resursbank extends WC_Payment_Gateway
         // Mirror title to method_title.
         $this->method_title = $this->title;
 
-        AdminUtility::redirectAtWrongSection(method: $method->id ?? $this->id);
+        // When the blocks editor redirects admins to woocommerce internal sections
+        // for handling payment methods, we need to redirect them back to the correct
+        // location as our methods are not editable from WooCommerce.
+        if ($this->id !== RESURSBANK_MODULE_PREFIX) {
+            // Redirect to the correct section if the wrong section is requested when section is set to a method id.
+            AdminUtility::redirectAtWrongSection(method: $method->id);
+        }
     }
 
     /**
