@@ -7,6 +7,9 @@ import { CART_STORE_KEY } from '@woocommerce/block-data';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 // @ts-ignore
 import { getSetting } from '@woocommerce/settings';
+// @ts-ignore
+import { ExternalLink } from '@wordpress/components';
+
 
 const settings = getSetting( 'resursbank_data', {} );
 
@@ -15,6 +18,20 @@ const settings = getSetting( 'resursbank_data', {} );
 		! Array.isArray( settings.payment_methods ) ||
 		settings.payment_methods.length === 0
 	) {
+		return;
+	}
+	if (typeof getSetting !== 'function') {
+		console.error('WooCommerce: getSetting is not available.');
+		return;
+	}
+
+	if (typeof registerPaymentMethod !== 'function') {
+		console.error('WooCommerce Blocks: registerPaymentMethod is not available.');
+		return;
+	}
+
+	if (typeof select !== 'function') {
+		console.error('WooCommerce: select is not available.');
 		return;
 	}
 
@@ -78,6 +95,11 @@ const settings = getSetting( 'resursbank_data', {} );
 						} }
 					/>
 					<style>{ method.read_more_css }</style>
+					<ExternalLink
+						href={`${window.location.origin}/wp-admin/admin.php?page=wc-settings&tab=checkout&problems=true&section=${method.name}`}
+					>
+						Configure {method.title}
+					</ExternalLink>
 				</div>
 			);
 		};
@@ -107,6 +129,10 @@ const settings = getSetting( 'resursbank_data', {} );
 			content: <Content />,
 			edit: <Content />,
 			canMakePayment: ( data: any ) => {
+				if (settings.is_admin) {
+					return true;
+				}
+
 				// Filter out all payment methods if customer country does not
 				// match country associated with API account.
 				if (
@@ -144,9 +170,7 @@ const settings = getSetting( 'resursbank_data', {} );
 				return true;
 			},
 			ariaLabel: label,
-			supports: {
-                blockBasedCheckout: true
-            },
+			editUrl: `${window.location.origin}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=${method.name}`
 		} );
 	} );
 } )();

@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
+use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
 use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
@@ -42,6 +43,7 @@ class Admin
             return;
         }
 
+        GatewayBlocks::init();
         Gateway::initAdmin();
         Order::init();
         OrderManagement::init();

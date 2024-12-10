@@ -20,6 +20,7 @@ use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
 use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Url;
@@ -36,16 +37,16 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     // phpcs:ignore
     protected $name = 'resursbank';
 
-        /**
+    /**
      * Register custom CSS and
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function initFrontend(): void
+    public static function init(): void
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            static fn (PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
+            static fn(PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
                 (new self())
             )
         );
@@ -78,6 +79,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      */
     public function is_active(): bool
     {
+        if (Admin::isAdmin()) {
+            return true;
+        }
         return Enabled::isEnabled();
     }
 
@@ -116,6 +120,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         $result = [
             'allowed_country' => $this->getAllowedCountry(),
             'payment_methods' => [],
+            'is_admin' => Admin::isAdmin(),
         ];
 
         try {
@@ -125,7 +130,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     paymentMethod: $paymentMethod,
                     amount: (float)WC()?->cart?->total
                 );
-                $logo = new Widget($paymentMethod);
+                $logo = new Widget(paymentMethod: $paymentMethod);
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
@@ -148,6 +153,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         return $result;
     }
 
+    /**
+     * Check if the payment method is available for the current country.
+     * @return Country
+     */
     private function getAllowedCountry(): Country
     {
         try {
