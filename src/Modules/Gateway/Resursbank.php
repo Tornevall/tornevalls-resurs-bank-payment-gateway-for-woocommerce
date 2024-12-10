@@ -43,6 +43,7 @@ use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Admin as AdminUtility;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -93,6 +94,8 @@ class Resursbank extends WC_Payment_Gateway
 
         // Mirror title to method_title.
         $this->method_title = $this->title;
+
+        AdminUtility::redirectAtWrongSection(method: $method->id ?? $this->id);
     }
 
     /**
