@@ -28,9 +28,6 @@ class Admin
         }
     }
 
-    /**
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
     public static function getAdminErrorNote(string $message, string $additional = ''): void
     {
         if (!self::isAdmin()) {
@@ -83,6 +80,34 @@ EX;
         }
 
         return $return;
+    }
+
+    /**
+     * Redirect to the correct section if the wrong section is requested.
+     *
+     * Wrong section for Resurs example: page=wc-settings&tab=checkout&section=<method-uuid>
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function redirectAtWrongSection(string $method): void
+    {
+        add_filter(
+            'woocommerce_get_sections_checkout',
+            static function (array $sections = []) use ($method): array {
+                if (
+                    isset($_REQUEST['section']) &&
+                    $_REQUEST['section'] === $method
+                ) {
+                    wp_safe_redirect(
+                        'admin.php?page=wc-settings&tab=resursbank&section=payment_methods'
+                    );
+                    die;
+                }
+
+                return $sections;
+            }
+        );
     }
 
     /**
