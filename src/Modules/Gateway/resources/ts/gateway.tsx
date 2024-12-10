@@ -144,6 +144,9 @@ const settings = getSetting( 'resursbank_data', {} );
 				return true;
 			},
 			ariaLabel: label,
+			supports: {
+                blockBasedCheckout: true
+            },
 		} );
 	} );
 } )();

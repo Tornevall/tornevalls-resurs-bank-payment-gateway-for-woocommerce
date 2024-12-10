@@ -132,7 +132,6 @@ export class BlocksAddressUpdater {
         cartData.shippingAddress.city = '';
         cartData.shippingAddress.country = '';
         cartData.shippingAddress.company = '';
-        //cartData.billingAddress.company = '';
 
         // Dispatch the updated cart data back to the store
         dispatch(CART_STORE_KEY).setCartData(cartData);

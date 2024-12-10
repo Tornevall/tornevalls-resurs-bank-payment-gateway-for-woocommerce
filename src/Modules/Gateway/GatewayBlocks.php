@@ -36,7 +36,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     // phpcs:ignore
     protected $name = 'resursbank';
 
-    /**
+        /**
      * Register custom CSS and
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
