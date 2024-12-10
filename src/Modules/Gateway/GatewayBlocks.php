@@ -46,7 +46,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            static fn(PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
+            static fn (PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
                 (new self())
             )
         );
@@ -82,6 +82,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         if (Admin::isAdmin()) {
             return true;
         }
+
         return Enabled::isEnabled();
     }
 
@@ -155,7 +156,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
 
     /**
      * Check if the payment method is available for the current country.
-     * @return Country
      */
     private function getAllowedCountry(): Country
     {
