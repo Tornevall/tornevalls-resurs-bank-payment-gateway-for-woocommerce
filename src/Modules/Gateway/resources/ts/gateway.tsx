@@ -130,10 +130,9 @@ const settings = getSetting( 'resursbank_data', {} );
 			content: <Content />,
 			edit: <Content />,
 			canMakePayment: ( data: any ) => {
-				if (settings.is_admin) {
-					return true;
+				if (method.name === 'resursbank') {
+					return false;
 				}
-
 				// Filter out all payment methods if customer country does not
 				// match country associated with API account.
 				if (
@@ -171,6 +170,9 @@ const settings = getSetting( 'resursbank_data', {} );
 				return true;
 			},
 			ariaLabel: label,
+			supports: {
+				blockBasedCheckout: method.name !== 'resursbank',
+			},
 			editUrl: `${window.location.origin}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=${method.name}`
 		} );
 	} );

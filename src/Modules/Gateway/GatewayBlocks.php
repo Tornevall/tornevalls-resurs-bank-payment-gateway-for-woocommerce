@@ -121,7 +121,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         $result = [
             'allowed_country' => $this->getAllowedCountry(),
             'payment_methods' => [],
-            'is_admin' => Admin::isAdmin(),
         ];
 
         try {
@@ -149,6 +148,20 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             }
         } catch (Throwable $error) {
             Log::error(error: $error);
+        }
+
+        if (count($result) > 0) {
+            // Register gateway as a placeholder, but do not allow it to be used.
+            // This removed the incompatibility flag in the editor.
+            $result['payment_methods'][] = [
+                'name' => RESURSBANK_MODULE_PREFIX,
+                'title' => 'Resurs Gateway Placeholder',
+                'description' => 'Resurs Gateway Placeholder',
+                'min_purchase_limit' => 0,
+                'max_purchase_limit' => 0,
+                'enabled_for_legal_customer' => false,
+                'enabled_for_natural_customer' => false,
+            ];
         }
 
         return $result;
