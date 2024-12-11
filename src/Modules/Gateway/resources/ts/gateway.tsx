@@ -7,9 +7,6 @@ import { CART_STORE_KEY } from '@woocommerce/block-data';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 // @ts-ignore
 import { getSetting } from '@woocommerce/settings';
-// ExternalLink may still be a problem for us.
-// @ts-ignore
-import { ExternalLink } from '@wordpress/components';
 
 const settings = getSetting( 'resursbank_data', {} );
 
@@ -96,11 +93,6 @@ const settings = getSetting( 'resursbank_data', {} );
 						} }
 					/>
 					<style>{ method.read_more_css }</style>
-					<ExternalLink
-						href={`${window.location.origin}/wp-admin/admin.php?page=wc-settings&tab=checkout&problems=true&section=${method.name}`}
-					>
-						Configure {method.title}
-					</ExternalLink>
 				</div>
 			);
 		};
