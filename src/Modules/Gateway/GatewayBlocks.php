@@ -47,9 +47,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            static function (PaymentMethodRegistry $payment_method_registry): void {
-                $payment_method_registry->register(new self());
-            }
+            static fn (PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
+                (new self())
+            )
         );
 
         wp_register_style(
