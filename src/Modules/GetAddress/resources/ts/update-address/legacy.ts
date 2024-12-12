@@ -15,7 +15,10 @@ export class LegacyAddressUpdater {
 
 	/**
 	 * Update the customer type in the checkout process.
+	 *
+	 * This is required by the checkout if payment methods should reload properly.
 	 * Sends an AJAX request to update the customer type and triggers the checkout update event.
+	 *
 	 * @param customerType The type of customer (LEGAL or NATURAL).
 	 */
 	private updateCustomerType(customerType: string) { // @ts-ignore
