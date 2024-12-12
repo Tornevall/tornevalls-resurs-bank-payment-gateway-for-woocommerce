@@ -240,12 +240,12 @@ class Connection
             $return = new Jwt(
                 clientId: $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
                 clientSecret: $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
+                grantType: GrantType::CREDENTIALS,
                 scope: EnvironmentEnum::from(
                     value: $envValue
                 ) === EnvironmentEnum::PROD ?
                     Scope::MERCHANT_API :
-                    Scope::MOCK_MERCHANT_API,
-                grantType: GrantType::CREDENTIALS
+                    Scope::MOCK_MERCHANT_API
             );
         }
 

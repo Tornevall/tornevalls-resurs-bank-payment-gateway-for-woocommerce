@@ -14,6 +14,8 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
@@ -23,6 +25,7 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -40,7 +43,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function initFrontend(): void
+    public static function init(): void
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
@@ -84,6 +87,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      * Register JavaScript code for our gateway.
      *
      * @return array<string>
+     * @throws FilesystemException
+     * @throws EmptyValueException
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
@@ -94,7 +99,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
             ['react', 'wc-blocks-data-store', 'wc-blocks-registry', 'wc-settings', 'wp-data'],
-            '101f57a1921624052624',
+            WooCommerce::getAssetVersion(),
             // Load script in footer.
             true
         );
@@ -124,7 +129,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     paymentMethod: $paymentMethod,
                     amount: (float)WC()?->cart?->total
                 );
-                $logo = new Widget($paymentMethod);
+                $logo = new Widget(paymentMethod: $paymentMethod);
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
@@ -147,6 +152,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         return $result;
     }
 
+    /**
+     * Check if the payment method is available for the current country.
+     */
     private function getAllowedCountry(): Country
     {
         try {

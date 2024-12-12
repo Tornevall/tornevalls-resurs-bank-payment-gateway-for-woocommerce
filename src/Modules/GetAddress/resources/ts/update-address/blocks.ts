@@ -1,127 +1,217 @@
-import { select, dispatch } from '@wordpress/data';
+import {dispatch, select} from '@wordpress/data';
 // @ts-ignore
-import { CART_STORE_KEY } from '@woocommerce/block-data';
+import {CART_STORE_KEY} from '@woocommerce/block-data';
+// @ts-ignore
+import {getSetting} from '@woocommerce/settings';
 
 // Ignore missing Resursbank_GetAddress renders through Ecom Widget.
 declare const Resursbank_GetAddress: any;
 
 export class BlocksAddressUpdater {
-	/**
-	 * Widget instance.
-	 */
-	private widget: any = null;
+    /**
+     * Widget instance.
+     */
+    private widget: any = null;
 
-	/**
-	 * Generate widget instance.
-	 */
-	constructor() {
-		// Initialize any properties if needed
-		this.widget = new Resursbank_GetAddress( {
-			updateAddress: ( data: any ) => {
-				// Reset store data (and consequently the form).
-				this.resetCartData();
+    /**
+     * Store all payment methods persistently.
+     * @private
+     */
+    private allPaymentMethods: any[] = [];
 
-				// Get current cart data.
-				let cartData = this.getCartData();
+    /**
+     * Generate widget instance.
+     */
+    constructor() {
+        // Initialize any properties if needed
+        this.widget = new Resursbank_GetAddress({
+            updateAddress: (data: any) => {
 
-				const map = {
-					first_name: 'firstName',
-					last_name: 'lastName',
-					address_1: 'addressRow1',
-					address_2: 'addressRow2',
-					postcode: 'postalCode',
-					city: 'postalArea',
-					country: 'countryCode',
-					company: 'fullName',
-				};
+                // Reset store data (and consequently the form).
+                this.resetCartData();
 
-				for ( const [ key, value ] of Object.entries( map ) ) {
-					if ( ! data.hasOwnProperty( value ) ) {
-						throw new Error(
-							`Missing required field "${ value }" in data object.`
-						);
-					}
+                // Get current cart data.
+                let cartData = this.getCartData();
 
-					if ( key === 'company' ) {
-						if (
-							typeof data[ value ] === 'string' &&
-							this.widget.getCustomerType() === 'LEGAL'
-						) {
-							cartData.shippingAddress.company = data[ value ];
-							continue;
-						}
-						continue;
-					}
+                const map = {
+                    first_name: 'firstName',
+                    last_name: 'lastName',
+                    address_1: 'addressRow1',
+                    address_2: 'addressRow2',
+                    postcode: 'postalCode',
+                    city: 'postalArea',
+                    country: 'countryCode',
+                    company: 'fullName',
+                };
 
-					cartData.shippingAddress[ key ] =
-						typeof data[ value ] === 'string' ? data[ value ] : '';
-				}
+                for (const [key, value] of Object.entries(map)) {
+                    if (!data.hasOwnProperty(value)) {
+                        throw new Error(
+                            `Missing required field "${value}" in data object.`
+                        );
+                    }
 
-				// Dispatch the updated cart data back to the store
-				dispatch( CART_STORE_KEY ).setCartData( cartData );
-			},
-		} );
-	}
+                    if (key === 'company') {
+                        this.setBillingAndShipping(cartData,
+                            typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : '');
+                        continue;
+                    }
 
-	/**
-	 * Configure the event listeners for the widget.
-	 */
-	initialize() {
-		this.widget.setupEventListeners();
-	}
+                    // Update both shipping and billing.
+                    const addressValue = typeof data[value] === 'string' ? data[value] : '';
+                    cartData.shippingAddress[key] = addressValue;
+                    cartData.billingAddress[key] = addressValue;
+                }
 
-	/**
-	 * Resolve cart data from store and confirm the presence of shipping address
-	 * data since this is what we will be manipulating.
-	 */
-	getCartData() {
-		const data = select( CART_STORE_KEY ).getCartData();
+                // Dispatch the updated cart data back to the store
+                dispatch(CART_STORE_KEY).setCartData(cartData);
 
-		// Validate presence of shippingAddress and all required fields.
-		if ( ! data.shippingAddress ) {
-			throw new Error( 'Missing shipping address data in cart.' );
-		}
+                // Trigger update for payment methods by re-triggering cart actions
+                this.refreshPaymentMethods();
+            },
+        });
+    }
 
-		// Loop through all required fields and ensure they are present.
-		const requiredFields = [
-			'first_name',
-			'last_name',
-			'address_1',
-			'address_2',
-			'postcode',
-			'city',
-			'country',
-			'company',
-		];
+    setBillingAndShipping(cartData: any, value: any) {
+        // Unset the value when this is happening.
+        if (value === 'Not A Company') {
+            value = '';
+        }
 
-		for ( const field of requiredFields ) {
-			if ( data.shippingAddress[ field ] === undefined ) {
-				throw new Error(
-					`Missing required field "${ field }" in shipping address data.`
-				);
-			}
-		}
+        // Update both shipping and billing.
+        cartData.shippingAddress.company = value;
+        cartData.billingAddress.company = value;
+    }
 
-		return data;
-	}
+    /**
+     * Configure the event listeners for the widget.
+     */
+    initialize() {
+        this.widget.setupEventListeners();
+        this.loadAllPaymentMethods();
+    }
 
-	/**
-	 * Reset cart data.
-	 */
-	resetCartData() {
-		let cartData = this.getCartData();
+    /**
+     * Load all payment methods from the store before iterating through it when getAddress are switching
+     * customer types.
+     */
+    loadAllPaymentMethods() {
+        const cartData = select(CART_STORE_KEY).getCartData();
+        if (cartData.paymentMethods && cartData.paymentMethods.length) {
+            this.allPaymentMethods = [...cartData.paymentMethods]; // Store a copy of all methods.
+        }
+    }
 
-		// Clear address.
-		cartData.shippingAddress.first_name = '';
-		cartData.shippingAddress.last_name = '';
-		cartData.shippingAddress.address_1 = '';
-		cartData.shippingAddress.address_2 = '';
-		cartData.shippingAddress.postcode = '';
-		cartData.shippingAddress.city = '';
-		cartData.shippingAddress.country = '';
-		cartData.shippingAddress.company = '';
+    /**
+     * Resolve cart data from store and confirm the presence of shipping address
+     * data since this is what we will be manipulating.
+     */
+    getCartData() {
+        const data = select(CART_STORE_KEY).getCartData();
+        const requiredFields = [
+            'first_name', 'last_name', 'address_1', 'address_2',
+            'postcode', 'city', 'country', 'company'
+        ];
 
-		// Dispatch the updated cart data back to the store
-		dispatch( CART_STORE_KEY ).setCartData( cartData );
-	}
+        if (!data.shippingAddress || requiredFields.some(field => data.shippingAddress[field] === undefined)) {
+            throw new Error('Missing required shipping address data in cart.');
+        }
+
+        return data;
+    }
+
+    /**
+     * Reset cart data.
+     */
+    resetCartData() {
+        let cartData = this.getCartData();
+
+        // Clear address.
+        cartData.shippingAddress.first_name = '';
+        cartData.shippingAddress.last_name = '';
+        cartData.shippingAddress.address_1 = '';
+        cartData.shippingAddress.address_2 = '';
+        cartData.shippingAddress.postcode = '';
+        cartData.shippingAddress.city = '';
+        cartData.shippingAddress.country = '';
+        cartData.shippingAddress.company = '';
+
+        // Dispatch the updated cart data back to the store
+        dispatch(CART_STORE_KEY).setCartData(cartData);
+    }
+
+    /**
+     * Trigger WooCommerce to recalculate cart and payment methods.
+     */
+    refreshPaymentMethods() {
+        if (!this.allPaymentMethods.length) {
+            console.warn('No payment methods available for filtering.');
+            this.loadAllPaymentMethods(); // Reload if methods are not available.
+            return;
+        }
+
+        const cartData = select(CART_STORE_KEY).getCartData();
+        const paymentMethods = cartData.paymentMethods;
+
+        if (!paymentMethods) {
+            console.warn('No payment methods found in cart data.');
+            dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
+            return;
+        }
+
+        const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
+
+        // Create a map of settings methods using a normalized key.
+        const settingsMethodsMap = new Map(
+            paymentMethodsFromSettings.map((method: any) => [
+                method.id?.toLowerCase() || method.name?.toLowerCase(), // Normalize keys
+                method,
+            ])
+        );
+
+        const isCorporate = this.widget.getCustomerType() === 'LEGAL';
+        const cartTotal =
+            parseInt(cartData.totals.total_price, 10) /
+            Math.pow(10, cartData.totals.currency_minor_unit);
+
+        // Iterate over all cart methods and update their availability.
+        const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {
+            const normalizedCartMethodId = cartMethod?.toLowerCase().trim(); // Normalize the `cartMethod`.
+            const methodFromSettings = settingsMethodsMap.get(normalizedCartMethodId);
+
+            if (methodFromSettings) {
+                const { // @ts-ignore
+                    enabled_for_legal_customer, // @ts-ignore
+                    enabled_for_natural_customer, // @ts-ignore
+                    min_purchase_limit, // @ts-ignore
+                    max_purchase_limit
+                } =
+                    methodFromSettings;
+
+                // Include methods based on customer type or both flags being true.
+                const supportsCustomerType =
+                    (isCorporate && enabled_for_legal_customer) ||
+                    (!isCorporate && enabled_for_natural_customer) ||
+                    (!isCorporate && enabled_for_legal_customer && enabled_for_natural_customer);
+
+                // Validate purchase limits.
+                const withinPurchaseLimits =
+                    cartTotal >= min_purchase_limit && cartTotal <= max_purchase_limit;
+
+                if (supportsCustomerType && withinPurchaseLimits) {
+                    return cartMethod; // Keep the method if it meets all conditions.
+                }
+
+                return null; // Exclude the method if it doesn't meet the conditions.
+            }
+
+            // If it's not a custom method, retain it as-is.
+            return cartMethod;
+        }).filter(Boolean);
+
+        dispatch(CART_STORE_KEY).setCartData({
+            ...cartData,
+            paymentMethods: updatedPaymentMethods,
+        });
+    }
 }

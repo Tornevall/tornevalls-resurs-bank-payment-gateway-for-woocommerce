@@ -11,6 +11,8 @@ namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
@@ -89,21 +91,41 @@ class WooCommerce
     }
 
     /**
-     * Get version from assets file.
+     * Retrieves the version of a specified asset from its associated .asset.php file.
+     *
+     * @throws FilesystemException
+     * @throws EmptyValueException
      */
-    public static function getAssetVersion(): string
+    public static function getAssetVersion(string $assetFile = 'gateway'): string
     {
+        // Sanitize the input to allow only alphanumeric characters, underscores, and dashes.
+        $sanitizedFile = preg_replace('/[^a-zA-Z0-9_-]/', '', $assetFile);
+
+        // Construct the file path.
+        $filePath = RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/' . $sanitizedFile . '.asset.php';
+
+        // Verify the file exists and is within the expected directory.
         if (
-            !file_exists(
-                RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/gateway.asset.php'
-            )
+            !file_exists(filename: $filePath) ||
+            !is_readable(filename: $filePath)
         ) {
-            return '';
+            throw new FilesystemException(
+                message: "Asset file not found or inaccessible: $filePath"
+            );
         }
 
-        $assets = include RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/gateway.asset.php';
+        // Include the asset file safely.
+        $assets = include $filePath;
 
-        return $assets['version'] ?? '';
+        // Check if version exists and is valid.
+        if (empty($assets['version'])) {
+            throw new EmptyValueException(
+                message: "Version not found or empty in asset file: $filePath"
+            );
+        }
+
+        // Return the version if available; otherwise, return an empty string.
+        return $assets['version'];
     }
 
     /**

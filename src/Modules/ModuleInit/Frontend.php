@@ -33,7 +33,7 @@ class Frontend
             return;
         }
 
-        GatewayBlocks::initFrontend();
+        GatewayBlocks::init();
         Gateway::initFrontend();
         CustomerType::init();
         ThankYou::init();

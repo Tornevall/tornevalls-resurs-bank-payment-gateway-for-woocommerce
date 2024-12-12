@@ -7,3 +7,4 @@ qa/php-cs-fixer/.php-cs-fixer.cache
 lib/cbf
 node_modules
 Makefile
+**.DS_Store

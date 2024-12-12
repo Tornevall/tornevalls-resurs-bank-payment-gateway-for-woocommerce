@@ -41,6 +41,7 @@ class Gateway
 {
     /**
      * Add payment gateways.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {

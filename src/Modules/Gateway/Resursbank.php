@@ -93,6 +93,14 @@ class Resursbank extends WC_Payment_Gateway
 
         // Mirror title to method_title.
         $this->method_title = $this->title;
+
+        // When the blocks editor redirects admins to woocommerce internal sections
+        // for handling payment methods, we need to redirect them back to the correct
+        // location since our methods are not editable from WooCommerce.
+        if ($this->id !== RESURSBANK_MODULE_PREFIX) {
+            // Redirect to the correct section if the wrong section is requested when section is set to a method id.
+            AdminUtility::redirectAtWrongSection(method: $method->id);
+        }
     }
 
     /**

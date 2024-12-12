@@ -18,6 +18,21 @@ const settings = getSetting( 'resursbank_data', {} );
 		return;
 	}
 
+	if (typeof getSetting !== 'function') {
+		console.error('WooCommerce: getSetting is not available.');
+		return;
+	}
+
+	if (typeof registerPaymentMethod !== 'function') {
+		console.error('WooCommerce Blocks: registerPaymentMethod is not available.');
+		return;
+	}
+
+	if (typeof select !== 'function') {
+		console.error('WooCommerce: select is not available.');
+		return;
+	}
+
 	settings.payment_methods.forEach( ( method: any ) => {
 		const label = method.title;
 
@@ -121,12 +136,13 @@ const settings = getSetting( 'resursbank_data', {} );
 					( data.billingAddress.company !== '' &&
 						! method.enabled_for_legal_customer ) ||
 					( data.billingAddress.company === '' &&
-						! method.enabled_for_natural_customer )
+						! method.enabled_for_natural_customer
+					)
 				) {
 					return false;
 				}
 
-				// List all properties and methods of the dat)a object
+				// List all properties and methods of the data object
 				const cart_total =
 					parseInt( data.cartTotals.total_price, 10 ) /
 					Math.pow( 10, data.cartTotals.currency_minor_unit );
@@ -143,6 +159,10 @@ const settings = getSetting( 'resursbank_data', {} );
 				return true;
 			},
 			ariaLabel: label,
+			supports: {
+				blockBasedCheckout: method.name !== 'resursbank',
+			},
+			editUrl: `${window.location.origin}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=${method.name}`
 		} );
 	} );
 } )();

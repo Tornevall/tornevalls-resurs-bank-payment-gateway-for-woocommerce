@@ -102,7 +102,7 @@ EX;
                     wp_safe_redirect(
                         'admin.php?page=wc-settings&tab=resursbank&section=payment_methods'
                     );
-                    die;
+                    wp_die();
                 }
 
                 return $sections;
