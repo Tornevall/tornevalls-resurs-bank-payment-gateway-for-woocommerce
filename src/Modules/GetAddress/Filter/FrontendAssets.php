@@ -14,6 +14,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
@@ -22,6 +23,7 @@ use Throwable;
  */
 class FrontendAssets
 {
+    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     public static function exec(): void
     {
         wp_enqueue_script(
@@ -31,6 +33,17 @@ class FrontendAssets
             WooCommerce::getAssetVersion(assetFile: 'update-address'),
             // Load script in footer.
             true
+        );
+
+        wp_localize_script(
+            'rb-get-address',
+            'rbCustomerTypeData',
+            [
+                'currentCustomerType' => WcSession::getCustomerType(),
+                'apiUrl' => Route::getUrl(
+                    route: Route::ROUTE_SET_CUSTOMER_TYPE
+                ),
+            ]
         );
 
         wp_add_inline_script(

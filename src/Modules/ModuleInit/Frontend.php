@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Modules\CustomerType\Filter\CustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
@@ -35,7 +34,6 @@ class Frontend
 
         GatewayBlocks::init();
         Gateway::initFrontend();
-        CustomerType::init();
         ThankYou::init();
         Failure::init();
         PartPayment::initFrontend();

@@ -65,11 +65,20 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     }
 
     /**
-     * Initialize block. Method is required by WooCommerce.
+     * Initializes the integration block.
+     *
+     * This method is required by WooCommerce's architecture and acts as an entry point
+     * for any necessary configuration or dependency setup related to the integration.
+     * While Resurs-specific logic could theoretically be registered here, the dynamic
+     * nature of our payment methods necessitates a different approach.
+     *
+     * Instead, the actual registration occurs in the `get_payment_method_data` method.
+     * This design allows GatewayBlocks to function as modular placeholders, delegating
+     * specific functionality to smaller submodules for enhanced flexibility and scalability.
      */
     public function initialize(): void
     {
-        // WooCommerce requires this method to be implemented.
+        // Placeholder for potential Resurs-specific initialization logic, if needed.
     }
 
     /**
