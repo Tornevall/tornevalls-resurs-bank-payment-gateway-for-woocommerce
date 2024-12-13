@@ -150,7 +150,7 @@ EX;
         } catch (Throwable $e) {
             Log::error(error: $e);
 
-            $this->renderError();
+            $this->renderError(view: $section, throwable: $e);
         }
 
         echo '</table>';
@@ -198,28 +198,72 @@ EX;
      *
      * @SuppressWarnings(PHPMD.ElseExpression)
      */
-    private function renderError(string $view = ''): void
+    /**
+     * Render an error message based on the view and exception provided.
+     *
+     * @param string $view The view context for the error (e.g., 'payment_methods', 'advanced').
+     * @param Throwable|null $throwable Optional exception for additional error context.
+     */
+    private function renderError(string $view = '', ?Throwable $throwable = null): void
     {
-        $additional = Translator::translate(phraseId: 'see-log');
+        $additional = $this->getAdditionalMessage(view: $view);
+        $msg = $this->getErrorMessage(view: $view, throwable: $throwable);
+        Admin::getAdminErrorNote(message: $msg, additional: $additional);
+    }
 
+    /**
+     * Get additional message for the error note based on the view context.
+     *
+     * @param string $view The view context for the error.
+     * @return string The additional context message for the error note.
+     */
+    private function getAdditionalMessage(string $view): string
+    {
         if ($view === 'payment_methods') {
-            $msg = Translator::translate(
-                phraseId: 'payment-methods-widget-render-failed'
-            );
-
+            // Suggest configuring credentials if they are missing
             if (!Connection::hasCredentials()) {
-                $additional = Translator::translate(
-                    phraseId: 'configure-credentials'
-                );
-            } elseif (StoreId::getData() === '') {
-                $additional = Translator::translate(
-                    phraseId: 'configure-store'
-                );
+                return Translator::translate(phraseId: 'configure-credentials');
             }
-        } else {
-            $msg = Translator::translate(phraseId: 'content-render-failed');
+
+            // Suggest configuring the store if store data is missing
+            if (StoreId::getData() === '') {
+                return Translator::translate(phraseId: 'configure-store');
+            }
         }
 
-        Admin::getAdminErrorNote(message: $msg, additional: $additional);
+        // Default additional message for other views
+        return Translator::translate(phraseId: 'see-log');
+    }
+
+    /**
+     * Get the main error message based on the view context and optional exception.
+     *
+     * @param string $view The view context for the error.
+     * @param Throwable|null $throwable Optional exception for additional error details.
+     * @return string The main error message to display.
+     */
+    private function getErrorMessage(string $view, ?Throwable $throwable = null): string
+    {
+        if ($view === 'payment_methods') {
+            // Specific error message for payment methods rendering failure
+            return Translator::translate(
+                phraseId: 'payment-methods-widget-render-failed'
+            );
+        }
+
+        if ($view === 'advanced') {
+            // Error message for advanced view with more exception details. Getting errors on this view
+            // is never good, since error logging are actually configured here, so we need to show more of them.
+            $msg = Translator::translate(phraseId: 'content-render-failed');
+
+            if ($throwable instanceof Throwable) {
+                $msg .= '<br><b>' . $throwable->getMessage() . '</b>';
+            }
+
+            return $msg;
+        }
+
+        // Default error message for other views
+        return Translator::translate(phraseId: 'content-render-failed');
     }
 }

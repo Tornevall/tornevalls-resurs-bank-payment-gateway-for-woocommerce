@@ -10,6 +10,14 @@ declare const Resursbank_GetAddress: any;
  * depending on whether blocks or legacy is used.
  */
 document.addEventListener( 'DOMContentLoaded', () => {
+	if ( ! ( // @ts-ignore
+		rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
+		rbFrontendData?.getAddressEnabled === true
+	) ) {
+		console.log( 'Address Fetcher is disabled.' );
+		return;
+	}
+
 	// Confirm we are loaded on the checkout page.
 	if ( ! document.querySelector( '.woocommerce-checkout' ) ) {
 		return;

@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
@@ -24,6 +29,12 @@ use Throwable;
 class FrontendAssets
 {
     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+    /**
+     * @throws HttpException
+     * @throws EmptyValueException
+     * @throws IllegalValueException
+     * @throws FilesystemException
+     */
     public static function exec(): void
     {
         wp_enqueue_script(
@@ -37,18 +48,19 @@ class FrontendAssets
 
         wp_localize_script(
             'rb-get-address',
-            'rbCustomerTypeData',
+            'rbFrontendData',
             [
                 'currentCustomerType' => WcSession::getCustomerType(),
                 'apiUrl' => Route::getUrl(
                     route: Route::ROUTE_SET_CUSTOMER_TYPE
                 ),
+                'getAddressEnabled' => EnableGetAddress::isEnabled(),
             ]
         );
 
         wp_add_inline_script(
             'rb-get-address',
-            (string) GetAddress::getWidget()?->js
+            (string)GetAddress::getWidget()?->js
         );
 
         try {

@@ -8,7 +8,13 @@ declare const Resursbank_GetAddress: any;
 export class LegacyAddressUpdater {
 	private getAddressWidget: any;
 
+	private getAddressEnabled: boolean;
+
 	constructor() {
+		this.getAddressEnabled = // @ts-ignore
+			rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
+			rbFrontendData?.getAddressEnabled === true;
+
 		// Initialize the address widget to undefined.
 		this.getAddressWidget = undefined;
 	}
@@ -22,8 +28,8 @@ export class LegacyAddressUpdater {
 	 * @param customerType The type of customer (LEGAL or NATURAL).
 	 */
 	private updateCustomerType(customerType: string) { // @ts-ignore
-		// rbCustomerTypeData is expected through internal localization.
-		const apiUrl = rbCustomerTypeData?.apiUrl; // Ensure the API URL is defined.
+		// rbFrontendData is expected through internal localization.
+		const apiUrl = rbFrontendData?.apiUrl; // Ensure the API URL is defined.
 		if (!apiUrl) {
 			console.error('API URL is undefined');
 			return;
@@ -47,6 +53,11 @@ export class LegacyAddressUpdater {
 	 * Sets up the address widget and event listeners for handling updates.
 	 */
 	initialize() {
+		if (!this.getAddressEnabled) {
+			console.log('Legacy Address Fetcher is disabled.');
+			return;
+		}
+
 		console.log('Legacy Address Fetcher Loaded.');
 
 		jQuery(document).ready(() => {

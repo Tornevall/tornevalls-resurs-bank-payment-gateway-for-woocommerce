@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\GetAddress;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Customer\Widget\GetAddress as Widget;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
@@ -27,6 +28,10 @@ class GetAddress
      */
     public static function init(): void
     {
+        if (EnableGetAddress::isEnabled() === false) {
+            return;
+        }
+
         add_action(
             hook_name: 'wp_enqueue_scripts',
             callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\FrontendAssets::exec'
