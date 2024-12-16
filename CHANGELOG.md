@@ -1,3 +1,11 @@
+# 1.0.58
+
+[WOO-1390](https://resursbankplugins.atlassian.net/browse/WOO-1390) Partpayment widget errors with out of stocks
+
+# 1.0.57
+
+* Hotfix for missing files in the WP repo.
+
 # 1.0.56
 
 * [WOO-1246](https://resursbankplugins.atlassian.net/browse/WOO-1246) Resolve default store id by using ECom method instead
