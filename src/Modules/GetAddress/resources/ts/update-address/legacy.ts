@@ -100,11 +100,8 @@ export class LegacyAddressUpdater {
 
 		// Update the customer type based on initial conditions.
 		this.updateCustomerType(customerType);
-		if (customerType === 'LEGAL') {
-			legalEl.checked = true;
-		} else {
-			naturalEl.checked = true;
-		}
+		// The not-so-optimal customer type checker.
+		// if (customerType === 'LEGAL') { legalEl.checked = true; } else { naturalEl.checked = true; }
 	}
 
 	/**
@@ -138,8 +135,39 @@ export class LegacyAddressUpdater {
 		};
 
 		const mapResursFieldName = (name: string): string => {
-			const key = name.split('_')[1]; // @ts-ignore
-			return mapFieldNames[key] || '';
+			let result = '';
+			const fieldName = name.split('billing_')[1] || name.split('shipping_')[1];
+
+			switch (fieldName) {
+				case 'first_name':
+					result = 'firstName';
+					break;
+				case 'last_name':
+					result = 'lastName';
+					break;
+				case 'country':
+					result = 'countryCode';
+					break;
+				case 'address_1':
+					result = 'addressRow1';
+					break;
+				case 'address_2':
+					result = 'addressRow2';
+					break;
+				case 'postcode':
+					result = 'postalCode';
+					break;
+				case 'city':
+					result = 'postalArea';
+					break;
+				case 'company':
+					result = 'fullName';
+					break;
+				default:
+					result = '';
+			}
+
+			return result;
 		};
 
 		/**
