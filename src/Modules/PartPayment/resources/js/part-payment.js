@@ -31,7 +31,7 @@ jQuery(document).ready(function () {
                     return getRbPpPriceFromWooCom() * this.getQty();
                 },
                 getObservableElements: function () {
-                    return [qtyElement];
+                    return qtyElement ? [qtyElement] : [];
                 },
                 getQtyElement: function () {
                     return qtyElement;
