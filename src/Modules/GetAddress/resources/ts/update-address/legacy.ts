@@ -1,232 +1,208 @@
 // @ts-ignore
 import * as jQuery from 'jquery';
 
-// Ignore missing Resursbank_GetAddress renders through Ecom Widget.
+// Declare the Resursbank_GetAddress function from the external library.
 declare const Resursbank_GetAddress: any;
 
-// legacy.ts
+// LegacyAddressUpdater class handles interactions with the Resursbank address widget
 export class LegacyAddressUpdater {
-	private getAddressCustomerType: string | undefined;
 	private getAddressWidget: any;
 
+	private getAddressEnabled: boolean;
+
 	constructor() {
-		this.getAddressCustomerType = undefined;
+		this.getAddressEnabled = // @ts-ignore
+			rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
+			rbFrontendData?.getAddressEnabled === true;
+
+		// Initialize the address widget to undefined.
 		this.getAddressWidget = undefined;
 	}
 
+	/**
+	 * Update the customer type in the checkout process.
+	 *
+	 * This is required by the checkout if payment methods should reload properly.
+	 * Sends an AJAX request to update the customer type and triggers the checkout update event.
+	 *
+	 * @param customerType The type of customer (LEGAL or NATURAL).
+	 */
+	private updateCustomerType(customerType: string) { // @ts-ignore
+		// rbFrontendData is expected through internal localization.
+		const apiUrl = rbFrontendData?.apiUrl; // Ensure the API URL is defined.
+		if (!apiUrl) {
+			console.error('API URL is undefined');
+			return;
+		}
+
+		jQuery.ajax({
+			url: `${apiUrl}&customerType=${customerType}`,
+		})
+			.done(() => {
+				// Trigger the update_checkout event on successful AJAX call.
+				jQuery(document.body).trigger('update_checkout');
+			}) // @ts-ignore
+			.fail((error) => {
+				// Log any errors encountered during the AJAX call.
+				console.error('Error updating customer type:', error);
+			});
+	}
+
+	/**
+	 * Initialize the LegacyAddressUpdater.
+	 * Sets up the address widget and event listeners for handling updates.
+	 */
 	initialize() {
-		console.log( 'Legacy Updater' );
+		if (!this.getAddressEnabled) {
+			console.log('Legacy Address Fetcher is disabled.');
+			return;
+		}
 
-		jQuery( document ).on(
-			'update_resurs_customer_type',
-			( ev, customerType ) => {
-				jQuery.ajax( {
-					url: `${ rbCustomerTypeData[ 'apiUrl' ] }&customerType=${ customerType }`,
-				} );
-			}
-		);
+		console.log('Legacy Address Fetcher Loaded.');
 
-		jQuery( document ).ready( () => {
-			if (
-				typeof Resursbank_GetAddress !== 'function' ||
-				document.getElementById( 'rb-ga-widget' ) === null
-			) {
+		jQuery(document).ready(() => {
+			// Ensure the address widget is available before proceeding.
+			if (typeof Resursbank_GetAddress !== 'function' || !document.getElementById('rb-ga-widget')) {
 				return;
 			}
 
-			this.getAddressWidget = new Resursbank_GetAddress( {
-				updateAddress: ( data: any ) => {
-					this.getAddressCustomerType =
-						this.getAddressWidget.getCustomerType();
-					this.rbHandleFetchAddressResponse(
-						data,
-						this.getAddressCustomerType
-					);
+			// Initialize the address widget with updateAddress callback.
+			this.getAddressWidget = new Resursbank_GetAddress({
+				updateAddress: (data: any) => {
+					// Handle the fetched address response and update the customer type.
+					this.handleFetchAddressResponse(data);
+					this.updateCustomerType(this.getAddressWidget.getCustomerType());
 				},
-			} );
+			});
 
 			try {
+				// Set up customer type on initialization.
+				this.setupCustomerTypeOnInit();
+
+				// Configure event listeners for the widget.
 				this.getAddressWidget.setupEventListeners();
-				const naturalEl =
-					this.getAddressWidget.getCustomerTypeElNatural();
-				const legalEl = this.getAddressWidget.getCustomerTypeElLegal();
-				naturalEl.addEventListener( 'change', () => {
-					jQuery( 'body' ).trigger( 'update_resurs_customer_type', [
-						'NATURAL',
-					] );
-				} );
-				legalEl.addEventListener( 'change', () => {
-					jQuery( 'body' ).trigger( 'update_resurs_customer_type', [
-						'LEGAL',
-					] );
-				} );
-			} catch ( e ) {
-				console.log( e );
+			} catch (error) {
+				console.error('Error initializing address widget:', error);
 			}
-		} );
+		});
 	}
 
-	private rbHandleFetchAddressResponse = ( () => {
-		const getCheckoutForm = (): HTMLFormElement | null => {
-			const form = document.forms[ 'checkout' ];
+	/**
+	 * Configure the initial customer type based on the billing company field.
+	 */
+	private setupCustomerTypeOnInit() {
+		const billingCompany = jQuery('#billing_company');
+		const isCompany = billingCompany.length > 0 && billingCompany.val() !== '';
+		const customerType = isCompany ? 'LEGAL' : 'NATURAL';
+
+		const naturalEl = this.getAddressWidget.getCustomerTypeElNatural();
+		const legalEl = this.getAddressWidget.getCustomerTypeElLegal();
+
+		// Update the customer type based on initial conditions.
+		this.updateCustomerType(customerType);
+		if (customerType === 'LEGAL') {
+			legalEl.checked = true;
+		} else {
+			naturalEl.checked = true;
+		}
+	}
+
+	/**
+	 * Handle the response from the address widget and map the fields.
+	 * This function updates the checkout form fields with the retrieved address data.
+	 */
+	private handleFetchAddressResponse = (() => {
+		/**
+		 * Retrieve the checkout form element.
+		 * @returns The checkout form element or null if not found.
+		 */
+		const getCheckoutForm = (): HTMLFormElement | null => { // @ts-ignore
+			const form = document.forms['checkout'];
 			return form instanceof HTMLFormElement ? form : null;
 		};
 
-		const getNamedFields = ( el: HTMLElement ): boolean =>
-			el.hasAttribute( 'name' );
-		const getBillingFields = ( el: HTMLInputElement ): boolean =>
-			el.name.startsWith( 'billing' );
-		const getShippingFields = ( el: HTMLInputElement ): boolean =>
-			el.name.startsWith( 'shipping' );
-
-		const mapResursFieldName = ( name: string ): string => {
-			let result: string;
-
-			switch (
-				name.split( 'billing_' )[ 1 ] ||
-				name.split( 'shipping_' )[ 1 ]
-			) {
-				case 'first_name':
-					result = 'firstName';
-					break;
-				case 'last_name':
-					result = 'lastName';
-					break;
-				case 'country':
-					result = 'countryCode';
-					break;
-				case 'address_1':
-					result = 'addressRow1';
-					break;
-				case 'address_2':
-					result = 'addressRow2';
-					break;
-				case 'postcode':
-					result = 'postalCode';
-					break;
-				case 'city':
-					result = 'postalArea';
-					break;
-				case 'company':
-					result = 'fullName';
-					break;
-				default:
-					result = '';
-			}
-
-			return result;
+		/**
+		 * Map field names from Resursbank format to WooCommerce field names.
+		 * @param name The field name to map.
+		 * @returns The mapped field name or an empty string if not mapped.
+		 */
+		const mapFieldNames = {
+			first_name: 'firstName',
+			last_name: 'lastName',
+			country: 'countryCode',
+			address_1: 'addressRow1',
+			address_2: 'addressRow2',
+			postcode: 'postalCode',
+			city: 'postalArea',
+			company: 'fullName',
 		};
 
-		const mapResursField = ( el: HTMLInputElement ) => ( {
-			name: mapResursFieldName( el.name ),
-			el,
-		} );
-
-		const getUsableFields = ( obj: { name: string } ): boolean =>
-			obj.name !== '';
-
-		const mapResursFields = (
-			els: Element[]
-		): { name: string; el: HTMLInputElement }[] =>
-			els.map( mapResursField ).filter( getUsableFields );
-
-		const getAddressFields = ( form: HTMLFormElement | null ) => {
-			let result: {
-				billing: { name: string; el: HTMLInputElement }[];
-				shipping: { name: string; el: HTMLInputElement }[];
-			} | null = null;
-			if ( form instanceof HTMLFormElement ) {
-				const arr = Array.from( form.elements );
-				const namedFields = arr.filter( getNamedFields );
-
-				result = {
-					billing: mapResursFields(
-						namedFields.filter( getBillingFields )
-					),
-					shipping: mapResursFields(
-						namedFields.filter( getShippingFields )
-					),
-				};
-			}
-
-			return result;
+		const mapResursFieldName = (name: string): string => {
+			const key = name.split('_')[1]; // @ts-ignore
+			return mapFieldNames[key] || '';
 		};
 
-		const updateAddressFields = ( data: any, customerType: string ) => {
-			const fields = getAddressFields( getCheckoutForm() );
+		/**
+		 * Map form elements to Resurs field format.
+		 * @param elements The form elements to map.
+		 * @returns An array of objects containing name and element pairs.
+		 */
+		const mapFields = (elements: HTMLInputElement[]): { name: string; el: HTMLInputElement }[] => {
+			return elements
+				.map((el) => ({ name: mapResursFieldName(el.name), el }))
+				.filter((field) => field.name !== '');
+		};
 
-			const billingResursGovId = jQuery(
-				'#billing_resurs_government_id'
-			);
+		/**
+		 * Get address fields from the checkout form.
+		 * @param form The checkout form element.
+		 * @returns An object containing billing and shipping fields or null if the form is invalid.
+		 */
+		const getAddressFields = (form: HTMLFormElement | null) => {
+			if (!form) return null;
 
-			if (
-				typeof this.getAddressWidget !== 'undefined' &&
-				customerType === 'LEGAL'
-			) {
-				const govIdElement = this.getAddressWidget.getGovIdElement();
-				if ( billingResursGovId.length > 0 ) {
-					billingResursGovId.val( govIdElement.value );
-				}
-			}
+			const elements = Array.from(form.elements) as HTMLInputElement[];
+			const namedFields = elements.filter((el) => el.name);
 
-			fields?.billing.forEach( ( obj ) => {
-				const dataVal = data[ obj.name ];
-				const newVal =
-					typeof dataVal === 'string' ? dataVal : obj.el.value;
-				if ( obj.name === 'fullName' ) {
-					if ( customerType === 'LEGAL' ) {
-						obj.el.value = newVal;
-					} else {
-						obj.el.value = '';
-						billingResursGovId.val( '' );
-					}
+			return {
+				billing: mapFields(namedFields.filter((el) => el.name.startsWith('billing_'))),
+				shipping: mapFields(namedFields.filter((el) => el.name.startsWith('shipping_'))),
+			};
+		};
+
+		/**
+		 * Update form fields with the provided data.
+		 * @param fields The fields to update.
+		 * @param data The data to use for updating the fields.
+		 */
+		const updateFields = (fields: { name: string; el: HTMLInputElement }[], data: any) => {
+			fields.forEach(({ name, el }) => {
+				const value = data[name] ?? el.value;
+
+				// Handle fullName updates for LEGAL customer type.
+				if (name === 'fullName' && this.getAddressWidget.getCustomerType() !== 'LEGAL') {
+					el.value = '';
 				} else {
-					obj.el.value = newVal;
+					el.value = value;
 				}
 
-				if (
-					typeof obj.el.parentNode?.parentNode?.classList ===
-						'object' &&
-					obj.el.parentNode.parentNode.classList.contains(
-						'woocommerce-invalid'
-					)
-				) {
-					obj.el.parentNode.parentNode.classList.remove(
-						'woocommerce-invalid'
-					);
-					obj.el.parentNode.parentNode.classList.remove(
-						'woocommerce-invalid-required-field'
-					);
+				// Remove invalid class indicators from fields.
+				const parentNode = el.closest('.woocommerce-invalid');
+				if (parentNode) {
+					parentNode.classList.remove('woocommerce-invalid', 'woocommerce-invalid-required-field');
 				}
-			} );
+			});
 		};
 
-		const billingResursGovId = jQuery( '#billing_resurs_government_id' );
-
-		return ( data: any, customerType: string ) => {
+		return (data: any) => {
 			try {
-				if ( billingResursGovId.length > 0 ) {
-					if ( customerType === 'LEGAL' ) {
-						if (
-							jQuery(
-								'#rb-customer-widget-getAddress-input-govId'
-							).length > 0
-						) {
-							billingResursGovId.val(
-								jQuery(
-									'#rb-customer-widget-getAddress-input-govId'
-								).val()
-							);
-						}
-					} else {
-						billingResursGovId.val( '' );
-					}
+				const fields = getAddressFields(getCheckoutForm());
+				if (fields) {
+					updateFields(fields.billing, data);
 				}
-				updateAddressFields( data, customerType );
-				rbUpdateCustomerType();
-			} catch ( e ) {
-				console.log( e );
+			} catch (error) {
+				console.error('Error updating address fields:', error);
 			}
 		};
-	} )();
+	})();
 }
