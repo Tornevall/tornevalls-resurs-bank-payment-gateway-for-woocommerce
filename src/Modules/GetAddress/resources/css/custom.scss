@@ -26,7 +26,7 @@
         display: block;
         width: 0.9em;
         height: 0.9em;
-        background: var(--wp--preset--color--contrast); /* Behåller din färginställning */
+        background: var(--wp--preset--color--contrast);
         border-radius: 50%;
         position: absolute;
         top: 50%;
@@ -36,7 +36,7 @@
       }
 
       &:checked::after {
-        opacity: 1; /* Gör att indikatorn visas när den är markerad */
+        opacity: 1;
       }
     }
 

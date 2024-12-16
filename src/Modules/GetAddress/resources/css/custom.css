@@ -1,9 +1,9 @@
-@charset "UTF-8";
 #rb-ga-widget {
   padding-bottom: 25px;
 }
 #rb-ga-widget #rb-ga-ct-area input {
   -moz-appearance: none;
+  /*appearance: none;*/
   background: #fff;
   border: 1px solid rgba(25, 23, 17, 0.48);
   border-radius: 50%;
