@@ -92,15 +92,23 @@ export class LegacyAddressUpdater {
 	 */
 	private setupCustomerTypeOnInit() {
 		const billingCompany = jQuery('#billing_company');
-		const isCompany = billingCompany.length > 0 && billingCompany.val() !== '';
-		const customerType = isCompany ? 'LEGAL' : 'NATURAL';
 
-		const naturalEl = this.getAddressWidget.getCustomerTypeElNatural();
-		const legalEl = this.getAddressWidget.getCustomerTypeElLegal();
+		/**
+		 * Listen for changes in the billing company field and update the customer type accordingly.
+		 */
+		const updateCustomerType = () => {
+			const isCompany = billingCompany.length > 0 && billingCompany.val().trim() !== '';
+			const customerType = isCompany ? 'LEGAL' : 'NATURAL';
+			this.updateCustomerType(customerType);
+		};
 
-		// Update the customer type based on initial conditions.
-		this.updateCustomerType(customerType);
+		updateCustomerType();
+		billingCompany.on('input change', updateCustomerType);
+
 		// The not-so-optimal customer type checker.
+		// @todo Find out a more efficient way to set the radio properly after a saved session request.
+		//const naturalEl = this.getAddressWidget.getCustomerTypeElNatural();
+		//const legalEl = this.getAddressWidget.getCustomerTypeElLegal();
 		// if (customerType === 'LEGAL') { legalEl.checked = true; } else { naturalEl.checked = true; }
 	}
 
