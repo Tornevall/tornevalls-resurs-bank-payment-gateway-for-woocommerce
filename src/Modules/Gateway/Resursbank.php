@@ -73,7 +73,6 @@ class Resursbank extends WC_Payment_Gateway
 
     /**
      * Setup.
-     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public function __construct(
         private ?PaymentMethod $method = null,
