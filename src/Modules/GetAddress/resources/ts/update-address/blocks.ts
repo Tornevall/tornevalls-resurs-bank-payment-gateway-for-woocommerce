@@ -82,9 +82,19 @@ export class BlocksAddressUpdater {
      * Configure the event listeners for the widget.
      */
     initialize() {
+        const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
+        if (!cartDataReady) {
+            dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
+        }
+
         this.widget.setupEventListeners();
         this.loadAllPaymentMethods();
         this.refreshPaymentMethods();
+
+        // If refreshing above doesn't work, try this instead.
+        //setTimeout(() => {
+        //    this.refreshPaymentMethods();
+        //}, 200);
     }
 
     /**
@@ -156,7 +166,6 @@ export class BlocksAddressUpdater {
         }
 
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
-
         // Create a map of settings methods using a normalized key.
         const settingsMethodsMap = new Map(
             paymentMethodsFromSettings.map((method: any) => [
@@ -165,7 +174,9 @@ export class BlocksAddressUpdater {
             ])
         );
 
-        const isCorporate = this.widget.getCustomerType() === 'LEGAL';
+        const isCorporate = this.widget.getCustomerType() === 'LEGAL' ||
+            cartData.billingAddress?.company?.trim() !== '';
+
         const cartTotal =
             parseInt(cartData.totals.total_price, 10) /
             Math.pow(10, cartData.totals.currency_minor_unit);
