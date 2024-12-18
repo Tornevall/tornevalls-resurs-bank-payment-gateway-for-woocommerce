@@ -182,7 +182,6 @@ export class BlocksAddressUpdater {
         const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {
             const normalizedCartMethodId = cartMethod?.toLowerCase().trim(); // Normalize the `cartMethod`.
             const methodFromSettings = settingsMethodsMap.get(normalizedCartMethodId);
-            console.log(normalizedCartMethodId, methodFromSettings);
             if (methodFromSettings) {
                 const { // @ts-ignore
                     enabled_for_legal_customer, // @ts-ignore

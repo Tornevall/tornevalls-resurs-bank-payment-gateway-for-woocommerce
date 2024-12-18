@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('jquery', 'wc-blocks-data-store', 'wc-settings', 'wp-data'), 'version' => 'f93d6e108d7f9b756145');
+<?php return array('dependencies' => array('jquery', 'wc-blocks-data-store', 'wc-settings', 'wp-data'), 'version' => 'e074225e6106f83fac33');
