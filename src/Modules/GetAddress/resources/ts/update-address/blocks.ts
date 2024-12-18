@@ -196,8 +196,6 @@ export class BlocksAddressUpdater {
                 } =
                     methodFromSettings;
 
-                console.log(isCorporate);
-
                 // Include methods based on customer type or both flags being true.
                 const supportsCustomerType =
                     (isCorporate && enabled_for_legal_customer) ||
