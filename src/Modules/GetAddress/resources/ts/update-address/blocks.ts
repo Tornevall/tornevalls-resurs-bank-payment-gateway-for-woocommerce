@@ -84,6 +84,7 @@ export class BlocksAddressUpdater {
     initialize() {
         this.widget.setupEventListeners();
         this.loadAllPaymentMethods();
+        this.refreshPaymentMethods();
     }
 
     /**
