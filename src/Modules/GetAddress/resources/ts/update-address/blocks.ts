@@ -66,6 +66,7 @@ export class BlocksAddressUpdater {
                 // Dispatch the updated cart data back to the store
                 dispatch(CART_STORE_KEY).setCartData(cartData);
 
+                console.log('Refresh rnu from updateaddress', cartData);
                 // Trigger update for payment methods by re-triggering cart actions
                 this.refreshPaymentMethods();
             },
