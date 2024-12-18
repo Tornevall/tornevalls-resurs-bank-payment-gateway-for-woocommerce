@@ -161,6 +161,7 @@ export class BlocksAddressUpdater {
         }
 
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
+        console.dir(paymentMethods);
         console.dir(paymentMethodsFromSettings);
         // Create a map of settings methods using a normalized key.
         const settingsMethodsMap = new Map(
