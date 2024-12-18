@@ -89,12 +89,7 @@ export class BlocksAddressUpdater {
 
         this.widget.setupEventListeners();
         this.loadAllPaymentMethods();
-        //this.refreshPaymentMethods();
-
-        setTimeout(() => {
-            console.log('refreshing payment methods');
-            this.refreshPaymentMethods();
-        }, 200);
+        this.refreshPaymentMethods();
     }
 
     /**
@@ -211,6 +206,7 @@ export class BlocksAddressUpdater {
 
                 return null; // Exclude the method if it doesn't meet the conditions.
             }
+            console.dir(updatedPaymentMethods);
 
             // If it's not a custom method, retain it as-is.
             return cartMethod;
