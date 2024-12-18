@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Throwable;
 
 /**
@@ -90,8 +91,18 @@ EX;
      * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function redirectAtWrongSection(string $method): void
+    public static function redirectAtWrongSection(mixed $method): void
     {
+        try {
+            // Make sure we are dealing with a UUID, before activating the redirect filter to minimize the
+            // risk of weird loops (IF they occur).
+            $stringValidation = (new StringValidation());
+            $stringValidation->isUuid(value: $method);
+        } catch (Throwable) {
+            // Do nothing.
+            return;
+        }
+
         add_filter(
             'woocommerce_get_sections_checkout',
             static function (array $sections = []) use ($method): array {
