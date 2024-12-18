@@ -161,8 +161,20 @@ export class BlocksAddressUpdater {
         }
 
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
-        console.dir(paymentMethods);
-        console.dir(paymentMethodsFromSettings);
+        const existingMethodIds = new Set(
+            this.allPaymentMethods.map((method: string) => method.toLowerCase())
+        );
+
+        paymentMethodsFromSettings.forEach((method: any) => {
+            const methodKey = (method.id?.toLowerCase() || method.name?.toLowerCase()).trim();
+            if (!existingMethodIds.has(methodKey)) {
+                this.allPaymentMethods.push(methodKey);
+            }
+        });
+
+        console.log(paymentMethods);
+        console.log(paymentMethodsFromSettings);
+
         // Create a map of settings methods using a normalized key.
         const settingsMethodsMap = new Map(
             paymentMethodsFromSettings.map((method: any) => [
