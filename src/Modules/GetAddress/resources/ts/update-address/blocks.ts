@@ -176,6 +176,8 @@ export class BlocksAddressUpdater {
             parseInt(cartData.totals.total_price, 10) /
             Math.pow(10, cartData.totals.currency_minor_unit);
 
+        this.loadAllPaymentMethods();
+
         // Iterate over all cart methods and update their availability.
         const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {
             const normalizedCartMethodId = cartMethod?.toLowerCase().trim(); // Normalize the `cartMethod`.
@@ -190,7 +192,7 @@ export class BlocksAddressUpdater {
                 } =
                     methodFromSettings;
 
-                console.log(methodFromSettings, cartMethod, isCorporate);
+                console.log(isCorporate);
 
                 // Include methods based on customer type or both flags being true.
                 const supportsCustomerType =
