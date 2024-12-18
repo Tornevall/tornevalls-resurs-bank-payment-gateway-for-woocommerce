@@ -97,10 +97,19 @@ export class BlocksAddressUpdater {
      * customer types.
      */
     loadAllPaymentMethods() {
-        const cartData = select(CART_STORE_KEY).getCartData();
-        if (cartData.paymentMethods && cartData.paymentMethods.length) {
-            this.allPaymentMethods = [...cartData.paymentMethods]; // Store a copy of all methods.
-        }
+        const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
+
+        const existingMethodIds = new Set(
+            this.allPaymentMethods.map((method: string) => method.toLowerCase())
+        );
+
+        paymentMethodsFromSettings.forEach((method: any) => {
+            const methodKey = (method.id?.toLowerCase() || method.name?.toLowerCase()).trim();
+
+            if (!existingMethodIds.has(methodKey)) {
+                this.allPaymentMethods.push(methodKey);
+            }
+        });
     }
 
     /**
@@ -161,20 +170,13 @@ export class BlocksAddressUpdater {
         }
 
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
-        const existingMethodIds = new Set(
-            this.allPaymentMethods.map((method: string) => method.toLowerCase())
+
+        const settingsMethodsMap = new Map(
+            paymentMethodsFromSettings.map((method: any) => [
+                method.id?.toLowerCase() || method.name?.toLowerCase(),
+                method,
+            ])
         );
-
-        const settingsMethodsMap = new Map();
-        paymentMethodsFromSettings.forEach((method: any) => {
-            const methodKey = (method.id?.toLowerCase() || method.name?.toLowerCase()).trim();
-
-            settingsMethodsMap.set(methodKey, method);
-
-            if (!existingMethodIds.has(methodKey)) {
-                this.allPaymentMethods.push(methodKey);
-            }
-        });
 
         const isCorporate = this.widget.getCustomerType() === 'LEGAL' ||
             cartData.billingAddress?.company?.trim() !== '';
