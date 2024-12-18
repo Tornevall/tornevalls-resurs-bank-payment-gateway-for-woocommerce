@@ -73,11 +73,6 @@ export class BlocksAddressUpdater {
     }
 
     setBillingAndShipping(cartData: any, value: any) {
-        // Unset the value when this is happening.
-        if (value === 'Not A Company') {
-            value = '';
-        }
-
         // Update both shipping and billing.
         cartData.shippingAddress.company = value;
         cartData.billingAddress.company = value;
