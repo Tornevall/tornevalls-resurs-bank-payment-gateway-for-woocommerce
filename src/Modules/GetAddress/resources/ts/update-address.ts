@@ -38,7 +38,10 @@ document.addEventListener( 'DOMContentLoaded', () => {
 		const observer = new MutationObserver((mutations, obs) => {
 			// Check if the required element has been added to the DOM.
 			if (document.querySelector('.wc-block-components-form')) {
-				new BlocksAddressUpdater().initialize();
+				const blocksAddress = new BlocksAddressUpdater();
+				blocksAddress.initialize();
+				setTimeout(() => blocksAddress.refreshPaymentMethods(), 1000);
+				//new BlocksAddressUpdater().initialize();
 				console.log('Fetcher found and initialized.');
 				obs.disconnect(); // Stop observing once initialized.
 			}
