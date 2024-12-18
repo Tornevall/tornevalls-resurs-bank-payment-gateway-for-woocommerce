@@ -101,7 +101,6 @@ export class BlocksAddressUpdater {
         if (cartData.paymentMethods && cartData.paymentMethods.length) {
             this.allPaymentMethods = [...cartData.paymentMethods]; // Store a copy of all methods.
         }
-        console.dir(this.allPaymentMethods);
     }
 
     /**
@@ -147,10 +146,11 @@ export class BlocksAddressUpdater {
      */
     refreshPaymentMethods() {
         if (!this.allPaymentMethods.length) {
-            console.warn('No payment methods available for filtering.');
+            console.log('No payment methods available for filtering.');
             this.loadAllPaymentMethods();
             return;
         }
+        console.log('refresh');
 
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethods = cartData.paymentMethods;
