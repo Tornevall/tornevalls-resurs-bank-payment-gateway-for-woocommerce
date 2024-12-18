@@ -89,12 +89,12 @@ export class BlocksAddressUpdater {
 
         this.widget.setupEventListeners();
         this.loadAllPaymentMethods();
-        this.refreshPaymentMethods();
+        //this.refreshPaymentMethods();
 
-        // If refreshing above doesn't work, try this instead.
-        //setTimeout(() => {
-        //    this.refreshPaymentMethods();
-        //}, 200);
+        setTimeout(() => {
+            console.log('refreshing payment methods');
+            this.refreshPaymentMethods();
+        }, 200);
     }
 
     /**
