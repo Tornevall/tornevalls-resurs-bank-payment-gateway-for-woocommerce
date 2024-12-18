@@ -150,7 +150,6 @@ export class BlocksAddressUpdater {
             this.loadAllPaymentMethods();
             return;
         }
-        console.log('refresh');
 
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethods = cartData.paymentMethods;
@@ -181,7 +180,7 @@ export class BlocksAddressUpdater {
         const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {
             const normalizedCartMethodId = cartMethod?.toLowerCase().trim(); // Normalize the `cartMethod`.
             const methodFromSettings = settingsMethodsMap.get(normalizedCartMethodId);
-
+console.log('körv');
             if (methodFromSettings) {
                 const { // @ts-ignore
                     enabled_for_legal_customer, // @ts-ignore
@@ -207,7 +206,7 @@ export class BlocksAddressUpdater {
 
                 return null; // Exclude the method if it doesn't meet the conditions.
             }
-            console.dir(updatedPaymentMethods);
+            console.log('flörb');
 
             // If it's not a custom method, retain it as-is.
             return cartMethod;
