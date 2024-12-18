@@ -165,23 +165,16 @@ export class BlocksAddressUpdater {
             this.allPaymentMethods.map((method: string) => method.toLowerCase())
         );
 
+        const settingsMethodsMap = new Map();
         paymentMethodsFromSettings.forEach((method: any) => {
             const methodKey = (method.id?.toLowerCase() || method.name?.toLowerCase()).trim();
+
+            settingsMethodsMap.set(methodKey, method);
+
             if (!existingMethodIds.has(methodKey)) {
                 this.allPaymentMethods.push(methodKey);
             }
         });
-
-        console.log(paymentMethods);
-        console.log(paymentMethodsFromSettings);
-
-        // Create a map of settings methods using a normalized key.
-        const settingsMethodsMap = new Map(
-            paymentMethodsFromSettings.map((method: any) => [
-                method.id?.toLowerCase() || method.name?.toLowerCase(),
-                method,
-            ])
-        );
 
         const isCorporate = this.widget.getCustomerType() === 'LEGAL' ||
             cartData.billingAddress?.company?.trim() !== '';
