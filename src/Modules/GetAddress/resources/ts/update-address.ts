@@ -40,7 +40,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			if (document.querySelector('.wc-block-components-form')) {
 				const blocksAddress = new BlocksAddressUpdater();
 				blocksAddress.initialize();
-				setTimeout(() => blocksAddress.refreshPaymentMethods(), 1000);
+				setTimeout(() => blocksAddress.refreshPaymentMethods(), 2000);
 				//new BlocksAddressUpdater().initialize();
 				console.log('Fetcher found and initialized.');
 				obs.disconnect(); // Stop observing once initialized.
