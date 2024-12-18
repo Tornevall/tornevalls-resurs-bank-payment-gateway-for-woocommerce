@@ -97,11 +97,14 @@ export class BlocksAddressUpdater {
      * customer types.
      */
     loadAllPaymentMethods() {
+        const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
 
         const existingMethodIds = new Set(
-            this.allPaymentMethods.map((method: string) => method.toLowerCase())
+            (cartData.paymentMethods || []).map((method: string) => method.toLowerCase())
         );
+
+        this.allPaymentMethods = [...(cartData.paymentMethods || [])];
 
         paymentMethodsFromSettings.forEach((method: any) => {
             const methodKey = (method.id?.toLowerCase() || method.name?.toLowerCase()).trim();
