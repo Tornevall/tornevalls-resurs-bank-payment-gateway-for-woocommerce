@@ -248,18 +248,13 @@ class Resursbank extends WC_Payment_Gateway
 
     public function validate_fields(): bool
     {
-        $billingCompanyGovernmentId = Url::getHttpPost(
-            key: 'billing_resurs_government_id'
-        );
-
         if (!isset($this->method)) {
             $return = true;
         }
 
         if (
             WcSession::getCustomerType() === CustomerType::LEGAL &&
-            $this->method->enabledForLegalCustomer &&
-            empty($billingCompanyGovernmentId)
+            $this->method->enabledForLegalCustomer
         ) {
             // Using WooCommerce phrases (copied) to show woocommerce default, since this is how
             // WooCommerce displays errors, with proper translations.
