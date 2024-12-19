@@ -97,6 +97,7 @@ export class BlocksAddressUpdater {
      * customer types.
      */
     loadAllPaymentMethods() {
+        // Initially build a full list, locally, of available payment methods.
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
 
