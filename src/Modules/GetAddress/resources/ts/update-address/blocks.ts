@@ -84,6 +84,7 @@ export class BlocksAddressUpdater {
     initialize() {
         const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
         if (!cartDataReady) {
+            console.log('Cart data not ready, waiting for resolution.');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         }
 
