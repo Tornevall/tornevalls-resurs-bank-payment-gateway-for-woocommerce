@@ -246,33 +246,6 @@ class Resursbank extends WC_Payment_Gateway
         return AdminUtility::isAdmin() || WC()->cart === null;
     }
 
-    public function validate_fields(): bool
-    {
-        if (!isset($this->method)) {
-            $return = true;
-        }
-
-        if (
-            WcSession::getCustomerType() === CustomerType::LEGAL &&
-            $this->method->enabledForLegalCustomer
-        ) {
-            // Using WooCommerce phrases (copied) to show woocommerce default, since this is how
-            // WooCommerce displays errors, with proper translations.
-            wc_add_notice(
-                message: sprintf(
-                    __('%s is a required field.', 'woocommerce'),
-                    Translator::translate(phraseId: 'customer-type-legal')
-                ),
-                notice_type: 'error',
-                data: ['id' => 'billing_resurs_government_id']
-            );
-
-            $return = false;
-        }
-
-        return $return ?? true;
-    }
-
     /**
      * Make sure payment method is set up properly on null/not null.
      */
