@@ -82,8 +82,15 @@ export class BlocksAddressUpdater {
      * Configure the event listeners for the widget.
      */
     initialize() {
+        const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
+        if (!cartDataReady) {
+            console.log('Cart data not ready, triggered dispatch.');
+            dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
+        }
+
         this.widget.setupEventListeners();
         this.loadAllPaymentMethods();
+        this.refreshPaymentMethods();
     }
 
     /**
@@ -91,10 +98,23 @@ export class BlocksAddressUpdater {
      * customer types.
      */
     loadAllPaymentMethods() {
+        // Initially build a full list, locally, of available payment methods.
         const cartData = select(CART_STORE_KEY).getCartData();
-        if (cartData.paymentMethods && cartData.paymentMethods.length) {
-            this.allPaymentMethods = [...cartData.paymentMethods]; // Store a copy of all methods.
-        }
+        const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
+
+        const existingMethodIds = new Set(
+            (cartData.paymentMethods || []).map((method: string) => method.toLowerCase())
+        );
+
+        this.allPaymentMethods = [...(cartData.paymentMethods || [])];
+
+        paymentMethodsFromSettings.forEach((method: any) => {
+            const methodKey = (method.id?.toLowerCase() || method.name?.toLowerCase()).trim();
+
+            if (!existingMethodIds.has(methodKey)) {
+                this.allPaymentMethods.push(methodKey);
+            }
+        });
     }
 
     /**
@@ -140,8 +160,8 @@ export class BlocksAddressUpdater {
      */
     refreshPaymentMethods() {
         if (!this.allPaymentMethods.length) {
-            console.warn('No payment methods available for filtering.');
-            this.loadAllPaymentMethods(); // Reload if methods are not available.
+            console.log('No payment methods available for filtering.');
+            this.loadAllPaymentMethods();
             return;
         }
 
@@ -156,15 +176,16 @@ export class BlocksAddressUpdater {
 
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
 
-        // Create a map of settings methods using a normalized key.
         const settingsMethodsMap = new Map(
             paymentMethodsFromSettings.map((method: any) => [
-                method.id?.toLowerCase() || method.name?.toLowerCase(), // Normalize keys
+                method.id?.toLowerCase() || method.name?.toLowerCase(),
                 method,
             ])
         );
 
-        const isCorporate = this.widget.getCustomerType() === 'LEGAL';
+        const isCorporate = this.widget.getCustomerType() === 'LEGAL' ||
+            cartData.billingAddress?.company?.trim() !== '';
+
         const cartTotal =
             parseInt(cartData.totals.total_price, 10) /
             Math.pow(10, cartData.totals.currency_minor_unit);
@@ -173,7 +194,6 @@ export class BlocksAddressUpdater {
         const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {
             const normalizedCartMethodId = cartMethod?.toLowerCase().trim(); // Normalize the `cartMethod`.
             const methodFromSettings = settingsMethodsMap.get(normalizedCartMethodId);
-
             if (methodFromSettings) {
                 const { // @ts-ignore
                     enabled_for_legal_customer, // @ts-ignore
