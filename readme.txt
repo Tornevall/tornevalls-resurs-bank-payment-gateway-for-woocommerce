@@ -8,7 +8,7 @@ WC Tested up to: 9.2.3
 WC requires at least: 7.6.0
 Plugin requires ecom: 3.1.1
 Requires Plugins: woocommerce
-Stable tag: 1.0.56
+Stable tag: 1.0.58
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -61,6 +61,14 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.0.58
+
+[WOO-1390](https://resursbankplugins.atlassian.net/browse/WOO-1390) Partpayment widget errors with out of stocks
+
+# 1.0.57
+
+* Hotfix for missing files in the WP repo.
 
 # 1.0.56
 
