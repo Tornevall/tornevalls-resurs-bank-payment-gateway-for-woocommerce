@@ -228,5 +228,13 @@ export class BlocksAddressUpdater {
             ...cartData,
             paymentMethods: updatedPaymentMethods,
         });
+
+        if (isCorporate) {
+            // VFX only.
+            // Make sure the customer type legal is checked, if a company is present.
+            setTimeout(() => {
+                this.widget.getCustomerTypeElLegal().checked = true;
+            }, 100)
+        }
     }
 }
