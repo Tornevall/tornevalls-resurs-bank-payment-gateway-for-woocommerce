@@ -234,7 +234,7 @@ export class BlocksAddressUpdater {
             // Make sure the customer type legal is checked, if a company is present.
             setTimeout(() => {
                 this.widget.getCustomerTypeElLegal().checked = true;
-            }, 1000)
+            }, 100)
         }
     }
 }
