@@ -96,16 +96,6 @@ export class LegacyAddressUpdater {
      * Configure the initial customer type based on the billing company field.
      */
     private setupCustomerTypeOnInit() {
-        // Automatically set the correct customer type GA-element checked, depending on the fields.
-        const naturalEl = this.getAddressWidget.getCustomerTypeElNatural();
-        const legalEl = this.getAddressWidget.getCustomerTypeElLegal();
-
-        if (this.isCorporate()) {
-            legalEl.checked = true;
-        } else {
-            naturalEl.checked = true;
-        }
-
         /**
          * Listen for changes in the billing company field and update the customer type accordingly.
          */
