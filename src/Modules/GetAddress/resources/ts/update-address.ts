@@ -48,8 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (getAddressEnabled) {
-        // Initialize legacy.
-        new LegacyAddressUpdater().initialize();
-    }
+    // Initialize legacy.
+    new LegacyAddressUpdater().initialize();
 });

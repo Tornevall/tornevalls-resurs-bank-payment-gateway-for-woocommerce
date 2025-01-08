@@ -54,7 +54,7 @@ export class LegacyAddressUpdater {
      */
     initialize() {
         if (!this.getAddressEnabled) {
-            this.updateCustomerType(this.getAddressWidget.getCustomerType());
+            this.setupCustomerTypeOnInit();
             console.log('Legacy Address Fetcher is disabled.');
             return;
         }
@@ -66,21 +66,22 @@ export class LegacyAddressUpdater {
                 return;
             }
 
-            // Initialize the address widget with updateAddress callback.
-            this.getAddressWidget = new Resursbank_GetAddress({
-                updateAddress: (data: any) => {
-                    // Handle the fetched address response and update the customer type.
-                    this.handleFetchAddressResponse(data);
-                    this.updateCustomerType(this.getAddressWidget.getCustomerType());
-                },
-            });
-
             try {
+                if (this.getAddressEnabled) {
+                    // Initialize the address widget with updateAddress callback.
+                    this.getAddressWidget = new Resursbank_GetAddress({
+                        updateAddress: (data: any) => {
+                            // Handle the fetched address response and update the customer type.
+                            this.handleFetchAddressResponse(data);
+                            this.updateCustomerType(this.getAddressWidget.getCustomerType());
+                        },
+                    });
+
+                    // Configure event listeners for the widget.
+                    this.getAddressWidget.setupEventListeners();
+                }
                 // Set up customer type on initialization.
                 this.setupCustomerTypeOnInit();
-
-                // Configure event listeners for the widget.
-                this.getAddressWidget.setupEventListeners();
             } catch (error) {
                 console.error('Error initializing address widget:', error);
             }
