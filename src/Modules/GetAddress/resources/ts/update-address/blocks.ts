@@ -14,6 +14,12 @@ export class BlocksAddressUpdater {
     private widget: any = null;
 
     /**
+     * Widget enabled flag.
+     * @private
+     */
+    private widgetEnabled: boolean = false;
+
+    /**
      * Store all payment methods persistently.
      * @private
      */
@@ -22,54 +28,60 @@ export class BlocksAddressUpdater {
     /**
      * Generate widget instance.
      */
-    constructor() {
+    constructor(useWidget: boolean) {
+        this.widgetEnabled = useWidget;
         // Initialize any properties if needed
-        this.widget = new Resursbank_GetAddress({
-            updateAddress: (data: any) => {
+        if (useWidget) {
+            this.widget = new Resursbank_GetAddress({
+                updateAddress: (data: any) => {
 
-                // Reset store data (and consequently the form).
-                this.resetCartData();
+                    // Reset store data (and consequently the form).
+                    this.resetCartData();
 
-                // Get current cart data.
-                let cartData = this.getCartData();
+                    // Get current cart data.
+                    let cartData = this.getCartData();
 
-                const map = {
-                    first_name: 'firstName',
-                    last_name: 'lastName',
-                    address_1: 'addressRow1',
-                    address_2: 'addressRow2',
-                    postcode: 'postalCode',
-                    city: 'postalArea',
-                    country: 'countryCode',
-                    company: 'fullName',
-                };
+                    const map = {
+                        first_name: 'firstName',
+                        last_name: 'lastName',
+                        address_1: 'addressRow1',
+                        address_2: 'addressRow2',
+                        postcode: 'postalCode',
+                        city: 'postalArea',
+                        country: 'countryCode',
+                        company: 'fullName',
+                    };
 
-                for (const [key, value] of Object.entries(map)) {
-                    if (!data.hasOwnProperty(value)) {
-                        throw new Error(
-                            `Missing required field "${value}" in data object.`
-                        );
+                    for (const [key, value] of Object.entries(map)) {
+                        if (!data.hasOwnProperty(value)) {
+                            throw new Error(
+                                `Missing required field "${value}" in data object.`
+                            );
+                        }
+
+                        if (key === 'company') {
+                            this.setBillingAndShipping(cartData,
+                                typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : '');
+                            continue;
+                        }
+
+                        // Update both shipping and billing.
+                        const addressValue = typeof data[value] === 'string' ? data[value] : '';
+                        cartData.shippingAddress[key] = addressValue;
+                        cartData.billingAddress[key] = addressValue;
                     }
 
-                    if (key === 'company') {
-                        this.setBillingAndShipping(cartData,
-                            typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : '');
-                        continue;
-                    }
+                    // Dispatch the updated cart data back to the store
+                    dispatch(CART_STORE_KEY).setCartData(cartData);
 
-                    // Update both shipping and billing.
-                    const addressValue = typeof data[value] === 'string' ? data[value] : '';
-                    cartData.shippingAddress[key] = addressValue;
-                    cartData.billingAddress[key] = addressValue;
-                }
-
-                // Dispatch the updated cart data back to the store
-                dispatch(CART_STORE_KEY).setCartData(cartData);
-
-                // Trigger update for payment methods by re-triggering cart actions
-                this.refreshPaymentMethods();
-            },
-        });
+                    // Trigger update for payment methods by re-triggering cart actions
+                    this.refreshPaymentMethods();
+                },
+            });
+        } else {
+            this.loadAllPaymentMethods();
+            this.refreshPaymentMethods();
+        }
     }
 
     setBillingAndShipping(cartData: any, value: any) {
@@ -81,14 +93,17 @@ export class BlocksAddressUpdater {
     /**
      * Configure the event listeners for the widget.
      */
-    initialize() {
+    initialize(widgetEnabled: boolean) {
+        this.widgetEnabled = widgetEnabled;
         const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
         if (!cartDataReady) {
             console.log('Cart data not ready, triggered dispatch.');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         }
 
-        this.widget.setupEventListeners();
+        if (this.widgetEnabled) {
+            this.widget.setupEventListeners();
+        }
         this.loadAllPaymentMethods();
         this.refreshPaymentMethods();
     }
@@ -183,7 +198,7 @@ export class BlocksAddressUpdater {
             ])
         );
 
-        const isCorporate = this.widget.getCustomerType() === 'LEGAL' ||
+        const isCorporate = this.widget?.getCustomerType() === 'LEGAL' ||
             cartData.billingAddress?.company?.trim() !== '';
 
         const cartTotal =

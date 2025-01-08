@@ -54,11 +54,11 @@ export class LegacyAddressUpdater {
      */
     initialize() {
         if (!this.getAddressEnabled) {
+            this.updateCustomerType(this.getAddressWidget.getCustomerType());
             console.log('Legacy Address Fetcher is disabled.');
             return;
         }
-
-        console.log('Legacy Address Fetcher Loaded.');
+        console.log('Legacy Address Fetcher Ready.');
 
         jQuery(document).ready(() => {
             // Ensure the address widget is available before proceeding.

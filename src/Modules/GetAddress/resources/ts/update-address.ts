@@ -10,13 +10,10 @@ declare const Resursbank_GetAddress: any;
  * depending on whether blocks or legacy is used.
  */
 document.addEventListener('DOMContentLoaded', () => {
-    if (!( // @ts-ignore
+    const getAddressEnabled = ( // @ts-ignore
         rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
         rbFrontendData?.getAddressEnabled === true
-    )) {
-        console.log('Address Fetcher is disabled.');
-        return;
-    }
+    );
 
     // Confirm we are loaded on the checkout page.
     if (!document.querySelector('.woocommerce-checkout')) {
@@ -32,13 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Limited to the checkout section. Occurs randomly depending on load speed.
     if (document.querySelector('.wc-block-components-form')) {
         console.log('Fetcher found by element.');
-        new BlocksAddressUpdater().initialize();
+        new BlocksAddressUpdater(getAddressEnabled).initialize(getAddressEnabled);
     } else {
         // When blocks are not present, we need to observe the DOM for changes.
         const observer = new MutationObserver((mutations, obs) => {
             // Check if the required element has been added to the DOM.
             if (document.querySelector('.wc-block-components-form')) {
-                new BlocksAddressUpdater().initialize();
+                new BlocksAddressUpdater(getAddressEnabled).initialize(getAddressEnabled);
                 console.log('Fetcher found by observer.');
                 obs.disconnect();
             }
@@ -51,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialize legacy.
-    new LegacyAddressUpdater().initialize();
+    if (getAddressEnabled) {
+        // Initialize legacy.
+        new LegacyAddressUpdater().initialize();
+    }
 });
