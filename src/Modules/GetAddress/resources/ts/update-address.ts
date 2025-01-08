@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if blocks exist and initialize, otherwise observe until it appears.
     // Limited to the checkout section. Occurs randomly depending on load speed.
     if (document.querySelector('.wc-block-components-form')) {
-        console.log('Fetcher found by element.');
+        console.log('Address Fetcher found by element (Enabled: ' + getAddressEnabled + ').');
         new BlocksAddressUpdater(getAddressEnabled).initialize(getAddressEnabled);
     } else {
         // When blocks are not present, we need to observe the DOM for changes.
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if the required element has been added to the DOM.
             if (document.querySelector('.wc-block-components-form')) {
                 new BlocksAddressUpdater(getAddressEnabled).initialize(getAddressEnabled);
-                console.log('Fetcher found by observer.');
+                console.log('Address Fetcher found by observer (Enabled: ' + getAddressEnabled + ').');
                 obs.disconnect();
             }
         });
