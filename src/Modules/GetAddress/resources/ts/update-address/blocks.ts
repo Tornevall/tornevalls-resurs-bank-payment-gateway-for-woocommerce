@@ -30,6 +30,7 @@ export class BlocksAddressUpdater {
      */
     constructor(useWidget: boolean) {
         this.widgetEnabled = useWidget;
+
         // Initialize any properties if needed
         if (useWidget) {
             this.widget = new Resursbank_GetAddress({
@@ -60,8 +61,10 @@ export class BlocksAddressUpdater {
                         }
 
                         if (key === 'company') {
-                            this.setBillingAndShipping(cartData,
-                                typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : '');
+                            this.setBillingAndShipping(
+                                cartData,
+                                typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : ''
+                            );
                             continue;
                         }
 
@@ -81,7 +84,29 @@ export class BlocksAddressUpdater {
         } else {
             this.loadAllPaymentMethods();
             this.refreshPaymentMethods();
+            this.addCartUpdateListener('#shipping-company');
+            this.addCartUpdateListener('#billing-company');
         }
+    }
+
+    addCartUpdateListener(fieldName: string) {
+        const mutationObserver = new MutationObserver(() => {
+            const companyField = document.querySelector(fieldName);
+
+            if (companyField) {
+                mutationObserver.disconnect();
+
+                companyField.addEventListener('change', (event) => {
+                    console.log(`${fieldName} has changed`);
+                    this.refreshPaymentMethods();
+                });
+            }
+        });
+
+        mutationObserver.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
     }
 
     setBillingAndShipping(cartData: any, value: any) {
