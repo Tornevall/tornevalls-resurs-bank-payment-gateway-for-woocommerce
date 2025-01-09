@@ -77,11 +77,19 @@ export class BlocksAddressUpdater {
         } else {
             this.loadAllPaymentMethods();
             this.refreshPaymentMethods();
+
+            // When getAddress is disabled, we need to check for changes in the company field separately
+            // to make sure payment methods are updated properly.
             this.addCartUpdateListener('#shipping-company');
             this.addCartUpdateListener('#billing-company');
         }
     }
 
+    /**
+     * Add a listener to the specified field to trigger payment method updates on changes.
+     *
+     * @param fieldName
+     */
     addCartUpdateListener(fieldName: string) {
         const mutationObserver = new MutationObserver(() => {
             const companyField = document.querySelector(fieldName);
@@ -102,6 +110,11 @@ export class BlocksAddressUpdater {
         });
     }
 
+    /**
+     * Update billing and shipping address in cartData.
+     * @param cartData
+     * @param value
+     */
     setBillingAndShipping(cartData: any, value: any) {
         // Update both shipping and billing.
         cartData.shippingAddress.company = value;
@@ -109,7 +122,7 @@ export class BlocksAddressUpdater {
     }
 
     /**
-     * Configure the event listeners for the widget.
+     * Configure the event listeners for the getAddress-widget.
      *
      * @param widgetEnabled
      */
