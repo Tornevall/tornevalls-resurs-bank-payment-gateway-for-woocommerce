@@ -8,6 +8,10 @@ declare const Resursbank_GetAddress: any;
 export class LegacyAddressUpdater {
     private getAddressWidget: any;
 
+    /**
+     * Check if the address widget is enabled from the internal configuratio.
+     * @private
+     */
     private getAddressEnabled: boolean;
 
     constructor() {
@@ -54,11 +58,11 @@ export class LegacyAddressUpdater {
      */
     initialize() {
         if (!this.getAddressEnabled) {
+            this.setupCustomerTypeOnInit();
             console.log('Legacy Address Fetcher is disabled.');
             return;
         }
-
-        console.log('Legacy Address Fetcher Loaded.');
+        console.log('Legacy Address Fetcher Ready.');
 
         jQuery(document).ready(() => {
             // Ensure the address widget is available before proceeding.
@@ -66,50 +70,47 @@ export class LegacyAddressUpdater {
                 return;
             }
 
-            // Initialize the address widget with updateAddress callback.
-            this.getAddressWidget = new Resursbank_GetAddress({
-                updateAddress: (data: any) => {
-                    // Handle the fetched address response and update the customer type.
-                    this.handleFetchAddressResponse(data);
-                    this.updateCustomerType(this.getAddressWidget.getCustomerType());
-                },
-            });
-
             try {
+                if (this.getAddressEnabled) {
+                    // Initialize the address widget with updateAddress callback.
+                    this.getAddressWidget = new Resursbank_GetAddress({
+                        updateAddress: (data: any) => {
+                            // Handle the fetched address response and update the customer type.
+                            this.handleFetchAddressResponse(data);
+                            this.updateCustomerType(this.getAddressWidget.getCustomerType());
+                        },
+                    });
+
+                    // Configure event listeners for the widget.
+                    this.getAddressWidget.setupEventListeners();
+                }
                 // Set up customer type on initialization.
                 this.setupCustomerTypeOnInit();
-
-                // Configure event listeners for the widget.
-                this.getAddressWidget.setupEventListeners();
             } catch (error) {
                 console.error('Error initializing address widget:', error);
             }
         });
     }
 
+    isCorporate() {
+        const billingCompany = jQuery('#billing_company');
+        return billingCompany.length > 0 && billingCompany.val().trim() !== '';
+    }
+
     /**
      * Configure the initial customer type based on the billing company field.
      */
     private setupCustomerTypeOnInit() {
-        const billingCompany = jQuery('#billing_company');
-
         /**
          * Listen for changes in the billing company field and update the customer type accordingly.
          */
         const updateCustomerType = () => {
-            const isCompany = billingCompany.length > 0 && billingCompany.val().trim() !== '';
-            const customerType = isCompany ? 'LEGAL' : 'NATURAL';
+            const customerType = this.isCorporate() ? 'LEGAL' : 'NATURAL';
             this.updateCustomerType(customerType);
         };
 
         updateCustomerType();
-        billingCompany.on('input change', updateCustomerType);
-
-        // The not-so-optimal customer type checker.
-        // @todo Find out a more efficient way to set the radio properly after a saved session request.
-        //const naturalEl = this.getAddressWidget.getCustomerTypeElNatural();
-        //const legalEl = this.getAddressWidget.getCustomerTypeElLegal();
-        // if (customerType === 'LEGAL') { legalEl.checked = true; } else { naturalEl.checked = true; }
+        jQuery('#billing_company').on('input change', updateCustomerType);
     }
 
     /**

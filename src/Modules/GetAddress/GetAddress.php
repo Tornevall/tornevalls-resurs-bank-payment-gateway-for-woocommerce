@@ -28,14 +28,14 @@ class GetAddress
      */
     public static function init(): void
     {
-        if (EnableGetAddress::isEnabled() === false) {
-            return;
-        }
-
         add_action(
             hook_name: 'wp_enqueue_scripts',
             callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\FrontendAssets::exec'
         );
+
+        if (EnableGetAddress::isEnabled() === false) {
+            return;
+        }
 
         // Inject Get Address widget in blocked based checkout.
         add_filter(

@@ -154,7 +154,6 @@ const settings = getSetting('resursbank_data', {});
                 ) {
                     return false;
                 }
-
                 // All checks passed, payment method is allowed.
                 return true;
             },

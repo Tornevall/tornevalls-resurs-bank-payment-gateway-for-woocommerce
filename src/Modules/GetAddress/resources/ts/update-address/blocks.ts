@@ -22,56 +22,99 @@ export class BlocksAddressUpdater {
     /**
      * Generate widget instance.
      */
-    constructor() {
+    constructor(useWidget: boolean) {
+
         // Initialize any properties if needed
-        this.widget = new Resursbank_GetAddress({
-            updateAddress: (data: any) => {
+        if (useWidget) {
+            this.widget = new Resursbank_GetAddress({
+                updateAddress: (data: any) => {
 
-                // Reset store data (and consequently the form).
-                this.resetCartData();
+                    // Reset store data (and consequently the form).
+                    this.resetCartData();
 
-                // Get current cart data.
-                let cartData = this.getCartData();
+                    // Get current cart data.
+                    let cartData = this.getCartData();
 
-                const map = {
-                    first_name: 'firstName',
-                    last_name: 'lastName',
-                    address_1: 'addressRow1',
-                    address_2: 'addressRow2',
-                    postcode: 'postalCode',
-                    city: 'postalArea',
-                    country: 'countryCode',
-                    company: 'fullName',
-                };
+                    const map = {
+                        first_name: 'firstName',
+                        last_name: 'lastName',
+                        address_1: 'addressRow1',
+                        address_2: 'addressRow2',
+                        postcode: 'postalCode',
+                        city: 'postalArea',
+                        country: 'countryCode',
+                        company: 'fullName',
+                    };
 
-                for (const [key, value] of Object.entries(map)) {
-                    if (!data.hasOwnProperty(value)) {
-                        throw new Error(
-                            `Missing required field "${value}" in data object.`
-                        );
+                    for (const [key, value] of Object.entries(map)) {
+                        if (!data.hasOwnProperty(value)) {
+                            throw new Error(
+                                `Missing required field "${value}" in data object.`
+                            );
+                        }
+
+                        if (key === 'company') {
+                            this.setBillingAndShipping(
+                                cartData,
+                                typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : ''
+                            );
+                            continue;
+                        }
+
+                        // Update both shipping and billing.
+                        const addressValue = typeof data[value] === 'string' ? data[value] : '';
+                        cartData.shippingAddress[key] = addressValue;
+                        cartData.billingAddress[key] = addressValue;
                     }
 
-                    if (key === 'company') {
-                        this.setBillingAndShipping(cartData,
-                            typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : '');
-                        continue;
-                    }
+                    // Dispatch the updated cart data back to the store
+                    dispatch(CART_STORE_KEY).setCartData(cartData);
 
-                    // Update both shipping and billing.
-                    const addressValue = typeof data[value] === 'string' ? data[value] : '';
-                    cartData.shippingAddress[key] = addressValue;
-                    cartData.billingAddress[key] = addressValue;
-                }
+                    // Trigger update for payment methods by re-triggering cart actions
+                    this.refreshPaymentMethods();
+                },
+            });
+        } else {
+            this.loadAllPaymentMethods();
+            this.refreshPaymentMethods();
 
-                // Dispatch the updated cart data back to the store
-                dispatch(CART_STORE_KEY).setCartData(cartData);
+            // When getAddress is disabled, we need to check for changes in the company field separately
+            // to make sure payment methods are updated properly.
+            this.addCartUpdateListener('#shipping-company');
+            this.addCartUpdateListener('#billing-company');
+        }
+    }
 
-                // Trigger update for payment methods by re-triggering cart actions
-                this.refreshPaymentMethods();
-            },
+    /**
+     * Add a listener to the specified field to trigger payment method updates on changes.
+     *
+     * @param fieldName
+     */
+    addCartUpdateListener(fieldName: string) {
+        const mutationObserver = new MutationObserver(() => {
+            const companyField = document.querySelector(fieldName);
+
+            if (companyField) {
+                mutationObserver.disconnect();
+
+                companyField.addEventListener('change', (event) => {
+                    console.log(`${fieldName} has changed`);
+                    this.refreshPaymentMethods();
+                });
+            }
+        });
+
+        mutationObserver.observe(document.body, {
+            childList: true,
+            subtree: true,
         });
     }
 
+    /**
+     * Update billing and shipping address in cartData.
+     * @param cartData
+     * @param value
+     */
     setBillingAndShipping(cartData: any, value: any) {
         // Update both shipping and billing.
         cartData.shippingAddress.company = value;
@@ -79,16 +122,20 @@ export class BlocksAddressUpdater {
     }
 
     /**
-     * Configure the event listeners for the widget.
+     * Configure the event listeners for the getAddress-widget.
+     *
+     * @param widgetEnabled
      */
-    initialize() {
+    initialize(widgetEnabled: boolean) {
         const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
         if (!cartDataReady) {
             console.log('Cart data not ready, triggered dispatch.');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         }
 
-        this.widget.setupEventListeners();
+        if (widgetEnabled) {
+            this.widget.setupEventListeners();
+        }
         this.loadAllPaymentMethods();
         this.refreshPaymentMethods();
     }
@@ -183,7 +230,7 @@ export class BlocksAddressUpdater {
             ])
         );
 
-        const isCorporate = this.widget.getCustomerType() === 'LEGAL' ||
+        const isCorporate = this.widget?.getCustomerType() === 'LEGAL' ||
             cartData.billingAddress?.company?.trim() !== '';
 
         const cartTotal =
