@@ -8,6 +8,10 @@ declare const Resursbank_GetAddress: any;
 export class LegacyAddressUpdater {
     private getAddressWidget: any;
 
+    /**
+     * Check if the address widget is enabled from the internal configuratio.
+     * @private
+     */
     private getAddressEnabled: boolean;
 
     constructor() {

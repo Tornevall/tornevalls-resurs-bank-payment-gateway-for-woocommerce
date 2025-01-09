@@ -14,12 +14,6 @@ export class BlocksAddressUpdater {
     private widget: any = null;
 
     /**
-     * Widget enabled flag.
-     * @private
-     */
-    private widgetEnabled: boolean = false;
-
-    /**
      * Store all payment methods persistently.
      * @private
      */
@@ -29,7 +23,6 @@ export class BlocksAddressUpdater {
      * Generate widget instance.
      */
     constructor(useWidget: boolean) {
-        this.widgetEnabled = useWidget;
 
         // Initialize any properties if needed
         if (useWidget) {
@@ -117,16 +110,17 @@ export class BlocksAddressUpdater {
 
     /**
      * Configure the event listeners for the widget.
+     *
+     * @param widgetEnabled
      */
     initialize(widgetEnabled: boolean) {
-        this.widgetEnabled = widgetEnabled;
         const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
         if (!cartDataReady) {
             console.log('Cart data not ready, triggered dispatch.');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         }
 
-        if (this.widgetEnabled) {
+        if (widgetEnabled) {
             this.widget.setupEventListeners();
         }
         this.loadAllPaymentMethods();
