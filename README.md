@@ -1,19 +1,20 @@
 # Resurs Bank Payments for WooCommerce
 
-This is a payment gateway for WooCommerce and WordPress. Do not run this plugin side by side with the prior releases of Resurs Bank plugins!
+This is a payment gateway for WooCommerce and WordPress. Do not run this plugin side by side with the prior releases of
+Resurs Bank plugins!
 Requires PHP 8.1
 
 This is a payment gateway for WooCommerce and WordPress.
 
 # System requirements
 
-| Requirement       | Version        | Notes                                                                                                                                                    |
-|-------------------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| PHP               | 8.1+           |                                                                                                                                                          |
-| WordPress         | Latest | See the official PHP/WordPress compatiblity chart [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/). |
-| WooCommerce       | 7.6.0+         |
-| PHP CURL extension | Required       |
-| SSL (HTTPS)       | Required       | Callbacks from Resurs Bank will not work without this.                                                                                                   |
+| Requirement        | Version  | Notes                                                                                                                                                    |
+|--------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| PHP                | 8.1+     |                                                                                                                                                          |
+| WordPress          | Latest   | See the official PHP/WordPress compatiblity chart [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/). |
+| WooCommerce        | 7.6.0+   |
+| PHP CURL extension | Required |
+| SSL (HTTPS)        | Required | Callbacks from Resurs Bank will not work without this.                                                                                                   |
 
 # Configuration
 
@@ -23,7 +24,8 @@ Configuration are made through the admin panel.
 
 ### Where can I get more information about this plugin?
 
-Find out more in about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/).
+Find out more in about the
+plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/).
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar).
 
@@ -76,7 +78,7 @@ HTML output.
 - **Attributes**: `content`, `align`
 - **Admin Rendering**: Provides a text area to enter and format text.
 - **Frontend Rendering**: Outputs a `<p>` tag with the specified content and
-   alignment.
+  alignment.
 
 ## NodeJs & NPM
 
@@ -138,14 +140,14 @@ files for the project. Here is a summary of our configuration:
 
 - **Dependencies**:
     - `@wordpress/scripts/config/webpack.config`: Base configuration from
-    WordPress scripts.
+      WordPress scripts.
     - `@woocommerce/dependency-extraction-webpack-plugin`: Plugin to handle
-    WooCommerce dependencies.
+      WooCommerce dependencies.
     - `path`: Node.js module for handling file paths.
 
 - **WooCommerce Dependency Mapping**:
     - `wcDepMap` and `wcHandleMap` are used to map WooCommerce dependencies to
-    external resources.
+      external resources.
 
 WooCommerce initially used separate node modules, but they have been merged into
 the main WooCommerce repository. The reason is that if every module was to
@@ -174,9 +176,9 @@ object. For example this:
 
 ```typescript
 const wcDepMap = {
-    '@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
-    '@woocommerce/settings': [ 'wc', 'wcSettings' ],
-    '@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
+    '@woocommerce/blocks-registry': ['wc', 'wcBlocksRegistry'],
+    '@woocommerce/settings': ['wc', 'wcSettings'],
+    '@woocommerce/block-data': ['wc', 'wcBlocksData'],
 };
 ```
 
@@ -204,7 +206,7 @@ https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks
 
 - **Output**:
     - Bundled files are output to the `assets/js` directory with filenames
-    matching the entry point keys.
+      matching the entry point keys.
 
 Basically, `src/Modules/Gateway/resources/ts/gateway.tsx` will be bundled into
 `assets/js/dist/gateway.js` and so on.
@@ -212,7 +214,7 @@ Basically, `src/Modules/Gateway/resources/ts/gateway.tsx` will be bundled into
 - **Plugins**:
     - Filters out the default `DependencyExtractionWebpackPlugin`.
     - Adds `WooCommerceDependencyExtractionWebpackPlugin` with custom
-    `requestToExternal` and `requestToHandle` functions.
+      `requestToExternal` and `requestToHandle` functions.
 
 Basically, we disable any default `DependencyExtractionWebpackPlugin` to avoid
 conflicts and then register the `WooCommerceDependencyExtractionWebpackPlugin`
@@ -253,7 +255,9 @@ function setLabel(newLabel) {
     store.my_label = newLabel;
 }
 ```
+
 ```html
+
 <div>{store.my_label}</div>
 ```
 
@@ -392,7 +396,7 @@ separate payment method block component (see the call to
 
 Note that this file is suffixed with **.tsx** because it contains JSX code.
 
-Also note the **canMakePayment** property of the object we return. This is a 
+Also note the **canMakePayment** property of the object we return. This is a
 native property of payment methods, a function which executes automatically when
 the cart store (more on this later) changes, to check whether payment methods
 are available.
@@ -403,9 +407,9 @@ blocks to be modifiable.
 
 On line 106 - 108 we supply the HTML components for our payment method:
 
-* \<Label> - This corresponds to the **const Label** declared around 
+* \<Label> - This corresponds to the **const Label** declared around
   **line 98**
-* \<Content> - This corresponds to the **const Content** declared around 
+* \<Content> - This corresponds to the **const Content** declared around
   **line 60**
 
 If you examine these constants, you will see that they both declare a function
@@ -418,6 +422,43 @@ cause confusion around the state being split into multiple stores at all).
 For example, see the **Content** const where we update the iframe URL around
 **line 69** to reflect the current cart total (taking applied coupons etc. into
 account).
+
+## Payment methods and customer tracking
+
+Depending on whether the fetchAddress widget is enabled or not, the rendering behavior of payment methods varies. A
+persistent challenge since the creation of this part of the plugin has been the necessity to identify the customer type
+regardless of the widget's state.
+
+To simplify this process, we have implemented a customer-tracking feature in the segments actively utilized by our
+widget. The tracking itself is located in a dedicated TypeScript
+segment (`src/Modules/GetAddress/resources/ts/update-address/customer.ts`). This implementation consists solely of an
+AJAX request, resembling the approach previously used in the legacy system without blocks.
+
+When the fetchAddress functionality is invoked, it is essential to load the scripts even if the widget is disabled. This
+is because our payment methods, when rendered, support both business customers (LEGAL) and private individuals (
+NATURAL). However, our block handler must always be aware of the available payment methods. One reason for this
+requirement is that switching between NATURAL and LEGAL filters out payment methods in a way that prevents them from
+being retrieved again without a page refresh.
+
+We have resolved this by storing all payment methods in memory. During each update of the cart and WooCommerce data,
+payment methods are retrieved from memory rather than relying on WooCommerce's partially provided data. This ensures
+consistent availability and proper rendering of payment options regardless of customer type or widget state.
+
+It is also in this segmentation that we handle customer types. Without the customer-type tracking, our backend scripts
+would be unable to determine which payment methods should be displayed in different scenarios, resulting in NATURAL
+always being prioritized. This, in turn, leads to LEGAL methods sometimes not being properly registered or displayed in
+the checkout unless we ensure that payment methods can be programmatically updated afterward. When everything functions
+as intended, all payment methods will always appear immediately upon loading, even when LEGAL is used. This behavior is
+managed through `WcSession`, where `customerType` is set, for instance, when the 'company-name' field is filled in the
+customer details. This occurs via a backend call while the script is executing.
+
+To prevent issues with this kind of loading, we use the following two methods to ensure that all methods are available,
+even when the session for which customerTypes reside in, is not yet synchronized:
+
+```typescript
+this.loadAllPaymentMethods();
+this.refreshPaymentMethods();
+```
 
 ## State and Store
 
