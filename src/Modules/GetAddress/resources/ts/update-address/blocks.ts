@@ -3,6 +3,7 @@ import {dispatch, select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 // @ts-ignore
 import {getSetting} from '@woocommerce/settings';
+import {BlocksCustomerType} from "./customer";
 
 // Ignore missing Resursbank_GetAddress renders through Ecom Widget.
 declare const Resursbank_GetAddress: any;
@@ -20,9 +21,16 @@ export class BlocksAddressUpdater {
     private allPaymentMethods: any[] = [];
 
     /**
+     * Customer Type Update Action.
+     * @private
+     */
+    private customerTypeUpdater: any;
+
+    /**
      * Generate widget instance.
      */
     constructor(useWidget: boolean) {
+        this.customerTypeUpdater = new BlocksCustomerType();
 
         // Initialize any properties if needed
         if (useWidget) {
@@ -98,7 +106,8 @@ export class BlocksAddressUpdater {
                 mutationObserver.disconnect();
 
                 companyField.addEventListener('change', (event) => {
-                    console.log(`${fieldName} has changed`);
+                    // @ts-ignore
+                    resursConsoleLog(`${fieldName} has changed`, 'DEBUG');
                     this.refreshPaymentMethods();
                 });
             }
@@ -129,7 +138,8 @@ export class BlocksAddressUpdater {
     initialize(widgetEnabled: boolean) {
         const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
         if (!cartDataReady) {
-            console.log('Cart data not ready, triggered dispatch.');
+            // @ts-ignore
+            resursConsoleLog('Cart data not ready, triggered dispatch.', 'DEBUG');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         }
 
@@ -207,7 +217,8 @@ export class BlocksAddressUpdater {
      */
     refreshPaymentMethods() {
         if (!this.allPaymentMethods.length) {
-            console.log('No payment methods available for filtering.');
+            // @ts-ignore
+            resursConsoleLog('No payment methods available for filtering.', 'DEBUG');
             this.loadAllPaymentMethods();
             return;
         }
@@ -275,5 +286,7 @@ export class BlocksAddressUpdater {
             ...cartData,
             paymentMethods: updatedPaymentMethods,
         });
+
+        this.customerTypeUpdater.updateCustomerType(isCorporate ? 'LEGAL' : 'NATURAL');
     }
 }

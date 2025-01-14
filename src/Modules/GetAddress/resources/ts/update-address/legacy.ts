@@ -1,5 +1,6 @@
 // @ts-ignore
 import * as jQuery from 'jquery';
+import {BlocksCustomerType} from "./customer";
 
 // Declare the Resursbank_GetAddress function from the external library.
 declare const Resursbank_GetAddress: any;
@@ -14,42 +15,21 @@ export class LegacyAddressUpdater {
      */
     private getAddressEnabled: boolean;
 
+    /**
+     * Customer Type Update Action.
+     * @private
+     */
+    private customerTypeUpdater: any;
+
     constructor() {
         this.getAddressEnabled = // @ts-ignore
             rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
             rbFrontendData?.getAddressEnabled === true;
 
+        this.customerTypeUpdater = new BlocksCustomerType();
+
         // Initialize the address widget to undefined.
         this.getAddressWidget = undefined;
-    }
-
-    /**
-     * Update the customer type in the checkout process.
-     *
-     * This is required by the checkout if payment methods should reload properly.
-     * Sends an AJAX request to update the customer type and triggers the checkout update event.
-     *
-     * @param customerType The type of customer (LEGAL or NATURAL).
-     */
-    private updateCustomerType(customerType: string) { // @ts-ignore
-        // rbFrontendData is expected through internal localization.
-        const apiUrl = rbFrontendData?.apiUrl; // Ensure the API URL is defined.
-        if (!apiUrl) {
-            console.error('API URL is undefined');
-            return;
-        }
-
-        jQuery.ajax({
-            url: `${apiUrl}&customerType=${customerType}`,
-        })
-            .done(() => {
-                // Trigger the update_checkout event on successful AJAX call.
-                jQuery(document.body).trigger('update_checkout');
-            }) // @ts-ignore
-            .fail((error) => {
-                // Log any errors encountered during the AJAX call.
-                console.error('Error updating customer type:', error);
-            });
     }
 
     /**
@@ -59,10 +39,12 @@ export class LegacyAddressUpdater {
     initialize() {
         if (!this.getAddressEnabled) {
             this.setupCustomerTypeOnInit();
-            console.log('Legacy Address Fetcher is disabled.');
+            // @ts-ignore
+            resursConsoleLog('Legacy Address Fetcher is disabled.');
             return;
         }
-        console.log('Legacy Address Fetcher Ready.');
+        // @ts-ignore
+        resursConsoleLog('Legacy Address Fetcher Ready.');
 
         jQuery(document).ready(() => {
             // Ensure the address widget is available before proceeding.
@@ -77,7 +59,7 @@ export class LegacyAddressUpdater {
                         updateAddress: (data: any) => {
                             // Handle the fetched address response and update the customer type.
                             this.handleFetchAddressResponse(data);
-                            this.updateCustomerType(this.getAddressWidget.getCustomerType());
+                            this.customerTypeUpdater.updateCustomerType(this.getAddressWidget.getCustomerType());
                         },
                     });
 
@@ -106,11 +88,11 @@ export class LegacyAddressUpdater {
          */
         const updateCustomerType = () => {
             const customerType = this.isCorporate() ? 'LEGAL' : 'NATURAL';
-            this.updateCustomerType(customerType);
+            this.customerTypeUpdater.updateCustomerType(customerType);
         };
 
         updateCustomerType();
-        jQuery('#billing_company').on('input change', updateCustomerType);
+        jQuery('#billing_company').on('input change', this.customerTypeUpdater.updateCustomerType);
     }
 
     /**

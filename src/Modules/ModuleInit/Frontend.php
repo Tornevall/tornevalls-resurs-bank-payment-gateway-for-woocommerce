@@ -25,12 +25,16 @@ class Frontend
 {
     /**
      * Init various modules.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
         if (!Enabled::isEnabled()) {
             return;
         }
+
+        add_action('wp_enqueue_scripts', [self::class, 'enableConsoleLogs'], 1);
 
         GatewayBlocks::init();
         Gateway::initFrontend();
@@ -39,5 +43,22 @@ class Frontend
         PartPayment::initFrontend();
         GetAddress::init();
         UniqueSellingPoint::init();
+    }
+
+    /**
+     * Enable logging to console for widget code, but based on the configured logLevel.
+     */
+    public static function enableConsoleLogs(): void
+    {
+        echo "<script>
+        function resursConsoleLog(message, logLevel = 'INFO') {
+            if (typeof rbFrontendData !== 'undefined') {
+                const currentLogLevel = rbFrontendData.logLevel;
+                if (currentLogLevel === 'DEBUG' || (currentLogLevel === 'INFO' && logLevel === 'INFO')) {
+                    console.log(message);
+                }
+            }
+        }
+    </script>";
     }
 }

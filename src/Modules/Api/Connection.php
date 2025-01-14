@@ -165,7 +165,7 @@ class Connection
     {
         $result = new NoneLogger();
 
-        if (!LogEnabled::getData()) {
+        if (!LogEnabled::getData() || LogDir::getData() === '') {
             return $result;
         }
 
