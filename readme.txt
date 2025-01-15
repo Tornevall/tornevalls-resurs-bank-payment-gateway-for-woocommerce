@@ -9,7 +9,7 @@ WC requires at least: 7.6.0
 Plugin requires ecom: 3.1.1
 Requires Plugins: woocommerce
 Stable tag: 1.0.58
-Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
+Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ A payment is expected to be simple, secure and fast, regardless of whether it ta
 At checkout, your customer can choose between several flexible payment options, something that not only provides a better shopping experience but also generates more and larger purchases.
 
 [Sign up for Resurs](https://www.resursbank.se/betallosningar)!
-Find out more in about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/).
+Find out more in about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/).
 
 = System Requirements =
 
@@ -49,7 +49,7 @@ Doing it manually? Look below.
 
 = Where can I get more information about this plugin? =
 
-Find out more about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/).
+Find out more about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/).
 
 = Can I upgrade from version 2.2.x? =
 
