@@ -42,6 +42,7 @@ class SetCustomerType
                     key: RESURSBANK_MODULE_PREFIX . '_' . CustomerRepository::SESSION_KEY_CUSTOMER_TYPE,
                     value: $customerType->value
                 );
+                $response['customerType'] = $customerType->value;
             }
         }
 

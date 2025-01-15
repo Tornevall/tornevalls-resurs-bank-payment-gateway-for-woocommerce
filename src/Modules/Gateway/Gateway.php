@@ -29,7 +29,6 @@ use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use function is_array;
@@ -235,6 +234,7 @@ class Gateway
 
             foreach ($paymentMethodList as $paymentMethod) {
                 $sortOrder++;
+
                 $gateway = new Resursbank(
                     method: $paymentMethod,
                     sortOrder: $sortOrder
@@ -248,7 +248,19 @@ class Gateway
             }
         } catch (Throwable $e) {
             Log::error(error: $e);
+
+            /**
+             * @todo Consider an alternative method for displaying errors.
+             *
+             * The messages below will always appear on the screen, even if no credentials are set.
+             * The primary intent is to display errors to admin users, such as 502 Gateway Errors.
+             * However, the error code for such messages is 0, making it difficult to track them properly.
+             */
+            //if (Admin::isAdmin()) {
+            //    Log::error(error: $e, message: 'A problem occurred when fetching payment methods.');
+            //}
         }
+
 
         // Add default method to payment gateways. Will only be reflected on
         // gateway page, see \Resursbank\Woocommerce\Modules\Gateway\Resursbank::is_available

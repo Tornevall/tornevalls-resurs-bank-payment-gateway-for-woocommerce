@@ -88,7 +88,7 @@ class Resursbank extends WC_Payment_Gateway
         $this->type = null;
         $this->sortOrder = $sortOrder;
 
-        // __constructor complexity solving.
+        // Resolving payment method, setting the proper id for the gateway.
         $this->resolveNullableMethod();
 
         // Mirror title to method_title.
@@ -97,10 +97,11 @@ class Resursbank extends WC_Payment_Gateway
         // When the blocks editor redirects admins to woocommerce internal sections
         // for handling payment methods, we need to redirect them back to the correct
         // location since our methods are not editable from WooCommerce.
-        if (isset($method->id) &&
+        if (isset($_REQUEST['section']) &&
+            isset($method->id) &&
             is_string(value: $this->id) &&
-            $method->id !== RESURSBANK_MODULE_PREFIX)
-        {
+            $method->id !== RESURSBANK_MODULE_PREFIX
+        ) {
             // Redirect to the correct section if the wrong section is requested when section is set to a method id.
             AdminUtility::redirectAtWrongSection(method: $method->id);
         }
@@ -176,6 +177,7 @@ class Resursbank extends WC_Payment_Gateway
      * Whether payment method is available.
      *
      * @noinspection PhpMissingParentCallCommonInspection
+     * @throws ConfigException
      */
     public function is_available(): bool
     {
@@ -187,30 +189,46 @@ class Resursbank extends WC_Payment_Gateway
             return false;
         }
 
+        // Conditions below are separated to make debugging easier.
+
         // Not in checkout? Act like they are all there.
         if (!is_checkout()) {
             return true;
         }
 
-        return $this->validatePurchaseLimit() &&
-            $this->validateCustomerCountry() &&
-            match (WcSession::getCustomerType()) {
-                CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
-                CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
-            };
+        // If purchase limit are not fulfilled, skip early.
+        if ($this->validatePurchaseLimit() === false) {
+            return false;
+        }
+
+        // Validate country, except when restrictions are disabled. This is a
+        // credit card-related feature where, in some cases, we want credit cards
+        // to work across borders, but they don't when we sell exclusively within
+        // our own country. When restrictions are disabled, all payment methods
+        // are opened up for cross-border sales. Here, we have chosen not to
+        // implement specific checks for which payment methods are allowed to
+        // operate in this scenario - it's an all-or-nothing approach.
+        if (SetMethodCountryRestriction::getData() && !$this->validateCustomerCountry()) {
+            return false;
+        }
+
+        return match (WcSession::getCustomerType()) {
+            CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
+            CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
+        };
     }
 
     /**
      * Customer country validation.
      *
      * @return bool
+     * @throws ConfigException
      */
     public function validateCustomerCountry(): bool
     {
         // If country restrictions are enabled, we will validate that the customer is located in the
         // same country as the API based country.
-        return !(SetMethodCountryRestriction::getData()) ||
-            (WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry());
+        return (WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry());
     }
 
     /**

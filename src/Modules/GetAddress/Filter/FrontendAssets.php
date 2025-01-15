@@ -9,11 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
+use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
@@ -28,14 +25,23 @@ use Throwable;
  */
 class FrontendAssets
 {
-    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     /**
-     * @throws HttpException
-     * @throws EmptyValueException
-     * @throws IllegalValueException
-     * @throws FilesystemException
+     * Enqueued script execution.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(): void
+    {
+        self::enableScripts();
+        self::enableStyles();
+    }
+
+    /**
+     * Enable all scripts for the front end.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function enableScripts(): void
     {
         wp_enqueue_script(
             'rb-get-address',
@@ -55,6 +61,7 @@ class FrontendAssets
                     route: Route::ROUTE_SET_CUSTOMER_TYPE
                 ),
                 'getAddressEnabled' => EnableGetAddress::isEnabled(),
+                'logLevel' => LogLevel::getData()->name
             ]
         );
 
@@ -62,7 +69,15 @@ class FrontendAssets
             'rb-get-address',
             (string)GetAddress::getWidget()?->js
         );
+    }
 
+    /**
+     * Enable all styles for the front end.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function enableStyles(): void
+    {
         try {
             wp_enqueue_style(
                 'rb-ga-basic-css',

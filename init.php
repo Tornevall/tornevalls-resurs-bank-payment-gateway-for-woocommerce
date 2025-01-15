@@ -22,6 +22,7 @@
 // Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
 
+
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -47,6 +48,7 @@ if (!file_exists(filename: __DIR__ . '/lib/ecom/composer.json')) {
     resursBankHasNoEcom();
     return;
 }
+
 if (PHP_VERSION_ID < 80100) {
     resursBankHasOldPhp();
     return;
@@ -63,21 +65,13 @@ define(
 
 // Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>"
 define(
-	constant_name: 'RESURSBANK_MODULE_DIR_PATH',
-	value: plugin_dir_path(file: __FILE__)
+    constant_name: 'RESURSBANK_MODULE_DIR_PATH',
+    value: plugin_dir_path(file: __FILE__)
 );
 
 define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 require_once __DIR__ . '/autoload.php';
-
-// Translation domain is used for all phrases that is not relying on ecom2.
-load_plugin_textdomain(
-    domain: 'resurs-bank-payments-for-woocommerce',
-    plugin_rel_path: dirname(
-        path: plugin_basename(file: __FILE__)
-    ) . '/language/'
-);
 
 // Make sure there is an instance of WooCommerce among active plugins.
 if (!WooCommerce::isAvailable()) {
@@ -99,7 +93,11 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     add_action(
         'before_woocommerce_init',
         static function (): void {
-            if (!class_exists(class: 'Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+            if (
+                !class_exists(
+                    class: 'Automattic\WooCommerce\Utilities\FeaturesUtil'
+                )
+            ) {
                 return;
             }
 

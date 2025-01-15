@@ -17,7 +17,6 @@ const settings = getSetting('resursbank_data', {});
     ) {
         return;
     }
-
     if (typeof getSetting !== 'function') {
         console.error('WooCommerce: getSetting is not available.');
         return;
@@ -116,8 +115,15 @@ const settings = getSetting('resursbank_data', {});
             );
         };
 
+        // @ts-ignore
+        resursConsoleLog(
+            'Register ' + method.name + ' (' + method.title + ').',
+            'DEBUG'
+        );
+
         registerPaymentMethod({
             name: method.name,
+            paymentMethodId: method.name,
             label: <Label/>,
             content: <Content/>,
             edit: <Content/>,
@@ -127,6 +133,11 @@ const settings = getSetting('resursbank_data', {});
                 if (
                     data.billingAddress.country !== settings.allowed_country
                 ) {
+                    // @ts-ignore
+                    resursConsoleLog(
+                        'Country does not match.',
+                        'DEBUG'
+                    );
                     return false;
                 }
 
@@ -139,6 +150,11 @@ const settings = getSetting('resursbank_data', {});
                         !method.enabled_for_natural_customer
                     )
                 ) {
+                    // @ts-ignore
+                    resursConsoleLog(
+                        'Customer type does not match for ' + method.name + '/' + method.title + '.',
+                        'DEBUG'
+                    );
                     return false;
                 }
 
@@ -152,6 +168,11 @@ const settings = getSetting('resursbank_data', {});
                     cart_total < method.min_purchase_limit ||
                     cart_total > method.max_purchase_limit
                 ) {
+                    // @ts-ignore
+                    resursConsoleLog(
+                        'Order total ('+cart_total+') does not match.',
+                        'DEBUG'
+                    );
                     return false;
                 }
                 // All checks passed, payment method is allowed.
@@ -160,8 +181,8 @@ const settings = getSetting('resursbank_data', {});
             ariaLabel: label,
             supports: {
                 blockBasedCheckout: method.name !== 'resursbank',
+                features: ['products', 'shipping', 'coupons'],
             },
-            editUrl: `${window.location.origin}/wp-admin/admin.php?page=wc-settings&tab=checkout&section=${method.name}`
         });
     });
 })();

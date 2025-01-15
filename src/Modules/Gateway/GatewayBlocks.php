@@ -52,6 +52,14 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             )
         );
 
+        add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
+    }
+
+    /**
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function enqueueAssets(): void
+    {
         wp_register_style(
             'rb-wc-blocks-css',
             Url::getResourceUrl(
