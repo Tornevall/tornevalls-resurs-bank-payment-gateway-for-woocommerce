@@ -254,6 +254,9 @@ export class BlocksAddressUpdater {
             parseInt(cartData.totals.total_price, 10) /
             Math.pow(10, cartData.totals.currency_minor_unit);
 
+        // @ts-ignore
+        resursConsoleLog('Current Customer Type: ' + (isCorporate ? 'LEGAL' : 'NATURAL'), 'DEBUG');
+
         // Iterate over all cart methods and update their availability.
         const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {
             const normalizedCartMethodId = cartMethod?.toLowerCase().trim(); // Normalize the `cartMethod`.
@@ -273,12 +276,6 @@ export class BlocksAddressUpdater {
                     (!isCorporate && enabled_for_natural_customer) ||
                     (!isCorporate && enabled_for_legal_customer && enabled_for_natural_customer);
 
-                // @ts-ignore
-                resursConsoleLog( // @ts-ignore
-                    'Customer type used for ' + methodFromSettings.title + ': ' + (isCorporate ? 'LEGAL' : 'NATURAL'),
-                    'DEBUG'
-                );
-
                 // Validate purchase limits.
                 const withinPurchaseLimits =
                     cartTotal >= min_purchase_limit && cartTotal <= max_purchase_limit;
@@ -290,8 +287,13 @@ export class BlocksAddressUpdater {
                 );
 
                 if (supportsCustomerType && withinPurchaseLimits) {
+                    // @ts-ignore
+                    resursConsoleLog(methodFromSettings.title + ' is approved as method.', 'DEBUG');
                     return cartMethod; // Keep the method if it meets all conditions.
                 }
+
+                // @ts-ignore
+                resursConsoleLog(methodFromSettings.title + ' is excluded as method.', 'DEBUG');
 
                 return null; // Exclude the method if it doesn't meet the conditions.
             }
