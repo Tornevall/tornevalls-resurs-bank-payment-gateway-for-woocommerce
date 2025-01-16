@@ -85,12 +85,10 @@ export class BlocksAddressUpdater {
         } else {
             this.loadAllPaymentMethods();
             this.refreshPaymentMethods();
-
-            // When getAddress is disabled, we need to check for changes in the company field separately
-            // to make sure payment methods are updated properly.
-            this.addCartUpdateListener('#shipping-company');
-            this.addCartUpdateListener('#billing-company');
         }
+
+        this.addCartUpdateListener('#shipping-company');
+        this.addCartUpdateListener('#billing-company');
     }
 
     /**
