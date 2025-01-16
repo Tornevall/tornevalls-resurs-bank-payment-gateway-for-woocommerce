@@ -282,13 +282,19 @@ export class BlocksAddressUpdater {
 
                 if (supportsCustomerType && withinPurchaseLimits) {
                     // @ts-ignore
-                    // @ts-ignore
                     resursConsoleLog( // @ts-ignore
-                        'Order total for ' + methodFromSettings.title + ', ' + cartTotal + ': ' + (withinPurchaseLimits ? 'Within' : 'Outside') + ' limits and supported by customer type.',
+                        methodFromSettings.title + ', ' + cartTotal + ': Approved limit and supported customer type.',
                         'DEBUG'
                     );
                     return cartMethod; // Keep the method if it meets all conditions.
                 }
+
+                // @ts-ignore
+                resursConsoleLog( // @ts-ignore
+                    methodFromSettings.title + ', ' + cartTotal + ': Not approved. (' + (withinPurchaseLimits ? 'Within' : 'Outside') + ' limit). ' +
+                    (supportsCustomerType ? 'Customer type supported.' : 'Customer type not supported.'),
+                    'DEBUG'
+                );
 
                 // @ts-ignore
                 resursConsoleLog(methodFromSettings.title + ' is excluded as method.', 'DEBUG');
