@@ -280,15 +280,13 @@ export class BlocksAddressUpdater {
                 const withinPurchaseLimits =
                     cartTotal >= min_purchase_limit && cartTotal <= max_purchase_limit;
 
-                // @ts-ignore
-                resursConsoleLog( // @ts-ignore
-                    'Order total for ' + methodFromSettings.title + ', ' + cartTotal + ': ' + (withinPurchaseLimits ? 'Within' : 'Outside') + ' limits.',
-                    'DEBUG'
-                );
-
                 if (supportsCustomerType && withinPurchaseLimits) {
                     // @ts-ignore
-                    resursConsoleLog(methodFromSettings.title + ' is approved as method.', 'DEBUG');
+                    // @ts-ignore
+                    resursConsoleLog( // @ts-ignore
+                        'Order total for ' + methodFromSettings.title + ', ' + cartTotal + ': ' + (withinPurchaseLimits ? 'Within' : 'Outside') + ' limits and supported by customer type.',
+                        'DEBUG'
+                    );
                     return cartMethod; // Keep the method if it meets all conditions.
                 }
 
