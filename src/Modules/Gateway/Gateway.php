@@ -261,7 +261,6 @@ class Gateway
             //}
         }
 
-
         // Add default method to payment gateways. Will only be reflected on
         // gateway page, see \Resursbank\Woocommerce\Modules\Gateway\Resursbank::is_available
         $gateways[] = Resursbank::class;

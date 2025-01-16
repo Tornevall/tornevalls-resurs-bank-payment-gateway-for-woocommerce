@@ -155,6 +155,9 @@ export class BlocksAddressUpdater {
      * customer types.
      */
     loadAllPaymentMethods() {
+        // @ts-ignore
+        resursConsoleLog('Loading internal payment methods.', 'DEBUG');
+
         // Initially build a full list, locally, of available payment methods.
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
@@ -223,6 +226,9 @@ export class BlocksAddressUpdater {
             return;
         }
 
+        // @ts-ignore
+        resursConsoleLog('Refreshing internal payment methods.', 'DEBUG');
+
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethods = cartData.paymentMethods;
 
@@ -267,9 +273,21 @@ export class BlocksAddressUpdater {
                     (!isCorporate && enabled_for_natural_customer) ||
                     (!isCorporate && enabled_for_legal_customer && enabled_for_natural_customer);
 
+                // @ts-ignore
+                resursConsoleLog(
+                    'Customer type: ' + (isCorporate ? 'LEGAL' : 'NATURAL') + ' for ' + cartMethod,
+                    'DEBUG'
+                );
+
                 // Validate purchase limits.
                 const withinPurchaseLimits =
                     cartTotal >= min_purchase_limit && cartTotal <= max_purchase_limit;
+
+                // @ts-ignore
+                resursConsoleLog(
+                    'Order total (' + cartTotal + ') for ' + cartMethod + ' is ' + (withinPurchaseLimits ? 'within' : 'outside') + ' limits.',
+                    'DEBUG'
+                );
 
                 if (supportsCustomerType && withinPurchaseLimits) {
                     return cartMethod; // Keep the method if it meets all conditions.
