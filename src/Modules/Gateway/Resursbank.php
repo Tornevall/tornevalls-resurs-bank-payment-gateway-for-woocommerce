@@ -151,7 +151,6 @@ class Resursbank extends WC_Payment_Gateway
 
         $order = new WC_Order(order: $order_id);
 
-
         try {
             $payment = $this->createPayment(order: $order);
         } catch (Throwable $e) {

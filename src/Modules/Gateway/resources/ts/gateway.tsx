@@ -32,6 +32,8 @@ const settings = getSetting('resursbank_data', {});
         return;
     }
 
+    const debugAlwaysReturn = false;
+
     settings.payment_methods.forEach((method: any) => {
         const label = method.title;
 
@@ -128,6 +130,11 @@ const settings = getSetting('resursbank_data', {});
             content: <Content/>,
             edit: <Content/>,
             canMakePayment: (data: any) => {
+
+                if (debugAlwaysReturn) {
+                    return true;
+                }
+
                 // Filter out all payment methods if customer country does not
                 // match country associated with API account.
                 if (

@@ -274,8 +274,8 @@ export class BlocksAddressUpdater {
                     (!isCorporate && enabled_for_legal_customer && enabled_for_natural_customer);
 
                 // @ts-ignore
-                resursConsoleLog(
-                    'Customer type: ' + (isCorporate ? 'LEGAL' : 'NATURAL') + ' for ' + cartMethod,
+                resursConsoleLog( // @ts-ignore
+                    'Customer type used for ' + methodFromSettings.title + ': ' + (isCorporate ? 'LEGAL' : 'NATURAL'),
                     'DEBUG'
                 );
 
@@ -284,8 +284,8 @@ export class BlocksAddressUpdater {
                     cartTotal >= min_purchase_limit && cartTotal <= max_purchase_limit;
 
                 // @ts-ignore
-                resursConsoleLog(
-                    'Order total (' + cartTotal + ') for ' + cartMethod + ' is ' + (withinPurchaseLimits ? 'within' : 'outside') + ' limits.',
+                resursConsoleLog( // @ts-ignore
+                    'Order total for ' + methodFromSettings.title + ', ' + cartTotal + ': ' + (withinPurchaseLimits ? 'Within' : 'Outside') + ' limits.',
                     'DEBUG'
                 );
 
