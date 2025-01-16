@@ -177,7 +177,8 @@ const settings = getSetting('resursbank_data', {});
                 ) {
                     // @ts-ignore
                     resursConsoleLog(
-                        'Order total ('+cart_total+') does not match.',
+                        method.title + ': Order total (' + cart_total + ') does not match with ' +
+                        method.min_purchase_limit + ' and ' + method.max_purchase_limit + '.',
                         'DEBUG'
                     );
                     return false;
