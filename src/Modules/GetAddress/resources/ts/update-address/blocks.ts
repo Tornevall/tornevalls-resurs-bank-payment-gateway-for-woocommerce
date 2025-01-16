@@ -296,9 +296,6 @@ export class BlocksAddressUpdater {
                     'DEBUG'
                 );
 
-                // @ts-ignore
-                resursConsoleLog(methodFromSettings.title + ' is excluded as method.', 'DEBUG');
-
                 return null; // Exclude the method if it doesn't meet the conditions.
             }
 
