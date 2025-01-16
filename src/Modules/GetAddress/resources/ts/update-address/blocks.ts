@@ -291,8 +291,8 @@ export class BlocksAddressUpdater {
 
                 // @ts-ignore
                 resursConsoleLog( // @ts-ignore
-                    methodFromSettings.title + ', ' + cartTotal + ': Excluded. Reason - ' + (withinPurchaseLimits ? 'Within' : 'Outside') + ' limit. ' +
-                    (supportsCustomerType ? 'Customer type supported.' : 'Customer type not supported.'),
+                    methodFromSettings.title + ', ' + cartTotal + ': ' + (withinPurchaseLimits ? 'Within (OK)' : 'Outside (Not OK)') + ' limit. ' +
+                    (supportsCustomerType ? 'Customer type supported (OK).' : 'Customer type not supported (Not OK).'),
                     'DEBUG'
                 );
 
