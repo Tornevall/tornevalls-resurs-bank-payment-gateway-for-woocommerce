@@ -245,8 +245,10 @@ export class BlocksAddressUpdater {
             ])
         );
 
+        // In blocks,shipping address has higher priority than billing when it comes
+        // to company names.
         const isCorporate = this.widget?.getCustomerType() === 'LEGAL' ||
-            (cartData.billingAddress?.company?.trim() !== '' || cartData.shippingAddress?.company?.trim() !== '');
+            cartData.shippingAddress?.company?.trim() !== '';
 
         const cartTotal =
             parseInt(cartData.totals.total_price, 10) /

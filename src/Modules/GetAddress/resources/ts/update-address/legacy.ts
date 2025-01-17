@@ -21,6 +21,10 @@ export class LegacyAddressUpdater {
      */
     private customerTypeUpdater: any;
 
+    /**
+     * Check if the checkout blocks are enabled, through our natural lookups.
+     * @private
+     */
     private isUsingCheckoutBlocks: boolean;
 
     constructor() {
@@ -103,8 +107,14 @@ export class LegacyAddressUpdater {
             this.customerTypeUpdater.updateCustomerType(customerType);
         };
 
+        // Update the customer type on initialization and then bind on input changes.
         updateCustomerType();
-        jQuery('#billing_company').on('input change', this.customerTypeUpdater.updateCustomerType);
+        jQuery('#billing_company').on('change', function() {
+            const customerTypeUpdater = new BlocksCustomerType();
+
+            // @ts-ignore
+            customerTypeUpdater.updateCustomerType(this.value !== '' ? 'LEGAL' : 'NATURAL');
+        });
     }
 
     /**
