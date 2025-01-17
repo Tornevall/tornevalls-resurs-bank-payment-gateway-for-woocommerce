@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -39,7 +40,6 @@ use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
-use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -143,15 +143,21 @@ class Resursbank extends WC_Payment_Gateway
      * Create Resurs Bank payment and assign additional metadata to WC_Order.
      *
      * @noinspection PhpMissingParentCallCommonInspection
+     * @throws Exception
      */
     public function process_payment(mixed $order_id): array
     {
+        global $blockCreateErrorMessage;
+
         $order = new WC_Order(order: $order_id);
 
         try {
             $payment = $this->createPayment(order: $order);
         } catch (Throwable $e) {
             $this->handleCreatePaymentError(order: $order, error: $e);
+            if ($blockCreateErrorMessage && WooCommerce::isUsingBlocksCheckout()) {
+                throw new Exception(message: $blockCreateErrorMessage);
+            }
         }
 
         if (!isset($payment) || !$payment->isProcessable()) {
@@ -452,6 +458,7 @@ class Resursbank extends WC_Payment_Gateway
     // @phpcs:ignoreFile CognitiveComplexity
     private function handleCreatePaymentError(WC_Order $order, Throwable $error): void
     {
+        global $blockCreateErrorMessage;
         Log::error(
             error: $error,
             message: Translator::translate(phraseId: 'error-creating-payment')
@@ -464,11 +471,14 @@ class Resursbank extends WC_Payment_Gateway
 
             if ($error instanceof CurlException) {
                 if (count($error->getDetails())) {
+                    /** @var $detail */
                     foreach ($error->getDetails() as $detail) {
                         MessageBag::addError(message: $detail);
+                        $blockCreateErrorMessage .= $detail . "\n";
                     }
                 } else {
                     MessageBag::addError(message: $error->getMessage());
+                    $blockCreateErrorMessage = $error->getMessage();
                 }
             } else {
                 // Only display relevant error messages on the order placement screen. CurlExceptions usually contains

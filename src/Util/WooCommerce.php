@@ -40,6 +40,16 @@ class WooCommerce
     }
 
     /**
+     * Trying to determine if the checkout is using blocks or not.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function isUsingBlocksCheckout(): bool
+    {
+        return has_block('woocommerce/checkout', wc_get_page_id('checkout'));
+    }
+
+    /**
      * Fast way to get a cart total from WC.
      */
     public static function getCartTotals(): float

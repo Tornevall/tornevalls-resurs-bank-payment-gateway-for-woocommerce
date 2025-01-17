@@ -128,6 +128,7 @@ const settings = getSetting('resursbank_data', {});
             content: <Content/>,
             edit: <Content/>,
             canMakePayment: (data: any) => {
+
                 // Filter out all payment methods if customer country does not
                 // match country associated with API account.
                 if (
