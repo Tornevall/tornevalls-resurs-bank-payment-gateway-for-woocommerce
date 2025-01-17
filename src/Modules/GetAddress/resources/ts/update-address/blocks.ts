@@ -27,10 +27,18 @@ export class BlocksAddressUpdater {
     private customerTypeUpdater: any;
 
     /**
+     * Use billing element.
+     * @private
+     */
+    private useBillingElement: any;
+
+    /**
      * Generate widget instance.
      */
     constructor(useWidget: boolean) {
         this.customerTypeUpdater = new BlocksCustomerType();
+
+        this.initializeUseBillingElement();
 
         // Initialize any properties if needed
         if (useWidget) {
@@ -112,6 +120,38 @@ export class BlocksAddressUpdater {
         });
 
         mutationObserver.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
+    }
+
+    /**
+     * Initialize the useBillingElement and set up an observer if it doesn't exist.
+     */
+    private initializeUseBillingElement() {
+        // Try to find the element initially
+        const element = document.querySelector<HTMLInputElement>('.wc-block-checkout__use-address-for-billing input[type="checkbox"]');
+        if (element) {
+            // @ts-ignore
+            resursConsoleLog("useBillingElement found during initialization.", 'DEBUG');
+            this.useBillingElement = element;
+            return;
+        }
+
+        // @ts-ignore
+        // Set up a MutationObserver to detect when the element is added
+        resursConsoleLog("useBillingElement not found. Setting up observer...", 'DEBUG');
+        const observer = new MutationObserver((mutations, obs) => {
+            const observedElement = document.querySelector<HTMLInputElement>('.wc-block-checkout__use-address-for-billing input[type="checkbox"]');
+            if (observedElement) {
+                // @ts-ignore
+                resursConsoleLog("useBillingElement found by observer.", 'DEBUG');
+                this.useBillingElement = observedElement;
+                obs.disconnect(); // Stop observing once the element is found
+            }
+        });
+
+        observer.observe(document.body, {
             childList: true,
             subtree: true,
         });
@@ -214,6 +254,20 @@ export class BlocksAddressUpdater {
     }
 
     /**
+     * Determine whether billing is being used based on the checkbox state.
+     */
+    usingBilling(): boolean {
+        if (!this.useBillingElement) {
+            console.warn("useBillingElement is not initialized. Defaulting to billing.");
+            return true; // Default to billing if the element is not initialized
+        }
+
+        // @ts-ignore
+        resursConsoleLog("Use same address for billing:", this.useBillingElement.checked);
+        return !this.useBillingElement.checked; // Return true when unchecked (use billing)
+    }
+
+    /**
      * Trigger WooCommerce to recalculate cart and payment methods.
      */
     refreshPaymentMethods() {
@@ -245,10 +299,14 @@ export class BlocksAddressUpdater {
             ])
         );
 
-        // In blocks,shipping address has higher priority than billing when it comes
+        // In blocks, shipping address has higher priority than billing when it comes
         // to company names.
         const isCorporate = this.widget?.getCustomerType() === 'LEGAL' ||
-            cartData.shippingAddress?.company?.trim() !== '';
+            (
+                this.usingBilling()
+                    ? cartData.billingAddress?.company?.trim() !== ''
+                    : cartData.shippingAddress?.company?.trim() !== ''
+            );
 
         const cartTotal =
             parseInt(cartData.totals.total_price, 10) /
