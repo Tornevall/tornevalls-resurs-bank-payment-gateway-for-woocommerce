@@ -61,7 +61,8 @@ class FrontendAssets
                     route: Route::ROUTE_SET_CUSTOMER_TYPE
                 ),
                 'getAddressEnabled' => EnableGetAddress::isEnabled(),
-                'logLevel' => LogLevel::getData()->name
+                'logLevel' => LogLevel::getData()->name,
+                'isUsingCheckoutBlocks' => WooCommerce::isUsingBlocksCheckout()
             ]
         );
 

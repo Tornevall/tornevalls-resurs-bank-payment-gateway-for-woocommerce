@@ -246,14 +246,13 @@ export class BlocksAddressUpdater {
         );
 
         const isCorporate = this.widget?.getCustomerType() === 'LEGAL' ||
-            cartData.billingAddress?.company?.trim() !== '';
+            (cartData.billingAddress?.company?.trim() !== '' || cartData.shippingAddress?.company?.trim() !== '');
 
         const cartTotal =
             parseInt(cartData.totals.total_price, 10) /
             Math.pow(10, cartData.totals.currency_minor_unit);
 
-        // @ts-ignore
-        resursConsoleLog('Current Customer Type: ' + (isCorporate ? 'LEGAL' : 'NATURAL'), 'DEBUG');
+        this.customerTypeUpdater.updateCustomerType(isCorporate ? 'LEGAL' : 'NATURAL');
 
         // Iterate over all cart methods and update their availability.
         const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {
@@ -305,7 +304,5 @@ export class BlocksAddressUpdater {
             ...cartData,
             paymentMethods: updatedPaymentMethods,
         });
-
-        this.customerTypeUpdater.updateCustomerType(isCorporate ? 'LEGAL' : 'NATURAL');
     }
 }

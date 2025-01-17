@@ -9,6 +9,32 @@ import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {getSetting} from '@woocommerce/settings';
 
 const settings = getSetting('resursbank_data', {});
+let lastResursCompanyName = '';
+
+
+/**
+ * Validate the customer type based on the billing address and method settings.
+ *
+ * @param {object} billingAddress - The billing address data.
+ * @param {object} method - The payment method data.
+ * @returns {boolean} - Returns true if the customer type matches, false otherwise.
+ */
+const validateCustomerType = (billingAddress: any, method: any) => {
+    if (
+        (billingAddress.company !== '' && !method.enabled_for_legal_customer) ||
+        (billingAddress.company === '' && !method.enabled_for_natural_customer)
+    ) {
+        lastResursCompanyName = billingAddress.company;
+        // Log the mismatch for debugging purposes
+        // @ts-ignore
+        resursConsoleLog(
+            'Exclude ' + method.title + ': Customer type not matching.',
+            'DEBUG'
+        );
+        return false;
+    }
+    return true;
+};
 
 (() => {
     if (
@@ -115,12 +141,6 @@ const settings = getSetting('resursbank_data', {});
             );
         };
 
-        // @ts-ignore
-        resursConsoleLog(
-            'Register ' + method.name + ' (' + method.title + ').',
-            'DEBUG'
-        );
-
         registerPaymentMethod({
             name: method.name,
             paymentMethodId: method.name,
@@ -128,7 +148,6 @@ const settings = getSetting('resursbank_data', {});
             content: <Content/>,
             edit: <Content/>,
             canMakePayment: (data: any) => {
-
                 // Filter out all payment methods if customer country does not
                 // match country associated with API account.
                 if (
@@ -142,20 +161,7 @@ const settings = getSetting('resursbank_data', {});
                     return false;
                 }
 
-                // Filter out payment methods based on customer type (determined
-                // by whether a company name is provided).
-                if (
-                    (data.billingAddress.company !== '' &&
-                        !method.enabled_for_legal_customer) ||
-                    (data.billingAddress.company === '' &&
-                        !method.enabled_for_natural_customer
-                    )
-                ) {
-                    // @ts-ignore
-                    resursConsoleLog(
-                        'Customer type does not match for ' + method.name + '/' + method.title + '.',
-                        'DEBUG'
-                    );
+                if (!validateCustomerType(data.billingAddress, method)) {
                     return false;
                 }
 
