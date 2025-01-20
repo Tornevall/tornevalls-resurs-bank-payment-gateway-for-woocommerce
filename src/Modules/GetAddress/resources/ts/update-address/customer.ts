@@ -22,9 +22,6 @@ export class BlocksCustomerType {
             return;
         }
 
-        // @ts-ignore
-        resursConsoleLog('Customer Type Update: ' + customerType, 'DEBUG');
-
         jQuery.ajax({
             url: `${apiUrl}&customerType=${customerType}`,
         }) // @ts-ignore

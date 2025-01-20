@@ -21,7 +21,16 @@ export class LegacyAddressUpdater {
      */
     private customerTypeUpdater: any;
 
+    /**
+     * Check if the checkout blocks are enabled, through our natural lookups.
+     * @private
+     */
+    private isUsingCheckoutBlocks: boolean;
+
     constructor() {
+        // @ts-ignore
+        this.isUsingCheckoutBlocks = rbFrontendData?.isUsingCheckoutBlocks === '1' || rbFrontendData?.isUsingCheckoutBlocks === true;
+
         this.getAddressEnabled = // @ts-ignore
             rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
             rbFrontendData?.getAddressEnabled === true;
@@ -37,7 +46,14 @@ export class LegacyAddressUpdater {
      * Sets up the address widget and event listeners for handling updates.
      */
     initialize() {
+        if (this.isUsingCheckoutBlocks) {
+            // @ts-ignore
+            resursConsoleLog('Checkout Blocks enabled. Skipping Legacy Address Fetcher Initializations.');
+            return;
+        }
         if (!this.getAddressEnabled) {
+            // @ts-ignore
+            resursConsoleLog('Legacy Address Fetcher is disabled, Initializing Alternative CustomerType.');
             this.setupCustomerTypeOnInit();
             // @ts-ignore
             resursConsoleLog('Legacy Address Fetcher is disabled.');
@@ -91,8 +107,14 @@ export class LegacyAddressUpdater {
             this.customerTypeUpdater.updateCustomerType(customerType);
         };
 
+        // Update the customer type on initialization and then bind on input changes.
         updateCustomerType();
-        jQuery('#billing_company').on('input change', this.customerTypeUpdater.updateCustomerType);
+        jQuery('#billing_company').on('change', function() {
+            const customerTypeUpdater = new BlocksCustomerType();
+
+            // @ts-ignore
+            customerTypeUpdater.updateCustomerType(this.value !== '' ? 'LEGAL' : 'NATURAL');
+        });
     }
 
     /**
