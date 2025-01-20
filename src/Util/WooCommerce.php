@@ -46,7 +46,15 @@ class WooCommerce
      */
     public static function isUsingBlocksCheckout(): bool
     {
-        return has_block('woocommerce/checkout', wc_get_page_id('checkout'));
+        $checkoutPageId = wc_get_page_id('checkout');
+
+        // Check if the checkout page ID is valid
+        if (!$checkoutPageId || $checkoutPageId <= 0) {
+            return false;
+        }
+
+        // Check if the page contains the specific block
+        return has_block('woocommerce/checkout', $checkoutPageId);
     }
 
     /**
