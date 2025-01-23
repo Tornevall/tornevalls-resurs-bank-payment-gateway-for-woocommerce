@@ -174,11 +174,13 @@ class PartPayment
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
         $customerCountry = get_option('woocommerce_default_country');
+
         try {
             $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
         } catch (Throwable) {
             $storeCountry = $customerCountry;
         }
+
         $minLimit = 150;
 
         if ($storeCountry === 'FI') {
