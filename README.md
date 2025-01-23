@@ -48,7 +48,12 @@ complex content (like the WooCommerce checkout).
 
 Blocks on the other hand are re-usable components for the new Gutenberg editor.
 They allow users to build complex layouts and content structures in a modular
-and reusable way. Here's a brief explanation of how blocks work:
+and reusable way. Below is an explanation of how blocks work.
+
+Take note of the fact that not all themes you have installed fully support blocks.
+The basic behavior of our plugin often relates to core functions in WooCommerce
+and/or the themes. If the theme does not support blocks, you also need to ensure
+that this is not the main problem.
 
 ### Reusable Components with Attributes
 
