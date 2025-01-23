@@ -30,6 +30,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as Payment
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -173,9 +174,14 @@ class PartPayment
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
         $customerCountry = get_option('woocommerce_default_country');
+        try {
+            $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
+        } catch (Throwable) {
+            $storeCountry = $customerCountry;
+        }
         $minLimit = 150;
 
-        if ($customerCountry === 'FI') {
+        if ($storeCountry === 'FI') {
             $minLimit = 15;
         }
 
@@ -192,6 +198,7 @@ class PartPayment
                 )
             ));
         } elseif ($new < $minLimit) {
+            update_option('resursbank_part_payment_limit', $minLimit);
             MessageBag::addError(message: str_replace(
                 search: '%1',
                 replace: (string)$minLimit,
