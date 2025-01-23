@@ -12,7 +12,6 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
-use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -34,7 +33,6 @@ class Customer
      * Retrieve Customer object for payment creation.
      *
      * @throws AttributeCombinationException
-     * @throws IllegalCharsetException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
@@ -60,12 +58,9 @@ class Customer
             ),
             customerType: WcSession::getCustomerType(),
             contactPerson: $contactPerson,
-            email: self::getAddressData(key: 'email', address: $address),
+            email: $order->get_billing_email(),
             governmentId: WcSession::getGovernmentId(),
-            mobilePhone: self::getAddressData(
-                key: 'mobile',
-                address: $address
-            ),
+            mobilePhone: self::getCustomerPhone(order: $order),
             deviceInfo: new DeviceInfo(
                 ip: DeviceInfo::getIp(),
                 userAgent: DeviceInfo::getUserAgent()
@@ -96,16 +91,12 @@ class Customer
     }
 
     /**
-     * Get proper address based on blocks and legacy. For legacy this is very much automated by the checkbox.
-     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    private static function getProperAddress(WC_Order $order): array
+    private static function useAddressForBilling(WC_Order $order): bool
     {
         if (!WooCommerce::isUsingBlocksCheckout()) {
-            return isset($_POST['ship_to_different_address'])
-                ? $order->get_address('shipping')
-                : $order->get_address();
+            return !isset($_POST['ship_to_different_address']);
         }
 
         $shippingAddress = $order->get_address('shipping');
@@ -134,11 +125,44 @@ class Customer
                 isset($shippingAddress[$field], $billingAddress[$field])
                 && $shippingAddress[$field] !== $billingAddress[$field]
             ) {
-                return $shippingAddress;
+                return false;
             }
         }
 
-        return $billingAddress;
+        return true;
+    }
+
+    /**
+     * Get proper address based on blocks and legacy. For legacy this is very much automated by the checkbox.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    private static function getProperAddress(WC_Order $order): array
+    {
+        return self::useAddressForBilling(order: $order)
+            ? $order->get_address()
+            : $order->get_address('shipping');
+    }
+
+    /**
+     * Get customer phone number.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    private static function getCustomerPhone(WC_Order $order): string
+    {
+        $billingPhone = $order->get_billing_phone();
+        $shippingPhone = $order->get_shipping_phone();
+
+        // Legacy only have billing phone.
+        if (!WooCommerce::isUsingBlocksCheckout()) {
+            return $billingPhone;
+        }
+
+        // Always use billing phone primarily when it exists. If shipping phone is empty,
+        // fall back on billing.
+        return !self::useAddressForBilling(order: $order) &&
+        !empty($billingPhone) ? $billingPhone : ($shippingPhone ?? $billingPhone);
     }
 
     /**
