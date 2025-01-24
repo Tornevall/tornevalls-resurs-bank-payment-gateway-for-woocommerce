@@ -41,6 +41,16 @@ class PartPayment
     public const SECTION_ID = 'partpayment';
 
     /**
+     * Default minimum limit for part payment threshold.
+     */
+    public const MINIMUM_THRESHOLD_LIMIT_DEFAULT = 150;
+
+    /**
+     * Minimum limit for part payment threshold in Finland.
+     */
+    public const MINIMUM_THRESHOLD_LIMIT_FI = 15;
+
+    /**
      * Get translated title of tab.
      */
     public static function getTitle(): string
@@ -130,6 +140,7 @@ class PartPayment
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
@@ -181,11 +192,7 @@ class PartPayment
             $storeCountry = $customerCountry;
         }
 
-        $minLimit = 150;
-
-        if ($storeCountry === 'FI') {
-            $minLimit = 15;
-        }
+        $minLimit = ($storeCountry === 'FI' ? self::MINIMUM_THRESHOLD_LIMIT_FI : self::MINIMUM_THRESHOLD_LIMIT_DEFAULT);
 
         if ($new < 0) {
             MessageBag::addError(message: Translator::translate(
