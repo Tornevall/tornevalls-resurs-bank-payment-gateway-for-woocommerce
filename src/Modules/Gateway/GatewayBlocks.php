@@ -17,7 +17,6 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
 use Resursbank\Ecom\Module\Store\Enum\Country;
@@ -26,10 +25,8 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
-use WC_Customer;
 
 /**
  * This class adds support for Resurs Bank payment methods in the WooCommerce
@@ -185,32 +182,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         }
 
         return $result;
-    }
-
-    /**
-     * Make sure we get the customer type as early as possible, if this can help payment method loading.
-     */
-    private static function getEarlyCustomerType(): void
-    {
-        $customer = WC()->customer;
-
-        if (!($customer instanceof WC_Customer)) {
-            return;
-        }
-
-        $billingCompany = $customer->get_billing_company();
-        $shippingCompany = $customer->get_shipping_company();
-
-        if ($billingCompany || $shippingCompany) {
-            $customerType = 'LEGAL';
-        } else {
-            $customerType = 'NATURAL';
-        }
-
-        WcSession::set(
-            key: RESURSBANK_MODULE_PREFIX . '_' . CustomerRepository::SESSION_KEY_CUSTOMER_TYPE,
-            value: $customerType
-        );
     }
 
     /**
