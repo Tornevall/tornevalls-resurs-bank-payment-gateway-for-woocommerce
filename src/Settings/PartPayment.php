@@ -30,6 +30,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as Payment
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -38,6 +39,16 @@ use Throwable;
 class PartPayment
 {
     public const SECTION_ID = 'partpayment';
+
+    /**
+     * Default minimum limit for part payment threshold.
+     */
+    public const MINIMUM_THRESHOLD_LIMIT_DEFAULT = 150;
+
+    /**
+     * Minimum limit for part payment threshold in Finland.
+     */
+    public const MINIMUM_THRESHOLD_LIMIT_FI = 15;
 
     /**
      * Get translated title of tab.
@@ -129,6 +140,7 @@ class PartPayment
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
@@ -173,11 +185,14 @@ class PartPayment
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
         $customerCountry = get_option('woocommerce_default_country');
-        $minLimit = 150;
 
-        if ($customerCountry === 'FI') {
-            $minLimit = 15;
+        try {
+            $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
+        } catch (Throwable) {
+            $storeCountry = $customerCountry;
         }
+
+        $minLimit = ($storeCountry === 'FI' ? self::MINIMUM_THRESHOLD_LIMIT_FI : self::MINIMUM_THRESHOLD_LIMIT_DEFAULT);
 
         if ($new < 0) {
             MessageBag::addError(message: Translator::translate(
@@ -192,6 +207,7 @@ class PartPayment
                 )
             ));
         } elseif ($new < $minLimit) {
+            update_option('resursbank_part_payment_limit', $minLimit);
             MessageBag::addError(message: str_replace(
                 search: '%1',
                 replace: (string)$minLimit,
