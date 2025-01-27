@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
 use Resursbank\Ecom\Module\Store\Enum\Country;
@@ -25,8 +26,10 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
+use WC_Customer;
 
 /**
  * This class adds support for Resurs Bank payment methods in the WooCommerce
@@ -47,9 +50,12 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            static fn (PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
-                (new self())
-            )
+            static function (PaymentMethodRegistry $payment_method_registry): void {
+                $payment_method_registry->register(
+                    (new self())
+                );
+                self::getEarlyCustomerType();
+            }
         );
 
         add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
@@ -112,6 +118,13 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      */
     public function get_payment_method_script_handles(): array
     {
+        $paymentMethodOrder = [];
+
+        /** @var PaymentMethod $paymentMethod */
+        foreach (Repository::getPaymentMethods() as $paymentMethod) {
+            $paymentMethodOrder[] = $paymentMethod->id;
+        }
+
         wp_register_script(
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
@@ -122,6 +135,11 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         );
 
         wp_script_add_data('rb-wc-blocks-js', 'type', 'module');
+        wp_localize_script(
+            'rb-wc-blocks-js',
+            'rbFrontendMethods',
+            $paymentMethodOrder
+        );
 
         return array('rb-wc-blocks-js');
     }
@@ -167,6 +185,32 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         }
 
         return $result;
+    }
+
+    /**
+     * Make sure we get the customer type as early as possible, if this can help payment method loading.
+     */
+    private static function getEarlyCustomerType(): void
+    {
+        $customer = WC()->customer;
+
+        if (!($customer instanceof WC_Customer)) {
+            return;
+        }
+
+        $billingCompany = $customer->get_billing_company();
+        $shippingCompany = $customer->get_shipping_company();
+
+        if ($billingCompany || $shippingCompany) {
+            $customerType = 'LEGAL';
+        } else {
+            $customerType = 'NATURAL';
+        }
+
+        WcSession::set(
+            key: RESURSBANK_MODULE_PREFIX . '_' . CustomerRepository::SESSION_KEY_CUSTOMER_TYPE,
+            value: $customerType
+        );
     }
 
     /**

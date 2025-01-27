@@ -218,6 +218,12 @@ class Resursbank extends WC_Payment_Gateway
             return false;
         }
 
+        if (WooCommerce::isUsingBlocksCheckout()) {
+            // Always return true for everything coming from blocks checkout since, in this case,
+            // filtering on customer types is done in the blocks checkout itself.
+            return true;
+        }
+
         return match (WcSession::getCustomerType()) {
             CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
             CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
