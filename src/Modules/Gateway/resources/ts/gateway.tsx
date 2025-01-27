@@ -10,8 +10,9 @@ import {getSetting} from '@woocommerce/settings';
 
 const settings = getSetting('resursbank_data', {});
 
+// Has the address company field been filled out?
 const hasAddressCompany = (billingAddress: any, shippingAddress: any) => {
-    return billingAddress.company !== '';
+    return billingAddress.company !== '' || shippingAddress.company !== '';
 }
 
 /**
