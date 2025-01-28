@@ -22,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -145,7 +146,9 @@ class PartPayment
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
     {
-        if ($option !== Limit::getName()) {
+        global $overrideSavedCountryCode;
+
+        if ($option !== Limit::getName() && $option !== StoreId::getName()) {
             return;
         }
 
@@ -174,6 +177,58 @@ class PartPayment
             return;
         }
 
+        if ($option === StoreId::getName()) {
+            try {
+                $newStore = StoreRepository::getStores()->filterById(id: $new);
+                $countryCode = $newStore->countryCode->value;
+                $currentStoreCountry = WooCommerce::getStoreCountry();
+                $countryGroup1 = ['SE', 'NO', 'DK'];
+                $countryGroup2 = ['FI'];
+
+                if (
+                    (
+                        in_array($currentStoreCountry, $countryGroup1) &&
+                        in_array($countryCode, $countryGroup2)
+                    ) ||
+                    (
+                        in_array($currentStoreCountry, $countryGroup2) &&
+                        in_array($countryCode, $countryGroup1)
+                    )
+                ) {
+                    $overrideSavedCountryCode = $countryCode;
+
+                    if ($countryCode === 'FI') {
+                        update_option(
+                            'resursbank_part_payment_limit',
+                            self::MINIMUM_THRESHOLD_LIMIT_FI
+                        );
+                    } else {
+                        update_option(
+                            'resursbank_part_payment_limit',
+                            self::MINIMUM_THRESHOLD_LIMIT_DEFAULT
+                        );
+                    }
+                }
+            } catch (Throwable) {
+                // Ignore the exception.
+            }
+
+            return;
+        }
+
+        $customerCountry = get_option('woocommerce_default_country');
+
+        try {
+            $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
+
+            // Do not touch anything if overrider is active.
+            if (isset($overrideSavedCountryCode)) {
+                return;
+            }
+        } catch (Throwable) {
+            $storeCountry = $customerCountry;
+        }
+
         $paymentMethod = Repository::getById(paymentMethodId: $paymentMethodId);
 
         if ($paymentMethod === null) {
@@ -184,14 +239,6 @@ class PartPayment
         }
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
-        $customerCountry = get_option('woocommerce_default_country');
-
-        try {
-            $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
-        } catch (Throwable) {
-            $storeCountry = $customerCountry;
-        }
-
         $minLimit = ($storeCountry === 'FI' ? self::MINIMUM_THRESHOLD_LIMIT_FI : self::MINIMUM_THRESHOLD_LIMIT_DEFAULT);
 
         if ($new < 0) {
@@ -217,7 +264,6 @@ class PartPayment
             ));
         }
     }
-
 
     /**
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
