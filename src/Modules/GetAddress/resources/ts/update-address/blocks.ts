@@ -195,7 +195,6 @@ export class BlocksAddressUpdater {
     loadAllPaymentMethods() {
         // @ts-ignore
         resursConsoleLog('Loading internal payment methods.', 'DEBUG');
-
         // Initially build a full list, locally, of available payment methods.
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
@@ -212,6 +211,9 @@ export class BlocksAddressUpdater {
             if (!existingMethodIds.has(methodKey)) {
                 this.allPaymentMethods.push(methodKey);
             }
+        });
+        this.allPaymentMethods.sort((a, b) => { // @ts-ignore
+            return rbFrontendMethods.indexOf(a) - rbFrontendMethods.indexOf(b);
         });
     }
 
@@ -360,6 +362,11 @@ export class BlocksAddressUpdater {
             return cartMethod;
         }).filter(Boolean);
 
+        updatedPaymentMethods.sort((a, b) => { // @ts-ignore
+            return rbFrontendMethods.indexOf(a) - rbFrontendMethods.indexOf(b);
+        });
+
+        //dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         dispatch(CART_STORE_KEY).setCartData({
             ...cartData,
             paymentMethods: updatedPaymentMethods,

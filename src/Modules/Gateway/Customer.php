@@ -93,7 +93,7 @@ class Customer
     /**
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    private static function useAddressForBilling(WC_Order $order): bool
+    public static function useAddressForBilling(WC_Order $order): bool
     {
         if (!WooCommerce::isUsingBlocksCheckout()) {
             return !isset($_POST['ship_to_different_address']);
