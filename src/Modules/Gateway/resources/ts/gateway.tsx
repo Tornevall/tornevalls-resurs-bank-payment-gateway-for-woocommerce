@@ -9,8 +9,11 @@ import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {getSetting} from '@woocommerce/settings';
 
 const settings = getSetting('resursbank_data', {});
-let lastResursCompanyName = '';
 
+// Has the address company field been filled out?
+const hasAddressCompany = (billingAddress: any, shippingAddress: any) => {
+    return billingAddress.company !== '' || shippingAddress.company !== '';
+}
 
 /**
  * Validate the customer type based on the billing address and method settings.
@@ -19,12 +22,11 @@ let lastResursCompanyName = '';
  * @param {object} method - The payment method data.
  * @returns {boolean} - Returns true if the customer type matches, false otherwise.
  */
-const validateCustomerType = (billingAddress: any, method: any) => {
+const validateCustomerType = (billingAddress: any, shippingAddress: any, method: any) => {
     if (
-        (billingAddress.company !== '' && !method.enabled_for_legal_customer) ||
-        (billingAddress.company === '' && !method.enabled_for_natural_customer)
+        (hasAddressCompany(billingAddress, shippingAddress) && !method.enabled_for_legal_customer) ||
+        (!hasAddressCompany(billingAddress, shippingAddress) && !method.enabled_for_natural_customer)
     ) {
-        lastResursCompanyName = billingAddress.company;
         // Log the mismatch for debugging purposes
         // @ts-ignore
         resursConsoleLog(
@@ -141,6 +143,8 @@ const validateCustomerType = (billingAddress: any, method: any) => {
             );
         };
 
+        //resursConsoleLog('Registering payment method: ' + method.title + ' (' + method.name + ')', 'DEBUG');
+
         registerPaymentMethod({
             name: method.name,
             paymentMethodId: method.name,
@@ -161,7 +165,9 @@ const validateCustomerType = (billingAddress: any, method: any) => {
                     return false;
                 }
 
-                if (!validateCustomerType(data.billingAddress, method)) {
+                if (!validateCustomerType(data.billingAddress, data.shippingAddress, method)) {
+                    // @ts-ignore
+                    resursConsoleLog('Customer type does not match.', 'DEBUG');
                     return false;
                 }
 
@@ -191,6 +197,6 @@ const validateCustomerType = (billingAddress: any, method: any) => {
                 blockBasedCheckout: method.name !== 'resursbank',
                 features: ['products', 'shipping', 'coupons'],
             },
-        });
+        })
     });
 })();

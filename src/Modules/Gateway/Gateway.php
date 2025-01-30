@@ -288,30 +288,6 @@ class Gateway
     }
 
     /**
-     * Returns a boolean value if payment method collection has LEGAL customer support.
-     */
-    private static function hasPaymentMethodsLegal(): bool
-    {
-        try {
-            $paymentMethodList = self::getPaymentMethodList();
-
-            if ($paymentMethodList->count()) {
-                /** @var Payment\PaymentMethod $paymentMethod */
-                foreach ($paymentMethodList as $paymentMethod) {
-                    if ($paymentMethod->enabledForLegalCustomer) {
-                        $return = true;
-                        break;
-                    }
-                }
-            }
-        } catch (Throwable $e) {
-            Log::error(error: $e);
-        }
-
-        return $return ?? false;
-    }
-
-    /**
      * @return PaymentMethodCollection
      * @throws ApiException
      * @throws AuthException

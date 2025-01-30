@@ -14,8 +14,18 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
@@ -34,8 +44,7 @@ use Throwable;
  */
 final class GatewayBlocks extends AbstractPaymentMethodType
 {
-    /** @inheritdoc */
-    // phpcs:ignore
+    /** @inheritdoc */ // phpcs:ignore
     protected $name = 'resursbank';
 
     /**
@@ -47,15 +56,19 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     {
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
-            static fn (PaymentMethodRegistry $payment_method_registry) => $payment_method_registry->register(
-                (new self())
-            )
+            static function (PaymentMethodRegistry $payment_method_registry): void {
+                $payment_method_registry->register(
+                    (new self())
+                );
+            }
         );
 
         add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
     }
 
     /**
+     * Enqueue assets for the checkout block.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function enqueueAssets(): void
@@ -94,6 +107,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      *
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function is_active(): bool
     {
@@ -104,14 +118,33 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      * Register JavaScript code for our gateway.
      *
      * @return array<string>
-     * @throws FilesystemException
      * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws Throwable
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @noinspection PhpMissingParentCallCommonInspection
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function get_payment_method_script_handles(): array
     {
+        $paymentMethodOrder = [];
+
+        /** @var PaymentMethod $paymentMethod */
+        foreach (Repository::getPaymentMethods() as $paymentMethod) {
+            $paymentMethodOrder[] = $paymentMethod->id;
+        }
+
         wp_register_script(
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
@@ -122,8 +155,13 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         );
 
         wp_script_add_data('rb-wc-blocks-js', 'type', 'module');
+        wp_localize_script(
+            'rb-wc-blocks-js',
+            'rbFrontendMethods',
+            $paymentMethodOrder
+        );
 
-        return array('rb-wc-blocks-js');
+        return ['rb-wc-blocks-js'];
     }
 
     /**
@@ -131,6 +169,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      *
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function get_payment_method_data(): array
     {
