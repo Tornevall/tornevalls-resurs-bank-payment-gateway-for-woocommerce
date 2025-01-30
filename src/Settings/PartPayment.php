@@ -254,6 +254,7 @@ class PartPayment
      *   This method will update the longest period with zero interest for the new payment method and save the uuid.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @todo As this method already exists in ecom it eventually could be better to centralize it?
      */
     private static function updateLongestPeriodWithZeroInterest(PaymentMethodCollection $paymentMethods): void
     {
