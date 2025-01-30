@@ -22,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -122,7 +123,7 @@ class PartPayment
     }
 
     /**
-     * Validate Limit setting and show error messages if the user hasn't configured the widget correctly
+     * Validate Limit setting and show error messages if the user hasn't configured the widget correctly.
      *
      * @throws ApiException
      * @throws AuthException
@@ -145,10 +146,36 @@ class PartPayment
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
     {
-        if ($option !== Limit::getName()) {
+        if (!self::canValidateOptionChange($option)) {
             return;
         }
 
+        if (!self::validateStoreAndMethod()) {
+            return;
+        }
+
+        if ($option === StoreId::getName()) {
+            self::handleStoreIdUpdate(new: $new);
+            return;
+        }
+
+        self::handleLimitUpdate(new: $new);
+    }
+
+    /**
+     * Determines if this option should be validated.
+     */
+    private static function canValidateOptionChange(mixed $option): bool
+    {
+        return $option === Limit::getName() || $option === StoreId::getName();
+    }
+
+    /**
+     * Checks if required store, payment method, and period data is present.
+     *  If missing, an error message is added and false is returned.
+     */
+    private static function validateStoreAndMethod(): bool
+    {
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
         $period = Period::getData();
@@ -157,23 +184,131 @@ class PartPayment
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-store-id'
             ));
-            return;
+            return false;
         }
 
         if (empty($paymentMethodId)) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-payment-method'
             ));
-            return;
+            return false;
         }
 
         if (empty($period)) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-period'
             ));
-            return;
+            return false;
         }
 
+        return true;
+    }
+
+    /**
+     * Handles the update logic when StoreId changes.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    private static function handleStoreIdUpdate(mixed $new): void
+    {
+        global $overrideSavedCountryCode;
+
+        try {
+            $newStore = StoreRepository::getStores()->filterById(id: $new);
+            $countryCode = $newStore->countryCode->value;
+            $currentStoreCountry = WooCommerce::getStoreCountry();
+
+            if (
+                self::canSwitchMinValueByCountry(
+                    $currentStoreCountry,
+                    $countryCode
+                )
+            ) {
+                $overrideSavedCountryCode = $countryCode;
+                self::updateThresholdLimit($countryCode);
+            }
+        } catch (Throwable) {
+            // Ignore exception.
+        }
+    }
+
+    /**
+     * Checks if the store change is a cross-country change.
+     */
+    private static function canSwitchMinValueByCountry(string $currentCountry, string $newCountry): bool
+    {
+        $countryGroup1 = ['SE', 'NO', 'DK'];
+        $countryGroup2 = ['FI'];
+
+        return
+            (in_array(
+                needle: $currentCountry,
+                haystack: $countryGroup1,
+                strict: true
+            ) && in_array(
+                needle: $newCountry,
+                haystack: $countryGroup2,
+                strict: true
+            )) ||
+            (in_array(
+                needle: $currentCountry,
+                haystack: $countryGroup2,
+                strict: true
+            ) && in_array(
+                needle: $newCountry,
+                haystack: $countryGroup1,
+                strict: true
+            ));
+    }
+
+    /**
+     * Updates the part payment threshold limit based on the new country.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    private static function updateThresholdLimit(string $countryCode): void
+    {
+        $newLimit = $countryCode === 'FI'
+            ? self::MINIMUM_THRESHOLD_LIMIT_FI
+            : self::MINIMUM_THRESHOLD_LIMIT_DEFAULT;
+        update_option(Limit::getName(), $newLimit);
+    }
+
+    /**
+     * Handles the validation of the limit when StoreId is not the updated option.
+     *
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws ValidationException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    private static function handleLimitUpdate(mixed $new): void
+    {
+        global $overrideSavedCountryCode;
+
+        $customerCountry = get_option('woocommerce_default_country');
+
+        try {
+            $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
+
+            // Do not touch anything if override is active.
+            if (isset($overrideSavedCountryCode)) {
+                return;
+            }
+        } catch (Throwable) {
+            $storeCountry = $customerCountry;
+        }
+
+        $paymentMethodId = PaymentMethodOption::getData();
         $paymentMethod = Repository::getById(paymentMethodId: $paymentMethodId);
 
         if ($paymentMethod === null) {
@@ -184,21 +319,16 @@ class PartPayment
         }
 
         $maxLimit = $paymentMethod->maxPurchaseLimit;
-        $customerCountry = get_option('woocommerce_default_country');
+        $minLimit = (float)($storeCountry === 'FI')
+            ? self::MINIMUM_THRESHOLD_LIMIT_FI
+            : self::MINIMUM_THRESHOLD_LIMIT_DEFAULT;
 
-        try {
-            $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
-        } catch (Throwable) {
-            $storeCountry = $customerCountry;
-        }
-
-        $minLimit = ($storeCountry === 'FI' ? self::MINIMUM_THRESHOLD_LIMIT_FI : self::MINIMUM_THRESHOLD_LIMIT_DEFAULT);
-
+        // Validate numeric range against min/max.
         if ($new < 0) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-new-value-not-positive'
             ));
-        } elseif ($new > $maxLimit) {
+        } elseif ((float)$new > $maxLimit) {
             MessageBag::addError(message: str_replace(
                 search: '%1',
                 replace: (string)$maxLimit,
@@ -217,7 +347,6 @@ class PartPayment
             ));
         }
     }
-
 
     /**
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
