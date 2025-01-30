@@ -23,6 +23,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
+use Resursbank\Woocommerce\Modules\Api\Controller\Admin\GetStoreCountry;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
 use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
@@ -98,6 +99,12 @@ class Route
     public const ROUTE_GET_STORES_ADMIN = 'get-stores-admin';
 
     /**
+     * Route to get JSON response with store country (usually happens after a save for which that value is delayed
+     * until page is reloaded).
+     */
+    public const ROUTE_GET_STORE_COUNTRY = 'get-store-country';
+
+    /**
      * Route to get JSON encoded order view content.
      */
     public const ROUTE_ADMIN_GET_ORDER_CONTENT = 'get-order-content-admin';
@@ -114,8 +121,7 @@ class Route
             is_string(value: $_GET[self::ROUTE_PARAM])
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
-        $userIsAdmin = self::userIsAdmin()
-            ?: Admin::isAdmin();
+        $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
         try {
             if (
@@ -321,6 +327,10 @@ class Route
 
             case self::ROUTE_GET_STORES_ADMIN:
                 self::respondWithExit(body: (new GetStores())->exec());
+                break;
+
+            case self::ROUTE_GET_STORE_COUNTRY:
+                self::respondWithExit(body: (new GetStoreCountry())->exec());
                 break;
 
             case self::ROUTE_SET_CUSTOMER_TYPE:

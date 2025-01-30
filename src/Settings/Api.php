@@ -16,8 +16,10 @@ use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Model\Store\Store;
@@ -29,7 +31,10 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\ResourceType;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
@@ -56,7 +61,55 @@ class Api
      */
     public static function init(): void
     {
-        // Required for the loading to act properly.
+        add_action(
+            'admin_enqueue_scripts',
+            'Resursbank\Woocommerce\Settings\Api::initScripts'
+        );
+    }
+
+    /**
+     * @throws HttpException
+     * @throws IllegalValueException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function initScripts(): void
+    {
+        wp_register_script(
+            'rb-api-admin-scripts-load',
+            Url::getResourceUrl(
+                module: 'Api',
+                file: 'saved-updates.js'
+            )
+        );
+        wp_enqueue_script(
+            'rb-api-admin-scripts-load',
+            Url::getResourceUrl(
+                module: 'Api',
+                file: 'saved-updates.js'
+            ),
+            ['jquery']
+        );
+
+        wp_localize_script(
+            'rb-api-admin-scripts-load',
+            'rbApiAdminLocalize',
+            [
+                'url' => Route::getUrl(
+                    route: Route::ROUTE_GET_STORE_COUNTRY
+                ),
+            ]
+        );
+
+        wp_enqueue_style(
+            'rb-ga-css',
+            Url::getResourceUrl(
+                module: 'Api',
+                file: 'api.css',
+                type: ResourceType::CSS
+            ),
+            [],
+            '1.0.0'
+        );
     }
 
     /**
@@ -118,7 +171,7 @@ class Api
     private static function getStoreCountrySetting(): array
     {
         return [
-            'id' => self::NAME_PREFIX . '_store_country',
+            'id' => self::NAME_PREFIX . 'store_country',
             'type' => 'text',
             'custom_attributes' => [
                 'disabled' => true,

@@ -19,7 +19,6 @@ use Throwable;
 class GetStoreCountry extends GetStoresController
 {
     /**
-     * @return string
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public function exec(): string
