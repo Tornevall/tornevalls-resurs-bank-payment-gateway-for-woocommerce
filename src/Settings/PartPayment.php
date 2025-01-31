@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Settings;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -20,7 +21,9 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
+use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -154,12 +157,54 @@ class PartPayment
             return;
         }
 
-        if ($option === StoreId::getName()) {
-            self::handleStoreIdUpdate(new: $new);
+        if ($option === StoreId::getName() && $old !== $new) {
+            // Ignore further actions on changes. The rest of this method has been moved to the frontend request.
             return;
         }
 
         self::handleLimitUpdate(new: $new);
+    }
+
+    /**
+     * Handles the update logic when StoreId changes.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function handleStoreIdUpdate(mixed $newStoreId): void
+    {
+        global $overrideSavedCountryCode;
+
+        try {
+            Config::getCache()->invalidate();
+
+            $newStore = StoreRepository::getStores()->filterById(
+                id: $newStoreId
+            );
+
+            try {
+                $paymentMethods = Repository::getPaymentMethods();
+                self::updateLongestPeriodWithZeroInterest(
+                    paymentMethods: $paymentMethods
+                );
+            } catch (Throwable) {
+                // Ignore exception and proceed with no further actions.
+            }
+
+            $countryCode = $newStore->countryCode->value;
+            $currentStoreCountry = WooCommerce::getStoreCountry();
+
+            if (
+                self::canSwitchMinValueByCountry(
+                    $currentStoreCountry,
+                    $countryCode
+                )
+            ) {
+                $overrideSavedCountryCode = $countryCode;
+                self::updateThresholdLimit($countryCode);
+            }
+        } catch (Throwable) {
+            // Ignore exception.
+        }
     }
 
     /**
@@ -205,30 +250,47 @@ class PartPayment
     }
 
     /**
-     * Handles the update logic when StoreId changes.
+     * When we save new stores to the configuration, the payment method will no longer match with the PPW rules.
+     *   This method will update the longest period with zero interest for the new payment method and save the uuid.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @todo As this method already exists in ecom it eventually could be better to centralize it?
      */
-    private static function handleStoreIdUpdate(mixed $new): void
+    private static function updateLongestPeriodWithZeroInterest(PaymentMethodCollection $paymentMethods): void
     {
-        global $overrideSavedCountryCode;
+        $longestPeriod = 0;
+        $paymentMethodId = '';
 
         try {
-            $newStore = StoreRepository::getStores()->filterById(id: $new);
-            $countryCode = $newStore->countryCode->value;
-            $currentStoreCountry = WooCommerce::getStoreCountry();
+            $firstFilteredMethod = AnnuityRepository::filterMethods(
+                paymentMethods: $paymentMethods
+            )->getFirst();
+            $annuityFactors = AnnuityRepository::getAnnuityFactors(
+                paymentMethodId: $firstFilteredMethod->id
+            );
 
-            if (
-                self::canSwitchMinValueByCountry(
-                    $currentStoreCountry,
-                    $countryCode
-                )
-            ) {
-                $overrideSavedCountryCode = $countryCode;
-                self::updateThresholdLimit($countryCode);
+            if ($annuityFactors->count() > 0) {
+                $paymentMethodId = $firstFilteredMethod->id;
+
+                foreach ($annuityFactors as $annuityFactor) {
+                    if ($annuityFactor->interest > 0.0) {
+                        continue;
+                    }
+
+                    $longestPeriod = max(
+                        $annuityFactor->durationMonths,
+                        $longestPeriod
+                    );
+                }
+            }
+
+            if ($longestPeriod > 0) {
+                update_option(PaymentMethod::getName(), $paymentMethodId);
+                update_option(Period::getName(), $longestPeriod);
             }
         } catch (Throwable) {
-            // Ignore exception.
+            // Ignore exceptions and proceed if this moment fails, and leave the configuration as is instead
+            // of blocking something.
         }
     }
 

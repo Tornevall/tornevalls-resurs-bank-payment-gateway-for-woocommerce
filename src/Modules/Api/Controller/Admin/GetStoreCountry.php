@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Api\Controller\Admin;
 
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
@@ -31,6 +33,11 @@ class GetStoreCountry extends GetStoresController
             $response = [
                 'storeCountry' => 'N/A'
             ];
+        }
+
+        // Make sure we have saved data before using it within the search.
+        if (StoreId::getData() !== '') {
+            PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
         }
 
         try {

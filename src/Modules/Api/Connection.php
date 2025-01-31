@@ -226,13 +226,13 @@ class Connection
         if (
             Admin::isAdmin() &&
             isset(
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                $_POST[RESURSBANK_MODULE_PREFIX . '_environment']
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'],
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment']
             ) && (
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
-                $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
                 Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
             )
         ) {

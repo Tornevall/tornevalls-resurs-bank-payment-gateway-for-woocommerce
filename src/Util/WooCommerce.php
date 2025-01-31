@@ -76,9 +76,10 @@ class WooCommerce
 
         try {
             if (StoreId::getData() !== '') {
+                $configuredStore = Repository::getConfiguredStore();
                 $return = strtoupper(
-                    string: Repository::getConfiguredStore()?->countryCode->value
-                ) ?? 'EN';
+                    string: $configuredStore?->countryCode->value
+                );
             }
         } catch (Throwable $exception) {
             Config::getLogger()->debug(
