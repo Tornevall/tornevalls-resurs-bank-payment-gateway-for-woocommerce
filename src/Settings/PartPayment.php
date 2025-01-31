@@ -157,8 +157,8 @@ class PartPayment
             return;
         }
 
-        if ($option === StoreId::getName() && $old !== $new) {
-            // Ignore further actions on changes. The rest of this method has been moved to the frontend request.
+        if ($option === StoreId::getName()) {
+            PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
             return;
         }
 
