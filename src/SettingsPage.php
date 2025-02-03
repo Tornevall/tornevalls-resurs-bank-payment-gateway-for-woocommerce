@@ -222,7 +222,9 @@ EX;
         if ($view === 'payment_methods') {
             // Suggest configuring credentials if they are missing
             if (!Connection::hasCredentials()) {
-                return Translator::translate(phraseId: 'configure-credentials');
+                return '<b>' . Translator::translate(
+                    phraseId: 'configure-credentials'
+                ) . '</b>';
             }
 
             // Suggest configuring the store if store data is missing
