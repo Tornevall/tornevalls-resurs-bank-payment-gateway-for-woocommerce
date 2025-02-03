@@ -1,3 +1,7 @@
+# 1.1.1
+
+[WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors
+
 # 1.1.0
 
 * [WOO-1373](https://resursbankplugins.atlassian.net/browse/WOO-1373) Update src/Modules/GetAddress/resources/update-address/legacy.js
