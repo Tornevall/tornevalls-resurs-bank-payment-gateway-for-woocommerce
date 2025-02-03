@@ -145,9 +145,15 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     {
         $paymentMethodOrder = [];
 
-        /** @var PaymentMethod $paymentMethod */
-        foreach (Repository::getPaymentMethods() as $paymentMethod) {
-            $paymentMethodOrder[] = $paymentMethod->id;
+        try {
+            $paymentMethods = Repository::getPaymentMethods();
+
+            /** @var PaymentMethod $paymentMethod */
+            foreach ($paymentMethods as $paymentMethod) {
+                $paymentMethodOrder[] = $paymentMethod->id;
+            }
+        } catch (Throwable $error) {
+            Log::error(error: $error);
         }
 
         wp_register_script(
