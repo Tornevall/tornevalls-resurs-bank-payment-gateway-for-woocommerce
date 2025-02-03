@@ -30,6 +30,7 @@ class Settings
     /**
      * Setup event listeners to render our configuration page and save settings.
      *
+     * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
@@ -43,10 +44,13 @@ class Settings
             'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
-        add_action(
-            'in_admin_header',
-            'Resursbank\Woocommerce\Settings\About::setCss'
-        );
+        // Only need this css when in proper section.
+        if (isset($_REQUEST['section']) && $_REQUEST['section'] === 'about') {
+            add_action(
+                'in_admin_header',
+                'Resursbank\Woocommerce\Settings\About::setCss'
+            );
+        }
 
         /**
          * @noinspection PhpArgumentWithoutNamedIdentifierInspection

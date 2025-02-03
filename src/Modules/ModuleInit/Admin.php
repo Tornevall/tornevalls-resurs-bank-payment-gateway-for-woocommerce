@@ -46,7 +46,6 @@ class Admin
         // Initialize same block components for Admin as for the frontend to mark
         // payment methods as compatible in block editor.
         GatewayBlocks::init();
-
         Gateway::initAdmin();
         Order::init();
         OrderManagement::init();

@@ -1,3 +1,7 @@
+# 1.1.2
+
+[WOO-1414](https://resursbankplugins.atlassian.net/browse/WOO-1414) isEnabled shouts false positives
+
 # 1.1.1
 
 [WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors

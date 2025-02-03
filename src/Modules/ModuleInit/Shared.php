@@ -26,13 +26,15 @@ class Shared
      */
     public static function init(): void
     {
+        // Things that should be available even without the plugin API being enabled.
+        Route::exec();
+        MessageBag::init();
+
         if (!Enabled::isEnabled()) {
             return;
         }
 
-        Route::exec();
         Gateway::init();
-        MessageBag::init();
         Callback::init();
         GetAddress::init();
     }
