@@ -31,6 +31,7 @@ use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
 use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
@@ -54,6 +55,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      */
     public static function init(): void
     {
+        if (empty(StoreId::getData())) {
+            return;
+        }
+
         add_action(
             'woocommerce_blocks_payment_method_type_registration',
             static function (PaymentMethodRegistry $payment_method_registry): void {
