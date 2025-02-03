@@ -149,6 +149,7 @@ class Callback
      *
      * @throws HttpException
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     * @phpcs:ignoreFile CognitiveComplexity
      */
     private static function checkIfReadyForCallback(WC_Order $order): void
     {

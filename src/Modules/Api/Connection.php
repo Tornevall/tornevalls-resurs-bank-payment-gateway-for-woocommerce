@@ -165,7 +165,7 @@ class Connection
     {
         $result = new NoneLogger();
 
-        if (!LogEnabled::getData()) {
+        if (!LogEnabled::getData() || LogDir::getData() === '') {
             return $result;
         }
 
@@ -226,13 +226,13 @@ class Connection
         if (
             Admin::isAdmin() &&
             isset(
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                $_POST[RESURSBANK_MODULE_PREFIX . '_environment']
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'],
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment']
             ) && (
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
-                $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
-                $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
+                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
                 Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
             )
         ) {
@@ -240,12 +240,12 @@ class Connection
             $return = new Jwt(
                 clientId: $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
                 clientSecret: $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
+                grantType: GrantType::CREDENTIALS,
                 scope: EnvironmentEnum::from(
                     value: $envValue
                 ) === EnvironmentEnum::PROD ?
                     Scope::MERCHANT_API :
-                    Scope::MOCK_MERCHANT_API,
-                grantType: GrantType::CREDENTIALS
+                    Scope::MOCK_MERCHANT_API
             );
         }
 

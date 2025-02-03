@@ -1,0 +1,7 @@
+.spinner.country-code-spinner {
+  position: absolute !important;
+  right: 100% !important;
+  display: inline-block !important;
+  z-index: 9999 !important;
+  visibility: hidden;
+}

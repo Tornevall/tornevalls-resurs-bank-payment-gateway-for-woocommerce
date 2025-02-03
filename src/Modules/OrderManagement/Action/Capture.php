@@ -27,6 +27,7 @@ class Capture extends Action
 {
     /**
      * Capture Resurs Bank payment.
+     * @phpcs:ignoreFile CognitiveComplexity
      */
     public static function exec(
         WC_Order $order

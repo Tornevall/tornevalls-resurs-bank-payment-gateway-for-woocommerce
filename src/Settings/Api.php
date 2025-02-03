@@ -9,6 +9,18 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Model\Store\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
@@ -19,7 +31,10 @@ use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\ResourceType;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
@@ -46,6 +61,55 @@ class Api
      */
     public static function init(): void
     {
+        add_action(
+            'admin_enqueue_scripts',
+            'Resursbank\Woocommerce\Settings\Api::initScripts'
+        );
+    }
+
+    /**
+     * @throws HttpException
+     * @throws IllegalValueException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function initScripts(): void
+    {
+        wp_register_script(
+            'rb-api-admin-scripts-load',
+            Url::getResourceUrl(
+                module: 'Api',
+                file: 'saved-updates.js'
+            )
+        );
+        wp_enqueue_script(
+            'rb-api-admin-scripts-load',
+            Url::getResourceUrl(
+                module: 'Api',
+                file: 'saved-updates.js'
+            ),
+            ['jquery']
+        );
+
+        wp_localize_script(
+            'rb-api-admin-scripts-load',
+            'rbApiAdminLocalize',
+            [
+                'url' => Route::getUrl(
+                    route: Route::ROUTE_GET_STORE_COUNTRY
+                ),
+            ]
+        );
+
+        wp_enqueue_style(
+            'rb-ga-css',
+            Url::getResourceUrl(
+                module: 'Api',
+                file: 'api.css',
+                type: ResourceType::CSS
+            ),
+            [],
+            '1.0.0'
+        );
     }
 
     /**
@@ -107,7 +171,7 @@ class Api
     private static function getStoreCountrySetting(): array
     {
         return [
-            'id' => self::NAME_PREFIX . '_store_country',
+            'id' => self::NAME_PREFIX . 'store_country',
             'type' => 'text',
             'custom_attributes' => [
                 'disabled' => true,
@@ -165,22 +229,62 @@ class Api
                 // If no store has been selected in the configuration, default to the first store,
                 // as this will be displayed in the dropdown after saving. This ensures the merchant
                 // has a value saved, even if no store was selected initially.
-                if (StoreId::getData() === '') {
-                    $firstStore = StoreRepository::getStores()->getFirst();
-
-                    if ($firstStore instanceof Store) {
-                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-                        update_option(StoreId::getName(), $firstStore->id);
-                    }
+                if (self::credentialsAreSet()) {
+                    $result['options'] = StoreRepository::getStores()->getSelectList();
+                    self::setDefaultStoreIfNoneSelected();
                 }
             }
         } catch (Throwable $error) {
-            // Some errors cannot be rendered through the admin_notices. Avoid that action.
-            Admin::getAdminErrorNote(message: $error->getMessage());
-
-            Log::error(error: $error);
+            self::logAndHandleError(error: $error);
         }
 
         return $result;
+    }
+
+    /**
+     * Are credentials set?
+     */
+    private static function credentialsAreSet(): bool
+    {
+        return ClientId::getData() !== '' && ClientSecret::getData() !== '';
+    }
+
+    /**
+     * @throws Throwable
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     */
+    private static function setDefaultStoreIfNoneSelected(): void
+    {
+        if (StoreId::getData() !== '') {
+            return;
+        }
+
+        $firstStore = StoreRepository::getStores()->getFirst();
+
+        if (!($firstStore instanceof Store)) {
+            return;
+        }
+
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        update_option(StoreId::getName(), $firstStore->id);
+    }
+
+    /**
+     * Log and handle visible error messages.
+     */
+    private static function logAndHandleError(Throwable $error): void
+    {
+        // Some errors cannot be rendered through the admin_notices. Avoid that action.
+        Admin::getAdminErrorNote(message: $error->getMessage());
+        Log::error(error: $error);
     }
 }

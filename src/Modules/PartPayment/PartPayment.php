@@ -219,7 +219,9 @@ class PartPayment
         }
 
         try {
-            echo '<div id="rb-pp-widget-container">' . self::getWidget()->content . self::getReadMoreWidget()->content . '</div>';
+            echo '<div id="rb-pp-widget-container">' .
+                self::getWidget()->content .
+                self::getReadMoreWidget()->content . '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -266,7 +268,7 @@ EX;
         try {
             wp_enqueue_script(
                 'partpayment-script',
-                Url::getScriptUrl(
+                Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'part-payment.js'
                 ),
@@ -276,7 +278,6 @@ EX;
                 'partpayment-script',
                 self::getWidget()->js
             );
-            //add_action('wp_enqueue_scripts', 'partpayment-script');
 
             try {
                 $maxApplicationLimit = self::getWidget()->paymentMethod->maxApplicationLimit;

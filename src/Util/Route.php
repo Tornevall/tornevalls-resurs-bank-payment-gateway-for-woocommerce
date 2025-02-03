@@ -23,11 +23,13 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
+use Resursbank\Woocommerce\Modules\Api\Controller\Admin\GetStoreCountry;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
 use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
@@ -55,6 +57,11 @@ class Route
      * Route to get address controller.
      */
     public const ROUTE_GET_ADDRESS = 'get-address';
+
+    /**
+     * Route to controller injecting get address css.
+     */
+    public const ROUTE_GET_ADDRESS_CSS = 'get-address-css';
 
     /**
      * Route to update current customer type in session.
@@ -92,6 +99,12 @@ class Route
     public const ROUTE_GET_STORES_ADMIN = 'get-stores-admin';
 
     /**
+     * Route to get JSON response with store country (usually happens after a save for which that value is delayed
+     * until page is reloaded).
+     */
+    public const ROUTE_GET_STORE_COUNTRY = 'get-store-country';
+
+    /**
      * Route to get JSON encoded order view content.
      */
     public const ROUTE_ADMIN_GET_ORDER_CONTENT = 'get-order-content-admin';
@@ -108,8 +121,7 @@ class Route
             is_string(value: $_GET[self::ROUTE_PARAM])
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
-        $userIsAdmin = self::userIsAdmin()
-            ?: Admin::isAdmin();
+        $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
         try {
             if (
@@ -194,10 +206,11 @@ class Route
      */
     public static function respond(
         string $body,
-        int $code = 200
+        int $code = 200,
+        string $contentType = 'application/json'
     ): void {
         status_header(code: $code);
-        header(header: 'Content-Type: application/json');
+        header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
         echo $body;
@@ -217,9 +230,10 @@ class Route
      */
     public static function respondWithExit(
         string $body,
-        int $code = 200
+        int $code = 200,
+        string $contentType = 'application/json'
     ): void {
-        self::respond(body: $body, code: $code);
+        self::respond(body: $body, code: $code, contentType: $contentType);
         exit;
     }
 
@@ -300,12 +314,23 @@ class Route
                 self::respondWithExit(body: GetAddress::exec());
                 break;
 
+            case self::ROUTE_GET_ADDRESS_CSS:
+                self::respondWithExit(
+                    body: GetAddressCss::exec(),
+                    contentType: 'text/css'
+                );
+                break;
+
             case self::ROUTE_PART_PAYMENT:
                 self::respondWithExit(body: PartPayment::exec());
                 break;
 
             case self::ROUTE_GET_STORES_ADMIN:
                 self::respondWithExit(body: (new GetStores())->exec());
+                break;
+
+            case self::ROUTE_GET_STORE_COUNTRY:
+                self::respondWithExit(body: (new GetStoreCountry())->exec());
                 break;
 
             case self::ROUTE_SET_CUSTOMER_TYPE:

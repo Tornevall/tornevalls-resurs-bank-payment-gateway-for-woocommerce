@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
@@ -65,32 +66,12 @@ class Advanced
             $return[self::SECTION_ID]['get_address_enabled'] = self::getCountryRestrictionConfig();
         }
 
-        // Disabling getAddress based on GDPR rules have higher priority than the country code.
-        if (!EnableGetAddress::isGetAddressAllowedByGdprRule()) {
-            $return[self::SECTION_ID]['get_address_enabled'] = self::getGdprRestrictionConfig();
-        }
-
         return $return;
     }
 
-    private static function getGdprRestrictionConfig(): array
-    {
-        return [
-            'id' => 'get_address',
-            'type' => 'text',
-            'custom_attributes' => [
-                'disabled' => true,
-            ],
-            'title' => Translator::translate(
-                phraseId: 'enable-widget-to-get-address'
-            ),
-            'value' => __('Disabled'),
-            'desc' => '<b>Setting is unavailable due to GDPR restrictions.</b>',
-            // phpcs:ignore
-            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
-        ];
-    }
-
+    /**
+     * @throws ConfigException
+     */
     private static function getCountryRestrictionConfig(): array
     {
         // On new installs, countryCode tend to be empty until credentials are set.

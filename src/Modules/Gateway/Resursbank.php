@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -39,7 +40,6 @@ use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
-use Resursbank\Woocommerce\Database\Options\Api\StoreCountryCode;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -88,11 +88,23 @@ class Resursbank extends WC_Payment_Gateway
         $this->type = null;
         $this->sortOrder = $sortOrder;
 
-        // __constructor complexity solving.
+        // Resolving payment method, setting the proper id for the gateway.
         $this->resolveNullableMethod();
 
         // Mirror title to method_title.
         $this->method_title = $this->title;
+
+        // When the blocks editor redirects admins to woocommerce internal sections
+        // for handling payment methods, we need to redirect them back to the correct
+        // location since our methods are not editable from WooCommerce.
+        if (isset($_REQUEST['section']) &&
+            isset($method->id) &&
+            is_string(value: $this->id) &&
+            $method->id !== RESURSBANK_MODULE_PREFIX
+        ) {
+            // Redirect to the correct section if the wrong section is requested when section is set to a method id.
+            AdminUtility::redirectAtWrongSection(method: $method->id);
+        }
     }
 
     /**
@@ -131,15 +143,21 @@ class Resursbank extends WC_Payment_Gateway
      * Create Resurs Bank payment and assign additional metadata to WC_Order.
      *
      * @noinspection PhpMissingParentCallCommonInspection
+     * @throws Exception
      */
     public function process_payment(mixed $order_id): array
     {
+        global $blockCreateErrorMessage;
+
         $order = new WC_Order(order: $order_id);
 
         try {
             $payment = $this->createPayment(order: $order);
         } catch (Throwable $e) {
             $this->handleCreatePaymentError(order: $order, error: $e);
+            if ($blockCreateErrorMessage && WooCommerce::isUsingBlocksCheckout()) {
+                throw new Exception(message: $blockCreateErrorMessage);
+            }
         }
 
         if (!isset($payment) || !$payment->isProcessable()) {
@@ -165,6 +183,7 @@ class Resursbank extends WC_Payment_Gateway
      * Whether payment method is available.
      *
      * @noinspection PhpMissingParentCallCommonInspection
+     * @throws ConfigException
      */
     public function is_available(): bool
     {
@@ -176,30 +195,52 @@ class Resursbank extends WC_Payment_Gateway
             return false;
         }
 
+        // Conditions below are separated to make debugging easier.
+
         // Not in checkout? Act like they are all there.
         if (!is_checkout()) {
             return true;
         }
 
-        return $this->validatePurchaseLimit() &&
-            $this->validateCustomerCountry() &&
-            match (WcSession::getCustomerType()) {
-                CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
-                CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
-            };
+        // If purchase limit are not fulfilled, skip early.
+        if ($this->validatePurchaseLimit() === false) {
+            return false;
+        }
+
+        // Validate country, except when restrictions are disabled. This is a
+        // credit card-related feature where, in some cases, we want credit cards
+        // to work across borders, but they don't when we sell exclusively within
+        // our own country. When restrictions are disabled, all payment methods
+        // are opened up for cross-border sales. Here, we have chosen not to
+        // implement specific checks for which payment methods are allowed to
+        // operate in this scenario - it's an all-or-nothing approach.
+        if (SetMethodCountryRestriction::getData() && !$this->validateCustomerCountry()) {
+            return false;
+        }
+
+        if (WooCommerce::isUsingBlocksCheckout()) {
+            // Always return true for everything coming from blocks checkout since, in this case,
+            // filtering on customer types is done in the blocks checkout itself.
+            return true;
+        }
+
+        return match (WcSession::getCustomerType()) {
+            CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
+            CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
+        };
     }
 
     /**
      * Customer country validation.
      *
      * @return bool
+     * @throws ConfigException
      */
     public function validateCustomerCountry(): bool
     {
         // If country restrictions are enabled, we will validate that the customer is located in the
         // same country as the API based country.
-        return !(SetMethodCountryRestriction::getData()) ||
-            (WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry());
+        return (WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry());
     }
 
     /**
@@ -233,38 +274,6 @@ class Resursbank extends WC_Payment_Gateway
     public function isAdmin(): bool
     {
         return AdminUtility::isAdmin() || WC()->cart === null;
-    }
-
-    public function validate_fields(): bool
-    {
-        $billingCompanyGovernmentId = Url::getHttpPost(
-            key: 'billing_resurs_government_id'
-        );
-
-        if (!isset($this->method)) {
-            $return = true;
-        }
-
-        if (
-            WcSession::getCustomerType() === CustomerType::LEGAL &&
-            $this->method->enabledForLegalCustomer &&
-            empty($billingCompanyGovernmentId)
-        ) {
-            // Using WooCommerce phrases (copied) to show woocommerce default, since this is how
-            // WooCommerce displays errors, with proper translations.
-            wc_add_notice(
-                message: sprintf(
-                    __('%s is a required field.', 'woocommerce'),
-                    Translator::translate(phraseId: 'customer-type-legal')
-                ),
-                notice_type: 'error',
-                data: ['id' => 'billing_resurs_government_id']
-            );
-
-            $return = false;
-        }
-
-        return $return ?? true;
     }
 
     /**
@@ -455,6 +464,7 @@ class Resursbank extends WC_Payment_Gateway
     // @phpcs:ignoreFile CognitiveComplexity
     private function handleCreatePaymentError(WC_Order $order, Throwable $error): void
     {
+        global $blockCreateErrorMessage;
         Log::error(
             error: $error,
             message: Translator::translate(phraseId: 'error-creating-payment')
@@ -467,11 +477,14 @@ class Resursbank extends WC_Payment_Gateway
 
             if ($error instanceof CurlException) {
                 if (count($error->getDetails())) {
+                    /** @var $detail */
                     foreach ($error->getDetails() as $detail) {
                         MessageBag::addError(message: $detail);
+                        $blockCreateErrorMessage .= $detail . "\n";
                     }
                 } else {
                     MessageBag::addError(message: $error->getMessage());
+                    $blockCreateErrorMessage = $error->getMessage();
                 }
             } else {
                 // Only display relevant error messages on the order placement screen. CurlExceptions usually contains

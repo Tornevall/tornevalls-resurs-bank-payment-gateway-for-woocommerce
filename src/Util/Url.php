@@ -29,14 +29,29 @@ class Url
      *
      * @param string $file | File path relative to resources dir.
      */
-    public static function getScriptUrl(
+    public static function getResourceUrl(
         string $module,
-        string $file
+        string $file,
+        ResourceType $type = ResourceType::JS
     ): string {
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         // NOTE: plugin_dir_url returns everything up to the last slash.
         return plugin_dir_url(
-            RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/js/" .
+            RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/{$type->value}/" .
+                str_replace(search: '/', replace: '', subject: $file)
+        ) . $file;
+    }
+
+    /**
+     * Helper to get script file from assets directory.
+     *
+     * @param string $file | File path relative to resources dir.
+     */
+    public static function getAssetUrl(
+        string $file
+    ): string {
+        return plugin_dir_url(
+            RESURSBANK_MODULE_DIR_NAME . "/assets/js/dist/" .
                 str_replace(search: '/', replace: '', subject: $file)
         ) . $file;
     }

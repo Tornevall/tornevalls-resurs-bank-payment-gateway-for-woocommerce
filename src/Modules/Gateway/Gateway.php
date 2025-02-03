@@ -26,11 +26,9 @@ use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use function is_array;
@@ -42,6 +40,7 @@ class Gateway
 {
     /**
      * Add payment gateways.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
@@ -212,37 +211,6 @@ class Gateway
             10,
             1
         );
-        add_filter(
-            'woocommerce_checkout_fields',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::checkoutFieldHandler'
-        );
-    }
-
-    /**
-     * Add custom field as helper to company payments.
-     *
-     * @param null $fields Nullable. Fields may not necessarily be received properly initially.
-     * @return array|null
-     */
-    public static function checkoutFieldHandler($fields = null): ?array
-    {
-        // Validate that we really got the fields properly.
-        if (
-            self::hasPaymentMethodsLegal() &&
-            isset($fields['billing']) &&
-            is_array(value: $fields['billing'])
-        ) {
-            $fields['billing']['billing_resurs_government_id'] = [
-                'label' => Translator::translate(
-                    phraseId: 'customer-type-legal'
-                ),
-                'class' => '',
-                'required' => false,
-                'priority' => 31,
-            ];
-        }
-
-        return $fields;
     }
 
     /**
@@ -266,6 +234,7 @@ class Gateway
 
             foreach ($paymentMethodList as $paymentMethod) {
                 $sortOrder++;
+
                 $gateway = new Resursbank(
                     method: $paymentMethod,
                     sortOrder: $sortOrder
@@ -279,6 +248,17 @@ class Gateway
             }
         } catch (Throwable $e) {
             Log::error(error: $e);
+
+            /**
+             * @todo Consider an alternative method for displaying errors.
+             *
+             * The messages below will always appear on the screen, even if no credentials are set.
+             * The primary intent is to display errors to admin users, such as 502 Gateway Errors.
+             * However, the error code for such messages is 0, making it difficult to track them properly.
+             */
+            //if (Admin::isAdmin()) {
+            //    Log::error(error: $e, message: 'A problem occurred when fetching payment methods.');
+            //}
         }
 
         // Add default method to payment gateways. Will only be reflected on
@@ -296,7 +276,7 @@ class Gateway
         if (gettype($icon) !== 'string' || $icon === '') {
             return $icon;
         }
-        
+
         return preg_replace(
             pattern: '/>$/',
             replacement: ' style="padding:0;margin:0;max-height:1em;vertical-align:middle;' . apply_filters(
@@ -305,30 +285,6 @@ class Gateway
             ) . '">',
             subject: $icon
         );
-    }
-
-    /**
-     * Returns a boolean value if payment method collection has LEGAL customer support.
-     */
-    private static function hasPaymentMethodsLegal(): bool
-    {
-        try {
-            $paymentMethodList = self::getPaymentMethodList();
-
-            if ($paymentMethodList->count()) {
-                /** @var Payment\PaymentMethod $paymentMethod */
-                foreach ($paymentMethodList as $paymentMethod) {
-                    if ($paymentMethod->enabledForLegalCustomer) {
-                        $return = true;
-                        break;
-                    }
-                }
-            }
-        } catch (Throwable $e) {
-            Log::error(error: $e);
-        }
-
-        return $return ?? false;
     }
 
     /**

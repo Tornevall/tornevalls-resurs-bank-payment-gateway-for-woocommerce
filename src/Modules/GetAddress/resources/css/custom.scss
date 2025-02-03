@@ -1,0 +1,136 @@
+#rb-ga-widget {
+  padding-bottom: 25px;
+
+  #rb-ga-ct-area {
+    input {
+      -moz-appearance: none;
+      /*appearance: none;*/
+      background: #fff;
+      border: 1px solid rgba(25, 23, 17, .48);
+      border-radius: 50%;
+      cursor: pointer;
+      display: inline-block;
+      height: 1.5em;
+      left: 0px;
+      margin: inherit;
+      min-height: 24px;
+      min-width: 24px;
+      position: relative;
+      top: 40%;
+      transform: translateY(-45%);
+      width: 1.5em;
+      outline: 0;
+
+      &::after {
+        content: '';
+        display: block;
+        width: 0.9em;
+        height: 0.9em;
+        background: var(--wp--preset--color--contrast);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+      }
+
+      &:checked::after {
+        opacity: 1;
+      }
+    }
+
+    label {
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  .rb-ga-ssn-area {
+    #rb-ga-btn {
+      padding: 14px;
+      text-align: center;
+      background-color: var(--wp--preset--color--contrast);
+      color: var(--wp--preset--color--base);
+      cursor: pointer;
+      border-color: var(--wp--preset--color--contrast);
+      border-radius: .33rem;
+      font-family: var(--wp--preset--font-size--small);
+      font-weight: 500;
+      font-size: var(--wp--preset--font-size--small);
+
+      .rb-ga-fetch-icon-shard {
+        display: none !important;
+      }
+
+      .rb-ga-fetch-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border-top: 3px solid #FFF;
+        border-right: 3px solid transparent;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+      }
+
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      &:hover, &:disabled {
+        background-color: #666666;
+        border-color: #666666;
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+
+    #rb-ga-gov-id {
+      background-color: #fff;
+      border: 1px solid hsla(0, 0%, 7%, .8);
+      border-radius: 4px;
+      box-sizing: border-box;
+      color: #2b2d2f;
+      font-family: inherit;
+      font-size: 1em;
+      height: 50px;
+      line-height: 1em;
+      margin: 0;
+      min-height: 0;
+      padding: 1em .5em;
+      width: 100%;
+
+      &:focus {
+        outline: 1px solid hsla(0, 0%, 7%, .8);
+      }
+
+      &.error {
+        border-color: #cc1818;
+      }
+    }
+  }
+
+  #rb-ga-error {
+    margin: -10px 0 0 0;
+    color: #cc1818;
+    font-size: .75em;
+    white-space: normal;
+    display: none;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

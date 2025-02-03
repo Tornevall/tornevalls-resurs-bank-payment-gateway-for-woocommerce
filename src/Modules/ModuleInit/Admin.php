@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
+use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
 use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
@@ -41,6 +42,10 @@ class Admin
         if (!Enabled::isEnabled()) {
             return;
         }
+
+        // Initialize same block components for Admin as for the frontend to mark
+        // payment methods as compatible in block editor.
+        GatewayBlocks::init();
 
         Gateway::initAdmin();
         Order::init();

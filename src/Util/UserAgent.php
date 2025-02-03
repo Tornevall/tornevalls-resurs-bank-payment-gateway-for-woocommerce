@@ -29,7 +29,7 @@ class UserAgent
         // Using get_file_data here since WordPress' base function get_plugin_data is currently not available when
         // this method is called.
         $pluginFileData = get_file_data(
-            RESURSBANK_GATEWAY_PATH . '/readme.txt',
+            RESURSBANK_MODULE_DIR_PATH . '/readme.txt',
             ['plugin_version' => 'Stable tag']
         );
 

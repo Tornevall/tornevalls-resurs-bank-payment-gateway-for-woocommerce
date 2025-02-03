@@ -58,7 +58,7 @@ class Admin
 
             wp_register_script(
                 'rb-store-admin-scripts-load',
-                Url::getScriptUrl(
+                Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'rb-part-payment-admin.js'
                 )
@@ -66,7 +66,7 @@ class Admin
 
             wp_enqueue_script(
                 'rb-store-admin-scripts-load',
-                Url::getScriptUrl(
+                Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'rb-part-payment-admin.js'
                 ),

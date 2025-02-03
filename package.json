@@ -1,0 +1,21 @@
+{
+	"name": "resursbank",
+	"version": "1.0.0",
+	"description": "Resurs Bank Payment Gateway",
+	"scripts": {
+		"build": "wp-scripts build",
+		"start": "wp-scripts start"
+	},
+	"author": "Resurs Bank",
+	"license": "Apache-2.0",
+	"devDependencies": {
+		"@woocommerce/dependency-extraction-webpack-plugin": "^3.0.1",
+		"@wordpress/scripts": "^30.4.0",
+		"ts-loader": "^9.5.1",
+		"webpack": "^5.95.0",
+		"webpack-cli": "^5.1.4"
+	},
+	"dependencies": {
+		"@wordpress/data": "^10.11.0"
+	}
+}
