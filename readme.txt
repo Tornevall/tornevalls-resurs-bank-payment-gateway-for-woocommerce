@@ -8,7 +8,7 @@ WC Tested up to: 9.6.0
 WC requires at least: 7.6.0
 Plugin requires ecom: 3.1.1
 Requires Plugins: woocommerce
-Stable tag: 1.0.58
+Stable tag: 1.1.0
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
