@@ -62,9 +62,28 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.1.0
+
+* [WOO-1373](https://resursbankplugins.atlassian.net/browse/WOO-1373) Update src/Modules/GetAddress/resources/update-address/legacy.js
+* [WOO-1379](https://resursbankplugins.atlassian.net/browse/WOO-1379) Confirm functionality of logged in customer
+* [WOO-1384](https://resursbankplugins.atlassian.net/browse/WOO-1384) wp-admin payment method editor says incompatible methods
+* [WOO-1403](https://resursbankplugins.atlassian.net/browse/WOO-1403) New url to docs in readme
+* [WOO-1407](https://resursbankplugins.atlassian.net/browse/WOO-1407) Investigation of Support for Payment Method Management and Sorting in WooCommerce Blocks
+* [WOO-1396](https://resursbankplugins.atlassian.net/browse/WOO-1396) Missing company payment method
+* [WOO-1397](https://resursbankplugins.atlassian.net/browse/WOO-1397) Legacy checkout do not reload payment methods
+* [WOO-1400](https://resursbankplugins.atlassian.net/browse/WOO-1400) Purchase button invalidates in specific occasions for some LEGAL method
+* [WOO-1402](https://resursbankplugins.atlassian.net/browse/WOO-1402) Billing address are not seind in deliveryAddress with blocks
+* [WOO-1404](https://resursbankplugins.atlassian.net/browse/WOO-1404) Error message from Merchant-api is missing
+* [WOO-1405](https://resursbankplugins.atlassian.net/browse/WOO-1405) For a Finnish account, the threshold value should be 15€
+* [WOO-1406](https://resursbankplugins.atlassian.net/browse/WOO-1406) The Legacy checkout does not list the "correct" payment methods at checkout depending on the country
+* [WOO-1409](https://resursbankplugins.atlassian.net/browse/WOO-1409) Email is not properly added to payload when order are created
+* [WOO-1410](https://resursbankplugins.atlassian.net/browse/WOO-1410) Send the personal identification number, email, and mobile number of the person responsible for the payment, i.e., the details required by the service provider.
+* [WOO-1412](https://resursbankplugins.atlassian.net/browse/WOO-1412) PPW not showing after resetting values
+* [WOO-1378](https://resursbankplugins.atlassian.net/browse/WOO-1378) Test Blocks and Legacy
+
 # 1.0.58
 
-[WOO-1390](https://resursbankplugins.atlassian.net/browse/WOO-1390) Partpayment widget errors with out of stocks
+* [WOO-1390](https://resursbankplugins.atlassian.net/browse/WOO-1390) Partpayment widget errors with out of stocks
 
 # 1.0.57
 
