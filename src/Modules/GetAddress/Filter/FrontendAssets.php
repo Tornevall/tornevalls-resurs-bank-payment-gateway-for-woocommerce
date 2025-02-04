@@ -32,6 +32,10 @@ class FrontendAssets
      */
     public static function exec(): void
     {
+        if (!is_checkout()) {
+            return;
+        }
+
         self::enableScripts();
         self::enableStyles();
     }
