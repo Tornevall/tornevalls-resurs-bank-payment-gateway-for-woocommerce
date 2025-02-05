@@ -55,8 +55,6 @@ export class LegacyAddressUpdater {
             // @ts-ignore
             resursConsoleLog('Legacy Address Fetcher is disabled, Initializing Alternative CustomerType.');
             this.setupCustomerTypeOnInit();
-            // @ts-ignore
-            resursConsoleLog('Legacy Address Fetcher is disabled.');
             return;
         }
         // @ts-ignore

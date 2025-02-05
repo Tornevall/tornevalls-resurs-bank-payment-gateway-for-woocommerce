@@ -212,9 +212,6 @@ export class BlocksAddressUpdater {
                 this.allPaymentMethods.push(methodKey);
             }
         });
-        this.allPaymentMethods.sort((a, b) => { // @ts-ignore
-            return rbFrontendMethods.indexOf(a) - rbFrontendMethods.indexOf(b);
-        });
     }
 
     /**
@@ -361,10 +358,6 @@ export class BlocksAddressUpdater {
             // If it's not a custom method, retain it as-is.
             return cartMethod;
         }).filter(Boolean);
-
-        updatedPaymentMethods.sort((a, b) => { // @ts-ignore
-            return rbFrontendMethods.indexOf(a) - rbFrontendMethods.indexOf(b);
-        });
 
         //dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         dispatch(CART_STORE_KEY).setCartData({
