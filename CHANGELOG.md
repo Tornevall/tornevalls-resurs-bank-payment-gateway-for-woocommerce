@@ -1,10 +1,12 @@
-# 1.1.2
+# 1.1.1 - 1.1.4
 
-[WOO-1414](https://resursbankplugins.atlassian.net/browse/WOO-1414) isEnabled shouts false positives
-
-# 1.1.1
-
-[WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors
+* [WOO-1411](https://resursbankplugins.atlassian.net/browse/WOO-1411) About-widget broken
+* [WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors
+* [WOO-1415](https://resursbankplugins.atlassian.net/browse/WOO-1415) Remove \(if possible\) extra sort order on blocks methods
+* [WOO-1416](https://resursbankplugins.atlassian.net/browse/WOO-1416) slow loading with get-address?
+* [WOO-1414](https://resursbankplugins.atlassian.net/browse/WOO-1414) isEnabled shouts false positives
+* [WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors
+* Uncatched blocks exception handled.
 
 # 1.1.0
 
