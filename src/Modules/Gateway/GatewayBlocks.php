@@ -68,6 +68,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             }
         );
 
+        if (!is_checkout()) {
+            return;
+        }
+
         add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
     }
 
