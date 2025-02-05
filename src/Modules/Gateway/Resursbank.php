@@ -102,7 +102,7 @@ class Resursbank extends WC_Payment_Gateway
             is_string(value: $this->id) &&
             $method->id !== RESURSBANK_MODULE_PREFIX
         ) {
-            // Redirect to the correct section if the wrong section is requested when section is set to a method id.
+            // Redirects to the correct section if the wrong section is requested when the section is set to a method ID.
             AdminUtility::redirectAtWrongSection(method: $method->id);
         }
     }
