@@ -153,12 +153,12 @@ class PartPayment
             return;
         }
 
-        if (!self::validateStoreAndMethod()) {
+        if ($option === StoreId::getName()) {
+            PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
             return;
         }
 
-        if ($option === StoreId::getName()) {
-            PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
+        if (!self::validateStoreAndMethod()) {
             return;
         }
 
@@ -172,7 +172,9 @@ class PartPayment
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
-        global $overrideSavedCountryCode;
+        global $overrideSavedCountryCode, $isCountryOverride;
+
+        $isCountryOverride = false;
 
         try {
             Config::getCache()->invalidate();
@@ -201,6 +203,7 @@ class PartPayment
                 )
             ) {
                 $overrideSavedCountryCode = $countryCode;
+                $isCountryOverride = true;
                 self::updateThresholdLimit($countryCode);
             }
         } catch (Throwable) {
@@ -222,6 +225,8 @@ class PartPayment
      */
     private static function validateStoreAndMethod(): bool
     {
+        global $isCountryOverride;
+
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
         $period = Period::getData();
@@ -240,7 +245,10 @@ class PartPayment
             return false;
         }
 
-        if (empty($period)) {
+        // Country overrider may cause empty values during a limited amount of time
+        // due to handleStoreIdUpdate are saving the threshold values via the update hook.
+        // During this time we should not validate the period.
+        if (empty($period) && !$isCountryOverride) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-period'
             ));
