@@ -183,6 +183,7 @@ class PartPayment
 
             try {
                 $paymentMethods = Repository::getPaymentMethods();
+
                 self::updateLongestPeriodWithZeroInterest(
                     paymentMethods: $paymentMethods
                 );
@@ -253,6 +254,7 @@ class PartPayment
      * When we save new stores to the configuration, the payment method will no longer match with the PPW rules.
      *   This method will update the longest period with zero interest for the new payment method and save the uuid.
      *
+     * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @todo As this method already exists in ecom it eventually could be better to centralize it?
      */
@@ -262,6 +264,12 @@ class PartPayment
         $paymentMethodId = '';
 
         try {
+            $isAjaxRequest = isset($_REQUEST['resursbank']) && $_REQUEST['resursbank'] === 'get-store-country';
+
+            if ($isAjaxRequest) {
+                return;
+            }
+
             $firstFilteredMethod = AnnuityRepository::filterMethods(
                 paymentMethods: $paymentMethods
             )->getFirst();
