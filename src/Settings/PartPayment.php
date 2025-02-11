@@ -153,12 +153,12 @@ class PartPayment
             return;
         }
 
-        if (!self::validateStoreAndMethod()) {
+        if ($option === StoreId::getName()) {
+            PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
             return;
         }
 
-        if ($option === StoreId::getName()) {
-            PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
+        if (!self::validateStoreAndMethod()) {
             return;
         }
 
@@ -172,7 +172,9 @@ class PartPayment
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
-        global $overrideSavedCountryCode;
+        global $overrideSavedCountryCode, $isCountryOverride;
+
+        $isCountryOverride = false;
 
         try {
             Config::getCache()->invalidate();
@@ -183,6 +185,7 @@ class PartPayment
 
             try {
                 $paymentMethods = Repository::getPaymentMethods();
+
                 self::updateLongestPeriodWithZeroInterest(
                     paymentMethods: $paymentMethods
                 );
@@ -200,6 +203,7 @@ class PartPayment
                 )
             ) {
                 $overrideSavedCountryCode = $countryCode;
+                $isCountryOverride = true;
                 self::updateThresholdLimit($countryCode);
             }
         } catch (Throwable) {
@@ -221,6 +225,8 @@ class PartPayment
      */
     private static function validateStoreAndMethod(): bool
     {
+        global $isCountryOverride;
+
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
         $period = Period::getData();
@@ -239,7 +245,10 @@ class PartPayment
             return false;
         }
 
-        if (empty($period)) {
+        // Country overrider may cause empty values during a limited amount of time
+        // due to handleStoreIdUpdate are saving the threshold values via the update hook.
+        // During this time we should not validate the period.
+        if (empty($period) && !$isCountryOverride) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-period'
             ));
@@ -253,6 +262,7 @@ class PartPayment
      * When we save new stores to the configuration, the payment method will no longer match with the PPW rules.
      *   This method will update the longest period with zero interest for the new payment method and save the uuid.
      *
+     * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @todo As this method already exists in ecom it eventually could be better to centralize it?
      */
@@ -262,6 +272,14 @@ class PartPayment
         $paymentMethodId = '';
 
         try {
+            // This method are triggered through several requests due to how javascripts are loaded
+            // but should not be fully executed when AJAX requests are handling the calls.
+            $isAjaxRequest = isset($_REQUEST['resursbank']) && $_REQUEST['resursbank'] === 'get-store-country';
+
+            if ($isAjaxRequest) {
+                return;
+            }
+
             $firstFilteredMethod = AnnuityRepository::filterMethods(
                 paymentMethods: $paymentMethods
             )->getFirst();

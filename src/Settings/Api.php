@@ -61,6 +61,17 @@ class Api
      */
     public static function init(): void
     {
+        $properSection = (Admin::isSection('') || Admin::isSection(
+            'api_settings'
+        ));
+
+        if (
+            !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX) ||
+            !$properSection
+        ) {
+            return;
+        }
+
         add_action(
             'admin_enqueue_scripts',
             'Resursbank\Woocommerce\Settings\Api::initScripts'
@@ -167,6 +178,8 @@ class Api
 
     /**
      * Return config value for current store countryCode.
+     *
+     * @throws ConfigException
      */
     private static function getStoreCountrySetting(): array
     {
