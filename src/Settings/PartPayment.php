@@ -264,6 +264,8 @@ class PartPayment
         $paymentMethodId = '';
 
         try {
+            // This method are triggered through several requests but should be skipped when  AJAX
+            // requests are handling the calls.
             $isAjaxRequest = isset($_REQUEST['resursbank']) && $_REQUEST['resursbank'] === 'get-store-country';
 
             if ($isAjaxRequest) {
