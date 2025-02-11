@@ -1,3 +1,7 @@
+# 1.1.5
+
+* [WOO-1417](https://resursbankplugins.atlassian.net/browse/WOO-1417) ppw period resets to wrong value
+
 # 1.1.1 - 1.1.4
 
 * [WOO-1411](https://resursbankplugins.atlassian.net/browse/WOO-1411) About-widget broken

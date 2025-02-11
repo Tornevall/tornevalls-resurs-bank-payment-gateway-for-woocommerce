@@ -4,11 +4,11 @@ Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, 
 Requires at least: 6.0
 Tested up to: 6.7.1
 Requires PHP: 8.1
-WC Tested up to: 9.6.0
+WC Tested up to: 9.6.1
 WC requires at least: 7.6.0
-Plugin requires ecom: 3.1.1
+Plugin requires ecom: 3.1.4
 Requires Plugins: woocommerce
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -60,6 +60,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.1.5
+
+* [WOO-1417](https://resursbankplugins.atlassian.net/browse/WOO-1417) ppw period resets to wrong value
+
 # 1.1.1 - 1.1.4
 
 * [WOO-1411](https://resursbankplugins.atlassian.net/browse/WOO-1411) About-widget broken
@@ -93,57 +97,5 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 * [WOO-1412](https://resursbankplugins.atlassian.net/browse/WOO-1412) PPW not showing after resetting values
 * [WOO-1378](https://resursbankplugins.atlassian.net/browse/WOO-1378) Test Blocks and Legacy
 
-# 1.0.58
-
-* [WOO-1390](https://resursbankplugins.atlassian.net/browse/WOO-1390) Partpayment widget errors with out of stocks
-
-# 1.0.57
-
-* Hotfix for missing files in the WP repo.
-
-# 1.0.56
-
-* [WOO-1246](https://resursbankplugins.atlassian.net/browse/WOO-1246) Resolve default store id by using ECom method instead
-* [WOO-1359](https://resursbankplugins.atlassian.net/browse/WOO-1359) Remove getSiteLanguage and \\Resursbank\\Woocommerce\\Database\\Options\\Api\\StoreCountryCode
-* [WOO-1366](https://resursbankplugins.atlassian.net/browse/WOO-1366) 1359/1246: Clean up Language/Country/Default Store transient handling.
-* [WOO-1364](https://resursbankplugins.atlassian.net/browse/WOO-1364) Error in ecom.log when fetchAddress in checkout
-* [WOO-1381](https://resursbankplugins.atlassian.net/browse/WOO-1381) Missing type check in Modules\\Gateway\\Gateway::modifyIcon
-
-# 1.0.50 - 1.0.55
-
-* Miscellaneous hotfixes.
-* [WOO-1355](https://resursbankplugins.atlassian.net/browse/WOO-1355) PPW renders duplicate payment \(and too many\) payment methods
-* [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.
-
-# 1.0.50
-
-* [WOO-1353](https://resursbankplugins.atlassian.net/browse/WOO-1353) Memory exhaustion patch.
-
-# 1.0.49
-
-* [WOO-1343](https://resursbankplugins.atlassian.net/browse/WOO-1343) Adjust for ECP-855 changes
-* [WOO-1345](https://resursbankplugins.atlassian.net/browse/WOO-1345) Apply ECP-860 changes
-* [WOO-1351](https://resursbankplugins.atlassian.net/browse/WOO-1351) Unable to handle payments not belonging to Resurs in special circumstances
-
-# 1.0.43 - 1.0.48
-
-* Hotfixes for various problems. One covers a "live" vs "coming soon"-pages issue. Another one is based on a misplaced script-tag.
-
-# 1.0.42
-
-* [WOO-1308](https://resursbankplugins.atlassian.net/browse/WOO-1308) Upgrade to v3
-* [WOO-1332](https://resursbankplugins.atlassian.net/browse/WOO-1332) getAddress don't show up
-* [WOO-1333](https://resursbankplugins.atlassian.net/browse/WOO-1333) get use of rb-ga-gov-id to fill in company name on LEGAL
-* [WOO-1337](https://resursbankplugins.atlassian.net/browse/WOO-1337) Raise woocommerce too ecom v3-tag
-* [WOO-1329](https://resursbankplugins.atlassian.net/browse/WOO-1329) Fix annuity-factor widget in admin \(Breaking change for v3\).
-* [WOO-1334](https://resursbankplugins.atlassian.net/browse/WOO-1334) createPaymentRequest classes moved to models
-* [WOO-1335](https://resursbankplugins.atlassian.net/browse/WOO-1335) PPW: Period laddas inte vid val av betalmetod
-* [WOO-1336](https://resursbankplugins.atlassian.net/browse/WOO-1336) Admin: Butiksval laddas inte in vi byte av credentials
-* [WOO-1338](https://resursbankplugins.atlassian.net/browse/WOO-1338) Government id not submitted to createpayment
-* [WOO-1339](https://resursbankplugins.atlassian.net/browse/WOO-1339) Modify seems to not work properly
-* [WOO-1340](https://resursbankplugins.atlassian.net/browse/WOO-1340) Bulk finalization may still cause booleans instead of null when using getOrder
-* [WOO-1342](https://resursbankplugins.atlassian.net/browse/WOO-1342) About-widget errors
-
 
 == Upgrade Notice ==
-
