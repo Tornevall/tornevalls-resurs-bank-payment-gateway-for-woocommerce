@@ -62,8 +62,8 @@ class PartPayment
         $response = [
             'css' => '',
             'startingAt' => '',
-            'startingAtHtml' => '',
-            'readMoreWidget' => '',
+            'html' => '',
+            'readMoreHtml' => '',
             'monthlyCost' => ''
         ];
 
@@ -90,13 +90,15 @@ class PartPayment
                 ),
                 threshold: Limit::getData()
             );
+
             $readMoreWidget = new ReadMore(
                 paymentMethod: $paymentMethod,
                 amount: (float)$requestAmount
             );
-            $response['startingAtHtml'] = $widget->getStartingAt();
+
+            $response['html'] = $widget->content;
             $response['startingAt'] = (float)$requestAmount;
-            $response['readMoreWidget'] = $readMoreWidget->content;
+            $response['readMoreHtml'] = $readMoreWidget->content;
             $response['monthlyCost'] = $widget->getMonthlyCost();
         }
 
