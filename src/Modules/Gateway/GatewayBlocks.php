@@ -188,6 +188,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
                     'description' => $usp->content,
+                    'costlist' => GatewayHelper::getCostList(
+                        method: $paymentMethod
+                    ),
+                    'price_signage_warning' => GatewayHelper::getPriceSignageWarning(),
                     'read_more_css' => $usp->readMore->css,
                     'logo' => $logo->html,
                     'logo_type' => $logo->getIdentifier(),

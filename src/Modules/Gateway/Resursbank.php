@@ -39,6 +39,9 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
+use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
+use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
+use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
@@ -129,7 +132,7 @@ class Resursbank extends WC_Payment_Gateway
                 paymentMethod: $this->method,
                 amount: $this->get_order_total()
             );
-            echo $usp->content;
+            echo $usp->content . GatewayHelper::renderPaymentMethodContent(method: $this->method);
         } catch (TranslationException $error) {
             // Translation errors should rather go as debug messages since we
             // translate with english fallbacks.
