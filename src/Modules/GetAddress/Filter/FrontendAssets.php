@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
@@ -28,21 +33,45 @@ class FrontendAssets
     /**
      * Enqueued script execution.
      *
+     * @throws EmptyValueException
+     * @throws FilesystemException
+     * @throws HttpException
+     * @throws IllegalValueException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(): void
     {
+        // Things that has to be loaded regardless.
+        self::enableGenericStyles();
+
         if (!is_checkout()) {
             return;
         }
 
-        self::enableScripts();
         self::enableStyles();
+        self::enableScripts();
+    }
+
+    /**
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function enableGenericStyles(): void
+    {
+        wp_register_style('rb-costlist-css', false);
+        wp_enqueue_style('rb-costlist-css');
+        wp_add_inline_style(
+            'rb-costlist-css',
+            CostList::getCss()
+        );
     }
 
     /**
      * Enable all scripts for the front end.
      *
+     * @throws FilesystemException
+     * @throws HttpException
+     * @throws EmptyValueException
+     * @throws IllegalValueException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function enableScripts(): void

@@ -221,7 +221,8 @@ class PartPayment
         try {
             echo '<div id="rb-pp-widget-container">' .
                 self::getWidget()->content .
-                self::getReadMoreWidget()->content . '</div>';
+                self::getReadMoreWidget()->content .
+                '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

@@ -119,6 +119,16 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                             __html: method.description,
                         }}
                     />
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: method.costlist,
+                        }}
+                    />
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: method.price_signage_warning,
+                        }}
+                    />
                     <style>{method.read_more_css}</style>
                 </div>
             );
