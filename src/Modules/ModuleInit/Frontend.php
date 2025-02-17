@@ -25,8 +25,6 @@ class Frontend
 {
     /**
      * Init various modules.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
