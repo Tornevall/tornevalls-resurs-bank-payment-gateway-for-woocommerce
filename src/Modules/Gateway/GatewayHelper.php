@@ -4,7 +4,19 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Model\PriceSignage\PriceSignage;
 use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
@@ -17,34 +29,20 @@ use WC_Cart;
  */
 class GatewayHelper
 {
+    private ?PriceSignage $priceSignage;
+
+    public function __construct(private readonly PaymentMethod $paymentMethod)
+    {
+    }
+
     /**
      * Render Cost List widget and return HTML.
      */
-    public static function getCostList(PaymentMethod $method): string
+    public function getCostList(): string
     {
         try {
-            $total = 0.0;
-
-            if (WC()->cart instanceof WC_Cart) {
-                $total = (float) WC()->cart->get_total();
-                $totals = WC()->cart->get_totals();
-
-                if (
-                    $total === 0.0 &&
-                    isset($totals['total']) &&
-                    is_array($totals) &&
-                    (float) $totals['total'] > 0
-                ) {
-                    $total = (float) $totals['total'];
-                }
-            }
-
             return '<div class="rb-ps-cl-container">' . (new CostList(
-                method: $method,
-                priceSignage: GetPriceSignageRepository::getPriceSignage(
-                    paymentMethodId: $method->id,
-                    amount: $total
-                )
+                priceSignage: $this->getPriceSignage()
             ))->content . '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -55,10 +53,12 @@ class GatewayHelper
     /**
      * Render Price Signage Warning widget HTML.
      */
-    public static function getPriceSignageWarning(): string
+    public function getPriceSignageWarning(): string
     {
         try {
-            return '<div class="rb-ps-warning-container">' . (new Warning())->content . '</div>';
+            return '<div class="rb-ps-warning-container">' . (new Warning(
+                priceSignage: $this->getPriceSignage()
+            ))->content . '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
             return '';
@@ -68,11 +68,59 @@ class GatewayHelper
     /**
      * Render payment method content including Cost List and Warning widgets.
      */
-    public static function renderPaymentMethodContent(PaymentMethod $method): string
+    public function renderPaymentMethodContent(): string
     {
         return '<div class="payment-method-content">' .
-            self::getCostList(method: $method) .
-            self::getPriceSignageWarning() .
+            $this->getCostList() .
+            $this->getPriceSignageWarning() .
             '</div>';
+    }
+
+    private function getWcTotal(): float
+    {
+        $total = 0.0;
+
+        if (WC()->cart instanceof WC_Cart) {
+            $total = (float)WC()->cart->get_total();
+            $totals = WC()->cart->get_totals();
+
+            if (
+                $total === 0.0 &&
+                isset($totals['total']) &&
+                is_array($totals) &&
+                (float)$totals['total'] > 0
+            ) {
+                $total = (float)$totals['total'];
+            }
+        }
+
+        return $total;
+    }
+
+    /**
+     * @throws Throwable
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     */
+    private function getPriceSignage(): PriceSignage
+    {
+        return GetPriceSignageRepository::getPriceSignage(
+            paymentMethodId: $this->getPaymentMethod()->id,
+            amount: $this->getWcTotal()
+        );
+    }
+
+    private function getPaymentMethod(): PaymentMethod
+    {
+        return $this->paymentMethod;
     }
 }

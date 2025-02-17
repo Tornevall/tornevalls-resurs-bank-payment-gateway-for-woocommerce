@@ -128,11 +128,12 @@ class Resursbank extends WC_Payment_Gateway
     public function payment_fields(): void
     {
         try {
+            $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
             $usp = PaymentMethodRepository::getUniqueSellingPoint(
                 paymentMethod: $this->method,
                 amount: $this->get_order_total()
             );
-            echo $usp->content . GatewayHelper::renderPaymentMethodContent(method: $this->method);
+            echo $usp->content . $gatewayHelper->renderPaymentMethodContent();
         } catch (TranslationException $error) {
             // Translation errors should rather go as debug messages since we
             // translate with english fallbacks.

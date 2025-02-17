@@ -183,15 +183,14 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     amount: (float)WC()?->cart?->total
                 );
                 $logo = new Widget(paymentMethod: $paymentMethod);
+                $helper = new GatewayHelper(paymentMethod: $paymentMethod);
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
                     'description' => $usp->content,
-                    'costlist' => GatewayHelper::getCostList(
-                        method: $paymentMethod
-                    ),
-                    'price_signage_warning' => GatewayHelper::getPriceSignageWarning(),
+                    'costlist' => $helper->getCostList(),
+                    'price_signage_warning' => $helper->getPriceSignageWarning(),
                     'read_more_css' => $usp->readMore->css,
                     'logo' => $logo->html,
                     'logo_type' => $logo->getIdentifier(),
