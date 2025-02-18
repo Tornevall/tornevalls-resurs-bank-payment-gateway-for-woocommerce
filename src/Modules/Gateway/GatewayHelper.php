@@ -45,20 +45,9 @@ class GatewayHelper
 
         try {
             if ($this->paymentMethod->priceSignagePossible) {
-                /*$transientName = 'resursbank_cost_list_' . md5(string: $this->paymentMethod->id . $return);
-                $storedCostList = get_transient($transientName);*/
-
                 $return = '<div class="rb-ps-cl-container">' . (new CostList(
                     priceSignage: $this->getPriceSignage()
                 ))->content . '</div>';
-
-                /*
-                set_transient(
-                    $transientName,
-                    $return,
-                    expiration: 600
-                );
-                */
             }
         } catch (Throwable $error) {
             Log::error(error: $error);
