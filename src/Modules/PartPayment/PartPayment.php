@@ -136,6 +136,7 @@ class PartPayment
             );
         }
 
+        // Only fetch payment method if not already set instead of generate a performance drop.
         if (empty($partPaymentWidgetMethod)) {
             $partPaymentWidgetMethod = Repository::getById(
                 paymentMethodId: $paymentMethodSet
