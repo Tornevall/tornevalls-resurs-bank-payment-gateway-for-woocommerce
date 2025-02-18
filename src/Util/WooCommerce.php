@@ -50,22 +50,18 @@ class WooCommerce
     {
         global $wp_query, $post;
 
-        // Try to discover legacy by current page id primarily before falling back to WooCommerce
-        // preconfigured theme for blocks, making it possible to be present even when WooCommerce are misconfigured.
         if ($wp_query !== null && function_exists('get_queried_object')) {
             $post = get_queried_object();
         }
 
-        $checkoutPageId = $post instanceof WP_Post
-            ? $post->ID
-            : wc_get_page_id('checkout');
+        $checkoutPageId = (int)($post instanceof WP_Post ? $post->ID : wc_get_page_id(
+            'checkout'
+        ));
 
-        // Check if the checkout page ID is valid
-        if (!$checkoutPageId || $checkoutPageId <= 0) {
+        if ($checkoutPageId === 0) {
             return false;
         }
 
-        // Check if the page contains the specific block
         return has_block('woocommerce/checkout', $checkoutPageId);
     }
 
