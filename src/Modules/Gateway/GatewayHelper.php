@@ -102,7 +102,7 @@ class GatewayHelper
     private function getCostListHtml(): string
     {
         // Fixing performance issues on reloads.
-        $transientName = 'resursbank_cost_list_' . $this->getPaymentMethod()->id;
+        $transientName = 'resursbank_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
         $transientContent = get_transient($transientName);
 
         if ($transientContent) {
