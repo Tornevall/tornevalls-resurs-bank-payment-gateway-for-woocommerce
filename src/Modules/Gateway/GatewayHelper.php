@@ -113,7 +113,8 @@ class GatewayHelper
             priceSignage: $this->getPriceSignage()
         ))->content . '</div>';
 
-        // 5 minute transient storage.
+        // 5-minute transient storage. If someone uses the same method and the same price,
+        // we can cache the result globally to improve performance.
         set_transient($transientName, $return, 300);
 
         return $return;
