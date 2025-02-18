@@ -50,8 +50,8 @@ class WooCommerce
     {
         global $wp_query, $post;
 
-        // Try to discover legacy by current page id primarily before falling back to woocommerce
-        // preconfigured theme for blocks.
+        // Try to discover legacy by current page id primarily before falling back to WooCommerce
+        // preconfigured theme for blocks, making it possible to be present even when WooCommerce are misconfigured.
         if ($wp_query !== null && function_exists('get_queried_object')) {
             $post = get_queried_object();
         }
