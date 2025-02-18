@@ -104,7 +104,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
             const cartTotal = calculateCartTotal(cartData);
             const billingCountry = cartData?.billing_address?.country || '';
             const shippingCountry = cartData?.shipping_address?.country || '';
-            
+
             React.useEffect(() => {
                 const iframe = document.querySelector(
                     'iframe.rb-rm-iframe'
