@@ -69,8 +69,6 @@ class PartPayment
      */
     public static function getReadMoreWidget(): ReadMore
     {
-        global $readMorePaymentMethod;
-
         if (self::$readMoreInstance !== null) {
             return self::$readMoreInstance;
         }
@@ -84,11 +82,9 @@ class PartPayment
         }
 
         // Only fetch payment method if not already set instead of generate a performance drop.
-        if (empty($readMorePaymentMethod)) {
-            $readMorePaymentMethod = Repository::getById(
-                paymentMethodId: $paymentMethodSet
-            );
-        }
+        $readMorePaymentMethod = Repository::getById(
+            paymentMethodId: $paymentMethodSet
+        );
 
         self::$readMoreInstance = new ReadMore(
             paymentMethod: $readMorePaymentMethod,
@@ -117,8 +113,6 @@ class PartPayment
      */
     public static function getWidget(): ?EcomPartPayment
     {
-        global $partPaymentWidgetMethod;
-
         if (self::$instance !== null) {
             return self::$instance;
         }
@@ -138,11 +132,9 @@ class PartPayment
         }
 
         // Only fetch payment method if not already set instead of generate a performance drop.
-        if (empty($partPaymentWidgetMethod)) {
-            $partPaymentWidgetMethod = Repository::getById(
-                paymentMethodId: $paymentMethodSet
-            );
-        }
+        $partPaymentWidgetMethod = Repository::getById(
+            paymentMethodId: $paymentMethodSet
+        );
 
         if ($partPaymentWidgetMethod === null) {
             throw new IllegalTypeException(
