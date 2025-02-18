@@ -6,6 +6,7 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -22,7 +23,6 @@ use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Cart;
 
@@ -102,24 +102,29 @@ class GatewayHelper
     private function getCostListHtml(): string
     {
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
-        $transientName = 'resursbank_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
-        $transientContent = get_transient($transientName);
+        $cacheKey = 'resursbank-ecom-cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
 
-        if ($transientContent) {
-            return $transientContent;
+        // Fetch from cache
+        $cache = Config::getCache();
+        $cachedContent = $cache->read($cacheKey);
+
+        if ($cachedContent !== null) {
+            return $cachedContent;
         }
 
         $return = '<div class="rb-ps-cl-container">' . (new CostList(
             priceSignage: $this->getPriceSignage()
         ))->content . '</div>';
 
-        // 5-minute transient storage. If someone uses the same method and the same price,
-        // we can cache the result globally to improve performance.
-        set_transient($transientName, $return, 300);
+        // Store in cache with a 5-minute expiration time
+        $cache->write($cacheKey, $return, 300);
 
         return $return;
     }
 
+    /**
+     * Get correct totals.
+     */
     private function getWcTotal(): float
     {
         $total = 0.0;
