@@ -79,7 +79,7 @@ class GatewayHelper
     {
         return '<div class="payment-method-content">' .
             $this->getCostList() .
-            (WooCommerce::getStoreCountry() === 'SE' ?? $this->getPriceSignageWarning()) .
+            $this->getPriceSignageWarning() .
             '</div>';
     }
 
