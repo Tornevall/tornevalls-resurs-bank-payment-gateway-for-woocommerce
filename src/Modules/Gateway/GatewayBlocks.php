@@ -185,8 +185,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 $logo = new Widget(paymentMethod: $paymentMethod);
                 $helper = new GatewayHelper(paymentMethod: $paymentMethod);
 
-                $priceSignageContent = $paymentMethod->priceSignagePossible ?
-                    $helper->getCostList() . $helper->getPriceSignageWarning() : '';
+                $priceSignageContent = $helper->getCostList() . $helper->getPriceSignageWarning();
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,

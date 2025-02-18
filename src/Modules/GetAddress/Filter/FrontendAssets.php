@@ -43,7 +43,7 @@ class FrontendAssets
     {
         // Things that has to be loaded regardless.
         self::enableGenericStyles();
-        self::enableGenericJs();
+        self::enqueueCostListJs();
 
         if (!is_checkout()) {
             return;
@@ -67,9 +67,11 @@ class FrontendAssets
     }
 
     /**
+     * Enqueue scripts related to CostList.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function enableGenericJs(): void
+    public static function enqueueCostListJs(): void
     {
         wp_register_script(
             'rb-costlist-js',
