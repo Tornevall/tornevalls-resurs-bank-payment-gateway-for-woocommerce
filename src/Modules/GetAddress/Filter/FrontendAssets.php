@@ -43,6 +43,7 @@ class FrontendAssets
     {
         // Things that has to be loaded regardless.
         self::enableGenericStyles();
+        self::enableGenericJs();
 
         if (!is_checkout()) {
             return;
@@ -62,6 +63,23 @@ class FrontendAssets
         wp_add_inline_style(
             'rb-costlist-css',
             CostList::getCss()
+        );
+    }
+
+    /**
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function enableGenericJs(): void
+    {
+        wp_register_script(
+            'rb-costlist-js',
+            '',
+            []
+        );
+        wp_enqueue_script('rb-costlist-js');
+        wp_add_inline_script(
+            'rb-costlist-js',
+            CostList::getJs()
         );
     }
 

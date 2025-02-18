@@ -69,6 +69,8 @@ class PartPayment
      */
     public static function getReadMoreWidget(): ReadMore
     {
+        global $readMorePaymentMethod;
+
         if (self::$readMoreInstance !== null) {
             return self::$readMoreInstance;
         }
@@ -81,12 +83,14 @@ class PartPayment
             );
         }
 
-        $paymentMethod = Repository::getById(
-            paymentMethodId: PaymentMethod::getData()
-        );
+        if (empty($readMorePaymentMethod)) {
+            $readMorePaymentMethod = Repository::getById(
+                paymentMethodId: $paymentMethodSet
+            );
+        }
 
         self::$readMoreInstance = new ReadMore(
-            paymentMethod: $paymentMethod,
+            paymentMethod: $readMorePaymentMethod,
             amount: self::getPriceData()
         );
 
@@ -112,6 +116,8 @@ class PartPayment
      */
     public static function getWidget(): ?EcomPartPayment
     {
+        global $partPaymentWidgetMethod;
+
         if (self::$instance !== null) {
             return self::$instance;
         }
@@ -130,23 +136,25 @@ class PartPayment
             );
         }
 
-        $paymentMethod = Repository::getById(
-            paymentMethodId: PaymentMethod::getData()
-        );
+        if (empty($partPaymentWidgetMethod)) {
+            $partPaymentWidgetMethod = Repository::getById(
+                paymentMethodId: $paymentMethodSet
+            );
+        }
 
-        if ($paymentMethod === null) {
+        if ($partPaymentWidgetMethod === null) {
             throw new IllegalTypeException(
                 message: "Payment method $paymentMethodSet not found."
             );
         }
 
         if (
-            $priceData >= $paymentMethod->minPurchaseLimit &&
-            $priceData <= $paymentMethod->maxPurchaseLimit
+            $priceData >= $partPaymentWidgetMethod->minPurchaseLimit &&
+            $priceData <= $partPaymentWidgetMethod->maxPurchaseLimit
         ) {
             self::$instance = new EcomPartPayment(
                 storeId: StoreId::getData(),
-                paymentMethod: $paymentMethod,
+                paymentMethod: $partPaymentWidgetMethod,
                 months: (int)Period::getData(),
                 amount: $priceData,
                 currencySymbol: Currency::getWooCommerceCurrencySymbol(),
