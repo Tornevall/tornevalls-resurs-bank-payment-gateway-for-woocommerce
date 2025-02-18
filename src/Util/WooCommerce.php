@@ -84,6 +84,7 @@ class WooCommerce
      */
     public static function getStoreCountry(): string
     {
+        // Performance fix for moments where this method are recalled several times.
         if (self::$storeCountry !== null) {
             return self::$storeCountry;
         }
