@@ -11,6 +11,7 @@ use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -45,9 +46,7 @@ class GatewayHelper
 
         try {
             if ($this->paymentMethod->priceSignagePossible) {
-                $return = '<div class="rb-ps-cl-container">' . (new CostList(
-                    priceSignage: $this->getPriceSignage()
-                ))->content . '</div>';
+                return $this->getCostListHtml();
             }
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -82,6 +81,42 @@ class GatewayHelper
             $this->getCostList() .
             (WooCommerce::getStoreCountry() === 'SE' ?? $this->getPriceSignageWarning()) .
             '</div>';
+    }
+
+    /**
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws ValidationException
+     * @throws FilesystemException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    private function getCostListHtml(): string
+    {
+        // Fixing performance issues on reloads.
+        $transientName = 'resursbank_cost_list_' . $this->getPaymentMethod()->id;
+        $transientContent = get_transient($transientName);
+
+        if ($transientContent) {
+            return $transientContent;
+        }
+
+        $return = '<div class="rb-ps-cl-container">' . (new CostList(
+            priceSignage: $this->getPriceSignage()
+        ))->content . '</div>';
+
+        // 5 minute transient storage.
+        set_transient($transientName, $return, 300);
+
+        return $return;
     }
 
     private function getWcTotal(): float
