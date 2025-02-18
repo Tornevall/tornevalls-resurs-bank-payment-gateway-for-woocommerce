@@ -41,14 +41,19 @@ class GatewayHelper
      */
     public function getCostList(): string
     {
+        $return = '';
+
         try {
-            return '<div class="rb-ps-cl-container">' . (new CostList(
-                priceSignage: $this->getPriceSignage()
-            ))->content . '</div>';
+            if ($this->paymentMethod->priceSignagePossible) {
+                $return = '<div class="rb-ps-cl-container">' . (new CostList(
+                    priceSignage: $this->getPriceSignage()
+                ))->content . '</div>';
+            }
         } catch (Throwable $error) {
             Log::error(error: $error);
-            return '';
         }
+
+        return $return;
     }
 
     /**
