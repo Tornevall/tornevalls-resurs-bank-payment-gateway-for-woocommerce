@@ -83,6 +83,7 @@ class PartPayment
             );
         }
 
+        // Only fetch payment method if not already set instead of generate a performance drop.
         if (empty($readMorePaymentMethod)) {
             $readMorePaymentMethod = Repository::getById(
                 paymentMethodId: $paymentMethodSet
