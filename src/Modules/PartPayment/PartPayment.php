@@ -81,13 +81,10 @@ class PartPayment
             );
         }
 
-        // Only fetch payment method if not already set instead of generate a performance drop.
-        $readMorePaymentMethod = Repository::getById(
-            paymentMethodId: $paymentMethodSet
-        );
-
         self::$readMoreInstance = new ReadMore(
-            paymentMethod: $readMorePaymentMethod,
+            paymentMethod: Repository::getById(
+                paymentMethodId: $paymentMethodSet
+            ),
             amount: self::getPriceData()
         );
 
@@ -131,7 +128,6 @@ class PartPayment
             );
         }
 
-        // Only fetch payment method if not already set instead of generate a performance drop.
         $partPaymentWidgetMethod = Repository::getById(
             paymentMethodId: $paymentMethodSet
         );
