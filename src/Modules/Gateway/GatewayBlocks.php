@@ -29,6 +29,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -184,12 +185,13 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 );
                 $logo = new Widget(paymentMethod: $paymentMethod);
                 $helper = new GatewayHelper(paymentMethod: $paymentMethod);
+                $readMore = new ReadMore(paymentMethod: $paymentMethod, amount: (float)WC()?->cart?->total);
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
-                    'description' => $usp->content . $helper->getCostList() . $helper->getPriceSignageWarning(),
-                    'read_more_css' => $usp->readMore->css,
+                    'description' => $usp->message . $helper->getCostList() . $readMore->content  . $helper->getPriceSignageWarning(),
+                    'read_more_css' => '',
                     'logo' => $logo->html,
                     'logo_type' => $logo->getIdentifier(),
                     'min_purchase_limit' => $paymentMethod->minPurchaseLimit,

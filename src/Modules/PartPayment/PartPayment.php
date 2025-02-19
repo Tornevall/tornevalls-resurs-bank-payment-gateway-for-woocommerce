@@ -27,6 +27,8 @@ use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMoreJs;
+use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
+use Resursbank\Ecom\Module\PriceSignage\Widget\CostListJs;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -220,7 +222,7 @@ class PartPayment
         try {
             echo '<div id="rb-pp-widget-container">' .
                 self::getWidget()->content .
-                '</div>';
+            '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -239,15 +241,19 @@ class PartPayment
         try {
             $css = self::getWidget()->css ?? '';
             $readMoreCss = self::getReadMoreWidget()->css ?? '';
-            $readMoreJs = (new ReadMoreJs(containerElDomPath: '#rb-pp-widget-container'))->content;
+            $readMoreJs = (new ReadMoreJs(containerElDomPath: '#content'))->content;
+            $costList = CostList::getCss();
+            $costListJs = (new CostListJs(containerElDomPath: '#payment-method'))->content;
 
             echo <<<EX
 <style id="rb-pp-styles">
   $css
   $readMoreCss
+  $costList
 </style>
 <script>
   $readMoreJs
+  $costListJs
 </script>
 EX;
         } catch (EmptyValueException) {
