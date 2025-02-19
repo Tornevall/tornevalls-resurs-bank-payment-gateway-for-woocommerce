@@ -185,7 +185,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 $logo = new Widget(paymentMethod: $paymentMethod);
                 $helper = new GatewayHelper(paymentMethod: $paymentMethod);
 
-                $priceSignageContent = $helper->getCostList() . $helper->getPriceSignageWarning();
+                // Since this data goes out into the wild react world, we need to make sure that the
+                // warnings and country checks are handled elsewhere.
+                $priceSignageContent = $paymentMethod->priceSignagePossible ?
+                    $helper->getCostList() . $helper->getPriceSignageWarning() : '';
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
