@@ -176,6 +176,11 @@ class PartPayment
      */
     public static function initFrontend(): void
     {
+        add_action(
+            'wp_head',
+            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
+        );
+
         if (
             !PartPaymentOptions::isEnabled() ||
             PaymentMethod::getData() === ''
@@ -183,10 +188,6 @@ class PartPayment
             return;
         }
 
-        add_action(
-            'wp_head',
-            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
-        );
         add_action(
             'wp_enqueue_scripts',
             'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
