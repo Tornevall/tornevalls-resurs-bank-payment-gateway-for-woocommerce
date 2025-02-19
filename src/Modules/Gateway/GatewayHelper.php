@@ -113,7 +113,8 @@ class GatewayHelper
         }
 
         $return = '<div class="rb-ps-cl-container">' . (new CostList(
-            priceSignage: $this->getPriceSignage()
+            priceSignage: $this->getPriceSignage(),
+            method: $this->paymentMethod
         ))->content . '</div>';
 
         // Store in cache with a 5-minute expiration time
