@@ -126,13 +126,11 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                             __html: method.costlist,
                         }}
                     />
-                    {(billingCountry === 'SE' || shippingCountry === 'SE') && (
-                        <div
-                            dangerouslySetInnerHTML={{
-                                __html: method.price_signage_warning,
-                            }}
-                        />
-                    )}
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: method.price_signage_warning,
+                        }}
+                    />
                     <style>{method.read_more_css}</style>
                 </div>
             );
