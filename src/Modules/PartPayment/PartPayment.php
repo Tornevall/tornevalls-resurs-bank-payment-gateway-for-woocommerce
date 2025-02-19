@@ -243,7 +243,7 @@ class PartPayment
             $readMoreCss = self::getReadMoreWidget()->css ?? '';
             $readMoreJs = (new ReadMoreJs(containerElDomPath: '#content'))->content;
             $costList = CostList::getCss();
-            $costListJs = (new CostListJs(containerElDomPath: '#payment-method'))->content;
+            $costListJs = (new CostListJs(containerElDomPath: '#content'))->content;
 
             echo <<<EX
 <style id="rb-pp-styles">
