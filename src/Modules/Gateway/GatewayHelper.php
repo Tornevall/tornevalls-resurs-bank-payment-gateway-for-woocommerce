@@ -23,6 +23,7 @@ use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Cart;
 
@@ -79,7 +80,7 @@ class GatewayHelper
     {
         return '<div class="payment-method-content">' .
             $this->getCostList() .
-            $this->getPriceSignageWarning() .
+            (WooCommerce::getStoreCountry() === 'SE' ?? $this->getPriceSignageWarning()) .
             '</div>';
     }
 
