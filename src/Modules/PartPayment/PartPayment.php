@@ -250,6 +250,19 @@ class PartPayment
   $css
   $readMoreCss
   $costList
+  
+  .rb-usp {
+	display: block;
+	background-color: rgba(0, 155, 145, 0.8);
+	border-radius: 4px;
+	padding: 10px;
+	color: #fff;
+	margin: 0 0 15px 0;
+  }
+  
+  .rb-ps-cl-container {
+    margin-bottom: 10px;
+  }
 </style>
 <script>
   $readMoreJs

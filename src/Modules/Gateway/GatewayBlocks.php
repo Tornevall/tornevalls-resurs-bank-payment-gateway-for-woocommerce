@@ -190,7 +190,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
-                    'description' => $usp->message . $helper->getCostList() . $readMore->content  . $helper->getPriceSignageWarning(),
+                    'description' => '<div class="rb-usp">' . $usp->message . '</div>' . $helper->getCostList() . $readMore->content  . $helper->getPriceSignageWarning(),
                     'read_more_css' => '',
                     'logo' => $logo->html,
                     'logo_type' => $logo->getIdentifier(),
