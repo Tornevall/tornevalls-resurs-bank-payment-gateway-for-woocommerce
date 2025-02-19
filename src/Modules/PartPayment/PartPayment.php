@@ -26,6 +26,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMoreJs;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -219,7 +220,6 @@ class PartPayment
         try {
             echo '<div id="rb-pp-widget-container">' .
                 self::getWidget()->content .
-                self::getReadMoreWidget()->content .
                 '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -239,12 +239,16 @@ class PartPayment
         try {
             $css = self::getWidget()->css ?? '';
             $readMoreCss = self::getReadMoreWidget()->css ?? '';
+            $readMoreJs = (new ReadMoreJs(containerElDomPath: '#rb-pp-widget-container'))->content;
 
             echo <<<EX
-<style id=" rb-pp-styles">
+<style id="rb-pp-styles">
   $css
   $readMoreCss
 </style>
+<script>
+  $readMoreJs
+</script>
 EX;
         } catch (EmptyValueException) {
             // Take no action when payment method is not set.
