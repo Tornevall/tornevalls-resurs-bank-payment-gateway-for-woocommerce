@@ -19,6 +19,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PriceSignage\PriceSignage;
+use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
@@ -76,11 +77,15 @@ class GatewayHelper
      *
      * @throws ConfigException
      */
-    public function renderPaymentMethodContent(): string
+    public function renderPaymentMethodContent(
+        $paymentMethod,
+        $amount,
+    ): string
     {
         return '<div class="payment-method-content">' .
             $this->getCostList() .
-            (WooCommerce::getStoreCountry() === 'SE' ?? $this->getPriceSignageWarning()) .
+            (new ReadMore(paymentMethod: $paymentMethod, amount: $amount))->content .
+            $this->getPriceSignageWarning() .
             '</div>';
     }
 
