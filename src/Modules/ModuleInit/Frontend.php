@@ -17,6 +17,7 @@ use Resursbank\Woocommerce\Modules\Order\Filter\Failure;
 use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint;
+use Resursbank\Woocommerce\Util\WooCommerce;
 
 /**
  * Module initialization class for functionality used by the frontend parts of plugin.
@@ -34,7 +35,10 @@ class Frontend
 
         add_action('wp_enqueue_scripts', [self::class, 'enableConsoleLogs'], 1);
 
-        GatewayBlocks::init();
+        if (WooCommerce::isUsingBlocksCheckout()) {
+            GatewayBlocks::init();
+        }
+
         Gateway::initFrontend();
         ThankYou::init();
         Failure::init();

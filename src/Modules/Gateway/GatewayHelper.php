@@ -6,11 +6,13 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -21,6 +23,7 @@ use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Cart;
 
@@ -40,14 +43,17 @@ class GatewayHelper
      */
     public function getCostList(): string
     {
+        $return = '';
+
         try {
-            return '<div class="rb-ps-cl-container">' . (new CostList(
-                priceSignage: $this->getPriceSignage()
-            ))->content . '</div>';
+            if ($this->paymentMethod->priceSignagePossible) {
+                return $this->getCostListHtml();
+            }
         } catch (Throwable $error) {
             Log::error(error: $error);
-            return '';
         }
+
+        return $return;
     }
 
     /**
@@ -67,15 +73,60 @@ class GatewayHelper
 
     /**
      * Render payment method content including Cost List and Warning widgets.
+     *
+     * @throws ConfigException
      */
     public function renderPaymentMethodContent(): string
     {
         return '<div class="payment-method-content">' .
             $this->getCostList() .
-            $this->getPriceSignageWarning() .
+            (WooCommerce::getStoreCountry() === 'SE' ?? $this->getPriceSignageWarning()) .
             '</div>';
     }
 
+    /**
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws Throwable
+     * @throws ValidationException
+     * @throws FilesystemException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    private function getCostListHtml(): string
+    {
+        // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
+        $cacheKey = 'resursbank-ecom-cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
+
+        // Fetch from cache
+        $cache = Config::getCache();
+        $cachedContent = $cache->read($cacheKey);
+
+        if ($cachedContent !== null) {
+            return $cachedContent;
+        }
+
+        $return = '<div class="rb-ps-cl-container">' . (new CostList(
+            priceSignage: $this->getPriceSignage(),
+            method: $this->paymentMethod
+        ))->content . '</div>';
+
+        // Store in cache with a 5-minute expiration time
+        $cache->write($cacheKey, $return, 300);
+
+        return $return;
+    }
+
+    /**
+     * Get correct totals.
+     */
     private function getWcTotal(): float
     {
         $total = 0.0;

@@ -81,12 +81,10 @@ class PartPayment
             );
         }
 
-        $paymentMethod = Repository::getById(
-            paymentMethodId: PaymentMethod::getData()
-        );
-
         self::$readMoreInstance = new ReadMore(
-            paymentMethod: $paymentMethod,
+            paymentMethod: Repository::getById(
+                paymentMethodId: $paymentMethodSet
+            ),
             amount: self::getPriceData()
         );
 
@@ -130,23 +128,23 @@ class PartPayment
             );
         }
 
-        $paymentMethod = Repository::getById(
-            paymentMethodId: PaymentMethod::getData()
+        $partPaymentWidgetMethod = Repository::getById(
+            paymentMethodId: $paymentMethodSet
         );
 
-        if ($paymentMethod === null) {
+        if ($partPaymentWidgetMethod === null) {
             throw new IllegalTypeException(
                 message: "Payment method $paymentMethodSet not found."
             );
         }
 
         if (
-            $priceData >= $paymentMethod->minPurchaseLimit &&
-            $priceData <= $paymentMethod->maxPurchaseLimit
+            $priceData >= $partPaymentWidgetMethod->minPurchaseLimit &&
+            $priceData <= $partPaymentWidgetMethod->maxPurchaseLimit
         ) {
             self::$instance = new EcomPartPayment(
                 storeId: StoreId::getData(),
-                paymentMethod: $paymentMethod,
+                paymentMethod: $partPaymentWidgetMethod,
                 months: (int)Period::getData(),
                 amount: $priceData,
                 currencySymbol: Currency::getWooCommerceCurrencySymbol(),

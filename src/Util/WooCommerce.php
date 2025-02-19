@@ -14,8 +14,8 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Module\Store\Repository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Throwable;
+use WP_Post;
 
 use function in_array;
 
@@ -24,6 +24,8 @@ use function in_array;
  */
 class WooCommerce
 {
+    private static ?string $storeCountry = null;
+
     /**
      * Safely confirm whether WC is loaded.
      */
@@ -46,14 +48,20 @@ class WooCommerce
      */
     public static function isUsingBlocksCheckout(): bool
     {
-        $checkoutPageId = wc_get_page_id('checkout');
+        global $wp_query, $post;
 
-        // Check if the checkout page ID is valid
-        if (!$checkoutPageId || $checkoutPageId <= 0) {
+        if ($wp_query !== null && function_exists('get_queried_object')) {
+            $post = get_queried_object();
+        }
+
+        $checkoutPageId = (int)($post instanceof WP_Post ? $post->ID : wc_get_page_id(
+            'checkout'
+        ));
+
+        if ($checkoutPageId === 0) {
             return false;
         }
 
-        // Check if the page contains the specific block
         return has_block('woocommerce/checkout', $checkoutPageId);
     }
 
@@ -72,22 +80,29 @@ class WooCommerce
      */
     public static function getStoreCountry(): string
     {
-        $return = 'EN';
+        // Performance fix for moments where this method are recalled several times.
+        if (self::$storeCountry !== null) {
+            return self::$storeCountry;
+        }
 
         try {
-            if (StoreId::getData() !== '') {
-                $configuredStore = Repository::getConfiguredStore();
-                $return = strtoupper(
-                    string: $configuredStore?->countryCode->value
+            $configuredStore = Repository::getConfiguredStore();
+
+            if ($configuredStore?->countryCode?->value) {
+                self::$storeCountry = strtoupper(
+                    string: $configuredStore->countryCode->value
                 );
+            } else {
+                self::$storeCountry = 'EN';
             }
         } catch (Throwable $exception) {
             Config::getLogger()->debug(
                 message: 'Store country code fallback to EN. Could be configured: ' . $exception->getMessage()
             );
+            self::$storeCountry = 'EN';
         }
 
-        return $return;
+        return self::$storeCountry;
     }
 
     /**
