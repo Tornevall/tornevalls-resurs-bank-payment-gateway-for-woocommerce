@@ -102,7 +102,10 @@ class AssetLoader
 
         wp_register_style('rb-pp-styles', false);
         wp_enqueue_style('rb-pp-styles');
-        wp_add_inline_style('rb-pp-styles', $css);
+        wp_add_inline_style(
+            'rb-pp-styles',
+            WooCommerce::getRenderedWithNoCrLf(content: $css)
+        );
 
         wp_register_style('rb-pp-css-extra', false);
         wp_enqueue_style('rb-pp-css-extra');
@@ -112,6 +115,9 @@ class AssetLoader
         );
     }
 
+    /**
+     * Enqueue styles related to ReadMore.
+     */
     public static function enqueueReadMoreStyle(): void
     {
         try {
@@ -123,9 +129,15 @@ class AssetLoader
 
         wp_register_style('rb-read-more-style', false);
         wp_enqueue_style('rb-read-more-style');
-        wp_add_inline_style('rb-read-more-style', $readMoreCss);
+        wp_add_inline_style(
+            'rb-read-more-style',
+            WooCommerce::getRenderedWithNoCrLf(content: $readMoreCss)
+        );
     }
 
+    /**
+     * Enqueue scripts related to ReadMore.
+     */
     public static function enqueueReadMoreJs(): void
     {
         if (is_product()) {
@@ -231,6 +243,9 @@ class AssetLoader
         );
     }
 
+    /**
+     * Enqueue part payment scripts.
+     */
     public static function enqueuePartPaymentScripts(): void
     {
         wp_register_script(
@@ -245,6 +260,9 @@ class AssetLoader
         );
     }
 
+    /**
+     * Get the extra CSS for part payment.
+     */
     private static function getPartPaymentCssExtras(): string
     {
         return <<<EX

@@ -81,6 +81,18 @@ class WooCommerce
     }
 
     /**
+     * @param string $webContent
+     */
+    public static function getRenderedWithNoCrLf(string $content): string
+    {
+        return preg_replace(
+            pattern: '/\n\s*\n/m',
+            replacement: " ",
+            subject: $content
+        );
+    }
+
+    /**
      * Return country as string, by the value returned from the current set store.
      *
      * @throws ConfigException
