@@ -26,9 +26,6 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMoreJs;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostListJs;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
@@ -176,13 +173,6 @@ class PartPayment
      */
     public static function initFrontend(): void
     {
-        if (PaymentMethod::getData() !== '') {
-            add_action(
-                'wp_head',
-                'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setCss'
-            );
-        }
-
         if (!PartPaymentOptions::isEnabled()) {
             return;
         }
@@ -222,55 +212,7 @@ class PartPayment
         try {
             echo '<div id="rb-pp-widget-container">' .
                 self::getWidget()->content .
-            '</div>';
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-    }
-
-    /**
-     * Output widget CSS if on single product page.
-     */
-    public static function setCss(): void
-    {
-        // No price, not widget.
-        if (self::getPriceData() <= 0.0) {
-            return;
-        }
-
-        try {
-            $css = self::getWidget()->css ?? '';
-            $readMoreCss = self::getReadMoreWidget()->css ?? '';
-            $readMoreJs = (new ReadMoreJs(containerElDomPath: 'body'))->content;
-            $costList = CostList::getCss();
-            $costListJs = (new CostListJs(containerElDomPath: 'body'))->content;
-
-            echo <<<EX
-<style id="rb-pp-styles">
-  $css
-  $readMoreCss
-  $costList
-  
-  .rb-usp {
-	display: block;
-	background-color: rgba(0, 155, 145, 0.8);
-	border-radius: 4px;
-	padding: 10px;
-	color: #fff;
-	margin: 0 0 15px 0;
-  }
-  
-  .rb-ps-cl-container {
-    margin-bottom: 10px;
-  }
-</style>
-<script>
-  $readMoreJs
-  $costListJs
-</script>
-EX;
-        } catch (EmptyValueException) {
-            // Take no action when payment method is not set.
+                '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

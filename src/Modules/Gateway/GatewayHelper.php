@@ -24,7 +24,6 @@ use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Cart;
 
@@ -79,12 +78,14 @@ class GatewayHelper
      */
     public function renderPaymentMethodContent(
         $paymentMethod,
-        $amount,
-    ): string
-    {
+        $amount
+    ): string {
         return '<div class="payment-method-content">' .
             $this->getCostList() .
-            (new ReadMore(paymentMethod: $paymentMethod, amount: $amount))->content .
+            (new ReadMore(
+                paymentMethod: $paymentMethod,
+                amount: $amount
+            ))->content .
             $this->getPriceSignageWarning() .
             '</div>';
     }
