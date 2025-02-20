@@ -8,7 +8,7 @@ WC Tested up to: 9.6.2
 WC requires at least: 7.6.0
 Plugin requires ecom: 3.1.6
 Requires Plugins: woocommerce
-Stable tag: 1.1.6
+Stable tag: 1.2.0
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -59,6 +59,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.2.0
+
+* Placeholder for release of a legal requirements patch.
 
 # 1.1.5
 
