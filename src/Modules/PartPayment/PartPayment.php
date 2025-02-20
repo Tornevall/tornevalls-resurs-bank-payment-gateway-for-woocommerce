@@ -112,6 +112,10 @@ class PartPayment
      */
     public static function getWidget(): ?EcomPartPayment
     {
+        Config::setLocation(
+            location: Location::from(value: WooCommerce::getStoreCountry())
+        );
+
         if (self::$instance !== null) {
             return self::$instance;
         }
@@ -210,10 +214,6 @@ class PartPayment
         if (!self::isEnabled()) {
             return;
         }
-
-        Config::setLocation(
-            location: Location::from(value: WooCommerce::getStoreCountry())
-        );
 
         try {
             echo '<div id="rb-pp-widget-container">' .
