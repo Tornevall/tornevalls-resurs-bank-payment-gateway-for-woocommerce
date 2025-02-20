@@ -101,7 +101,11 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
          */
         const Content = () => {
             const cartData = select(CART_STORE_KEY).getCartData();
+            const customerData = select(CART_STORE_KEY).getCustomerData();
             const cartTotal = calculateCartTotal(cartData);
+
+            const billingCountry = customerData?.billingAddress?.country || '';
+            const shippingCountry = customerData?.shippingAddress?.country || '';
 
             React.useEffect(() => {
                 const iframe = document.querySelector(
@@ -119,6 +123,23 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                             __html: method.description,
                         }}
                     />
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: method.costlist,
+                        }}
+                    />
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: method.readmore,
+                        }}
+                    />
+                    {(billingCountry === 'SE' || shippingCountry === 'SE') && (
+                        <div
+                            dangerouslySetInnerHTML={{
+                                __html: method.price_signage_warning,
+                            }}
+                        />
+                    )}
                     <style>{method.read_more_css}</style>
                 </div>
             );
