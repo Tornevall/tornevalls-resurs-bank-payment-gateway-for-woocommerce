@@ -109,16 +109,16 @@ class GatewayHelper
      */
     private function getCostListHtml(): string
     {
-        if (!$this->paymentMethod->priceSignagePossible) {
-            return '';
-        }
-
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
         $transientName = 'resursbank_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
         $transientContent = get_transient($transientName);
 
         if ($transientContent) {
             return $transientContent;
+        }
+
+        if (!$this->paymentMethod->priceSignagePossible) {
+            return '';
         }
 
         $return = '<div class="rb-ps-cl-container">' . (new CostList(
