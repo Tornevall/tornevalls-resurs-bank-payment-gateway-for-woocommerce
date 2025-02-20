@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -23,6 +24,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
@@ -208,6 +210,10 @@ class PartPayment
         if (!self::isEnabled()) {
             return;
         }
+
+        Config::setLocation(
+            location: Location::from(value: WooCommerce::getStoreCountry())
+        );
 
         try {
             echo '<div id="rb-pp-widget-container">' .

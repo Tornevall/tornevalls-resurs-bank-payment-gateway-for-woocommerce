@@ -62,6 +62,10 @@ class PartPayment
      */
     public static function exec(): string
     {
+        Config::setLocation(
+            location: Location::from(value: WooCommerce::getStoreCountry())
+        );
+
         $response = [
             'css' => '',
             'startingAt' => '',
@@ -75,10 +79,6 @@ class PartPayment
         );
 
         $requestAmount = Url::getHttpJson(key: 'amount');
-
-        Config::setLocation(
-            location: Location::from(value: WooCommerce::getStoreCountry())
-        );
 
         if (
             is_numeric(value: $requestAmount) &&
