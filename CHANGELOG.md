@@ -1,3 +1,7 @@
+# 1.2.0
+
+* Placeholder for release of a legal requirements patch.
+
 # 1.1.5
 
 * [WOO-1417](https://resursbankplugins.atlassian.net/browse/WOO-1417) ppw period resets to wrong value
