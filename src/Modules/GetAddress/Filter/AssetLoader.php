@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+<?php
+
+/** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
 
 /**
  * Copyright © Resurs Bank AB. All rights reserved.
@@ -46,7 +48,6 @@ class AssetLoader
     /**
      * Enqueued script execution.
      *
-     * @return void
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
@@ -81,7 +82,6 @@ class AssetLoader
     }
 
     /**
-     * @return void
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function enqueueCostListStyle(): void
@@ -109,15 +109,9 @@ class AssetLoader
             []
         );
         wp_enqueue_script('rb-costlist-js');
-        wp_add_inline_script(
-            'rb-costlist-js',
-            $costListJs
-        );
+        wp_add_inline_script('rb-costlist-js', $costListJs);
     }
 
-    /**
-     * @return void
-     */
     public static function enqueuePartPaymentStyles(): void
     {
         try {
@@ -129,10 +123,7 @@ class AssetLoader
 
         wp_register_style('rb-pp-styles', false);
         wp_enqueue_style('rb-pp-styles');
-        wp_add_inline_style(
-            'rb-pp-styles',
-            $css
-        );
+        wp_add_inline_style('rb-pp-styles', $css);
 
         wp_register_style('rb-pp-css-extra', false);
         wp_enqueue_style('rb-pp-css-extra');
@@ -142,30 +133,6 @@ class AssetLoader
         );
     }
 
-    /**
-     * @return string
-     */
-    private static function getPartPaymentCssExtras(): string
-    {
-        return <<<EX
-  .rb-usp {
-	display: block;
-	background-color: rgba(0, 155, 145, 0.8);
-	border-radius: 4px;
-	padding: 10px;
-	color: #fff;
-	margin: 0 0 15px 0;
-  }
-  
-  .rb-ps-cl-container {
-    margin-bottom: 10px;
-  }
-EX;
-    }
-
-    /**
-     * @return void
-     */
     public static function enqueueReadMoreStyle(): void
     {
         try {
@@ -174,17 +141,12 @@ EX;
             Log::error(error: $error);
             $readMoreCss = '';
         }
+
         wp_register_style('rb-read-more-style', false);
         wp_enqueue_style('rb-read-more-style');
-        wp_add_inline_style(
-            'rb-read-more-style',
-            $readMoreCss
-        );
+        wp_add_inline_style('rb-read-more-style', $readMoreCss);
     }
 
-    /**
-     * @return void
-     */
     public static function enqueueReadMoreJs(): void
     {
         if (is_product()) {
@@ -197,23 +159,27 @@ EX;
             wp_enqueue_script('rb-pp-readmore-js');
             wp_add_inline_script(
                 'rb-pp-readmore-js',
-                (new ReadMoreJs(containerElDomPath: '#rb-pp-widget-container'))->content
+                (new ReadMoreJs(
+                    containerElDomPath: '#rb-pp-widget-container'
+                ))->content
             );
         }
 
-        if (is_checkout()) {
-            // Checkout page js.
-            wp_register_script(
-                'rb-rm-readmore-js',
-                '',
-                []
-            );
-            wp_enqueue_script('rb-rm-readmore-js');
-            wp_add_inline_script(
-                'rb-rm-readmore-js',
-                (new ReadMoreJs(containerElDomPath: 'body'))->content
-            );
+        if (!is_checkout()) {
+            return;
         }
+
+        // Checkout page js.
+        wp_register_script(
+            'rb-rm-readmore-js',
+            '',
+            []
+        );
+        wp_enqueue_script('rb-rm-readmore-js');
+        wp_add_inline_script(
+            'rb-rm-readmore-js',
+            (new ReadMoreJs(containerElDomPath: 'body'))->content
+        );
     }
 
     /**
@@ -298,5 +264,23 @@ EX;
             'rb-pp-js',
             CostList::getJs()
         );
+    }
+
+    private static function getPartPaymentCssExtras(): string
+    {
+        return <<<EX
+  .rb-usp {
+	display: block;
+	background-color: rgba(0, 155, 145, 0.8);
+	border-radius: 4px;
+	padding: 10px;
+	color: #fff;
+	margin: 0 0 15px 0;
+  }
+  
+  .rb-ps-cl-container {
+    margin-bottom: 10px;
+  }
+EX;
     }
 }
