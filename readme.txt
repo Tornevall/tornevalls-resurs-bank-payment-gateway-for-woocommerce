@@ -8,7 +8,7 @@ WC Tested up to: 9.6.2
 WC requires at least: 7.6.0
 Plugin requires ecom: 3.1.6
 Requires Plugins: woocommerce
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -59,6 +59,19 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 == Changelog ==
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
+
+# 1.2.2
+
+* [WOO-1426](https://resursbankplugins.atlassian.net/browse/WOO-1426) Unsupported themes makes widgets go nuts \(sometimes\)
+* [WOO-1427](https://resursbankplugins.atlassian.net/browse/WOO-1427) Country checks required in react
+
+# 1.2.0 - 1.2.1
+
+* [WOO-1418](https://resursbankplugins.atlassian.net/browse/WOO-1418) Implement breaking changes for Part Payment widget
+* [WOO-1420](https://resursbankplugins.atlassian.net/browse/WOO-1420) Implementation of New Part Payment Widget and Warning Widget in Checkout – Compliance with New Legal Requirements
+* [WOO-1423](https://resursbankplugins.atlassian.net/browse/WOO-1423) \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::getWidget
+* [WOO-1424](https://resursbankplugins.atlassian.net/browse/WOO-1424) Restructure css/js for legal requirements to not execute under partpayment scripthooks
+* [WOO-1425](https://resursbankplugins.atlassian.net/browse/WOO-1425) \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::setCss
 
 # 1.2.0 - 1.2.1
 
