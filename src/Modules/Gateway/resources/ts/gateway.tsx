@@ -102,8 +102,6 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
         const Content = () => {
             const cartData = select(CART_STORE_KEY).getCartData();
             const cartTotal = calculateCartTotal(cartData);
-            const billingCountry = cartData?.billing_address?.country || '';
-            const shippingCountry = cartData?.shipping_address?.country || '';
 
             React.useEffect(() => {
                 const iframe = document.querySelector(

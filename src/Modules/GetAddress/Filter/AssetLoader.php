@@ -48,21 +48,10 @@ class AssetLoader
     /**
      * Enqueued script execution.
      *
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws ConfigException
-     * @throws CurlException
      * @throws EmptyValueException
      * @throws FilesystemException
      * @throws HttpException
-     * @throws IllegalTypeException
      * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws Throwable
-     * @throws TranslationException
-     * @throws ValidationException
      */
     public static function init(): void
     {
@@ -131,6 +120,23 @@ class AssetLoader
             'rb-pp-css-extra',
             self::getPartPaymentCssExtras()
         );
+    }
+
+    private static function getPartPaymentCssExtras(): string
+    {
+        return <<<EX
+  .rb-usp {
+	display: block;
+	background-color: rgba(0, 155, 145, 0.8);
+	border-radius: 4px;
+	padding: 10px;
+	color: #fff;
+	margin: 0 0 15px 0;
+  }
+  .rb-ps-cl-container {
+    margin-bottom: 10px;
+  }
+EX;
     }
 
     public static function enqueueReadMoreStyle(): void
@@ -264,23 +270,5 @@ class AssetLoader
             'rb-pp-js',
             CostList::getJs()
         );
-    }
-
-    private static function getPartPaymentCssExtras(): string
-    {
-        return <<<EX
-  .rb-usp {
-	display: block;
-	background-color: rgba(0, 155, 145, 0.8);
-	border-radius: 4px;
-	padding: 10px;
-	color: #fff;
-	margin: 0 0 15px 0;
-  }
-  
-  .rb-ps-cl-container {
-    margin-bottom: 10px;
-  }
-EX;
     }
 }
