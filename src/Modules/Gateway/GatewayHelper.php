@@ -67,8 +67,12 @@ class GatewayHelper
 
         try {
             if ($this->paymentMethod->priceSignagePossible) {
+                return 'Y':
                 return $this->getCostListHtml();
+            } else {
+                return 'N';
             }
+
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

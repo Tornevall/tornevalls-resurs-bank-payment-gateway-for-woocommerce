@@ -133,7 +133,7 @@ class Resursbank extends WC_Payment_Gateway
                 paymentMethod: $this->method,
                 amount: $this->get_order_total()
             );
-            echo '<div class="rb-usp">###' . $usp->message . '</div>' . $gatewayHelper->renderPaymentMethodContent(
+            echo '<div class="rb-usp">' . $usp->message . '</div>' . $gatewayHelper->renderPaymentMethodContent(
                     paymentMethod: $this->method,
                     amount: $this->get_order_total()
                 );
