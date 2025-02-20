@@ -50,14 +50,13 @@ class WooCommerce
     {
         global $wp_query, $post;
 
-        $blocksCheckoutPageId = wc_get_page_id(
-            'checkout'
-        );
+        $blocksCheckoutPageId = wc_get_page_id('checkout');
 
         // Special legacy vs blocks control
         if ($wp_query !== null && function_exists('get_queried_object')) {
             $post = get_queried_object();
-            $currentPostID = $post instanceof WP_Post ? $post->ID : 0;
+            $currentPostID = (int)($post instanceof WP_Post ? $post->ID : 0);
+
             // We usually check if the page contains WC blocks, but if we are on the checkout page,
             // but in legacy, we should check blocks based on the post id instead of the preconfigured
             // template.
