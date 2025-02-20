@@ -303,6 +303,7 @@ class Route
      * @throws ValidationException
      * @throws EmptyValueException
      * @throws IllegalTypeException
+     * @throws Throwable
      * @SuppressWarnings(PHPMD.ExitExpression)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection

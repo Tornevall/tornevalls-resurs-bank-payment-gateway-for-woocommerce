@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\PartPayment\Controller;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -23,6 +24,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
@@ -33,6 +35,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -72,6 +75,10 @@ class PartPayment
         );
 
         $requestAmount = Url::getHttpJson(key: 'amount');
+
+        Config::setLocation(
+            location: Location::from(value: WooCommerce::getStoreCountry())
+        );
 
         if (
             is_numeric(value: $requestAmount) &&
