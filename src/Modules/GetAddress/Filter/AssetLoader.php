@@ -11,20 +11,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMoreJs;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostListJs;
@@ -120,23 +110,6 @@ class AssetLoader
             'rb-pp-css-extra',
             self::getPartPaymentCssExtras()
         );
-    }
-
-    private static function getPartPaymentCssExtras(): string
-    {
-        return <<<EX
-  .rb-usp {
-	display: block;
-	background-color: rgba(0, 155, 145, 0.8);
-	border-radius: 4px;
-	padding: 10px;
-	color: #fff;
-	margin: 0 0 15px 0;
-  }
-  .rb-ps-cl-container {
-    margin-bottom: 10px;
-  }
-EX;
     }
 
     public static function enqueueReadMoreStyle(): void
@@ -270,5 +243,22 @@ EX;
             'rb-pp-js',
             CostList::getJs()
         );
+    }
+
+    private static function getPartPaymentCssExtras(): string
+    {
+        return <<<EX
+  .rb-usp {
+	display: block;
+	background-color: rgba(0, 155, 145, 0.8);
+	border-radius: 4px;
+	padding: 10px;
+	color: #fff;
+	margin: 0 0 15px 0;
+  }
+  .rb-ps-cl-container {
+    margin-bottom: 10px;
+  }
+EX;
     }
 }

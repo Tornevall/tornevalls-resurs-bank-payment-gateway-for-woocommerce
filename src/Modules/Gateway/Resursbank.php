@@ -231,7 +231,8 @@ class Resursbank extends WC_Payment_Gateway
             return true;
         }
 
-        return match (WcSession::getCustomerType()) {
+        $customerType = WcSession::getCustomerType();
+        return match ($customerType) {
             CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
             CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
         };
