@@ -110,6 +110,11 @@ class GatewayHelper
      */
     private function getCostListHtml(): string
     {
+        return '<div class="rb-ps-cl-container">' . (new CostList(
+            priceSignage: $this->getPriceSignage(),
+            method: $this->paymentMethod
+        ))->content . '</div>';
+
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
         $cacheKey = 'resursbank-ecom-cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
 
