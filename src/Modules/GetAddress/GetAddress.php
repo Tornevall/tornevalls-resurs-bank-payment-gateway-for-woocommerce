@@ -28,11 +28,6 @@ class GetAddress
      */
     public static function init(): void
     {
-        add_action(
-            hook_name: 'wp_enqueue_scripts',
-            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\FrontendAssets::exec'
-        );
-
         if (EnableGetAddress::isEnabled() === false) {
             return;
         }
