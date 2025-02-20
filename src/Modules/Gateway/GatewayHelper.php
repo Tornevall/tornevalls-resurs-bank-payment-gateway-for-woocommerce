@@ -24,6 +24,7 @@ use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
 use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Cart;
 
@@ -36,6 +37,25 @@ class GatewayHelper
 
     public function __construct(private readonly PaymentMethod $paymentMethod)
     {
+    }
+
+    /**
+     * Render payment method content including Cost List and Warning widgets.
+     *
+     * @throws ConfigException
+     */
+    public function renderPaymentMethodContent(
+        $paymentMethod,
+        $amount
+    ): string {
+        return '<div class="payment-method-content">' .
+            $this->getCostList() .
+            (new ReadMore(
+                paymentMethod: $paymentMethod,
+                amount: $amount
+            ))->content .
+            $this->getPriceSignageWarning() .
+            '</div>';
     }
 
     /**
@@ -62,32 +82,14 @@ class GatewayHelper
     public function getPriceSignageWarning(): string
     {
         try {
-            return '<div class="rb-ps-warning-container">' . (new Warning(
-                priceSignage: $this->getPriceSignage()
-            ))->content . '</div>';
+            return $this->paymentMethod->priceSignagePossible && WooCommerce::getStoreCountry() === 'SE' ?
+                '<div class="rb-ps-warning-container">' . (new Warning(
+                    priceSignage: $this->getPriceSignage()
+                ))->content . '</div>' : '';
         } catch (Throwable $error) {
             Log::error(error: $error);
             return '';
         }
-    }
-
-    /**
-     * Render payment method content including Cost List and Warning widgets.
-     *
-     * @throws ConfigException
-     */
-    public function renderPaymentMethodContent(
-        $paymentMethod,
-        $amount
-    ): string {
-        return '<div class="payment-method-content">' .
-            $this->getCostList() .
-            (new ReadMore(
-                paymentMethod: $paymentMethod,
-                amount: $amount
-            ))->content .
-            $this->getPriceSignageWarning() .
-            '</div>';
     }
 
     /**
@@ -128,6 +130,11 @@ class GatewayHelper
         $cache->write($cacheKey, $return, 300);
 
         return $return;
+    }
+
+    private function getPaymentMethod(): PaymentMethod
+    {
+        return $this->paymentMethod;
     }
 
     /**
@@ -174,10 +181,5 @@ class GatewayHelper
             paymentMethodId: $this->getPaymentMethod()->id,
             amount: $this->getWcTotal()
         );
-    }
-
-    private function getPaymentMethod(): PaymentMethod
-    {
-        return $this->paymentMethod;
     }
 }
