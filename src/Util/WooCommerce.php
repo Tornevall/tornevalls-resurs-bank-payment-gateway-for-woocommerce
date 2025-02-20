@@ -80,11 +80,9 @@ class WooCommerce
         return (float)(WC()->cart?->get_totals()['total'] ?? 0.0);
     }
 
-    /**
-     * @param string $webContent
-     */
     public static function getRenderedWithNoCrLf(string $content): string
     {
+        return $content;
         return preg_replace(
             pattern: '/\n\s*\n/m',
             replacement: " ",
