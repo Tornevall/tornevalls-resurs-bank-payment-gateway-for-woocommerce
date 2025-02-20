@@ -131,6 +131,9 @@ class GatewayHelper
         return $return;
     }
 
+    /**
+     * Get current payment method.
+     */
     private function getPaymentMethod(): PaymentMethod
     {
         return $this->paymentMethod;
