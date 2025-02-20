@@ -6,7 +6,6 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -110,20 +109,12 @@ class GatewayHelper
      */
     private function getCostListHtml(): string
     {
-        return '<div class="rb-ps-cl-container">' . (new CostList(
-            priceSignage: $this->getPriceSignage(),
-            method: $this->paymentMethod
-        ))->content . '</div>';
-
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
-        $cacheKey = 'resursbank-ecom-cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
+        $transientName = 'resursbank_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
+        $transientContent = get_transient($transientName);
 
-        // Fetch from cache
-        $cache = Config::getCache();
-        $cachedContent = $cache->read($cacheKey);
-
-        if ($cachedContent !== null) {
-            return $cachedContent;
+        if ($transientContent) {
+            return $transientContent;
         }
 
         $return = '<div class="rb-ps-cl-container">' . (new CostList(
@@ -131,8 +122,7 @@ class GatewayHelper
             method: $this->paymentMethod
         ))->content . '</div>';
 
-        // Store in cache with a 5-minute expiration time
-        $cache->write($cacheKey, $return, 300);
+        set_transient($transientName, $return, 300);
 
         return $return;
     }
