@@ -9,15 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 
 /**
@@ -27,14 +24,13 @@ class Shared
 {
     /**
      * Init various modules.
-     *
-     * @throws FilesystemException
-     * @throws HttpException
-     * @throws EmptyValueException
-     * @throws IllegalValueException
      */
     public static function init(): void
     {
+        // Preload cached currency data.
+        Currency::getWooCommerceCurrencySymbol();
+        Currency::getWooCommerceCurrencyFormat();
+
         // Things that should be available even without the plugin API being enabled.
         Route::exec();
         MessageBag::init();

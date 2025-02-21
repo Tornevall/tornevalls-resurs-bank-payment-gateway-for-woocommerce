@@ -88,7 +88,14 @@ if (!Config::hasInstance()) {
 
 // Setup event listeners and resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
-    Shared::init();
+    try {
+        Shared::init();
+    } catch (Throwable $e) {
+        Connection::getWcLoggerCritical(
+            message: 'Resurs Bank: ' . $e->getMessage()
+        );
+    }
+
     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     add_action(
         'before_woocommerce_init',
