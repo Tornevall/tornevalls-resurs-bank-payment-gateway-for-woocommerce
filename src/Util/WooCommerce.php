@@ -142,7 +142,7 @@ class WooCommerce
                     '_transient_',
                     '',
                     $transient
-                // Ta bort prefixet för att få transientens faktiska namn
+                    // Ta bort prefixet för att få transientens faktiska namn
                 );
                 delete_transient($transient_name);
             }
