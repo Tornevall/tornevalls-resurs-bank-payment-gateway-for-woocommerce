@@ -30,7 +30,7 @@ class Currency
         $currencySymbol = get_transient('resurs_early_currency_symbol');
 
         // Feature used by ecom init, for where woocommerce in an early init is not available.
-        if (function_exists('get_woocommerce_currency_symbol')) {
+        if (!$currencySymbol && function_exists('get_woocommerce_currency_symbol')) {
             $currencySymbol = get_woocommerce_currency_symbol();
             set_transient('resurs_early_currency_symbol', $currencySymbol);
         }
@@ -43,13 +43,14 @@ class Currency
      *
      * @return string Defaults to "[symbol] [price]" if return value from WC is not a string
      * @SuppressWarnings(PHPMD.ElseExpression)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getWooCommerceCurrencyFormat(): string
     {
         $currencyFormat = get_transient('resurs_early_currency_format');
 
         // Feature used by ecom init, for where woocommerce in an early init is not available.
-        if (function_exists('get_woocommerce_currency_symbol')) {
+        if (!$currencyFormat && function_exists('get_woocommerce_currency_symbol')) {
             $currencyFormat = get_woocommerce_price_format();
             set_transient('resurs_early_currency_format', $currencyFormat);
         }
