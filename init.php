@@ -88,6 +88,10 @@ if (!Config::hasInstance()) {
 
 // Setup event listeners and resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
+    if (!WooCommerce::isWcPresent()) {
+        return;
+    }
+
     Shared::init();
     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     add_action(
@@ -108,6 +112,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
                 true
             );
 
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             FeaturesUtil::declare_compatibility(
                 'cart_checkout_blocks',
                 __FILE__,
@@ -121,4 +126,4 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     } else {
         Frontend::init();
     }
-});
+}, priority: 11);

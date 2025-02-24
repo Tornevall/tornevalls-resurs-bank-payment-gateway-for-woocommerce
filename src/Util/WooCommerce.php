@@ -16,7 +16,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Module\Store\Repository;
 use Throwable;
 use WP_Post;
-
 use function in_array;
 
 /**
@@ -39,6 +38,16 @@ class WooCommerce
             ),
             strict: true
         );
+    }
+
+    /**
+     * Is WooCommerce present?
+     *
+     * @return bool
+     */
+    public static function isWcPresent(): bool
+    {
+        return function_exists(function: 'WC');
     }
 
     /**
@@ -125,25 +134,6 @@ class WooCommerce
     }
 
     /**
-     * Check if WooCommerce supports HPOS or not, and if it is enabled.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function isUsingHpos(): bool
-    {
-        try {
-            // Throws exceptions on nonexistent classes,
-            $return = wc_get_container()->get(
-                'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController'
-            )->custom_orders_table_usage_is_enabled();
-        } catch (Throwable) {
-            $return = false;
-        }
-
-        return $return;
-    }
-
-    /**
      * Retrieves the version of a specified asset from its associated .asset.php file.
      *
      * @throws FilesystemException
@@ -202,5 +192,24 @@ class WooCommerce
                     $_GET['action'] === 'add'
                 )
             );
+    }
+
+    /**
+     * Check if WooCommerce supports HPOS or not, and if it is enabled.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function isUsingHpos(): bool
+    {
+        try {
+            // Throws exceptions on nonexistent classes,
+            $return = wc_get_container()->get(
+                'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController'
+            )->custom_orders_table_usage_is_enabled();
+        } catch (Throwable) {
+            $return = false;
+        }
+
+        return $return;
     }
 }
