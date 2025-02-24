@@ -47,7 +47,7 @@ class WooCommerce
      */
     public static function isWcPresent(): bool
     {
-        return function_exists(function: 'WC');
+        return class_exists('Automattic\WooCommerce\Utilities\FeaturesUtil');
     }
 
     /**
