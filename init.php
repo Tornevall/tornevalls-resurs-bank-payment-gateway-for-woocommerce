@@ -92,7 +92,13 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
         return;
     }
 
-    Shared::init();
+    try {
+        Shared::init();
+    } catch (Throwable $e) {
+        Connection::getWcLoggerCritical(
+            message: 'Resurs Bank: ' . $e->getMessage()
+        );
+    }
     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     add_action(
         'before_woocommerce_init',
@@ -126,4 +132,4 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
     } else {
         Frontend::init();
     }
-}, priority: 11);
+});

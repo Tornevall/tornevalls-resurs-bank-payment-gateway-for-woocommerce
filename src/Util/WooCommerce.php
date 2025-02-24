@@ -134,6 +134,33 @@ class WooCommerce
     }
 
     /**
+     * Full cache invalidation.
+     */
+    public static function invalidateFullCache(): void
+    {
+        global $wpdb;
+
+        try {
+            $transients = $wpdb->get_col(
+                "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_resurs_%' OR option_name LIKE '_transient_timeout_resurs_%'"
+            );
+
+            // Making sure we delete other cached transients as well, besides the ecom cache.
+            foreach ($transients as $transient) {
+                $transient_name = str_replace(
+                    '_transient_',
+                    '',
+                    $transient
+                    // Ta bort prefixet för att få transientens faktiska namn
+                );
+                delete_transient($transient_name);
+            }
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+        }
+    }
+
+    /**
      * Retrieves the version of a specified asset from its associated .asset.php file.
      *
      * @throws FilesystemException
