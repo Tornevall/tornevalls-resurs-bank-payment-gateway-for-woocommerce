@@ -125,22 +125,30 @@ class WooCommerce
     }
 
     /**
-     * Check if WooCommerce supports HPOS or not, and if it is enabled.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * Full cache invalidation.
      */
-    public static function isUsingHpos(): bool
+    public static function invalidateFullCache(): void
     {
-        try {
-            // Throws exceptions on nonexistent classes,
-            $return = wc_get_container()->get(
-                'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController'
-            )->custom_orders_table_usage_is_enabled();
-        } catch (Throwable) {
-            $return = false;
-        }
+        global $wpdb;
 
-        return $return;
+        try {
+            $transients = $wpdb->get_col(
+                "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_resurs_%' OR option_name LIKE '_transient_timeout_resurs_%'"
+            );
+
+            // Making sure we delete other cached transients as well, besides the ecom cache.
+            foreach ($transients as $transient) {
+                $transient_name = str_replace(
+                    '_transient_',
+                    '',
+                    $transient
+                    // Ta bort prefixet för att få transientens faktiska namn
+                );
+                delete_transient($transient_name);
+            }
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+        }
     }
 
     /**
@@ -202,5 +210,24 @@ class WooCommerce
                     $_GET['action'] === 'add'
                 )
             );
+    }
+
+    /**
+     * Check if WooCommerce supports HPOS or not, and if it is enabled.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function isUsingHpos(): bool
+    {
+        try {
+            // Throws exceptions on nonexistent classes,
+            $return = wc_get_container()->get(
+                'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController'
+            )->custom_orders_table_usage_is_enabled();
+        } catch (Throwable) {
+            $return = false;
+        }
+
+        return $return;
     }
 }

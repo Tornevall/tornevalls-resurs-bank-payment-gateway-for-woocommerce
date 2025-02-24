@@ -36,6 +36,7 @@ use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\UserAgent;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Logger;
 
@@ -106,6 +107,7 @@ class Connection
                     // We need to clear store list cache after ecom init, but before the getStores-request.
                     // This is a requirement since the list of stores may be cached at this point.
                     Repository::getCache()->clear();
+                    WooCommerce::invalidateFullCache();
                 } catch (Throwable) {
                 }
             }
