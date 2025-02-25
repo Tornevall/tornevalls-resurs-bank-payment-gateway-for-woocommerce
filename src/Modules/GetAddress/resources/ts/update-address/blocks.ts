@@ -41,7 +41,7 @@ export class BlocksAddressUpdater {
         this.initializeUseBillingElement();
 
         // Initialize any properties if needed
-        if (useWidget) {
+        if (useWidget && typeof Resursbank_GetAddress !== 'undefined') {
             this.widget = new Resursbank_GetAddress({
                 updateAddress: (data: any) => {
 
@@ -110,6 +110,9 @@ export class BlocksAddressUpdater {
 
             if (companyField) {
                 mutationObserver.disconnect();
+
+                // @ts-ignore
+                resursConsoleLog(`Listener add: ${fieldName}`, 'DEBUG');
 
                 companyField.addEventListener('change', (event) => {
                     // @ts-ignore

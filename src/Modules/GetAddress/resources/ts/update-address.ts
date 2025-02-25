@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Confirm that the Resursbank_GetAddress function is available.
     if (typeof Resursbank_GetAddress !== 'function') {
+        new BlocksAddressUpdater(getAddressEnabled).initialize(false);
+        new LegacyAddressUpdater().initialize();
         return;
     }
 
