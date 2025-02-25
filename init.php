@@ -88,6 +88,10 @@ if (!Config::hasInstance()) {
 
 // Setup event listeners and resources when WP has finished loading all modules.
 add_action(hook_name: 'plugins_loaded', callback: static function (): void {
+    if (!WooCommerce::isWcPresent()) {
+        return;
+    }
+
     try {
         Shared::init();
     } catch (Throwable $e) {
@@ -95,7 +99,6 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
             message: 'Resurs Bank: ' . $e->getMessage()
         );
     }
-
     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     add_action(
         'before_woocommerce_init',
@@ -115,6 +118,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
                 true
             );
 
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             FeaturesUtil::declare_compatibility(
                 'cart_checkout_blocks',
                 __FILE__,
