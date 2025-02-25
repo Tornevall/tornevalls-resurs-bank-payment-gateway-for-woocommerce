@@ -146,7 +146,7 @@ class Metadata
             // Validate payment method on uuid first, then verify that the payment method
             // is Resurs based. If it is not a UUID we can save performance by just not checking
             // it further.
-            $stringValidation = (new StringValidation());
+            $stringValidation = new StringValidation();
             $stringValidation->isUuid(value: $order->get_payment_method());
             self::isValidResursMethod(order: $order);
         } catch (Throwable) {

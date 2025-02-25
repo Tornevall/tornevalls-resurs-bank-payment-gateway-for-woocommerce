@@ -126,24 +126,24 @@ class WooCommerce
 
     /**
      * Full cache invalidation.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function invalidateFullCache(): void
     {
         global $wpdb;
 
         try {
+            /** @noinspection SqlNoDataSourceInspection */
             $transients = $wpdb->get_col(
-                "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_resurs_%' OR option_name LIKE '_transient_timeout_resurs_%'"
+                "SELECT option_name FROM {$wpdb->options}
+                         WHERE option_name LIKE '_transient_resurs_%'
+                         AND option_name NOT LIKE '_transient_resurs_%_cost_list_%'"
             );
 
             // Making sure we delete other cached transients as well, besides the ecom cache.
             foreach ($transients as $transient) {
-                $transient_name = str_replace(
-                    '_transient_',
-                    '',
-                    $transient
-                    // Ta bort prefixet för att få transientens faktiska namn
-                );
+                $transient_name = str_replace('_transient_', '', $transient);
                 delete_transient($transient_name);
             }
         } catch (Throwable $e) {
