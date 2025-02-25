@@ -23,8 +23,6 @@ class Invalidate
 {
     /**
      * Invalidate cache store.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(): void
     {
