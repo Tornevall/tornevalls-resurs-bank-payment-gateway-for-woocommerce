@@ -1,3 +1,8 @@
+# 1.2.3
+
+[WOO-1429](https://resursbankplugins.atlassian.net/browse/WOO-1429) Changing stores does not necessarily mean we're clearing the entire cache
+[WOO-1432](https://resursbankplugins.atlassian.net/browse/WOO-1432) Update ecom to show necessary values in cost-list
+
 # 1.2.2
 
 * [WOO-1426](https://resursbankplugins.atlassian.net/browse/WOO-1426) Unsupported themes makes widgets go nuts \(sometimes\)
