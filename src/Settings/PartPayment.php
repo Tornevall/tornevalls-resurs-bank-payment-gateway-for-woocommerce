@@ -153,7 +153,10 @@ class PartPayment
             return;
         }
 
-        if ($option === 'woocommerce_currency') {
+        if (
+            $option === 'woocommerce_currency' ||
+            $option === 'woocommerce_currency_pos'
+        ) {
             WooCommerce::invalidateFullCache();
             return;
         }
@@ -221,7 +224,10 @@ class PartPayment
      */
     private static function canValidateOptionChange(mixed $option): bool
     {
-        return $option === Limit::getName() || $option === StoreId::getName() || $option === 'woocommerce_currency';
+        return $option === Limit::getName() ||
+            $option === StoreId::getName() ||
+            $option === 'woocommerce_currency' ||
+            $option === 'woocommerce_currency_pos';
     }
 
     /**
