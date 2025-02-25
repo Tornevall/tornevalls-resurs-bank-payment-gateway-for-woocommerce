@@ -16,6 +16,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Module\Store\Repository;
 use Throwable;
 use WP_Post;
+
 use function in_array;
 
 /**
@@ -42,11 +43,11 @@ class WooCommerce
 
     /**
      * Is WooCommerce present?
-     *
-     * @return bool
      */
     public static function isWcPresent(): bool
     {
+        // This class always exists in WooCommerce, but is only present when woocommerce has been loaded,
+        // making this the safest way to ensure that WooCommerce is not disabled/missing.
         return class_exists('Automattic\WooCommerce\Utilities\FeaturesUtil');
     }
 
