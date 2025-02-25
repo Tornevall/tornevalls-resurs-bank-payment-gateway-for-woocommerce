@@ -138,7 +138,8 @@ class WooCommerce
             $transients = $wpdb->get_col(
                 "SELECT option_name FROM {$wpdb->options}
                          WHERE option_name LIKE '_transient_resurs_%'
-                         AND option_name NOT LIKE '_transient_resurs_%_cost_list_%'"
+                         AND option_name NOT LIKE '_transient_resurs_%_cost_list_%'
+                         AND option_name NOT LIKE '_transient_resurs_%_price-signage-%'"
             );
 
             // Making sure we delete other cached transients as well, besides the ecom cache.
