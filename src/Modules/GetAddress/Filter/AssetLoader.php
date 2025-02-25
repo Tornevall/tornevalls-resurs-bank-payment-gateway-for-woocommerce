@@ -244,23 +244,6 @@ class AssetLoader
     }
 
     /**
-     * Enqueue part payment scripts.
-     */
-    public static function enqueuePartPaymentScripts(): void
-    {
-        wp_register_script(
-            'rb-pp-js',
-            '',
-            []
-        );
-        wp_enqueue_script('rb-pp-js');
-        wp_add_inline_script(
-            'rb-pp-js',
-            CostList::getJs()
-        );
-    }
-
-    /**
      * Get the extra CSS for part payment.
      */
     private static function getPartPaymentCssExtras(): string
