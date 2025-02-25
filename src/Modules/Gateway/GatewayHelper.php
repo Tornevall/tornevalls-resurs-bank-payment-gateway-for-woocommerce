@@ -12,6 +12,7 @@ use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -41,11 +42,19 @@ class GatewayHelper
     /**
      * Render payment method content including Cost List and Warning widgets.
      *
+     * @param $paymentMethod
+     * @param $amount
      * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws TranslationException
      */
     public function renderPaymentMethodContent(
-        $paymentMethod,
-        $amount
+        PaymentMethod $paymentMethod,
+        float $amount
     ): string {
         return '<div class="payment-method-content">' .
             $this->getCostList() .
@@ -110,7 +119,7 @@ class GatewayHelper
     private function getCostListHtml(): string
     {
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
-        $transientName = 'resursbank_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
+        $transientName = RESURSBANK_MODULE_PREFIX . '_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
         $transientContent = get_transient($transientName);
 
         if ($transientContent) {

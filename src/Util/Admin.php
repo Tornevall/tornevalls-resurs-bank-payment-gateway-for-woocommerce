@@ -96,7 +96,7 @@ EX;
         try {
             // Make sure we are dealing with a UUID, before activating the redirect filter to minimize the
             // risk of weird loops (IF they occur).
-            $stringValidation = (new StringValidation());
+            $stringValidation = new StringValidation();
             $stringValidation->isUuid(value: $method);
         } catch (Throwable) {
             // Do nothing.
