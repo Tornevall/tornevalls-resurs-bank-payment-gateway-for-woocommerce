@@ -41,7 +41,7 @@ export class BlocksAddressUpdater {
         this.initializeUseBillingElement();
 
         // Initialize any properties if needed
-        if (useWidget && typeof Resursbank_GetAddress !== 'undefined') {
+        if (typeof Resursbank_GetAddress !== 'undefined') {
             this.widget = new Resursbank_GetAddress({
                 updateAddress: (data: any) => {
 
