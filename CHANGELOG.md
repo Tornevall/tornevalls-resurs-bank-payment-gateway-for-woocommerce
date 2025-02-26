@@ -1,7 +1,10 @@
 # 1.2.3
 
-[WOO-1429](https://resursbankplugins.atlassian.net/browse/WOO-1429) Changing stores does not necessarily mean we're clearing the entire cache
-[WOO-1432](https://resursbankplugins.atlassian.net/browse/WOO-1432) Update ecom to show necessary values in cost-list
+* [WOO-1428](https://resursbankplugins.atlassian.net/browse/WOO-1428) Instead of doing all country checks in the plugin, we should take advantage of Location that was unreachable from Config::setup before
+* [WOO-1422](https://resursbankplugins.atlassian.net/browse/WOO-1422) Performance issues and bugs for costlist
+* [WOO-1429](https://resursbankplugins.atlassian.net/browse/WOO-1429) Changing stores does not necessarily mean we're clearing the entire cache
+* [WOO-1431](https://resursbankplugins.atlassian.net/browse/WOO-1431) Running Resurs plugin with WooCommerce disabled.
+* [WOO-1432](https://resursbankplugins.atlassian.net/browse/WOO-1432) Update ecom to show necessary values in cost-list
 
 # 1.2.2
 

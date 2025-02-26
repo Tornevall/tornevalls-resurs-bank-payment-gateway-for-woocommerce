@@ -6,7 +6,7 @@ Tested up to: 6.7.2
 Requires PHP: 8.1
 WC Tested up to: 9.6.2
 WC requires at least: 7.6.0
-Plugin requires ecom: 3.1.6
+Plugin requires ecom: master
 Requires Plugins: woocommerce
 Stable tag: 1.2.3
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
@@ -62,8 +62,11 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 # 1.2.3
 
-[WOO-1429](https://resursbankplugins.atlassian.net/browse/WOO-1429) Changing stores does not necessarily mean we're clearing the entire cache
-[WOO-1432](https://resursbankplugins.atlassian.net/browse/WOO-1432) Update ecom to show necessary values in cost-list
+* [WOO-1428](https://resursbankplugins.atlassian.net/browse/WOO-1428) Instead of doing all country checks in the plugin, we should take advantage of Location that was unreachable from Config::setup before
+* [WOO-1422](https://resursbankplugins.atlassian.net/browse/WOO-1422) Performance issues and bugs for costlist
+* [WOO-1429](https://resursbankplugins.atlassian.net/browse/WOO-1429) Changing stores does not necessarily mean we're clearing the entire cache
+* [WOO-1431](https://resursbankplugins.atlassian.net/browse/WOO-1431) Running Resurs plugin with WooCommerce disabled.
+* [WOO-1432](https://resursbankplugins.atlassian.net/browse/WOO-1432) Update ecom to show necessary values in cost-list
 
 # 1.2.2
 
@@ -90,38 +93,6 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 * [WOO-1417](https://resursbankplugins.atlassian.net/browse/WOO-1417) ppw period resets to wrong value
 
-# 1.1.1 - 1.1.4
-
-* [WOO-1411](https://resursbankplugins.atlassian.net/browse/WOO-1411) About-widget broken
-* [WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors
-* [WOO-1415](https://resursbankplugins.atlassian.net/browse/WOO-1415) Remove \(if possible\) extra sort order on blocks methods
-* [WOO-1416](https://resursbankplugins.atlassian.net/browse/WOO-1416) slow loading with get-address?
-* [WOO-1414](https://resursbankplugins.atlassian.net/browse/WOO-1414) isEnabled shouts false positives
-* [WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors
-* Uncatched blocks exception handled.
-
-# 1.1.1
-
-* [WOO-1413](https://resursbankplugins.atlassian.net/browse/WOO-1413) Some stores, during upgrade, may get JWT errors
-
-# 1.1.0
-
-* [WOO-1373](https://resursbankplugins.atlassian.net/browse/WOO-1373) Update src/Modules/GetAddress/resources/update-address/legacy.js
-* [WOO-1379](https://resursbankplugins.atlassian.net/browse/WOO-1379) Confirm functionality of logged in customer
-* [WOO-1384](https://resursbankplugins.atlassian.net/browse/WOO-1384) wp-admin payment method editor says incompatible methods
-* [WOO-1403](https://resursbankplugins.atlassian.net/browse/WOO-1403) New url to docs in readme
-* [WOO-1407](https://resursbankplugins.atlassian.net/browse/WOO-1407) Investigation of Support for Payment Method Management and Sorting in WooCommerce Blocks
-* [WOO-1396](https://resursbankplugins.atlassian.net/browse/WOO-1396) Missing company payment method
-* [WOO-1397](https://resursbankplugins.atlassian.net/browse/WOO-1397) Legacy checkout do not reload payment methods
-* [WOO-1400](https://resursbankplugins.atlassian.net/browse/WOO-1400) Purchase button invalidates in specific occasions for some LEGAL method
-* [WOO-1402](https://resursbankplugins.atlassian.net/browse/WOO-1402) Billing address are not seind in deliveryAddress with blocks
-* [WOO-1404](https://resursbankplugins.atlassian.net/browse/WOO-1404) Error message from Merchant-api is missing
-* [WOO-1405](https://resursbankplugins.atlassian.net/browse/WOO-1405) For a Finnish account, the threshold value should be 15€
-* [WOO-1406](https://resursbankplugins.atlassian.net/browse/WOO-1406) The Legacy checkout does not list the "correct" payment methods at checkout depending on the country
-* [WOO-1409](https://resursbankplugins.atlassian.net/browse/WOO-1409) Email is not properly added to payload when order are created
-* [WOO-1410](https://resursbankplugins.atlassian.net/browse/WOO-1410) Send the personal identification number, email, and mobile number of the person responsible for the payment, i.e., the details required by the service provider.
-* [WOO-1412](https://resursbankplugins.atlassian.net/browse/WOO-1412) PPW not showing after resetting values
-* [WOO-1378](https://resursbankplugins.atlassian.net/browse/WOO-1378) Test Blocks and Legacy
-
-
 == Upgrade Notice ==
+
+Avoid running auto upgrade functions in the platform.
