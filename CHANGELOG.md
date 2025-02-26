@@ -1,3 +1,7 @@
+# 1.2.4
+
+* Finnish translation hotfix.
+
 # 1.2.3
 
 * [WOO-1428](https://resursbankplugins.atlassian.net/browse/WOO-1428) Instead of doing all country checks in the plugin, we should take advantage of Location that was unreachable from Config::setup before
