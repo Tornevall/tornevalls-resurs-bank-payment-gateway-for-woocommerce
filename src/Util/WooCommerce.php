@@ -16,6 +16,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Module\Store\Repository;
 use Throwable;
 use WP_Post;
+
 use function in_array;
 
 /**
@@ -42,8 +43,6 @@ class WooCommerce
 
     /**
      * Is WooCommerce present?
-     *
-     * @return bool
      */
     public static function isWcPresent(): bool
     {
