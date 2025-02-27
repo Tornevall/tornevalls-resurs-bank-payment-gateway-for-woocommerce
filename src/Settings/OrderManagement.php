@@ -59,6 +59,7 @@ class OrderManagement
             ),
             'type' => 'checkbox',
             'default' => EnableCapture::getDefault(),
+            'desc_tip' => 'Default: ' . EnableCapture::getDefault(),
         ];
     }
 
@@ -75,6 +76,7 @@ class OrderManagement
             ),
             'type' => 'checkbox',
             'default' => EnableCancel::getDefault(),
+            'desc_tip' => 'Default: ' . EnableCancel::getDefault(),
         ];
     }
 
@@ -91,6 +93,7 @@ class OrderManagement
             ),
             'type' => 'checkbox',
             'default' => EnableModify::getDefault(),
+            'desc_tip' => 'Default: ' . EnableModify::getDefault(),
         ];
     }
 
@@ -107,6 +110,7 @@ class OrderManagement
             ),
             'type' => 'checkbox',
             'default' => EnableRefund::getDefault(),
+            'desc_tip' => 'Default: ' . EnableRefund::getDefault(),
         ];
     }
 }
