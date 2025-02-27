@@ -44,6 +44,7 @@ class Advanced
     /**
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
+     * @throws ConfigException
      */
     public static function getSettings(): array
     {
@@ -70,42 +71,6 @@ class Advanced
     }
 
     /**
-     * @throws ConfigException
-     */
-    private static function getCountryRestrictionConfig(): array
-    {
-        // On new installs, countryCode tend to be empty until credentials are set.
-        $countryCode = WooCommerce::getStoreCountry();
-        return [
-            'id' => 'get_address',
-            'type' => 'text',
-            'custom_attributes' => [
-                'disabled' => true,
-            ],
-            'title' => Translator::translate(
-                phraseId: 'enable-widget-to-get-address'
-            ),
-            'value' => __('Disabled'),
-            'desc' => '<b>Not available in this country (' . $countryCode . ')</b>',
-            // phpcs:ignore
-            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
-        ];
-    }
-
-    /**
-     * Timeout settings for API requests.
-     */
-    private static function getApiTimeout(): array
-    {
-        return [
-            'id' => ApiTimeout::getName(),
-            'type' => 'text',
-            'title' => 'API Timeout (in seconds)',
-            'default' => ApiTimeout::getDefault()
-        ];
-    }
-
-    /**
      * Return array for Enable log setting.
      */
     private static function getLogEnabledSetting(): array
@@ -115,7 +80,39 @@ class Advanced
             'type' => 'checkbox',
             'desc' => __('Yes'),
             'title' => Translator::translate(phraseId: 'log-enabled'),
+            'desc_tip' => 'Default: ' . LogEnabled::getDefault(),
             'default' => LogEnabled::getDefault()
+        ];
+    }
+
+    /**
+     * Return array for Log Dir/Path setting.
+     */
+    private static function getLogDirSetting(): array
+    {
+        return [
+            'id' => LogDir::getName(),
+            'type' => 'text',
+            'title' => Translator::translate(phraseId: 'log-path'),
+            'desc' => Translator::translate(
+                    phraseId: 'leave-empty-to-disable-logging'
+                ) . '<br>Default: ' . LogDir::getDefault(),
+            'default' => LogDir::getDefault(),
+        ];
+    }
+
+    /**
+     * Return array for Log Level setting.
+     */
+    private static function getLogLevelSetting(): array
+    {
+        return [
+            'id' => LogLevel::getName(),
+            'type' => 'select',
+            'title' => Translator::translate(phraseId: 'log-level'),
+            'desc' => Translator::translate(phraseId: 'log-level-description') . '<br>' . 'Default: ' . EcomLogLevel::INFO->name,
+            'default' => EcomLogLevel::INFO->value,
+            'options' => self::getLogLevelOptions(),
         ];
     }
 
@@ -134,37 +131,6 @@ class Advanced
     }
 
     /**
-     * Return array for Log Dir/Path setting.
-     */
-    private static function getLogDirSetting(): array
-    {
-        return [
-            'id' => LogDir::getName(),
-            'type' => 'text',
-            'title' => Translator::translate(phraseId: 'log-path'),
-            'desc' => Translator::translate(
-                phraseId: 'leave-empty-to-disable-logging'
-            ),
-            'default' => LogDir::getDefault()
-        ];
-    }
-
-    /**
-     * Return array for Log Level setting.
-     */
-    private static function getLogLevelSetting(): array
-    {
-        return [
-            'id' => LogLevel::getName(),
-            'type' => 'select',
-            'title' => Translator::translate(phraseId: 'log-level'),
-            'desc' => Translator::translate(phraseId: 'log-level-description'),
-            'default' => EcomLogLevel::INFO->value,
-            'options' => self::getLogLevelOptions()
-        ];
-    }
-
-    /**
      * Return array for Cache Enabled setting.
      */
     private static function getCacheEnabled(): array
@@ -174,12 +140,14 @@ class Advanced
             'title' => Translator::translate(phraseId: 'cache-enabled'),
             'type' => 'checkbox',
             'desc' => __('Yes'),
-            'default' => EnableCache::getDefault()
+            'default' => EnableCache::getDefault(),
+            'desc_tip' => 'Default: ' . EnableCache::getDefault(),
         ];
     }
 
     /**
      * Return array for Invalidate Cache button setting.
+     * @noinspection SpellCheckingInspection
      */
     private static function getInvalidateCacheButton(): array
     {
@@ -203,7 +171,7 @@ class Advanced
             ),
             'desc' => __('Yes'),
             'default' => EnableGetAddress::getData(),
-            'desc_tip' => 'Only available in Sweden',
+            'desc_tip' => 'Only available in Sweden.<br>Default: ' . EnableGetAddress::getDefault(),
         ];
     }
 
@@ -218,7 +186,8 @@ class Advanced
             'title' => 'Sort payment methods according to admin',
             'type' => 'checkbox',
             'desc' => __('Yes'),
-            'default' => ForcePaymentMethodSortOrder::getDefault()
+            'default' => ForcePaymentMethodSortOrder::getDefault(),
+            'desc_tip' => 'Default: ' . ForcePaymentMethodSortOrder::getDefault(),
         ];
     }
 
@@ -232,7 +201,22 @@ class Advanced
             'title' => 'Restrict payment methods display in checkout to API country',
             'type' => 'checkbox',
             'desc' => __('Yes'),
-            'default' => SetMethodCountryRestriction::getDefault()
+            'default' => SetMethodCountryRestriction::getDefault(),
+            'desc_tip' => 'Default: ' . SetMethodCountryRestriction::getDefault(),
+        ];
+    }
+
+    /**
+     * Timeout settings for API requests.
+     */
+    private static function getApiTimeout(): array
+    {
+        return [
+            'id' => ApiTimeout::getName(),
+            'type' => 'text',
+            'title' => 'API Timeout (in seconds)',
+            'default' => ApiTimeout::getDefault(),
+            'desc' => 'Default: ' . ApiTimeout::getDefault(),
         ];
     }
 
@@ -248,7 +232,30 @@ class Advanced
             'default' => XDebugSessionValue::getDefault(),
             'desc' => Translator::translate(
                 phraseId: 'enable-developer-mode-comment'
-            )
+            ),
+        ];
+    }
+
+    /**
+     * @throws ConfigException
+     */
+    private static function getCountryRestrictionConfig(): array
+    {
+        // On new installs, countryCode tend to be empty until credentials are set.
+        $countryCode = WooCommerce::getStoreCountry();
+        return [
+            'id' => 'get_address',
+            'type' => 'text',
+            'custom_attributes' => [
+                'disabled' => true,
+            ],
+            'title' => Translator::translate(
+                phraseId: 'enable-widget-to-get-address'
+            ),
+            'value' => __('Disabled'),
+            'desc' => '<b>Not available in this country (' . $countryCode . ')</b>',
+            // phpcs:ignore
+            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',
         ];
     }
 }
