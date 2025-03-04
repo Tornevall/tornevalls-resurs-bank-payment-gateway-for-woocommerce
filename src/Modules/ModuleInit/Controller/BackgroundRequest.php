@@ -18,7 +18,7 @@ class BackgroundRequest
     /**
      * Run and execute data for background caching.
      *
-     * @throws \JsonException
+     * @return string
      */
     public function exec(): string
     {
