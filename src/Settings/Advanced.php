@@ -44,6 +44,7 @@ class Advanced
     /**
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
+     *
      * @throws ConfigException
      */
     public static function getSettings(): array
@@ -95,8 +96,8 @@ class Advanced
             'type' => 'text',
             'title' => Translator::translate(phraseId: 'log-path'),
             'desc' => Translator::translate(
-                    phraseId: 'leave-empty-to-disable-logging'
-                ) . '<br>Default: ' . LogDir::getDefault(),
+                phraseId: 'leave-empty-to-disable-logging'
+            ) . '<br>Default: ' . LogDir::getDefault(),
             'default' => LogDir::getDefault(),
         ];
     }
@@ -110,7 +111,9 @@ class Advanced
             'id' => LogLevel::getName(),
             'type' => 'select',
             'title' => Translator::translate(phraseId: 'log-level'),
-            'desc' => Translator::translate(phraseId: 'log-level-description') . '<br>' . 'Default: ' . EcomLogLevel::INFO->name,
+            'desc' => Translator::translate(
+                phraseId: 'log-level-description'
+            ) . '<br>' . 'Default: ' . EcomLogLevel::INFO->name,
             'default' => EcomLogLevel::INFO->value,
             'options' => self::getLogLevelOptions(),
         ];
@@ -147,6 +150,7 @@ class Advanced
 
     /**
      * Return array for Invalidate Cache button setting.
+     *
      * @noinspection SpellCheckingInspection
      */
     private static function getInvalidateCacheButton(): array
