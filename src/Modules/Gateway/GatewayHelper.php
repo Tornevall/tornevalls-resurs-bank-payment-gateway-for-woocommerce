@@ -26,24 +26,30 @@ use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
-use WC_Cart;
 
 /**
  * Generic class that provides both blocks and legacy with relevant methods for the gateway.
  */
 class GatewayHelper
 {
-    private ?PriceSignage $priceSignage;
+    /**
+     * WooCommerce amount to work with.
+     */
+    private float $amount = 0.0;
 
-    public function __construct(private readonly PaymentMethod $paymentMethod)
+    /**
+     * How long transients should remain before expire.
+     */
+    private int $transientExpireTime = 600;
+
+    public function __construct(public readonly PaymentMethod $paymentMethod, float $amount = 0.0)
     {
+        $this->amount = $amount > 0.0 ? $amount : WooCommerce::getCartTotals();
     }
 
     /**
      * Render payment method content including Cost List and Warning widgets.
      *
-     * @param $paymentMethod
-     * @param $amount
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -51,19 +57,50 @@ class GatewayHelper
      * @throws JsonException
      * @throws ReflectionException
      * @throws TranslationException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function renderPaymentMethodContent(
-        PaymentMethod $paymentMethod,
-        float $amount
+        PaymentMethod $paymentMethod
     ): string {
-        return '<div class="payment-method-content">' .
+
+        // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
+        // Payment method content needs a separate transient storage for the pre-caching system.
+        $transientName = sprintf(
+            '%s_method_content_%s_%s',
+            RESURSBANK_MODULE_PREFIX,
+            $this->getPaymentMethod()->id,
+            $this->amount
+        );
+        $transientContent = get_transient($transientName);
+
+        if ($transientContent) {
+            return $transientContent;
+        }
+
+        $return = '<div class="payment-method-content">' .
             $this->getCostList() .
             (new ReadMore(
                 paymentMethod: $paymentMethod,
-                amount: $amount
+                amount: $this->amount
             ))->content .
             $this->getPriceSignageWarning() .
             '</div>';
+
+        set_transient($transientName, $return, $this->getTransientExpiration());
+
+        return $return;
+    }
+
+    /**
+     * Expire time setup for transients related to cost-list and priceSignage.
+     */
+    public function getTransientExpiration(): int
+    {
+        $expiration = $this->transientExpireTime ?? 600;
+        return (int)apply_filters(
+            'rb_cost_transient_expire',
+            is_numeric(value: $expiration) ? $expiration : 600
+        );
     }
 
     /**
@@ -75,7 +112,7 @@ class GatewayHelper
 
         try {
             if ($this->paymentMethod->priceSignagePossible) {
-                return $this->getCostListHtml();
+                $return = $this->getCostListHtml();
             }
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -119,7 +156,12 @@ class GatewayHelper
     private function getCostListHtml(): string
     {
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
-        $transientName = RESURSBANK_MODULE_PREFIX . '_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
+        $transientName = sprintf(
+            '%s_cost_list_%s_%s',
+            RESURSBANK_MODULE_PREFIX,
+            $this->getPaymentMethod()->id,
+            $this->amount
+        );
         $transientContent = get_transient($transientName);
 
         if ($transientContent) {
@@ -135,7 +177,7 @@ class GatewayHelper
             method: $this->paymentMethod
         ))->content . '</div>';
 
-        set_transient($transientName, $return, 300);
+        set_transient($transientName, $return, $this->getTransientExpiration());
 
         return $return;
     }
@@ -146,30 +188,6 @@ class GatewayHelper
     private function getPaymentMethod(): PaymentMethod
     {
         return $this->paymentMethod;
-    }
-
-    /**
-     * Get correct totals.
-     */
-    private function getWcTotal(): float
-    {
-        $total = 0.0;
-
-        if (WC()->cart instanceof WC_Cart) {
-            $total = (float)WC()->cart->get_total();
-            $totals = WC()->cart->get_totals();
-
-            if (
-                $total === 0.0 &&
-                isset($totals['total']) &&
-                is_array($totals) &&
-                (float)$totals['total'] > 0
-            ) {
-                $total = (float)$totals['total'];
-            }
-        }
-
-        return $total;
     }
 
     /**
@@ -190,7 +208,7 @@ class GatewayHelper
     {
         return GetPriceSignageRepository::getPriceSignage(
             paymentMethodId: $this->getPaymentMethod()->id,
-            amount: $this->getWcTotal()
+            amount: $this->amount
         );
     }
 }

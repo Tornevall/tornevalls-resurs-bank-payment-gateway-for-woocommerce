@@ -189,16 +189,32 @@ class Connection
      *
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
-    public static function getWcLoggerCritical(string $message): void
+    public static function getWcLoggerCritical(string $message, string $loggerType = 'critical'): void
     {
         try {
-            // If WordPress/WooCommerce cannot handle their own logging errors when we attempt to log critical
-            // messages, we suppress them here.
-            //
-            // We've observed this issue with PHP 8.3 and errors that occurs in `class-wp-filesystem-ftpext.php`
-            // for where errors are only shown on screen and never logged. Improved error handling reveals previously
-            // unnoticed logging issues may be the problem.
-            (new WC_Logger())->critical(message: $message);
+            // Make sure WC is present before using the class.
+            if (class_exists(class: '\WC_Logger')) {
+                // If WordPress/WooCommerce cannot handle their own logging errors when we attempt to log critical
+                // messages, we suppress them here.
+                //
+                // We've observed this issue with PHP 8.3 and errors that occurs in `class-wp-filesystem-ftpext.php`
+                // for where errors are only shown on screen and never logged. Improved error handling reveals previously
+                // unnoticed logging issues may be the problem.
+                $logger = new WC_Logger();
+
+                switch ($loggerType) {
+                    case 'warning':
+                        $logger->warning(
+                            message: RESURSBANK_MODULE_PREFIX . ': ' . $message
+                        );
+                        break;
+
+                    default:
+                        $logger->critical(
+                            message: RESURSBANK_MODULE_PREFIX . ': ' . $message
+                        );
+                }
+            }
         } catch (Throwable) {
         }
     }

@@ -39,9 +39,6 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
-use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
-use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
@@ -128,14 +125,19 @@ class Resursbank extends WC_Payment_Gateway
     public function payment_fields(): void
     {
         try {
-            $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
+            $wcAmount = $this->get_order_total();
+            $gatewayHelper = new GatewayHelper(
+                paymentMethod: $this->method,
+                amount: $wcAmount
+            );
             $usp = PaymentMethodRepository::getUniqueSellingPoint(
                 paymentMethod: $this->method,
-                amount: $this->get_order_total()
+                amount: $wcAmount
             );
-            echo '<div class="rb-usp">' . $usp->message . '</div>' . $gatewayHelper->renderPaymentMethodContent(
+            echo '<div class="rb-usp">' .
+                $usp->message . '</div>' .
+                $gatewayHelper->renderPaymentMethodContent(
                     paymentMethod: $this->method,
-                    amount: $this->get_order_total()
                 );
         } catch (TranslationException $error) {
             // Translation errors should rather go as debug messages since we

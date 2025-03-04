@@ -31,6 +31,7 @@ use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\ModuleInit\Controller\BackgroundRequest;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
 use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
@@ -97,6 +98,11 @@ class Route
      * Route to get JSON encoded list of stores (only in admin).
      */
     public const ROUTE_GET_STORES_ADMIN = 'get-stores-admin';
+
+    /**
+     * Route to get automated background handling.
+     */
+    public const ROUTE_GET_BACKGROUND_AGENT_REQUEST = 'get-background-agent-request';
 
     /**
      * Route to get JSON response with store country (usually happens after a save for which that value is delayed
@@ -328,6 +334,10 @@ class Route
 
             case self::ROUTE_GET_STORES_ADMIN:
                 self::respondWithExit(body: (new GetStores())->exec());
+                break;
+
+            case self::ROUTE_GET_BACKGROUND_AGENT_REQUEST:
+                self::respondWithExit(body: (new BackgroundRequest())->exec());
                 break;
 
             case self::ROUTE_GET_STORE_COUNTRY:

@@ -15,6 +15,7 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Module\Store\Repository;
 use Throwable;
+use WC_Cart;
 use WP_Post;
 
 use function in_array;
@@ -39,6 +40,28 @@ class WooCommerce
             ),
             strict: true
         );
+    }
+
+    /**
+     * End browser connection without waiting for user or process to be finished.
+     */
+    public static function endConnection(string $message = ''): void
+    {
+        if ($message !== '') {
+            echo $message;
+        }
+
+        session_write_close();
+        ignore_user_abort(enable: true);
+        ob_end_flush();
+        ob_flush();
+        flush();
+
+        if (!function_exists(function: 'fastcgi_finish_request')) {
+            return;
+        }
+
+        fastcgi_finish_request();
     }
 
     /**
@@ -85,7 +108,33 @@ class WooCommerce
      */
     public static function getCartTotals(): float
     {
-        return (float)(WC()->cart?->get_totals()['total'] ?? 0.0);
+        $total = 0.0;
+
+        try {
+            // Try get a WC-session available.
+            if (function_exists(function: 'WC')) {
+                if (!WC()->cart instanceof WC_Cart) {
+                    WC()->initialize_session();
+                }
+            }
+        } catch (Throwable) {
+        }
+
+        if (WC()->cart instanceof WC_Cart) {
+            $total = (float)WC()->cart->get_total();
+            $totals = WC()->cart->get_totals();
+
+            if (
+                $total === 0.0 &&
+                isset($totals['total']) &&
+                is_array(value: $totals) &&
+                (float)$totals['total'] > 0
+            ) {
+                $total = (float)$totals['total'];
+            }
+        }
+
+        return $total;
     }
 
     /**
