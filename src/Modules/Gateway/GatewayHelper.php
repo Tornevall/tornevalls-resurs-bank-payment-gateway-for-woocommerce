@@ -42,8 +42,9 @@ class GatewayHelper
     /**
      * Render payment method content including Cost List and Warning widgets.
      *
-     * @param $paymentMethod
-     * @param $amount
+     * @param PaymentMethod $paymentMethod
+     * @param float $amount
+     * @return string
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
