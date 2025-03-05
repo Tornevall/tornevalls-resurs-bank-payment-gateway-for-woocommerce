@@ -1,3 +1,7 @@
+# 1.2.5
+
+[WOO-1433](https://resursbankplugins.atlassian.net/browse/WOO-1433) Performance issues in cart and checkout
+
 # 1.2.4
 
 * Finnish translation hotfix.
