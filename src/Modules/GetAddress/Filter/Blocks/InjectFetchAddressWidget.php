@@ -40,6 +40,10 @@ class InjectFetchAddressWidget
     public static function exec(mixed $content): string
     {
         try {
+            if (!function_exists(function: 'is_checkout') || !is_checkout()) {
+                return $content;
+            }
+
             // Since this is a filter hook executed by the_content, we cannot be sure that the
             // content really is string and throw errors back to the frontend from here.
             // If we get anything but a string, we will therefore only silently return it.

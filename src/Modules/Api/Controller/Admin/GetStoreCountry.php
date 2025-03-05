@@ -38,6 +38,7 @@ class GetStoreCountry extends GetStoresController
         // Make sure we have saved data before using it within the search.
         if (StoreId::getData() !== '') {
             PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
+            WooCommerce::validateAndUpdatePartPaymentMethod();
         }
 
         try {
