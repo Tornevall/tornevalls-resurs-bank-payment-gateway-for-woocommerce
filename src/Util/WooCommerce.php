@@ -303,7 +303,7 @@ class WooCommerce
     }
 
     /**
-     * Check for misconfigured payment methods.
+     * Check for misconfigured payment methods during CSS-process and option updates in wp-admin.
      */
     public static function validateAndUpdatePartPaymentMethod(): bool
     {
