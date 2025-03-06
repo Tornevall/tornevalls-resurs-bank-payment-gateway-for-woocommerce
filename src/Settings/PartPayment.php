@@ -23,7 +23,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
-use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
@@ -162,7 +161,8 @@ class PartPayment
         }
 
         if ($option === StoreId::getName()) {
-            PartPayment::handleStoreIdUpdate(newStoreId: StoreId::getData());
+            // Store the NEW value, not the value already stored in the system!
+            PartPayment::handleStoreIdUpdate(newStoreId: $new);
             return;
         }
 
@@ -193,6 +193,9 @@ class PartPayment
 
             try {
                 $paymentMethods = Repository::getPaymentMethods();
+                WooCommerce::updatePartPaymentData(
+                    paymentMethods: $paymentMethods
+                );
 
                 self::updateLongestPeriodWithZeroInterest(
                     paymentMethods: $paymentMethods
@@ -279,9 +282,6 @@ class PartPayment
      */
     private static function updateLongestPeriodWithZeroInterest(PaymentMethodCollection $paymentMethods): void
     {
-        $longestPeriod = 0;
-        $paymentMethodId = '';
-
         try {
             // This method are triggered through several requests due to how javascripts are loaded
             // but should not be fully executed when AJAX requests are handling the calls.
@@ -291,32 +291,7 @@ class PartPayment
                 return;
             }
 
-            $firstFilteredMethod = AnnuityRepository::filterMethods(
-                paymentMethods: $paymentMethods
-            )->getFirst();
-            $annuityFactors = AnnuityRepository::getAnnuityFactors(
-                paymentMethodId: $firstFilteredMethod->id
-            );
-
-            if ($annuityFactors->count() > 0) {
-                $paymentMethodId = $firstFilteredMethod->id;
-
-                foreach ($annuityFactors as $annuityFactor) {
-                    if ($annuityFactor->interest > 0.0) {
-                        continue;
-                    }
-
-                    $longestPeriod = max(
-                        $annuityFactor->durationMonths,
-                        $longestPeriod
-                    );
-                }
-            }
-
-            if ($longestPeriod > 0) {
-                update_option(PaymentMethod::getName(), $paymentMethodId);
-                update_option(Period::getName(), $longestPeriod);
-            }
+            WooCommerce::updatePartPaymentData(paymentMethods: $paymentMethods);
         } catch (Throwable) {
             // Ignore exceptions and proceed if this moment fails, and leave the configuration as is instead
             // of blocking something.

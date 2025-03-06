@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
@@ -42,6 +43,7 @@ class AssetLoader
      * @throws FilesystemException
      * @throws HttpException
      * @throws IllegalValueException
+     * @throws ConfigException
      */
     public static function init(): void
     {
@@ -121,7 +123,9 @@ class AssetLoader
     public static function enqueueReadMoreStyle(): void
     {
         try {
-            $readMoreCss = PartPayment::getReadMoreWidget()->css ?? '';
+            $readMoreCss = WooCommerce::validateAndUpdatePartPaymentMethod()
+                ? PartPayment::getReadMoreWidget()->css
+                : '';
         } catch (Throwable $error) {
             Log::error(error: $error);
             $readMoreCss = '';
