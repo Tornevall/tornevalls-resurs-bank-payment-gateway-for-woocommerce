@@ -1,6 +1,7 @@
 === Resurs Bank Payments for WooCommerce ===
 Contributors: RB-Tornevall
-Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank, payments, checkout, hosted, simplified, hosted flow, simplified flow
+Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank
+Requires at least: 6.0
 Requires at least: 6.0
 Tested up to: 6.7.2
 Requires PHP: 8.1
