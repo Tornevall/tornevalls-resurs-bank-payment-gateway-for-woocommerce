@@ -37,9 +37,17 @@ use Throwable;
  */
 class InjectFetchAddressWidget
 {
+    /**
+     * Initialize the fetchAddress widget.
+     */
     public static function exec(mixed $content): string
     {
         try {
+            // Not clear if we really need to protect this section.
+            //if (!function_exists(function: 'is_checkout') || !is_checkout()) {
+            //    return $content;
+            //}
+
             // Since this is a filter hook executed by the_content, we cannot be sure that the
             // content really is string and throw errors back to the frontend from here.
             // If we get anything but a string, we will therefore only silently return it.

@@ -9,11 +9,26 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\Store\Repository;
+use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
+use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbank\Woocommerce\Modules\Api\Connection;
 use Throwable;
 use WC_Cart;
 use WP_Post;
@@ -285,5 +300,84 @@ class WooCommerce
         }
 
         return $return;
+    }
+
+    /**
+     * @throws ConfigException
+     * @throws EmptyValueException
+     * @throws Throwable
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function updatePartPaymentData(PaymentMethodCollection $paymentMethods): void
+    {
+        $longestPeriod = 0;
+        $paymentMethodId = '';
+        $firstFilteredMethod = AnnuityRepository::filterMethods(
+            paymentMethods: $paymentMethods
+        )->getFirst();
+        $annuityFactors = AnnuityRepository::getAnnuityFactors(
+            paymentMethodId: $firstFilteredMethod->id
+        );
+
+        if ($annuityFactors->count() > 0) {
+            $paymentMethodId = $firstFilteredMethod->id;
+
+            foreach ($annuityFactors as $annuityFactor) {
+                if ($annuityFactor->interest > 0.0) {
+                    continue;
+                }
+
+                $longestPeriod = max(
+                    $annuityFactor->durationMonths,
+                    $longestPeriod
+                );
+            }
+        }
+
+        if ($longestPeriod <= 0) {
+            return;
+        }
+
+        update_option(PaymentMethod::getName(), $paymentMethodId);
+        update_option(Period::getName(), $longestPeriod);
+    }
+
+    /**
+     * Check for misconfigured payment methods during CSS-process and option updates in wp-admin.
+     */
+    public static function validateAndUpdatePartPaymentMethod(): bool
+    {
+        $paymentMethod = null;
+
+        try {
+            $paymentMethodSet = PaymentMethod::getData();
+            $paymentMethod = \Resursbank\Ecom\Module\PaymentMethod\Repository::getById(
+                paymentMethodId: $paymentMethodSet
+            );
+
+            // Failsafe: If there is no payment method set, which usually is the case even though the widget is not enabled
+            // itself, it has to be preconfigured. In Settings/PartPayment this is very much handled when credentials
+            // are saved. This could potentially occur when switching stores as WordPress saving functions are delayed.
+            if (
+                !$paymentMethod instanceof EcomPaymentMethod &&
+                Connection::hasCredentials()
+            ) {
+                WooCommerce::updatePartPaymentData(
+                    paymentMethods: \Resursbank\Ecom\Module\PaymentMethod\Repository::getPaymentMethods()
+                );
+            }
+        } catch (Throwable) {
+        }
+
+        return $paymentMethod instanceof PaymentMethod;
     }
 }
