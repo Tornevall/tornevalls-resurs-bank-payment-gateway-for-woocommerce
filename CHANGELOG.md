@@ -1,10 +1,14 @@
+# 1.2.7
+
+* No changes in the plugin, but in the ecom library for where the part payment information has been further compacted.
+
 # 1.2.6
 
-[WOO-1434](https://resursbankplugins.atlassian.net/browse/WOO-1434) Switching between stores may cause payment method desynch
+* [WOO-1434](https://resursbankplugins.atlassian.net/browse/WOO-1434) Switching between stores may cause payment method desynch
 
 # 1.2.5
 
-[WOO-1433](https://resursbankplugins.atlassian.net/browse/WOO-1433) Performance issues in cart and checkout
+* [WOO-1433](https://resursbankplugins.atlassian.net/browse/WOO-1433) Performance issues in cart and checkout
 
 # 1.2.4
 
