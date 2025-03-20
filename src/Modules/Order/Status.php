@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Order;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -28,6 +29,7 @@ use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
+use Throwable;
 use WC_Order;
 
 /**
@@ -61,8 +63,6 @@ class Status
         $payment = PaymentRepository::get(
             paymentId: Metadata::getPaymentId(order: $order)
         );
-
-        self::getFailedOrCancelled(payment: $payment, order: $order);
 
         if (
             $order->get_status() !== 'pending' && !BeforeOrderStatusChange::validatePaymentAction(
@@ -165,35 +165,34 @@ class Status
     /**
      * Gets "failed" or "cancelled" based on task completion status.
      *
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
      * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
      */
     private static function getFailedOrCancelled(Payment $payment, WC_Order $order): string
     {
-        $taskStatusDetails = Repository::getTaskStatusDetails(
-            paymentId: $payment->id
-        );
-        $defaultStatus = $taskStatusDetails->completed ? 'failed' : 'cancelled';
+        try {
+            $taskStatusDetails = Repository::getTaskStatusDetails(
+                paymentId: $payment->id
+            );
+            $defaultStatus = $taskStatusDetails->completed
+                ? 'failed'
+                : 'cancelled';
 
-        // By default, we always return the expected status from the task status details.
-        // However, we allow filtering of the status to be returned if modifications are required by someone else.
-        // In this case, we are forwarding the default status, the task status details, the payment, and the order.
-        // Note: For $taskStatusDetails, the point of interest here is the "complete" value.
-        return apply_filters(
-            'resurs_payment_task_status',
-            $defaultStatus,
-            $taskStatusDetails,
-            $payment,
-            $order
-        ) ?? $defaultStatus;
+            // By default, we always return the expected status from the task status details.
+            // However, we allow filtering of the status to be returned if modifications are required by someone else.
+            // In this case, we are forwarding the default status, the task status details, the payment, and the order.
+            // Note: For $taskStatusDetails, the point of interest here is the "complete" value.
+            $returnStatus = apply_filters(
+                'resurs_payment_task_status',
+                $defaultStatus,
+                $taskStatusDetails,
+                $payment,
+                $order
+            ) ?? $defaultStatus;
+        } catch (Throwable $e) {
+            $returnStatus = 'failed';
+            Config::getLogger()->error(message: $e);
+        }
+
+        return $returnStatus;
     }
 }
