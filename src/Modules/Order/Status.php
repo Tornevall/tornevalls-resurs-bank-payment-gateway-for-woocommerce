@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Order;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -28,6 +29,7 @@ use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
+use Throwable;
 use WC_Order;
 
 /**
@@ -64,7 +66,10 @@ class Status
 
         if (
             $order->get_status() !== 'pending' && !BeforeOrderStatusChange::validatePaymentAction(
-                status: self::orderStatusFromPaymentStatus(payment: $payment),
+                status: self::orderStatusFromPaymentStatus(
+                    payment: $payment,
+                    order: $order
+                ),
                 order: $order
             )
         ) {
@@ -101,12 +106,13 @@ class Status
      * @throws ReflectionException
      * @throws ValidationException
      */
-    public static function orderStatusFromPaymentStatus(Payment $payment): string
+    public static function orderStatusFromPaymentStatus(Payment $payment, WC_Order $order): string
     {
         return match ($payment->status) {
             PaymentStatus::ACCEPTED => 'processing',
             PaymentStatus::REJECTED => self::getFailedOrCancelled(
-                payment: $payment
+                payment: $payment,
+                order: $order
             ),
             default => 'on-hold'
         };
@@ -131,7 +137,7 @@ class Status
         Payment $payment,
         WC_Order $order
     ): void {
-        $status = self::getFailedOrCancelled(payment: $payment);
+        $status = self::getFailedOrCancelled(payment: $payment, order: $order);
         $orderStatus = $order->get_status();
 
         // If Resurs status of the payment is set to cancellation and
@@ -159,22 +165,34 @@ class Status
     /**
      * Gets "failed" or "cancelled" based on task completion status.
      *
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
      * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
      */
-    private static function getFailedOrCancelled(Payment $payment): string
+    private static function getFailedOrCancelled(Payment $payment, WC_Order $order): string
     {
-        return Repository::getTaskStatusDetails(
-            paymentId: $payment->id
-        )->completed ? 'failed' : 'cancelled';
+        try {
+            $taskStatusDetails = Repository::getTaskStatusDetails(
+                paymentId: $payment->id
+            );
+            $defaultStatus = $taskStatusDetails->completed
+                ? 'failed'
+                : 'cancelled';
+
+            // By default, we always return the expected status from the task status details.
+            // However, we allow filtering of the status to be returned if modifications are required by someone else.
+            // In this case, we are forwarding the default status, the task status details, the payment, and the order.
+            // Note: For $taskStatusDetails, the point of interest here is the "complete" value.
+            $returnStatus = apply_filters(
+                'resurs_payment_task_status',
+                $defaultStatus,
+                $taskStatusDetails,
+                $payment,
+                $order
+            ) ?? $defaultStatus;
+        } catch (Throwable $e) {
+            $returnStatus = $defaultStatus ?? 'failed';
+            Config::getLogger()->error(message: $e);
+        }
+
+        return $returnStatus;
     }
 }
