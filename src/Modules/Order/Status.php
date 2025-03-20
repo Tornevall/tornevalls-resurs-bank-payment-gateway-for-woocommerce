@@ -62,9 +62,14 @@ class Status
             paymentId: Metadata::getPaymentId(order: $order)
         );
 
+        self::getFailedOrCancelled(payment: $payment, order: $order);
+
         if (
             $order->get_status() !== 'pending' && !BeforeOrderStatusChange::validatePaymentAction(
-                status: self::orderStatusFromPaymentStatus(payment: $payment),
+                status: self::orderStatusFromPaymentStatus(
+                    payment: $payment,
+                    order: $order
+                ),
                 order: $order
             )
         ) {
@@ -101,12 +106,13 @@ class Status
      * @throws ReflectionException
      * @throws ValidationException
      */
-    public static function orderStatusFromPaymentStatus(Payment $payment): string
+    public static function orderStatusFromPaymentStatus(Payment $payment, WC_Order $order): string
     {
         return match ($payment->status) {
             PaymentStatus::ACCEPTED => 'processing',
             PaymentStatus::REJECTED => self::getFailedOrCancelled(
-                payment: $payment
+                payment: $payment,
+                order: $order
             ),
             default => 'on-hold'
         };
@@ -131,7 +137,7 @@ class Status
         Payment $payment,
         WC_Order $order
     ): void {
-        $status = self::getFailedOrCancelled(payment: $payment);
+        $status = self::getFailedOrCancelled(payment: $payment, order: $order);
         $orderStatus = $order->get_status();
 
         // If Resurs status of the payment is set to cancellation and
@@ -171,10 +177,23 @@ class Status
      * @throws ReflectionException
      * @throws ValidationException
      */
-    private static function getFailedOrCancelled(Payment $payment): string
+    private static function getFailedOrCancelled(Payment $payment, WC_Order $order): string
     {
-        return Repository::getTaskStatusDetails(
+        $taskStatusDetails = Repository::getTaskStatusDetails(
             paymentId: $payment->id
-        )->completed ? 'failed' : 'cancelled';
+        );
+        $defaultStatus = $taskStatusDetails->completed ? 'failed' : 'cancelled';
+
+        // By default, we always return the expected status from the task status details.
+        // However, we allow filtering of the status to be returned if modifications are required by someone else.
+        // In this case, we are forwarding the default status, the task status details, the payment, and the order.
+        // Note: For $taskStatusDetails, the point of interest here is the "complete" value.
+        return apply_filters(
+            'resurs_payment_task_status',
+            $defaultStatus,
+            $taskStatusDetails,
+            $payment,
+            $order
+        ) ?? $defaultStatus;
     }
 }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Woocommerce\Database\Options\Advanced\CancelledStatusHandling;
+use Resursbank\Woocommerce\Database\Options\Advanced\FailedStatusHandling;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
@@ -48,5 +50,31 @@ class Shared
         Gateway::init();
         Callback::init();
         GetAddress::init();
+        self::registerStatusFilters();
+    }
+
+    /**
+     * Registers filters related to payment status handling.
+     */
+    private static function registerStatusFilters(): void
+    {
+        add_filter(
+            'resurs_payment_task_status',
+            static function (string $status, $taskStatusDetails): string {
+                $failedHandling = FailedStatusHandling::getData();
+                $cancelledHandling = CancelledStatusHandling::getData();
+
+                // Check the task status details and determine the status.
+                if ($taskStatusDetails->completed) {
+                    // If completed, use the configured failed handling.
+                    return $failedHandling;
+                }
+
+                // If not completed, use the configured cancelled handling.
+                return $cancelledHandling;
+            },
+            10,
+            4
+        );
     }
 }
