@@ -189,7 +189,7 @@ class Status
                 $order
             ) ?? $defaultStatus;
         } catch (Throwable $e) {
-            $returnStatus = 'failed';
+            $returnStatus = $defaultStatus ?? 'failed';
             Config::getLogger()->error(message: $e);
         }
 
