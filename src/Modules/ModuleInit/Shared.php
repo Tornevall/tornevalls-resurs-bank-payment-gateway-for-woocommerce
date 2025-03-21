@@ -70,16 +70,19 @@ class Shared
                 $failedHandling = FailedStatusHandling::getData();
                 $cancelledHandling = CancelledStatusHandling::getData();
 
+                // Set failed or cancelled on an order depending on the rejected reason.
+                // If it is unknown, we may want to always cancel the order.
                 return match ($payment->rejectedReason->category ?? null) {
-                    RejectedReasonCategory::UNKNOWN => $failedHandling,
-                    RejectedReasonCategory::TECHNICAL_ERROR => $failedHandling,
-                    RejectedReasonCategory::CREDIT_DENIED => $cancelledHandling,
-                    RejectedReasonCategory::PAYMENT_FROZEN => $failedHandling,
-                    RejectedReasonCategory::TIMEOUT => $failedHandling,
-                    RejectedReasonCategory::ABORTED_BY_CUSTOMER => $cancelledHandling,
+                    RejectedReasonCategory::UNKNOWN,
+                    RejectedReasonCategory::TECHNICAL_ERROR,
+                    RejectedReasonCategory::PAYMENT_FROZEN,
+                    RejectedReasonCategory::TIMEOUT,
                     RejectedReasonCategory::INSUFFICIENT_FUNDS => $failedHandling,
+
+                    RejectedReasonCategory::CREDIT_DENIED,
+                    RejectedReasonCategory::ABORTED_BY_CUSTOMER,
                     RejectedReasonCategory::CANCELED => $cancelledHandling,
-                    default => $cancelledHandling, // Default if an unknown category appears.
+                    default => $cancelledHandling,
                 };
             },
             10,
