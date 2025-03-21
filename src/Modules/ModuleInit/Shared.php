@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Module\Payment\Enum\RejectedReasonCategory;
 use Resursbank\Woocommerce\Database\Options\Advanced\CancelledStatusHandling;
 use Resursbank\Woocommerce\Database\Options\Advanced\FailedStatusHandling;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
@@ -18,6 +20,7 @@ use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
+use WC_Order;
 
 /**
  * Module initialization class for functionality shared between both the frontend and wp-admin.
@@ -63,18 +66,21 @@ class Shared
         // correct, before trigging further actions. This filter should be used with caution.
         add_filter(
             'resurs_payment_task_status',
-            static function (string $status, $taskStatusDetails): string {
+            static function (string $status, $taskStatusDetails, Payment $payment, WC_Order $order): string {
                 $failedHandling = FailedStatusHandling::getData();
                 $cancelledHandling = CancelledStatusHandling::getData();
 
-                // Check the task status details and determine the status.
-                if ($taskStatusDetails->completed) {
-                    // If completed, use the configured failed handling.
-                    return $failedHandling;
-                }
-
-                // If not completed, use the configured cancelled handling.
-                return $cancelledHandling;
+                return match ($payment->rejectedReason->category ?? null) {
+                    RejectedReasonCategory::UNKNOWN => $failedHandling,
+                    RejectedReasonCategory::TECHNICAL_ERROR => $failedHandling,
+                    RejectedReasonCategory::CREDIT_DENIED => $cancelledHandling,
+                    RejectedReasonCategory::PAYMENT_FROZEN => $failedHandling,
+                    RejectedReasonCategory::TIMEOUT => $failedHandling,
+                    RejectedReasonCategory::ABORTED_BY_CUSTOMER => $cancelledHandling,
+                    RejectedReasonCategory::INSUFFICIENT_FUNDS => $failedHandling,
+                    RejectedReasonCategory::CANCELED => $cancelledHandling,
+                    default => $cancelledHandling, // Default if an unknown category appears.
+                };
             },
             10,
             4
