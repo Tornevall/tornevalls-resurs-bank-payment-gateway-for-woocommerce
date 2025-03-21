@@ -123,9 +123,8 @@ class AssetLoader
     public static function enqueueReadMoreStyle(): void
     {
         try {
-            $readMoreCss = WooCommerce::validateAndUpdatePartPaymentMethod()
-                ? PartPayment::getReadMoreWidget()->css
-                : '';
+            WooCommerce::validateAndUpdatePartPaymentMethod();
+            $readMoreCss = PartPayment::getReadMoreWidget()->css ?? '';
         } catch (Throwable $error) {
             Log::error(error: $error);
             $readMoreCss = '';
