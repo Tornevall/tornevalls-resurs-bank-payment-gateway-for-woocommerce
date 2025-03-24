@@ -10,9 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Module\Payment\Enum\RejectedReasonCategory;
-use Resursbank\Woocommerce\Database\Options\Advanced\CancelledStatusHandling;
-use Resursbank\Woocommerce\Database\Options\Advanced\FailedStatusHandling;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
@@ -63,28 +60,10 @@ class Shared
     {
         // This filter handles a maximum of 4 arguments, but since we only use this internally, we onlu use two of
         // them. Creating own filters, however may require all 4 arguments to make sure payment and order data is
-        // correct, before trigging further actions. This filter should be used with caution.
+        // correct, before triggering further actions. This filter should be used with caution.
         add_filter(
             'resurs_payment_task_status',
-            static function (string $status, $taskStatusDetails, Payment $payment, WC_Order $order): string {
-                $failedHandling = FailedStatusHandling::getData();
-                $cancelledHandling = CancelledStatusHandling::getData();
-
-                // Set failed or cancelled on an order depending on the rejected reason.
-                // If it is unknown, we may want to always cancel the order.
-                return match ($payment->rejectedReason->category ?? null) {
-                    RejectedReasonCategory::UNKNOWN,
-                    RejectedReasonCategory::TECHNICAL_ERROR,
-                    RejectedReasonCategory::PAYMENT_FROZEN,
-                    RejectedReasonCategory::TIMEOUT,
-                    RejectedReasonCategory::INSUFFICIENT_FUNDS => $failedHandling,
-
-                    RejectedReasonCategory::CREDIT_DENIED,
-                    RejectedReasonCategory::ABORTED_BY_CUSTOMER,
-                    RejectedReasonCategory::CANCELED => $cancelledHandling,
-                    default => $cancelledHandling,
-                };
-            },
+            static fn (string $status, $taskStatusDetails, Payment $payment, WC_Order $order): string => 'cancelled',
             10,
             4
         );

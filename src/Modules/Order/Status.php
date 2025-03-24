@@ -94,17 +94,7 @@ class Status
     /**
      * Translates a Resurs payment status to a WooCommerce order status string.
      *
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
      * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
      */
     public static function orderStatusFromPaymentStatus(Payment $payment, WC_Order $order): string
     {
@@ -121,17 +111,7 @@ class Status
     /**
      * Update WC_Order status based on reason for payment rejection.
      *
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
      * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
      */
     private static function updateRejected(
         Payment $payment,
