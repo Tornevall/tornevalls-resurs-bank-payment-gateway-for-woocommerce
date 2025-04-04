@@ -50,11 +50,14 @@ class Shared
         Gateway::init();
         Callback::init();
         GetAddress::init();
-        self::registerStatusFilters();
+        //self::registerStatusFilters();
     }
 
     /**
      * Registers filters related to payment status handling.
+     * Not in use - for the moment.
+     *
+     * @todo Currently not in use. Should be used to handle payment status changes on future decision.
      */
     private static function registerStatusFilters(): void
     {

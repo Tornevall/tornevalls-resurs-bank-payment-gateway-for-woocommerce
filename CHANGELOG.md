@@ -1,3 +1,11 @@
+# 1.2.9
+
+* [WOO-1439](https://resursbankplugins.atlassian.net/browse/WOO-1439) Fix PHP warnings and notices in relation to resolving WC informaion
+
+# 1.2.8
+
+-
+
 # 1.2.7
 
 * No changes in the plugin, but in the ecom library for where the part payment information has been further compacted.

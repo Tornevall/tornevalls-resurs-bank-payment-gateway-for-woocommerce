@@ -7,7 +7,7 @@
  * WC requires at least: 7.6.0
  * Plugin requires ecom: 3.2.8
  * Requires PHP: 8.1
- * Version: 1.2.8
+ * Version: 1.2.9
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
@@ -99,6 +99,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
             message: 'Resurs Bank: ' . $e->getMessage()
         );
     }
+
     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     add_action(
         'before_woocommerce_init',
