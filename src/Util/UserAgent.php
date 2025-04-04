@@ -49,14 +49,33 @@ class UserAgent
     }
 
     /**
-     * Simplified method to fetch WooCommerce version from the current plugin data.
+     * Resolve version of WooCommerce.
+     *
+     * Note that we cannot use get_plugin_data() because that function depends
+     * on WP functionality not yet loaded when we need to resolve this value.
+     * This is because we need this data when we initialize Ecom, which we do as
+     * early as possible. If you attempt to use get_plugin_data() you will get a
+     * PHP notice.
      */
     public static function getWooCommerceVersion(): string
     {
-        return self::getVersionFromPluginData(
-            pluginMatch: 'WooCommerce',
-            pluginData: self::getWooCommerceInformation()
-        );
+        $plugin_file = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
+
+        // Check if the file exists.
+        if (!file_exists($plugin_file)) {
+            return '';
+        }
+
+        // Read the file contents.
+        $file_contents = file_get_contents($plugin_file);
+
+        // Use a regular expression to extract the version information.
+        if (preg_match('/Version:\s*(\S+)/', $file_contents, $matches)) {
+            return $matches[1];
+        }
+
+        // Return default value.
+        return 'Unknown';
     }
 
     /**
@@ -75,36 +94,6 @@ class UserAgent
         }
 
         return $return;
-    }
-
-    /**
-     * Fetch WooCommerce version information via the available plugin.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    private static function getWooCommerceInformation(): array
-    {
-        $return = [];
-
-        if (!function_exists(function: 'get_plugin_data')) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-
-        $pluginList = wp_get_active_and_valid_plugins();
-
-        foreach ($pluginList as $pluginInit) {
-            if (
-                dirname(
-                    path: plugin_basename($pluginInit)
-                ) !== 'woocommerce'
-            ) {
-                continue;
-            }
-
-            $return = get_plugin_data($pluginInit);
-        }
-
-        return is_array(value: $return) ? $return : [];
     }
 
     /**

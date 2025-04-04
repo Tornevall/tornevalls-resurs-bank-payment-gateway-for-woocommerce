@@ -67,6 +67,9 @@ class WooCommerce
     /**
      * Trying to determine if the checkout is using blocks or not.
      *
+     * NOTE: This function also checks whether the current page is the checkout
+     * page.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function isUsingBlocksCheckout(): bool
