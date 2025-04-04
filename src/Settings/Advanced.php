@@ -13,10 +13,8 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
 use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
-use Resursbank\Woocommerce\Database\Options\Advanced\CancelledStatusHandling;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
-use Resursbank\Woocommerce\Database\Options\Advanced\FailedStatusHandling;
 use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
@@ -59,8 +57,6 @@ class Advanced
                 'cache_enabled' => self::getCacheEnabled(),
                 'invalidate_cache' => self::getInvalidateCacheButton(),
                 'get_address_enabled' => self::getGetAddressEnabled(),
-                'failed_task_status_handling' => self::getFailedStatusHandling(),
-                'cancelled_task_status_handling' => self::getCancelledStatusHandling(),
                 'force_payment_method_sort_order' => self::getForcePaymentMethodSortOrder(),
                 'set_method_country_restriction' => self::setMethodCountryRestriction(),
                 'api_timeout' => self::getApiTimeout(),
@@ -73,48 +69,6 @@ class Advanced
         }
 
         return $return;
-    }
-
-    /**
-     * Retrieve the setting for failed status handling.
-     */
-    private static function getFailedStatusHandling(): array
-    {
-        return [
-            'id' => FailedStatusHandling::getName(),
-            'type' => 'select',
-            'title' => 'Failed Status Handling',
-            'desc' => __(
-                'Defines how rejected payments are handled if the task status flag completed is true (usually when signing/authentication fails).'
-            ),
-            'desc_tip' => 'Default: failed (do not touch this unless you know what you are doing)',
-            'default' => 'failed',
-            'options' => [
-                'failed' => 'Failed',
-                'cancelled' => 'Cancelled'
-            ]
-        ];
-    }
-
-    /**
-     * Retrieve the setting for cancelled status handling.
-     */
-    private static function getCancelledStatusHandling(): array
-    {
-        return [
-            'id' => CancelledStatusHandling::getName(),
-            'type' => 'select',
-            'title' => 'Cancelled Status Handling',
-            'desc' => __(
-                'Defines how rejected payments are handled if the task status flag completed are false (credit assessment fails).'
-            ),
-            'desc_tip' => 'Default: cancelled (do not touch this unless you know what you are doing)',
-            'default' => 'cancelled',
-            'options' => [
-                'failed' => 'Failed',
-                'cancelled' => 'Cancelled'
-            ]
-        ];
     }
 
     /**
