@@ -1,3 +1,7 @@
+# 1.2.10
+
+Readme update for WP 6.8.
+
 # 1.2.9
 
 * [WOO-1439](https://resursbankplugins.atlassian.net/browse/WOO-1439) Fix PHP warnings and notices in relation to resolving WC informaion

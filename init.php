@@ -18,7 +18,7 @@
  * @noinspection PhpDefineCanBeReplacedWithConstInspection
  */
 
-// Welcome to WordPress. SideEffects can not be handled properly while the init looks like this.
+// Welcome to WordPress. SideEffects cannot be handled properly while the init looks like this.
 // Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
 

@@ -60,6 +60,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 [See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
+# 1.2.10
+
+Readme update for WP 6.8.
+
 # 1.2.9
 
 * [WOO-1439](https://resursbankplugins.atlassian.net/browse/WOO-1439) Fix PHP warnings and notices in relation to resolving WC informaion
