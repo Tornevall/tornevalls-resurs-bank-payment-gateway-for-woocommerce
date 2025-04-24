@@ -9,13 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Database\Options\PartPayment;
 
-use Resursbank\Woocommerce\Database\DataType\StringOption;
+use Resursbank\Woocommerce\Database\DataType\IntOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_part_payment_period value in options table.
  */
-class Period extends StringOption implements OptionInterface
+class Period extends IntOption implements OptionInterface
 {
     /**
      * @inheritdoc
