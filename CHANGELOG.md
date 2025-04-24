@@ -4,7 +4,7 @@ Readme update for WP 6.8.
 
 # 1.2.7 - 1.2.9
 
-* WOO-1439 Fix PHP warnings and notices in relation to resolving WC informaion
+* WOO-1439 Fix PHP warnings and notices in relation to resolving WC information
 * No changes in the plugin, but in the ecom library for where the part payment information has been further compacted.
 
 # 1.2.6
