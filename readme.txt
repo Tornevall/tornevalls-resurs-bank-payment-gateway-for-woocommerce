@@ -8,7 +8,7 @@ WC requires at least: 7.6.0
 WC Tested up to: 9.8.2
 Plugin requires ecom: 3.2.9
 Requires Plugins: woocommerce
-Stable tag: 1.2.10
+Stable tag: 1.2.12
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -58,7 +58,15 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 == Changelog ==
 
-See full changelog here.
+See the full changelog here.
+
+# 1.2.12
+
+WOO-1452 Period is reset each time config enters get-store-country
+
+# 1.2.11
+
+* WOO-1454 Critical akamai hotfix, enforcing ecom to resolve on IPv4.
 
 # 1.2.10
 
