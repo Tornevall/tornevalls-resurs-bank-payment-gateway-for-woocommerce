@@ -31,7 +31,6 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Throwable;
 use WP_Post;
-
 use function in_array;
 
 /**
@@ -80,13 +79,14 @@ class WooCommerce
 
         // Special legacy vs blocks control
         if ($wp_query !== null && function_exists('get_queried_object')) {
+            $objectId = function_exists('get_queried_object_id') ? get_queried_object_id() : 0;
             $post = get_queried_object();
-            $currentPostID = (int)($post instanceof WP_Post ? $post->ID : 0);
+            $currentPostID = (int)($post instanceof WP_Post ? $post->ID : $objectId);
 
             // We usually check if the page contains WC blocks, but if we are on the checkout page,
             // but in legacy, we should check blocks based on the post id instead of the preconfigured
-            // template.
-            if ($currentPostID !== $blocksCheckoutPageId) {
+            // template. For WP 6.8 this check may be broken, but seems to work in versions over 6.8.
+            if ($currentPostID !== $blocksCheckoutPageId && $currentPostID > 0) {
                 return has_block('woocommerce/checkout', $currentPostID);
             }
         }
@@ -94,7 +94,6 @@ class WooCommerce
         if ($blocksCheckoutPageId === 0) {
             return false;
         }
-
         return has_block('woocommerce/checkout', $blocksCheckoutPageId);
     }
 
@@ -113,7 +112,7 @@ class WooCommerce
     {
         return preg_replace(
             pattern: '/\n\s*\n/m',
-            replacement: " ",
+            replacement: ' ',
             subject: $content
         );
     }
