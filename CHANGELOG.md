@@ -1,3 +1,11 @@
+# 1.2.12
+
+WOO-1452 Period is reset each time config enters get-store-country
+
+# 1.2.11
+
+* WOO-1454 Critical akamai hotfix, enforcing ecom to resolve on IPv4.
+
 # 1.2.10
 
 Readme update for WP 6.8.

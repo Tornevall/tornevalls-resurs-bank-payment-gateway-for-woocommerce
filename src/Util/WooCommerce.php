@@ -301,7 +301,19 @@ class WooCommerce
             return;
         }
 
+        $currentPaymentMethod = PaymentMethod::getData();
+
+        // Only switch this if changes has been made.
+        if ($currentPaymentMethod === $paymentMethodId) {
+            return;
+        }
+
         update_option(PaymentMethod::getName(), $paymentMethodId);
+
+        if (Period::getData()) {
+            return;
+        }
+
         update_option(Period::getName(), $longestPeriod);
     }
 
