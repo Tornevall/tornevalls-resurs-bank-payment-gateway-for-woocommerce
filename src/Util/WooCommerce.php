@@ -85,7 +85,10 @@ class WooCommerce
 
             // We usually check if the page contains WC blocks, but if we are on the checkout page,
             // but in legacy, we should check blocks based on the post id instead of the preconfigured
-            // template. For WP 6.8 this check may be broken.
+            // template.
+            // For WP 6.8 this check breaks on special occasions where the current post id remains 0.
+            // If that happens, we should go on, just looking at the default blocks page id, because if it
+            // exists, this is the best option for us to use.
             if ($currentPostID !== $blocksCheckoutPageId && $currentPostID > 0) {
                 return has_block('woocommerce/checkout', $currentPostID);
             }
