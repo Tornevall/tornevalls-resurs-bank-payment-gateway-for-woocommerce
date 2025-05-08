@@ -87,6 +87,7 @@ class UserAgent
             $return = implode(separator: ' +', array: [
                 'WooCommerce-' . self::getWooCommerceVersion(),
                 'Resurs-' . self::getPluginVersion(),
+                'WordPress-' . get_bloginfo('version')
             ]);
         } catch (Throwable) {
             // Fail silently, but with at least a source indicator.
