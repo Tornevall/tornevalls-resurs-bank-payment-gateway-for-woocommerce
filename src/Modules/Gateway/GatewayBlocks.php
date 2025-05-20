@@ -36,6 +36,9 @@ use Throwable;
  */
 final class GatewayBlocks extends AbstractPaymentMethodType
 {
+    // phpcs:ignore
+    private static bool $blocksScriptEnqueued;
+
     /** @inheritdoc */ // phpcs:ignore
     protected $name = 'resursbank';
 
@@ -119,15 +122,20 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     /**
      * Register JavaScript code for our gateway.
      *
-     * @return array<string>
+     * @return array
      * @throws EmptyValueException
      * @throws FilesystemException
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function get_payment_method_script_handles(): array
     {
+        if (isset(self::$blocksScriptEnqueued) && self::$blocksScriptEnqueued) {
+            return ['rb-wc-blocks-js'];
+        }
+
         wp_register_script(
             'rb-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
@@ -138,7 +146,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         );
 
         wp_script_add_data('rb-wc-blocks-js', 'type', 'module');
-
+        self::$blocksScriptEnqueued = true;
         return ['rb-wc-blocks-js'];
     }
 

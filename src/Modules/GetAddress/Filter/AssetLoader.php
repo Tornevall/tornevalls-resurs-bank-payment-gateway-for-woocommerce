@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
-use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
@@ -43,11 +42,9 @@ class AssetLoader
      * @throws FilesystemException
      * @throws HttpException
      * @throws IllegalValueException
-     * @throws ConfigException
      */
     public static function init(): void
     {
-        // Things that has to be loaded regardless.
         self::enqueueCostListStyle();
         self::enqueueCostListJs();
         self::enqueuePartPaymentStyles();
@@ -93,6 +90,10 @@ class AssetLoader
         wp_add_inline_script('rb-costlist-js', $costListJs);
     }
 
+    /**
+     * Part payment widget styles.
+     * @return void
+     */
     public static function enqueuePartPaymentStyles(): void
     {
         try {
@@ -217,6 +218,9 @@ class AssetLoader
      */
     public static function enqueueGetAddressJs(): void
     {
+        if (wp_script_is('rb-get-address', 'enqueued')) {
+            return;
+        }
         wp_enqueue_script(
             'rb-get-address',
             Url::getAssetUrl(file: 'update-address.js'),
