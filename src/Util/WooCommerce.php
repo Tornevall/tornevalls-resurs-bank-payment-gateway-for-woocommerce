@@ -80,12 +80,23 @@ class WooCommerce
 
         // Special legacy vs blocks control
         if ($wp_query !== null && function_exists('get_queried_object')) {
+            $objectId = function_exists('get_queried_object_id')
+                ? get_queried_object_id()
+                : 0;
             $post = get_queried_object();
-            $currentPostID = (int)($post instanceof WP_Post ? $post->ID : 0);
+            $currentPostID = (int)($post instanceof WP_Post ? $post->ID : $objectId);
 
             // We usually check if the page contains WC blocks, but if we are on the checkout page,
             // but in legacy, we should check blocks based on the post id instead of the preconfigured
             // template.
+            //
+            // For WP 6.8 this check breaks on special occasions where the current post id remains 0.
+            // We should, however, avoid changing the business logic for this method and proceed as usual
+            // if this happens.
+            //
+            // See https://resursbankplugins.atlassian.net/browse/WOO-1455 for the issue where this was first
+            // discovered.
+            // Issue should be solved in the address handling segment instead.
             if ($currentPostID !== $blocksCheckoutPageId) {
                 return has_block('woocommerce/checkout', $currentPostID);
             }
@@ -113,7 +124,7 @@ class WooCommerce
     {
         return preg_replace(
             pattern: '/\n\s*\n/m',
-            replacement: " ",
+            replacement: ' ',
             subject: $content
         );
     }

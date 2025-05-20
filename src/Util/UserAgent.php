@@ -101,7 +101,6 @@ class UserAgent
      * Extract data from plugin registry naturally but validated.
      *
      * @param string $pluginMatch Case-sensitive matching.
-     * @noinspection PhpSameParameterValueInspection
      */
     private static function getVersionFromPluginData(string $pluginMatch, array $pluginData): string
     {
