@@ -21,6 +21,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
@@ -79,8 +80,8 @@ class Gateway
             // Check if there's an object to handle instead of an instance of
             // WC_Payment_Gateways, as the Gateway may execute before other
             // initializations before WC. We also want to make sure that
-            // there are gateways available. This validation prevents someone
-            // handing over broken data.
+            // there are gateways available. This validation prevents that
+            // someone is handing over broken data.
             if (!is_object(value: $wcPaymentGateways) ||
                 !property_exists(object_or_class: $wcPaymentGateways, property: 'payment_gateways') ||
                 !is_array(value: $wcPaymentGateways->payment_gateways) ||
@@ -213,7 +214,7 @@ class Gateway
     }
 
     /**
-     * Add Resurs Bank payment methods to the list of available methods in checkout.
+     * Add Resurs Bank payment methods to list of available methods in checkout.
      *
      * @param mixed $gateways Preferably an array with gateways but given as a mixed from WP/WC.
      * @param bool $validateAvailable Ignored during normal filters. Use from a secondary will skip some validations.
@@ -260,8 +261,8 @@ class Gateway
             //}
         }
 
-        // Add the default method to payment gateways.
-        // Will only be reflected on gateway page, see \Resursbank\Woocommerce\Modules\Gateway\Resursbank::is_available
+        // Add default method to payment gateways. Will only be reflected on
+        // gateway page, see \Resursbank\Woocommerce\Modules\Gateway\Resursbank::is_available
         $gateways[] = Resursbank::class;
 
         return $gateways;

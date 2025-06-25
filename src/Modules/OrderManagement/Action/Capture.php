@@ -59,7 +59,6 @@ class Capture extends Action
                 }
 
                 if (!$payment->canCapture()) {
-                    $order->add_order_note(Translator::translate('payment-not-ready-to-be-captured'));
                     return;
                 }
 

@@ -87,7 +87,6 @@ class UserAgent
             $return = implode(separator: ' +', array: [
                 'WooCommerce-' . self::getWooCommerceVersion(),
                 'Resurs-' . self::getPluginVersion(),
-                'WordPress-' . get_bloginfo('version')
             ]);
         } catch (Throwable) {
             // Fail silently, but with at least a source indicator.
@@ -101,6 +100,7 @@ class UserAgent
      * Extract data from plugin registry naturally but validated.
      *
      * @param string $pluginMatch Case-sensitive matching.
+     * @noinspection PhpSameParameterValueInspection
      */
     private static function getVersionFromPluginData(string $pluginMatch, array $pluginData): string
     {

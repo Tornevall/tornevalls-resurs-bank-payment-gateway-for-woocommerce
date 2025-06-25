@@ -57,7 +57,6 @@ class Shared
      * Registers filters related to payment status handling.
      * Not in use - for the moment.
      *
-     * @noinspection PhpUnusedPrivateMethodInspection
      * @todo Currently not in use. Should be used to handle payment status changes on future decision.
      */
     private static function registerStatusFilters(): void

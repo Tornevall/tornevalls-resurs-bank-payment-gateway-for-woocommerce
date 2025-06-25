@@ -95,50 +95,41 @@ class Customer
      */
     public static function useAddressForBilling(WC_Order $order): bool
     {
-        /*
-         * If the order was created via Store API (used by the new checkout blocks),
-         * the traditional 'ship_to_different_address' POST flag is not present.
-         * In this case, we must infer intent by comparing billing and shipping addresses.
-         */
-        if ($order->is_created_via('store-api')) {
-            $shippingAddress = $order->get_address('shipping');
-            $billingAddress = $order->get_address();
-
-            $compareFields = [
-                'first_name',
-                'last_name',
-                'company',
-                'address_1',
-                'address_2',
-                'city',
-                'state',
-                'postcode',
-                'country',
-                'phone',
-                'email'
-            ];
-
-            // When use-address-for-billing is true, this is not shown in the blocks request. Neither if it is unchecked.
-            // We infer billing and shipping are identical when it is checked.
-            // If use-address-for-billing is false, no assumption can be made.
-            // In this case, we must detect changes to see if the addresses differ.
-            foreach ($compareFields as $field) {
-                if (
-                    isset($shippingAddress[$field], $billingAddress[$field])
-                    && $shippingAddress[$field] !== $billingAddress[$field]
-                ) {
-                    return false;
-                }
-            }
-
-            return true;
+        if (!WooCommerce::isUsingBlocksCheckout()) {
+            return !isset($_POST['ship_to_different_address']);
         }
 
-        /*
-         * For classic checkout (non-block), rely on the legacy POST flag.
-         * If 'ship_to_different_address' is not set, assume shipping = billing.
-         */
-        return !isset($_POST['ship_to_different_address']);
+        $shippingAddress = $order->get_address('shipping');
+        $billingAddress = $order->get_address();
+
+        $compareFields = [
+            'first_name',
+            'last_name',
+            'company',
+            'address_1',
+            'address_2',
+            'city',
+            'state',
+            'postcode',
+            'country',
+            'phone',
+            'email'
+        ];
+
+        // When use-address-for-billing is true, this is not shown in the blocks request. Neither if it is unchecked.
+        // We infer billing and shipping are identical when it is checked.
+        // If use-address-for-billing is false, no assumption can be made.
+        // In this case, we must detect changes to see if the addresses differ.
+        foreach ($compareFields as $field) {
+            if (
+                isset($shippingAddress[$field], $billingAddress[$field])
+                && $shippingAddress[$field] !== $billingAddress[$field]
+            ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
