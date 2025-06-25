@@ -1,3 +1,0 @@
-1. Import Codestyle.xml from File -> Settings -> Code Style (click the cogwheel next to the Scheme selection box at the top of the window and chose Import Scheme at the bototm of the list).
-2. Import Inspection.xml from File -> Settings -> Inspections (same as above).
-3. Go to File -> Settings -> Directories and mark the tests/ directory as Test (green) to make sure insepections are properly separated.

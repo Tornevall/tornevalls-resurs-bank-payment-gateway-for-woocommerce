@@ -87,13 +87,6 @@ class Connection
                 $timeout = 30;
             }
 
-            // For internal usages (dashboard).
-            $useProxy = apply_filters('mapi_proxy', '') ?? '';
-
-            if (!is_string($useProxy)) {
-                $useProxy = '';
-            }
-
             Config::setup(
                 logger: self::getLogger(),
                 cache: self::getCache(),
@@ -104,8 +97,7 @@ class Connection
                 currencyFormat: Currency::getEcomCurrencyFormat(),
                 network: new Network(
                     timeout: $timeout,
-                    userAgent: UserAgent::getUserAgent(),
-                    proxy: $useProxy
+                    userAgent: UserAgent::getUserAgent()
                 ),
                 storeId: StoreId::getData()
             );

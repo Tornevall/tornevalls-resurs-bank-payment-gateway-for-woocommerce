@@ -8,7 +8,7 @@ WC requires at least: 7.6.0
 WC Tested up to: 9.8.2
 Plugin requires ecom: 3.2.9
 Requires Plugins: woocommerce
-Stable tag: 1.2.12
+Stable tag: 1.2.10
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -21,8 +21,8 @@ A payment is expected to be simple, secure and fast, regardless of whether it ta
 
 At checkout, your customer can choose between several flexible payment options, something that not only provides a better shopping experience but also generates more and larger purchases.
 
-Sign up for Resurs!
-Find out more in about the plugin in our documentation.
+[Sign up for Resurs](https://www.resursbank.se/betallosningar)!
+Find out more in about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/).
 
 = System Requirements =
 
@@ -30,7 +30,7 @@ Find out more in about the plugin in our documentation.
 * **Required**: WooCommerce: At least v7.6.0
 * **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
 * **Required**: CURL (php-curl) with **CURLAUTH_BEARER**.
-* Preferably the **latest** release of WordPress. See here for more information.
+* Preferably the **latest** release of WordPress. See [here](https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/) for more information.
 
 
 == Installation ==
@@ -47,7 +47,7 @@ Doing it manually? Look below.
 
 = Where can I get more information about this plugin? =
 
-Find out more about the plugin in our documentation.
+Find out more about the plugin [in our documentation](https://developers.resurs.com/platform-plugins/woocommerce/).
 
 = Can I upgrade from version 2.2.x? =
 
@@ -58,32 +58,31 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 == Changelog ==
 
-See the full changelog here.
-
-# 1.2.12
-
-WOO-1452 Period is reset each time config enters get-store-country
-
-# 1.2.11
-
-* WOO-1454 Critical akamai hotfix, enforcing ecom to resolve on IPv4.
+[See full changelog here](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md).
 
 # 1.2.10
 
 Readme update for WP 6.8.
 
-# 1.2.7 - 1.2.9
+# 1.2.9
 
-* WOO-1439 Fix PHP warnings and notices in relation to resolving WC informaion
+* [WOO-1439](https://resursbankplugins.atlassian.net/browse/WOO-1439) Fix PHP warnings and notices in relation to resolving WC informaion
+
+# 1.2.8
+
+-
+
+# 1.2.7
+
 * No changes in the plugin, but in the ecom library for where the part payment information has been further compacted.
 
 # 1.2.6
 
-* WOO-1434 Switching between stores may cause payment method desynch
+* [WOO-1434](https://resursbankplugins.atlassian.net/browse/WOO-1434) Switching between stores may cause payment method desynch
 
 # 1.2.5
 
-* WOO-1433 Performance issues in cart and checkout
+* [WOO-1433](https://resursbankplugins.atlassian.net/browse/WOO-1433) Performance issues in cart and checkout
 
 # 1.2.4
 
@@ -91,36 +90,36 @@ Readme update for WP 6.8.
 
 # 1.2.3
 
-* WOO-1428 Instead of doing all country checks in the plugin, we should take advantage of Location that was unreachable from Config::setup before
-* WOO-1422 Performance issues and bugs for costlist
-* WOO-1429 Changing stores does not necessarily mean we're clearing the entire cache
-* WOO-1431 Running Resurs plugin with WooCommerce disabled.
-* WOO-1432 Update ecom to show necessary values in cost-list
+* [WOO-1428](https://resursbankplugins.atlassian.net/browse/WOO-1428) Instead of doing all country checks in the plugin, we should take advantage of Location that was unreachable from Config::setup before
+* [WOO-1422](https://resursbankplugins.atlassian.net/browse/WOO-1422) Performance issues and bugs for costlist
+* [WOO-1429](https://resursbankplugins.atlassian.net/browse/WOO-1429) Changing stores does not necessarily mean we're clearing the entire cache
+* [WOO-1431](https://resursbankplugins.atlassian.net/browse/WOO-1431) Running Resurs plugin with WooCommerce disabled.
+* [WOO-1432](https://resursbankplugins.atlassian.net/browse/WOO-1432) Update ecom to show necessary values in cost-list
 
 # 1.2.2
 
-* WOO-1426 Unsupported themes makes widgets go nuts \(sometimes\)
-* WOO-1427 Country checks required in react
+* [WOO-1426](https://resursbankplugins.atlassian.net/browse/WOO-1426) Unsupported themes makes widgets go nuts \(sometimes\)
+* [WOO-1427](https://resursbankplugins.atlassian.net/browse/WOO-1427) Country checks required in react
 
 # 1.2.0 - 1.2.1
 
-* WOO-1418 Implement breaking changes for Part Payment widget
-* WOO-1420 Implementation of New Part Payment Widget and Warning Widget in Checkout – Compliance with New Legal Requirements
-* WOO-1423 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::getWidget
-* WOO-1424 Restructure css/js for legal requirements to not execute under partpayment scripthooks
-* WOO-1425 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::setCss
+* [WOO-1418](https://resursbankplugins.atlassian.net/browse/WOO-1418) Implement breaking changes for Part Payment widget
+* [WOO-1420](https://resursbankplugins.atlassian.net/browse/WOO-1420) Implementation of New Part Payment Widget and Warning Widget in Checkout – Compliance with New Legal Requirements
+* [WOO-1423](https://resursbankplugins.atlassian.net/browse/WOO-1423) \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::getWidget
+* [WOO-1424](https://resursbankplugins.atlassian.net/browse/WOO-1424) Restructure css/js for legal requirements to not execute under partpayment scripthooks
+* [WOO-1425](https://resursbankplugins.atlassian.net/browse/WOO-1425) \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::setCss
 
 # 1.2.0 - 1.2.1
 
-WOO-1418 Implement breaking changes for Part Payment widget
-WOO-1420 Implementation of New Part Payment Widget and Warning Widget in Checkout – Compliance with New Legal Requirements
-WOO-1423 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::getWidget
-WOO-1424 Restructure css/js for legal requirements to not execute under partpayment scripthooks
-WOO-1425 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::setCss
+[WOO-1418](https://resursbankplugins.atlassian.net/browse/WOO-1418) Implement breaking changes for Part Payment widget
+[WOO-1420](https://resursbankplugins.atlassian.net/browse/WOO-1420) Implementation of New Part Payment Widget and Warning Widget in Checkout – Compliance with New Legal Requirements
+[WOO-1423](https://resursbankplugins.atlassian.net/browse/WOO-1423) \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::getWidget
+[WOO-1424](https://resursbankplugins.atlassian.net/browse/WOO-1424) Restructure css/js for legal requirements to not execute under partpayment scripthooks
+[WOO-1425](https://resursbankplugins.atlassian.net/browse/WOO-1425) \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::setCss
 
 # 1.1.5
 
-* WOO-1417 ppw period resets to wrong value
+* [WOO-1417](https://resursbankplugins.atlassian.net/browse/WOO-1417) ppw period resets to wrong value
 
 == Upgrade Notice ==
 

@@ -28,7 +28,7 @@ abstract class IntOption extends Option
     }
 
     /**
-     * @return string|null To be compliant with OptionInterface contact (must be string).
+     * @return string|null To be compliant with OptionInterface contact.
      */
     public static function getDefault(): ?string
     {

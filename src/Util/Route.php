@@ -100,7 +100,7 @@ class Route
 
     /**
      * Route to get JSON response with store country (usually happens after a save for which that value is delayed
-     * until the page is reloaded).
+     * until page is reloaded).
      */
     public const ROUTE_GET_STORE_COUNTRY = 'get-store-country';
 
