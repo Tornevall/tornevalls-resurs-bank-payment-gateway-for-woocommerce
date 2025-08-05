@@ -58,69 +58,14 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 
 == Changelog ==
 
-See the full changelog here.
+[See the full changelog here.](https://bitbucket.org/resursbankplugins/resursbank-woocommerce/src/master/CHANGELOG.md)
+For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
+
+Latest changes:
 
 # 1.2.12
 
 WOO-1452 Period is reset each time config enters get-store-country
-
-# 1.2.11
-
-* WOO-1454 Critical akamai hotfix, enforcing ecom to resolve on IPv4.
-
-# 1.2.10
-
-Readme update for WP 6.8.
-
-# 1.2.7 - 1.2.9
-
-* WOO-1439 Fix PHP warnings and notices in relation to resolving WC informaion
-* No changes in the plugin, but in the ecom library for where the part payment information has been further compacted.
-
-# 1.2.6
-
-* WOO-1434 Switching between stores may cause payment method desynch
-
-# 1.2.5
-
-* WOO-1433 Performance issues in cart and checkout
-
-# 1.2.4
-
-* Finnish translation hotfix.
-
-# 1.2.3
-
-* WOO-1428 Instead of doing all country checks in the plugin, we should take advantage of Location that was unreachable from Config::setup before
-* WOO-1422 Performance issues and bugs for costlist
-* WOO-1429 Changing stores does not necessarily mean we're clearing the entire cache
-* WOO-1431 Running Resurs plugin with WooCommerce disabled.
-* WOO-1432 Update ecom to show necessary values in cost-list
-
-# 1.2.2
-
-* WOO-1426 Unsupported themes makes widgets go nuts \(sometimes\)
-* WOO-1427 Country checks required in react
-
-# 1.2.0 - 1.2.1
-
-* WOO-1418 Implement breaking changes for Part Payment widget
-* WOO-1420 Implementation of New Part Payment Widget and Warning Widget in Checkout – Compliance with New Legal Requirements
-* WOO-1423 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::getWidget
-* WOO-1424 Restructure css/js for legal requirements to not execute under partpayment scripthooks
-* WOO-1425 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::setCss
-
-# 1.2.0 - 1.2.1
-
-WOO-1418 Implement breaking changes for Part Payment widget
-WOO-1420 Implementation of New Part Payment Widget and Warning Widget in Checkout – Compliance with New Legal Requirements
-WOO-1423 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::getWidget
-WOO-1424 Restructure css/js for legal requirements to not execute under partpayment scripthooks
-WOO-1425 \\Resursbank\\Woocommerce\\Modules\\PartPayment\\PartPayment::setCss
-
-# 1.1.5
-
-* WOO-1417 ppw period resets to wrong value
 
 == Upgrade Notice ==
 
