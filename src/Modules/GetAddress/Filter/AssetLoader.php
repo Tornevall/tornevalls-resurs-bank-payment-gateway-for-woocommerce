@@ -143,7 +143,7 @@ class AssetLoader
      */
     public static function enqueueReadMoreJs(): void
     {
-        if (is_product()) {
+        if (is_product() && PartPayment::isEnabled()) {
             // Product page js.
             wp_register_script(
                 'rb-pp-readmore-js',
