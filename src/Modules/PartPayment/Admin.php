@@ -42,7 +42,7 @@ class Admin
             methodElementId: 'resursbank_part_payment_payment_method',
             periodElementId: 'resursbank_part_payment_period',
             selectedPaymentMethod: PartPaymentMethodOption::getData(),
-            selectedPeriod: Period::getData()
+            selectedPeriod: (int)Period::getData()
         );
 
         /** @noinspection BadExceptionsProcessingInspection */

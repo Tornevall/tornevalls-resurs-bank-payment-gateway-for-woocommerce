@@ -306,7 +306,7 @@ class PartPayment
     /**
      * Indicates whether widget should be visible or not.
      */
-    private static function isEnabled(): bool
+    public static function isEnabled(): bool
     {
         try {
             // Enabled if there is a product and a price.
