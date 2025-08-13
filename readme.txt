@@ -65,7 +65,11 @@ Latest changes:
 
 # 1.2.12
 
-WOO-1452 Period is reset each time config enters get-store-country
+* WOO-1452 Period is reset each time config enters get-store-country
+* WOO-1461 README/Changelog updates
+* WOO-1464 ECP Timeouts Control
+* WOO-1469 Plugin requires ecom 3.2.9 issue.
+* WOO-1470 GetPeriods error
 
 == Upgrade Notice ==
 
