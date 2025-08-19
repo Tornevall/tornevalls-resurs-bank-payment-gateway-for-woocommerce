@@ -21,7 +21,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation as EcomPaymentInformation;
+use Resursbank\Ecom\Module\Widget\PaymentInformation as EcomPaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Sanitize;
@@ -33,7 +33,7 @@ use Resursbank\Woocommerce\Util\Sanitize;
  */
 class PaymentInformation
 {
-    public EcomPaymentInformation $widget;
+    public EcomPaymentInformation\Html $htmlWidget;
 
     /**
      * @param string $paymentId Resurs payment ID
@@ -52,12 +52,11 @@ class PaymentInformation
      */
     public function __construct(string $paymentId)
     {
-        $currencySymbol = Currency::getWooCommerceCurrencySymbol();
-        $currencyFormat = Currency::getEcomCurrencyFormat();
-        $this->widget = new EcomPaymentInformation(
+        //$currencySymbol = Currency::getWooCommerceCurrencySymbol();
+        //$currencyFormat = Currency::getEcomCurrencyFormat();
+
+        $this->htmlWidget = new EcomPaymentInformation\Html(
             paymentId: $paymentId,
-            currencySymbol: $currencySymbol,
-            currencyFormat: $currencyFormat
         );
     }
 
@@ -74,8 +73,6 @@ class PaymentInformation
 
     /**
      * Sets CSS in header if the current page is the order view.
-     *
-     * @throws EmptyValueException
      */
     public static function setCss(): void
     {
@@ -83,8 +80,10 @@ class PaymentInformation
             return;
         }
 
+        $cssWidget = new EcomPaymentInformation\Css();
+
         echo '<style>' .
-            Sanitize::sanitizeHtml(html: EcomPaymentInformation::getCss()) .
+            Sanitize::sanitizeHtml(html: $cssWidget->content) .
             '</style>';
     }
 
@@ -93,8 +92,10 @@ class PaymentInformation
      *
      * @noinspection PhpUnused
      */
-    public function getWidget(): void
+    public function getWidget(): string
     {
-        echo Sanitize::sanitizeHtml(html: $this->widget->content);
-    }
+        return Sanitize::sanitizeHtml(
+            html: $this->htmlWidget->content
+        );
+     }
 }
