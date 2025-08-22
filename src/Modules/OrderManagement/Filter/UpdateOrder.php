@@ -46,7 +46,20 @@ class UpdateOrder
     private static bool $modificationError = false;
 
     /**
+     * @throws ApiException
+     * @throws AttributeCombinationException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
+     * @throws JsonException
+     * @throws NotJsonEncodedException
+     * @throws ReflectionException
+     * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @noinspection PhpUnusedParameterInspection
      */
     public static function exec(mixed $orderId, mixed $order): void
     {
@@ -84,7 +97,7 @@ class UpdateOrder
 
             if ($payment->rejectedReason !== null) {
                 $order->add_order_note(
-                    'Unable to modify order: ' . $payment->rejectedReason->category->value
+                    note: 'Unable to modify order: ' . $payment->rejectedReason->category->value
                 );
                 return;
             }

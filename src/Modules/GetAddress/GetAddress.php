@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\GetAddress;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Module\Customer\Widget\GetAddress as Widget;
+use Resursbank\Ecom\Module\Widget\GetAddress\Js as Widget;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;

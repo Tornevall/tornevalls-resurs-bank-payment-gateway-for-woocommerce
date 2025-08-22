@@ -12,8 +12,7 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Module\AnnuityFactor\Widget\GetPeriods;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriods;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PartPaymentMethodOption;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Admin as AdminUtil;
@@ -38,7 +37,6 @@ class Admin
         }
 
         $periods = new GetPeriods(
-            storeId: StoreId::getData(),
             methodElementId: 'resursbank_part_payment_payment_method',
             periodElementId: 'resursbank_part_payment_period',
             selectedPaymentMethod: PartPaymentMethodOption::getData(),
@@ -51,7 +49,7 @@ class Admin
             wp_enqueue_script('partpayment-admin-scripts');
             wp_add_inline_script(
                 'partpayment-admin-scripts',
-                $periods->js,
+                $periods->content,
                 'before'
             );
             add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');

@@ -40,7 +40,7 @@ class HideCaptureAction
                 // and potential cancellation of the order. Actions are limited to not block for other
                 // buttons.
                 if ($name === 'on_hold' ||
-                    ($order->has_status('on-hold') && ($name === 'complete' || $name === 'processing'))
+                    ($order->has_status(status: 'on-hold') && ($name === 'complete' || $name === 'processing'))
                 ) {
                     continue;
                 }

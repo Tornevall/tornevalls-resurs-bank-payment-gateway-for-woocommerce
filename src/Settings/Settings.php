@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
@@ -132,6 +133,8 @@ class Settings
 
     /**
      * Resolve array of config options matching supplied section.
+     *
+     * @throws ConfigException
      */
     public static function getSection(
         string $section = Api::SECTION_ID
@@ -155,6 +158,8 @@ class Settings
 
     /**
      * Retrieve all settings as sequential array.
+     *
+     * @throws ConfigException
      */
     public static function getAll(): array
     {
@@ -191,6 +196,7 @@ class Settings
             is_array(value: $links) &&
             $file === RESURSBANK_MODULE_DIR_NAME . '/init.php'
         ) {
+            /** @noinspection HtmlUnknownTarget */
             $links[] = sprintf(
                 '<a href="%s">%s</a>',
                 Route::getSettingsUrl(),

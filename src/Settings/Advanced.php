@@ -150,8 +150,6 @@ class Advanced
 
     /**
      * Return array for Invalidate Cache button setting.
-     *
-     * @noinspection SpellCheckingInspection
      */
     private static function getInvalidateCacheButton(): array
     {

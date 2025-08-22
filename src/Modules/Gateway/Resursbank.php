@@ -39,9 +39,6 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
-use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
-use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
@@ -358,7 +355,7 @@ class Resursbank extends WC_Payment_Gateway
             );
         }
 
-        $order->add_order_note('Resurs initiated payment process.');
+        $order->add_order_note(note: 'Resurs initiated payment process.');
         Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value: (string)time());
 
         return PaymentRepository::create(
@@ -431,7 +428,7 @@ class Resursbank extends WC_Payment_Gateway
         $orderIdByRequest = $_GET['id'] ?? null;
 
         if (!$orderIdByRequest && isset($_GET['post']) && (int)$_GET['post']) {
-            $testOrderByPost = wc_get_order($_GET['post']);
+            $testOrderByPost = wc_get_order(the_order: $_GET['post']);
             if ($testOrderByPost instanceof WC_Order) {
                 $orderIdByRequest = $testOrderByPost->get_id();
             }
@@ -484,7 +481,7 @@ class Resursbank extends WC_Payment_Gateway
             );
 
             if ($error instanceof CurlException) {
-                if (count($error->getDetails())) {
+                if (count(value: $error->getDetails())) {
                     /** @var $detail */
                     foreach ($error->getDetails() as $detail) {
                         MessageBag::addError(message: $detail);

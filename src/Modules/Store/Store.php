@@ -11,7 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Store;
 
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Module\Store\Widget\GetStores;
+use Resursbank\Ecom\Module\Widget\GetStores\Js as GetStores;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;

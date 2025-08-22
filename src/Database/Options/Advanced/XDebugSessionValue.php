@@ -7,6 +7,9 @@ namespace Resursbank\Woocommerce\Database\Options\Advanced;
 use Resursbank\Woocommerce\Database\DataType\StringOption;
 use Resursbank\Woocommerce\Database\OptionInterface;
 
+/**
+ * Xdebug session value option.
+ */
 class XDebugSessionValue extends StringOption implements OptionInterface
 {
     /**
@@ -19,6 +22,7 @@ class XDebugSessionValue extends StringOption implements OptionInterface
 
     /**
      * @return string|null'
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public static function getDefault(): ?string
     {

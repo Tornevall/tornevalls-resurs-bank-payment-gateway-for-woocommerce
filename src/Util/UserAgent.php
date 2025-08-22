@@ -62,15 +62,15 @@ class UserAgent
         $plugin_file = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
 
         // Check if the file exists.
-        if (!file_exists($plugin_file)) {
+        if (!file_exists(filename: $plugin_file)) {
             return '';
         }
 
         // Read the file contents.
-        $file_contents = file_get_contents($plugin_file);
+        $file_contents = file_get_contents(filename: $plugin_file);
 
         // Use a regular expression to extract the version information.
-        if (preg_match('/Version:\s*(\S+)/', $file_contents, $matches)) {
+        if (preg_match(pattern: '/Version:\s*(\S+)/', subject: $file_contents, matches: $matches)) {
             return $matches[1];
         }
 

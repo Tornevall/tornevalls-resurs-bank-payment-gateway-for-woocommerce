@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Modules\Api\Connection;
 use Resursbank\Woocommerce\Settings\About;
@@ -103,6 +104,7 @@ EX;
      *
      * @inheritdoc
      * @noinspection PhpMissingParentCallCommonInspection
+     * @throws ConfigException
      */
     public function get_settings(): array // phpcs:ignore
     {

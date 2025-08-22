@@ -11,14 +11,15 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
-use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMoreJs;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostListJs;
+use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
+use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
+use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
+use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
+use Resursbank\Ecom\Module\Widget\CostList\Css as CostListCss;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
@@ -43,7 +44,6 @@ class AssetLoader
      * @throws FilesystemException
      * @throws HttpException
      * @throws IllegalValueException
-     * @throws ConfigException
      */
     public static function init(): void
     {
@@ -71,7 +71,7 @@ class AssetLoader
         wp_enqueue_style('rb-costlist-css');
         wp_add_inline_style(
             'rb-costlist-css',
-            CostList::getCss()
+            (new CostListCss())->content
         );
     }
 
@@ -96,7 +96,7 @@ class AssetLoader
     public static function enqueuePartPaymentStyles(): void
     {
         try {
-            $css = PartPayment::getWidget()->css ?? '';
+            $css = (new EcomPartPaymentCss())->content ?? '';
         } catch (Throwable $error) {
             Log::error(error: $error);
             $css = '';
@@ -124,7 +124,7 @@ class AssetLoader
     {
         try {
             WooCommerce::validateAndUpdatePartPaymentMethod();
-            $readMoreCss = PartPayment::getReadMoreWidget()->css ?? '';
+            $readMoreCss = (new ReadMoreCss())->content?? '';
         } catch (Throwable $error) {
             Log::error(error: $error);
             $readMoreCss = '';
@@ -242,7 +242,7 @@ class AssetLoader
 
         wp_add_inline_script(
             'rb-get-address',
-            (string)GetAddress::getWidget()?->js
+            (string)GetAddress::getWidget()?->content
         );
     }
 

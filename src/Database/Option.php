@@ -18,6 +18,7 @@ abstract class Option
 {
     /**
      * Name prefix for entries in options table.
+     * @noinspection PhpMissingClassConstantTypeInspection
      */
     public const NAME_PREFIX = 'resursbank_';
 

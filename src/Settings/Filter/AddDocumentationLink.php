@@ -41,10 +41,10 @@ class AddDocumentationLink
             $file === RESURSBANK_MODULE_DIR_NAME . '/init.php'
         ) {
             $links[] = wp_kses(
-                '<a href="blank" target="_blank">' .
-                Translator::translate(phraseId: 'documentation') .
+                content: '<a href="blank" target="_blank">' .
+                    Translator::translate(phraseId: 'documentation') .
                 '</a>',
-                ['a' => ['target' => true]]
+                allowed_html: ['a' => ['target' => true]]
             );
         }
 

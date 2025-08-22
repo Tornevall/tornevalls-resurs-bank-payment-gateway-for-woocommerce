@@ -18,7 +18,7 @@ use Throwable;
 use function function_exists;
 
 /**
- * AJAX controller for the Part payment widget
+ * AJAX controller for the Part payment widget.
  */
 class SetCustomerType
 {
