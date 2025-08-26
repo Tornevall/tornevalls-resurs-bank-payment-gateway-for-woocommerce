@@ -290,11 +290,17 @@ class PartPayment
                 : (float)self::getProduct()?->get_price();
 
             // Let partners override.
-            $priceData = (float)apply_filters(
+            $priceDataMaybe = (float)apply_filters(
                 'resursbank_pp_price_data',
                 $priceData,
                 self::getProduct()
             );
+
+            // Only accept positive values from filter.
+            if ($priceDataMaybe > 0.0) {
+                $priceData = $priceDataMaybe;
+            }
+
         } catch (Throwable) {
             $priceData = WooCommerce::getCartTotals();
         }
