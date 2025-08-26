@@ -1,3 +1,7 @@
+# 1.2.13
+
+* WOO-1474 Consistent part payment pricing via external systems (Lemonsoft, etc) lowest price + correct VAT on product page
+
 # 1.2.12
 
 * WOO-1452 Period is reset each time config enters get-store-country

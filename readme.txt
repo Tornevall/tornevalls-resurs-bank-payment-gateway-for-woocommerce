@@ -5,10 +5,10 @@ Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 8.1
 WC requires at least: 7.6.0
-WC Tested up to: 10.0.4
+WC Tested up to: 10.1.1
 Plugin requires ecom: 3.2.13
 Requires Plugins: woocommerce
-Stable tag: 1.2.12
+Stable tag: 1.2.13
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -62,6 +62,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
 
 Latest changes:
+
+# 1.2.13
+
+* WOO-1474 Consistent part payment pricing via external systems (Lemonsoft, etc) lowest price + correct VAT on product page
 
 # 1.2.12
 
