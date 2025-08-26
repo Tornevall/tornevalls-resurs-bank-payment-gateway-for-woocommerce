@@ -103,8 +103,8 @@ EX;
      * NOTE: Suppressing PHPCS because we cannot name method properly (parent).
      *
      * @inheritdoc
-     * @noinspection PhpMissingParentCallCommonInspection
      * @throws ConfigException
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function get_settings(): array // phpcs:ignore
     {

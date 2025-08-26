@@ -15,11 +15,11 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
-use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
-use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
-use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
 use Resursbank\Ecom\Module\Widget\CostList\Css as CostListCss;
+use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
+use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
+use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
+use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
@@ -124,7 +124,7 @@ class AssetLoader
     {
         try {
             WooCommerce::validateAndUpdatePartPaymentMethod();
-            $readMoreCss = (new ReadMoreCss())->content?? '';
+            $readMoreCss = (new ReadMoreCss())->content ?? '';
         } catch (Throwable $error) {
             Log::error(error: $error);
             $readMoreCss = '';

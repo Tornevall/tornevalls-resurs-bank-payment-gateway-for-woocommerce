@@ -150,7 +150,12 @@ class Modify extends Action
 
                 $orderLines = Order::getOrderLines(order: $order);
 
-                if (count(value: $orderLines) > 0 && $orderLines->getTotal() > 0) {
+                if (
+                    count(
+                    value: $orderLines
+                ) > 0 &&
+                    $orderLines->getTotal() > 0
+                ) {
                     Repository::addOrderLines(
                         paymentId: $payment->id,
                         orderLines: $orderLines

@@ -465,7 +465,8 @@ class OrderManagement
             MerchantPortal::TEST;
 
         $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
-        $order->add_order_note(note: $message);
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $order->add_order_note($message);
     }
 
     /**
@@ -526,11 +527,12 @@ class OrderManagement
     ): void {
         Log::debug(message: $message);
         MessageBag::addSuccess(message: $message);
-        $order?->add_order_note(note: $message);
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $order?->add_order_note($message);
     }
 
     /**
-     * Log generic success message from payment action.
+     * Log a generic success message from payment action.
      */
     public static function logSuccessPaymentAction(
         ActionType $action,

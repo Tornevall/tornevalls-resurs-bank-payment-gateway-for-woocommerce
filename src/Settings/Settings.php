@@ -86,7 +86,7 @@ class Settings
         /**
          * @noinspection PhpArgumentWithoutNamedIdentifierInspection
          */
-        // Add link to Settings page from Plugin page in WP admin.
+        // Add a link to Settings page from Plugin page in WP admin.
         add_filter(
             'plugin_action_links',
             'Resursbank\Woocommerce\Settings\Settings::addPluginActionLinks',
@@ -132,7 +132,7 @@ class Settings
     }
 
     /**
-     * Resolve array of config options matching supplied section.
+     * Resolve an array of config options matching supplied section.
      *
      * @throws ConfigException
      */

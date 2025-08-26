@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\MessageBag\Models;
 
-use ReflectionException;
 use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Lib\Attribute\Validation\StringNotEmpty;
 use Resursbank\Ecom\Lib\Model\Model;

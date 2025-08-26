@@ -34,14 +34,14 @@ class GetAddress
 
         // Inject Get Address widget in blocked based checkout.
         add_filter(
-            hook_name: 'the_content',
-            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks\InjectFetchAddressWidget::exec'
+            'the_content',
+            'Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks\InjectFetchAddressWidget::exec'
         );
 
         // Inject Get Address widget in legacy checkout.
         add_filter(
-            hook_name: 'woocommerce_before_checkout_form',
-            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\Legacy\InjectFetchAddressWidget::exec'
+            'woocommerce_before_checkout_form',
+            'Resursbank\Woocommerce\Modules\GetAddress\Filter\Legacy\InjectFetchAddressWidget::exec'
         );
     }
 

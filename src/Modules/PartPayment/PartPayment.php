@@ -9,21 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\PartPayment;
 
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
@@ -213,6 +201,29 @@ class PartPayment
     }
 
     /**
+     * Indicates whether widget should be visible or not.
+     */
+    public static function isEnabled(): bool
+    {
+        try {
+            $amount = self::getPriceData();
+            $method = self::getPaymentMethod();
+
+            // Enabled if there is a product and a price.
+            return PartPaymentOptions::isEnabled() &&
+                PaymentMethod::getData() !== '' &&
+                is_product() &&
+                $amount > 0.0 &&
+                $amount >= $method->minPurchaseLimit &&
+                $amount <= $method->maxPurchaseLimit;
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+
+        return false;
+    }
+
+    /**
      * Get checkout or product price.
      */
     private static function getPriceData(): float
@@ -237,29 +248,6 @@ class PartPayment
     {
         $returnBool = apply_filters('display_part_payment_info_text', true);
         return is_bool(value: $returnBool) ? $returnBool : false;
-    }
-
-    /**
-     * Indicates whether widget should be visible or not.
-     */
-    public static function isEnabled(): bool
-    {
-        try {
-            $amount = self::getPriceData();
-            $method = self::getPaymentMethod();
-
-            // Enabled if there is a product and a price.
-            return PartPaymentOptions::isEnabled() &&
-                PaymentMethod::getData() !== '' &&
-                is_product() &&
-                $amount > 0.0 &&
-                $amount >= $method->minPurchaseLimit &&
-                $amount <= $method->maxPurchaseLimit;
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-
-        return false;
     }
 
     /**

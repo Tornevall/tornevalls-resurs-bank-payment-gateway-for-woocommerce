@@ -71,8 +71,9 @@ class UpdateOrder
         }
 
         if (self::canUpdate(order: $order)) {
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $order->add_order_note(
-                note: Translator::translate(
+                Translator::translate(
                     phraseId: 'order-changed-by-unknown-source'
                 )
             );
@@ -96,8 +97,9 @@ class UpdateOrder
             }
 
             if ($payment->rejectedReason !== null) {
+                /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
                 $order->add_order_note(
-                    note: 'Unable to modify order: ' . $payment->rejectedReason->category->value
+                    'Unable to modify order: ' . $payment->rejectedReason->category->value
                 );
                 return;
             }

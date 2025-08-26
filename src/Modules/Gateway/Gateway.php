@@ -39,7 +39,6 @@ class Gateway
 {
     /**
      * Add payment gateways.
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
@@ -55,8 +54,8 @@ class Gateway
         }
 
         // Perform a verification process for sorting after WooCommerce has initialized
-        // the payment gateways. If forced sorting are disabled, this will never occur.
-        // Feature is only available from WooCommerce 8.5.0 and above.
+        // the payment gateways. If forced sorting is disabled, this will never occur.
+        // The Feature is only available from WooCommerce 8.5.0 and above.
         add_action(
             'wc_payment_gateways_initialized',
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::handleInitializedGatewaysSorting'

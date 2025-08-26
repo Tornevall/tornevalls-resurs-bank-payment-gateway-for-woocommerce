@@ -395,7 +395,9 @@ class Route
      */
     private static function userIsAdmin(): bool
     {
-        return is_user_logged_in() && current_user_can(capability: 'administrator');
+        return is_user_logged_in() && current_user_can(
+            capability: 'administrator'
+        );
     }
 
     /**

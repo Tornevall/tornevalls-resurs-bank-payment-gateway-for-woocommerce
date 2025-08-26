@@ -25,8 +25,6 @@ use WC_Order_Item_Shipping;
 class Shipping
 {
     /**
-     * @param WC_Order_Item_Shipping $item
-     * @return OrderLine
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException

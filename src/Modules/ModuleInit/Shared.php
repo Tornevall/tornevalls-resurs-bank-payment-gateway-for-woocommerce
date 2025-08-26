@@ -43,8 +43,8 @@ class Shared
 
         // Assets must be enqueued, not called directly.
         add_action(
-            hook_name: 'wp_enqueue_scripts',
-            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
         );
 
         Gateway::init();
@@ -66,10 +66,10 @@ class Shared
         // them. Creating own filters, however may require all 4 arguments to make sure payment and order data is
         // correct, before triggering further actions. This filter should be used with caution.
         add_filter(
-            hook_name: 'resurs_payment_task_status',
-            callback: static fn (string $status, $taskStatusDetails, Payment $payment, WC_Order $order): string => 'cancelled',
-            priority: 10,
-            accepted_args: 4
+            'resurs_payment_task_status',
+            static fn (string $status, $taskStatusDetails, Payment $payment, WC_Order $order): string => 'cancelled',
+            10,
+            4
         );
     }
 }

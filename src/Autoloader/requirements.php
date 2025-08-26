@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Add admin notice when dependencies like ecom is missing.
+ * Add admin notice when dependencies like ecom are missing.
  */
 function resursBankHasNoEcom(): void
 {

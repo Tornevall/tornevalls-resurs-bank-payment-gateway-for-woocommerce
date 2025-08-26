@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Resursbank\Ecom\Module\Widget\SupportInfo\Html as EcomSupportInfo;
 use Resursbank\Ecom\Module\Widget\SupportInfo\Css as EcomSupportInfoCss;
+use Resursbank\Ecom\Module\Widget\SupportInfo\Html as EcomSupportInfo;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;

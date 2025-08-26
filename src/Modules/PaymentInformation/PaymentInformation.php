@@ -54,7 +54,9 @@ class PaymentInformation
         }
 
         echo '<style>' .
-            Sanitize::sanitizeHtml(html: (new EcomPaymentInformationCss())->content) .
+            Sanitize::sanitizeHtml(
+                html: (new EcomPaymentInformationCss())->content
+            ) .
             '</style>';
     }
 

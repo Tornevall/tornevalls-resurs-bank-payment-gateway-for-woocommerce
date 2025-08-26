@@ -25,8 +25,6 @@ use WC_Order_Item_Fee;
 class Fee
 {
     /**
-     * @param WC_Order_Item_Fee $fee
-     * @return OrderLine
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
