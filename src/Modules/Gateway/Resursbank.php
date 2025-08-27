@@ -543,7 +543,6 @@ class Resursbank extends WC_Payment_Gateway
                 management: new Callback(
                     url: Url::getCallbackUrl(type: CallbackType::MANAGEMENT)
                 ),
-                creditApplication: null
             ),
             timeToLiveInMinutes: $stockEnabled &&
             $holdStockMinutes > 0 &&

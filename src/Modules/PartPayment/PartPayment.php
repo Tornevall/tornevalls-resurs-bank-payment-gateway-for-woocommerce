@@ -226,18 +226,35 @@ class PartPayment
     /**
      * Get checkout or product price.
      */
+    /**
+     * Get checkout or product price, with optional override via filter.
+     */
     private static function getPriceData(): float
     {
         try {
             $priceData = is_checkout()
                 ? WooCommerce::getCartTotals()
                 : (float)self::getProduct()?->get_price();
+
+            // Let partners override.
+            $priceDataMaybe = (float)apply_filters(
+                'resursbank_pp_price_data',
+                $priceData,
+                self::getProduct()
+            );
+
+            // Only accept positive values from filter.
+            if ($priceDataMaybe > 0.0) {
+                $priceData = $priceDataMaybe;
+            }
+
         } catch (Throwable) {
             $priceData = WooCommerce::getCartTotals();
         }
 
         return $priceData;
     }
+
 
     /**
      * Programmatically control whether part payment info text should be shown or hidden. Default is to show.

@@ -63,7 +63,7 @@ class Shared
     private static function registerStatusFilters(): void
     {
         // This filter handles a maximum of 4 arguments, but since we only use this internally, we onlu use two of
-        // them. Creating own filters, however may require all 4 arguments to make sure payment and order data is
+        // them. Creating own filters, however, may require all 4 arguments to make sure payment and order data is
         // correct, before triggering further actions. This filter should be used with caution.
         add_filter(
             'resurs_payment_task_status',
