@@ -18,10 +18,10 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\Logo\Widget;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use Resursbank\Ecom\Module\Widget\Logo\Html as LogoWidget;
+use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMoreWidget;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
@@ -163,9 +163,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     paymentMethod: $paymentMethod,
                     amount: (float)WC()?->cart?->total
                 );
-                $logo = new Widget(paymentMethod: $paymentMethod);
+                $logo = new LogoWidget(paymentMethod: $paymentMethod);
                 $helper = new GatewayHelper(paymentMethod: $paymentMethod);
-                $readMore = new ReadMore(
+                $readMore = new ReadMoreWidget(
                     paymentMethod: $paymentMethod,
                     amount: (float)WC()?->cart?->total
                 );
@@ -173,12 +173,12 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
-                    'description' => '<div class="rb-usp">' . $usp->message . '</div>',
+                    'description' => '<div class="rb-usp">' . $usp->getText() . '</div>',
                     'costlist' => $helper->getCostList(),
                     'readmore' => $readMore->content,
                     'price_signage_warning' => $helper->getPriceSignageWarning(),
                     'read_more_css' => '',
-                    'logo' => $logo->html,
+                    'logo' => $logo->content,
                     'logo_type' => $logo->getIdentifier(),
                     'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
                     'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,

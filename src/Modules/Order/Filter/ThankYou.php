@@ -31,10 +31,10 @@ class ThankYou
     public static function init(): void
     {
         add_action(
-            hook_name: 'woocommerce_thankyou',
-            callback: 'Resursbank\Woocommerce\Modules\Order\Filter\ThankYou::exec',
-            priority: 10,
-            accepted_args: 1
+            'woocommerce_thankyou',
+            'Resursbank\Woocommerce\Modules\Order\Filter\ThankYou::exec',
+            10,
+            1
         );
     }
 
@@ -67,8 +67,9 @@ class ThankYou
             Status::update(order: $order);
             Metadata::setThankYouTriggered(order: $order);
 
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $order->add_order_note(
-                note: Translator::translate(
+                Translator::translate(
                     phraseId: 'customer-landingpage-return'
                 )
             );

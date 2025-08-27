@@ -39,9 +39,6 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
-use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
-use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
@@ -62,7 +59,7 @@ use function get_option;
 
 /**
  * Resurs Bank payment gateway.
- * This class tend to be longer than necessary. We should ignore inspection warnings.
+ * This class tends to be longer than necessary. We should ignore inspection warnings.
  *
  * @noinspection EfferentObjectCouplingInspection
  */
@@ -358,6 +355,7 @@ class Resursbank extends WC_Payment_Gateway
             );
         }
 
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         $order->add_order_note('Resurs initiated payment process.');
         Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value: (string)time());
 
@@ -431,6 +429,7 @@ class Resursbank extends WC_Payment_Gateway
         $orderIdByRequest = $_GET['id'] ?? null;
 
         if (!$orderIdByRequest && isset($_GET['post']) && (int)$_GET['post']) {
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $testOrderByPost = wc_get_order($_GET['post']);
             if ($testOrderByPost instanceof WC_Order) {
                 $orderIdByRequest = $testOrderByPost->get_id();
@@ -479,12 +478,13 @@ class Resursbank extends WC_Payment_Gateway
         );
 
         try {
+            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $order->add_order_note(
-                note: Translator::translate(phraseId: 'error-creating-payment')
+                Translator::translate(phraseId: 'error-creating-payment')
             );
 
             if ($error instanceof CurlException) {
-                if (count($error->getDetails())) {
+                if (count(value: $error->getDetails())) {
                     /** @var $detail */
                     foreach ($error->getDetails() as $detail) {
                         MessageBag::addError(message: $detail);

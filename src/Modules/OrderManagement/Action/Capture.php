@@ -28,6 +28,7 @@ class Capture extends Action
     /**
      * Capture Resurs Bank payment.
      * @phpcs:ignoreFile CognitiveComplexity
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         WC_Order $order
@@ -59,7 +60,10 @@ class Capture extends Action
                 }
 
                 if (!$payment->canCapture()) {
-                    $order->add_order_note(Translator::translate('payment-not-ready-to-be-captured'));
+                    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                    $order->add_order_note(
+                        Translator::translate(phraseId: 'payment-not-ready-to-be-captured')
+                    );
                     return;
                 }
 

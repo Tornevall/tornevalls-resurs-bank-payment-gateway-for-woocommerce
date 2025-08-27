@@ -76,7 +76,7 @@ class Currency
         $wooFormat = self::getWooCommerceCurrencyFormat();
 
         if (
-            preg_match(pattern: '/\%1\$s.*\%2\$s/', subject: $wooFormat)
+            preg_match(pattern: '/%1\$s.*%2\$s/', subject: $wooFormat)
         ) {
             return CurrencyFormat::SYMBOL_FIRST;
         }

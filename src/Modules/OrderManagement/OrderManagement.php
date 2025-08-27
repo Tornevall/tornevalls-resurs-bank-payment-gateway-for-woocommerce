@@ -46,6 +46,7 @@ use WC_Order;
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  * @SuppressWarnings(PHPMD.LongVariable)
  * @noinspection EfferentObjectCouplingInspection
+ * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  */
 class OrderManagement
 {
@@ -217,6 +218,7 @@ class OrderManagement
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @noinspection PhpUnusedParameterInspection
      */
     public static function getCanNotEditTranslation(WC_Order $order): void
     {
@@ -237,9 +239,6 @@ class OrderManagement
             static function ($translation, $text, $domain) use ($isFrozen, $isRejected) {
                 if (
                     isset($text) &&
-                    is_string(
-                        value: $text
-                    ) &&
                     $text === 'This order is no longer editable.'
                 ) {
                     if ($isRejected) {
@@ -430,7 +429,7 @@ class OrderManagement
         $id = (int)$order->get_id();
 
         // Temporary stored payment. During one web request, several questions are pushed over to this segment
-        // as we validate several abilities for a payment (like canCapture, canCancel, etc). To avoid API
+        // as we validate several abilities for a payment (like canCapture, canCancel, etc.). To avoid API
         // overload, we'll use self if it has been already set once, instead of risking more than 10 API calls
         // during that single web request.
         if ($rbGetPaymentCount > 1 && isset(self::$payments[$id]) && self::$payments[$id] instanceof Payment) {
@@ -466,7 +465,8 @@ class OrderManagement
             MerchantPortal::TEST;
 
         $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
-        $order->add_order_note(note: $message);
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $order->add_order_note($message);
     }
 
     /**
@@ -527,11 +527,12 @@ class OrderManagement
     ): void {
         Log::debug(message: $message);
         MessageBag::addSuccess(message: $message);
-        $order?->add_order_note(note: $message);
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $order?->add_order_note($message);
     }
 
     /**
-     * Log generic success message from payment action.
+     * Log a generic success message from payment action.
      */
     public static function logSuccessPaymentAction(
         ActionType $action,

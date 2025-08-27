@@ -41,10 +41,10 @@ class Failure
     public static function init(): void
     {
         add_filter(
-            hook_name: 'woocommerce_order_cancelled_notice',
-            callback: 'Resursbank\Woocommerce\Modules\Order\Filter\Failure::exec',
-            priority: 10,
-            accepted_args: 1
+            'woocommerce_order_cancelled_notice',
+            'Resursbank\Woocommerce\Modules\Order\Filter\Failure::exec',
+            10,
+            1
         );
     }
 

@@ -43,8 +43,8 @@ class Shared
 
         // Assets must be enqueued, not called directly.
         add_action(
-            hook_name: 'wp_enqueue_scripts',
-            callback: 'Resursbank\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
+            'wp_enqueue_scripts',
+            'Resursbank\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
         );
 
         Gateway::init();

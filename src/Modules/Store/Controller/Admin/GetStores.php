@@ -34,7 +34,6 @@ class GetStores extends GetStoresController
      */
     public function exec(): string
     {
-        $result = '';
         $skipMessageBag = false;
 
         try {

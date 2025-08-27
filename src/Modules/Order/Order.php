@@ -180,11 +180,9 @@ class Order
                 <?php
             });
 
-            $paymentInformation = new PaymentInformation(
+            $data = PaymentInformation::getWidgetHtml(
                 paymentId: Metadata::getPaymentId(order: $order)
             );
-
-            $data = $paymentInformation->widget->content;
         } catch (Throwable $e) {
             $errorMessage = $e->getMessage();
 
