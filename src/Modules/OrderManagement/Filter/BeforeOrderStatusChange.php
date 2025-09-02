@@ -57,7 +57,7 @@ class BeforeOrderStatusChange
             status: $_POST['order_status'] ?? ''
         );
 
-        // Only continue if order was paid through Resurs Bank.
+        // Only continue if the order was paid through Resurs Bank.
         if (
             $order === null ||
             $newStatus === '' ||

@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Translator;
+use Throwable;
 use WC_Order;
 
 /**
@@ -28,6 +29,8 @@ class Capture extends Action
     /**
      * Capture Resurs Bank payment.
      * @phpcs:ignoreFile CognitiveComplexity
+     * @throws Throwable
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         WC_Order $order
@@ -42,27 +45,57 @@ class Capture extends Action
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
+                $frozenPreventionMessage = Translator::translate(
+                    phraseId: 'unable-to-capture-frozen-order'
+                );
+
                 // Do not allow frozen orders to be captured from order list view, as this
                 // could trigger Modify, which we normally don't want.
                 if ($payment->isFrozen() && Admin::isInOrderListView()) {
                     // Trying to scream on screen when this occurs.
-                    $frozenPreventionMessage = Translator::translate(
-                        phraseId: 'unable-to-capture-frozen-order'
-                    );
                     OrderManagement::logActionError(
                         action: ActionType::CAPTURE,
                         order: $order,
                         error: new Exception(message: $frozenPreventionMessage),
                         reason: $frozenPreventionMessage
                     );
-                    return;
+
+                    throw new Exception(message: $frozenPreventionMessage);
                 }
 
                 if (!$payment->canCapture()) {
-                    $order->add_order_note(Translator::translate('payment-not-ready-to-be-captured'));
+                    if ($payment->isCaptured()) {
+                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                        $order->add_order_note(Translator::translate(phraseId: 'payment-already-captured'));
+                        return;
+                    }
+                    if ($payment->isFrozen()) {
+                        $order->add_order_note($frozenPreventionMessage);
+                        // Special case: If order is frozen but WooCommerce changed it to "completed", we will put
+                        // it to on-hold to avoid letting them through too early. Frozen orders should not be allowed
+                        // to be captured.
+                        if ($order->get_status() === 'completed') {
+                            $order->set_status('on-hold', $frozenPreventionMessage);
+                        }
+                        if (apply_filters(
+                            'resursbank_allow_force_hold_on_frozen',
+                            true,
+                            $order,
+                            $payment
+                        )) {
+                            // Since this happens after WooCommerce has already updated the order status,
+                            // we enforce setting it back to "on-hold" in a way that does not conflict
+                            // with existing update filters. This is handled dynamically (on-the-fly).
+                            // If, against all odds, you actually need to override this behavior,
+                            // it can be done via the 'resursbank_allow_force_hold_on_frozen' filter.
+                            $order->set_status('on-hold', $frozenPreventionMessage);
+                            $order->save();
+                        }
+                    }
+                    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                    $order->add_order_note(Translator::translate(phraseId: 'payment-not-ready-to-be-captured'));
                     return;
                 }
-
                 $authorizedAmount = number_format(
                     num: (float)$payment->order?->authorizedAmount,
                     decimals: 2,
