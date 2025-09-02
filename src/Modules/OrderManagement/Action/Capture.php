@@ -76,19 +76,6 @@ class Capture extends Action
                         // to be captured.
                         if ($order->get_status() === 'completed') {
                             $order->set_status('on-hold', $frozenPreventionMessage);
-                        }
-                        if (apply_filters(
-                            'resursbank_allow_force_hold_on_frozen',
-                            true,
-                            $order,
-                            $payment
-                        )) {
-                            // Since this happens after WooCommerce has already updated the order status,
-                            // we enforce setting it back to "on-hold" in a way that does not conflict
-                            // with existing update filters. This is handled dynamically (on-the-fly).
-                            // If, against all odds, you actually need to override this behavior,
-                            // it can be done via the 'resursbank_allow_force_hold_on_frozen' filter.
-                            $order->set_status('on-hold', $frozenPreventionMessage);
                             $order->save();
                         }
                     }
