@@ -71,13 +71,6 @@ class Capture extends Action
                     }
                     if ($payment->isFrozen()) {
                         $order->add_order_note($frozenPreventionMessage);
-                        // Special case: If order is frozen but WooCommerce changed it to "completed", we will put
-                        // it to on-hold to avoid letting them through too early. Frozen orders should not be allowed
-                        // to be captured.
-                        if ($order->get_status() === 'completed') {
-                            $order->set_status('on-hold', $frozenPreventionMessage);
-                            $order->save();
-                        }
                     }
                     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
                     $order->add_order_note(Translator::translate(phraseId: 'payment-not-ready-to-be-captured'));
