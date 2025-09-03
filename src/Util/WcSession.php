@@ -107,7 +107,7 @@ class WcSession
             self::getCustomerType() === CustomerType::LEGAL &&
             isset($_POST['billing_resurs_government_id'])
         ) {
-            // POST data should have higher priority than the session not only for the getAddress
+            // POST-data should have higher priority than the session not only for the getAddress
             // widget, but also for security reason (so we won't use manipulated data from the session).
             $return = $_POST['billing_resurs_government_id'];
         }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Config;
@@ -28,6 +30,7 @@ use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use function is_array;
@@ -39,7 +42,6 @@ class Gateway
 {
     /**
      * Add payment gateways.
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
@@ -201,6 +203,7 @@ class Gateway
 
     /**
      * Executes on frontend.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initFrontend(): void
     {
