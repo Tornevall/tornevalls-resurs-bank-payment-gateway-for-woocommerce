@@ -59,8 +59,7 @@ class Capture extends Action
                         error: new Exception(message: $frozenPreventionMessage),
                         reason: $frozenPreventionMessage
                     );
-
-                    throw new Exception(message: $frozenPreventionMessage);
+                    return;
                 }
 
                 if (!$payment->canCapture()) {
@@ -71,6 +70,7 @@ class Capture extends Action
                     }
                     if ($payment->isFrozen()) {
                         $order->add_order_note($frozenPreventionMessage);
+                        return;
                     }
                     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
                     $order->add_order_note(Translator::translate(phraseId: 'payment-not-ready-to-be-captured'));
