@@ -73,7 +73,7 @@ class OrderManagement
         self::initRefund();
         self::initModify();
 
-        // Status update transition handler for legacy (non-HPOS systems).
+        // Status update transition handler for legacy (non-HPOS).
         add_action(
             'transition_post_status',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::exec',
@@ -81,7 +81,7 @@ class OrderManagement
             3
         );
 
-        // Break status update if unavailable based on payment status.
+        // Break status update if unavailable based on payment status (HPOS).
         add_action(
             'woocommerce_before_order_object_save',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::handlePostStatusTransitions',
