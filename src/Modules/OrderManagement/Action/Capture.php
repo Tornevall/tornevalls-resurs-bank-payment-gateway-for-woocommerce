@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 
