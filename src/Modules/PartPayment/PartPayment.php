@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Locale\Location;
@@ -76,7 +77,9 @@ class PartPayment
     }
 
     /**
-     * Output widget HTML if on single product page.
+     * Output widget HTML if on a single product page.
+     *
+     * @throws ConfigException
      */
     public static function renderWidget(): void
     {
@@ -139,31 +142,15 @@ class PartPayment
                 ['jquery']
             );
 
+            // Disable this only if you want all front end calculations to break.
             wp_add_inline_script('partpayment-script', $widget->content);
-/*
-            try {
-                $maxApplicationLimit = self::getPaymentMethod()->maxApplicationLimit;
-                $minApplicationLimit = self::getPaymentMethod()->minApplicationLimit;
-            } catch (Throwable) {
-                $minApplicationLimit = 0;
-                $maxApplicationLimit = 0;
-            }
-
-            // Allow max/min-application limits to render in front end, so
-            // that we can hide/show the part payment widget on demand (always rendering,
-            // regardless of the threshold).
             wp_localize_script(
                 'partpayment-script',
                 'rbPpScript',
                 [
                     'product_price' => self::getPriceData(),
-                    'maxApplicationLimit' => $maxApplicationLimit,
-                    'minApplicationLimit' => $minApplicationLimit,
-                    'thresholdLimit' => Limit::getData(),
-                    'monthlyCost' => $widget->getMonthlyCost(),
                 ]
             );
-*/
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
@@ -247,14 +234,12 @@ class PartPayment
             if ($priceDataMaybe > 0.0) {
                 $priceData = $priceDataMaybe;
             }
-
         } catch (Throwable) {
             $priceData = WooCommerce::getCartTotals();
         }
 
         return $priceData;
     }
-
 
     /**
      * Programmatically control whether part payment info text should be shown or hidden. Default is to show.

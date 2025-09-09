@@ -27,6 +27,7 @@ class Shared
 {
     /**
      * Init various modules.
+     *
      * @throws ConfigException
      */
     public static function init(): void
