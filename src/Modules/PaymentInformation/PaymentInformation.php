@@ -76,8 +76,6 @@ class PaymentInformation
      */
     public static function getWidgetHtml(string $paymentId): string
     {
-        return Sanitize::sanitizeHtml(
-            html: (new EcomPaymentInformation(paymentId: $paymentId))->content
-        );
+        return (new EcomPaymentInformation(paymentId: $paymentId))->content;
     }
 }
