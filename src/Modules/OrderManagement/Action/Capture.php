@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Translator;
+use Throwable;
 use WC_Order;
 
 /**
@@ -28,6 +29,8 @@ class Capture extends Action
     /**
      * Capture Resurs Bank payment.
      * @phpcs:ignoreFile CognitiveComplexity
+     * @throws Throwable
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         WC_Order $order
@@ -42,13 +45,14 @@ class Capture extends Action
             callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
+                $frozenPreventionMessage = Translator::translate(
+                    phraseId: 'unable-to-capture-frozen-order'
+                );
+
                 // Do not allow frozen orders to be captured from order list view, as this
                 // could trigger Modify, which we normally don't want.
                 if ($payment->isFrozen() && Admin::isInOrderListView()) {
                     // Trying to scream on screen when this occurs.
-                    $frozenPreventionMessage = Translator::translate(
-                        phraseId: 'unable-to-capture-frozen-order'
-                    );
                     OrderManagement::logActionError(
                         action: ActionType::CAPTURE,
                         order: $order,
@@ -59,10 +63,19 @@ class Capture extends Action
                 }
 
                 if (!$payment->canCapture()) {
-                    $order->add_order_note(Translator::translate('payment-not-ready-to-be-captured'));
+                    if ($payment->isCaptured()) {
+                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                        $order->add_order_note(Translator::translate(phraseId: 'payment-already-captured'));
+                        return;
+                    }
+                    if ($payment->isFrozen()) {
+                        $order->add_order_note($frozenPreventionMessage);
+                        return;
+                    }
+                    /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                    $order->add_order_note(Translator::translate(phraseId: 'payment-not-ready-to-be-captured'));
                     return;
                 }
-
                 $authorizedAmount = number_format(
                     num: (float)$payment->order?->authorizedAmount,
                     decimals: 2,

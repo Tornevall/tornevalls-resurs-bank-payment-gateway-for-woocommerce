@@ -6,7 +6,7 @@ Tested up to: 6.8
 Requires PHP: 8.1
 WC requires at least: 7.6.0
 WC Tested up to: 10.1.1
-Plugin requires ecom: 3.2.13
+Plugin requires ecom: 3.2.15
 Requires Plugins: woocommerce
 Stable tag: 1.2.13
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
