@@ -57,7 +57,7 @@ class BeforeOrderStatusChange
             status: $_POST['order_status'] ?? ''
         );
 
-        // Only continue if order was paid through Resurs Bank.
+        // Only continue if the order was paid through Resurs Bank.
         if (
             $order === null ||
             $newStatus === '' ||
@@ -83,6 +83,57 @@ class BeforeOrderStatusChange
         );
 
         Route::redirectBack();
+    }
+
+    /**
+     * HPOS transition handler.
+     *
+     * @param $data_store
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function handlePostStatusTransitions(WC_Order $order, $data_store = null): void
+    {
+        $order_id = $order->get_id();
+
+        if ($order_id <= 0) {
+            return;
+        }
+
+        $post = get_post($order_id);
+
+        if (!$post instanceof WP_Post || $post->post_type !== 'shop_order') {
+            return;
+        }
+
+        // e.g., 'wc-processing' or 'draft' (edge cases)
+        $old_status_prefixed = get_post_status($post);
+
+        // New status (prefixed) — admin forms post it as 'order_status' like 'wc-completed'.
+        // If it's not present (e.g., programmatic save), default to current to avoid false positives.
+        $new_status_prefixed = isset($_POST['order_status']) && is_string(
+            $_POST['order_status']
+        )
+            ? $_POST['order_status']
+            : $old_status_prefixed;
+
+        // Short-circuit if nothing actually changes (prevents redundant work and potential loops).
+        if ($new_status_prefixed === $old_status_prefixed) {
+            return;
+        }
+
+        /**
+         * Forward into the original validator.
+         * Signature parity with WordPress' transition_post_status:
+         *   exec( string $new_status, string $old_status, WP_Post $post )
+         *
+         * We *must* pass the prefixed variants here (e.g., 'wc-completed'), because
+         * ::exec() itself calls stripStatusPrefix() internally as needed.
+         */
+        self::exec(
+            wpStatus: $new_status_prefixed,
+            wcStatus: $old_status_prefixed,
+            post: $post
+        );
     }
 
     /**
