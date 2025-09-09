@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
@@ -26,6 +27,7 @@ class Shared
 {
     /**
      * Init various modules.
+     * @throws ConfigException
      */
     public static function init(): void
     {
@@ -50,7 +52,6 @@ class Shared
         Gateway::init();
         Callback::init();
         GetAddress::init();
-        //self::registerStatusFilters();
     }
 
     /**
