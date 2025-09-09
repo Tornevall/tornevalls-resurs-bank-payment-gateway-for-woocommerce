@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -293,7 +294,7 @@ class OrderManagement
     }
 
     /**
-     * Is order rejected?
+     * Is the order rejected?
      *
      * @throws ApiException
      * @throws AttributeCombinationException
@@ -455,7 +456,8 @@ class OrderManagement
     }
 
     /**
-     * Add error message to order notes and message bag.
+     * Add an error message to order notes and message bag.
+     * @throws Exception
      */
     public static function logError(
         string $message,
