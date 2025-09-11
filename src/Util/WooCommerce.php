@@ -357,4 +357,36 @@ class WooCommerce
 
         return $paymentMethod instanceof PaymentMethod;
     }
+
+    /**
+     * Type-safe wrapper for wc_get_order_status_name.
+     */
+    public static function getOrderStatusName(string $status): string
+    {
+        $name = wc_get_order_status_name(status: $status);
+
+        if (!is_string(value: $name)) {
+            return $status;
+        }
+
+        return $name;
+    }
+
+    /**
+     * Strip 'wc-' prefix from status string.
+     */
+    public static function stripStatusPrefix(
+        string $status
+    ): string {
+        $result = $status;
+
+        if (
+            strlen(string: $result) > 3 &&
+            str_starts_with(haystack: $status, needle: 'wc-')
+        ) {
+            $result = substr(string: $status, offset: 3);
+        }
+
+        return $result;
+    }
 }

@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
+use Exception;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
@@ -21,10 +22,10 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 use WP_Post;
-use function strlen;
 
 /**
  * Event which executes just before order status is changed.
@@ -37,6 +38,7 @@ class BeforeOrderStatusChange
      * captured payment cannot be captured or cancelled) we redirect back to the
      * order view with an error.
      *
+     * @throws Exception
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
@@ -46,13 +48,19 @@ class BeforeOrderStatusChange
         string $wcStatus,
         WP_Post $post
     ): void {
-        // Only execute for orders.
-        if ($post->post_type !== 'shop_order') {
+        // Only execute for orders (HPOS compatible).
+        if (
+            !in_array(
+                needle: $post->post_type,
+                haystack: ['shop_order', 'shop_order_placehold'],
+                strict: true
+            )
+        ) {
             return;
         }
 
         $order = OrderManagement::getOrder(id: (int)$post->ID);
-        $newStatus = self::stripStatusPrefix(
+        $newStatus = WooCommerce::stripStatusPrefix(
             status: $_POST['order_status'] ?? ''
         );
 
@@ -70,10 +78,10 @@ class BeforeOrderStatusChange
         OrderManagement::logError(
             message: sprintf(
                 Translator::translate(phraseId: 'failed-order-status-change'),
-                self::getOrderStatusName(
-                    status: self::stripStatusPrefix(status: $wcStatus)
+                WooCommerce::getOrderStatusName(
+                    status: WooCommerce::stripStatusPrefix(status: $wcStatus)
                 ),
-                self::getOrderStatusName(status: $newStatus)
+                WooCommerce::getOrderStatusName(status: $newStatus)
             ),
             error: new IllegalValueException(
                 message: "Failed changing order status from $wcStatus to $newStatus for $post->ID"
@@ -87,49 +95,56 @@ class BeforeOrderStatusChange
     /**
      * HPOS transition handler.
      *
-     * @param WC_Order $order
      * @param $data_store
-     * @return void
+     * @throws Exception
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function handlePostStatusTransitions(WC_Order $order, $data_store = null): void
     {
         $order_id = $order->get_id();
+
         if ($order_id <= 0) {
             return;
         }
 
         $post = get_post($order_id);
-        if (!$post instanceof WP_Post || $post->post_type !== 'shop_order') {
+
+        if (!$post instanceof WP_Post) {
             return;
         }
 
-        $old_status_prefixed = get_post_status($post); // e.g., 'wc-processing' or 'draft' (edge cases)
-
-        // New status (prefixed) — admin forms post it as 'order_status' like 'wc-completed'.
-        // If it's not present (e.g., programmatic save), default to current to avoid false positives.
-        $new_status_prefixed = isset($_POST['order_status']) && is_string($_POST['order_status'])
-            ? $_POST['order_status']
-            : $old_status_prefixed;
-
-        // Short-circuit if nothing actually changes (prevents redundant work and potential loops).
-        if ($new_status_prefixed === $old_status_prefixed) {
+        // If not a shop order, ignore (HPOS compatible).
+        if (
+            !in_array(
+                $post->post_type,
+                ['shop_order', 'shop_order_placehold'],
+                true
+            )
+        ) {
             return;
         }
 
-        /**
-         * Forward into the original validator.
-         * Signature parity with WordPress' transition_post_status:
-         *   exec( string $new_status, string $old_status, WP_Post $post )
-         *
-         * We *must* pass the prefixed variants here (e.g., 'wc-completed'), because
-         * ::exec() itself calls stripStatusPrefix() internally as needed.
-         */
-        self::exec(
-            wpStatus: $new_status_prefixed,
-            wcStatus: $old_status_prefixed,
-            post: $post
-        );
+        // Old = prior status according to WC, new = ongoing update. We no longer trust POST values.
+        $persisted = wc_get_order($order->get_id());
+        $old_status = $persisted
+            ? $persisted->get_status()
+            : $order->get_status('edit');
+        $new_status = $order->get_status();
+
+        if ($new_status === 'completed') {
+            // Trying to complete an order, that is frozen, is not allowed, not even here.
+            $payment = OrderManagement::getPayment(order: $order);
+
+            if ($payment->isFrozen()) {
+                throw new Exception(
+                    Translator::translate(
+                        phraseId: 'unable-to-capture-frozen-order'
+                    )
+                );
+            }
+        }
+
+        self::exec(wpStatus: $new_status, wcStatus: $old_status, post: $post);
     }
 
     /**
@@ -144,17 +159,17 @@ class BeforeOrderStatusChange
 
             return match ($status) {
                 'failed' => OrderManagement::canCancel(
-                        order: $order
-                    ) || (!$payment->isCancelled() || $payment->status === Status::REJECTED),
+                    order: $order
+                ) || (!$payment->isCancelled() || $payment->status === Status::REJECTED),
                 'cancelled' => OrderManagement::canCancel(
-                        order: $order
-                    ) || ($payment->isCancelled() || $payment->status === Status::TASK_REDIRECTION_REQUIRED),
+                    order: $order
+                ) || ($payment->isCancelled() || $payment->status === Status::TASK_REDIRECTION_REQUIRED),
                 'completed' => OrderManagement::canCapture(
-                        order: $order
-                    ) || $payment->isCaptured(),
+                    order: $order
+                ) || $payment->isCaptured(),
                 'refunded' => OrderManagement::canRefund(
-                        order: $order
-                    ) || $payment->isRefunded(),
+                    order: $order
+                ) || $payment->isRefunded(),
                 default => OrderManagement::canEdit(order: $order)
             };
         } catch (Throwable $error) {
@@ -183,37 +198,5 @@ class BeforeOrderStatusChange
             default:
                 return false;
         }
-    }
-
-    /**
-     * Strip 'wc-' prefix from status string.
-     */
-    private static function stripStatusPrefix(
-        string $status
-    ): string {
-        $result = $status;
-
-        if (
-            strlen(string: $result) > 3 &&
-            str_starts_with(haystack: $status, needle: 'wc-')
-        ) {
-            $result = substr(string: $status, offset: 3);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Type-safe wrapper for wc_get_order_status_name.
-     */
-    private static function getOrderStatusName(string $status): string
-    {
-        $name = wc_get_order_status_name(status: $status);
-
-        if (!is_string(value: $name)) {
-            return $status;
-        }
-
-        return $name;
     }
 }
