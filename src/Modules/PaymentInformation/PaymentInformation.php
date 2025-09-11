@@ -24,7 +24,6 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Css as EcomPaymentInformationCss;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Html as EcomPaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Sanitize;
 
 /**
  * Handles the output of the order view payment information widget
@@ -54,9 +53,7 @@ class PaymentInformation
         }
 
         echo '<style>' .
-            Sanitize::sanitizeHtml(
-                html: (new EcomPaymentInformationCss())->content
-            ) .
+            (new EcomPaymentInformationCss())->content .
             '</style>';
     }
 
@@ -76,8 +73,6 @@ class PaymentInformation
      */
     public static function getWidgetHtml(string $paymentId): string
     {
-        return Sanitize::sanitizeHtml(
-            html: (new EcomPaymentInformation(paymentId: $paymentId))->content
-        );
+        return (new EcomPaymentInformation(paymentId: $paymentId))->content;
     }
 }

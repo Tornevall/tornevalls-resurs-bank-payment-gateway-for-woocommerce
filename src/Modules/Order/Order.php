@@ -207,8 +207,7 @@ class Order
             Log::error(error: $e);
         }
 
-        // @todo This feature most definitely needs sanitizing but since it is fetched from Ecom we
-        // @todo need to figure out how the allowed tags should be handled.
+        // Skip sanitizing of data here.
         echo $data;
     }
 

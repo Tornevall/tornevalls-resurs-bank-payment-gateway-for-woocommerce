@@ -114,7 +114,7 @@ class MessageBag
             foreach (self::getBag() as $message) {
                 echo wp_kses(
                     '<div class="' . $message->type->value . ' notice"><p>' .
-                    $message->getEscapedMessage() . '</p></div>',
+                    $message->getMessage() . '</p></div>',
                     [
                         'div' => ['class' => true],
                         'p' => [],

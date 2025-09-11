@@ -15,7 +15,6 @@ use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Lib\Attribute\Validation\StringNotEmpty;
 use Resursbank\Ecom\Lib\Model\Model;
 use Resursbank\Woocommerce\Modules\MessageBag\Type;
-use Resursbank\Woocommerce\Util\Sanitize;
 
 /**
  * Message definition.
@@ -39,8 +38,8 @@ class Message extends Model
     /**
      * Retrieved escaped message for rendering.
      */
-    public function getEscapedMessage(): string
+    public function getMessage(): string
     {
-        return Sanitize::sanitizeHtml(html: $this->message);
+        return $this->message;
     }
 }
