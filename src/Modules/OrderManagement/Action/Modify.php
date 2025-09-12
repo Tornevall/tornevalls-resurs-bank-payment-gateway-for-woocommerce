@@ -231,6 +231,8 @@ class Modify extends Action
 
     /**
      * Handle logging of validation errors.
+     * @throws \Exception
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function handleValidationError(
         Throwable $error,
@@ -243,7 +245,7 @@ class Modify extends Action
         }
 
         OrderManagement::logError(
-            message: sprintf(
+            sprintf(
                 Translator::translate(phraseId: 'modify-too-large'),
                 Currency::getFormattedAmount(
                     amount: (float)$requestedAmount

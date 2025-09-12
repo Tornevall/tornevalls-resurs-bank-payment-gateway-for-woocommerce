@@ -152,6 +152,7 @@ class Callback
      * @throws HttpException
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @phpcs:ignoreFile CognitiveComplexity
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function checkIfReadyForCallback(WC_Order $order): void
     {
@@ -187,12 +188,12 @@ class Callback
             !Metadata::isThankYouTriggered(order: $order)
         ) {
             throw new HttpException(
-                message: sprintf(
+                sprintf(
                     'Order %s not ready for callbacks yet%s',
                     $order->get_id(),
                     $isRejected ? ' - Payment was rejected by Resurs.' : '.'
                 ),
-                code: 503
+                503
             );
         }
     }

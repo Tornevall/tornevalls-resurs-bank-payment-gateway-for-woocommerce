@@ -53,6 +53,7 @@ class Failure
      * failed at Resurs Bank.
      *
      * @SuppressWarnings(PHPMD.Superglobals)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(string $message = ''): string
     {
@@ -67,7 +68,7 @@ class Failure
                 message: $message,
                 orderId: $orderId
             );
-            Log::debug(message: sprintf('Order %s: %s.', $orderId, $message));
+            Log::debug(sprintf('Order %s: %s.', $orderId, $message));
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
