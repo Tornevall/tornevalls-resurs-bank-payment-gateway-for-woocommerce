@@ -143,7 +143,7 @@ class Metadata
         }
 
         try {
-            // Validate payment method on uuid first, then verify that the payment method
+            // Validate the payment method on uuid first, then verify that the payment method
             // is Resurs based. If it is not a UUID we can save performance by just not checking
             // it further.
             $stringValidation = new StringValidation();
@@ -164,7 +164,7 @@ class Metadata
         // If checkPaymentStatus is requested, attempt to validate the payment by requesting it.
         // Note that this method is called through several actions in the plugin which means
         // each request will render a getPayment, unless we cache it the first time. We only
-        // need to know the first time, if the payment is valid.
+        // need to know the first time if the payment is valid.
         if ($checkPaymentStatus && !isset($rbPaymentIsValid[$orderId])) {
             try {
                 OrderManagement::getPayment(order: $order);
