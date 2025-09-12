@@ -45,7 +45,8 @@ class Refund
     }
 
     /**
-     * Resolve refund object.
+     * Resolve a refund object.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function getRefund(int $id): ?WC_Order_Refund
     {
@@ -62,8 +63,8 @@ class Refund
             }
         } catch (Throwable $error) {
             Log::error(
-                error: $error,
-                message: sprintf(
+                $error,
+                sprintf(
                     Translator::translate(phraseId: 'failed-resolving-refund'),
                     $id
                 )

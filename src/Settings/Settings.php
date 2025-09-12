@@ -182,6 +182,7 @@ class Settings
 
     /**
      * Add link to "Settings" page for our plugin in WP admin.
+     * @noinspection HtmlUnknownTarget
      */
     public static function addPluginActionLinks(
         mixed $links,

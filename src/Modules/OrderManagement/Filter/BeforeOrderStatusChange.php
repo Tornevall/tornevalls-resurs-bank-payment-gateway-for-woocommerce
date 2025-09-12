@@ -12,7 +12,16 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Exception;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
 use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
@@ -42,6 +51,7 @@ class BeforeOrderStatusChange
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         string $wpStatus,
@@ -76,17 +86,17 @@ class BeforeOrderStatusChange
         }
 
         OrderManagement::logError(
-            message: sprintf(
+            sprintf(
                 Translator::translate(phraseId: 'failed-order-status-change'),
                 WooCommerce::getOrderStatusName(
                     status: WooCommerce::stripStatusPrefix(status: $wcStatus)
                 ),
                 WooCommerce::getOrderStatusName(status: $newStatus)
             ),
-            error: new IllegalValueException(
+            new IllegalValueException(
                 message: "Failed changing order status from $wcStatus to $newStatus for $post->ID"
             ),
-            order: $order
+            $order
         );
 
         Route::redirectBack();
@@ -95,9 +105,20 @@ class BeforeOrderStatusChange
     /**
      * HPOS transition handler.
      *
-     * @param $data_store
-     * @throws Exception
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @param WC_Order $order
+     * @param null $data_store
+     * @throws IllegalValueException
+     * @throws \JsonException
+     * @throws \ReflectionException
+     * @throws ApiException
+     * @throws AttributeCombinationException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws NotJsonEncodedException
      */
     public static function handlePostStatusTransitions(WC_Order $order, $data_store = null): void
     {

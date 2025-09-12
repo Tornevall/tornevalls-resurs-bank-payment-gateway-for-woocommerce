@@ -381,6 +381,7 @@ class OrderManagement
 
     /**
      * Get WC_Order from id.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getOrder(int $id): ?WC_Order
     {
@@ -406,8 +407,8 @@ class OrderManagement
             }
         } catch (Throwable $error) {
             Log::error(
-                error: $error,
-                message: sprintf(
+                $error,
+                sprintf(
                     Translator::translate(phraseId: 'failed-resolving-order'),
                     $id
                 )
@@ -505,6 +506,8 @@ class OrderManagement
 
     /**
      * Log error from a Payment Action request (cancel, debit, credit, modify).
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @throws Exception
      */
     public static function logActionError(
         ActionType $action,
@@ -519,12 +522,12 @@ class OrderManagement
         );
 
         self::logError(
-            message: sprintf(
+            sprintf(
                 Translator::translate(phraseId: "$actionString-action-failed"),
                 strtolower(string: $reason)
             ),
-            error: $error,
-            order: $order
+            $error,
+            $order
         );
     }
 
@@ -542,6 +545,7 @@ class OrderManagement
 
     /**
      * Log generic success message from payment action.
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function logSuccessPaymentAction(
         ActionType $action,
@@ -555,11 +559,11 @@ class OrderManagement
         );
 
         self::logSuccess(
-            message: sprintf(
+            sprintf(
                 Translator::translate(phraseId: "$actionString-success"),
                 Currency::getFormattedAmount(amount: (float)$amount)
             ),
-            order: $order
+            $order
         );
     }
 }
