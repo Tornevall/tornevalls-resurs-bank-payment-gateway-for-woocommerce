@@ -134,7 +134,7 @@ class BeforeOrderStatusChange
      * @throws Exception
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function handlePostStatusTransitions(WC_Order $order, null $data_store = null): void
+    public static function handlePostStatusTransitions(WC_Order $order, mixed $data_store): void
     {
         $order_id = $order->get_id();
 
