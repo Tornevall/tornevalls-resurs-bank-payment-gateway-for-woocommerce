@@ -390,7 +390,6 @@ class OrderManagement
         $result = wc_get_order($id);
 
         try {
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $result = $result instanceof WC_Order ? $result : wc_get_order($id);
 
             if (!$result instanceof WC_Order) {
