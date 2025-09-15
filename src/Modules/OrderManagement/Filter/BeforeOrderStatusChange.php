@@ -12,8 +12,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Exception;
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -21,6 +19,8 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
@@ -36,6 +36,7 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
+use WC_Order_Refund;
 use WP_Post;
 
 /**
@@ -53,6 +54,7 @@ class BeforeOrderStatusChange
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         string $wpStatus,
@@ -70,10 +72,23 @@ class BeforeOrderStatusChange
             return;
         }
 
-        $order = OrderManagement::getOrder(id: (int)$post->ID);
+        $postId = $post->ID;
+
+        // Refund objects are usually new and don't need to be checked in this context. Instead, we check the parent order.
+        if ($post->ID !== $post->post_parent && $post->post_parent > 0) {
+            $postId = $post->post_parent;
+        }
+
+        $order = OrderManagement::getOrder(id: (int)$postId);
         $newStatus = WooCommerce::stripStatusPrefix(
             status: $_POST['order_status'] ?? ''
         );
+
+        /** @noinspection PhpConditionAlreadyCheckedInspection */
+        if ($order instanceof WC_Order_Refund) {
+            // Refunds are handled elsewhere.
+            return;
+        }
 
         // Only continue if the order was paid through Resurs Bank.
         if (
@@ -87,17 +102,17 @@ class BeforeOrderStatusChange
         }
 
         OrderManagement::logError(
-            message: sprintf(
+            sprintf(
                 Translator::translate(phraseId: 'failed-order-status-change'),
                 WooCommerce::getOrderStatusName(
                     status: WooCommerce::stripStatusPrefix(status: $wcStatus)
                 ),
                 WooCommerce::getOrderStatusName(status: $newStatus)
             ),
-            error: new IllegalValueException(
+            new IllegalValueException(
                 message: "Failed changing order status from $wcStatus to $newStatus for $post->ID"
             ),
-            order: $order
+            $order
         );
 
         Route::redirectBack();
@@ -118,8 +133,10 @@ class BeforeOrderStatusChange
      * @throws EmptyValueException
      * @throws IllegalTypeException
      * @throws NotJsonEncodedException
+     * @throws Exception
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function handlePostStatusTransitions(WC_Order $order, $data_store = null): void
+    public static function handlePostStatusTransitions(WC_Order $order, mixed $data_store): void
     {
         $order_id = $order->get_id();
 

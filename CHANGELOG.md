@@ -1,3 +1,11 @@
+# 1.2.14
+
+* WOO-1471 Translation are missing after upgrade to ecom 3.2.x
+* WOO-1472 Order status change from on-hold to completed is inconsistently blocked or allowed despite thrown exceptions
+* WOO-1483 Reconsider the way we handle Before-Order-Status-Management \(prevent on-hold => completed on frozen orders\)
+* WOO-1484 Payment information widget \(Admin\)
+* WOO-1490 Debit => Credit WP\_Order not found
+
 # 1.2.13
 
 * WOO-1474 Consistent part payment pricing via external systems (Lemonsoft, etc) lowest price + correct VAT on product page

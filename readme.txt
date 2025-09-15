@@ -6,9 +6,9 @@ Tested up to: 6.8
 Requires PHP: 8.1
 WC requires at least: 7.6.0
 WC Tested up to: 10.1.1
-Plugin requires ecom: 3.2.15
+Plugin requires ecom: 3.3.6
 Requires Plugins: woocommerce
-Stable tag: 1.2.13
+Stable tag: 1.2.15
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -63,17 +63,13 @@ For full documentation, please refer to our [documentation](https://developers.r
 
 Latest changes:
 
-# 1.2.13
+# 1.2.14
 
-* WOO-1474 Consistent part payment pricing via external systems (Lemonsoft, etc) lowest price + correct VAT on product page
-
-# 1.2.12
-
-* WOO-1452 Period is reset each time config enters get-store-country
-* WOO-1461 README/Changelog updates
-* WOO-1464 ECP Timeouts Control
-* WOO-1469 Plugin requires ecom 3.2.9 issue.
-* WOO-1470 GetPeriods error
+* WOO-1471 Translation are missing after upgrade to ecom 3.2.x
+* WOO-1472 Order status change from on-hold to completed is inconsistently blocked or allowed despite thrown exceptions
+* WOO-1483 Reconsider the way we handle Before-Order-Status-Management \(prevent on-hold => completed on frozen orders\)
+* WOO-1484 Payment information widget \(Admin\)
+* WOO-1490 Debit => Credit WP\_Order not found
 
 == Upgrade Notice ==
 
