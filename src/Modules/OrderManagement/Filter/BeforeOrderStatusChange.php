@@ -19,6 +19,8 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
@@ -120,8 +122,8 @@ class BeforeOrderStatusChange
      * HPOS transition handler.
      *
      * @throws IllegalValueException
-     * @throws \JsonException
-     * @throws \ReflectionException
+     * @throws JsonException
+     * @throws ReflectionException
      * @throws ApiException
      * @throws AttributeCombinationException
      * @throws AuthException

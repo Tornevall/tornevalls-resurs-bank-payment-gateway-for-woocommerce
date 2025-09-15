@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\UniqueSellingPoint;
 
-use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
+use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMore;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
@@ -39,7 +39,7 @@ class UniqueSellingPoint
         }
 
         try {
-            $css = ReadMore::getCss();
+            $css = (new ReadMore())->content;
 
             echo <<<EX
 <style id="rb-rm-styles">

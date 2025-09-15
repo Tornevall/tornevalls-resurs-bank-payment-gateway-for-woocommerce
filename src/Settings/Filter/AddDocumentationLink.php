@@ -42,7 +42,7 @@ class AddDocumentationLink
         ) {
             $links[] = wp_kses(
                 '<a href="blank" target="_blank">' .
-                Translator::translate(phraseId: 'documentation') .
+                    Translator::translate(phraseId: 'documentation') .
                 '</a>',
                 ['a' => ['target' => true]]
             );

@@ -9,31 +9,19 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\PartPayment;
 
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
-use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Location;
+use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as EcomPartPayment;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Ecom\Module\Widget\PartPayment\Html as EcomPartPayment;
+use Resursbank\Ecom\Module\Widget\PartPayment\Js as EcomPartPaymentJs;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -46,128 +34,10 @@ use WC_Product;
  */
 class PartPayment
 {
-    public static ?ReadMore $readMoreInstance = null;
-
     /**
      * ECom Part Payment widget instance.
      */
-    private static ?EcomPartPayment $instance = null;
-
-    /**
-     * @throws TranslationException
-     * @throws ValidationException
-     * @throws CurlException
-     * @throws IllegalValueException
-     * @throws IllegalTypeException
-     * @throws Throwable
-     * @throws EmptyValueException
-     * @throws AuthException
-     * @throws JsonException
-     * @throws ConfigException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws CacheException
-     * @throws FilesystemException
-     */
-    public static function getReadMoreWidget(): ReadMore
-    {
-        if (self::$readMoreInstance !== null) {
-            return self::$readMoreInstance;
-        }
-
-        $paymentMethodSet = PaymentMethod::getData();
-
-        if ($paymentMethodSet === '') {
-            throw new EmptyValueException(
-                message: 'Payment method is not properly configured. Part payment view can not be used.'
-            );
-        }
-
-        self::$readMoreInstance = new ReadMore(
-            paymentMethod: Repository::getById(
-                paymentMethodId: $paymentMethodSet
-            ),
-            amount: self::getPriceData()
-        );
-
-        return self::$readMoreInstance;
-    }
-
-    /**
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws FilesystemException
-     * @throws HttpException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
-     * @throws ValidationException
-     * @throws Throwable
-     */
-    public static function getWidget(): ?EcomPartPayment
-    {
-        Config::setLocation(
-            location: Location::from(value: WooCommerce::getStoreCountry())
-        );
-
-        if (self::$instance !== null) {
-            return self::$instance;
-        }
-
-        $priceData = self::getPriceData();
-
-        if ($priceData <= 0.0) {
-            return null;
-        }
-
-        $paymentMethodSet = PaymentMethod::getData();
-
-        if ($paymentMethodSet === '') {
-            throw new EmptyValueException(
-                message: 'Payment method is not properly configured. Part payment view can not be used.'
-            );
-        }
-
-        $partPaymentWidgetMethod = Repository::getById(
-            paymentMethodId: $paymentMethodSet
-        );
-
-        if ($partPaymentWidgetMethod === null) {
-            throw new IllegalTypeException(
-                message: "Payment method $paymentMethodSet not found."
-            );
-        }
-
-        if (
-            $priceData >= $partPaymentWidgetMethod->minPurchaseLimit &&
-            $priceData <= $partPaymentWidgetMethod->maxPurchaseLimit
-        ) {
-            self::$instance = new EcomPartPayment(
-                storeId: StoreId::getData(),
-                paymentMethod: $partPaymentWidgetMethod,
-                months: (int)Period::getData(),
-                amount: $priceData,
-                currencySymbol: Currency::getWooCommerceCurrencySymbol(),
-                currencyFormat: Currency::getEcomCurrencyFormat(),
-                fetchStartingCostUrl: Route::getUrl(
-                    route: Route::ROUTE_PART_PAYMENT
-                ),
-                decimals: Currency::getConfiguredDecimalPoints(),
-                displayInfoText: self::displayInfoText(),
-                threshold: Limit::getData()
-            );
-
-            return self::$instance;
-        }
-
-        return null;
-    }
+    private static ?EcomPaymentMethod $paymentMethod = null;
 
     /**
      * Init method for frontend scripts and styling.
@@ -207,7 +77,9 @@ class PartPayment
     }
 
     /**
-     * Output widget HTML if on single product page.
+     * Output widget HTML if on a single product page.
+     *
+     * @throws ConfigException
      */
     public static function renderWidget(): void
     {
@@ -215,9 +87,24 @@ class PartPayment
             return;
         }
 
+        Config::setLocation(
+            location: Location::from(value: WooCommerce::getStoreCountry())
+        );
+
         try {
+            $widget = new EcomPartPayment(
+                paymentMethod: self::getPaymentMethod(),
+                months: (int)Period::getData(),
+                amount: self::getPriceData(),
+                fetchStartingCostUrl: Route::getUrl(
+                    route: Route::ROUTE_PART_PAYMENT
+                ),
+                displayInfoText: self::displayInfoText(),
+                threshold: Limit::getData()
+            );
+
             echo '<div id="rb-pp-widget-container">' .
-                self::getWidget()->content .
+                $widget->content .
                 '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -236,6 +123,16 @@ class PartPayment
         }
 
         try {
+            $widget = new EcomPartPaymentJs(
+                paymentMethod: self::getPaymentMethod(),
+                months: (int)Period::getData(),
+                amount: self::getPriceData(),
+                fetchStartingCostUrl: Route::getUrl(
+                    route: Route::ROUTE_PART_PAYMENT
+                ),
+                threshold: Limit::getData()
+            );
+
             wp_enqueue_script(
                 'partpayment-script',
                 Url::getResourceUrl(
@@ -244,36 +141,73 @@ class PartPayment
                 ),
                 ['jquery']
             );
-            wp_add_inline_script(
-                'partpayment-script',
-                self::getWidget()->js
-            );
 
-            try {
-                $maxApplicationLimit = self::getWidget()->paymentMethod->maxApplicationLimit;
-                $minApplicationLimit = self::getWidget()->paymentMethod->minApplicationLimit;
-            } catch (Throwable $error) {
-                $minApplicationLimit = 0;
-                $maxApplicationLimit = 0;
-            }
-
-            // Allow max/min-application limits to render in front end, so
-            // that we can hide/show the part payment widget on demand (always rendering,
-            // regardless of the threshold).
+            // Disable this only if you want all front end calculations to break.
+            wp_add_inline_script('partpayment-script', $widget->content);
             wp_localize_script(
                 'partpayment-script',
                 'rbPpScript',
                 [
                     'product_price' => self::getPriceData(),
-                    'maxApplicationLimit' => $maxApplicationLimit,
-                    'minApplicationLimit' => $minApplicationLimit,
-                    'thresholdLimit' => Limit::getData(),
-                    'monthlyCost' => self::getWidget()->getMonthlyCost()
                 ]
             );
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
+    }
+
+    public static function getPaymentMethod(): ?EcomPaymentMethod
+    {
+        if (self::$paymentMethod !== null) {
+            return self::$paymentMethod;
+        }
+
+        try {
+            $paymentMethodSet = PaymentMethod::getData();
+
+            if ($paymentMethodSet === '') {
+                throw new EmptyValueException(
+                    message: 'Payment method is not properly configured. Part payment view can not be used.'
+                );
+            }
+
+            self::$paymentMethod = Repository::getById(
+                paymentMethodId: $paymentMethodSet
+            );
+
+            if (self::$paymentMethod === null) {
+                throw new IllegalTypeException(
+                    message: "Payment method $paymentMethodSet not found."
+                );
+            }
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+
+        return self::$paymentMethod;
+    }
+
+    /**
+     * Indicates whether widget should be visible or not.
+     */
+    public static function isEnabled(): bool
+    {
+        try {
+            $amount = self::getPriceData();
+            $method = self::getPaymentMethod();
+
+            // Enabled if there is a product and a price.
+            return PartPaymentOptions::isEnabled() &&
+                PaymentMethod::getData() !== '' &&
+                is_product() &&
+                $amount > 0.0 &&
+                $amount >= $method->minPurchaseLimit &&
+                $amount <= $method->maxPurchaseLimit;
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+        }
+
+        return false;
     }
 
     /**
@@ -300,14 +234,12 @@ class PartPayment
             if ($priceDataMaybe > 0.0) {
                 $priceData = $priceDataMaybe;
             }
-
         } catch (Throwable) {
             $priceData = WooCommerce::getCartTotals();
         }
 
         return $priceData;
     }
-
 
     /**
      * Programmatically control whether part payment info text should be shown or hidden. Default is to show.
@@ -318,24 +250,6 @@ class PartPayment
     {
         $returnBool = apply_filters('display_part_payment_info_text', true);
         return is_bool(value: $returnBool) ? $returnBool : false;
-    }
-
-    /**
-     * Indicates whether widget should be visible or not.
-     */
-    public static function isEnabled(): bool
-    {
-        try {
-            // Enabled if there is a product and a price.
-            return PartPaymentOptions::isEnabled() &&
-                PaymentMethod::getData() !== '' &&
-                is_product() &&
-                self::getPriceData() > 0.0;
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-
-        return false;
     }
 
     /**

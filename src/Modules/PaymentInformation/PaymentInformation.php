@@ -21,10 +21,9 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\Payment\Widget\PaymentInformation as EcomPaymentInformation;
+use Resursbank\Ecom\Module\Widget\PaymentInformation\Css as EcomPaymentInformationCss;
+use Resursbank\Ecom\Module\Widget\PaymentInformation\Html as EcomPaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Currency;
-use Resursbank\Woocommerce\Util\Sanitize;
 
 /**
  * Handles the output of the order view payment information widget
@@ -33,34 +32,6 @@ use Resursbank\Woocommerce\Util\Sanitize;
  */
 class PaymentInformation
 {
-    public EcomPaymentInformation $widget;
-
-    /**
-     * @param string $paymentId Resurs payment ID
-     * @throws ApiException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws FilesystemException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
-     * @throws AttributeCombinationException
-     */
-    public function __construct(string $paymentId)
-    {
-        $currencySymbol = Currency::getWooCommerceCurrencySymbol();
-        $currencyFormat = Currency::getEcomCurrencyFormat();
-        $this->widget = new EcomPaymentInformation(
-            paymentId: $paymentId,
-            currencySymbol: $currencySymbol,
-            currencyFormat: $currencyFormat
-        );
-    }
-
     /**
      * Init method for loading module CSS.
      */
@@ -74,8 +45,6 @@ class PaymentInformation
 
     /**
      * Sets CSS in header if the current page is the order view.
-     *
-     * @throws EmptyValueException
      */
     public static function setCss(): void
     {
@@ -84,17 +53,26 @@ class PaymentInformation
         }
 
         echo '<style>' .
-            Sanitize::sanitizeHtml(html: EcomPaymentInformation::getCss()) .
+            (new EcomPaymentInformationCss())->content .
             '</style>';
     }
 
     /**
-     * Outputs the actual widget HTML
-     *
-     * @noinspection PhpUnused
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AttributeCombinationException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws FilesystemException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalTypeException
+     * @throws IllegalValueException
      */
-    public function getWidget(): void
+    public static function getWidgetHtml(string $paymentId): string
     {
-        echo Sanitize::sanitizeHtml(html: $this->widget->content);
+        return (new EcomPaymentInformation(paymentId: $paymentId))->content;
     }
 }

@@ -61,7 +61,9 @@ class WooCommerce
      */
     public static function isWcPresent(): bool
     {
-        return class_exists('Automattic\WooCommerce\Utilities\FeaturesUtil');
+        return class_exists(
+            class: 'Automattic\WooCommerce\Utilities\FeaturesUtil'
+        );
     }
 
     /**
@@ -196,7 +198,11 @@ class WooCommerce
     public static function getAssetVersion(string $assetFile = 'gateway'): string
     {
         // Sanitize the input to allow only alphanumeric characters, underscores, and dashes.
-        $sanitizedFile = preg_replace('/[^a-zA-Z0-9_-]/', '', $assetFile);
+        $sanitizedFile = preg_replace(
+            pattern: '/[^a-zA-Z0-9_-]/',
+            replacement: '',
+            subject: $assetFile
+        );
 
         // Construct the file path.
         $filePath = RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/' . $sanitizedFile . '.asset.php';

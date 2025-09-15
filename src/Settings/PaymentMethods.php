@@ -23,7 +23,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\PaymentMethods as PaymentMethodsWidget;
+use Resursbank\Ecom\Module\Widget\PaymentMethod\Html as PaymentMethodWidget;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
@@ -70,7 +70,7 @@ class PaymentMethods
             Repository::getCache()->clear();
         }
 
-        return (new PaymentMethodsWidget(
+        return (new PaymentMethodWidget(
             paymentMethods: Repository::getPaymentMethods()
         ))->content;
     }

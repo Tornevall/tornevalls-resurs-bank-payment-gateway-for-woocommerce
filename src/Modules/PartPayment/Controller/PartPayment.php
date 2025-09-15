@@ -26,13 +26,11 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\PartPayment as PartPaymentWidget;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Ecom\Module\Widget\PartPayment\Html as PartPaymentWidget;
+use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
@@ -84,14 +82,10 @@ class PartPayment
             is_numeric(value: $requestAmount) &&
             $paymentMethod !== null
         ) {
-            $currencySymbol = Currency::getWooCommerceCurrencySymbol();
             $widget = new PartPaymentWidget(
-                storeId: StoreId::getData(),
                 paymentMethod: $paymentMethod,
                 months: (int)Period::getData(),
                 amount: (float)$requestAmount,
-                currencySymbol: $currencySymbol,
-                currencyFormat: Currency::getEcomCurrencyFormat(),
                 fetchStartingCostUrl: Route::getUrl(
                     route: Route::ROUTE_PART_PAYMENT
                 ),

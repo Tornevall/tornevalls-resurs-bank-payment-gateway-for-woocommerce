@@ -41,10 +41,10 @@ class Failure
     public static function init(): void
     {
         add_filter(
-            hook_name: 'woocommerce_order_cancelled_notice',
-            callback: 'Resursbank\Woocommerce\Modules\Order\Filter\Failure::exec',
-            priority: 10,
-            accepted_args: 1
+            'woocommerce_order_cancelled_notice',
+            'Resursbank\Woocommerce\Modules\Order\Filter\Failure::exec',
+            10,
+            1
         );
     }
 
@@ -53,6 +53,7 @@ class Failure
      * failed at Resurs Bank.
      *
      * @SuppressWarnings(PHPMD.Superglobals)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(string $message = ''): string
     {
@@ -67,7 +68,7 @@ class Failure
                 message: $message,
                 orderId: $orderId
             );
-            Log::debug(message: sprintf('Order %s: %s.', $orderId, $message));
+            Log::debug(sprintf('Order %s: %s.', $orderId, $message));
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

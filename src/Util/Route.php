@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -44,6 +45,8 @@ use function strlen;
 
 /**
  * Primitive routing, executing arbitrary code depending on $_GET parameters.
+ *
+ * @noinspection PhpLackOfCohesionInspection
  */
 class Route
 {
@@ -110,6 +113,7 @@ class Route
     public const ROUTE_ADMIN_GET_ORDER_CONTENT = 'get-order-content-admin';
 
     /**
+     * @throws ConfigException
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.ExitExpression)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
@@ -239,6 +243,8 @@ class Route
 
     /**
      * Respond to browser with an error based on Throwable.
+     *
+     * @throws ConfigException
      */
     public static function respondWithError(
         Throwable $exception
@@ -292,7 +298,7 @@ class Route
      * @throws HttpException
      * @throws IllegalValueException
      * @throws JsonException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws ApiException
      * @throws AuthException
      * @throws CacheException
@@ -389,7 +395,9 @@ class Route
      */
     private static function userIsAdmin(): bool
     {
-        return is_user_logged_in() && current_user_can('administrator');
+        return is_user_logged_in() && current_user_can(
+            capability: 'administrator'
+        );
     }
 
     /**

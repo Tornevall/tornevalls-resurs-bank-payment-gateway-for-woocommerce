@@ -19,10 +19,10 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PriceSignage\PriceSignage;
-use Resursbank\Ecom\Module\PaymentMethod\Widget\ReadMore;
 use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
-use Resursbank\Ecom\Module\PriceSignage\Widget\CostList;
-use Resursbank\Ecom\Module\PriceSignage\Widget\Warning;
+use Resursbank\Ecom\Module\Widget\ConsumerCreditWarning\Html as Warning;
+use Resursbank\Ecom\Module\Widget\CostList\Html as CostList;
+use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -33,24 +33,28 @@ use WC_Cart;
  */
 class GatewayHelper
 {
-    private ?PriceSignage $priceSignage;
-
-    public function __construct(private readonly PaymentMethod $paymentMethod)
-    {
+    public function __construct(
+        private readonly PaymentMethod $paymentMethod
+    ) {
     }
 
     /**
      * Render payment method content including Cost List and Warning widgets.
      *
-     * @param $paymentMethod
-     * @param $amount
+     * @throws ApiException
+     * @throws AuthException
+     * @throws CacheException
      * @throws ConfigException
+     * @throws CurlException
+     * @throws EmptyValueException
      * @throws FilesystemException
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws Throwable
      * @throws TranslationException
+     * @throws ValidationException
      */
     public function renderPaymentMethodContent(
         PaymentMethod $paymentMethod,
@@ -163,7 +167,7 @@ class GatewayHelper
             if (
                 $total === 0.0 &&
                 isset($totals['total']) &&
-                is_array($totals) &&
+                is_array(value: $totals) &&
                 (float)$totals['total'] > 0
             ) {
                 $total = (float)$totals['total'];

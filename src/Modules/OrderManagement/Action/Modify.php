@@ -69,7 +69,6 @@ class Modify extends Action
      * @throws ReflectionException
      * @throws Throwable
      * @throws ValidationException
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         Payment $payment,
@@ -151,7 +150,12 @@ class Modify extends Action
 
                 $orderLines = Order::getOrderLines(order: $order);
 
-                if (count($orderLines) > 0 && $orderLines->getTotal() > 0) {
+                if (
+                    count(
+                    value: $orderLines
+                ) > 0 &&
+                    $orderLines->getTotal() > 0
+                ) {
                     Repository::addOrderLines(
                         paymentId: $payment->id,
                         orderLines: $orderLines
@@ -227,6 +231,8 @@ class Modify extends Action
 
     /**
      * Handle logging of validation errors.
+     * @throws \Exception
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function handleValidationError(
         Throwable $error,
@@ -239,7 +245,7 @@ class Modify extends Action
         }
 
         OrderManagement::logError(
-            message: sprintf(
+            sprintf(
                 Translator::translate(phraseId: 'modify-too-large'),
                 Currency::getFormattedAmount(
                     amount: (float)$requestedAmount

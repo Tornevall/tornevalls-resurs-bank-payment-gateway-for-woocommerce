@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Controller;
 
-use Resursbank\Woocommerce\Modules\GetAddress\GetAddress as GetAddressWidget;
+use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
@@ -21,7 +21,7 @@ class GetAddressCss
     public static function exec(): string
     {
         try {
-            return GetAddressWidget::getWidget()->css;
+            return (new Widget())->content;
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

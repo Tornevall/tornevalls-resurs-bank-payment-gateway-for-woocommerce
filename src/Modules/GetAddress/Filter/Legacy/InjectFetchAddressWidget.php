@@ -12,7 +12,7 @@ namespace Resursbank\Woocommerce\Modules\GetAddress\Filter\Legacy;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
-use Resursbank\Woocommerce\Modules\GetAddress\GetAddress as GetAddressWidget;
+use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
@@ -49,8 +49,8 @@ class InjectFetchAddressWidget
              */
             $result = preg_replace(
                 pattern: '/\n\s*\n/m',
-                replacement: " ",
-                subject: GetAddressWidget::getWidget()->content
+                replacement: ' ',
+                subject: (new Widget())->content
             );
         } catch (Throwable $e) {
             try {

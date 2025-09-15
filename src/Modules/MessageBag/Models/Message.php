@@ -9,11 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\MessageBag\Models;
 
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
+use Resursbank\Ecom\Lib\Attribute\Validation\StringNotEmpty;
 use Resursbank\Ecom\Lib\Model\Model;
-use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Woocommerce\Modules\MessageBag\Type;
-use Resursbank\Woocommerce\Util\Sanitize;
 
 /**
  * Message definition.
@@ -23,31 +24,22 @@ class Message extends Model
     /**
      * Setup model properties.
      *
-     * @throws EmptyValueException
+     * @throws AttributeCombinationException
+     * @throws JsonException
+     * @throws ReflectionException
      */
     public function __construct(
-        public readonly string $message,
-        public readonly Type $type,
-        private readonly StringValidation $stringValidation = new StringValidation()
+        #[StringNotEmpty] public readonly string $message,
+        public readonly Type $type
     ) {
-        $this->validateMessage();
+        parent::__construct();
     }
 
     /**
      * Retrieved escaped message for rendering.
      */
-    public function getEscapedMessage(): string
+    public function getMessage(): string
     {
-        return Sanitize::sanitizeHtml(html: $this->message);
-    }
-
-    /**
-     * Ensure message is not empty.
-     *
-     * @throws EmptyValueException
-     */
-    private function validateMessage(): void
-    {
-        $this->stringValidation->notEmpty(value: $this->message);
+        return $this->message;
     }
 }
