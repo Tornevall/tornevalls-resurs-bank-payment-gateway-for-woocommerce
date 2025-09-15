@@ -25,6 +25,7 @@ class EnableCancel extends BoolOption implements OptionInterface
         return self::NAME_PREFIX . 'enable_cancel';
     }
 
+    /** @noinspection PhpMissingParentCallCommonInspection */
     public static function getDefault(): ?string
     {
         return 'yes';

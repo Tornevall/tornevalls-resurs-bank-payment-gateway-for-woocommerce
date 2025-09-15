@@ -126,6 +126,8 @@ class Api
     /**
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
+     *
+     * @throws ConfigException
      */
     public static function getSettings(): array
     {

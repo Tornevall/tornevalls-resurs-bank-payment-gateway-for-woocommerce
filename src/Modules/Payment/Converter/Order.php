@@ -13,6 +13,7 @@ namespace Resursbank\Woocommerce\Modules\Payment\Converter;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\TranslationException;
@@ -39,6 +40,7 @@ use function is_array;
 class Order
 {
     /**
+     * @throws AttributeCombinationException
      * @throws ConfigException
      * @throws FilesystemException
      * @throws IllegalTypeException
@@ -111,13 +113,16 @@ class Order
 
     /**
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws AttributeCombinationException
      */
     private static function getShippingLines(
         WC_Abstract_Order $order
     ): array {
         $result = [];
 
-        $items = $order->get_items('shipping');
+        $items = $order->get_items(types: 'shipping');
 
         if (!is_array(value: $items)) {
             throw new IllegalValueException(
@@ -138,12 +143,13 @@ class Order
     }
 
     /**
+     * @throws AttributeCombinationException
+     * @throws ConfigException
+     * @throws FilesystemException
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws ConfigException
-     * @throws FilesystemException
      * @throws TranslationException
      */
     private static function getProductLines(
@@ -179,7 +185,10 @@ class Order
     }
 
     /**
+     * @throws AttributeCombinationException
      * @throws IllegalValueException
+     * @throws JsonException
+     * @throws ReflectionException
      */
     private static function getFeeLines(
         WC_Abstract_Order $order

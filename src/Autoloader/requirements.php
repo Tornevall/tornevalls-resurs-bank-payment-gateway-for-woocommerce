@@ -2,12 +2,8 @@
 
 declare(strict_types=1);
 
-/** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-
 /**
- * Add admin notice when dependencies like ecom is missing.
- *
- * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+ * Add admin notice when dependencies like ecom are missing.
  */
 function resursBankHasNoEcom(): void
 {
@@ -21,8 +17,6 @@ function resursBankHasNoEcom(): void
 
 /**
  * Add admin notice when installation runs on PHP older than 8.1.
- *
- * @noinspection PhpArgumentWithoutNamedIdentifierInspection
  */
 function resursBankHasOldPhp(): void
 {

@@ -39,6 +39,7 @@ class HideCaptureAction
                 // as it might be frozen by Resurs. Forcing a status change could cause incorrect handling
                 // and potential cancellation of the order. Actions are limited to not block for other
                 // buttons.
+                /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
                 if ($name === 'on_hold' ||
                     ($order->has_status('on-hold') && ($name === 'complete' || $name === 'processing'))
                 ) {

@@ -36,6 +36,6 @@ class Translator
             Log::error(error: $e);
         }
 
-        return Sanitize::sanitizeHtml(html: $result);
+        return $result;
     }
 }

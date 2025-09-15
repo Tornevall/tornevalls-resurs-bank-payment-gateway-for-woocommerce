@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\MessageBag;
 
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
@@ -43,7 +42,6 @@ class MessageBag
      */
     public static function init(): void
     {
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         add_action(
             'admin_notices',
             'Resursbank\Woocommerce\Modules\MessageBag\MessageBag::printMessages'
@@ -57,15 +55,15 @@ class MessageBag
     public static function add(string $message, Type $type): void
     {
         try {
-            $messageInstance = new Message(message: $message, type: $type);
-        } catch (EmptyValueException) {
-            $messageInstance = new Message(
-                message: 'Empty message encountered.',
-                type: Type::ERROR
-            );
-        }
+            if ($message === '') {
+                $messageInstance = new Message(
+                    message: 'Empty message encountered.',
+                    type: Type::ERROR
+                );
+            } else {
+                $messageInstance = new Message(message: $message, type: $type);
+            }
 
-        try {
             if (Admin::isAdmin()) {
                 if (defined(constant_name: 'DOING_AJAX')) {
                     // No way of handling messages in AJAX requests.
@@ -116,7 +114,7 @@ class MessageBag
             foreach (self::getBag() as $message) {
                 echo wp_kses(
                     '<div class="' . $message->type->value . ' notice"><p>' .
-                    $message->getEscapedMessage() . '</p></div>',
+                    $message->getMessage() . '</p></div>',
                     [
                         'div' => ['class' => true],
                         'p' => [],

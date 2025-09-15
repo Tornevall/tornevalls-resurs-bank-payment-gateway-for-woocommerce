@@ -37,7 +37,7 @@ class Url
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         // NOTE: plugin_dir_url returns everything up to the last slash.
         return plugin_dir_url(
-            RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/{$type->value}/" .
+            RESURSBANK_MODULE_DIR_NAME . "/src/Modules/$module/resources/$type->value/" .
                 str_replace(search: '/', replace: '', subject: $file)
         ) . $file;
     }
@@ -51,7 +51,7 @@ class Url
         string $file
     ): string {
         return plugin_dir_url(
-            RESURSBANK_MODULE_DIR_NAME . "/assets/js/dist/" .
+            file: RESURSBANK_MODULE_DIR_NAME . '/assets/js/dist/' .
                 str_replace(search: '/', replace: '', subject: $file)
         ) . $file;
     }
@@ -207,7 +207,7 @@ class Url
     {
         $jsonData = file_get_contents(filename: 'php://input');
         $data = json_decode(
-            $jsonData,
+            json: $jsonData,
             associative: true,
             flags: JSON_THROW_ON_ERROR
         );

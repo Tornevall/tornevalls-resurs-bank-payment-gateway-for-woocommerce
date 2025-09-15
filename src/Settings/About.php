@@ -9,7 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Resursbank\Ecom\Module\SupportInfo\Widget\SupportInfo as EcomSupportInfo;
+use Resursbank\Ecom\Module\Widget\SupportInfo\Css as EcomSupportInfoCss;
+use Resursbank\Ecom\Module\Widget\SupportInfo\Html as EcomSupportInfo;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
@@ -28,8 +29,7 @@ class About
      */
     public static function setCss(): void
     {
-        $widget = About::getWidget();
-        echo "<style>" . ($widget->css ?? '') . "</style>\n";
+        echo '<style>' . ((new EcomSupportInfoCss())->content ?? '') . "</style>\n";
     }
 
     /**
@@ -67,6 +67,6 @@ class About
     public static function getWidgetHtml(): string
     {
         $GLOBALS['hide_save_button'] = '1';
-        return self::getWidget()->html;
+        return self::getWidget()->content;
     }
 }

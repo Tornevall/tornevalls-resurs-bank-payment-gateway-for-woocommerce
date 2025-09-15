@@ -77,9 +77,9 @@ class GetOrderContentController
         $data = [];
 
         try {
-            $data['payment_info'] = (new PaymentInformation(
+            $data['payment_info'] = PaymentInformation::getWidgetHtml(
                 paymentId: Metadata::getPaymentId(order: $order)
-            ))->widget->content;
+            );
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

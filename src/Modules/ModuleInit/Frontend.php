@@ -32,7 +32,11 @@ class Frontend
             return;
         }
 
-        add_action('wp_enqueue_scripts', [self::class, 'enableConsoleLogs'], 1);
+        add_action(
+            'wp_enqueue_scripts',
+            [self::class, 'enableConsoleLogs'],
+            1
+        );
 
         if (WooCommerce::isUsingBlocksCheckout()) {
             GatewayBlocks::init();

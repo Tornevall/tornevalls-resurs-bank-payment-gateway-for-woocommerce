@@ -114,7 +114,7 @@ class Callback
         Route::respondWithExit(
             body: '',
             code: Repository::process(
-                callback: $controller->getRequestData(),
+                $controller->getRequestData(),
                 process: static function (
                     CallbackInterface $callback
                 ): void {
@@ -129,13 +129,15 @@ class Callback
                     self::checkIfReadyForCallback(order: $order);
 
                     try {
-                        $order->add_order_note(note: $callback->getNote());
+                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                        $order->add_order_note($callback->getNote());
                     } catch (Throwable $e) {
                         // In case translations are lost in ecom transitions, we will
                         // push out the error message instead for which the phrase id will
                         // be displayed instead. If this occurs, and we do not do this,
                         // callbacks will be rejected with an error instead.
-                        $order->add_order_note(note: $e->getMessage());
+                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                        $order->add_order_note($e->getMessage());
                     }
 
                     Status::update(order: $order);
