@@ -1,3 +1,7 @@
+# 1.2.15
+
+* Positional execution problem (hotfix).
+
 # 1.2.14
 
 * WOO-1471 Translation are missing after upgrade to ecom 3.2.x

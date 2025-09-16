@@ -35,7 +35,7 @@ class Cancel extends Action
         OrderManagement::execAction(
             action: ActionType::CANCEL,
             order: $order,
-            static function () use ($order): void {
+            callback: static function () use ($order): void {
                 $payment = OrderManagement::getPayment(
                     order: $order
                 );

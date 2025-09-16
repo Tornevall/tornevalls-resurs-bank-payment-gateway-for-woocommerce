@@ -63,6 +63,10 @@ For full documentation, please refer to our [documentation](https://developers.r
 
 Latest changes:
 
+# 1.2.15
+
+* Positional execution problem (hotfix).
+
 # 1.2.14
 
 * WOO-1471 Translation are missing after upgrade to ecom 3.2.x
