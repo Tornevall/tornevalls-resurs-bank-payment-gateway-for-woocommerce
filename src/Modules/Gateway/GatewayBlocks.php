@@ -26,6 +26,7 @@ use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -175,6 +176,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'title' => $paymentMethod->name,
                     'description' => '<div class="rb-usp">' . $usp->getText() . '</div>',
                     'costlist' => $helper->getCostList(),
+                    'costlist_url' => Route::getUrl(route: 'get-costlist'),
                     'readmore' => $readMore->content,
                     'price_signage_warning' => $helper->getPriceSignageWarning(),
                     'read_more_css' => '',

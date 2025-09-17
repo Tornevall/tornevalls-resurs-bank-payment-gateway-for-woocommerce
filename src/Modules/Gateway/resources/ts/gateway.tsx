@@ -96,6 +96,8 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
             }
         };
 
+        const costlistCache: Record<string, string> = {};
+
         /**
          * Content component
          */
@@ -107,6 +109,10 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
             const billingCountry = customerData?.billingAddress?.country || '';
             const shippingCountry = customerData?.shippingAddress?.country || '';
 
+            const [costlist, setCostlist] = React.useState(
+                costlistCache[method.name] || method.costlist
+            );
+
             React.useEffect(() => {
                 const iframe = document.querySelector(
                     'iframe.rb-rm-iframe'
@@ -114,7 +120,22 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                 if (iframe) {
                     updateIframeSource(iframe, cartTotal);
                 }
+
+                // Guard cart total updates and update costlist via local backend.
+                fetch(`${method.costlist_url}&method=${method.name}&amount=${cartTotal}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.html && data.html !== costlist) {
+                            costlistCache[method.name] = data.html;
+                            setCostlist(data.html);
+                        }
+                    })
+                    .catch(err => {
+                        // byt till resursConsoleLog om du vill
+                        console.error("Failed to fetch costlist:", err);
+                    });
             }, [cartTotal]);
+
 
             return (
                 <div>
@@ -125,7 +146,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                     />
                     <div
                         dangerouslySetInnerHTML={{
-                            __html: method.costlist,
+                            __html: costlist,
                         }}
                     />
                     <div

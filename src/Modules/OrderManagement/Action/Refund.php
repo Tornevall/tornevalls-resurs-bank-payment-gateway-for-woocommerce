@@ -36,7 +36,7 @@ class Refund extends Action
         OrderManagement::execAction(
             action: ActionType::REFUND,
             order: $order,
-            static function () use ($order, $refund): void {
+            callback: static function () use ($order, $refund): void {
                 $payment = OrderManagement::getPayment(order: $order);
 
                 if (!$payment->canRefund()) {

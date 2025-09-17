@@ -24,11 +24,14 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Modules\Api\Controller\Admin\GetStoreCountry;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
 use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
 use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
+use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
@@ -38,7 +41,6 @@ use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Callback;
 use Throwable;
-
 use function is_string;
 use function str_contains;
 use function strlen;
@@ -100,6 +102,12 @@ class Route
      * Route to get JSON encoded list of stores (only in admin).
      */
     public const ROUTE_GET_STORES_ADMIN = 'get-stores-admin';
+
+    /**
+     * Route to get updated cost list HTML.
+     */
+    public const ROUTE_COSTLIST = 'get-costlist';
+
 
     /**
      * Route to get JSON response with store country (usually happens after a save for which that value is delayed
@@ -171,8 +179,8 @@ class Route
     ): string {
         return admin_url(
             path: 'admin.php?page=wc-settings&tab='
-                . RESURSBANK_MODULE_PREFIX
-                . "&section=$tab"
+            . RESURSBANK_MODULE_PREFIX
+            . "&section=$tab"
         );
     }
 
@@ -277,7 +285,7 @@ class Route
             $default = self::getUrl(route: '', admin: $admin);
         } catch (Throwable $error) {
             Log::error(error: $error);
-            $default = (string) get_site_url();
+            $default = (string)get_site_url();
         }
 
         if (
@@ -371,6 +379,34 @@ class Route
                 );
                 break;
 
+            case self::ROUTE_COSTLIST:
+                $methodId = $_GET['method'] ?? '';
+                $amount = isset($_GET['amount']) ? (float)$_GET['amount'] : 0;
+
+                try {
+                    $paymentMethod = Repository::getById($methodId);
+                    if (!$paymentMethod instanceof PaymentMethod) {
+                        self::respondWithExit(
+                            body: wp_json_encode(
+                                ['html' => '']
+                            ),
+                            contentType: 'application/json'
+                        );
+                    }
+
+                    $helper = new GatewayHelper(paymentMethod: $paymentMethod);
+
+                    $html = $helper->getCostList();
+
+                    self::respondWithExit(
+                        body: wp_json_encode(['html' => $html]),
+                        contentType: 'application/json'
+                    );
+                } catch (\Throwable $e) {
+                    self::respondWithError($e);
+                }
+                break;
+
             default:
                 break;
         }
@@ -396,8 +432,8 @@ class Route
     private static function userIsAdmin(): bool
     {
         return is_user_logged_in() && current_user_can(
-            capability: 'administrator'
-        );
+                capability: 'administrator'
+            );
     }
 
     /**
@@ -406,9 +442,9 @@ class Route
     private static function getUrlWithProperTrailingSlash(string $url): string
     {
         return preg_replace(
-            pattern: '/\/$/',
-            replacement: '',
-            subject: $url
-        ) . '/';
+                pattern: '/\/$/',
+                replacement: '',
+                subject: $url
+            ) . '/';
     }
 }
