@@ -81,7 +81,7 @@ class Url
         };
 
         return self::getEcomUrl(
-            path: "src/Module/PaymentMethod/Widget/Resources/Images/$file"
+            path: "src/Module/Widget/Logo/img/$file"
         );
     }
 
