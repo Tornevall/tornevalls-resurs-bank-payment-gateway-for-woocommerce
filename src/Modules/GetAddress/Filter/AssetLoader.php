@@ -62,10 +62,6 @@ class AssetLoader
         self::enqueueGetAddressJs();
     }
 
-    public static function localizeAjax(): void
-    {
-    }
-
     /**
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
