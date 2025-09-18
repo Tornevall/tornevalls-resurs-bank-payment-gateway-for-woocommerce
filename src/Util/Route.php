@@ -384,7 +384,7 @@ class Route
                 $amount = isset($_GET['amount']) ? (float)$_GET['amount'] : 0;
 
                 try {
-                    $paymentMethod = Repository::getById($methodId);
+                    $paymentMethod = Repository::getById(paymentMethodId: $methodId);
                     if (!$paymentMethod instanceof PaymentMethod) {
                         self::respondWithExit(
                             body: wp_json_encode(
@@ -402,8 +402,8 @@ class Route
                         body: wp_json_encode(['html' => $html]),
                         contentType: 'application/json'
                     );
-                } catch (\Throwable $e) {
-                    self::respondWithError($e);
+                } catch (Throwable $e) {
+                    self::respondWithError(exception: $e);
                 }
                 break;
 
@@ -413,7 +413,7 @@ class Route
     }
 
     /**
-     * Fetches all routes which are only available to admin users.
+     * Fetches all routes that are only available to admin users.
      */
     private static function getAdminRoutes(): array
     {
