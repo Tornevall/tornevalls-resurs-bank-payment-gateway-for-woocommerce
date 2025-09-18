@@ -47,7 +47,7 @@ class AssetLoader
      */
     public static function init(): void
     {
-        // Things that has to be loaded regardless.
+        // Things that have to be loaded regardless.
         self::enqueueCostListStyle();
         self::enqueueCostListJs();
         self::enqueuePartPaymentStyles();
