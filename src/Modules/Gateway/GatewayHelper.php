@@ -178,7 +178,7 @@ class GatewayHelper
         if (
             isset($_GET['amount'], $_GET['resursbank']) &&
             $_GET['resursbank'] === 'get-costlist' &&
-            is_numeric($_GET['amount'])
+            is_numeric(value: $_GET['amount'])
         ) {
             $total = (float)$_GET['amount'];
         }
