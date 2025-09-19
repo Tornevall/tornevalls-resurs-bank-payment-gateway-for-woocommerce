@@ -84,6 +84,11 @@ class BeforeOrderStatusChange
             status: $_POST['order_status'] ?? ''
         );
 
+        // Ignore other methods.
+        if (!Metadata::isValidResursPayment(order: $order)) {
+            return;
+        }
+
         /** @noinspection PhpConditionAlreadyCheckedInspection */
         if ($order instanceof WC_Order_Refund) {
             // Refunds are handled elsewhere.
@@ -167,6 +172,11 @@ class BeforeOrderStatusChange
             ? $persisted->get_status()
             : $order->get_status('edit');
         $new_status = $order->get_status();
+
+        // Ignore other methods.
+        if (!Metadata::isValidResursPayment(order: $order)) {
+            return;
+        }
 
         if ($new_status === 'completed') {
             // Trying to complete an order, that is frozen, is not allowed, not even here.
