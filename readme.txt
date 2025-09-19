@@ -63,17 +63,14 @@ For full documentation, please refer to our [documentation](https://developers.r
 
 Latest changes:
 
+# 1.2.16
+
+* Ecom widget patch.
+
 # 1.2.15
 
 * Positional execution problem (hotfix).
-
-# 1.2.14
-
-* WOO-1471 Translation are missing after upgrade to ecom 3.2.x
-* WOO-1472 Order status change from on-hold to completed is inconsistently blocked or allowed despite thrown exceptions
-* WOO-1483 Reconsider the way we handle Before-Order-Status-Management \(prevent on-hold => completed on frozen orders\)
-* WOO-1484 Payment information widget \(Admin\)
-* WOO-1490 Debit => Credit WP\_Order not found
+* Can't change order status on other orders than Resurs (hotfix).
 
 == Upgrade Notice ==
 

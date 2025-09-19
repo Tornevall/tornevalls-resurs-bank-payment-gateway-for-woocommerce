@@ -1,6 +1,11 @@
+# 1.2.16
+
+* Ecom widget patch.
+
 # 1.2.15
 
 * Positional execution problem (hotfix).
+* Can't change order status on other orders than Resurs (hotfix).
 
 # 1.2.14
 
