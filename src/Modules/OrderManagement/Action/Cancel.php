@@ -12,7 +12,6 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use WC_Order;
@@ -28,10 +27,6 @@ class Cancel extends Action
     public static function exec(
         WC_Order $order
     ): void {
-        if (!EnableCancel::isEnabled()) {
-            return;
-        }
-
         OrderManagement::execAction(
             action: ActionType::CANCEL,
             order: $order,

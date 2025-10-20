@@ -16,7 +16,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Throwable;
@@ -295,7 +295,7 @@ class Metadata
             );
             $result = Repository::search(
                 orderReference: $orderReference,
-                storeId: StoreId::getData()
+                storeId: UserSettingsRepository::getStoreId()
             );
 
             if ($result->count() > 0) {

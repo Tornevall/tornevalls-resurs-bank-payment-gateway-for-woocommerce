@@ -17,21 +17,19 @@ use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -68,6 +66,7 @@ class PartPayment
      *
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @todo I can see a reason for validating min limit, but not ppw setting and it's meshed together with store, remove this validation. min limit should for that matter by validated on frontend at input time, not by the backend.
      */
     public static function init(): void
     {
@@ -92,6 +91,7 @@ class PartPayment
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     * @todo We present the select list, this is unnecessary. If anyone circumvents our system to store in inaccurate value they will just end up with Ecom not working anyway. This should be removed completely.
      */
     public static function sanitizeResursPartPaymentValues(mixed $value, mixed $option, mixed $raw_value): mixed
     {
@@ -147,6 +147,7 @@ class PartPayment
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @noinspection PhpUnusedParameterInspection
+     * @todo Should be moved to ecom and to the frontend. If anyone goes around it let them. If we want to validate it's accurate on the backend we should do so in ecom, not here.
      */
     // phpcs:ignore
     public static function validateLimit(mixed $option, mixed $old, mixed $new): void
@@ -163,7 +164,7 @@ class PartPayment
             return;
         }
 
-        if ($option === StoreId::getName()) {
+        if ($option === Reader::getOptionName(field: Field::STORE_ID)) {
             // Store the NEW value, not the value already stored in the system!
             PartPayment::handleStoreIdUpdate(newStoreId: $new);
             return;
@@ -180,6 +181,7 @@ class PartPayment
      * Handles the update logic when StoreId changes.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @todo min limit validation should be handled by ECom.
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
@@ -218,7 +220,6 @@ class PartPayment
             ) {
                 $overrideSavedCountryCode = $countryCode;
                 $isCountryOverride = true;
-                self::updateThresholdLimit($countryCode);
             }
         } catch (Throwable) {
             // Ignore exception.
@@ -227,11 +228,13 @@ class PartPayment
 
     /**
      * Determines if this option should be validated.
+     *
+     * @todo I've no idea what this is for, documentation needs improvement. This is only called from validateLimit, no idea what these other settings have to do with that.
      */
     private static function canValidateOptionChange(mixed $option): bool
     {
-        return $option === Limit::getName() ||
-            $option === StoreId::getName() ||
+        return $option === Reader::getOptionName(field: Field::PART_PAYMENT_THRESHOLD) ||
+            $option === Reader::getOptionName(field: Field::STORE_ID)||
             $option === 'woocommerce_currency' ||
             $option === 'woocommerce_currency_pos';
     }
@@ -239,14 +242,20 @@ class PartPayment
     /**
      * Checks if required store, payment method, and period data is present.
      *  If missing, an error message is added and false is returned.
+     *
+     * @throws ConfigException
+     * @throws UserSettingsException
+     * @todo Remove this with the rest of the validation.
+     *
      */
     private static function validateStoreAndMethod(): bool
     {
         global $isCountryOverride;
 
-        $paymentMethodId = PaymentMethodOption::getData();
-        $storeId = StoreId::getData();
-        $period = Period::getData();
+        $settings = UserSettingsRepository::getSettings();
+        $paymentMethodId = $settings->partPaymentMethod?->id;
+        $storeId = Config::getStoreId();
+        $period = $settings->partPaymentPeriod;
 
         if (empty($storeId)) {
             MessageBag::addError(message: Translator::translate(
@@ -262,9 +271,9 @@ class PartPayment
             return false;
         }
 
-        // Country overrider may cause empty values during a limited amount of time
-        // due to handleStoreIdUpdate are saving the threshold values via the update hook.
-        // During this time we should not validate the period.
+        // Country overrider may cause empty values during a limited amount of
+        // time due to handleStoreIdUpdate are saving the threshold values via
+        // the update hook. During this time we should not validate the period.
         if (empty($period) && !$isCountryOverride) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-period'
@@ -303,6 +312,8 @@ class PartPayment
 
     /**
      * Checks if the store change is a cross-country change.
+     *
+     * @todo This should either not exist or be placed in ECom.
      */
     private static function canSwitchMinValueByCountry(string $currentCountry, string $newCountry): bool
     {
@@ -331,19 +342,6 @@ class PartPayment
     }
 
     /**
-     * Updates the part payment threshold limit based on the new country.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    private static function updateThresholdLimit(string $countryCode): void
-    {
-        $newLimit = $countryCode === 'FI'
-            ? self::MINIMUM_THRESHOLD_LIMIT_FI
-            : self::MINIMUM_THRESHOLD_LIMIT_DEFAULT;
-        update_option(Limit::getName(), $newLimit);
-    }
-
-    /**
      * Handles the validation of the limit when StoreId is not the updated option.
      *
      * @throws ApiException
@@ -359,6 +357,7 @@ class PartPayment
      * @throws Throwable
      * @throws ValidationException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @todo This seems again to be a lot of validation that should, if exist at all, exist in ECom, and also it seems we are just using our own constants anyway so, not sure why this is here at all.
      */
     private static function handleLimitUpdate(mixed $new): void
     {
@@ -377,8 +376,7 @@ class PartPayment
             $storeCountry = $customerCountry;
         }
 
-        $paymentMethodId = PaymentMethodOption::getData();
-        $paymentMethod = Repository::getById(paymentMethodId: $paymentMethodId);
+        $paymentMethod = UserSettingsRepository::getSettings()->partPaymentMethod;
 
         if ($paymentMethod === null) {
             MessageBag::addError(message: Translator::translate(
@@ -421,24 +419,26 @@ class PartPayment
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     * @todo We give the options, not sure why we would validate the input like this? If someone goes around us Ecom will error anyway, so why bother with this?
      */
     private static function isValidPeriodOption(mixed $option, mixed $raw_value): bool
     {
-        return $option['id'] === Period::getName() && (int)$raw_value > 0;
+        return $option['id'] === Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD) && (int)$raw_value > 0;
     }
 
     /**
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     * @todo UUID validation is already supplied by Ecom, this must go.
      */
     private static function isValidPaymentOrStoreIdOption(mixed $option, mixed $raw_value): bool
     {
         if (
             $raw_value !== '' &&
             (
-                $option['id'] === PaymentMethod::getName() ||
-                $option['id'] === StoreId::getName()
+                $option['id'] === Reader::getOptionName(field: Field::PART_PAYMENT_METHOD) ||
+                $option['id'] === Reader::getOptionName(field: Field::STORE_ID)
             )
         ) {
             return self::isValidUuid(raw_value: $raw_value);
@@ -451,6 +451,7 @@ class PartPayment
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     * @todo Just a pointless shortcut to ECom, remove.
      */
     private static function isValidUuid(mixed $raw_value): bool
     {
@@ -469,25 +470,27 @@ class PartPayment
     private static function getEnabledSetting(): array
     {
         return [
-            'id' => Enabled::getName(),
+            'id' => Reader::getOptionName(field: Field::PART_PAYMENT_ENABLED),
             'title' => Translator::translate(
                 phraseId: 'part-payment-widget-enabled'
             ),
             'type' => 'checkbox',
-            'default' => Enabled::getDefault(),
+            'default' => UserSettingsRepository::getDefault(field: Field::PART_PAYMENT_ENABLED) ? 'yes' : 'no',
         ];
     }
 
     /**
      * Fetches the payment_method setting.
+     *
+     * @throws ConfigException
      */
     private static function getPaymentMethodSetting(): array
     {
         return [
-            'id' => PaymentMethodOption::getName(),
+            'id' => Reader::getOptionName(field: Field::PART_PAYMENT_METHOD),
             'title' => Translator::translate(phraseId: 'payment-method'),
             'type' => 'select',
-            'default' => PaymentMethodOption::getDefault(),
+            'default' => UserSettingsRepository::getDefault(field: Field::PART_PAYMENT_METHOD),
             'options' => [],
             'desc' => Translator::translate(
                 phraseId: 'part-payment-payment-method'
@@ -497,14 +500,16 @@ class PartPayment
 
     /**
      * Fetches the period setting.
+     *
+     * @throws ConfigException
      */
     private static function getPeriodSetting(): array
     {
         return [
-            'id' => Period::getName(),
+            'id' => Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD),
             'title' => Translator::translate(phraseId: 'annuity-period'),
             'type' => 'select',
-            'default' => Period::getDefault(),
+            'default' => (string) UserSettingsRepository::getDefault(field: Field::PART_PAYMENT_PERIOD),
             'options' => [],
             'desc' => Translator::translate(
                 phraseId: 'part-payment-annuity-period'
@@ -518,10 +523,10 @@ class PartPayment
     private static function getLimitSetting(): array
     {
         return [
-            'id' => Limit::getName(),
+            'id' => Reader::getOptionName(field: Field::PART_PAYMENT_THRESHOLD),
             'title' => Translator::translate(phraseId: 'limit'),
             'type' => 'text',
-            'default' => Limit::getDefault(),
+            'default' => UserSettingsRepository::getDefaultPartPaymentThreshold(),
             'desc' => Translator::translate(phraseId: 'part-payment-limit'),
         ];
     }

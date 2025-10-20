@@ -13,8 +13,6 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriods;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PartPaymentMethodOption;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Admin as AdminUtil;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -38,9 +36,7 @@ class Admin
 
         $periods = new GetPeriods(
             methodElementId: 'resursbank_part_payment_payment_method',
-            periodElementId: 'resursbank_part_payment_period',
-            selectedPaymentMethod: PartPaymentMethodOption::getData(),
-            selectedPeriod: Period::getData()
+            periodElementId: 'resursbank_part_payment_period'
         );
 
         /** @noinspection BadExceptionsProcessingInspection */

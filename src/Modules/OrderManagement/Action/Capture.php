@@ -12,13 +12,11 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Exception;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 
@@ -31,15 +29,10 @@ class Capture extends Action
      * Capture Resurs Bank payment.
      * @phpcs:ignoreFile CognitiveComplexity
      * @throws Throwable
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function exec(
         WC_Order $order
     ): void {
-        if (!EnableCapture::isEnabled()) {
-            return;
-        }
-
         OrderManagement::execAction(
             action: ActionType::CAPTURE,
             order: $order,

@@ -11,17 +11,13 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
-use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as EcomPartPayment;
 use Resursbank\Ecom\Module\Widget\PartPayment\Js as EcomPartPaymentJs;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
@@ -49,7 +45,7 @@ class PartPayment
      */
     public static function initFrontend(): void
     {
-        if (!PartPaymentOptions::isEnabled()) {
+        if (!UserSettingsRepository::isEnabled(field: Field::PART_PAYMENT_ENABLED)) {
             return;
         }
 
@@ -93,14 +89,11 @@ class PartPayment
 
         try {
             $widget = new EcomPartPayment(
-                paymentMethod: self::getPaymentMethod(),
-                months: (int)Period::getData(),
                 amount: self::getPriceData(),
                 fetchStartingCostUrl: Route::getUrl(
                     route: Route::ROUTE_PART_PAYMENT
                 ),
                 displayInfoText: self::displayInfoText(),
-                threshold: Limit::getData()
             );
 
             echo '<div id="rb-pp-widget-container">' .
@@ -124,13 +117,10 @@ class PartPayment
 
         try {
             $widget = new EcomPartPaymentJs(
-                paymentMethod: self::getPaymentMethod(),
-                months: (int)Period::getData(),
                 amount: self::getPriceData(),
                 fetchStartingCostUrl: Route::getUrl(
                     route: Route::ROUTE_PART_PAYMENT
-                ),
-                threshold: Limit::getData()
+                )
             );
 
             wp_enqueue_script(
@@ -156,53 +146,28 @@ class PartPayment
         }
     }
 
-    public static function getPaymentMethod(): ?EcomPaymentMethod
-    {
-        if (self::$paymentMethod !== null) {
-            return self::$paymentMethod;
-        }
-
-        try {
-            $paymentMethodSet = PaymentMethod::getData();
-
-            if ($paymentMethodSet === '') {
-                throw new EmptyValueException(
-                    message: 'Payment method is not properly configured. Part payment view can not be used.'
-                );
-            }
-
-            self::$paymentMethod = Repository::getById(
-                paymentMethodId: $paymentMethodSet
-            );
-
-            if (self::$paymentMethod === null) {
-                throw new IllegalTypeException(
-                    message: "Payment method $paymentMethodSet not found."
-                );
-            }
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-
-        return self::$paymentMethod;
-    }
-
     /**
      * Indicates whether widget should be visible or not.
+     *
+     * @todo Should be moved to Ecom partpayment widget as a trait to be used in CSS, JS and HTML classes.
      */
     public static function isEnabled(): bool
     {
         try {
+            $settings = UserSettingsRepository::getSettings();
+
             $amount = self::getPriceData();
-            $method = self::getPaymentMethod();
+            $method = $settings->partPaymentMethod;
 
             // Enabled if there is a product and a price.
-            return PartPaymentOptions::isEnabled() &&
-                PaymentMethod::getData() !== '' &&
+            return (
+                $method !== null &&
+                UserSettingsRepository::isEnabled(field: Field::PART_PAYMENT_ENABLED) &&
                 is_product() &&
                 $amount > 0.0 &&
                 $amount >= $method->minPurchaseLimit &&
-                $amount <= $method->maxPurchaseLimit;
+                $amount <= $method->maxPurchaseLimit
+            );
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

@@ -11,10 +11,14 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\UserSettingsException;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Cancel;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Capture;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Metadata;
+use Throwable;
 
 /**
  * After order status has been changed, execute call to capture or cancel
@@ -24,13 +28,17 @@ class AfterOrderStatusChange
 {
     /**
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @noinspection PhpUnusedParameterInspection
+     * @throws ConfigException
+     * @throws UserSettingsException
+     * @throws Throwable
      */
     public static function exec(
         int $orderId,
         string $old,
         string $new
     ): void {
+        $settings = Repository::getSettings();
+
         $order = OrderManagement::getOrder(id: $orderId);
 
         if ($order === null || !Metadata::isValidResursPayment(order: $order)) {
@@ -39,11 +47,17 @@ class AfterOrderStatusChange
 
         switch ($new) {
             case 'completed':
-                Capture::exec(order: $order);
+                if ($settings->captureEnabled) {
+                    Capture::exec(order: $order);
+                }
+
                 break;
 
             case 'cancelled':
-                Cancel::exec(order: $order);
+                if ($settings->cancelEnabled) {
+                    Cancel::exec(order: $order);
+                }
+
                 break;
 
             default:

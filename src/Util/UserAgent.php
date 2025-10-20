@@ -100,16 +100,4 @@ class UserAgent
 
         return $return;
     }
-
-    /**
-     * Extract data from plugin registry naturally but validated.
-     *
-     * @param string $pluginMatch Case-sensitive matching.
-     */
-    private static function getVersionFromPluginData(string $pluginMatch, array $pluginData): string
-    {
-        return isset($pluginData['Name'], $pluginData['Version']) &&
-        $pluginData['Name'] === $pluginMatch &&
-        is_string(value: $pluginData['Version']) ? $pluginData['Version'] : '';
-    }
 }

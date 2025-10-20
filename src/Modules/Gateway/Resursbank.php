@@ -39,7 +39,6 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -211,17 +210,6 @@ class Resursbank extends WC_Payment_Gateway
             return false;
         }
 
-        // Validate country, except when restrictions are disabled. This is a
-        // credit card-related feature where, in some cases, we want credit cards
-        // to work across borders, but they don't when we sell exclusively within
-        // our own country. When restrictions are disabled, all payment methods
-        // are opened up for cross-border sales. Here, we have chosen not to
-        // implement specific checks for which payment methods are allowed to
-        // operate in this scenario - it's an all-or-nothing approach.
-        if (SetMethodCountryRestriction::getData() && !$this->validateCustomerCountry()) {
-            return false;
-        }
-
         if (WooCommerce::isUsingBlocksCheckout()) {
             // Always return true for everything coming from blocks checkout since, in this case,
             // filtering on customer types is done in the blocks checkout itself.
@@ -233,19 +221,6 @@ class Resursbank extends WC_Payment_Gateway
             CustomerType::LEGAL => ($this->method !== null && $this->method->enabledForLegalCustomer) ?? false,
             CustomerType::NATURAL => ($this->method !== null && $this->method->enabledForNaturalCustomer) ?? false
         };
-    }
-
-    /**
-     * Customer country validation.
-     *
-     * @return bool
-     * @throws ConfigException
-     */
-    public function validateCustomerCountry(): bool
-    {
-        // If country restrictions are enabled, we will validate that the customer is located in the
-        // same country as the API based country.
-        return (WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry());
     }
 
     /**

@@ -9,26 +9,14 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
-use Resursbank\Ecom\Lib\Model\Store\Store;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Database\Options\Api\Environment;
+use Resursbank\Ecom\Module\UserSettings\Repository;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
@@ -149,10 +137,10 @@ class Api
     private static function getEnabled(): array
     {
         return [
-            'id' => Enabled::getName(),
+            'id' => Reader::getOptionName(field: Field::ENABLED),
             'title' => Translator::translate(phraseId: 'enabled'),
             'type' => 'checkbox',
-            'default' => Enabled::getDefault(),
+            'default' => Repository::getDefault(field: Field::ENABLED) ? 'yes' : 'no',
         ];
     }
 
@@ -161,8 +149,9 @@ class Api
      */
     private static function getEnvironment(): array
     {
+        // @todo Generating the options array can be centralized to Ecom.
         return [
-            'id' => Environment::getName(),
+            'id' => Reader::getOptionName(field: Field::ENVIRONMENT),
             'title' => Translator::translate(phraseId: 'environment'),
             'type' => 'select',
             'options' => [
@@ -174,7 +163,7 @@ class Api
                 ),
             ],
             'custom_attributes' => ['size' => 1],
-            'default' => Environment::getDefault(),
+            'default' => Repository::getDefault(field: Field::ENVIRONMENT)->value,
         ];
     }
 
@@ -182,6 +171,7 @@ class Api
      * Return config value for current store countryCode.
      *
      * @throws ConfigException
+     * @todo This must be removed. You should _not_ be able to configure the country, this is resolved by the API account.
      */
     private static function getStoreCountrySetting(): array
     {
@@ -202,11 +192,15 @@ class Api
      */
     private static function getClientId(): array
     {
+        // WooCommerce has no separation for test / prod credentials right now,
+        // which is why this uses the CLIENT_ID_PROD field here, prod and test
+        // uses the same option name in the database so it doesn't matter which
+        // we use here.
         return [
-            'id' => ClientId::getName(),
+            'id' => Reader::getOptionName(field: Field::CLIENT_ID_PROD),
             'title' => Translator::translate(phraseId: 'client-id'),
             'type' => 'text',
-            'default' => ClientId::getDefault()
+            'default' => ''
         ];
     }
 
@@ -216,10 +210,10 @@ class Api
     private static function getClientSecret(): array
     {
         return [
-            'id' => ClientSecret::getName(),
+            'id' => Reader::getOptionName(field: Field::CLIENT_SECRET_PROD),
             'title' => Translator::translate(phraseId: 'client-secret'),
             'type' => 'password',
-            'default' => ClientSecret::getDefault(),
+            'default' => '',
         ];
     }
 
@@ -229,68 +223,23 @@ class Api
     private static function getStoreIdSetting(): array
     {
         $result = [
-            'id' => StoreId::getName(),
+            'id' => Reader::getOptionName(field: Field::STORE_ID),
             'type' => 'select',
             'title' => Translator::translate(phraseId: 'store-id'),
-            'default' => StoreId::getDefault(),
+            'default' => '',
             'options' => [],
         ];
 
         try {
             // Do not fetch stores until credentials are present.
-            if (ClientId::getData() !== '' && ClientSecret::getData() !== '') {
+            if (Repository::hasUserCredentials()) {
                 $result['options'] = StoreRepository::getStores()->getSelectList();
-
-                // If no store has been selected in the configuration, default to the first store,
-                // as this will be displayed in the dropdown after saving. This ensures the merchant
-                // has a value saved, even if no store was selected initially.
-                if (self::credentialsAreSet()) {
-                    $result['options'] = StoreRepository::getStores()->getSelectList();
-                    self::setDefaultStoreIfNoneSelected();
-                }
             }
         } catch (Throwable $error) {
             self::logAndHandleError(error: $error);
         }
 
         return $result;
-    }
-
-    /**
-     * Are credentials set?
-     */
-    private static function credentialsAreSet(): bool
-    {
-        return ClientId::getData() !== '' && ClientSecret::getData() !== '';
-    }
-
-    /**
-     * @throws Throwable
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws ValidationException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     */
-    private static function setDefaultStoreIfNoneSelected(): void
-    {
-        if (StoreId::getData() !== '') {
-            return;
-        }
-
-        $firstStore = StoreRepository::getStores()->getFirst();
-
-        if (!($firstStore instanceof Store)) {
-            return;
-        }
-
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        update_option(StoreId::getName(), $firstStore->id);
     }
 
     /**

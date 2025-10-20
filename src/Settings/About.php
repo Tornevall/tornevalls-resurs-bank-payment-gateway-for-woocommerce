@@ -17,6 +17,8 @@ use Throwable;
 
 /**
  * Support info section.
+ *
+ * @todo CSS should be moved to controller, this file can then be deleted.
  */
 class About
 {
@@ -38,35 +40,5 @@ class About
     public static function getTitle(): string
     {
         return Translator::translate(phraseId: 'about');
-    }
-
-    /**
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
-     */
-    public static function getWidget(): ?EcomSupportInfo
-    {
-        try {
-            if (self::$widget === null) {
-                self::$widget = new EcomSupportInfo(
-                    minimumPhpVersion: '8.1',
-                    maximumPhpVersion: '8.4',
-                    pluginVersion: UserAgent::getPluginVersion()
-                );
-            }
-        } catch (Throwable) {
-        }
-
-        return self::$widget;
-    }
-
-    /**
-     * Create and return widget HTML.
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
-     */
-    public static function getWidgetHtml(): string
-    {
-        $GLOBALS['hide_save_button'] = '1';
-        return self::getWidget()->content;
     }
 }
