@@ -23,6 +23,7 @@ use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\Widget\ConsumerCreditWarning\Html as Warning;
 use Resursbank\Ecom\Module\Widget\CostList\Html as CostList;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
+use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -126,6 +127,10 @@ class GatewayHelper
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
         $transientName = RESURSBANK_MODULE_PREFIX . '_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
         $transientContent = get_transient($transientName);
+
+        if (EnableCache::isEnabled() === false) {
+            $transientContent = null;
+        }
 
         if ($transientContent) {
             return $transientContent;
