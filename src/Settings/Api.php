@@ -89,16 +89,6 @@ class Api
             ['jquery']
         );
 
-        wp_localize_script(
-            'rb-api-admin-scripts-load',
-            'rbApiAdminLocalize',
-            [
-                'url' => Route::getUrl(
-                    route: Route::ROUTE_GET_STORE_COUNTRY
-                ),
-            ]
-        );
-
         wp_enqueue_style(
             'rb-ga-css',
             Url::getResourceUrl(
@@ -125,8 +115,7 @@ class Api
                 'environment' => self::getEnvironment(),
                 'client_id' => self::getClientId(),
                 'client_secret' => self::getClientSecret(),
-                'store_id' => self::getStoreIdSetting(),
-                'store_country' => self::getStoreCountrySetting(),
+                'store_id' => self::getStoreIdSetting()
             ],
         ];
     }
@@ -164,26 +153,6 @@ class Api
             ],
             'custom_attributes' => ['size' => 1],
             'default' => Repository::getDefault(field: Field::ENVIRONMENT)->value,
-        ];
-    }
-
-    /**
-     * Return config value for current store countryCode.
-     *
-     * @throws ConfigException
-     * @todo This must be removed. You should _not_ be able to configure the country, this is resolved by the API account.
-     */
-    private static function getStoreCountrySetting(): array
-    {
-        return [
-            'id' => self::NAME_PREFIX . 'store_country',
-            'type' => 'text',
-            'custom_attributes' => [
-                'disabled' => true,
-            ],
-            'title' => __('Country'),
-            'value' => WooCommerce::getStoreCountry(),
-            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
         ];
     }
 

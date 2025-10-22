@@ -25,7 +25,6 @@ use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\Logo\Html as LogoWidget;
-use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMoreWidget;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
@@ -167,13 +166,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         try {
             /** @var PaymentMethod $paymentMethod */
             foreach (Repository::getPaymentMethods() as $paymentMethod) {
-                $usp = Repository::getUniqueSellingPoint(
-                    paymentMethod: $paymentMethod,
-                    amount: (float)WC()?->cart?->total
-                );
                 $logo = new LogoWidget(paymentMethod: $paymentMethod);
-                $helper = new GatewayHelper(paymentMethod: $paymentMethod);
-                $readMore = new ReadMoreWidget(
+                $helper = new GatewayHelper(
                     paymentMethod: $paymentMethod,
                     amount: (float)WC()?->cart?->total
                 );
@@ -181,10 +175,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
-                    'description' => '<div class="rb-usp">' . $usp->getText() . '</div>',
+                    'description' => $helper->getUspWidget(),
                     'costlist' => $helper->getCostList(),
                     'costlist_url' => Route::getUrl(route: 'get-costlist'),
-                    'readmore' => $readMore->content,
+                    'readmore' => $helper->getReadMore(),
                     'price_signage_warning' => $helper->getPriceSignageWarning(),
                     'read_more_css' => '',
                     'logo' => $logo->content,
@@ -192,8 +186,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
                     'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,
                     'enabled_for_legal_customer' => $paymentMethod->enabledForLegalCustomer,
-                    'enabled_for_natural_customer' => $paymentMethod->enabledForNaturalCustomer,
-                    'read_more_url' => $usp->readMore->url,
+                    'enabled_for_natural_customer' => $paymentMethod->enabledForNaturalCustomer
                 ];
             }
         } catch (Throwable $error) {

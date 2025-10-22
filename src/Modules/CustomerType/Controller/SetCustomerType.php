@@ -30,6 +30,7 @@ class SetCustomerType
         $response = [
             'update' => false,
         ];
+
         $customerType = Url::getHttpGet(key: 'customerType');
 
         if (function_exists(function: 'WC') && $customerType) {

@@ -10,21 +10,14 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Api;
 
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
-use Resursbank\Ecom\Lib\Api\GrantType;
 use Resursbank\Ecom\Lib\Api\Scope;
 use Resursbank\Ecom\Lib\Model\Config\Network;
-use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
-use Resursbank\Ecom\Module\Store\Repository;
+use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\UserAgent;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
-use WC_Logger;
 
 use function function_exists;
 
@@ -43,19 +36,19 @@ class Connection
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     // phpcs:ignore
-    public static function setup(
-        ?Jwt $jwt = null
-    ): void {
+    public static function setup(): void
+    {
         try {
             if (function_exists(function: 'WC')) {
                 WC()->initialize_session();
             }
 
+            $currencyFormat = get_option('woocommerce_currency_pos', 'right');
+
             Config::setup(
                 cache: new Transient(),
-                isProduction: isset($jwt->scope) && $jwt->scope === Scope::MERCHANT_API,
-                currencySymbol: Currency::getWooCommerceCurrencySymbol(),
-                currencyFormat: Currency::getEcomCurrencyFormat(),
+                currencyFormat: str_contains($currencyFormat, 'left') ?
+                    CurrencyFormat::SYMBOL_FIRST : CurrencyFormat::SYMBOL_LAST,
                 network: new Network(
                     userAgent: UserAgent::getUserAgent()
                 ),
@@ -75,25 +68,6 @@ class Connection
                     );
                 });
             }
-        }
-    }
-
-    /**
-     * Make sure we only log our messages if WP/WC allows it.
-     *
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
-     */
-    public static function getWcLoggerCritical(string $message): void
-    {
-        try {
-            // If WordPress/WooCommerce cannot handle their own logging errors when we attempt to log critical
-            // messages, we suppress them here.
-            //
-            // We've observed this issue with PHP 8.3 and errors that occurs in `class-wp-filesystem-ftpext.php`
-            // for where errors are only shown on screen and never logged. Improved error handling reveals previously
-            // unnoticed logging issues may be the problem.
-            (new WC_Logger())->critical(message: $message);
-        } catch (Throwable) {
         }
     }
 }

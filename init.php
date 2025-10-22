@@ -92,13 +92,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
         return;
     }
 
-    try {
-        Shared::init();
-    } catch (Throwable $e) {
-        Connection::getWcLoggerCritical(
-            message: 'Resurs Bank: ' . $e->getMessage()
-        );
-    }
+    Shared::init();
 
     /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
     add_action(

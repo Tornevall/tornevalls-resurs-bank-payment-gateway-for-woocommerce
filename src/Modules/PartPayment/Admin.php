@@ -12,9 +12,10 @@ namespace Resursbank\Woocommerce\Modules\PartPayment;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriods;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Admin as AdminUtil;
-use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
 /**
@@ -35,8 +36,8 @@ class Admin
         }
 
         $periods = new GetPeriods(
-            methodElementId: 'resursbank_part_payment_payment_method',
-            periodElementId: 'resursbank_part_payment_period'
+            methodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_METHOD),
+            periodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD)
         );
 
         /** @noinspection BadExceptionsProcessingInspection */
@@ -49,23 +50,6 @@ class Admin
                 'before'
             );
             add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');
-
-            wp_register_script(
-                'rb-store-admin-scripts-load',
-                Url::getResourceUrl(
-                    module: 'PartPayment',
-                    file: 'rb-part-payment-admin.js'
-                )
-            );
-
-            wp_enqueue_script(
-                'rb-store-admin-scripts-load',
-                Url::getResourceUrl(
-                    module: 'PartPayment',
-                    file: 'rb-part-payment-admin.js'
-                ),
-                ['jquery']
-            );
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);
         }

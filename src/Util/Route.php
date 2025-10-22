@@ -26,7 +26,7 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Woocommerce\Modules\Api\Controller\Admin\GetStoreCountry;
+use Resursbank\Ecom\Module\Store\Http\GetStoresController;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
 use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
@@ -37,7 +37,6 @@ use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
-use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Callback;
 use Throwable;
@@ -107,13 +106,6 @@ class Route
      * Route to get updated cost list HTML.
      */
     public const ROUTE_COSTLIST = 'get-costlist';
-
-
-    /**
-     * Route to get JSON response with store country (usually happens after a save for which that value is delayed
-     * until the page is reloaded).
-     */
-    public const ROUTE_GET_STORE_COUNTRY = 'get-store-country';
 
     /**
      * Route to get JSON encoded order view content.
@@ -341,11 +333,7 @@ class Route
                 break;
 
             case self::ROUTE_GET_STORES_ADMIN:
-                self::respondWithExit(body: (new GetStores())->exec());
-                break;
-
-            case self::ROUTE_GET_STORE_COUNTRY:
-                self::respondWithExit(body: (new GetStoreCountry())->exec());
+                self::respondWithExit(body: (new GetStoresController())->exec());
                 break;
 
             case self::ROUTE_SET_CUSTOMER_TYPE:
@@ -380,11 +368,9 @@ class Route
                 break;
 
             case self::ROUTE_COSTLIST:
-                $methodId = $_GET['method'] ?? '';
-                $amount = isset($_GET['amount']) ? (float)$_GET['amount'] : 0;
-
                 try {
-                    $paymentMethod = Repository::getById(paymentMethodId: $methodId);
+                    $paymentMethod = Repository::getById(paymentMethodId: $_GET['method'] ?? '');
+
                     if (!$paymentMethod instanceof PaymentMethod) {
                         self::respondWithExit(
                             body: wp_json_encode(
@@ -394,7 +380,10 @@ class Route
                         );
                     }
 
-                    $helper = new GatewayHelper(paymentMethod: $paymentMethod);
+                    $helper = new GatewayHelper(
+                        amount: isset($_GET['amount']) ? (float)$_GET['amount'] : 0,
+                        paymentMethod: $paymentMethod
+                    );
 
                     $html = $helper->getCostList();
 
@@ -404,8 +393,7 @@ class Route
                     );
                 } catch (Throwable $e) {
                     self::respondWithError(exception: $e);
-                }
-                break;
+                } break;
 
             default:
                 break;

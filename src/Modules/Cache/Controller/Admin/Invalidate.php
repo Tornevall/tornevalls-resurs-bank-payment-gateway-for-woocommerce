@@ -13,7 +13,6 @@ use Resursbank\Ecom\Config;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -28,7 +27,6 @@ class Invalidate
     {
         try {
             Config::getCache()->invalidate();
-            WooCommerce::invalidateFullCache();
             MessageBag::addSuccess(
                 message: Translator::translate(phraseId: 'cache-cleared')
             );

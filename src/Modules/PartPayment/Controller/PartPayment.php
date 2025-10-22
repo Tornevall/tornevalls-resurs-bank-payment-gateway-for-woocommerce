@@ -58,10 +58,6 @@ class PartPayment
      */
     public static function exec(): string
     {
-        Config::setLocation(
-            location: Location::from(value: WooCommerce::getStoreCountry())
-        );
-
         $response = [
             'css' => '',
             'startingAt' => '',
