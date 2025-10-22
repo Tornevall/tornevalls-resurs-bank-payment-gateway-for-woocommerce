@@ -2,6 +2,8 @@
 import * as jQuery from 'jquery';
 import {BlocksCustomerType} from "./customer";
 
+// @todo A lot of this can be moved to Ecom or just simply removed.
+
 // Declare the Resursbank_GetAddress function from the external library.
 declare const Resursbank_GetAddress: any;
 

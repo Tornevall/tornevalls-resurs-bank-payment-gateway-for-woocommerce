@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -25,12 +26,10 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\MerchantPortal;
 use Resursbank\Ecom\Lib\Model\Payment;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Database\Options\Api\Environment;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
+use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Log;
@@ -68,10 +67,6 @@ class OrderManagement
      */
     public static function init(): void
     {
-        if (!Enabled::isEnabled()) {
-            return;
-        }
-
         self::initRefund();
         self::initModify();
 
@@ -108,10 +103,12 @@ class OrderManagement
 
     /**
      * Register modification related event listeners.
+     *
+     * @throws ConfigException
      */
     public static function initModify(): void
     {
-        if (!EnableModify::isEnabled()) {
+        if (!UserSettingsRepository::isEnabled(field: Field::MODIFY_ENABLED)) {
             return;
         }
 
@@ -135,10 +132,12 @@ class OrderManagement
 
     /**
      * Register refund related event listeners.
+     *
+     * @throws ConfigException
      */
     public static function initRefund(): void
     {
-        if (!EnableRefund::isEnabled()) {
+        if (!UserSettingsRepository::isEnabled(field: Field::REFUND_ENABLED)) {
             return;
         }
 
@@ -456,7 +455,11 @@ class OrderManagement
 
     /**
      * Add an error message to order notes and message bag.
-     * @throws Exception
+     * @param string $message
+     * @param Throwable $error
+     * @param WC_Order|null $order
+     * @throws ConfigException
+     * @throws UserSettingsException
      */
     public static function logError(
         string $message,
@@ -470,7 +473,10 @@ class OrderManagement
             return;
         }
 
-        $url = Environment::getData() === EnvironmentEnum::PROD ?
+        $settings = UserSettingsRepository::getSettings();
+
+        // @todo Could be replaced by a widget in Ecom to render MP link element.
+        $url = $settings->environment === EnvironmentEnum::PROD ?
             MerchantPortal::PROD :
             MerchantPortal::TEST;
 

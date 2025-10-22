@@ -10,21 +10,21 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
+use Resursbank\Ecom\Module\Widget\PaymentMethod\Html as PaymentMethodWidget;
+use Resursbank\Ecom\Module\Widget\SupportInfo\Html as EcomSupportInfo;
 use Resursbank\Woocommerce\Settings\About;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
 use Resursbank\Woocommerce\Settings\Callback;
 use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
-use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
-use RuntimeException;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
 use WC_Admin_Settings;
 use WC_Settings_Page;
@@ -90,7 +90,7 @@ EX;
         // New sections should preferably be placed before the advanced section.
         return [
             Api::SECTION_ID => Api::getTitle(),
-            PaymentMethods::SECTION_ID => PaymentMethods::getTitle(),
+            'payment_methods' => Translator::translate(phraseId: 'payment-methods'),
             PartPayment::SECTION_ID => PartPayment::getTitle(),
             OrderManagement::SECTION_ID => OrderManagement::getTitle(),
             Callback::SECTION_ID => Callback::getTitle(),
@@ -118,19 +118,38 @@ EX;
      */
     public function output(): void
     {
-        $section = Settings::getCurrentSectionId();
+        try {
+            $section = Settings::getCurrentSectionId();
 
-        if ($section === 'payment_methods') {
-            $this->renderPaymentMethodsPage();
-            return;
+            if ($section === 'payment_methods') {
+                $GLOBALS['hide_save_button'] = '1';
+
+                echo (new PaymentMethodWidget(
+                    paymentMethods: PaymentMethodRepository::getPaymentMethods()
+                ))->content;
+
+                return;
+            }
+
+            if ($section === 'about') {
+                $GLOBALS['hide_save_button'] = '1';
+
+               echo (new EcomSupportInfo(
+                    minimumPhpVersion: '8.1',
+                    maximumPhpVersion: '8.4',
+                    pluginVersion: UserAgent::getPluginVersion()
+                ))->content;
+
+                return;
+            }
+
+            $this->renderSettingsPage(section: $section);
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+
+            // Add visual note stating the page failed to render.
+            Admin::getAdminErrorNote(message: Translator::translate(phraseId: 'content-render-failed'));
         }
-
-        if ($section === 'about') {
-            $this->renderAboutPage();
-            return;
-        }
-
-        $this->renderSettingsPage(section: $section);
     }
 
     /**
@@ -156,118 +175,5 @@ EX;
         }
 
         echo '</table>';
-    }
-
-    /**
-     * Render content of the payment method tab for our config page.
-     */
-    public function renderPaymentMethodsPage(): void
-    {
-        try {
-            if (StoreId::getData() === '') {
-                throw new RuntimeException(
-                    message: Translator::translate(
-                        phraseId: 'please-select-a-store'
-                    )
-                );
-            }
-
-            echo PaymentMethods::getOutput(storeId: StoreId::getData());
-        } catch (Throwable $e) {
-            Log::error(error: $e, message: $e->getMessage());
-
-            $this->renderError(view: 'payment_methods');
-        }
-    }
-
-    /**
-     * Render Support Info tab.
-     */
-    public function renderAboutPage(): void
-    {
-        try {
-            echo About::getWidgetHtml();
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-
-            $this->renderError();
-        }
-    }
-
-    /**
-     * Render an error message (cannot use the message bag since that has
-     * already been rendered).
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
-     */
-    /**
-     * Render an error message based on the view and exception provided.
-     *
-     * @param string $view The view context for the error (e.g., 'payment_methods', 'advanced').
-     * @param Throwable|null $throwable Optional exception for additional error context.
-     */
-    private function renderError(string $view = '', ?Throwable $throwable = null): void
-    {
-        $additional = $this->getAdditionalMessage(view: $view);
-        $msg = $this->getErrorMessage(view: $view, throwable: $throwable);
-        Admin::getAdminErrorNote(message: $msg, additional: $additional);
-    }
-
-    /**
-     * Get additional message for the error note based on the view context.
-     *
-     * @param string $view The view context for the error.
-     * @return string The additional context message for the error note.
-     */
-    private function getAdditionalMessage(string $view): string
-    {
-        if ($view === 'payment_methods') {
-            // Suggest configuring credentials if they are missing
-            if (!Connection::hasCredentials()) {
-                return '<b>' . Translator::translate(
-                    phraseId: 'configure-credentials'
-                ) . '</b>';
-            }
-
-            // Suggest configuring the store if store data is missing
-            if (StoreId::getData() === '') {
-                return Translator::translate(phraseId: 'configure-store');
-            }
-        }
-
-        // Default additional message for other views
-        return Translator::translate(phraseId: 'see-log');
-    }
-
-    /**
-     * Get the main error message based on the view context and optional exception.
-     *
-     * @param string $view The view context for the error.
-     * @param Throwable|null $throwable Optional exception for additional error details.
-     * @return string The main error message to display.
-     */
-    private function getErrorMessage(string $view, ?Throwable $throwable = null): string
-    {
-        if ($view === 'payment_methods') {
-            // Specific error message for payment methods rendering failure
-            return Translator::translate(
-                phraseId: 'payment-methods-widget-render-failed'
-            );
-        }
-
-        if ($view === 'advanced') {
-            // Error message for advanced view with more exception details. Getting errors on this view
-            // is never good, since error logging are actually configured here, so we need to show more of them.
-            $msg = Translator::translate(phraseId: 'content-render-failed');
-
-            if ($throwable instanceof Throwable) {
-                $msg .= '<br><b>' . $throwable->getMessage() . '</b>';
-            }
-
-            return $msg;
-        }
-
-        // Default error message for other views
-        return Translator::translate(phraseId: 'content-render-failed');
     }
 }

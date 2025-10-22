@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Modules\GetAddress;
 
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Js as Widget;
-use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
@@ -28,10 +27,6 @@ class GetAddress
      */
     public static function init(): void
     {
-        if (EnableGetAddress::isEnabled() === false) {
-            return;
-        }
-
         // Inject Get Address widget in blocked based checkout.
         add_filter(
             'the_content',

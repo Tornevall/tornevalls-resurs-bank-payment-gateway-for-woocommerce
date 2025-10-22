@@ -11,7 +11,8 @@ namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
@@ -29,6 +30,7 @@ class Shared
      * Init various modules.
      *
      * @throws ConfigException
+     * @todo The enable check can be moved to the init.php file instead, so we do not need it in the Frontend init, the Admin init and the Shared init.
      */
     public static function init(): void
     {
@@ -40,7 +42,7 @@ class Shared
         Route::exec();
         MessageBag::init();
 
-        if (!Enabled::isEnabled()) {
+        if (!Repository::isEnabled(field: Field::ENABLED)) {
             return;
         }
 

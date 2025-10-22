@@ -1,6 +1,8 @@
 import {LegacyAddressUpdater} from './update-address/legacy';
 import {BlocksAddressUpdater} from './update-address/blocks';
 
+// @todo This seems complete overkill, consider removing it, Ecom can handle all of this. If the widget renders it renders and should be used, getAddressEnabled especially has no place here. If you need to check if the widget is enabled, check if the JS class is present, present = rendered = should be used.
+
 // Ignore missing Resursbank_GetAddress renders through Ecom Widget.
 declare const Resursbank_GetAddress: any;
 

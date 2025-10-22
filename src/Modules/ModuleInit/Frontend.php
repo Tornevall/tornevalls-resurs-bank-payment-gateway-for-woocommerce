@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
 use Resursbank\Woocommerce\Modules\Order\Filter\Failure;
@@ -25,10 +27,13 @@ class Frontend
 {
     /**
      * Init various modules.
+     *
+     * @throws ConfigException
+     * @todo The enable check can be moved to the init.php file instead, so we do not need it in the Frontend init, the Admin init and the Shared init.
      */
     public static function init(): void
     {
-        if (!Enabled::isEnabled()) {
+        if (!Repository::isEnabled(field: Field::ENABLED)) {
             return;
         }
 

@@ -1,6 +1,8 @@
 // @ts-ignore
 import * as jQuery from 'jquery';
 
+// @todo Not sure this works well if it's even really used, the selection indicators on frontend doesn't reflect selection atm. graphically.
+
 /**
  * BlocksCustomerType class handles interactions with the customer type in the checkout process.
  * rbFrontendData is expected through internal localization.

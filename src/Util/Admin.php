@@ -29,11 +29,13 @@ class Admin
         }
     }
 
-    public static function getAdminErrorNote(string $message, string $additional = ''): void
+    public static function getAdminErrorNote(string $message): void
     {
         if (!self::isAdmin()) {
             return;
         }
+
+        $additional = Translator::translate(phraseId: 'see-log');
 
         echo <<<EX
 <div class="error notice">

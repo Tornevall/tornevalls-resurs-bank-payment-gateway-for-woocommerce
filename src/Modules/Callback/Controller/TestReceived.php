@@ -9,7 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Callback\Controller;
 
-use Resursbank\Woocommerce\Database\Options\Callback\TestReceivedAt;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
@@ -21,7 +22,10 @@ class TestReceived
     public static function exec(): void
     {
         try {
-            TestReceivedAt::setData(value: (string) time());
+            update_option(
+                option: Reader::getOptionName(field: Field::TEST_RECEIVED_AT),
+                value: time()
+            );
         } catch (Throwable $e) {
             Log::error(error: $e);
         }

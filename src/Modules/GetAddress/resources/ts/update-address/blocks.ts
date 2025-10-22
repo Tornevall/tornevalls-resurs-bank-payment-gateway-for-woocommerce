@@ -5,6 +5,8 @@ import {CART_STORE_KEY} from '@woocommerce/block-data';
 import {getSetting} from '@woocommerce/settings';
 import {BlocksCustomerType} from "./customer";
 
+// @todo This needs an overhaul, parts of it is unnecessary, we might be able to merge parts with the legacy version, checking that the widget is enabled is pointless since this can be done by checking if the class has rendered.
+
 // Ignore missing Resursbank_GetAddress renders through Ecom Widget.
 declare const Resursbank_GetAddress: any;
 

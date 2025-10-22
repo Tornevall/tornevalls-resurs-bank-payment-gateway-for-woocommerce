@@ -11,17 +11,18 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
 
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Ecom\Module\Widget\CostList\Css as CostListCss;
 use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
 use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
-use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Util\Log;
@@ -209,11 +210,12 @@ class AssetLoader
     /**
      * Enable all scripts for the front end.
      *
+     * @throws EmptyValueException
      * @throws FilesystemException
      * @throws HttpException
-     * @throws EmptyValueException
      * @throws IllegalValueException
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @throws ConfigException
+     * @throws UserSettingsException
      */
     public static function enqueueGetAddressJs(): void
     {
@@ -226,6 +228,9 @@ class AssetLoader
             true
         );
 
+        $settings = Repository::getSettings();
+
+        // @todo Consider moving this to a JS widget in ECom instead. Reflect log settings etc. on frontend isn't a bad idea for debug logs in JS for example. We should consider it.
         wp_localize_script(
             'rb-get-address',
             'rbFrontendData',
@@ -234,8 +239,8 @@ class AssetLoader
                 'apiUrl' => Route::getUrl(
                     route: Route::ROUTE_SET_CUSTOMER_TYPE
                 ),
-                'getAddressEnabled' => EnableGetAddress::isEnabled(),
-                'logLevel' => LogLevel::getData()->name,
+                'getAddressEnabled' => $settings->enableGetAddress,
+                'logLevel' => $settings->logLevel->name,
                 'isUsingCheckoutBlocks' => WooCommerce::isUsingBlocksCheckout()
             ]
         );

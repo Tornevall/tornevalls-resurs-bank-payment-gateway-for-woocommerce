@@ -10,8 +10,9 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
-use Resursbank\Woocommerce\Database\Option;
-use Resursbank\Woocommerce\Database\Options\Callback\TestReceivedAt;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Module\UserSettings\Repository;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
@@ -92,7 +93,7 @@ class Callback
     private static function getTestButton(): array
     {
         return [
-            'id' => Option::NAME_PREFIX . 'test_callback',
+            'id' => Reader::NAME_PREFIX . 'test_callback',
             'title' => Translator::translate(phraseId: 'test-callbacks'),
             'type' => 'rbtestcallbackbutton',
         ];
@@ -103,11 +104,8 @@ class Callback
      */
     private static function getTestReceivedAt(): array
     {
-        $time = TestReceivedAt::getData();
-        $date = $time > 0 ? date(format: 'Y-m-d H:i:s', timestamp: $time) : '';
-
         return [
-            'id' => TestReceivedAt::getName(),
+            'id' => Reader::getOptionName(field: Field::TEST_RECEIVED_AT),
             'type' => 'text',
             'custom_attributes' => [
                 'disabled' => true,
@@ -115,7 +113,7 @@ class Callback
             'title' => Translator::translate(
                 phraseId: 'callback-test-received-at'
             ),
-            'value' => $date,
+            'value' => Repository::getDate(filed: Field::TEST_RECEIVED_AT),
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
         ];
     }

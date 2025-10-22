@@ -14,16 +14,18 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\Logo\Html as LogoWidget;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMoreWidget;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
@@ -44,10 +46,13 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      * Register custom CSS and
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @throws ConfigException
+     *
+     * @todo This methods needs looking over. The docblock is incomplete so it's unclear what this solves. I'm not sure why we avoid it specifically if there is no store, if anything shouldn't we check against no credentials? Since store falls back to first available?
      */
     public static function init(): void
     {
-        if (empty(StoreId::getData())) {
+        if (!Config::getStoreId()) {
             return;
         }
 
@@ -111,10 +116,12 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @noinspection PhpMissingParentCallCommonInspection
+     * @throws ConfigException
+     * @todo Think this can just return true, cause the init method only runs if enabled is true already, so this is probably redundant.
      */
     public function is_active(): bool
     {
-        return Enabled::isEnabled();
+        return UserSettingsRepository::isEnabled(field: Field::ENABLED);
     }
 
     /**

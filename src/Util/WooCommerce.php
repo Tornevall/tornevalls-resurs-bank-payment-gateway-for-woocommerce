@@ -24,11 +24,11 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\Store\Repository;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Throwable;
 use WP_Post;
 
@@ -287,6 +287,7 @@ class WooCommerce
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @todo Should be removed, if anything is to be kept it should be moved to Ecom.
      */
     public static function updatePartPaymentData(PaymentMethodCollection $paymentMethods): void
     {
@@ -318,41 +319,43 @@ class WooCommerce
             return;
         }
 
-        $currentPaymentMethod = PaymentMethod::getData();
+        $currentPaymentMethod = UserSettingsRepository::getSettings()->partPaymentMethod?->id;
 
         // Only switch this if changes has been made.
         if ($currentPaymentMethod === $paymentMethodId) {
             return;
         }
 
-        update_option(PaymentMethod::getName(), $paymentMethodId);
+        update_option(
+            Reader::getOptionName(field: Field::PART_PAYMENT_METHOD),
+            $paymentMethodId
+        );
 
-        if (Period::getData()) {
+        if (UserSettingsRepository::getSettings()->partPaymentPeriod !== null) {
             return;
         }
 
-        update_option(Period::getName(), $longestPeriod);
+        update_option(Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD), $longestPeriod);
     }
 
     /**
      * Check for misconfigured payment methods during CSS-process and option updates in wp-admin.
+     *
+     * @todo Should be removed.
      */
     public static function validateAndUpdatePartPaymentMethod(): bool
     {
         $paymentMethod = null;
 
         try {
-            $paymentMethodSet = PaymentMethod::getData();
-            $paymentMethod = \Resursbank\Ecom\Module\PaymentMethod\Repository::getById(
-                paymentMethodId: $paymentMethodSet
-            );
+            $paymentMethod = UserSettingsRepository::getSettings()->partPaymentMethod;
 
             // Failsafe: If there is no payment method set, which usually is the case even though the widget is not enabled
             // itself, it has to be preconfigured. In Settings/PartPayment this is very much handled when credentials
             // are saved. This could potentially occur when switching stores as WordPress saving functions are delayed.
             if (
                 !$paymentMethod instanceof EcomPaymentMethod &&
-                Connection::hasCredentials()
+                UserSettingsRepository::hasUserCredentials()
             ) {
                 WooCommerce::updatePartPaymentData(
                     paymentMethods: \Resursbank\Ecom\Module\PaymentMethod\Repository::getPaymentMethods()
@@ -361,7 +364,7 @@ class WooCommerce
         } catch (Throwable) {
         }
 
-        return $paymentMethod instanceof PaymentMethod;
+        return $paymentMethod instanceof EcomPaymentMethod;
     }
 
     /**

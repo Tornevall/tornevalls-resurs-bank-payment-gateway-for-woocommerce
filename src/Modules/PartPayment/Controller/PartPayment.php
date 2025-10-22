@@ -25,12 +25,9 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Location;
-use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as PartPaymentWidget;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
@@ -57,6 +54,7 @@ class PartPayment
      * @throws ValidationException
      * @throws HttpException
      * @throws Throwable
+     * @todo Checks to confirm widgets should render should be moved to respective widget directly.
      */
     public static function exec(): string
     {
@@ -72,28 +70,22 @@ class PartPayment
             'monthlyCost' => ''
         ];
 
-        $paymentMethod = Repository::getById(
-            paymentMethodId: PaymentMethod::getData()
-        );
-
+        $settings = UserSettingsRepository::getSettings();
         $requestAmount = Url::getHttpJson(key: 'amount');
 
         if (
             is_numeric(value: $requestAmount) &&
-            $paymentMethod !== null
+            $settings->partPaymentMethod !== null
         ) {
             $widget = new PartPaymentWidget(
-                paymentMethod: $paymentMethod,
-                months: (int)Period::getData(),
                 amount: (float)$requestAmount,
                 fetchStartingCostUrl: Route::getUrl(
                     route: Route::ROUTE_PART_PAYMENT
-                ),
-                threshold: Limit::getData()
+                )
             );
 
             $readMoreWidget = new ReadMore(
-                paymentMethod: $paymentMethod,
+                paymentMethod: $settings->partPaymentMethod,
                 amount: (float)$requestAmount
             );
 

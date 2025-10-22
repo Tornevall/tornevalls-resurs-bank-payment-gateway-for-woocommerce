@@ -10,10 +10,13 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use JsonException;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
-use Resursbank\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use RuntimeException;
 
 use function is_string;
@@ -88,17 +91,30 @@ class Url
     /**
      * Generate a URL for a given endpoint, with a list of arguments.
      *
+     * @param string $baseUrl
+     * @param array $arguments
+     * @return string
      * @throws IllegalValueException
+     * @throws ConfigException
+     * @throws UserSettingsException
+     * @todo Exceptions from this method will crash admin (probably frontend too). Not sure if that's the correct behavior?
      */
     public static function getQueryArg(string $baseUrl, array $arguments): string
     {
         $queryArgument = $baseUrl;
 
-        if (XDebugSessionValue::getData() !== '') {
-            $arguments['XDEBUG_SESSION'] = XDebugSessionValue::getData();
+        $settings = Repository::getSettings();
+
+        if ($settings->xdebugSessionValue !== '') {
+            $arguments['XDEBUG_SESSION'] = $settings->xdebugSessionValue;
         }
 
         foreach ($arguments as $argumentKey => $argumentValue) {
+            // Skip null values.
+            if ($argumentValue === null) {
+                continue;
+            }
+
             if (!is_string(value: $argumentValue)) {
                 throw new IllegalValueException(
                     message: "$argumentValue is not a string"

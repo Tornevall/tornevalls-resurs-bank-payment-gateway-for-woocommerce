@@ -9,10 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Module\UserSettings\Repository;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Translator;
 
 /**
@@ -52,14 +51,13 @@ class OrderManagement
     private static function getEnableCapture(): array
     {
         return [
-            'id' => EnableCapture::getName(),
+            'id' => Reader::getOptionName(field: Field::CAPTURE_ENABLED),
             'title' => Translator::translate(phraseId: 'enable-capture'),
             'desc' => Translator::translate(
                 phraseId: 'automatic-order-management-on-complete'
             ),
             'type' => 'checkbox',
-            'default' => EnableCapture::getDefault(),
-            'desc_tip' => 'Default: ' . EnableCapture::getDefault(),
+            'default' => Repository::getDefault(field: Field::CAPTURE_ENABLED) ? 'yes' : 'no',
         ];
     }
 
@@ -69,14 +67,13 @@ class OrderManagement
     private static function getEnableCancel(): array
     {
         return [
-            'id' => EnableCancel::getName(),
+            'id' => Reader::getOptionName(field: Field::CANCEL_ENABLED),
             'title' => Translator::translate(phraseId: 'enable-cancel'),
             'desc' => Translator::translate(
                 phraseId: 'automatic-order-management-on-cancel'
             ),
             'type' => 'checkbox',
-            'default' => EnableCancel::getDefault(),
-            'desc_tip' => 'Default: ' . EnableCancel::getDefault(),
+            'default' => Repository::getDefault(field: Field::CANCEL_ENABLED) ? 'yes' : 'no'
         ];
     }
 
@@ -86,14 +83,13 @@ class OrderManagement
     private static function getEnableModify(): array
     {
         return [
-            'id' => EnableModify::getName(),
+            'id' => Reader::getOptionName(field: Field::MODIFY_ENABLED),
             'title' => Translator::translate(phraseId: 'enable-modify'),
             'desc' => Translator::translate(
                 phraseId: 'payment-action-modify-desc'
             ),
             'type' => 'checkbox',
-            'default' => EnableModify::getDefault(),
-            'desc_tip' => 'Default: ' . EnableModify::getDefault(),
+            'default' => Repository::getDefault(field: Field::MODIFY_ENABLED) ? 'yes' : 'no',
         ];
     }
 
@@ -103,14 +99,13 @@ class OrderManagement
     private static function getEnableRefund(): array
     {
         return [
-            'id' => EnableRefund::getName(),
+            'id' => Reader::getOptionName(field: Field::REFUND_ENABLED),
             'title' => Translator::translate(phraseId: 'enable-refund'),
             'desc' => Translator::translate(
                 phraseId: 'automatic-order-management-on-refund'
             ),
             'type' => 'checkbox',
-            'default' => EnableRefund::getDefault(),
-            'desc_tip' => 'Default: ' . EnableRefund::getDefault(),
+            'default' => Repository::getDefault(field: Field::REFUND_ENABLED) ? 'yes' : 'no'
         ];
     }
 }

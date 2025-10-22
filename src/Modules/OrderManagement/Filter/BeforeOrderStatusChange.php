@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use JsonException;
@@ -25,9 +26,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -227,20 +226,25 @@ class BeforeOrderStatusChange
 
     /**
      * If we get positive on payment action validation, we need to make ensure the feature is enabled to proceed.
+     *
+     * @throws ConfigException
+     * @throws UserSettingsException
      */
     public static function validateEnabledPaymentAction(
         string $status
     ): bool {
+        $settings = Repository::getSettings();
+
         switch ($status) {
             case 'failed':
             case 'cancelled':
-                return EnableCancel::isEnabled();
+                return $settings->cancelEnabled;
 
             case 'completed':
-                return EnableCapture::isEnabled();
+                return $settings->captureEnabled;
 
             case 'refunded':
-                return EnableRefund::isEnabled();
+                return $settings->refundEnabled;
 
             default:
                 return false;
