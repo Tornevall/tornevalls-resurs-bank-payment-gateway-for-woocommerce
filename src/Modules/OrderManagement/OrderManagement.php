@@ -27,11 +27,11 @@ use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\MerchantPortal;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Lib\Utilities\Price;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
@@ -568,7 +568,7 @@ class OrderManagement
         self::logSuccess(
             sprintf(
                 Translator::translate(phraseId: "$actionString-success"),
-                Currency::getFormattedAmount(amount: (float)$amount)
+                Price::format(value: (float)$amount)
             ),
             $order
         );

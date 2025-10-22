@@ -38,7 +38,6 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
-use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
@@ -124,15 +123,17 @@ class Resursbank extends WC_Payment_Gateway
     public function payment_fields(): void
     {
         try {
-            $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
-            $usp = PaymentMethodRepository::getUniqueSellingPoint(
+            $gatewayHelper = new GatewayHelper(
                 paymentMethod: $this->method,
                 amount: $this->get_order_total()
             );
-            echo '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
-                    paymentMethod: $this->method,
-                    amount: $this->get_order_total()
-                );
+
+            echo $gatewayHelper->getUspWidget() .
+                '<div class="payment-method-content">' .
+                    $gatewayHelper->getCostList() .
+                    $gatewayHelper->getReadMore() .
+                    $gatewayHelper->getPriceSignageWarning() .
+                '</div>';
         } catch (TranslationException $error) {
             // Translation errors should rather go as debug messages since we
             // translate with english fallbacks.
@@ -185,8 +186,7 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Whether payment method is available.
      *
-     * @noinspection PhpMissingParentCallCommonInspection
-     * @throws ConfigException
+     * @return bool
      */
     public function is_available(): bool
     {

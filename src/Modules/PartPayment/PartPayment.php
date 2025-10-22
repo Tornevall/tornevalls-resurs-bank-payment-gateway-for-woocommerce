@@ -13,7 +13,6 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Locale\Location;
-use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as EcomPartPayment;
@@ -30,11 +29,6 @@ use WC_Product;
  */
 class PartPayment
 {
-    /**
-     * ECom Part Payment widget instance.
-     */
-    private static ?EcomPaymentMethod $paymentMethod = null;
-
     /**
      * Init method for frontend scripts and styling.
      *
@@ -74,18 +68,12 @@ class PartPayment
 
     /**
      * Output widget HTML if on a single product page.
-     *
-     * @throws ConfigException
      */
     public static function renderWidget(): void
     {
         if (!self::isEnabled()) {
             return;
         }
-
-        Config::setLocation(
-            location: Location::from(value: WooCommerce::getStoreCountry())
-        );
 
         try {
             $widget = new EcomPartPayment(

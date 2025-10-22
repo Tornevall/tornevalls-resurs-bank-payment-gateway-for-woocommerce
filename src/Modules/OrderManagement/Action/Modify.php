@@ -22,6 +22,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Lib\Utilities\Price;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
@@ -29,7 +30,6 @@ use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Abstract_Order;
@@ -232,7 +232,7 @@ class Modify extends Action
 
     /**
      * Handle logging of validation errors.
-     * @throws \Exception
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function handleValidationError(
@@ -248,12 +248,8 @@ class Modify extends Action
         OrderManagement::logError(
             sprintf(
                 Translator::translate(phraseId: 'modify-too-large'),
-                Currency::getFormattedAmount(
-                    amount: (float)$requestedAmount
-                ),
-                Currency::getFormattedAmount(
-                    amount: (float)$availableAmount
-                )
+                Price::format(value: (float)$requestedAmount),
+                Price::format(value: (float)$availableAmount)
             ),
             error: $error,
             order: $order

@@ -17,7 +17,6 @@ use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use WC_Order;
 
@@ -34,10 +33,6 @@ class Shared
      */
     public static function init(): void
     {
-        // Preload cached currency data.
-        Currency::getWooCommerceCurrencySymbol();
-        Currency::getWooCommerceCurrencyFormat();
-
         // Things that should be available even without the plugin API being enabled.
         Route::exec();
         MessageBag::init();

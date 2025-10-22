@@ -132,38 +132,6 @@ class WooCommerce
     }
 
     /**
-     * Return country as string, by the value returned from the current set store.
-     *
-     * @throws ConfigException
-     */
-    public static function getStoreCountry(): string
-    {
-        // Performance fix for moments where this method are recalled several times.
-        if (self::$storeCountry !== null) {
-            return self::$storeCountry;
-        }
-
-        try {
-            $configuredStore = Repository::getConfiguredStore();
-
-            if ($configuredStore?->countryCode?->value) {
-                self::$storeCountry = strtoupper(
-                    string: $configuredStore->countryCode->value
-                );
-            } else {
-                self::$storeCountry = 'EN';
-            }
-        } catch (Throwable $exception) {
-            Config::getLogger()->debug(
-                message: 'Store country code fallback to EN. Could be configured: ' . $exception->getMessage()
-            );
-            self::$storeCountry = 'EN';
-        }
-
-        return self::$storeCountry;
-    }
-
-    /**
      * Full cache invalidation.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection

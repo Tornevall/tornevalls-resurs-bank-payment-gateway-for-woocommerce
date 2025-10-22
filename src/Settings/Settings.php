@@ -11,6 +11,8 @@ namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
@@ -72,7 +74,6 @@ class Settings
         );
 
         Api::init();
-        PartPayment::init();
 
         /**
          * @noinspection PhpArgumentWithoutNamedIdentifierInspection
