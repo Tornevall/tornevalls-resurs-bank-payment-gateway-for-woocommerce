@@ -55,7 +55,7 @@ class Metadata
      * Get UUID of Resurs Bank payment attached to order.
      * CRUD Compatible.
      *
-     * @throws EmptyValueException
+     * @todo This can be simplieid. First of all, we will rarely fetch legacy payments, so storing the resolved payment id is an expensive because of the increased maintenance. Empty payment id should simply be returned as an empty string without throwing. We should actually isntead check where this is used inside Ecom, and ensure that _those_ places do not accept empty strings or function with empty strings. Commented those sections for now to see effectrs.
      */
     public static function getPaymentId(WC_Abstract_Order $order): string
     {
@@ -66,7 +66,7 @@ class Metadata
 
         if ($paymentId === '' && self::isLegacyOrder(order: $order)) {
             $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
-
+/*
             if ($paymentId === '') {
                 throw new EmptyValueException(
                     message: 'No results found when searching for legacy order.'
@@ -78,14 +78,15 @@ class Metadata
                 key: self::KEY_PAYMENT_ID,
                 value: $paymentId
             );
+*/
         }
-
+/*
         if ($paymentId === '') {
             throw new EmptyValueException(
                 message: 'Unable to fetch payment ID'
             );
         }
-
+*/
         return $paymentId;
     }
 
@@ -199,27 +200,6 @@ class Metadata
         }
 
         return $result;
-    }
-
-    /**
-     * Add metadata to WC_Order indicating the "Thank You" page was reached.
-     */
-    public static function setThankYouTriggered(
-        WC_Order $order
-    ): void {
-        self::setOrderMeta(order: $order, key: self::KEY_THANK_YOU, value: '1');
-    }
-
-    /**
-     * Whether the "Thank You" page has been rendered for this order.
-     */
-    public static function isThankYouTriggered(
-        WC_Order $order
-    ): bool {
-        return self::getOrderMeta(
-            order: $order,
-            key: self::KEY_THANK_YOU
-        ) === '1';
     }
 
     /**

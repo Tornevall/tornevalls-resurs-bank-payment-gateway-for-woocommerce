@@ -13,6 +13,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Api\Scope;
 use Resursbank\Ecom\Lib\Model\Config\Network;
 use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
+use Resursbank\Woocommerce\Modules\Order\PaymentHistory;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Admin;
@@ -43,16 +44,13 @@ class Connection
                 WC()->initialize_session();
             }
 
-            $currencyFormat = get_option('woocommerce_currency_pos', 'right');
-
             Config::setup(
                 cache: new Transient(),
-                currencyFormat: str_contains($currencyFormat, 'left') ?
-                    CurrencyFormat::SYMBOL_FIRST : CurrencyFormat::SYMBOL_LAST,
                 network: new Network(
                     userAgent: UserAgent::getUserAgent()
                 ),
-                settingsReader: new Reader()
+                settingsReader: new Reader(),
+                paymentHistoryDataHandler: new PaymentHistory()
             );
         } catch (Throwable $e) {
             // We are unable to use loggers here (neither WC_Logger nor ecom will be available in this state).

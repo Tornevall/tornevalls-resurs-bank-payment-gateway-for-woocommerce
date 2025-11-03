@@ -33,46 +33,30 @@ class Refund extends Action
         WC_Order $order,
         WC_Order_Refund $refund
     ): void {
-        OrderManagement::execAction(
-            action: ActionType::REFUND,
-            order: $order,
-            callback: static function () use ($order, $refund): void {
-                $payment = OrderManagement::getPayment(order: $order);
+        $payment = OrderManagement::getPayment(order: $order);
 
-                if (!$payment->canRefund()) {
-                    return;
-                }
+        if (!$payment->canRefund()) {
+            return;
+        }
 
-                $orderLines = Order::getOrderLines(order: $refund);
+        $orderLines = Order::getOrderLines(order: $refund);
 
-                if (
-                    !self::validate(
-                        payment: $payment,
-                        order: $order,
-                        refund: $refund
-                    )
-                ) {
-                    return;
-                }
+        if (
+            !self::validate(
+                payment: $payment,
+                order: $order,
+                refund: $refund
+            )
+        ) {
+            return;
+        }
 
-                $transactionId = self::generateTransactionId();
+        $transactionId = self::generateTransactionId();
 
-                $response = Repository::refund(
-                    paymentId: $payment->id,
-                    orderLines: $orderLines->count() > 0 ? $orderLines : null,
-                    transactionId: $transactionId
-                );
-
-                $action = $response->order?->actionLog->getByTransactionId(
-                    id: $transactionId
-                );
-
-                OrderManagement::logSuccessPaymentAction(
-                    action: ActionType::REFUND,
-                    order: $order,
-                    amount: $action?->orderLines->getTotal()
-                );
-            }
+        Repository::refund(
+            paymentId: $payment->id,
+            orderLines: $orderLines->count() > 0 ? $orderLines : null,
+            transactionId: $transactionId
         );
     }
 

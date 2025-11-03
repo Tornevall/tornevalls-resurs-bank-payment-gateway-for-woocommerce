@@ -9,13 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Order\Filter;
 
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Woocommerce\Modules\Order\Status;
+use Resursbank\Ecom\Lib\Model\PaymentHistory\Entry;
+use Resursbank\Ecom\Lib\Model\PaymentHistory\Event;
+use Resursbank\Ecom\Lib\Model\PaymentHistory\User;
+use Resursbank\Ecom\Module\PaymentHistory\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
 /**
@@ -45,34 +45,18 @@ class ThankYou
     public static function exec(mixed $orderId = null): void
     {
         try {
-            if ($orderId === null) {
-                throw new EmptyValueException(message: 'Order ID is null');
-            }
-
             $order = OrderManagement::getOrder(id: $orderId);
 
+            // Failed to find Resurs Bank order.
             if ($order === null) {
-                throw new IllegalValueException(
-                    message: 'Failed to obtain order data.'
-                );
-            }
-
-            if (
-                !Metadata::isValidResursPayment(order: $order) ||
-                Metadata::isThankYouTriggered(order: $order)
-            ) {
                 return;
             }
 
-            Status::update(order: $order);
-            Metadata::setThankYouTriggered(order: $order);
-
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            $order->add_order_note(
-                Translator::translate(
-                    phraseId: 'customer-landingpage-return'
-                )
-            );
+            Repository::write(entry: new Entry(
+                paymentId: Metadata::getPaymentId(order: $order),
+                event: Event::REACHED_ORDER_SUCCESS_PAGE,
+                user: User::CUSTOMER
+            ));
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
