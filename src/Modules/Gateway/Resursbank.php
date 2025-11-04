@@ -158,7 +158,7 @@ class Resursbank extends WC_Payment_Gateway
         try {
             $payment = $this->createPayment(order: $order);
         } catch (Throwable $e) {
-            $this->handleCreatePaymentError(order: $order, error: $e);
+            $this->handleCreatePaymentError(error: $e);
             if ($blockCreateErrorMessage && WooCommerce::isUsingBlocksCheckout()) {
                 throw new Exception(message: $blockCreateErrorMessage);
             }
@@ -330,10 +330,6 @@ class Resursbank extends WC_Payment_Gateway
             );
         }
 
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        $order->add_order_note('Resurs initiated payment process.');
-        Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value: (string)time());
-
         return PaymentRepository::create(
             paymentMethodId: $this->method->id,
             orderLines: Order::getOrderLines(order: $order),
@@ -444,20 +440,11 @@ class Resursbank extends WC_Payment_Gateway
      * CurlException.
      */
     // @phpcs:ignoreFile CognitiveComplexity
-    private function handleCreatePaymentError(WC_Order $order, Throwable $error): void
+    private function handleCreatePaymentError(Throwable $error): void
     {
         global $blockCreateErrorMessage;
-        Log::error(
-            error: $error,
-            message: Translator::translate(phraseId: 'error-creating-payment')
-        );
 
         try {
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            $order->add_order_note(
-                Translator::translate(phraseId: 'error-creating-payment')
-            );
-
             if ($error instanceof CurlException) {
                 if (count(value: $error->getDetails())) {
                     /** @var $detail */

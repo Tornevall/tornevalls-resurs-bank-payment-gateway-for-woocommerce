@@ -106,7 +106,7 @@ class UpdateOrder
 
             Modify::exec(payment: $payment, order: $order);
         } catch (Throwable $error) {
-            self::handleError(error: $error, order: $order);
+            self::handleError(error: $error);
         }
     }
 
@@ -139,8 +139,7 @@ class UpdateOrder
      * method will only track one single error instance.
      */
     private static function handleError(
-        Throwable $error,
-        WC_Order $order
+        Throwable $error
     ): void {
         if (self::$modificationError) {
             return;
@@ -148,7 +147,6 @@ class UpdateOrder
 
         OrderManagement::logActionError(
             action: ActionType::MODIFY_ORDER,
-            order: $order,
             error: $error,
             reason: $error->getMessage()
         );

@@ -9,9 +9,14 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Callback;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\CallbackException;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Lib\Model\Callback\Authorization as AuthorizationModel;
 use Resursbank\Ecom\Lib\Model\Callback\CallbackInterface;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
@@ -101,8 +106,14 @@ class Callback
     }
 
     /**
+     * @param string $type
      * @throws ConfigException
      * @throws HttpException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws AttributeCombinationException
+     * @throws FilesystemException
+     * @throws TranslationException
      */
     private static function respond(
         string $type
@@ -114,87 +125,9 @@ class Callback
         Route::respondWithExit(
             body: '',
             code: Repository::process(
-                $controller->getRequestData(),
-                process: static function (
-                    CallbackInterface $callback
-                ): void {
-                    if (!($callback instanceof AuthorizationModel)) {
-                        return;
-                    }
-
-                    $order = CallbackModule::getOrder(
-                        paymentId: $callback->getPaymentId()
-                    );
-
-                    self::checkIfReadyForCallback(order: $order);
-
-                    try {
-                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-                        $order->add_order_note($callback->getNote());
-                    } catch (Throwable $e) {
-                        // In case translations are lost in ecom transitions, we will
-                        // push out the error message instead for which the phrase id will
-                        // be displayed instead. If this occurs, and we do not do this,
-                        // callbacks will be rejected with an error instead.
-                        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-                        $order->add_order_note($e->getMessage());
-                    }
-
-                    Status::update(order: $order);
-                }
+                callback: $controller->getRequestData(),
+                process: null
             )
         );
-    }
-
-    /**
-     * Check that order is ready for callbacks.
-     *
-     * @throws HttpException
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
-     * @phpcs:ignoreFile CognitiveComplexity
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    private static function checkIfReadyForCallback(WC_Order $order): void
-    {
-        /** @var WC_DateTime|null $dateCreated */
-        $dateCreated = $order->get_date_created();
-
-        if (!$dateCreated) {
-            $dateCreated = new WC_DateTime();
-        }
-
-        $timeSince = time() - $dateCreated->format(format: 'U');
-        $isRejected = false;
-
-        try {
-            $extendedOrderInfo = OrderManagement::getPayment(order: $order);
-            $isRejected = $extendedOrderInfo->isRejected();
-        } catch (Throwable) {
-        }
-
-        $rbCreated = Metadata::getOrderMeta(
-            order: $order,
-            key: Metadata::KEY_REPOSITORY_CREATED
-        );
-
-        // Applies to new orders for which we added this metadata key. If this value
-        // for some reason is missing, we will keep using the order creation date.
-        if ($rbCreated !== '' && (int)$rbCreated > 0) {
-            $timeSince = time() - (int)$rbCreated;
-        }
-
-        if (
-            $timeSince < self::MINIMUM_RESPONSE_DELAY &&
-            !Metadata::isThankYouTriggered(order: $order)
-        ) {
-            throw new HttpException(
-                sprintf(
-                    'Order %s not ready for callbacks yet%s',
-                    $order->get_id(),
-                    $isRejected ? ' - Payment was rejected by Resurs.' : '.'
-                ),
-                503
-            );
-        }
     }
 }

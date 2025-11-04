@@ -34,6 +34,8 @@ use WC_Order;
 
 /**
  * Business logic relating to WC_Order status.
+ *
+ * @todo This class seems overly complex. We can probably simplify and move it to the PaymentHistory class instead.
  */
 class Status
 {

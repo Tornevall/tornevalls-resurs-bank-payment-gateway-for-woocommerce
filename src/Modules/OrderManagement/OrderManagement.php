@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Modules\OrderManagement;
 use Exception;
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -378,45 +379,12 @@ class OrderManagement
     }
 
     /**
-     * Get WC_Order from id.
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function getOrder(int $id): ?WC_Order
-    {
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        // Will be either WC_Order or false.
-        $result = wc_get_order($id);
-
-        try {
-            $result = $result instanceof WC_Order ? $result : wc_get_order($id);
-
-            if (!$result instanceof WC_Order) {
-                $result = null;
-
-                if (WooCommerce::isAdminOrderCreateTool()) {
-                    // Use no errors in this tool.
-                    return null;
-                }
-
-                throw new IllegalTypeException(
-                    message: 'Returned object not of type WC_Order'
-                );
-            }
-        } catch (Throwable $error) {
-            Log::error(
-                $error,
-                sprintf(
-                    Translator::translate(phraseId: 'failed-resolving-order'),
-                    $id
-                )
-            );
-        }
-
-        return $result;
-    }
-
-    /**
+     * Resolve Resurs Bank payment from order.
+     *
+     * @param WC_Order $order
+     * @return Payment|null
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
@@ -424,99 +392,73 @@ class OrderManagement
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
+     * @throws NotJsonEncodedException
      * @throws ReflectionException
      * @throws ValidationException
-     * @throws AttributeCombinationException
-     * @throws NotJsonEncodedException
      */
-    public static function getPayment(WC_Order $order): Payment
+    public static function getPayment(WC_Order $order): ?Payment
     {
-        global $rbGetPaymentCount;
-        $rbGetPaymentCount++;
-
-        $id = (int)$order->get_id();
-
-        // Temporary stored payment. During one web request, several questions are pushed over to this segment
-        // as we validate several abilities for a payment (like canCapture, canCancel, etc.). To avoid API
-        // overload, we'll use self if it has been already set once, instead of risking more than 10 API calls
-        // during that single web request.
-        if ($rbGetPaymentCount > 1 && isset(self::$payments[$id]) && self::$payments[$id] instanceof Payment) {
-            return self::$payments[$id];
-        }
-
-        $result = Repository::get(
+        // @todo There was previously a local caching layer used here to suppress unnecessary API calls. It didn't specify where this was relevant. Investigate if we need to put it back.
+        return Repository::get(
             paymentId: Metadata::getPaymentId(order: $order)
         );
-
-        self::$payments[$id] = $result;
-
-        return $result;
     }
 
     /**
-     * Add an error message to order notes and message bag.
+     * Resolve WC_Order from ID if it was placed with Resurs Bank, else null.
+     *
+     * @param int $id
+     * @return WC_Order|null
+     * @throws ConfigException
+     */
+    public static function getOrder(int $id): ?WC_Order
+    {
+        try {
+            if ($id === 0) {
+                return null;
+            }
+
+            $orderObj = wc_get_order(the_order: $id);
+
+            if (!is_object(value: $orderObj) || !$orderObj instanceof WC_Order) {
+                throw new IllegalValueException(
+                    message: 'Failed to obtain order data.'
+                );
+            }
+
+            if (!Metadata::isValidResursPayment(order: $orderObj)) {
+                return null;
+            }
+
+            return $orderObj;
+        } catch (Throwable $error) {
+            Config::getLogger()->error(message: $error);
+            return null;
+        }
+    }
+
+    /**
+     * Log message to file on disk and message bag.
+     *
      * @param string $message
      * @param Throwable $error
      * @param WC_Order|null $order
-     * @throws ConfigException
-     * @throws UserSettingsException
      */
     public static function logError(
         string $message,
-        Throwable $error,
-        ?WC_Order $order = null
+        Throwable $error
     ): void {
         Log::error(error: $error);
         MessageBag::addError(message: $message);
-
-        if ($order === null) {
-            return;
-        }
-
-        $settings = UserSettingsRepository::getSettings();
-
-        // @todo Could be replaced by a widget in Ecom to render MP link element.
-        $url = $settings->environment === EnvironmentEnum::PROD ?
-            MerchantPortal::PROD :
-            MerchantPortal::TEST;
-
-        $message .= ' <a href="' . $url->value . '" target="_blank">Merchant Portal</a>';
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        $order->add_order_note($message);
-    }
-
-    /**
-     * Centralized method to execute a payment action and log potential errors.
-     */
-    public static function execAction(
-        ActionType $action,
-        WC_Order $order,
-        callable $callback
-    ): void {
-        try {
-            $callback();
-        } catch (CurlException $error) {
-            $trace = $error->getError();
-
-            self::logActionError(
-                action: $action,
-                order: $order,
-                error: $error,
-                reason: $trace?->message ?? 'unknown reason'
-            );
-        } catch (Throwable $error) {
-            self::logActionError(action: $action, order: $order, error: $error);
-        }
     }
 
     /**
      * Log error from a Payment Action request (cancel, debit, credit, modify).
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @throws Exception
+     * @todo Think we can remove this, places where it's used should be moveable to Ecom, or just removable altogether.
      */
     public static function logActionError(
         ActionType $action,
-        WC_Order $order,
         Throwable $error,
         string $reason = 'unknown reason'
     ): void {
@@ -527,50 +469,11 @@ class OrderManagement
         );
 
         self::logError(
-            sprintf(
+            message: sprintf(
                 Translator::translate(phraseId: "$actionString-action-failed"),
                 strtolower(string: $reason)
             ),
-            $error,
-            $order
-        );
-    }
-
-    /**
-     * Add success message to order notes and message bag.
-     */
-    public static function logSuccess(
-        string $message,
-        ?WC_Order $order = null
-    ): void {
-        Log::debug(message: $message);
-        MessageBag::addSuccess(message: $message);
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        $order?->add_order_note($message);
-    }
-
-    /**
-     * Log a generic success message from payment action.
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function logSuccessPaymentAction(
-        ActionType $action,
-        WC_Order $order,
-        ?float $amount = null
-    ): void {
-        $actionString = str_replace(
-            search: '_',
-            replace: '-',
-            subject: strtolower(string: $action->value)
-        );
-
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        self::logSuccess(
-            sprintf(
-                Translator::translate(phraseId: "$actionString-success"),
-                Price::format(value: (float)$amount)
-            ),
-            $order
+            error: $error
         );
     }
 }

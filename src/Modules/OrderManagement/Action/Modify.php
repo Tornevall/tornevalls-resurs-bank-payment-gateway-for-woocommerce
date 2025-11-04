@@ -23,7 +23,6 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Lib\Utilities\Price;
-use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
@@ -117,59 +116,48 @@ class Modify extends Action
         }
 
         $order = self::$order;
-        OrderManagement::execAction(
-            action: ActionType::MODIFY_ORDER,
-            order: self::$order,
-            callback: static function () use ($order): void {
-                $payment = OrderManagement::getPayment(
-                    order: $order
-                );
 
-                $allowModify = self::canBulkModify(
-                    order: $order,
-                    payment: $payment
-                ) || is_ajax();
-
-                // If Resurs payment status is still in redirection, the order can not be cancelled, but for
-                // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
-                // they tend to disappear if we throw exceptions. However, if orders are already cancelled
-                // we should avoid the update.
-                if (
-                    OrderManagement::$hasActiveCancel ||
-                    !$payment->canCancel() ||
-                    $payment->status === Status::TASK_REDIRECTION_REQUIRED ||
-                    !$allowModify
-                ) {
-                    return;
-                }
-
-                if ($payment->canCancel()) {
-                    Repository::cancel(
-                        paymentId: $payment->id
-                    );
-                }
-
-                $orderLines = Order::getOrderLines(order: $order);
-
-                if (
-                    count(
-                    value: $orderLines
-                ) > 0 &&
-                    $orderLines->getTotal() > 0
-                ) {
-                    Repository::addOrderLines(
-                        paymentId: $payment->id,
-                        orderLines: $orderLines
-                    );
-                }
-
-                OrderManagement::logSuccessPaymentAction(
-                    action: ActionType::MODIFY_ORDER,
-                    order: $order,
-                    amount: (float)$order->get_total()
-                );
-            }
+        $payment = OrderManagement::getPayment(
+            order: $order
         );
+
+        $allowModify = self::canBulkModify(
+            order: $order,
+            payment: $payment
+        ) || is_ajax();
+
+        // If Resurs payment status is still in redirection, the order can not be cancelled, but for
+        // cancels we must allow wooCommerce to cancel orders (especially pending orders), since
+        // they tend to disappear if we throw exceptions. However, if orders are already cancelled
+        // we should avoid the update.
+        if (
+            OrderManagement::$hasActiveCancel ||
+            !$payment->canCancel() ||
+            $payment->status === Status::TASK_REDIRECTION_REQUIRED ||
+            !$allowModify
+        ) {
+            return;
+        }
+
+        if ($payment->canCancel()) {
+            Repository::cancel(
+                paymentId: $payment->id
+            );
+        }
+
+        $orderLines = Order::getOrderLines(order: $order);
+
+        if (
+            count(
+            value: $orderLines
+        ) > 0 &&
+            $orderLines->getTotal() > 0
+        ) {
+            Repository::addOrderLines(
+                paymentId: $payment->id,
+                orderLines: $orderLines
+            );
+        }
     }
 
     /**
