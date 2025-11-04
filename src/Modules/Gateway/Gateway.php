@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -21,9 +22,12 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -62,6 +66,37 @@ class Gateway
      */
     public static function initFrontend(): void
     {
+        // This hook mitigates stale payment ids on orders when customers
+        // abandon the checkout and later return to complete the purchase using
+        // an alternative payment method not supplied by Resurs Bank.
+        //
+        // Scenario this fixes:
+        //
+        // 1. Customer places order, lands on Resurs gateway.
+        // 2. Customer uses back button, or address bar etc., to nav back to the checkout page.
+        // 3. Checkout is still active in WC session, as is standard.
+        // 4. Customer selects a different payment method from a different provider and completes the order.
+        // 5. The order now has a payment id from Resurs Bank stored in order metadata, even though the payment was completed using another provider.
+        //
+        // Customer backtracking and selecting a different payment method from
+        // Resurs Bank, effectively creating a new payment, is not an issue,
+        // because we update the metadata value when processing the new payment.
+        add_action(
+            'woocommerce_rest_checkout_process_payment_with_context',
+            function (PaymentContext $data) {
+                if (!$data->get_payment_method_instance() instanceof Resursbank) {
+                    return;
+                }
+
+                // Clear potentially existing payment ID in order metadata.
+                Metadata::setPaymentId(order: $data->order, id: '');
+            }
+        );
+
+        if (!Repository::isEnabled(field: Field::ENABLED)) {
+            return;
+        }
+
         add_filter(
             'woocommerce_gateway_icon',
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::modifyIcon',

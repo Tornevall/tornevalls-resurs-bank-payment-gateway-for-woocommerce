@@ -18,17 +18,13 @@ use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
-use Resursbank\Ecom\Lib\Api\MerchantPortal;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\UserSettings\Field;
-use Resursbank\Ecom\Lib\Utilities\Price;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
@@ -36,7 +32,6 @@ use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 
@@ -47,7 +42,6 @@ use WC_Order;
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  * @SuppressWarnings(PHPMD.LongVariable)
  * @noinspection EfferentObjectCouplingInspection
- * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  */
 class OrderManagement
 {
@@ -57,14 +51,7 @@ class OrderManagement
     public static bool $hasActiveCancel = false;
 
     /**
-     * Track resolved payments to avoid additional API calls.
-     */
-    private static array $payments = [];
-
-    /**
      * The actual method that sets up actions for order status change hooks.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function init(): void
     {
@@ -191,127 +178,7 @@ class OrderManagement
      */
     public static function canEdit(WC_Order $order): bool
     {
-        self::getCanNotEditTranslation(order: $order);
-
-        $frozenOrRejected = (self::isFrozen(order: $order) || self::isRejected(
-                order: $order
-            ));
-        $payment = self::getPayment(order: $order);
-
-        return
-            !$frozenOrRejected &&
-            (
-                self::canCapture(order: $order) ||
-                self::canCancel(order: $order) ||
-                (
-                    $payment->isCancelled() &&
-                    $payment->application->approvedCreditLimit > 0.0
-                )
-            );
-    }
-
-    /**
-     * Update translation in WooCommerce at editor level if Resurs has an order frozen or rejected.
-     *
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws NotJsonEncodedException
-     * @throws ReflectionException
-     * @throws ValidationException
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     * @noinspection PhpUnusedParameterInspection
-     */
-    public static function getCanNotEditTranslation(WC_Order $order): void
-    {
-        $isFrozen = self::isFrozen(order: $order);
-        $isRejected = self::isRejected(order: $order);
-
-        // Skip translation filter if not frozen nor rejected.
-        if (!$isRejected && !$isFrozen) {
-            return;
-        }
-
-        /**
-         * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
-         * @phpcs:ignoreFile CognitiveComplexity
-         */
-        add_filter(
-            'gettext',
-            static function ($translation, $text, $domain) use ($isFrozen, $isRejected) {
-                if (
-                    isset($text) &&
-                    $text === 'This order is no longer editable.'
-                ) {
-                    if ($isRejected) {
-                        $translation = Translator::translate(
-                            phraseId: 'can-not-edit-order-due-to-rejected'
-                        );
-                    }
-
-                    if ($isFrozen) {
-                        $translation = Translator::translate(
-                            phraseId: 'can-not-edit-order-due-to-frozen'
-                        );
-                    }
-                }
-
-                return $translation;
-            },
-            999,
-            3
-        );
-    }
-
-    /**
-     * Check if order is FROZEN.
-     *
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws NotJsonEncodedException
-     * @throws ReflectionException
-     * @throws ValidationException
-     */
-    public static function isFrozen(WC_Order $order): bool
-    {
-        $payment = self::getPayment(order: $order);
-        return $payment->isFrozen();
-    }
-
-    /**
-     * Is the order rejected?
-     *
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws NotJsonEncodedException
-     * @throws ReflectionException
-     * @throws ValidationException
-     */
-    public static function isRejected(WC_Order $order): bool
-    {
-        $payment = self::getPayment(order: $order);
-        return $payment->isRejected();
+        return self::getPayment(order: $order)->canModify();
     }
 
     /**
@@ -398,7 +265,7 @@ class OrderManagement
      */
     public static function getPayment(WC_Order $order): ?Payment
     {
-        // @todo There was previously a local caching layer used here to suppress unnecessary API calls. It didn't specify where this was relevant. Investigate if we need to put it back.
+        $a = 'asd';
         return Repository::get(
             paymentId: Metadata::getPaymentId(order: $order)
         );

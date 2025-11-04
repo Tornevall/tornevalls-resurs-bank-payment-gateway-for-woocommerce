@@ -12,13 +12,8 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
-use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
-use Resursbank\Woocommerce\Modules\Gateway\Gateway;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
@@ -34,8 +29,6 @@ class Metadata
 {
     public const KEY_PAYMENT_ID = RESURSBANK_MODULE_PREFIX . '_payment_id';
     public const KEY_LEGACY_ORDER_REFERENCE = 'paymentId';
-    public const KEY_THANK_YOU = RESURSBANK_MODULE_PREFIX . '_thankyou_trigger';
-    public const KEY_REPOSITORY_CREATED = RESURSBANK_MODULE_PREFIX . '_repository_created';
 
     /**
      * Store UUID of Resurs Bank payment on order.
@@ -66,27 +59,8 @@ class Metadata
 
         if ($paymentId === '' && self::isLegacyOrder(order: $order)) {
             $paymentId = self::findPaymentIdForLegacyOrder(order: $order);
-/*
-            if ($paymentId === '') {
-                throw new EmptyValueException(
-                    message: 'No results found when searching for legacy order.'
-                );
-            }
+        }
 
-            self::setOrderMeta(
-                order: $order,
-                key: self::KEY_PAYMENT_ID,
-                value: $paymentId
-            );
-*/
-        }
-/*
-        if ($paymentId === '') {
-            throw new EmptyValueException(
-                message: 'Unable to fetch payment ID'
-            );
-        }
-*/
         return $paymentId;
     }
 
@@ -132,53 +106,9 @@ class Metadata
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
-    public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
+    public static function isValidResursPayment(WC_Order $order): bool
     {
-        global $rbPaymentIsValid;
-
-        $orderId = $order->get_id() ?? 0;
-
-        // Early validation of cached payment status.
-        if (self::isCachedPaymentInvalid(orderId: $orderId)) {
-            return false;
-        }
-
-        try {
-            // Validate the payment method on uuid first, then verify that the payment method
-            // is Resurs based. If it is not a UUID we can save performance by just not checking
-            // it further.
-            $stringValidation = new StringValidation();
-            $stringValidation->isUuid(value: $order->get_payment_method());
-            self::isValidResursMethod(order: $order);
-        } catch (Throwable) {
-            $rbPaymentIsValid[$orderId] = false;
-            return false;
-        }
-
-        try {
-            // Attempt to retrieve the payment ID; if it fails, the order is invalid.
-            self::getPaymentId(order: $order);
-        } catch (Throwable) {
-            return false;
-        }
-
-        // If checkPaymentStatus is requested, attempt to validate the payment by requesting it.
-        // Note that this method is called through several actions in the plugin which means
-        // each request will render a getPayment, unless we cache it the first time. We only
-        // need to know the first time if the payment is valid.
-        if ($checkPaymentStatus && !isset($rbPaymentIsValid[$orderId])) {
-            try {
-                OrderManagement::getPayment(order: $order);
-                $rbPaymentIsValid[$orderId] = true;
-            } catch (Throwable $error) {
-                Log::debug(message: $error->getMessage());
-                $rbPaymentIsValid[$orderId] = false;
-                return false;
-            }
-        }
-
-        // If all checks passed or if checkPaymentStatus has not been requested.
-        return $rbPaymentIsValid[$orderId] ?? true;
+        return self::getPaymentId(order: $order) !== '';
     }
 
     /**
@@ -200,53 +130,6 @@ class Metadata
         }
 
         return $result;
-    }
-
-    /**
-     * Early validation of cached payment status.
-     */
-    private static function isCachedPaymentInvalid(int $orderId): bool
-    {
-        global $rbPaymentIsValid;
-        return isset($rbPaymentIsValid[$orderId]) && $rbPaymentIsValid[$orderId] === false;
-    }
-
-    /**
-     * Validate the used payment method for an order, making sure that we "own" the payment before proceeding.
-     *
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
-     * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
-     */
-    private static function isValidResursMethod(WC_Order $order): bool
-    {
-        $return = false;
-
-        try {
-            $paymentMethods = Gateway::getPaymentMethodList();
-            $orderPaymentMethod = $order->get_payment_method();
-
-            if ($orderPaymentMethod !== '' && $paymentMethods->count()) {
-                $return = self::isInMethodList(
-                    paymentMethods: $paymentMethods,
-                    orderPaymentMethod: $orderPaymentMethod
-                );
-            }
-        } catch (Throwable) {
-        }
-
-        return $return;
-    }
-
-    private static function isInMethodList(PaymentMethodCollection $paymentMethods, string $orderPaymentMethod): bool
-    {
-        /** @var PaymentMethod $paymentMethod */
-        foreach ($paymentMethods as $paymentMethod) {
-            if ($paymentMethod->id === $orderPaymentMethod) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

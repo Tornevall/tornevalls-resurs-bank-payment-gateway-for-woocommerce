@@ -44,7 +44,6 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin as AdminUtility;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WcSession;

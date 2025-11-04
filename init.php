@@ -21,7 +21,7 @@
 // Welcome to WordPress. SideEffects cannot be handled properly while the init looks like this.
 // Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
-
+// @todo All checks in this file are very confusing. We check for several resources in different blocks and places, we sometimes exit and sometimes return void, several classes  in plugins_loaded will check if the module is enabled but not all places. This needs to be fixed, it's too confusing.
 
 declare(strict_types=1);
 
