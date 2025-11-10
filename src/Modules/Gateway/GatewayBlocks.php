@@ -158,6 +158,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      */
     public function get_payment_method_data(): array
     {
+
+        $order_json = get_option('woocommerce_gateway_order', '[]');
+        $m = 'asd';
+
         $result = [
             'allowed_country' => $this->getAllowedCountry(),
             'payment_methods' => [],

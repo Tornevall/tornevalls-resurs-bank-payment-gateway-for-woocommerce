@@ -88,7 +88,7 @@ class Api
             ),
             ['jquery']
         );
-
+        
         wp_enqueue_style(
             'rb-ga-css',
             Url::getResourceUrl(

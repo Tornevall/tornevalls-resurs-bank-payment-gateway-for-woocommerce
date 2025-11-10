@@ -232,32 +232,6 @@ class Order
     }
 
     /**
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws Throwable
-     * @throws ValidationException
-     */
-    public static function getPaymentMethod(
-        WC_Order $order
-    ): ?PaymentMethod {
-        $method = (string)$order->get_payment_method();
-
-        if ($method === '') {
-            return null;
-        }
-
-        return Repository::getById(paymentMethodId: $method);
-    }
-
-    /**
      * Get currently viewed WP_Post as WP_Order instance, if any. For example,
      * while on the order view in admin we can obtain the currently viewed order
      * this way.

@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce;
 
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\Widget\PaymentMethod\Html as PaymentMethodWidget;
 use Resursbank\Ecom\Module\Widget\SupportInfo\Html as EcomSupportInfo;

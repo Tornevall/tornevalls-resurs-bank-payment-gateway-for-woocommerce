@@ -86,44 +86,6 @@ EX;
     }
 
     /**
-     * Redirect to the correct section if the wrong section is requested.
-     *
-     * Wrong section for Resurs example: page=wc-settings&tab=checkout&section=<method-uuid>
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function redirectAtWrongSection(mixed $method): void
-    {
-        try {
-            // Make sure we are dealing with a UUID, before activating the redirect filter to minimize the
-            // risk of weird loops (IF they occur).
-            $stringValidation = new StringValidation();
-            $stringValidation->isUuid(value: $method);
-        } catch (Throwable) {
-            // Do nothing.
-            return;
-        }
-
-        add_filter(
-            'woocommerce_get_sections_checkout',
-            static function (array $sections = []) use ($method): array {
-                if (
-                    isset($_REQUEST['section']) &&
-                    $_REQUEST['section'] === $method
-                ) {
-                    wp_safe_redirect(
-                        'admin.php?page=wc-settings&tab=resursbank&section=payment_methods'
-                    );
-                    wp_die();
-                }
-
-                return $sections;
-            }
-        );
-    }
-
-    /**
      * HPOS compatible method to find out if current screen is shop_order (wp-admin order view).
      */
     public static function isInShopOrderEdit(): bool

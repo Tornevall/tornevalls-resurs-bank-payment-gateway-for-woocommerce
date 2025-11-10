@@ -11,6 +11,9 @@ namespace Resursbank\Woocommerce\Modules\MessageBag;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\SessionException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
@@ -18,7 +21,6 @@ use Resursbank\Woocommerce\Modules\MessageBag\Models\Message;
 use Resursbank\Woocommerce\Modules\MessageBag\Models\MessageCollection;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
 use function defined;
@@ -150,14 +152,17 @@ class MessageBag
     /**
      * Resolve MessageCollection instance from JSON in session.
      *
+     * @return MessageCollection
      * @throws IllegalTypeException
+     * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws IllegalValueException
+     * @throws ConfigException
+     * @throws SessionException
      */
     public static function getBag(): MessageCollection
     {
-        $raw = WcSession::get(key: self::SESSION_KEY);
+        $raw = Config::getSessionHandler()->get(key: self::SESSION_KEY);
 
         $data = $raw !== '' ? json_decode(
             json: $raw,
@@ -195,13 +200,16 @@ class MessageBag
     /**
      * Update message bag data in session.
      *
+     * @param MessageCollection $bag
+     * @throws ConfigException
      * @throws JsonException
+     * @throws SessionException
      */
     private static function updateBag(MessageCollection $bag): void
     {
-        WcSession::set(
+        Config::getSessionHandler()->set(
             key: self::SESSION_KEY,
-            value: json_encode(
+            val: json_encode(
                 value: $bag->toArray(),
                 flags: JSON_THROW_ON_ERROR
             )

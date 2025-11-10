@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
+use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment;
@@ -20,7 +21,7 @@ use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
-use Resursbank\Woocommerce\Util\WcSession;
+use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use WC_Order;
 
@@ -36,30 +37,26 @@ class Customer
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws ConfigException
      */
     public static function getCustomer(WC_Order $order): CustomerModel
     {
+        $ssnData = Repository::getSsnData();
         $address = self::getProperAddress(order: $order);
-        $customerType = WcSession::getCustomerType();
         $firstName = self::getAddressData(key: 'first_name', address: $address);
         $lastName = self::getAddressData(key: 'last_name', address: $address);
-
-        $contactPerson = match ($customerType) {
-            CustomerType::LEGAL => "$firstName $lastName",
-            CustomerType::NATURAL => ''
-        };
 
         return new CustomerModel(
             deliveryAddress: self::getDeliveryAddress(
                 address: $address,
-                customerType: $customerType,
+                customerType: $ssnData?->customerType,
                 firstName: $firstName,
                 lastName: $lastName
             ),
-            customerType: WcSession::getCustomerType(),
-            contactPerson: $contactPerson,
+            customerType: $ssnData?->customerType,
+            contactPerson: $ssnData?->customerType === CustomerType::LEGAL ? "$firstName $lastName" : '',
             email: $order->get_billing_email(),
-            governmentId: WcSession::getGovernmentId(),
+            governmentId: $ssnData?->govId,
             mobilePhone: self::getCustomerPhone(order: $order),
             deviceInfo: new DeviceInfo(
                 ip: DeviceInfo::getIp(),
@@ -181,7 +178,7 @@ class Customer
      */
     private static function getDeliveryAddress(
         array $address,
-        CustomerType $customerType,
+        ?CustomerType $customerType,
         string $firstName,
         string $lastName
     ): Address {
@@ -190,7 +187,7 @@ class Customer
 
         $fullName = match ($customerType) {
             CustomerType::LEGAL => $company,
-            CustomerType::NATURAL => "$firstName $lastName"
+            default => "$firstName $lastName"
         };
 
         return new Address(

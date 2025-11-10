@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
@@ -56,5 +57,37 @@ class Admin
         OrderManagement::init();
         PaymentInformation::init();
         Order::initAdmin();
+
+        // Hide payment methods from the payment gateways list in WooCommerce
+        // settings. There is a hook available
+        // (woocommerce_admin_field_payment_gateways) which executes where
+        // payment methods are rendered. However, the hook executes, the page
+        // renders, and payment gateways are then fetched using an AJAX call.
+        // The AJAX call also maks the request from us seeing that it executes
+        // in the administration panel.
+        //
+        // As such, there is no good way to safely filter out our payment
+        // methods from the list specifically displayed inside the administation
+        // panel, instead we use this work-around to ensure that our methods are
+        // always present, but just hidden where they are not desired.
+        add_action('admin_head', function () {
+            $selectors = [];
+
+            /** @var PaymentMethod $method */
+            foreach (\Resursbank\Ecom\Module\PaymentMethod\Repository::getPaymentMethods() as $method) {
+                $id = $method->id;
+
+                // Escape first char if it's a digit, otherwise the CSS
+                // selector will be invalid. For example, "123gateway" becomes
+                // "\31 23gateway".
+                if (preg_match('/^[0-9]/', $id)) {
+                    $id = '\\3' . substr($id, 0, 1) . ' ' . substr($id, 1);
+                }
+
+                $selectors[] = ".settings-payment-gateways #{$id}";
+            }
+
+            echo '<style>' . implode(', ', $selectors) . ' { display:none !important; }</style>';
+        });
     }
 }

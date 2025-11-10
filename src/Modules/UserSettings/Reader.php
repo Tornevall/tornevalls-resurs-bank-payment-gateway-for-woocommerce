@@ -67,45 +67,6 @@ class Reader implements ReaderInterface
     }
 
 
-    public static function getDefaultEnvironment(): Environment
-    {
-        return self::getDefaultFromPost(field: Field::ENVIRONMENT);
-    }
-
-    public static function getDefaultClientIdTest(): ?string
-    {
-        return self::getDefaultFromPost(field: Field::CLIENT_ID_TEST);
-    }
-
-    public static function getDefaultClientIdProd(): ?string
-    {
-        return self::getDefaultFromPost(field: Field::CLIENT_ID_PROD);
-    }
-
-    public static function getDefaultClientSecretTest(): ?string
-    {
-        return self::getDefaultFromPost(field: Field::CLIENT_SECRET_TEST);
-    }
-
-    public static function getDefaultClientSecretProd(): ?string
-    {
-        return self::getDefaultFromPost(field: Field::CLIENT_SECRET_PROD);
-    }
-
-    public static function getDefaultFromPost(Field $field): mixed
-    {
-        $result = isset($_POST[self::getOptionName(field: $field)]) ? (string) $_POST[self::getOptionName(field: $field)] : Repository::getDefaultFromParam(field: $field);
-
-        if ($field === Field::ENVIRONMENT && is_string(value: $result)) {
-            try {
-                $result = Environment::from(value: $result);
-            } catch (ValueError) {
-                $result = Repository::getDefaultFromParam(field: $field);
-            }
-        }
-
-        return $result;
-    }
 
     /**
      * Converter from Field enum to option name in WP options table.
@@ -127,9 +88,9 @@ class Reader implements ReaderInterface
             Field::API_TIMEOUT => 'api_timeout',
             Field::LOG_ENABLED => 'log_enabled',
             Field::LOG_LEVEL => 'log_level',
-            Field::PART_PAYMENT_METHOD => 'part_payment_method',
+            Field::PART_PAYMENT_METHOD => '',
             Field::PART_PAYMENT_THRESHOLD => 'part_payment_limit',
-            Field::PART_PAYMENT_PERIOD => 'part_payment_period',
+            Field::PART_PAYMENT_PERIOD => '',
             Field::PART_PAYMENT_LEGACY_LINKS => '',
             Field::PART_PAYMENT_SHOW_COST_EXAMPLE => '',
             Field::ENABLE_GET_ADDRESS => 'get_address_enabled',
