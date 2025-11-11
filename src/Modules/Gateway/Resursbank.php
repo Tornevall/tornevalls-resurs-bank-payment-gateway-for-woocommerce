@@ -56,7 +56,7 @@ use function get_option;
 class Resursbank extends WC_Payment_Gateway
 {
     public function __construct(
-        private readonly PaymentMethod $method
+        public readonly PaymentMethod $method
     ) {
         $this->id = $method->id;
         $this->plugin_id = 'resursbank-mapi';

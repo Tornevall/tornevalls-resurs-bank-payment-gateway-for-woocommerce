@@ -65,7 +65,7 @@ class PaymentHistory implements DataHandlerInterface
 
             $data = DataConverter::arrayToCollection(
                 data: $entries,
-                type: EntryCollection::class
+                type: Entry::class
             );
 
             if (!$data instanceof EntryCollection) {

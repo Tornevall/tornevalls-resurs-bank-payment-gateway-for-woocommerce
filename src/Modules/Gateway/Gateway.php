@@ -10,7 +10,9 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
+use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
@@ -86,6 +88,83 @@ class Gateway
             return;
         }
 
+        // Filter payment method gateways availability in legacy checkout.
+        //
+        // Legacy checkout will not filter methods using JavaScript code, it
+        // must be done here on backend using this filter.
+        //
+        // Note that, if you enter the legacy checkout page without it being
+        // configured as the WooCommerce checkout page, then this filter is
+        // still skipped, as it should be.
+        add_filter('woocommerce_available_payment_gateways', function($gateways) {
+            // If you are not on the checkout page, or if you are using the
+            // blocks based checkout, skip filtering.
+            if (!is_checkout() || WooCommerce::isUsingBlocksCheckout()) {
+                return $gateways;
+            }
+
+            // Resolve total from cart.
+            $cartTotal = (float)WC()->cart?->get_total(context: 'edit');
+
+            // Resolve location from customer address.
+            $location = Location::tryFrom(value: (string)WC()->customer?->get_billing_country());
+
+            // Determine customer type.
+            $customerType = CustomerType::NATURAL;
+
+            // Attempt to resolve company name attached to billing address
+            // from POST data. When you change certain fields in the billing
+            // form in checkout, street address, country, postal code or city,
+            // the checkout gets automatically updated, and these values are
+            // picked up from POST data dn set on the customer billing object
+            // kept in session. This is why we can pick up country like we do
+            // above, without extracting it from the POST data.
+            //
+            // Since we want to filter payment methods based on company name
+            // field value however, we must pick it up directly from the POST
+            // data. Because even though it's included, WooCommerce will not
+            // update the value on WC()->customer->get_billing_company() until
+            // the checkout form is submitted.
+            try {
+                if (isset($_POST['post_data'])) {
+                    parse_str($_POST['post_data'], $data);
+                    $billing_company = $data['billing_company'] ?? '';
+
+                    if ((string) $billing_company !== '') {
+                        $customerType = CustomerType::LEGAL;
+                    }
+                }
+            } catch (Throwable $error) {
+                Log::error(error: $error);
+            }
+
+            // Loop through gateways and filter only our Resursbank instances.
+            foreach ($gateways as $id => $gateway) {
+                if (!($gateway instanceof Resursbank)) {
+                    continue;
+                }
+
+                // Check if payment method is available.
+                try {
+                    if (!$gateway->method->isAvailable(
+                        amount: $cartTotal,
+                        location: $location,
+                        customerType: $customerType
+                    )) {
+                        unset($gateways[$id]);
+                    }
+                } catch (Throwable $error) {
+                    Log::error(error: $error);
+
+                    // Cannot be certain the method should be available, so
+                    // filter it.
+                    unset($gateways[$id]);
+                }
+            }
+
+            return $gateways;
+        });
+
         add_filter(
             'woocommerce_gateway_icon',
             'Resursbank\Woocommerce\Modules\Gateway\Gateway::modifyIcon',
@@ -125,7 +204,7 @@ class Gateway
      */
     public static function modifyIcon(mixed $icon): mixed
     {
-        if (gettype($icon) !== 'string' || $icon === '') {
+        if (gettype(value: $icon) !== 'string' || $icon === '') {
             return $icon;
         }
 

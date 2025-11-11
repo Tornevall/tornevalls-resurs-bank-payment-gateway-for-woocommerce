@@ -22,10 +22,8 @@ use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
-use WC_Order;
 
 use function is_string;
 
@@ -76,22 +74,6 @@ class Callback
                 code: $e->getCode()
             );
         }
-    }
-
-    /**
-     * @throws CallbackException
-     */
-    public static function getOrder(string $paymentId): WC_Order
-    {
-        $order = Metadata::getOrderByPaymentId(paymentId: $paymentId);
-
-        if (!$order instanceof WC_Order) {
-            throw new CallbackException(
-                message: "Unable to find order matching $paymentId"
-            );
-        }
-
-        return $order;
     }
 
     /**

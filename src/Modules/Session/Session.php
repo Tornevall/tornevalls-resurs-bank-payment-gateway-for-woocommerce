@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Session;
 
-use Resursbank\Ecom\Exception\SessionException;
 use Resursbank\Ecom\Lib\Session\Session as BaseSession;
 use Resursbank\Ecom\Lib\Session\SessionHandlerInterface;
 
@@ -17,7 +16,7 @@ use Resursbank\Ecom\Lib\Session\SessionHandlerInterface;
  * Session handler integration to use the WooCommerce session handler, which
  * stores session data in the database instead of files.
  */
-class Session extends BaseSession implements SessionHandlerInterface
+class Session implements SessionHandlerInterface
 {
     /**
      * @inheritDoc
@@ -37,10 +36,33 @@ class Session extends BaseSession implements SessionHandlerInterface
 
     /**
      * @inheritDoc
-     * @throws SessionException
      */
     public function delete(string $key): void
     {
         $this->set(key: self::getKey(key: $key), val: null);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isAvailable(): bool
+    {
+        return WC()->session->has_session();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function init(): void
+    {
+        WC()->session->init();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getKey(string $key): string
+    {
+        return BaseSession::getKey(key: $key);
     }
 }
