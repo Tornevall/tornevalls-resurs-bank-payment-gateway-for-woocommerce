@@ -9,62 +9,38 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Session;
 
+use Resursbank\Ecom\Exception\SessionException;
 use Resursbank\Ecom\Lib\Session\Session as BaseSession;
 use Resursbank\Ecom\Lib\Session\SessionHandlerInterface;
-use RuntimeException;
-use WC_Session_Handler;
-use WooCommerce;
 
+/**
+ * Session handler integration to use the WooCommerce session handler, which
+ * stores session data in the database instead of files.
+ */
 class Session extends BaseSession implements SessionHandlerInterface
 {
+    /**
+     * @inheritDoc
+     */
     public function set(string $key, ?string $val): void
     {
-        WC()->session->set(key: $key, value: $val);
+        WC()->session->set(key: self::getKey(key: $key), value: $val);
     }
-
-    public function get(string $key): string
-    {
-        return (string) WC()->session->get(key: $this->getKey(key: $key));
-    }
-
-    public function delete(string $key): void
-    {
-        // No delete method in WC_Session_Handler, so we set to null.
-        $this->set(key: $key, val: null);
-    }
-
 
     /**
-     * Initializing WC() if not already done.
+     * @inerhitDoc
      */
-    private static function getWcSession(): void
+    public function get(string $key): string
     {
-        /**
-         * Psalm warns about the isset-check, but without this check, we get fatal errors when not set.
-         *
-         * @psalm-suppress RedundantCondition
-         * @psalm-suppress RedundantPropertyInitializationCheck
-         */
-        if (isset(self::$wooCom) && !(self::$wooCom instanceof WooCommerce)) {
-            throw new RuntimeException(
-                message: 'WooCommerce is not available.'
-            );
-        }
+        return (string) WC()->session->get(key: self::getKey(key: $key));
+    }
 
-        if (!function_exists(function: 'WC')) {
-            return;
-        }
-
-        self::$wooCom = WC();
-        self::$wooCom->initialize_session();
-
-        /**
-         * @psalm-suppress MixedPropertyFetch
-         */
-        if (!self::$wooCom->session instanceof WC_Session_Handler) {
-            throw new RuntimeException(
-                message: 'WC()->session is not available.'
-            );
-        }
+    /**
+     * @inheritDoc
+     * @throws SessionException
+     */
+    public function delete(string $key): void
+    {
+        $this->set(key: self::getKey(key: $key), val: null);
     }
 }

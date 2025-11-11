@@ -69,7 +69,6 @@ export class LegacyAddressUpdater {
 
                             // Reload checkout.
                             jQuery(document.body).trigger('update_checkout');
-                            console.log('Not sure we need this');
                         },
                     });
 
@@ -99,7 +98,6 @@ export class LegacyAddressUpdater {
         const updateCustomerType = () => {
             const customerType = this.isCorporate() ? 'LEGAL' : 'NATURAL';
             jQuery(document.body).trigger('update_checkout');
-            console.log('Not sure we need this');
         };
 
         // Update the customer type on initialization and then bind on input changes.
