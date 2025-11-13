@@ -38,10 +38,6 @@ class Connection
     public static function setup(): void
     {
         try {
-            if (function_exists(function: 'WC')) {
-                WC()->initialize_session();
-            }
-
             Config::setup(
                 cache: new Transient(),
                 network: new Network(

@@ -1,9 +1,11 @@
+// @ts-ignore
+import * as jQuery from 'jquery';
+// @ts-ignore
 import {dispatch, select} from '@wordpress/data';
 // @ts-ignore
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 // @ts-ignore
 import {getSetting} from '@woocommerce/settings';
-import {BlocksCustomerType} from "./customer";
 
 // @todo This needs an overhaul, parts of it is unnecessary, we might be able to merge parts with the legacy version, checking that the widget is enabled is pointless since this can be done by checking if the class has rendered.
 
@@ -23,12 +25,6 @@ export class BlocksAddressUpdater {
     private allPaymentMethods: any[] = [];
 
     /**
-     * Customer Type Update Action.
-     * @private
-     */
-    private customerTypeUpdater: any;
-
-    /**
      * Use billing element.
      * @private
      */
@@ -38,8 +34,6 @@ export class BlocksAddressUpdater {
      * Generate widget instance.
      */
     constructor(useWidget: boolean) {
-        this.customerTypeUpdater = new BlocksCustomerType();
-
         this.initializeUseBillingElement();
 
         // Initialize any properties if needed
@@ -315,8 +309,6 @@ export class BlocksAddressUpdater {
         const cartTotal =
             parseInt(cartData.totals.total_price, 10) /
             Math.pow(10, cartData.totals.currency_minor_unit);
-
-        this.customerTypeUpdater.updateCustomerType(isCorporate ? 'LEGAL' : 'NATURAL');
 
         // Iterate over all cart methods and update their availability.
         const updatedPaymentMethods = this.allPaymentMethods.map((cartMethod: any) => {

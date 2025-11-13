@@ -11,7 +11,6 @@ namespace Resursbank\Woocommerce\Util;
 
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -26,11 +25,10 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
-use Resursbank\Ecom\Module\Store\Repository;
+use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Throwable;
-use WP_Post;
 
 use function in_array;
 
@@ -39,8 +37,6 @@ use function in_array;
  */
 class WooCommerce
 {
-    private static ?string $storeCountry = null;
-
     /**
      * Safely confirm whether WC is loaded.
      */
@@ -69,46 +65,17 @@ class WooCommerce
     /**
      * Trying to determine if the checkout is using blocks or not.
      *
-     * NOTE: This function also checks whether the current page is the checkout
-     * page.
-     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function isUsingBlocksCheckout(): bool
     {
-        global $wp_query, $post;
+        $checkoutPageId = (int) wc_get_page_id('checkout');
 
-        $blocksCheckoutPageId = wc_get_page_id('checkout');
-
-        // Special legacy vs blocks control
-        if ($wp_query !== null && function_exists('get_queried_object')) {
-            $objectId = function_exists('get_queried_object_id')
-                ? get_queried_object_id()
-                : 0;
-            $post = get_queried_object();
-            $currentPostID = (int)($post instanceof WP_Post ? $post->ID : $objectId);
-
-            // We usually check if the page contains WC blocks, but if we are on the checkout page,
-            // but in legacy, we should check blocks based on the post id instead of the preconfigured
-            // template.
-            //
-            // For WP 6.8 this check breaks on special occasions where the current post id remains 0.
-            // We should, however, avoid changing the business logic for this method and proceed as usual
-            // if this happens.
-            //
-            // See https://resursbankplugins.atlassian.net/browse/WOO-1455 for the issue where this was first
-            // discovered.
-            // Issue should be solved in the address handling segment instead.
-            if ($currentPostID !== $blocksCheckoutPageId) {
-                return has_block('woocommerce/checkout', $currentPostID);
-            }
+        if ($checkoutPageId > 0) {
+            return has_block('woocommerce/checkout', $checkoutPageId);
         }
 
-        if ($blocksCheckoutPageId === 0) {
-            return false;
-        }
-
-        return has_block('woocommerce/checkout', $blocksCheckoutPageId);
+        return false;
     }
 
     /**
@@ -129,32 +96,6 @@ class WooCommerce
             replacement: ' ',
             subject: $content
         );
-    }
-
-    /**
-     * Full cache invalidation.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function invalidateFullCache(): void
-    {
-        global $wpdb;
-
-        try {
-            /** @noinspection SqlNoDataSourceInspection */
-            $transients = $wpdb->get_col(
-                "SELECT option_name FROM {$wpdb->options}
-                         WHERE option_name LIKE '_transient_resurs%'"
-            );
-
-            // Making sure we delete other cached transients as well, besides the ecom cache.
-            foreach ($transients as $transient) {
-                $transient_name = str_replace('_transient_', '', $transient);
-                delete_transient($transient_name);
-            }
-        } catch (Throwable $e) {
-            Log::error(error: $e);
-        }
     }
 
     /**
@@ -326,7 +267,7 @@ class WooCommerce
                 UserSettingsRepository::hasUserCredentials()
             ) {
                 WooCommerce::updatePartPaymentData(
-                    paymentMethods: \Resursbank\Ecom\Module\PaymentMethod\Repository::getPaymentMethods()
+                    paymentMethods: Repository::getPaymentMethods()
                 );
             }
         } catch (Throwable) {

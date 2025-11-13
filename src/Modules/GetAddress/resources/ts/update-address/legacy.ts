@@ -1,6 +1,5 @@
 // @ts-ignore
 import * as jQuery from 'jquery';
-import {BlocksCustomerType} from "./customer";
 
 // @todo A lot of this can be moved to Ecom or just simply removed.
 
@@ -18,12 +17,6 @@ export class LegacyAddressUpdater {
     private getAddressEnabled: boolean;
 
     /**
-     * Customer Type Update Action.
-     * @private
-     */
-    private customerTypeUpdater: any;
-
-    /**
      * Check if the checkout blocks are enabled, through our natural lookups.
      * @private
      */
@@ -36,8 +29,6 @@ export class LegacyAddressUpdater {
         this.getAddressEnabled = // @ts-ignore
             rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
             rbFrontendData?.getAddressEnabled === true;
-
-        this.customerTypeUpdater = new BlocksCustomerType();
 
         // Initialize the address widget to undefined.
         this.getAddressWidget = undefined;
@@ -75,7 +66,9 @@ export class LegacyAddressUpdater {
                         updateAddress: (data: any) => {
                             // Handle the fetched address response and update the customer type.
                             this.handleFetchAddressResponse(data);
-                            this.customerTypeUpdater.updateCustomerType(this.getAddressWidget.getCustomerType());
+
+                            // Reload checkout.
+                            jQuery(document.body).trigger('update_checkout');
                         },
                     });
 
@@ -104,16 +97,13 @@ export class LegacyAddressUpdater {
          */
         const updateCustomerType = () => {
             const customerType = this.isCorporate() ? 'LEGAL' : 'NATURAL';
-            this.customerTypeUpdater.updateCustomerType(customerType);
+            jQuery(document.body).trigger('update_checkout');
         };
 
         // Update the customer type on initialization and then bind on input changes.
         updateCustomerType();
         jQuery('#billing_company').on('change', function() {
-            const customerTypeUpdater = new BlocksCustomerType();
-
-            // @ts-ignore
-            customerTypeUpdater.updateCustomerType(this.value !== '' ? 'LEGAL' : 'NATURAL');
+            jQuery(document.body).trigger('update_checkout');
         });
     }
 

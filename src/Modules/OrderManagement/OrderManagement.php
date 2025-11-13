@@ -265,7 +265,6 @@ class OrderManagement
      */
     public static function getPayment(WC_Order $order): ?Payment
     {
-        $a = 'asd';
         return Repository::get(
             paymentId: Metadata::getPaymentId(order: $order)
         );

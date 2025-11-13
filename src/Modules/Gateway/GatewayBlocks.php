@@ -64,12 +64,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             }
         );
 
-        // Note that despite the naming this function also confirm whether we
-        // are currently rendering the blocks based checkout page.
-        if (!WooCommerce::isUsingBlocksCheckout()) {
-            return;
-        }
-
         add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
     }
 

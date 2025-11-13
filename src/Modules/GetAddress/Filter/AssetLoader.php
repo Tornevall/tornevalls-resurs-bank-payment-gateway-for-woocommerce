@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Ecom\Module\Widget\CostList\Css as CostListCss;
 use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
@@ -29,7 +30,6 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
@@ -235,10 +235,7 @@ class AssetLoader
             'rb-get-address',
             'rbFrontendData',
             [
-                'currentCustomerType' => WcSession::getCustomerType(),
-                'apiUrl' => Route::getUrl(
-                    route: Route::ROUTE_SET_CUSTOMER_TYPE
-                ),
+                'currentCustomerType' => CustomerRepository::getSsnData()?->customerType,
                 'getAddressEnabled' => $settings->enableGetAddress,
                 'logLevel' => $settings->logLevel->name,
                 'isUsingCheckoutBlocks' => WooCommerce::isUsingBlocksCheckout()

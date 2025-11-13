@@ -25,14 +25,13 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
 use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
-use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
-use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
 use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
@@ -66,11 +65,6 @@ class Route
      * Route to controller injecting get address css.
      */
     public const ROUTE_GET_ADDRESS_CSS = 'get-address-css';
-
-    /**
-     * Route to update current customer type in session.
-     */
-    public const ROUTE_SET_CUSTOMER_TYPE = 'set-customer-type';
 
     /**
      * Route to get part payment controller.
@@ -318,7 +312,7 @@ class Route
     {
         switch ($route) {
             case self::ROUTE_GET_ADDRESS:
-                self::respondWithExit(body: GetAddress::exec());
+                self::respondWithExit(body: (new GetAddressController())->exec());
                 break;
 
             case self::ROUTE_GET_ADDRESS_CSS:
@@ -335,10 +329,6 @@ class Route
             case self::ROUTE_GET_STORES_ADMIN:
                 self::respondWithExit(body: (new GetStoresController())->exec());
                 break;
-
-            case self::ROUTE_SET_CUSTOMER_TYPE:
-                self::respondWithExit(body: SetCustomerType::exec());
-                exit;
 
             case self::ROUTE_ADMIN_CACHE_INVALIDATE:
                 Invalidate::exec();
