@@ -74,7 +74,6 @@ class Gateway
         ) {
             try {
                 if (PaymentMethodRepository::getById(paymentMethodId: (string)$_GET['section'])) {
-                    // See SettingsPage
                     Route::redirectToSettings(tab: PaymentMethods::SECTION_ID);
                 }
             } catch (Throwable $error) {
