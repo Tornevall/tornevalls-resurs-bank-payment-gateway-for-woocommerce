@@ -45,9 +45,9 @@ module.exports = {
 			__dirname,
 			'src/Modules/Gateway/resources/ts/gateway.tsx'
 		),
-		'dist/update-address': path.resolve(
+		'dist/get-address': path.resolve(
 			__dirname,
-			'src/Modules/GetAddress/resources/ts/update-address.ts'
+			'src/Modules/GetAddress/resources/ts/get-address.ts'
 		),
 	},
 	output: {

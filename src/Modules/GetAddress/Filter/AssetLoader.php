@@ -203,7 +203,7 @@ class AssetLoader
                 type: ResourceType::CSS
             ),
             [],
-            '1.0.0'
+            '1.1.0'
         );
     }
 
@@ -221,11 +221,18 @@ class AssetLoader
     {
         wp_enqueue_script(
             'rb-get-address',
-            Url::getAssetUrl(file: 'update-address.js'),
+            Route::getUrl(Route::ROUTE_GET_ADDRESS_JS),
+            [],
+            '1.0.0',
+            false // Load script in header.
+        );
+
+        wp_enqueue_script(
+            'rb-get-address-impl',
+            Url::getAssetUrl(file: 'get-address.js'),
             ['wp-data', 'jquery', 'wc-blocks-data-store'],
-            WooCommerce::getAssetVersion(assetFile: 'update-address'),
-            // Load script in footer.
-            true
+            WooCommerce::getAssetVersion(assetFile: 'get-address'),
+            true // Load script in footer.
         );
 
         $settings = Repository::getSettings();
@@ -240,11 +247,6 @@ class AssetLoader
                 'logLevel' => $settings->logLevel->name,
                 'isUsingCheckoutBlocks' => WooCommerce::isUsingBlocksCheckout()
             ]
-        );
-
-        wp_add_inline_script(
-            'rb-get-address',
-            (string)GetAddress::getWidget()?->content
         );
     }
 
