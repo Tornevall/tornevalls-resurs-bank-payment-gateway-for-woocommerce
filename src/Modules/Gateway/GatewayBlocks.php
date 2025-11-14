@@ -83,6 +83,14 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             )
         );
 
+        wp_enqueue_script(
+            'rb-payment-method',
+            Route::getUrl(Route::ROUTE_PAYMENT_METHOD_JS),
+            [],
+            '1.0.0',
+            false // Load script in header.
+        );
+
         wp_enqueue_style('rb-wc-blocks-css');
     }
 
@@ -174,13 +182,8 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'costlist_url' => Route::getUrl(route: 'get-costlist'),
                     'readmore' => $helper->getReadMore(),
                     'price_signage_warning' => $helper->getPriceSignageWarning(),
-                    'read_more_css' => '',
                     'logo' => $logo->content,
                     'logo_type' => $logo->getIdentifier(),
-                    'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
-                    'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,
-                    'enabled_for_legal_customer' => $paymentMethod->enabledForLegalCustomer,
-                    'enabled_for_natural_customer' => $paymentMethod->enabledForNaturalCustomer
                 ];
             }
         } catch (Throwable $error) {

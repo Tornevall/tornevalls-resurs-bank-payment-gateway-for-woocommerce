@@ -10,41 +10,9 @@ import {getSetting} from '@woocommerce/settings';
 
 const settings = getSetting('resursbank_data', {});
 
-// Has the address company field been filled out?
-const hasAddressCompany = (billingAddress: any, shippingAddress: any) => {
-    return billingAddress.company !== '' || shippingAddress.company !== '';
-}
-
-/**
- * Validate the customer type based on the billing address and method settings.
- *
- * @param {object} billingAddress - The billing address data.
- * @param {object} method - The payment method data.
- * @returns {boolean} - Returns true if the customer type matches, false otherwise.
- */
-const validateCustomerType = (billingAddress: any, shippingAddress: any, method: any) => {
-    if (
-        (hasAddressCompany(billingAddress, shippingAddress) && !method.enabled_for_legal_customer) ||
-        (!hasAddressCompany(billingAddress, shippingAddress) && !method.enabled_for_natural_customer)
-    ) {
-        // Log the mismatch for debugging purposes
-        // @ts-ignore
-        resursConsoleLog(
-            'Exclude ' + method.title + ': Customer type not matching.',
-            'DEBUG'
-        );
-        return false;
-    }
-    return true;
-};
+declare var Resursbank_PaymentMethod: any;
 
 (() => {
-    if (
-        !Array.isArray(settings.payment_methods) ||
-        settings.payment_methods.length === 0
-    ) {
-        return;
-    }
     if (typeof getSetting !== 'function') {
         console.error('WooCommerce: getSetting is not available.');
         return;
@@ -60,9 +28,8 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
         return;
     }
 
+    // Register payment methods, making them available in the checkout.
     settings.payment_methods.forEach((method: any) => {
-        const label = method.title;
-
         /**
          * Calculate the cart total.
          *
@@ -99,7 +66,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
         const costlistCache: Record<string, string> = {};
 
         /**
-         * Content component
+         * Payment method content.
          */
         const Content = () => {
             const cartData = select(CART_STORE_KEY).getCartData();
@@ -117,6 +84,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                 const iframe = document.querySelector(
                     'iframe.rb-rm-iframe'
                 ) as HTMLIFrameElement;
+
                 if (iframe) {
                     updateIframeSource(iframe, cartTotal);
                 }
@@ -131,11 +99,9 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                         }
                     })
                     .catch(err => {
-                        // byt till resursConsoleLog om du vill
                         console.error("Failed to fetch costlist:", err);
                     });
             }, [cartTotal]);
-
 
             return (
                 <div>
@@ -161,7 +127,6 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                             }}
                         />
                     )}
-                    <style>{method.read_more_css}</style>
                 </div>
             );
         };
@@ -176,7 +141,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
 
             return (
                 <div className="rb-payment-method-title">
-                    <PaymentMethodLabel text={label}/>
+                    <PaymentMethodLabel text={method.title}/>
                     <div
                         className={`rb-payment-method-logo rb-logo-type-${method.logo_type}`}
                         dangerouslySetInnerHTML={{__html: method.logo}}
@@ -185,8 +150,6 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
             );
         };
 
-        //resursConsoleLog('Registering payment method: ' + method.title + ' (' + method.name + ')', 'DEBUG');
-
         registerPaymentMethod({
             name: method.name,
             paymentMethodId: method.name,
@@ -194,47 +157,19 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
             content: <Content/>,
             edit: <Content/>,
             canMakePayment: (data: any) => {
-                // Filter out all payment methods if customer country does not
-                // match country associated with API account.
-                if (
-                    data.billingAddress.country !== settings.allowed_country
-                ) {
-                    // @ts-ignore
-                    resursConsoleLog(
-                        'Country does not match.',
-                        'DEBUG'
-                    );
-                    return false;
-                }
-
-                if (!validateCustomerType(data.billingAddress, data.shippingAddress, method)) {
-                    // @ts-ignore
-                    resursConsoleLog('Customer type does not match.', 'DEBUG');
-                    return false;
-                }
-
                 // List all properties and methods of the data object
                 const cart_total =
                     parseInt(data.cartTotals.total_price, 10) /
                     Math.pow(10, data.cartTotals.currency_minor_unit);
 
-                // Filter out payment methods based on min / max order total.
-                if (
-                    cart_total < method.min_purchase_limit ||
-                    cart_total > method.max_purchase_limit
-                ) {
-                    // @ts-ignore
-                    resursConsoleLog(
-                        method.title + ': Order total (' + cart_total + ') does not match with ' +
-                        method.min_purchase_limit + ' and ' + method.max_purchase_limit + '.',
-                        'DEBUG'
-                    );
-                    return false;
-                }
-                // All checks passed, payment method is allowed.
-                return true;
+                return Resursbank_PaymentMethod.isAvailable(
+                    method.name,
+                    cart_total,
+                    ((document.getElementById('billing-company') as HTMLInputElement)?.value === '' ? 'NATURAL' : 'LEGAL'),
+                    data.billingAddress.country
+                );
             },
-            ariaLabel: label,
+            ariaLabel: method.title,
             supports: {
                 blockBasedCheckout: method.name !== 'resursbank',
                 features: ['products', 'shipping', 'coupons'],
