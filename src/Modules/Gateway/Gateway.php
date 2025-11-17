@@ -16,6 +16,7 @@ use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
+use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
@@ -42,14 +43,48 @@ class Gateway
 
     /**
      * Executes in admin.
+     *
+     * @throws Throwable
      */
     public static function initAdmin(): void
     {
-        if (!Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
-            return;
+        // Check if this is a request to attempt accessing the configuration
+        // page of a Resurs Bank payment method.
+        //
+        // In WooCommerce, each payment method has its own section (page) for
+        // settings, even if they all share the same main settings page.
+        //
+        // Here, we attempt to check if the requested section belongs to
+        // Resurs Bank, and if so, we redirect to our unified settings page.
+        // Otherwise, we would land on a page displaying the name of the payment
+        // method and no actual settings.
+        //
+        // Example of when WooCommerce may request such a page:
+        //
+        // 1. Admin opens the checkout page in the admin panel.
+        // 2. In the blocks editor, they select the payment method list element.
+        // 3. A list is now displayed on the left-hand side, listing all available
+        //    payment methods.
+        // 4. When clicking on one of the Resurs Bank methods, WooCommerce
+        //    attempts to open the settings page for that method.
+        if (
+            isset($_GET['page'], $_GET['tab'], $_GET['section']) &&
+            $_GET['page'] === 'wc-settings' &&
+            $_GET['tab'] === 'checkout'
+        ) {
+            try {
+                if (PaymentMethodRepository::getById(paymentMethodId: (string)$_GET['section'])) {
+                    Route::redirectToSettings(tab: PaymentMethods::SECTION_ID);
+                }
+            } catch (Throwable $error) {
+                Log::error(error: $error);
+                throw $error;
+            }
         }
 
-        Route::redirectToSettings();
+        if (Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
+            Route::redirectToSettings();
+        }
     }
 
     /**

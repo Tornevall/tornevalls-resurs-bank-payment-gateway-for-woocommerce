@@ -19,6 +19,7 @@ use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
@@ -28,11 +29,13 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
+use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
+use Resursbank\Ecom\Module\Widget\GetAddress\Js;
+use Resursbank\Ecom\Module\Widget\PaymentMethod\Js as PaymentMethodJs;
 use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
 use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
 use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
-use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
 use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
@@ -65,6 +68,16 @@ class Route
      * Route to controller injecting get address css.
      */
     public const ROUTE_GET_ADDRESS_CSS = 'get-address-css';
+
+    /**
+     * Controller route to render get address JS.
+     */
+    public const ROUTE_GET_ADDRESS_JS = 'get-address-js';
+
+    /**
+     * Controller route to render payment method JS.
+     */
+    public const ROUTE_PAYMENT_METHOD_JS = 'payment-method-js';
 
     /**
      * Route to get part payment controller.
@@ -173,7 +186,10 @@ class Route
     /**
      * Resolve full URL.
      *
-     * @throws HttpException|IllegalValueException
+     * @throws ConfigException
+     * @throws HttpException
+     * @throws IllegalValueException
+     * @throws UserSettingsException
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public static function getUrl(
@@ -287,6 +303,43 @@ class Route
     }
 
     /**
+     * Generic function to render a JS / CSS widget and respond
+     * with the appropriate content type, allowing us to render
+     * our JS / CSS widgets as external assets to avoid inline.
+     *
+     * @param AssetWidget $widget
+     * @return void
+     */
+    public static function renderAssetWidget(AssetWidget $widget): void
+    {
+        try {
+            $body = match ($widget) {
+                AssetWidget::GetAddressJs => (new Js(url: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)))->content,
+                AssetWidget::GetAddressCss => (new Widget())->content,
+                AssetWidget::PaymentMethodJs => (new PaymentMethodJs(
+                    paymentMethods: Repository::getPaymentMethods()
+                ))->content,
+            };
+
+            if ($body === '') {
+                throw new HttpException(
+                    message: 'Asset content could not be rendered.',
+                    code: 500
+                );
+            }
+
+            $contentType = match ($widget) {
+                AssetWidget::GetAddressJs, AssetWidget::PaymentMethodJs => 'application/javascript',
+                AssetWidget::GetAddressCss => 'text/css',
+            };
+
+            self::respondWithExit(body: $body, contentType: $contentType);
+        } catch (Throwable $e) {
+            Log::error(error: $e);
+        }
+    }
+
+    /**
      * Perform actual execution of controller code.
      *
      * @throws HttpException
@@ -316,10 +369,15 @@ class Route
                 break;
 
             case self::ROUTE_GET_ADDRESS_CSS:
-                self::respondWithExit(
-                    body: GetAddressCss::exec(),
-                    contentType: 'text/css'
-                );
+                self::renderAssetWidget(widget: AssetWidget::GetAddressCss);
+                break;
+
+            case self::ROUTE_GET_ADDRESS_JS:
+                self::renderAssetWidget(widget: AssetWidget::GetAddressJs);
+                break;
+
+            case self::ROUTE_PAYMENT_METHOD_JS:
+                self::renderAssetWidget(widget: AssetWidget::PaymentMethodJs);
                 break;
 
             case self::ROUTE_PART_PAYMENT:

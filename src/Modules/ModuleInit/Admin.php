@@ -34,6 +34,7 @@ use Resursbank\Woocommerce\Modules\Store\Store;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Settings\Filter\TestCallbackButton;
 use Resursbank\Woocommerce\Settings\Settings;
+use Resursbank\Woocommerce\Util\Route;
 use Throwable;
 
 /**
