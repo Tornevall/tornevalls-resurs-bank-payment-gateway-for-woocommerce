@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Ecom\Module\Widget\CostList\Css as CostListCss;
 use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
@@ -29,7 +30,6 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
@@ -203,7 +203,7 @@ class AssetLoader
                 type: ResourceType::CSS
             ),
             [],
-            '1.0.0'
+            '1.1.0'
         );
     }
 
@@ -221,11 +221,18 @@ class AssetLoader
     {
         wp_enqueue_script(
             'rb-get-address',
-            Url::getAssetUrl(file: 'update-address.js'),
+            Route::getUrl(Route::ROUTE_GET_ADDRESS_JS),
+            [],
+            '1.0.0',
+            false // Load script in header.
+        );
+
+        wp_enqueue_script(
+            'rb-get-address-impl',
+            Url::getAssetUrl(file: 'get-address.js'),
             ['wp-data', 'jquery', 'wc-blocks-data-store'],
-            WooCommerce::getAssetVersion(assetFile: 'update-address'),
-            // Load script in footer.
-            true
+            WooCommerce::getAssetVersion(assetFile: 'get-address'),
+            true // Load script in footer.
         );
 
         $settings = Repository::getSettings();
@@ -235,19 +242,11 @@ class AssetLoader
             'rb-get-address',
             'rbFrontendData',
             [
-                'currentCustomerType' => WcSession::getCustomerType(),
-                'apiUrl' => Route::getUrl(
-                    route: Route::ROUTE_SET_CUSTOMER_TYPE
-                ),
+                'currentCustomerType' => CustomerRepository::getSsnData()?->customerType,
                 'getAddressEnabled' => $settings->enableGetAddress,
                 'logLevel' => $settings->logLevel->name,
                 'isUsingCheckoutBlocks' => WooCommerce::isUsingBlocksCheckout()
             ]
-        );
-
-        wp_add_inline_script(
-            'rb-get-address',
-            (string)GetAddress::getWidget()?->content
         );
     }
 

@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
@@ -20,10 +17,8 @@ use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
-use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**
@@ -32,7 +27,6 @@ use Throwable;
 class Api
 {
     public const SECTION_ID = 'api_settings';
-    public const NAME_PREFIX = 'resursbank_';
 
     /**
      * Get translated title of tab.
@@ -67,8 +61,6 @@ class Api
     }
 
     /**
-     * @throws HttpException
-     * @throws IllegalValueException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initScripts(): void
@@ -88,7 +80,7 @@ class Api
             ),
             ['jquery']
         );
-
+        
         wp_enqueue_style(
             'rb-ga-css',
             Url::getResourceUrl(
@@ -105,7 +97,6 @@ class Api
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
-     * @throws ConfigException
      */
     public static function getSettings(): array
     {

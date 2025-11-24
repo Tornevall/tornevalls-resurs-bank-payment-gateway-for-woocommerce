@@ -17,21 +17,13 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\TranslationException;
-use Resursbank\Ecom\Lib\Model\Callback\Authorization as AuthorizationModel;
-use Resursbank\Ecom\Lib\Model\Callback\CallbackInterface;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
-use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
-use Resursbank\Woocommerce\Modules\Order\Status;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
-use WC_DateTime;
-use WC_Order;
 
 use function is_string;
 
@@ -40,11 +32,6 @@ use function is_string;
  */
 class Callback
 {
-    /**
-     * Minimum delay before callbacks are handled if the order confirmation page has not been loaded by the customer.
-     */
-    private const MINIMUM_RESPONSE_DELAY = 60;
-
     /**
      * Setup endpoint for incoming callbacks using the WC API.
      *
@@ -87,22 +74,6 @@ class Callback
                 code: $e->getCode()
             );
         }
-    }
-
-    /**
-     * @throws CallbackException
-     */
-    public static function getOrder(string $paymentId): WC_Order
-    {
-        $order = Metadata::getOrderByPaymentId(paymentId: $paymentId);
-
-        if (!$order instanceof WC_Order) {
-            throw new CallbackException(
-                message: "Unable to find order matching $paymentId"
-            );
-        }
-
-        return $order;
     }
 
     /**

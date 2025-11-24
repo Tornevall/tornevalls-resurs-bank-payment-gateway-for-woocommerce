@@ -209,8 +209,7 @@ class Modify extends Action
                 self::handleValidationError(
                     error: $error,
                     requestedAmount: (float)$requestedAmount,
-                    availableAmount: (float)$availableAmount,
-                    order: $order
+                    availableAmount: (float)$availableAmount
                 );
             }
 
@@ -226,8 +225,7 @@ class Modify extends Action
     private static function handleValidationError(
         Throwable $error,
         float $requestedAmount,
-        float $availableAmount,
-        WC_Order $order
+        float $availableAmount
     ): void {
         if (self::$hasAlreadyLogged) {
             return;
@@ -239,8 +237,7 @@ class Modify extends Action
                 Price::format(value: (float)$requestedAmount),
                 Price::format(value: (float)$availableAmount)
             ),
-            error: $error,
-            order: $order
+            error: $error
         );
         self::$hasAlreadyLogged = true;
     }

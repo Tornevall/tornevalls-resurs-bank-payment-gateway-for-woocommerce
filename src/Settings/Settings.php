@@ -183,7 +183,7 @@ class Settings
     {
         global $current_section;
 
-        return $current_section === '' ? Api::SECTION_ID : $current_section;
+        return $current_section === '' ? Api::SECTION_ID : (string) $current_section;
     }
 
     /**

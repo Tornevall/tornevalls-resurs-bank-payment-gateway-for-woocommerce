@@ -10,9 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Api;
 
 use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Lib\Api\Scope;
 use Resursbank\Ecom\Lib\Model\Config\Network;
-use Resursbank\Ecom\Module\PaymentMethod\Enum\CurrencyFormat;
 use Resursbank\Woocommerce\Modules\Order\PaymentHistory;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
@@ -40,10 +38,6 @@ class Connection
     public static function setup(): void
     {
         try {
-            if (function_exists(function: 'WC')) {
-                WC()->initialize_session();
-            }
-
             Config::setup(
                 cache: new Transient(),
                 network: new Network(
