@@ -1,3 +1,7 @@
+# 1.2.17
+
+* No changes, only tag bump.
+
 # 1.2.16
 
 * Ecom widget patch.
