@@ -160,25 +160,34 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         try {
             /** @var PaymentMethod $paymentMethod */
             foreach (Repository::getPaymentMethods() as $paymentMethod) {
-                $usp = Repository::getUniqueSellingPoint(
-                    paymentMethod: $paymentMethod,
-                    amount: (float)WC()?->cart?->total
-                );
                 $logo = new LogoWidget(paymentMethod: $paymentMethod);
                 $helper = new GatewayHelper(paymentMethod: $paymentMethod);
-                $readMore = new ReadMoreWidget(
-                    paymentMethod: $paymentMethod,
-                    amount: (float)WC()?->cart?->total
-                );
+
+                try {
+                    $usp = Repository::getUniqueSellingPoint(
+                        paymentMethod: $paymentMethod,
+                        amount: (float)WC()?->cart?->total
+                    );
+                    $uspText = $usp->getText();
+                    $costList = $helper->getCostList();
+                    $priceSignageWarning = $helper->getPriceSignageWarning();
+                    $readMore = new ReadMoreWidget(
+                        paymentMethod: $paymentMethod,
+                        amount: (float)WC()?->cart?->total
+                    );
+                } catch (Throwable $error) {
+                    Log::error(error: $error);
+                    continue;
+                }
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
-                    'description' => '<div class="rb-usp">' . $usp->getText() . '</div>',
-                    'costlist' => $helper->getCostList(),
+                    'description' => '<div class="rb-usp">' . ($uspText ?? '') . '</div>',
+                    'costlist' => $costList ?? '',
                     'costlist_url' => Route::getUrl(route: 'get-costlist'),
                     'readmore' => $readMore->content,
-                    'price_signage_warning' => $helper->getPriceSignageWarning(),
+                    'price_signage_warning' => $priceSignageWarning ?? '',
                     'read_more_css' => '',
                     'logo' => $logo->content,
                     'logo_type' => $logo->getIdentifier(),
