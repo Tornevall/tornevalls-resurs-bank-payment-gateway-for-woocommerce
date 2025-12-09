@@ -224,7 +224,7 @@ class Resursbank extends WC_Payment_Gateway
             return true;
         }
 
-        // If the purchase limit is not fulfilled, skip early.
+        // If the purchase limit is not fulfilled (or if there is something that prevents rendering), skip early.
         if ($this->validatePurchaseLimit() === false || !$this->canRenderPaymentMethods) {
             return false;
         }
