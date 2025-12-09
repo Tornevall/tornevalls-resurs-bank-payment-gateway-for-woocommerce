@@ -109,7 +109,7 @@ class GetOrderContentController
 
         try {
             $data['messages'] = json_encode(
-                value: MessageBag::getBag()->toArray(),
+                value: MessageBag::getBag(),
                 flags: JSON_THROW_ON_ERROR
             );
 

@@ -36,7 +36,7 @@ class Admin
         }
 
         $periods = new GetPeriods(
-            methodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_METHOD),
+            methodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_METHOD_ID),
             periodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD)
         );
 

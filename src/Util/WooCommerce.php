@@ -228,7 +228,7 @@ class WooCommerce
             return;
         }
 
-        $currentPaymentMethod = UserSettingsRepository::getSettings()->partPaymentMethod?->id;
+        $currentPaymentMethod = UserSettingsRepository::getSettings()->partPaymentMethodId;
 
         // Only switch this if changes has been made.
         if ($currentPaymentMethod === $paymentMethodId) {
@@ -236,7 +236,7 @@ class WooCommerce
         }
 
         update_option(
-            Reader::getOptionName(field: Field::PART_PAYMENT_METHOD),
+            Reader::getOptionName(field: Field::PART_PAYMENT_METHOD_ID),
             $paymentMethodId
         );
 
@@ -257,7 +257,7 @@ class WooCommerce
         $paymentMethod = null;
 
         try {
-            $paymentMethod = UserSettingsRepository::getSettings()->partPaymentMethod;
+            $paymentMethod = UserSettingsRepository::getPartPaymentMethod();
 
             // Failsafe: If there is no payment method set, which usually is the case even though the widget is not enabled
             // itself, it has to be preconfigured. In Settings/PartPayment this is very much handled when credentials

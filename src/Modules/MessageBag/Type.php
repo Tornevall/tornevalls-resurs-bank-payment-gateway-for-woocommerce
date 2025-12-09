@@ -10,10 +10,32 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\MessageBag;
 
 /**
- * Possible message types and their corresponding CSS class for message div.
+ * Possible message types.
  */
 enum Type: string
 {
     case ERROR = 'error';
-    case SUCCESS = 'notice-success';
+    case SUCCESS = 'success';
+
+    /**
+     * Convert to WordPress admin notice type.
+     */
+    public function toWordPressType(): string
+    {
+        return match($this) {
+            self::ERROR => 'error',
+            self::SUCCESS => 'success',
+        };
+    }
+
+    /**
+     * Convert to WooCommerce notice type.
+     */
+    public function toWooCommerceType(): string
+    {
+        return match($this) {
+            self::ERROR => 'error',
+            self::SUCCESS => 'success',
+        };
+    }
 }

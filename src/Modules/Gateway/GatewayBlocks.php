@@ -28,6 +28,7 @@ use Resursbank\Ecom\Module\Widget\Logo\Html as LogoWidget;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -85,7 +86,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
 
         wp_enqueue_script(
             'rb-payment-method',
-            Route::getUrl(Route::ROUTE_PAYMENT_METHOD_JS),
+            Route::getUrl(RouteVariant::PaymentMethodJs),
             [],
             '1.0.0',
             false // Load script in header.
@@ -179,7 +180,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'title' => $paymentMethod->name,
                     'description' => $helper->getUspWidget(),
                     'costlist' => $helper->getCostList(),
-                    'costlist_url' => Route::getUrl(route: 'get-costlist'),
+                    'costlist_url' => Route::getUrl(route: RouteVariant::Costlist),
                     'readmore' => $helper->getReadMore(),
                     'price_signage_warning' => $helper->getPriceSignageWarning(),
                     'logo' => $logo->content,

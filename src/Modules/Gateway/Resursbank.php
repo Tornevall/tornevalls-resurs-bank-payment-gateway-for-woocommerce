@@ -18,13 +18,14 @@ use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callback;
@@ -38,6 +39,8 @@ use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
@@ -107,6 +110,31 @@ class Resursbank extends WC_Payment_Gateway
         global $blockCreateErrorMessage;
 
         $order = new WC_Order(order: $order_id);
+
+        // Throw a CurlException with spoofed data for testing
+        /*$spoofedCurlException = new CurlException(
+            message: "Connection timeout to payment gateway",
+            code: 0,
+            previous: null
+        );
+
+        // Add spoofed details to the exception
+        $spoofedDetails = [
+            "Network Error: Connection timeout after 30 seconds",
+            "API Endpoint: https://api.resursbank.com/payment/create",
+            "HTTP Status: 408 Request Timeout",
+            "Retry Attempt: 1 of 3"
+        ];
+
+        // Use reflection to set the details property if it exists
+        $reflection = new \ReflectionClass($spoofedCurlException);
+        if ($reflection->hasProperty('details')) {
+            $detailsProperty = $reflection->getProperty('details');
+            $detailsProperty->setAccessible(true);
+            $detailsProperty->setValue($spoofedCurlException, $spoofedDetails);
+        }
+
+        throw $spoofedCurlException;*/
 
         try {
             $payment = $this->createPayment(order: $order);
@@ -245,11 +273,11 @@ class Resursbank extends WC_Payment_Gateway
                 if (count(value: $error->getDetails())) {
                     /** @var $detail */
                     foreach ($error->getDetails() as $detail) {
-                        MessageBag::addError(message: $detail);
+                        //MessageBag::addError(message: $detail);
                         $blockCreateErrorMessage .= $detail . "\n";
                     }
                 } else {
-                    MessageBag::addError(message: $error->getMessage());
+                    //MessageBag::addError(message: $error->getMessage());
                     $blockCreateErrorMessage = $error->getMessage();
                 }
             } else {
@@ -269,9 +297,12 @@ class Resursbank extends WC_Payment_Gateway
      * @param WC_Order $order
      * @return Options
      * @throws AttributeCombinationException
+     * @throws ConfigException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws HttpException
+     * @throws UserSettingsException
      */
     private function getOptions(WC_Order $order): Options
     {
@@ -296,11 +327,9 @@ class Resursbank extends WC_Payment_Gateway
             ),
             callbacks: new Callbacks(
                 authorization: new Callback(
-                    url: Url::getCallbackUrl(type: CallbackType::AUTHORIZATION)
+                    url: Route::getUrl(route: RouteVariant::AuthorizationCallback)
                 ),
-                management: new Callback(
-                    url: Url::getCallbackUrl(type: CallbackType::MANAGEMENT)
-                ),
+                management: null,
                 creditApplication: null
             ),
             timeToLiveInMinutes: $stockEnabled &&

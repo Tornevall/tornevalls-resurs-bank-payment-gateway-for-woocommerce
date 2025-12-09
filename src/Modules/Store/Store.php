@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Widget\GetStores\Js as GetStores;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -165,7 +166,7 @@ class Store
             'rbStoreAdminLocalize',
             [
                 'url' => Route::getUrl(
-                    route: Route::ROUTE_GET_STORES_ADMIN
+                    route: RouteVariant::GetStoresAdmin
                 ),
                 'fetch_stores_translation' => $fetchStoresString,
                 'no_fetch_url' => $noFetchUrl

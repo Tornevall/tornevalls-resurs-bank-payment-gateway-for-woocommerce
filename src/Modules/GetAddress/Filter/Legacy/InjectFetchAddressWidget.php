@@ -15,6 +15,7 @@ use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Throwable;
 
 /**
@@ -33,7 +34,7 @@ class InjectFetchAddressWidget
         try {
             Log::debug(
                 message: 'Initialize getAddress with URL: ' . Route::getUrl(
-                    route: Route::ROUTE_GET_ADDRESS
+                    route: RouteVariant::GetAddress
                 )
             );
 

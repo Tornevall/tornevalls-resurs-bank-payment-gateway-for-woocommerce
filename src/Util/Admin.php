@@ -29,6 +29,7 @@ class Admin
         }
     }
 
+    /*
     public static function getAdminErrorNote(string $message): void
     {
         if (!self::isAdmin()) {
@@ -45,7 +46,7 @@ class Admin
 </div>
 EX;
     }
-
+*/
     /**
      * Return boolean on specific admin configuration tab. This method does not check is_admin first.
      *

@@ -9,26 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Order;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Model\PaymentHistory\Event;
-use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -92,7 +78,7 @@ class Order
 
             $wcOrderid = $wcOrder->get_id();
             $fetchUrl = Route::getUrl(
-                route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
+                route: RouteVariant::AdminGetOrderContent,
                 admin: true
             );
 

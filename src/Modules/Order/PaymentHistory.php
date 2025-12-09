@@ -95,7 +95,7 @@ class PaymentHistory implements DataHandlerInterface
 
             if ($order === null) {
                 throw new InvalidArgumentException(
-                    message: 'Failed to reslve order from payment ' . $entry->paymentId
+                    message: 'Failed to resolve order from payment ' . $entry->paymentId
                 );
             }
 

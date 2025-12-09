@@ -9,35 +9,24 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\MessageBag;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\SessionException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Lib\Utilities\DataConverter;
-use Resursbank\Woocommerce\Modules\MessageBag\Models\Message;
-use Resursbank\Woocommerce\Modules\MessageBag\Models\MessageCollection;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
 use function defined;
 use function function_exists;
-use function is_array;
 
 /**
- * Message bag.
+ * Simplified message bag using native WordPress/WooCommerce functions.
  */
 class MessageBag
 {
-    public const SESSION_KEY = 'rb-message-bag';
+    private const SETTINGS_GROUP = 'resursbank_messages';
 
     /**
-     * Whether to clear the bag after rendering it.
+     * Static array to store messages during AJAX requests.
      */
-    private static bool $clear = true;
+    private static array $ajaxMessages = [];
 
     /**
      * Initialize this module.
@@ -53,33 +42,26 @@ class MessageBag
     /**
      * Add message to bag.
      */
-    // phpcs:ignore
     public static function add(string $message, Type $type): void
     {
         try {
             if ($message === '') {
-                $messageInstance = new Message(
-                    message: 'Empty message encountered.',
-                    type: Type::ERROR
-                );
-            } else {
-                $messageInstance = new Message(message: $message, type: $type);
+                return;
             }
 
             if (Admin::isAdmin()) {
-                if (defined(constant_name: 'DOING_AJAX')) {
-                    // No way of handling messages in AJAX requests.
+                if (defined(constant_name: 'DOING_AJAX') && DOING_AJAX) {
+                    // Store in memory for AJAX requests to return in response
+                    self::$ajaxMessages[] = [
+                        'message' => $message,
+                        'type' => $type->value,
+                    ];
                     return;
                 }
 
-                $bag = self::getBag();
-
-                if (!self::isInBag(message: $message, bag: $bag)) {
-                    $bag->offsetSet(offset: null, value: $messageInstance);
-                    self::updateBag(bag: $bag);
-                }
             } elseif (function_exists(function: 'wc_add_notice')) {
-                wc_add_notice(message: $message, notice_type: $type->value);
+                // Use WooCommerce native notice system for frontend
+                wc_add_notice(message: $message, notice_type: $type->toWooCommerceType());
             }
         } catch (Throwable $e) {
             Log::error(error: $e);
@@ -88,18 +70,14 @@ class MessageBag
 
     /**
      * Add error message.
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
      */
     public static function addError(string $message): void
     {
-        self::add(message: $message, type: Type::ERROR);
+       // self::add(message: $message, type: Type::ERROR);
     }
 
     /**
-     * Add error message.
-     *
-     * @SuppressWarnings(PHPMD.ElseExpression)
+     * Add success message.
      */
     public static function addSuccess(string $message): void
     {
@@ -107,112 +85,32 @@ class MessageBag
     }
 
     /**
-     * Print message bag.
+     * Get messages for AJAX responses.
+     *
+     * @return array Array of messages with 'message' and 'type' keys
+     */
+    public static function getBag(): array
+    {
+        return self::$ajaxMessages;
+    }
+
+    /**
+     * Clear messages (for AJAX requests).
+     */
+    public static function clear(): void
+    {
+        self::$ajaxMessages = [];
+    }
+
+    /**
+     * Print message bag (uses WordPress native settings_errors).
      */
     public static function printMessages(): void
     {
         try {
-            /** @var Message $message */
-            foreach (self::getBag() as $message) {
-                echo wp_kses(
-                    '<div class="' . $message->type->value . ' notice"><p>' .
-                    $message->getMessage() . '</p></div>',
-                    [
-                        'div' => ['class' => true],
-                        'p' => [],
-                    ]
-                );
-            }
-
-            if (self::$clear) {
-                self::clear();
-            }
+            settings_errors(setting: self::SETTINGS_GROUP);
         } catch (Throwable $e) {
             Log::error(error: $e);
         }
-    }
-
-    /**
-     * Do not clear bag after rendering it.
-     */
-    public static function keep(): void
-    {
-        self::$clear = false;
-    }
-
-    /**
-     * @throws IllegalTypeException
-     * @throws JsonException
-     */
-    public static function clear(): void
-    {
-        self::updateBag(bag: new MessageCollection(data: []));
-    }
-
-    /**
-     * Resolve MessageCollection instance from JSON in session.
-     *
-     * @return MessageCollection
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ConfigException
-     * @throws SessionException
-     */
-    public static function getBag(): MessageCollection
-    {
-        $raw = Config::getSessionHandler()->get(key: self::SESSION_KEY);
-
-        $data = $raw !== '' ? json_decode(
-            json: $raw,
-            associative: false,
-            depth: 512,
-            flags: JSON_THROW_ON_ERROR
-        ) : [];
-
-        $collection = DataConverter::arrayToCollection(
-            data: is_array(value: $data) ? $data : [],
-            type: Message::class
-        );
-
-        return $collection instanceof MessageCollection
-            ? $collection
-            : new MessageCollection(data: []);
-    }
-
-    /**
-     * Look for duplicate messages in the collection.
-     */
-    private static function isInBag(string $message, MessageCollection $bag): bool
-    {
-        /** @var Message $item */
-        foreach ($bag as $item) {
-            if ($item->message === $message) {
-                $return = true;
-                break;
-            }
-        }
-
-        return $return ?? false;
-    }
-
-    /**
-     * Update message bag data in session.
-     *
-     * @param MessageCollection $bag
-     * @throws ConfigException
-     * @throws JsonException
-     * @throws SessionException
-     */
-    private static function updateBag(MessageCollection $bag): void
-    {
-        Config::getSessionHandler()->set(
-            key: self::SESSION_KEY,
-            val: json_encode(
-                value: $bag->toArray(),
-                flags: JSON_THROW_ON_ERROR
-            )
-        );
     }
 }

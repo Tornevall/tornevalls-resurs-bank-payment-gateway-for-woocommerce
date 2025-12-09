@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Util;
 
 use JsonException;
 use ReflectionException;
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\CacheException;
@@ -26,21 +27,24 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
+use Resursbank\Ecom\Module\Callback\Repository as CallbackRepository;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
+use Resursbank\Ecom\Module\PaymentMethod\Http\PartPayment\GetDataController;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
+use Resursbank\Ecom\Module\Widget\CacheManagement\Css as CacheManagementCss;
+use Resursbank\Ecom\Module\Widget\CacheManagement\Js as CacheManagementJs;
+use Resursbank\Ecom\Module\Widget\CallbackList\Css as CallbackListCss;
+use Resursbank\Ecom\Module\Widget\CallbackTest\Css;
+use Resursbank\Ecom\Module\Widget\CallbackTest\Js as TestCallbackJs;
 use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
 use Resursbank\Ecom\Module\Widget\GetAddress\Js;
 use Resursbank\Ecom\Module\Widget\PaymentMethod\Js as PaymentMethodJs;
-use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
-use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
-use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
-use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
-use Resursbank\Woocommerce\Settings\Advanced;
-use Resursbank\Woocommerce\Settings\Callback;
+use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Throwable;
 use function is_string;
 use function str_contains;
@@ -48,8 +52,6 @@ use function strlen;
 
 /**
  * Primitive routing, executing arbitrary code depending on $_GET parameters.
- *
- * @noinspection PhpLackOfCohesionInspection
  */
 class Route
 {
@@ -60,66 +62,6 @@ class Route
     public const ROUTE_PARAM = 'resursbank';
 
     /**
-     * Route to get address controller.
-     */
-    public const ROUTE_GET_ADDRESS = 'get-address';
-
-    /**
-     * Route to controller injecting get address css.
-     */
-    public const ROUTE_GET_ADDRESS_CSS = 'get-address-css';
-
-    /**
-     * Controller route to render get address JS.
-     */
-    public const ROUTE_GET_ADDRESS_JS = 'get-address-js';
-
-    /**
-     * Controller route to render payment method JS.
-     */
-    public const ROUTE_PAYMENT_METHOD_JS = 'payment-method-js';
-
-    /**
-     * Route to get part payment controller.
-     */
-    public const ROUTE_PART_PAYMENT = 'part-payment';
-
-    /**
-     * Route to get part payment admin controller.
-     */
-    public const ROUTE_PART_PAYMENT_ADMIN = 'part-payment-admin';
-
-    /**
-     * Route to get part payment admin controller.
-     */
-    public const ROUTE_ADMIN_CACHE_INVALIDATE = 'admin-cache-invalidate';
-
-    /**
-     * Route to admin controller which triggers test callback.
-     */
-    public const ROUTE_ADMIN_TRIGGER_TEST_CALLBACK = 'admin-trigger-test-callback';
-
-    /**
-     * Route to controller accepting test callback from Resurs Bank.
-     */
-    public const ROUTE_TEST_CALLBACK_RECEIVED = 'test-callback-received';
-
-    /**
-     * Route to get JSON encoded list of stores (only in admin).
-     */
-    public const ROUTE_GET_STORES_ADMIN = 'get-stores-admin';
-
-    /**
-     * Route to get updated cost list HTML.
-     */
-    public const ROUTE_COSTLIST = 'get-costlist';
-
-    /**
-     * Route to get JSON encoded order view content.
-     */
-    public const ROUTE_ADMIN_GET_ORDER_CONTENT = 'get-order-content-admin';
-
-    /**
      * @throws ConfigException
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.ExitExpression)
@@ -127,14 +69,23 @@ class Route
      */
     public static function exec(): void
     {
-        $route = (
+        $routeString = (
             isset($_GET[self::ROUTE_PARAM]) &&
             is_string(value: $_GET[self::ROUTE_PARAM])
         ) ? $_GET[self::ROUTE_PARAM] : '';
 
+        // This function executes to all requests, but we only wish to process
+        // those that are actually meant for our module. If the "resursbank"
+        // parameter is not present, we simply return to filter out all others.
+        if ($routeString === '') {
+            return;
+        }
+
         $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
         try {
+            $route = RouteVariant::from(value: $routeString);
+
             if (
                 in_array(
                     needle: $route,
@@ -166,8 +117,6 @@ class Route
         string $tab = 'api_settings'
     ): void {
         wp_safe_redirect(self::getSettingsUrl(tab: $tab));
-
-        MessageBag::keep();
     }
 
     /**
@@ -193,7 +142,7 @@ class Route
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
     public static function getUrl(
-        string $route,
+        RouteVariant $route,
         bool $admin = false
     ): string {
         $url = !$admin ? get_site_url() : get_admin_url();
@@ -211,7 +160,8 @@ class Route
 
         return Url::getQueryArg(
             baseUrl: $url,
-            arguments: [self::ROUTE_PARAM => $route]
+            arguments: [self::ROUTE_PARAM => $route->value],
+            routeVariant: $route
         );
     }
 
@@ -284,7 +234,8 @@ class Route
         $url = $_SERVER['HTTP_REFERER'] ?? '';
 
         try {
-            $default = self::getUrl(route: '', admin: $admin);
+            // Use getSettingsUrl for default since getUrl now requires a RouteVariant
+            $default = $admin ? self::getSettingsUrl() : (string)get_site_url();
         } catch (Throwable $error) {
             Log::error(error: $error);
             $default = (string)get_site_url();
@@ -314,11 +265,20 @@ class Route
     {
         try {
             $body = match ($widget) {
-                AssetWidget::GetAddressJs => (new Js(url: Route::getUrl(route: Route::ROUTE_GET_ADDRESS)))->content,
+                AssetWidget::GetAddressJs => (new Js(url: Route::getUrl(route: RouteVariant::GetAddress)))->content,
                 AssetWidget::GetAddressCss => (new Widget())->content,
                 AssetWidget::PaymentMethodJs => (new PaymentMethodJs(
                     paymentMethods: Repository::getPaymentMethods()
                 ))->content,
+                AssetWidget::AdminCss => (
+                    (new Css())->content .
+                    (new CallbackListCss())->content .
+                    (new CacheManagementCss())->content
+                ),
+                AssetWidget::AdminJs => (
+                    (new TestCallbackJs())->content .
+                    (new CacheManagementJs())->content
+                )
             };
 
             if ($body === '') {
@@ -329,8 +289,8 @@ class Route
             }
 
             $contentType = match ($widget) {
-                AssetWidget::GetAddressJs, AssetWidget::PaymentMethodJs => 'application/javascript',
-                AssetWidget::GetAddressCss => 'text/css',
+                AssetWidget::GetAddressJs, AssetWidget::PaymentMethodJs, AssetWidget::AdminJs => 'application/javascript',
+                AssetWidget::GetAddressCss, AssetWidget::AdminCss => 'text/css',
             };
 
             self::respondWithExit(body: $body, contentType: $contentType);
@@ -361,61 +321,95 @@ class Route
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    private static function route(string $route): void
+    private static function route(RouteVariant $route): void
     {
-        switch ($route) {
-            case self::ROUTE_GET_ADDRESS:
-                self::respondWithExit(body: (new GetAddressController())->exec());
-                break;
+        match ($route) {
+            RouteVariant::GetAddress => self::respondWithExit(body: (new GetAddressController())->exec()),
+            RouteVariant::GetAddressCss => self::renderAssetWidget(widget: AssetWidget::GetAddressCss),
+            RouteVariant::GetAddressJs => self::renderAssetWidget(widget: AssetWidget::GetAddressJs),
+            RouteVariant::PaymentMethodJs => self::renderAssetWidget(widget: AssetWidget::PaymentMethodJs),
+            RouteVariant::PartPayment => self::respondWithExit(body: (new GetDataController())->exec()),
+            RouteVariant::GetStoresAdmin => self::respondWithExit(body: (new GetStoresController())->exec()),
+            RouteVariant::AdminCacheInvalidate => (function () {
+                try {
+                    Config::getCache()->invalidate();
 
-            case self::ROUTE_GET_ADDRESS_CSS:
-                self::renderAssetWidget(widget: AssetWidget::GetAddressCss);
-                break;
+                    self::respondWithExit(
+                        body: json_encode([
+                            'success' => true,
+                            'message' => Translator::translate(phraseId: 'cache-cleared')
+                        ]),
+                        contentType: 'application/json'
+                    );
+                } catch (Throwable $e) {
+                    Log::error(
+                        error: $e,
+                        message: Translator::translate(phraseId: 'clear-cache-failed')
+                    );
 
-            case self::ROUTE_GET_ADDRESS_JS:
-                self::renderAssetWidget(widget: AssetWidget::GetAddressJs);
-                break;
-
-            case self::ROUTE_PAYMENT_METHOD_JS:
-                self::renderAssetWidget(widget: AssetWidget::PaymentMethodJs);
-                break;
-
-            case self::ROUTE_PART_PAYMENT:
-                self::respondWithExit(body: PartPayment::exec());
-                break;
-
-            case self::ROUTE_GET_STORES_ADMIN:
-                self::respondWithExit(body: (new GetStoresController())->exec());
-                break;
-
-            case self::ROUTE_ADMIN_CACHE_INVALIDATE:
-                Invalidate::exec();
-                self::redirectToSettings(tab: Advanced::SECTION_ID);
-                break;
-
-            case self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK:
-                TestTrigger::exec();
-                self::redirectToSettings(tab: Callback::SECTION_ID);
-                break;
-
-            case self::ROUTE_TEST_CALLBACK_RECEIVED:
-                TestReceived::exec();
+                    self::respondWithExit(
+                        body: json_encode([
+                            'success' => false,
+                            'error' => Translator::translate(phraseId: 'clear-cache-failed')
+                        ]),
+                        code: 500,
+                        contentType: 'application/json'
+                    );
+                }
+            })(),
+            RouteVariant::AdminTriggerTestCallback => (function () {
+                try {
+                    $response = CallbackRepository::triggerTest();
+                    self::respondWithExit(
+                        body: $response->toJson(),
+                        contentType: 'application/json'
+                    );
+                } catch (Throwable $e) {
+                    Log::error(error: $e);
+                    self::respondWithExit(
+                        body: json_encode([
+                            'status' => 'ERROR',
+                            'code' => 500,
+                            'success' => false,
+                            'error' => $e->getMessage()
+                        ]),
+                        code: 500,
+                        contentType: 'application/json'
+                    );
+                }
+            })(),
+            RouteVariant::TestCallbackReceived => (function () {
+                $reader = new Reader();
+                $reader->update(field: Field::TEST_RECEIVED_AT, value: time());
                 self::respondWithExit(body: '');
-                break;
-
-            case self::ROUTE_ADMIN_GET_ORDER_CONTENT:
-                // We should not execute this until after post types are registered.
-                add_action(
-                    'woocommerce_after_register_post_type',
-                    static function (): void {
-                        Route::respondWithExit(
-                            body: GetOrderContentController::exec()
-                        );
-                    }
-                );
-                break;
-
-            case self::ROUTE_COSTLIST:
+            })(),
+            RouteVariant::GetCallbackTestReceivedAt => (function () {
+                try {
+                    $reader = new Reader();
+                    $timestamp = $reader->read(field: Field::TEST_RECEIVED_AT);
+                    
+                    self::respondWithExit(
+                        body: json_encode(['time' => $timestamp ? (int)$timestamp : null]),
+                        contentType: 'application/json'
+                    );
+                } catch (Throwable $e) {
+                    Log::error(error: $e);
+                    self::respondWithExit(
+                        body: json_encode(['time' => null, 'error' => $e->getMessage()]),
+                        code: 500,
+                        contentType: 'application/json'
+                    );
+                }
+            })(),
+            RouteVariant::AdminGetOrderContent => add_action(
+                'woocommerce_after_register_post_type',
+                static function (): void {
+                    Route::respondWithExit(
+                        body: GetOrderContentController::exec()
+                    );
+                }
+            ),
+            RouteVariant::Costlist => (function () {
                 try {
                     $paymentMethod = Repository::getById(paymentMethodId: $_GET['method'] ?? '');
 
@@ -441,11 +435,29 @@ class Route
                     );
                 } catch (Throwable $e) {
                     self::respondWithError(exception: $e);
-                } break;
-
-            default:
-                break;
-        }
+                }
+            })(),
+            RouteVariant::AuthorizationCallback => add_action(
+                'woocommerce_after_register_post_type',
+                static function (): void {
+                    // NOTE: In admin, we will only sse the log entry from
+                    // the callback arriving, and us accepting it. The
+                    // event logged when a callback completed, will only
+                    // appear if we've supplied a processing closure, which
+                    // we don't do here.
+                    Route::respondWithExit(
+                        body: '',
+                        code: CallbackRepository::process(
+                            callback: (new AuthorizationController())->getRequestData(),
+                            process: null
+                        )
+                    );
+                }
+            ),
+            RouteVariant::AdminCss => self::renderAssetWidget(widget: AssetWidget::AdminCss),
+            RouteVariant::AdminJs => self::renderAssetWidget(widget: AssetWidget::AdminJs),
+            default => null,
+        };
     }
 
     /**
@@ -454,11 +466,11 @@ class Route
     private static function getAdminRoutes(): array
     {
         return [
-            self::ROUTE_PART_PAYMENT_ADMIN,
-            self::ROUTE_ADMIN_CACHE_INVALIDATE,
-            self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
-            self::ROUTE_GET_STORES_ADMIN,
-            self::ROUTE_ADMIN_GET_ORDER_CONTENT,
+            RouteVariant::PartPaymentAdmin,
+            RouteVariant::AdminCacheInvalidate,
+            RouteVariant::AdminTriggerTestCallback,
+            RouteVariant::GetStoresAdmin,
+            RouteVariant::AdminGetOrderContent,
         ];
     }
 

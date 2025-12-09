@@ -182,33 +182,25 @@ class Api
      */
     private static function getStoreIdSetting(): array
     {
+
+        $options = [];
+
+        if (Repository::hasUserCredentials()) {
+            try {
+                $options = StoreRepository::getStores()->getSelectList();
+            } catch (Throwable $error) {
+                Log::error(error: $error);
+            }
+        }
+
         $result = [
             'id' => Reader::getOptionName(field: Field::STORE_ID),
             'type' => 'select',
             'title' => Translator::translate(phraseId: 'store-id'),
             'default' => '',
-            'options' => [],
+            'options' => $options,
         ];
 
-        try {
-            // Do not fetch stores until credentials are present.
-            if (Repository::hasUserCredentials()) {
-                $result['options'] = StoreRepository::getStores()->getSelectList();
-            }
-        } catch (Throwable $error) {
-            self::logAndHandleError(error: $error);
-        }
-
         return $result;
-    }
-
-    /**
-     * Log and handle visible error messages.
-     */
-    private static function logAndHandleError(Throwable $error): void
-    {
-        // Some errors cannot be rendered through the admin_notices. Avoid that action.
-        Admin::getAdminErrorNote(message: $error->getMessage());
-        Log::error(error: $error);
     }
 }

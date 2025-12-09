@@ -9,16 +9,15 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\PartPayment;
 
-use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Lib\UserSettings\Field;
+use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as EcomPartPayment;
 use Resursbank\Ecom\Module\Widget\PartPayment\Js as EcomPartPaymentJs;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -79,7 +78,7 @@ class PartPayment
             $widget = new EcomPartPayment(
                 amount: self::getPriceData(),
                 fetchStartingCostUrl: Route::getUrl(
-                    route: Route::ROUTE_PART_PAYMENT
+                    route: RouteVariant::PartPayment
                 ),
                 displayInfoText: self::displayInfoText(),
             );
@@ -104,12 +103,7 @@ class PartPayment
         }
 
         try {
-            $widget = new EcomPartPaymentJs(
-                amount: self::getPriceData(),
-                fetchStartingCostUrl: Route::getUrl(
-                    route: Route::ROUTE_PART_PAYMENT
-                )
-            );
+            $widget = new EcomPartPaymentJs(amount: self::getPriceData());
 
             wp_enqueue_script(
                 'partpayment-script',
@@ -142,10 +136,8 @@ class PartPayment
     public static function isEnabled(): bool
     {
         try {
-            $settings = UserSettingsRepository::getSettings();
-
             $amount = self::getPriceData();
-            $method = $settings->partPaymentMethod;
+            $method = Repository::getPartPaymentMethod();
 
             // Enabled if there is a product and a price.
             return (

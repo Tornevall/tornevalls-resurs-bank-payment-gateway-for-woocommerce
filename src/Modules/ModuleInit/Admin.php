@@ -24,6 +24,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
+use Resursbank\Ecom\Module\Widget\CacheManagement\Html;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
 use Resursbank\Woocommerce\Modules\Order\Order;
@@ -32,9 +33,10 @@ use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Modules\Store\Store;
 use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
-use Resursbank\Woocommerce\Settings\Filter\TestCallbackButton;
 use Resursbank\Woocommerce\Settings\Settings;
+use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Throwable;
 
 /**
@@ -61,11 +63,49 @@ class Admin
      */
     public static function init(): void
     {
+        // Render custom CSS & JS code while in admin panel.
+        add_action('admin_enqueue_scripts', function () {
+            try {
+                wp_enqueue_style(
+                    'resursbank-admin-css',
+                    Route::getUrl(route: RouteVariant::AdminCss),
+                    [],
+                    '1.0.0'
+                );
+
+                wp_enqueue_script(
+                    'resursbank-admin-js',
+                    Route::getUrl(route: RouteVariant::AdminJs),
+                    ['jquery'],
+                    '1.0.0',
+                    true
+                );
+
+                // Load Callback module CSS
+                wp_enqueue_style(
+                    'resursbank-callback-css',
+                    plugins_url('resursbank/src/Settings/assets/css.css'),
+                    ['resursbank-admin-css'],
+                    '1.0.0'
+                );
+            } catch (Throwable $e) {
+                // Silently fail if routes cannot be generated
+                Log::error(error: $e);
+            }
+        });
+
         // Settings-related init methods that need to run in order for the plugin to be configurable when
         // it's inactivated.
         Settings::init();
-        InvalidateCacheButton::init();
-        TestCallbackButton::init();
+
+        // Inject invalidate cache button into settings.
+        add_action(
+            'woocommerce_admin_field_rbinvalidatecachebutton',
+            function () {
+                echo (new Html())->content;
+            }
+        );
+
         PartPayment::initAdmin();
         Store::initAdmin();
 
@@ -97,21 +137,32 @@ class Admin
         add_action('admin_head', function () {
             $selectors = [];
 
-            /** @var PaymentMethod $method */
-            foreach (PaymentMethodRepository::getPaymentMethods() as $method) {
-                $id = $method->id;
-
-                // Escape first char if it's a digit, otherwise the CSS
-                // selector will be invalid. For example, "123gateway" becomes
-                // "\31 23gateway".
-                if (preg_match(pattern: '/^[0-9]/', subject: $id)) {
-                    $id = '\\3' . substr(string: $id, offset: 0, length: 1) . ' ' . substr(string: $id, offset: 1);
-                }
-
-                $selectors[] = ".settings-payment-gateways #{$id}";
+            // Cannot fetch payment methods if user credentials are not set.
+            if (!Repository::hasUserCredentials()) {
+                return;
             }
 
-            echo '<style>' . implode(separator: ', ', array: $selectors) . ' { display:none !important; }</style>';
+            try {
+                /** @var PaymentMethod $method */
+                foreach (PaymentMethodRepository::getPaymentMethods() as $method) {
+                    $id = $method->id;
+
+                    // Escape first char if it's a digit, otherwise the CSS
+                    // selector will be invalid. For example, "123gateway" becomes
+                    // "\31 23gateway".
+                    if (preg_match(pattern: '/^[0-9]/', subject: $id)) {
+                        $id = '\\3' . substr(string: $id, offset: 0, length: 1) . ' ' . substr(string: $id, offset: 1);
+                    }
+
+                    $selectors[] = ".settings-payment-gateways #{$id}";
+                }
+
+                echo '<style>' . implode(separator: ', ', array: $selectors) . ' { display:none !important; }</style>';
+            } catch (Throwable $e) {
+                // Silently fail if payment methods cannot be fetched.
+                Log::error(error: $e);
+                return;
+            }
         });
     }
 }

@@ -15,7 +15,6 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
-use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\ResursbankLink;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
@@ -55,7 +54,6 @@ class Shared
         );
 
         Gateway::init();
-        Callback::init();
         GetAddress::init();
     }
 

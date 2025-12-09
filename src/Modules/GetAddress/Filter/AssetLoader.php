@@ -24,11 +24,11 @@ use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
 use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
-use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -41,10 +41,12 @@ class AssetLoader
     /**
      * Enqueued script execution.
      *
+     * @throws ConfigException
      * @throws EmptyValueException
      * @throws FilesystemException
      * @throws HttpException
      * @throws IllegalValueException
+     * @throws UserSettingsException
      */
     public static function init(): void
     {
@@ -187,7 +189,7 @@ class AssetLoader
         try {
             wp_enqueue_style(
                 'rb-ga-basic-css',
-                Route::getUrl('get-address-css'),
+                Route::getUrl(RouteVariant::GetAddressCss),
                 [],
                 '1.0.0'
             );
@@ -221,7 +223,7 @@ class AssetLoader
     {
         wp_enqueue_script(
             'rb-get-address',
-            Route::getUrl(Route::ROUTE_GET_ADDRESS_JS),
+            Route::getUrl(RouteVariant::GetAddressJs),
             [],
             '1.0.0',
             false // Load script in header.
