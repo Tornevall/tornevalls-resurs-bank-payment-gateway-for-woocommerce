@@ -67,7 +67,7 @@ use function get_option;
 class Resursbank extends WC_Payment_Gateway
 {
     /** @var bool Errors that should be catchable in an early state, to prevent render "bad" payment methods. */
-    public bool $canRenderPaymentMethods = true;
+    public bool $canRenderPaymentFields = true;
 
     public ?string $type = '';
 
@@ -156,7 +156,7 @@ class Resursbank extends WC_Payment_Gateway
             Log::debug(message: $error->getMessage());
         } catch (Throwable $error) {
             Log::error(error: $error);
-            $this->canRenderPaymentMethods = false;
+            $this->canRenderPaymentFields = false;
         }
     }
 
@@ -225,7 +225,7 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // If the purchase limit is not fulfilled (or if there is something that prevents rendering), skip early.
-        if ($this->validatePurchaseLimit() === false || !$this->canRenderPaymentMethods) {
+        if ($this->validatePurchaseLimit() === false || !$this->canRenderPaymentFields) {
             return false;
         }
 
