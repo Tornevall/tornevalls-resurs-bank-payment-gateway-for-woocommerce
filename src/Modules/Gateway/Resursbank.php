@@ -66,10 +66,16 @@ use function get_option;
 // phpcs:ignore
 class Resursbank extends WC_Payment_Gateway
 {
+    /** @var bool Errors that should be catchable in an early state, to prevent render "bad" payment methods. */
+    public bool $canRenderPaymentMethods = true;
+
     public ?string $type = '';
 
     /** @var int Internal sort order. */
     public int $sortOrder = 0;
+
+    /** @var string Pre-generated USP text. */
+    private string $uspText = '';
 
     /**
      * Setup.
@@ -105,6 +111,8 @@ class Resursbank extends WC_Payment_Gateway
             // Redirects to the correct section if the wrong section is requested when the section is set to a method ID.
             AdminUtility::redirectAtWrongSection(method: $method->id);
         }
+
+        $this->generatePaymentFieldsHtml();
     }
 
     /**
@@ -124,24 +132,34 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function payment_fields(): void
     {
+        echo $this->uspText;
+    }
+
+    /**
+     * @return void
+     */
+    private function generatePaymentFieldsHtml(): void
+    {
         try {
             $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
             $usp = PaymentMethodRepository::getUniqueSellingPoint(
                 paymentMethod: $this->method,
                 amount: $this->get_order_total()
             );
-            echo '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
+            $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
                     paymentMethod: $this->method,
                     amount: $this->get_order_total()
                 );
         } catch (TranslationException $error) {
-            // Translation errors should rather go as debug messages since we
+            // Translation errors should rather  go as debug messages since we
             // translate with english fallbacks.
             Log::debug(message: $error->getMessage());
         } catch (Throwable $error) {
             Log::error(error: $error);
+            $this->canRenderPaymentMethods = false;
         }
     }
+
 
     /**
      * Create Resurs Bank payment and assign additional metadata to WC_Order.
@@ -199,15 +217,15 @@ class Resursbank extends WC_Payment_Gateway
             return false;
         }
 
-        // Conditions below are separated to make debugging easier.
+        // The conditions below are separated to make debugging easier.
 
         // Not in checkout? Act like they are all there.
         if (!is_checkout()) {
             return true;
         }
 
-        // If purchase limit are not fulfilled, skip early.
-        if ($this->validatePurchaseLimit() === false) {
+        // If the purchase limit is not fulfilled, skip early.
+        if ($this->validatePurchaseLimit() === false || !$this->canRenderPaymentMethods) {
             return false;
         }
 
