@@ -141,6 +141,10 @@ class Resursbank extends WC_Payment_Gateway
     private function generatePaymentFieldsHtml(): void
     {
         try {
+            if (AdminUtility::isAdmin() ||WC()?->cart === null) {
+                // Do not render payment fields in admin.
+                return;
+            }
             $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
             $usp = PaymentMethodRepository::getUniqueSellingPoint(
                 paymentMethod: $this->method,
