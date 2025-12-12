@@ -29,24 +29,6 @@ class Admin
         }
     }
 
-    /*
-    public static function getAdminErrorNote(string $message): void
-    {
-        if (!self::isAdmin()) {
-            return;
-        }
-
-        $additional = Translator::translate(phraseId: 'see-log');
-
-        echo <<<EX
-<div class="error notice">
-  $message
-  <br/>
-  $additional
-</div>
-EX;
-    }
-*/
     /**
      * Return boolean on specific admin configuration tab. This method does not check is_admin first.
      *
@@ -88,11 +70,14 @@ EX;
 
     /**
      * HPOS compatible method to find out if current screen is shop_order (wp-admin order view).
+     *
+     * @todo This method is wierd, cause post_type = "shop_order" applies to more places than just the order view specifically.
      */
     public static function isInShopOrderEdit(): bool
     {
         // Current screen can be null when is_ajax().
         $currentScreen = get_current_screen();
+
         // id is used in legacy mode. post_type is used in HPOS mode.
         return isset($currentScreen) &&
             ($currentScreen->id === 'shop_order' || $currentScreen->post_type === 'shop_order');
@@ -100,12 +85,19 @@ EX;
 
     /**
      * Check if user is currently located in the order list.
+     *
+     * @todo This method is weird, the purpose according to its name seems to be to confrim we are on order list view, yet the id "edit-shop_order" suggests we are checking for the edit view, unless very wierdly named in an earlier version of WC since this is at least no longer the name of the list view page.
      */
     public static function isInOrderListView(): bool
     {
         $currentScreen = get_current_screen();
-        // The list screen is held separately from the single order view and is regardless of HPOS
-        // always the id.
-        return self::isInShopOrderEdit() && isset($currentScreen) && $currentScreen->id === 'edit-shop_order';
+
+        // The list screen is held separately from the single order view and is
+        // regardless of HPOS always the id.
+        return
+            (
+                (self::isInShopOrderEdit() && isset($currentScreen)) &&
+                ($currentScreen->id === 'edit-shop_order' || $currentScreen->base === 'woocommerce_page_wc-orders')
+            );
     }
 }

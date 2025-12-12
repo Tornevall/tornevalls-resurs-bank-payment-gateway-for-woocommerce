@@ -20,7 +20,7 @@ use Resursbank\Ecom\Lib\Model\PaymentHistory\EntryCollection;
 use Resursbank\Ecom\Lib\Model\PaymentHistory\Event;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
 use Resursbank\Ecom\Module\PaymentHistory\Translator;
-use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 
@@ -59,7 +59,7 @@ class PaymentHistory implements DataHandlerInterface
                         flags: JSON_THROW_ON_ERROR
                     );
                 } catch (Throwable $error) {
-                    Log::error(error: $error);
+                    Logger::error(message: $error);
                 }
             }
 
@@ -76,7 +76,7 @@ class PaymentHistory implements DataHandlerInterface
 
             return $data;
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return new EntryCollection(data: []);
@@ -120,7 +120,7 @@ class PaymentHistory implements DataHandlerInterface
                 Status::update(order: $order);
             }
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
     }
 

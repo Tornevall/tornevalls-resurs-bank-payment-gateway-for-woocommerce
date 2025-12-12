@@ -14,11 +14,11 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Api\Environment;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Lib\UserSettings\ReaderInterface;
 use Resursbank\Ecom\Lib\UserSettings\Url;
 use Resursbank\Ecom\Module\UserSettings\Repository;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\RouteVariant;
 use Throwable;
@@ -153,7 +153,7 @@ class Reader implements ReaderInterface
             // Clear UserSettings cache
             Repository::clearCache();
         } catch (Throwable $e) {
-            Log::error(error: $e);
+            Logger::error(message: $e);
         }
     }
 

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Woocommerce\Settings\About;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
@@ -18,7 +19,6 @@ use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Admin_Settings;
@@ -102,7 +102,7 @@ class SettingsPage extends WC_Settings_Page
                 echo '</table>';
             }
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
 
             // Display a generic error message to the user. Letting them know
             // the page could not render and info is logged.

@@ -11,8 +11,8 @@ namespace Resursbank\Woocommerce\Modules\Store;
 
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Module\Widget\GetStores\Js as GetStores;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Translator;
@@ -55,12 +55,12 @@ class Store
             self::enqueueScripts();
             self::localizeScripts();
         } catch (Throwable $error) {
-            Log::error(
-                error: $error,
-                message: Translator::translate(
+            Logger::error(message: $error);
+
+            /*
+             * message: Translator::translate(
                     phraseId: 'failed-initializing-store-selector-assistant'
-                )
-            );
+                )*/
         }
     }
 

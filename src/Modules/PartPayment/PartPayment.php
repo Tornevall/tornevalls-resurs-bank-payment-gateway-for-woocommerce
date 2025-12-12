@@ -10,12 +10,12 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\PartPayment;
 
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as EcomPartPayment;
 use Resursbank\Ecom\Module\Widget\PartPayment\Js as EcomPartPaymentJs;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
@@ -77,9 +77,6 @@ class PartPayment
         try {
             $widget = new EcomPartPayment(
                 amount: self::getPriceData(),
-                fetchStartingCostUrl: Route::getUrl(
-                    route: RouteVariant::PartPayment
-                ),
                 displayInfoText: self::displayInfoText(),
             );
 
@@ -87,7 +84,7 @@ class PartPayment
                 $widget->content .
                 '</div>';
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
     }
 
@@ -124,7 +121,7 @@ class PartPayment
                 ]
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
     }
 
@@ -149,7 +146,7 @@ class PartPayment
                 $amount <= $method->maxPurchaseLimit
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return false;
@@ -160,6 +157,8 @@ class PartPayment
      */
     /**
      * Get checkout or product price, with optional override via filter.
+     *
+     * @todo The business logic in this is wierd. the fallback is WooCommerce::getCartTotals, yet since that is part of the try block that may be the point of failure, there is no way of telling. We also do not convert the data in the catch block.
      */
     private static function getPriceData(): float
     {

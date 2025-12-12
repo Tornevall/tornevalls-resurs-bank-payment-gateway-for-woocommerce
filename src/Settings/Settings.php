@@ -11,13 +11,11 @@ namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Lib\UserSettings\Field;
-use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 
 use function is_array;
@@ -123,12 +121,13 @@ class Settings
 
             Config::getCache()->invalidate();
         } catch (Throwable $e) {
-            Log::error(
-                error: $e,
+            Logger::error(message: $e);
+
+            /*
                 message: Translator::translate(
                     phraseId: 'save-settings-failed'
                 )
-            );
+            );*/
         }
     }
 
@@ -146,8 +145,7 @@ class Settings
             Api::SECTION_ID => Api::getSettings(),
             Advanced::SECTION_ID => Advanced::getSettings(),
             PartPayment::SECTION_ID => PartPayment::getSettings(),
-            OrderManagement::SECTION_ID => OrderManagement::getSettings(),
-            Callback::SECTION_ID => Callback::getSettings()
+            OrderManagement::SECTION_ID => OrderManagement::getSettings()
         };
 
         if (isset($data[$section]) && is_array(value: $data[$section])) {
@@ -168,8 +166,7 @@ class Settings
             Api::getSettings(),
             Advanced::getSettings(),
             PartPayment::getSettings(),
-            OrderManagement::getSettings(),
-            Callback::getSettings()
+            OrderManagement::getSettings()
         );
     }
 

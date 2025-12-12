@@ -45,6 +45,7 @@ use Resursbank\Ecom\Module\Widget\PaymentMethod\Js as PaymentMethodJs;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
 use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 use function is_string;
 use function str_contains;
@@ -135,7 +136,6 @@ class Route
     /**
      * Resolve full URL.
      *
-     * @throws ConfigException
      * @throws HttpException
      * @throws IllegalValueException
      * @throws UserSettingsException
@@ -237,7 +237,7 @@ class Route
             // Use getSettingsUrl for default since getUrl now requires a RouteVariant
             $default = $admin ? self::getSettingsUrl() : (string)get_site_url();
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             $default = (string)get_site_url();
         }
 
@@ -295,7 +295,7 @@ class Route
 
             self::respondWithExit(body: $body, contentType: $contentType);
         } catch (Throwable $e) {
-            Log::error(error: $e);
+            Logger::error(message: $e);
         }
     }
 
@@ -342,10 +342,7 @@ class Route
                         contentType: 'application/json'
                     );
                 } catch (Throwable $e) {
-                    Log::error(
-                        error: $e,
-                        message: Translator::translate(phraseId: 'clear-cache-failed')
-                    );
+                    Logger::error(message: $e);
 
                     self::respondWithExit(
                         body: json_encode([
@@ -365,7 +362,7 @@ class Route
                         contentType: 'application/json'
                     );
                 } catch (Throwable $e) {
-                    Log::error(error: $e);
+                    Logger::error(message: $e);
                     self::respondWithExit(
                         body: json_encode([
                             'status' => 'ERROR',
@@ -393,7 +390,7 @@ class Route
                         contentType: 'application/json'
                     );
                 } catch (Throwable $e) {
-                    Log::error(error: $e);
+                    Logger::error(message: $e);
                     self::respondWithExit(
                         body: json_encode(['time' => null, 'error' => $e->getMessage()]),
                         code: 500,

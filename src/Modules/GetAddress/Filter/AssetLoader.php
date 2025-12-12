@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Ecom\Module\Widget\CostList\Css as CostListCss;
@@ -25,7 +26,6 @@ use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\RouteVariant;
@@ -101,7 +101,7 @@ class AssetLoader
         try {
             $css = (new EcomPartPaymentCss())->content ?? '';
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             $css = '';
         }
 
@@ -129,7 +129,7 @@ class AssetLoader
             WooCommerce::validateAndUpdatePartPaymentMethod();
             $readMoreCss = (new ReadMoreCss())->content ?? '';
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             $readMoreCss = '';
         }
 
@@ -194,7 +194,7 @@ class AssetLoader
                 '1.0.0'
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         wp_enqueue_style(

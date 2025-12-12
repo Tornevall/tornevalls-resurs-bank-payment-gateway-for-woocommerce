@@ -69,6 +69,7 @@ class Modify extends Action
      * @throws ReflectionException
      * @throws Throwable
      * @throws ValidationException
+     * @todo Because we
      */
     public static function exec(
         Payment $payment,
@@ -221,13 +222,14 @@ class Modify extends Action
      * Handle logging of validation errors.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @todo As of right now there is no way to propagate errors to frontend because of how we integrate Modify. Errors will not reflect in real-time. Commented the code in this method for now.
      */
     private static function handleValidationError(
         Throwable $error,
         float $requestedAmount,
         float $availableAmount
     ): void {
-        if (self::$hasAlreadyLogged) {
+        /*if (self::$hasAlreadyLogged) {
             return;
         }
 
@@ -239,6 +241,6 @@ class Modify extends Action
             ),
             error: $error
         );
-        self::$hasAlreadyLogged = true;
+        self::$hasAlreadyLogged = true;*/
     }
 }

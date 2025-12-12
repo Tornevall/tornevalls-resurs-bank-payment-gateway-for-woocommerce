@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
@@ -39,7 +39,7 @@ class IsOrderRefundable
         try {
             $result = OrderManagement::canRefund(order: $order);
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             $result = false;
         }
 

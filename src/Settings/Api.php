@@ -15,11 +15,11 @@ use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
+use Resursbank\Ecom\Lib\Log\Logger;
 
 /**
  * API settings section.
@@ -189,7 +189,7 @@ class Api
             try {
                 $options = StoreRepository::getStores()->getSelectList();
             } catch (Throwable $error) {
-                Log::error(error: $error);
+                Logger::error(message: $error);
             }
         }
 

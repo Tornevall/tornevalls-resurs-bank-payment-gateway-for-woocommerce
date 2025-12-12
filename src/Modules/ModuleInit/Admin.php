@@ -20,6 +20,7 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
@@ -32,9 +33,7 @@ use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Modules\Store\Store;
-use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
 use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\RouteVariant;
 use Throwable;
@@ -90,7 +89,7 @@ class Admin
                 );
             } catch (Throwable $e) {
                 // Silently fail if routes cannot be generated
-                Log::error(error: $e);
+                Logger::error(message: $e);
             }
         });
 
@@ -160,7 +159,7 @@ class Admin
                 echo '<style>' . implode(separator: ', ', array: $selectors) . ' { display:none !important; }</style>';
             } catch (Throwable $e) {
                 // Silently fail if payment methods cannot be fetched.
-                Log::error(error: $e);
+                Logger::error(message: $e);
                 return;
             }
         });
