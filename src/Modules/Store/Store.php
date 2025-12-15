@@ -57,6 +57,7 @@ class Store
         } catch (Throwable $error) {
             Logger::error(message: $error);
 
+            // @todo Technically, we want to centralize loading of admin related CSS / JS. Therefore, the error below might no longer be relevant.
             /*
              * message: Translator::translate(
                     phraseId: 'failed-initializing-store-selector-assistant'

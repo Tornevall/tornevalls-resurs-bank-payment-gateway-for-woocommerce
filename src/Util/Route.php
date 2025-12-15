@@ -160,8 +160,7 @@ class Route
 
         return Url::getQueryArg(
             baseUrl: $url,
-            arguments: [self::ROUTE_PARAM => $route->value],
-            routeVariant: $route
+            arguments: [self::ROUTE_PARAM => $route->value]
         );
     }
 

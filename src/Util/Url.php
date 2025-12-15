@@ -68,13 +68,12 @@ class Url
      *
      * @param string $baseUrl
      * @param array $arguments
-     * @param RouteVariant|null $routeVariant Used to prevent circular dependencies. For example, PartPayment route cannot fetch xDebug settings as it may trigger UserSettings which depends on PartPayment URL.
      * @return string
      * @throws IllegalValueException
      * @throws UserSettingsException
      * @todo Exceptions from this method will crash admin (probably frontend too). Not sure if that's the correct behavior?
      */
-    public static function getQueryArg(string $baseUrl, array $arguments, ?RouteVariant $routeVariant = null): string
+    public static function getQueryArg(string $baseUrl, array $arguments): string
     {
         $queryArgument = $baseUrl;
         $xdebugValue = Repository::getSettings()->xdebugSessionValue;

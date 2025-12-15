@@ -18,6 +18,7 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 
+use WC_Admin_Meta_Boxes;
 use function is_array;
 
 /**
@@ -123,11 +124,12 @@ class Settings
         } catch (Throwable $e) {
             Logger::error(message: $e);
 
-            /*
-                message: Translator::translate(
+            // @todo This message will be displayed on the sub-sequent page view, indicating that when saveSettings executes messages have already been rendered by WC. Unsure how to fix this for now. One idea is to do what we do for custom page sections and display a custom message. This is wierd though, there should be a generic way other modules use for the same thing. Investigate.
+            WC_Admin_Meta_Boxes::add_error(
+                text: Translator::translate(
                     phraseId: 'save-settings-failed'
                 )
-            );*/
+            );
         }
     }
 
