@@ -25,15 +25,16 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
+use WC_Admin_Meta_Boxes;
 use WC_Order;
 use WC_Order_Refund;
 use WP_Post;
@@ -105,6 +106,8 @@ class BeforeOrderStatusChange
             return;
         }
 
+        // @todo Need to discuss whether we need to report that the status could not be updated, since we are already reporting that the action fialed below. That implicility indicates order status transition failed. Also, there was an error, the merchant likely checks the status and sees it did not change.
+        /*
         OrderManagement::logError(
             sprintf(
                 Translator::translate(phraseId: 'failed-order-status-change'),
@@ -117,6 +120,19 @@ class BeforeOrderStatusChange
                 message: "Failed changing order status from $wcStatus to $newStatus for $post->ID"
             ),
             $order
+        );
+        */
+
+        $action =  match ($newStatus) {
+            'failed', 'cancelled' => 'cancel',
+            'completed' => 'capture',
+            'refunded' => 'refund',
+            default => 'edit'
+        };
+
+        // Add error message and redirect back to order edit screen.
+        WC_Admin_Meta_Boxes::add_error(
+            text: Translator::translate(phraseId: 'payment-action-' . $action . '-failed')
         );
 
         Route::redirectBack();
@@ -219,7 +235,7 @@ class BeforeOrderStatusChange
                 default => OrderManagement::canEdit(order: $order)
             };
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             return false;
         }
     }
@@ -227,7 +243,6 @@ class BeforeOrderStatusChange
     /**
      * If we get positive on payment action validation, we need to make ensure the feature is enabled to proceed.
      *
-     * @throws ConfigException
      * @throws UserSettingsException
      */
     public static function validateEnabledPaymentAction(

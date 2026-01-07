@@ -17,6 +17,7 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Ecom\Module\Widget\CostList\Css as CostListCss;
@@ -24,11 +25,10 @@ use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
 use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
-use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -41,10 +41,12 @@ class AssetLoader
     /**
      * Enqueued script execution.
      *
+     * @throws ConfigException
      * @throws EmptyValueException
      * @throws FilesystemException
      * @throws HttpException
      * @throws IllegalValueException
+     * @throws UserSettingsException
      */
     public static function init(): void
     {
@@ -99,7 +101,7 @@ class AssetLoader
         try {
             $css = (new EcomPartPaymentCss())->content ?? '';
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             $css = '';
         }
 
@@ -127,7 +129,7 @@ class AssetLoader
             WooCommerce::validateAndUpdatePartPaymentMethod();
             $readMoreCss = (new ReadMoreCss())->content ?? '';
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             $readMoreCss = '';
         }
 
@@ -187,12 +189,12 @@ class AssetLoader
         try {
             wp_enqueue_style(
                 'rb-ga-basic-css',
-                Route::getUrl('get-address-css'),
+                Route::getUrl(RouteVariant::GetAddressCss),
                 [],
                 '1.0.0'
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         wp_enqueue_style(
@@ -221,7 +223,7 @@ class AssetLoader
     {
         wp_enqueue_script(
             'rb-get-address',
-            Route::getUrl(Route::ROUTE_GET_ADDRESS_JS),
+            Route::getUrl(RouteVariant::GetAddressJs),
             [],
             '1.0.0',
             false // Load script in header.

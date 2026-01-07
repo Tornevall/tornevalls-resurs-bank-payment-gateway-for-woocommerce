@@ -18,13 +18,16 @@ use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
+use Resursbank\Ecom\Lib\Locale\Translator;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callback;
@@ -34,13 +37,12 @@ use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\RedirectionUr
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\UserAgent;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 use WC_Payment_Gateway;
@@ -87,12 +89,8 @@ class Resursbank extends WC_Payment_Gateway
                     $gatewayHelper->getReadMore() .
                     $gatewayHelper->getPriceSignageWarning() .
                 '</div>';
-        } catch (TranslationException $error) {
-            // Translation errors should rather go as debug messages since we
-            // translate with english fallbacks.
-            Log::debug(message: $error->getMessage());
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
     }
 
@@ -104,17 +102,16 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function process_payment(mixed $order_id): array
     {
-        global $blockCreateErrorMessage;
-
         $order = new WC_Order(order: $order_id);
 
         try {
             $payment = $this->createPayment(order: $order);
-        } catch (Throwable $e) {
-            $this->handleCreatePaymentError(error: $e);
-            if ($blockCreateErrorMessage && WooCommerce::isUsingBlocksCheckout()) {
-                throw new Exception(message: $blockCreateErrorMessage);
-            }
+        } catch (CurlException $error) {
+            throw new HttpException(
+                message: $error->getDetailedMessage(
+                    msg: Translator::translate(phraseId: 'payment-create-failed')
+                ),
+            );
         }
 
         if (!isset($payment) || !$payment->isProcessable()) {
@@ -131,8 +128,8 @@ class Resursbank extends WC_Payment_Gateway
         return [
             'result' => 'success',
             'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                    order: $order
-                ),
+                order: $order
+            ),
         ];
     }
 
@@ -144,7 +141,7 @@ class Resursbank extends WC_Payment_Gateway
         try {
             Repository::clearSsnData();
         } catch (ConfigException $e) {
-            Log::error(error: $e);
+            Logger::error(message: $e);
         }
     }
 
@@ -204,7 +201,7 @@ class Resursbank extends WC_Payment_Gateway
             try {
                 $data[] = Customer::getLoggedInCustomerIdMetaEntry(order: $order);
             } catch (IllegalValueException $error) {
-                Log::error(error: $error);
+                Logger::error(message: $error);
             }
         }
 
@@ -232,46 +229,15 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
-     * Attempts to extract and translate more detailed error message from
-     * CurlException.
-     */
-    // @phpcs:ignoreFile CognitiveComplexity
-    private function handleCreatePaymentError(Throwable $error): void
-    {
-        global $blockCreateErrorMessage;
-
-        try {
-            if ($error instanceof CurlException) {
-                if (count(value: $error->getDetails())) {
-                    /** @var $detail */
-                    foreach ($error->getDetails() as $detail) {
-                        MessageBag::addError(message: $detail);
-                        $blockCreateErrorMessage .= $detail . "\n";
-                    }
-                } else {
-                    MessageBag::addError(message: $error->getMessage());
-                    $blockCreateErrorMessage = $error->getMessage();
-                }
-            } else {
-                // Only display relevant error messages on the order placement screen. CurlExceptions usually contains
-                // trace messages for which we do not need to show in the customer view.
-                wc_add_notice(
-                    message: $error->getMessage(),
-                    notice_type: 'error'
-                );
-            }
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-    }
-
-    /**
      * @param WC_Order $order
      * @return Options
      * @throws AttributeCombinationException
+     * @throws ConfigException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
+     * @throws HttpException
+     * @throws UserSettingsException
      */
     private function getOptions(WC_Order $order): Options
     {
@@ -296,11 +262,9 @@ class Resursbank extends WC_Payment_Gateway
             ),
             callbacks: new Callbacks(
                 authorization: new Callback(
-                    url: Url::getCallbackUrl(type: CallbackType::AUTHORIZATION)
+                    url: Route::getUrl(route: RouteVariant::AuthorizationCallback)
                 ),
-                management: new Callback(
-                    url: Url::getCallbackUrl(type: CallbackType::MANAGEMENT)
-                ),
+                management: null,
                 creditApplication: null
             ),
             timeToLiveInMinutes: $stockEnabled &&

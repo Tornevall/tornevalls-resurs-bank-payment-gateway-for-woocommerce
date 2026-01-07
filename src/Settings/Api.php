@@ -15,11 +15,11 @@ use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
+use Resursbank\Ecom\Lib\Log\Logger;
 
 /**
  * API settings section.
@@ -182,33 +182,25 @@ class Api
      */
     private static function getStoreIdSetting(): array
     {
+
+        $options = [];
+
+        if (Repository::hasUserCredentials()) {
+            try {
+                $options = StoreRepository::getStores()->getSelectList();
+            } catch (Throwable $error) {
+                Logger::error(message: $error);
+            }
+        }
+
         $result = [
             'id' => Reader::getOptionName(field: Field::STORE_ID),
             'type' => 'select',
             'title' => Translator::translate(phraseId: 'store-id'),
             'default' => '',
-            'options' => [],
+            'options' => $options,
         ];
 
-        try {
-            // Do not fetch stores until credentials are present.
-            if (Repository::hasUserCredentials()) {
-                $result['options'] = StoreRepository::getStores()->getSelectList();
-            }
-        } catch (Throwable $error) {
-            self::logAndHandleError(error: $error);
-        }
-
         return $result;
-    }
-
-    /**
-     * Log and handle visible error messages.
-     */
-    private static function logAndHandleError(Throwable $error): void
-    {
-        // Some errors cannot be rendered through the admin_notices. Avoid that action.
-        Admin::getAdminErrorNote(message: $error->getMessage());
-        Log::error(error: $error);
     }
 }

@@ -10,17 +10,15 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
-use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\ResursbankLink;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
 use WC_Order;
@@ -40,7 +38,6 @@ class Shared
     {
         // Things that should be available even without the plugin API being enabled.
         Route::exec();
-        MessageBag::init();
 
         self::setupPaymentMethodSortOrderHook();
 
@@ -55,7 +52,6 @@ class Shared
         );
 
         Gateway::init();
-        Callback::init();
         GetAddress::init();
     }
 
@@ -92,7 +88,7 @@ class Shared
             try {
                 $methods = PaymentMethodRepository::getPaymentMethods();
             } catch (Throwable $error) {
-                Log::error(error: $error);
+                Logger::error(message: $error);
                 return $new_value;
             }
 

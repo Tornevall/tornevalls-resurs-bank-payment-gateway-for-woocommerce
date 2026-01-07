@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
 use Exception;
-use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -34,22 +33,15 @@ class Capture extends Action
     ): void {
         $payment = OrderManagement::getPayment(order: $order);
 
-        $frozenPreventionMessage = Translator::translate(
-            phraseId: 'unable-to-capture-frozen-order'
-        );
-
-        // Do not allow frozen orders to be captured from order list view, as this
-        // could trigger Modify, which we normally don't want.
+        // Do not allow frozen orders to be captured from order list view, as
+        // this can inaccurately trigger Modify.
         if ($payment->isFrozen() && Admin::isInOrderListView()) {
-            // Trying to scream on screen when this occurs.
-            OrderManagement::logActionError(
-                action: ActionType::CAPTURE,
-                error: new Exception(message: $frozenPreventionMessage),
-                reason: $frozenPreventionMessage
-            );
-            return;
+            // Will be caught upstream where we display an error message and log
+            // as order comment as well.
+            throw new Exception(message: 'Frozen orders cannot be captured from order list view.');
         }
 
+        // @todo Can be moved to Ecom, to the Repo class perofmring capture. Use Payment History to track exact reason why capture cannot be executed.
         if (!$payment->canCapture()) {
             if ($payment->isCaptured()) {
                 /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
@@ -57,7 +49,9 @@ class Capture extends Action
                 return;
             }
             if ($payment->isFrozen()) {
-                $order->add_order_note($frozenPreventionMessage);
+                $order->add_order_note(Translator::translate(
+                    phraseId: 'unable-to-capture-frozen-order'
+                ));
                 return;
             }
             /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */

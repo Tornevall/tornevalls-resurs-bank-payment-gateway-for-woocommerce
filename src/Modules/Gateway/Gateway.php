@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Resursbank\Ecom\Lib\Locale\Location;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\UserSettings\Field;
@@ -18,7 +19,6 @@ use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\WooCommerce;
@@ -77,7 +77,7 @@ class Gateway
                     Route::redirectToSettings(tab: PaymentMethods::SECTION_ID);
                 }
             } catch (Throwable $error) {
-                Log::error(error: $error);
+                Logger::error(message: $error);
                 throw $error;
             }
         }
@@ -170,7 +170,7 @@ class Gateway
                     }
                 }
             } catch (Throwable $error) {
-                Log::error(error: $error);
+                Logger::error(message: $error);
             }
 
             // Loop through gateways and filter only our Resursbank instances.
@@ -189,7 +189,7 @@ class Gateway
                         unset($gateways[$id]);
                     }
                 } catch (Throwable $error) {
-                    Log::error(error: $error);
+                    Logger::error(message: $error);
 
                     // Cannot be certain the method should be available, so
                     // filter it.
@@ -225,8 +225,8 @@ class Gateway
             foreach (PaymentMethodRepository::getPaymentMethods() as $paymentMethod) {
                 $gateways[$paymentMethod->id]  = new Resursbank(method: $paymentMethod);
             }
-        } catch (Throwable $e) {
-            Log::error(error: $e);
+        } catch (Throwable $error) {
+            Logger::error(message: $error);
         }
 
         $gateways[ResursbankLink::ID] = new ResursbankLink();

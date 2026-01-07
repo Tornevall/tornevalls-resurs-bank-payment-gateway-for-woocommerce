@@ -9,15 +9,26 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
+use JsonException;
+use ReflectionException;
+use Resursbank\Ecom\Exception\ApiException;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
+use Resursbank\Ecom\Exception\AuthException;
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\CurlException;
+use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\PaymentActionException;
-use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Ecom\Module\Payment\Enum\ActionType;
+use Resursbank\Ecom\Exception\TranslationException;
+use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
+use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Translator;
-use Throwable;
 use WC_Order;
 use WC_Order_Refund;
 
@@ -28,6 +39,24 @@ class Refund extends Action
 {
     /**
      * Refund Resurs Bank payment.
+     *
+     * @param WC_Order $order
+     * @param WC_Order_Refund $refund
+     * @throws IllegalTypeException
+     * @throws PaymentActionException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws ApiException
+     * @throws AttributeCombinationException
+     * @throws AuthException
+     * @throws ConfigException
+     * @throws CurlException
+     * @throws FilesystemException
+     * @throws TranslationException
+     * @throws ValidationException
+     * @throws EmptyValueException
+     * @throws IllegalValueException
+     * @throws NotJsonEncodedException
      */
     public static function exec(
         WC_Order $order,
@@ -41,14 +70,25 @@ class Refund extends Action
 
         $orderLines = Order::getOrderLines(order: $refund);
 
-        if (
-            !self::validate(
-                payment: $payment,
-                order: $order,
-                refund: $refund
-            )
-        ) {
-            return;
+        $amount = $refund->get_amount();
+
+        if (!is_numeric(value: $amount)) {
+            throw new IllegalTypeException(
+                message: 'Refund amount is not numeric.'
+            );
+        }
+
+        $availableAmount = $payment->order->capturedAmount - $payment->order->refundedAmount;
+
+        // @todo Validation process should be moved to Ecom.
+        if ((float) $amount > $availableAmount) {
+            throw new PaymentActionException(
+                message: sprintf(
+                    Translator::translate(phraseId: 'refund-too-large'),
+                    $amount,
+                    $availableAmount
+                )
+            );
         }
 
         $transactionId = self::generateTransactionId();
@@ -58,55 +98,5 @@ class Refund extends Action
             orderLines: $orderLines->count() > 0 ? $orderLines : null,
             transactionId: $transactionId
         );
-    }
-
-    /**
-     * Whether requested refund amount is possible against Resurs Bank payment.
-     *
-     * @throws PaymentActionException
-     * @throws Throwable
-     */
-    private static function validate(
-        Payment $payment,
-        WC_Order $order,
-        WC_Order_Refund $refund
-    ): bool {
-        $result = true;
-
-        $availableAmount = $payment->order->capturedAmount - $payment->order->refundedAmount;
-
-        try {
-            $requestedAmount = $refund->get_amount();
-
-            if (!is_numeric(value: $requestedAmount)) {
-                throw new PaymentActionException(
-                    message: 'Refund amount is not numeric.'
-                );
-            }
-
-            if ((float) $requestedAmount > $availableAmount) {
-                throw new PaymentActionException(
-                    message: "Requested amount $requestedAmount exceeds $availableAmount on $payment->id"
-                );
-            }
-        } catch (Throwable $error) {
-            $result = false;
-
-            if (!isset($requestedAmount)) {
-                throw $error;
-            }
-
-            OrderManagement::logError(
-                message: sprintf(
-                    Translator::translate(phraseId: 'refund-too-large'),
-                    $requestedAmount,
-                    $availableAmount
-                ),
-                error: $error,
-                order: $order
-            );
-        }
-
-        return $result;
     }
 }
