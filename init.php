@@ -22,6 +22,7 @@
 // Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
 // @todo All checks in this file are very confusing. We check for several resources in different blocks and places, we sometimes exit and sometimes return void, several classes  in plugins_loaded will check if the module is enabled but not all places. This needs to be fixed, it's too confusing.
+// @todo Wherever we inject CSS & JS, we give  aversion number, this should match the plugin version number probably, to avoid stale caching. Needs to be fixed in several places.
 
 declare(strict_types=1);
 
