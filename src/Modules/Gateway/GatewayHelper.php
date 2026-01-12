@@ -97,7 +97,6 @@ class GatewayHelper
         try {
             return $this->paymentMethod->priceSignagePossible && WooCommerce::getStoreCountry() === 'SE' ?
                 '<div class="rb-ps-warning-container">' . (new Warning(
-                    priceSignage: $this->getPriceSignage(),
                     paymentMethod: $this->paymentMethod
                 ))->content . '</div>' : '';
         } catch (Throwable $error) {
