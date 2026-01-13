@@ -30,10 +30,12 @@ abstract class Option
      */
     public static function getRawData(): ?string
     {
-        $val = get_option(
+        // Temporary workaround: API scope has been removed,
+        // so environment (prod/test) must be resolved via request overrides.
+        $val = apply_filters('rb_raw_data_config', get_option(
             static::getName(),
             null
-        );
+        ));
 
         return is_string(value: $val) ? $val : null;
     }

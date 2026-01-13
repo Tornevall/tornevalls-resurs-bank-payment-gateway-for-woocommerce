@@ -11,9 +11,7 @@ namespace Resursbank\Woocommerce\Modules\Store\Controller\Admin;
 
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\GrantType;
-use Resursbank\Ecom\Lib\Api\Scope;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
 use Resursbank\Ecom\Module\Store\Repository;
@@ -44,9 +42,6 @@ class GetStores extends GetStoresController
                 jwt: new Jwt(
                     clientId: $data->clientId,
                     clientSecret: $data->clientSecret,
-                    scope: $data->environment === EnvironmentEnum::PROD ?
-                        Scope::MERCHANT_API :
-                        Scope::MOCK_MERCHANT_API,
                     grantType: GrantType::CREDENTIALS
                 )
             );

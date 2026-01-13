@@ -40,7 +40,6 @@ use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin as AdminUtility;
@@ -55,6 +54,7 @@ use Throwable;
 use WC_Cart;
 use WC_Order;
 use WC_Payment_Gateway;
+
 use function get_option;
 
 /**
@@ -103,7 +103,8 @@ class Resursbank extends WC_Payment_Gateway
         // When the blocks editor redirects admins to woocommerce internal sections
         // for handling payment methods, we need to redirect them back to the correct
         // location since our methods are not editable from WooCommerce.
-        if (isset($_REQUEST['section']) &&
+        if (
+            isset($_REQUEST['section']) &&
             isset($method->id) &&
             is_string(value: $this->id) &&
             $method->id !== RESURSBANK_MODULE_PREFIX
@@ -136,40 +137,10 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
-     * @return void
-     */
-    private function generatePaymentFieldsHtml(): void
-    {
-        try {
-            if (AdminUtility::isAdmin() ||WC()?->cart === null) {
-                // Do not render payment fields in admin.
-                return;
-            }
-            $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
-            $usp = PaymentMethodRepository::getUniqueSellingPoint(
-                paymentMethod: $this->method,
-                amount: $this->get_order_total()
-            );
-            $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
-                    paymentMethod: $this->method,
-                    amount: $this->get_order_total()
-                );
-        } catch (TranslationException $error) {
-            // Translation errors should rather  go as debug messages since we
-            // translate with english fallbacks.
-            Log::debug(message: $error->getMessage());
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-            $this->canRenderPaymentFields = false;
-        }
-    }
-
-
-    /**
      * Create Resurs Bank payment and assign additional metadata to WC_Order.
      *
-     * @noinspection PhpMissingParentCallCommonInspection
      * @throws Exception
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function process_payment(mixed $order_id): array
     {
@@ -181,7 +152,11 @@ class Resursbank extends WC_Payment_Gateway
             $payment = $this->createPayment(order: $order);
         } catch (Throwable $e) {
             $this->handleCreatePaymentError(order: $order, error: $e);
-            if ($blockCreateErrorMessage && WooCommerce::isUsingBlocksCheckout()) {
+
+            if (
+                $blockCreateErrorMessage &&
+                WooCommerce::isUsingBlocksCheckout()
+            ) {
                 throw new Exception(message: $blockCreateErrorMessage);
             }
         }
@@ -200,16 +175,16 @@ class Resursbank extends WC_Payment_Gateway
         return [
             'result' => 'success',
             'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                    order: $order
-                ),
+                order: $order
+            ),
         ];
     }
 
     /**
      * Whether payment method is available.
      *
-     * @noinspection PhpMissingParentCallCommonInspection
      * @throws ConfigException
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function is_available(): bool
     {
@@ -229,7 +204,10 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // If the purchase limit is not fulfilled (or something went south with priceSignage), skip early.
-        if ($this->validatePurchaseLimit() === false || !$this->canRenderPaymentFields) {
+        if (
+            $this->validatePurchaseLimit() === false ||
+            !$this->canRenderPaymentFields
+        ) {
             return false;
         }
 
@@ -240,7 +218,10 @@ class Resursbank extends WC_Payment_Gateway
         // are opened up for cross-border sales. Here, we have chosen not to
         // implement specific checks for which payment methods are allowed to
         // operate in this scenario - it's an all-or-nothing approach.
-        if (SetMethodCountryRestriction::getData() && !$this->validateCustomerCountry()) {
+        if (
+            SetMethodCountryRestriction::getData() &&
+            !$this->validateCustomerCountry()
+        ) {
             return false;
         }
 
@@ -260,14 +241,13 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Customer country validation.
      *
-     * @return bool
      * @throws ConfigException
      */
     public function validateCustomerCountry(): bool
     {
         // If country restrictions are enabled, we will validate that the customer is located in the
         // same country as the API based country.
-        return (WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry());
+        return WC()?->cart && WC()?->customer?->get_billing_country() === WooCommerce::getStoreCountry();
     }
 
     /**
@@ -301,6 +281,33 @@ class Resursbank extends WC_Payment_Gateway
     public function isAdmin(): bool
     {
         return AdminUtility::isAdmin() || WC()->cart === null;
+    }
+
+    private function generatePaymentFieldsHtml(): void
+    {
+        try {
+            if (AdminUtility::isAdmin() || WC()?->cart === null) {
+                // Do not render payment fields in admin.
+                return;
+            }
+
+            $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
+            $usp = PaymentMethodRepository::getUniqueSellingPoint(
+                paymentMethod: $this->method,
+                amount: $this->get_order_total()
+            );
+            $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
+                paymentMethod: $this->method,
+                amount: $this->get_order_total()
+            );
+        } catch (TranslationException $error) {
+            // Translation errors should rather  go as debug messages since we
+            // translate with english fallbacks.
+            Log::debug(message: $error->getMessage());
+        } catch (Throwable $error) {
+            Log::error(error: $error);
+            $this->canRenderPaymentFields = false;
+        }
     }
 
     /**
@@ -351,8 +358,6 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
-     * @param WC_Order $order
-     * @return Payment
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
@@ -379,14 +384,21 @@ class Resursbank extends WC_Payment_Gateway
 
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
         $order->add_order_note('Resurs initiated payment process.');
-        Metadata::setOrderMeta(order: $order, key: Metadata::KEY_REPOSITORY_CREATED, value: (string)time());
+        Metadata::setOrderMeta(
+            order: $order,
+            key: Metadata::KEY_REPOSITORY_CREATED,
+            value: (string)time()
+        );
 
         return PaymentRepository::create(
             paymentMethodId: $this->method->id,
             orderLines: Order::getOrderLines(order: $order),
             orderReference: (string)$order->get_id(),
             customer: Customer::getCustomer(order: $order),
-            metadata: $this->getBaseMetadata(order: $order), //Customer::getLoggedInCustomerIdMeta(order: $order),
+            //Customer::getLoggedInCustomerIdMeta(order: $order),
+            metadata: $this->getBaseMetadata(
+                order: $order
+            ),
             options: $this->getOptions(order: $order)
         );
     }
@@ -394,9 +406,6 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Get metadata to attach to order.
      *
-     * @param WC_Order $order
-     *
-     * @return Payment\Metadata
      * @throws AttributeCombinationException
      * @throws IllegalTypeException
      * @throws IllegalValueException
@@ -414,7 +423,9 @@ class Resursbank extends WC_Payment_Gateway
 
         if ($order->get_user_id() > 0) {
             try {
-                $data[] = Customer::getLoggedInCustomerIdMetaEntry(order: $order);
+                $data[] = Customer::getLoggedInCustomerIdMetaEntry(
+                    order: $order
+                );
             } catch (IllegalValueException $error) {
                 Log::error(error: $error);
             }
@@ -453,6 +464,7 @@ class Resursbank extends WC_Payment_Gateway
         if (!$orderIdByRequest && isset($_GET['post']) && (int)$_GET['post']) {
             /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $testOrderByPost = wc_get_order($_GET['post']);
+
             if ($testOrderByPost instanceof WC_Order) {
                 $orderIdByRequest = $testOrderByPost->get_id();
             }
@@ -465,7 +477,9 @@ class Resursbank extends WC_Payment_Gateway
         $validatedOrder = wc_get_order($orderIdByRequest);
 
         // Return the order if valid ID is provided and it's a valid order.
-        return $validatedOrder instanceof WC_Order && (int)$orderIdByRequest ? $validatedOrder : null;
+        return $validatedOrder instanceof WC_Order && (int)$orderIdByRequest
+            ? $validatedOrder
+            : null;
     }
 
     /**
@@ -487,51 +501,50 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
-     * Attempts to extract and translate more detailed error message from
+     * Attempts to extract and translate a more detailed error message from
      * CurlException.
      */
-    // @phpcs:ignoreFile CognitiveComplexity
     private function handleCreatePaymentError(WC_Order $order, Throwable $error): void
     {
+        // Required for Blocks checkout: an error message must be handled through process_payment(),
+        // wc_add_notice() alone is not respected by Blocks.
         global $blockCreateErrorMessage;
+
         Log::error(
             error: $error,
-            message: Translator::translate(phraseId: 'error-creating-payment')
+            message: $error->getMessage()
         );
 
-        try {
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            $order->add_order_note(
-                Translator::translate(phraseId: 'error-creating-payment')
-            );
+        $translatedMessage = Translator::translate(
+            phraseId: 'error-creating-payment'
+        );
 
-            if ($error instanceof CurlException) {
-                if (count(value: $error->getDetails())) {
-                    /** @var $detail */
-                    foreach ($error->getDetails() as $detail) {
-                        MessageBag::addError(message: $detail);
-                        $blockCreateErrorMessage .= $detail . "\n";
-                    }
-                } else {
-                    MessageBag::addError(message: $error->getMessage());
-                    $blockCreateErrorMessage = $error->getMessage();
-                }
-            } else {
-                // Only display relevant error messages on the order placement screen. CurlExceptions usually contains
-                // trace messages for which we do not need to show in the customer view.
-                wc_add_notice(
-                    message: $error->getMessage(),
-                    notice_type: 'error'
+        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+        $order->add_order_note($translatedMessage);
+
+        $finalMessage = $translatedMessage;
+
+        if ($error instanceof CurlException) {
+            try {
+                // getDetailedMessage already appends details when applicable
+                $finalMessage = $error->getDetailedMessage(
+                    msg: $translatedMessage
                 );
+
+                Log::error(error: $error, message: $finalMessage);
+            } catch (ConfigException $configException) {
+                // Do not break checkout on config issues, but log them
+                Log::error(error: $configException);
             }
-        } catch (Throwable $error) {
-            Log::error(error: $error);
         }
+
+        wc_add_notice(message: $finalMessage, notice_type: 'error');
+
+        // Pass message back to process_payment() for Blocks checkout
+        $blockCreateErrorMessage = $finalMessage;
     }
 
     /**
-     * @param WC_Order $order
-     * @return Options
      * @throws AttributeCombinationException
      * @throws IllegalValueException
      * @throws JsonException
@@ -542,8 +555,8 @@ class Resursbank extends WC_Payment_Gateway
         // TTL default from WooCommerce. If stock reservations is enabled and over 0, we should use that value instead
         // of our default.
         $stockEnabled = ((string)get_option(
-                'woocommerce_manage_stock'
-            ) === 'yes');
+            'woocommerce_manage_stock'
+        ) === 'yes');
         $holdStockMinutes = (int)get_option('woocommerce_hold_stock_minutes');
 
         return new Options(

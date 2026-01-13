@@ -9,12 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Api;
 
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Config;
+use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Api\GrantType;
-use Resursbank\Ecom\Lib\Api\Scope;
 use Resursbank\Ecom\Lib\Cache\CacheInterface;
 use Resursbank\Ecom\Lib\Cache\None;
 use Resursbank\Ecom\Lib\Log\FileLogger;
@@ -66,7 +67,7 @@ class Connection
             }
 
             // Marks the current JWT if it is used from _POST-vars or if it is used from a stored setup.
-            // Conditions is that data is saved from wp-admin under very specific circumstances.
+            // Conditions are that data is saved from wp-admin under very specific circumstances.
             $hasPostJwtInstance = false;
 
             if ($jwt === null && self::getJwtFromPost() instanceof Jwt) {
@@ -99,7 +100,7 @@ class Connection
                 cache: self::getCache(),
                 jwtAuth: $jwt,
                 logLevel: LogLevel::getData(),
-                isProduction: isset($jwt->scope) && $jwt->scope === Scope::MERCHANT_API,
+                isProduction: Environment::getData() === EnvironmentEnum::PROD,
                 currencySymbol: Currency::getWooCommerceCurrencySymbol(),
                 currencyFormat: Currency::getEcomCurrencyFormat(),
                 network: new Network(
@@ -149,7 +150,9 @@ class Connection
 
     /**
      * @throws AuthException
-     * @throws EmptyValueException
+     * @throws JsonException
+     * @throws ReflectionException
+     * @throws AttributeCombinationException
      */
     public static function getConfigJwt(): ?Jwt
     {
@@ -160,9 +163,6 @@ class Connection
         return new Jwt(
             clientId: ClientId::getData(),
             clientSecret: ClientSecret::getData(),
-            scope: Environment::getData() === EnvironmentEnum::PROD ?
-                Scope::MERCHANT_API :
-                Scope::MOCK_MERCHANT_API,
             grantType: GrantType::CREDENTIALS
         );
     }
@@ -223,7 +223,9 @@ class Connection
      * Get JWT from $_POST. Used on early update_option requests from where we need to try to fetch store lists
      * with not-yet-set credentials.
      *
-     * @throws EmptyValueException
+     * @throws AttributeCombinationException
+     * @throws JsonException
+     * @throws ReflectionException
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     // phpcs:ignore
@@ -231,7 +233,7 @@ class Connection
     {
         // WordPress usually deliver_wpnonces for us here, but we can't use it to verify the nonce in this early state
         // since WP is not a guarantee to be present. However, we can verify that users are admins and that the
-        // usual request variables for updating options is present. This access request must be limited to one section
+        // usual request variables for updating options are present. This access request must be limited to one section
         // only.
         if (
             Admin::isAdmin() &&
@@ -246,16 +248,10 @@ class Connection
                 Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
             )
         ) {
-            $envValue = $_POST[RESURSBANK_MODULE_PREFIX . '_environment'] ?? 'test';
             $return = new Jwt(
                 clientId: $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
                 clientSecret: $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                grantType: GrantType::CREDENTIALS,
-                scope: EnvironmentEnum::from(
-                    value: $envValue
-                ) === EnvironmentEnum::PROD ?
-                    Scope::MERCHANT_API :
-                    Scope::MOCK_MERCHANT_API
+                grantType: GrantType::CREDENTIALS
             );
         }
 
