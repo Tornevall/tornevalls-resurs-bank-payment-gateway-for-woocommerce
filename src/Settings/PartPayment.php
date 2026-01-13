@@ -207,7 +207,7 @@ class PartPayment
                 // Ignore exception and proceed with no further actions.
             }
 
-            $countryCode = $newStore->countryCode->value;
+            $countryCode = $newStore->countryCode->value ?? '';
             $currentStoreCountry = WooCommerce::getStoreCountry();
 
             if (
