@@ -148,7 +148,7 @@ class Api
     }
 
     /**
-     * Get Client ID setting array.
+     * Get a Client ID setting array.
      */
     private static function getClientId(): array
     {
