@@ -17,7 +17,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment\Customer as CustomerModel;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
-use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Module\Customer\Repository;

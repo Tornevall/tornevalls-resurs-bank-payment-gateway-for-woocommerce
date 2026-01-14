@@ -12,23 +12,14 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 use Exception;
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
-use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\UserSettingsException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\Logger;
-use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callback;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callbacks;
@@ -74,6 +65,9 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Render info about our payment methods in their section at checkout.
      *
+     * NOTE: This is only used in legacy checkout, blocks render the checkout
+     * using React components instead.
+     *
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function payment_fields(): void
@@ -105,70 +99,6 @@ class Resursbank extends WC_Payment_Gateway
     {
         $order = new WC_Order(order: $order_id);
 
-        try {
-            $payment = $this->createPayment(order: $order);
-        } catch (CurlException $error) {
-            throw new HttpException(
-                message: $error->getDetailedMessage(
-                    msg: Translator::translate(phraseId: 'payment-create-failed')
-                ),
-            );
-        }
-
-        if (!isset($payment) || !$payment->isProcessable()) {
-            return [
-                'result' => 'failure',
-                'redirect' => $this->getFailureUrl(order: $order),
-            ];
-        }
-
-        $this->clearSession();
-
-        Metadata::setPaymentId(order: $order, id: $payment->id);
-
-        return [
-            'result' => 'success',
-            'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                order: $order
-            ),
-        ];
-    }
-
-    /**
-     * Remove session data related to the checkout process.
-     */
-    private function clearSession(): void
-    {
-        try {
-            Repository::clearSsnData();
-        } catch (ConfigException $e) {
-            Logger::error(message: $e);
-        }
-    }
-
-    /**
-     * @param WC_Order $order
-     * @return Payment
-     * @throws ApiException
-     * @throws AttributeCombinationException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws FilesystemException
-     * @throws HttpException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
-     * @throws UserSettingsException
-     * @throws ValidationException
-     * @throws NotJsonEncodedException
-     */
-    private function createPayment(
-        WC_Order $order
-    ): Payment {
         // Add customer id to metadata, if customer is logged in.
         if ($order->get_user_id() > 0) {
             $meta[] = new Entry(
@@ -177,19 +107,56 @@ class Resursbank extends WC_Payment_Gateway
             );
         }
 
-        return PaymentRepository::create(
-            paymentMethodId: $this->method->id,
-            orderLines: Order::getOrderLines(order: $order),
-            orderReference: (string)$order->get_id(),
-            customer: Customer::getCustomer(order: $order),
-            metadata: PaymentRepository::getIntegrationInfoMetadata(
-                platform: 'WooCommerce',
-                platformVersion: UserAgent::getWooCommerceVersion(),
-                pluginVersion: UserAgent::getPluginVersion(),
-                additionalData: $meta ?? []
+        try {
+            $payment = PaymentRepository::create(
+                paymentMethodId: $this->method->id,
+                orderLines: Order::getOrderLines(order: $order),
+                orderReference: (string)$order->get_id(),
+                customer: Customer::getCustomer(order: $order),
+                metadata: PaymentRepository::getIntegrationInfoMetadata(
+                    platform: 'WooCommerce',
+                    platformVersion: UserAgent::getWooCommerceVersion(),
+                    pluginVersion: UserAgent::getPluginVersion(),
+                    additionalData: $meta ?? []
+                ),
+                options: $this->getOptions(order: $order)
+            );
+        } catch (CurlException $error) {
+            throw new HttpException(
+                message: $error->getDetailedMessage(
+                    msg: Translator::translate(phraseId: 'payment-create-failed')
+                ),
+            );
+        }
+
+        // @todo Document this behaviour.
+        if (!$payment->isProcessable()) {
+            return [
+                'result' => 'failure',
+                'redirect' => $this->getFailureUrl(order: $order),
+            ];
+        }
+
+        // Clear SSN data from session after payment creation.
+        try {
+            Repository::clearSsnData();
+        } catch (ConfigException $e) {
+            Logger::error(message: $e);
+        }
+
+        // Store payment id in order metadata for future reference.
+        //
+        // Note that this is metadata from the WooCommerce plugin, not the
+        // Resurs Bank payment metadata.
+        Metadata::setPaymentId(order: $order, id: $payment->id);
+
+        // Redirect customer to Resurs Bank payment page.
+        return [
+            'result' => 'success',
+            'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
+                order: $order
             ),
-            options: $this->getOptions(order: $order)
-        );
+        ];
     }
 
     /**
@@ -214,11 +181,10 @@ class Resursbank extends WC_Payment_Gateway
      * @param WC_Order $order
      * @return Options
      * @throws AttributeCombinationException
-     * @throws ConfigException
+     * @throws HttpException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws HttpException
      * @throws UserSettingsException
      */
     private function getOptions(WC_Order $order): Options
