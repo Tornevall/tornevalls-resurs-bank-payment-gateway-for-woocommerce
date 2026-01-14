@@ -26,6 +26,8 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\Store\Repository;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
+use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Modules\Api\Connection;
@@ -151,7 +153,16 @@ class WooCommerce
                     string: $configuredStore->countryCode->value
                 );
             } else {
-                self::$storeCountry = 'EN';
+                $newStore = StoreRepository::getStores()->getFirst();
+                self::$storeCountry = $newStore->countryCode?->value ?? 'EN';
+
+                if ($configuredStore === null && $newStore !== null) {
+                    // No store was configured, but we have at least one store available that should be there.
+                    update_option(
+                        option: StoreId::getName(),
+                        value: $newStore->id
+                    );
+                }
             }
         } catch (Throwable $exception) {
             Config::getLogger()->debug(

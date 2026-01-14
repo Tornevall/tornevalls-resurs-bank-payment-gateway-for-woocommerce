@@ -35,13 +35,20 @@ class Admin
             return;
         }
 
-        echo <<<EX
-<div class="error notice">
-  $message
-  <br/>
-  $additional
-</div>
-EX;
+        // Admin notices must be added via action hook. Not echo directly.
+        add_action(
+            'admin_notices',
+            static function () use ($message, $additional): void {
+                echo '<div class="notice notice-error">';
+                echo $message;
+
+                if ($additional !== '') {
+                    echo '<br />' . $additional;
+                }
+
+                echo '</div>';
+            }
+        );
     }
 
     /**
