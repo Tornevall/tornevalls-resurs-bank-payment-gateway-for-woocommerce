@@ -9,22 +9,17 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
-use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
+use Resursbank\Ecom\Lib\Log\Logger;
 
 /**
  * API settings section.
@@ -32,7 +27,6 @@ use Throwable;
 class Api
 {
     public const SECTION_ID = 'api_settings';
-    public const NAME_PREFIX = 'resursbank_';
 
     /**
      * Get translated title of tab.
@@ -67,8 +61,6 @@ class Api
     }
 
     /**
-     * @throws HttpException
-     * @throws IllegalValueException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function initScripts(): void
@@ -88,7 +80,7 @@ class Api
             ),
             ['jquery']
         );
-
+        
         wp_enqueue_style(
             'rb-ga-css',
             Url::getResourceUrl(
@@ -105,7 +97,6 @@ class Api
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
-     * @throws ConfigException
      */
     public static function getSettings(): array
     {
@@ -191,33 +182,25 @@ class Api
      */
     private static function getStoreIdSetting(): array
     {
+
+        $options = [];
+
+        if (Repository::hasUserCredentials()) {
+            try {
+                $options = StoreRepository::getStores()->getSelectList();
+            } catch (Throwable $error) {
+                Logger::error(message: $error);
+            }
+        }
+
         $result = [
             'id' => Reader::getOptionName(field: Field::STORE_ID),
             'type' => 'select',
             'title' => Translator::translate(phraseId: 'store-id'),
             'default' => '',
-            'options' => [],
+            'options' => $options,
         ];
 
-        try {
-            // Do not fetch stores until credentials are present.
-            if (Repository::hasUserCredentials()) {
-                $result['options'] = StoreRepository::getStores()->getSelectList();
-            }
-        } catch (Throwable $error) {
-            self::logAndHandleError(error: $error);
-        }
-
         return $result;
-    }
-
-    /**
-     * Log and handle visible error messages.
-     */
-    private static function logAndHandleError(Throwable $error): void
-    {
-        // Some errors cannot be rendered through the admin_notices. Avoid that action.
-        Admin::getAdminErrorNote(message: $error->getMessage());
-        Log::error(error: $error);
     }
 }

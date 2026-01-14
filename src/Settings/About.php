@@ -9,11 +9,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\FilesystemException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Widget\SupportInfo\Css as EcomSupportInfoCss;
 use Resursbank\Ecom\Module\Widget\SupportInfo\Html as EcomSupportInfo;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\UserAgent;
-use Throwable;
 
 /**
  * Support info section.
@@ -40,5 +42,21 @@ class About
     public static function getTitle(): string
     {
         return Translator::translate(phraseId: 'about');
+    }
+
+    /**
+     * @throws ConfigException
+     * @throws FilesystemException
+     * @throws IllegalValueException
+     */
+    public static function render(): void
+    {
+        $GLOBALS['hide_save_button'] = '1';
+
+        echo (new EcomSupportInfo(
+            minimumPhpVersion: '8.1',
+            maximumPhpVersion: '8.4',
+            pluginVersion: UserAgent::getPluginVersion()
+        ))->content;
     }
 }

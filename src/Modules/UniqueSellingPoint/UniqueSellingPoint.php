@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\UniqueSellingPoint;
 
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMore;
-use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 
 /**
@@ -47,7 +47,7 @@ class UniqueSellingPoint
 </style>
 EX;
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
     }
 }

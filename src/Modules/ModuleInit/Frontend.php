@@ -27,12 +27,6 @@ class Frontend
      */
     public static function init(): void
     {
-        add_action(
-            'wp_enqueue_scripts',
-            [self::class, 'enableConsoleLogs'],
-            1
-        );
-
         if (WooCommerce::isUsingBlocksCheckout()) {
             GatewayBlocks::init();
         }
@@ -42,22 +36,5 @@ class Frontend
         Failure::init();
         PartPayment::initFrontend();
         UniqueSellingPoint::init();
-    }
-
-    /**
-     * Enable logging to console for widget code, but based on the configured logLevel.
-     */
-    public static function enableConsoleLogs(): void
-    {
-        echo "<script>
-        function resursConsoleLog(message, logLevel = 'INFO') {
-            if (typeof rbFrontendData !== 'undefined') {
-                const currentLogLevel = rbFrontendData.logLevel;
-                if (currentLogLevel === 'DEBUG' || (currentLogLevel === 'INFO' && logLevel === 'INFO')) {
-                    console.log(message);
-                }
-            }
-        }
-    </script>";
     }
 }

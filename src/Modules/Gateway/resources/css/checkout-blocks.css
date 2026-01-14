@@ -32,3 +32,7 @@
     position: relative;
     left: 10px;
 }
+
+.rb-logo-type-trustly img {
+  float: right;
+}

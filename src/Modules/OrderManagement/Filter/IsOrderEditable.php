@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
@@ -48,6 +48,12 @@ class IsOrderEditable
                 // For example, WooCommerce allows you to edit orders that are
                 // "on-hold", but we use this status to indicate that the payment
                 // has been frozen at Resurs Bank, and thus cannot be modified.
+                //
+                // This message is displayed below the product list in the order
+                // edit screen. This is why we use the gettext filter to modify
+                // the specific string that would originally display there,
+                // "This order is no longer editable." and replace this with our
+                // own translated message to give a more precise reason.
                 add_filter(
                     'gettext',
                     static function ($translation, $text, $domain) use ($payment) {
@@ -76,7 +82,7 @@ class IsOrderEditable
                 );
             }
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             $result = false;
         }
 

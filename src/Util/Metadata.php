@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
@@ -179,7 +180,7 @@ class Metadata
                 message: 'No results found when searching for legacy order.'
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return '';

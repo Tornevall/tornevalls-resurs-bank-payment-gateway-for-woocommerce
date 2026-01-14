@@ -9,10 +9,19 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\UserSettings;
 
+use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Exception\HttpException;
+use Resursbank\Ecom\Exception\UserSettingsException;
+use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Api\Environment;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Lib\UserSettings\ReaderInterface;
+use Resursbank\Ecom\Lib\UserSettings\Url;
 use Resursbank\Ecom\Module\UserSettings\Repository;
+use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
+use Throwable;
 use ValueError;
 
 class Reader implements ReaderInterface
@@ -31,6 +40,25 @@ class Reader implements ReaderInterface
     public function read(Field $field): ?string
     {
         return get_option(self::getOptionName(field: $field), null);
+    }
+
+    /**
+     * @param Url $url
+     * @return string|null
+     * @throws ConfigException
+     * @throws HttpException
+     * @throws IllegalValueException
+     * @throws UserSettingsException
+     */
+    public function getUrl(Url $url): ?string
+    {
+        return match ($url) {
+            Url::PART_PAYMENT_AJAX_URL => Route::getUrl(route: RouteVariant::PartPayment),
+            Url::CALLBACK_TEST_TRIGGER_URL => Route::getUrl(route: RouteVariant::AdminTriggerTestCallback),
+            Url::CALLBACK_TEST_URL => Route::getUrl(route: RouteVariant::TestCallbackReceived),
+            Url::CALLBACK_TEST_RECEIVED_AT_URL => Route::getUrl(route: RouteVariant::GetCallbackTestReceivedAt),
+            Url::CACHE_CLEAR_URL => Route::getUrl(route: RouteVariant::AdminCacheInvalidate),
+        };
     }
 
     /**
@@ -108,6 +136,28 @@ class Reader implements ReaderInterface
     }
 
     /**
+     * Update a user settings field value.
+     *
+     * @param Field $field
+     * @param mixed $value
+     * @return void
+     */
+    public function update(Field $field, mixed $value): void
+    {
+        try {
+            update_option(
+                option: self::getOptionName(field: $field),
+                value: $value
+            );
+
+            // Clear UserSettings cache
+            Repository::clearCache();
+        } catch (Throwable $e) {
+            Logger::error(message: $e);
+        }
+    }
+
+    /**
      * Converter from Field enum to option name in WP options table.
      *
      * @noinspection PhpFunctionCyclomaticComplexityInspection
@@ -127,7 +177,7 @@ class Reader implements ReaderInterface
             Field::API_TIMEOUT => 'api_timeout',
             Field::LOG_ENABLED => 'log_enabled',
             Field::LOG_LEVEL => 'log_level',
-            Field::PART_PAYMENT_METHOD => 'part_payment_method',
+            Field::PART_PAYMENT_METHOD_ID => 'part_payment_method',
             Field::PART_PAYMENT_THRESHOLD => 'part_payment_limit',
             Field::PART_PAYMENT_PERIOD => 'part_payment_period',
             Field::PART_PAYMENT_LEGACY_LINKS => '',

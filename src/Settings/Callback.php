@@ -9,14 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Settings;
 
-use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
-use Resursbank\Ecom\Lib\UserSettings\Field;
-use Resursbank\Ecom\Module\UserSettings\Repository;
-use Resursbank\Woocommerce\Modules\UserSettings\Reader;
-use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Ecom\Module\Widget\CallbackList\Html as CallbackListHtml;
+use Resursbank\Ecom\Module\Widget\CallbackTest\Html;
+use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
-use Throwable;
 
 /**
  * Callback settings section.
@@ -24,8 +21,6 @@ use Throwable;
 class Callback
 {
     public const SECTION_ID = 'callback';
-
-    public const NAME_PREFIX = 'resursbank_';
 
     /**
      * Get translated title of tab.
@@ -35,86 +30,16 @@ class Callback
         return Translator::translate(phraseId: 'callbacks');
     }
 
-    /**
-     * Returns settings provided by this section. These will be rendered by
-     * WooCommerce to a form on the config page.
-     */
-    public static function getSettings(): array
+    public static function render(): void
     {
-        return [
-            self::SECTION_ID => [
-                'test_button' => self::getTestButton(),
-                'test_received_at' => self::getTestReceivedAt(),
-                'authorization_callback_url' => self::getUrl(
-                    type: CallbackType::AUTHORIZATION
-                ),
-                'management_callback_url' => self::getUrl(
-                    type: CallbackType::MANAGEMENT
-                ),
-            ],
-        ];
-    }
+        $GLOBALS['hide_save_button'] = '1';
 
-    /**
-     * Return URL utilised by Resurs Bank to execute callbacks.
-     */
-    public static function getUrl(
-        CallbackType $type
-    ): array {
-        try {
-            $typeValue = strtolower(string: $type->value);
-            $title = Translator::translate(phraseId: "callback-url-$typeValue");
+        $testBtn = (new Html())->content;
+        $callbackInfo = (new CallbackListHtml(
+            authorizationUrl: Route::getUrl(route: RouteVariant::AuthorizationCallback)
+        ))->content;
 
-            return [
-                'id' => self::NAME_PREFIX . $typeValue . '_callback_url',
-                'type' => 'text',
-                'custom_attributes' => [
-                    'disabled' => true,
-                ],
-                'title' => $title,
-                'value' => Url::getCallbackUrl(type: $type),
-                'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
-            ];
-        } catch (Throwable $error) {
-            Log::error(
-                error: $error,
-                message: Translator::translate(
-                    phraseId: 'generate-callback-template-failed'
-                )
-            );
-        }
-
-        return [];
-    }
-
-    /**
-     * Button to execute a test callback from Resurs Bank.
-     */
-    private static function getTestButton(): array
-    {
-        return [
-            'id' => Reader::NAME_PREFIX . 'test_callback',
-            'title' => Translator::translate(phraseId: 'test-callbacks'),
-            'type' => 'rbtestcallbackbutton',
-        ];
-    }
-
-    /**
-     * Timestamp of last received test callback from Resurs Bank.
-     */
-    private static function getTestReceivedAt(): array
-    {
-        return [
-            'id' => Reader::getOptionName(field: Field::TEST_RECEIVED_AT),
-            'type' => 'text',
-            'custom_attributes' => [
-                'disabled' => true,
-            ],
-            'title' => Translator::translate(
-                phraseId: 'callback-test-received-at'
-            ),
-            'value' => Repository::getDate(filed: Field::TEST_RECEIVED_AT),
-            'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
-        ];
+        echo $testBtn;
+        echo $callbackInfo;
     }
 }

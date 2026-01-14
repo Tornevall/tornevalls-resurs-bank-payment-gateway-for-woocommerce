@@ -14,10 +14,10 @@ use ReflectionException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Translator;
 use WC_Order_Item_Product;
 use WC_Product;
@@ -124,8 +124,8 @@ class Product
         $result = $originalProduct->get_sku();
 
         if (!is_string(value: $result) || $result === '') {
-            Log::error(
-                error: new EmptyValueException(
+            Logger::error(
+                message: new EmptyValueException(
                     message: 'Failed to resolve SKU from product with id ' . $product->get_id() .
                              ' when parsing order line.'
                 )

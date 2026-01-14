@@ -29,23 +29,6 @@ class Admin
         }
     }
 
-    public static function getAdminErrorNote(string $message): void
-    {
-        if (!self::isAdmin()) {
-            return;
-        }
-
-        $additional = Translator::translate(phraseId: 'see-log');
-
-        echo <<<EX
-<div class="error notice">
-  $message
-  <br/>
-  $additional
-</div>
-EX;
-    }
-
     /**
      * Return boolean on specific admin configuration tab. This method does not check is_admin first.
      *
@@ -86,50 +69,15 @@ EX;
     }
 
     /**
-     * Redirect to the correct section if the wrong section is requested.
-     *
-     * Wrong section for Resurs example: page=wc-settings&tab=checkout&section=<method-uuid>
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function redirectAtWrongSection(mixed $method): void
-    {
-        try {
-            // Make sure we are dealing with a UUID, before activating the redirect filter to minimize the
-            // risk of weird loops (IF they occur).
-            $stringValidation = new StringValidation();
-            $stringValidation->isUuid(value: $method);
-        } catch (Throwable) {
-            // Do nothing.
-            return;
-        }
-
-        add_filter(
-            'woocommerce_get_sections_checkout',
-            static function (array $sections = []) use ($method): array {
-                if (
-                    isset($_REQUEST['section']) &&
-                    $_REQUEST['section'] === $method
-                ) {
-                    wp_safe_redirect(
-                        'admin.php?page=wc-settings&tab=resursbank&section=payment_methods'
-                    );
-                    wp_die();
-                }
-
-                return $sections;
-            }
-        );
-    }
-
-    /**
      * HPOS compatible method to find out if current screen is shop_order (wp-admin order view).
+     *
+     * @todo This method is wierd, cause post_type = "shop_order" applies to more places than just the order view specifically.
      */
     public static function isInShopOrderEdit(): bool
     {
         // Current screen can be null when is_ajax().
         $currentScreen = get_current_screen();
+
         // id is used in legacy mode. post_type is used in HPOS mode.
         return isset($currentScreen) &&
             ($currentScreen->id === 'shop_order' || $currentScreen->post_type === 'shop_order');
@@ -137,12 +85,19 @@ EX;
 
     /**
      * Check if user is currently located in the order list.
+     *
+     * @todo This method is weird, the purpose according to its name seems to be to confrim we are on order list view, yet the id "edit-shop_order" suggests we are checking for the edit view, unless very wierdly named in an earlier version of WC since this is at least no longer the name of the list view page.
      */
     public static function isInOrderListView(): bool
     {
         $currentScreen = get_current_screen();
-        // The list screen is held separately from the single order view and is regardless of HPOS
-        // always the id.
-        return self::isInShopOrderEdit() && isset($currentScreen) && $currentScreen->id === 'edit-shop_order';
+
+        // The list screen is held separately from the single order view and is
+        // regardless of HPOS always the id.
+        return
+            (
+                (self::isInShopOrderEdit() && isset($currentScreen)) &&
+                ($currentScreen->id === 'edit-shop_order' || $currentScreen->base === 'woocommerce_page_wc-orders')
+            );
     }
 }

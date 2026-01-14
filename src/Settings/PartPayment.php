@@ -70,10 +70,10 @@ class PartPayment
     private static function getPaymentMethodSetting(): array
     {
         return [
-            'id' => Reader::getOptionName(field: Field::PART_PAYMENT_METHOD),
+            'id' => Reader::getOptionName(field: Field::PART_PAYMENT_METHOD_ID),
             'title' => Translator::translate(phraseId: 'payment-method'),
             'type' => 'select',
-            'default' => UserSettingsRepository::getDefault(field: Field::PART_PAYMENT_METHOD),
+            'default' => UserSettingsRepository::getDefault(field: Field::PART_PAYMENT_METHOD_ID),
             'options' => Repository::getAssocPaymentMethods(),
             'desc' => Translator::translate(
                 phraseId: 'part-payment-payment-method'

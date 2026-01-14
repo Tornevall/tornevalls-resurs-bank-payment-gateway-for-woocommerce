@@ -29,6 +29,8 @@ use Resursbank\Woocommerce\Util\Admin;
  * Handles the output of the order view payment information widget
  *
  * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+ *
+ * @todo This is overkill, we should move the CSS nad HTML bits and remove this class.
  */
 class PaymentInformation
 {

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Gateway;
 
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\Widget\ConsumerCreditWarning\Html as Warning;
 use Resursbank\Ecom\Module\Widget\CostList\Html as CostList;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
-use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
 /**
@@ -37,7 +37,7 @@ class GatewayHelper
                 amount: $this->amount
             ))->content;
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             return '';
         }
 
@@ -62,7 +62,7 @@ class GatewayHelper
                 method: $this->paymentMethod
             ))->content . '</div>';
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             return '';
         }
     }
@@ -90,7 +90,7 @@ class GatewayHelper
                 )->getText() .
             '</div>';
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
             return '';
         }
     }

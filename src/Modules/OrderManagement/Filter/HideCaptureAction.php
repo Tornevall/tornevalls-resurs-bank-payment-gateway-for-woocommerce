@@ -27,12 +27,7 @@ class HideCaptureAction
     ): array {
         $result = [];
 
-        if (
-            Metadata::isValidResursPayment(
-                order: $order,
-                checkPaymentStatus: false
-            )
-        ) {
+        if (Metadata::isValidResursPayment(order: $order)) {
             foreach ($actions as $name => $action) {
                 // Prevent the "complete" button from being added if the order or action is "on-hold".
                 // Also, don't allow changing an "on-hold" order to "processing" in the list view,

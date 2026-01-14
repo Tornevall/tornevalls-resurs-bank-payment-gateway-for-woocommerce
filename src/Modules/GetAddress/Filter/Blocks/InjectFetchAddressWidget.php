@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks;
 
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
-use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
 /**
@@ -71,7 +71,7 @@ class InjectFetchAddressWidget
                 subject: $content
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return $content;

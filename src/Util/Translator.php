@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 use Resursbank\Ecom\Lib\Locale\Translator as EcomTranslator;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 
 /**
@@ -33,7 +34,7 @@ class Translator
                 translationFile: $translationFile
             );
         } catch (Throwable $e) {
-            Log::error(error: $e);
+            Logger::error(message: $e);
         }
 
         return $result;

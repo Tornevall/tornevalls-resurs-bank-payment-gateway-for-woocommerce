@@ -25,9 +25,9 @@ use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\TaskStatusDetails;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 
 /**
@@ -68,9 +68,10 @@ class Failure
                 message: $message,
                 orderId: $orderId
             );
-            Log::debug(sprintf('Order %s: %s.', $orderId, $message));
+
+            Logger::debug(sprintf('Order %s: %s.', $orderId, $message));
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return $message;

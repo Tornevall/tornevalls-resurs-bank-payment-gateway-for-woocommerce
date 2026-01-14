@@ -11,12 +11,10 @@ namespace Resursbank\Woocommerce\Modules\Order\Controller\Admin;
 
 use JsonException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 
 use function constant;
@@ -29,7 +27,6 @@ class GetOrderContentController
     /**
      * @throws HttpException
      * @throws JsonException
-     * @throws EmptyValueException
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
@@ -81,7 +78,7 @@ class GetOrderContentController
                 paymentId: Metadata::getPaymentId(order: $order)
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         try {
@@ -104,18 +101,7 @@ class GetOrderContentController
         } catch (HttpException $error) {
             throw $error;
         } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-
-        try {
-            $data['messages'] = json_encode(
-                value: MessageBag::getBag()->toArray(),
-                flags: JSON_THROW_ON_ERROR
-            );
-
-            MessageBag::clear();
-        } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return json_encode(value: $data, flags: JSON_THROW_ON_ERROR);

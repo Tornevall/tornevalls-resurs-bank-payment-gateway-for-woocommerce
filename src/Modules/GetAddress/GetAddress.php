@@ -9,19 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\GetAddress;
 
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Module\Widget\GetAddress\Js as Widget;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
-use Throwable;
-
 /**
  * Implementation of get address widget in checkout.
  */
 class GetAddress
 {
-    private static ?Widget $instance = null;
-
     /**
      * Register frontend related actions and filters.
      */
@@ -38,33 +30,5 @@ class GetAddress
             'woocommerce_before_checkout_form',
             'Resursbank\Woocommerce\Modules\GetAddress\Filter\Legacy\InjectFetchAddressWidget::exec'
         );
-    }
-
-    /**
-     * Create and return Get Address Widget instance. We store it locally to
-     * improve performance since we will need to call the widget from several
-     * locations during the checkout page rendering.
-     */
-    public static function getWidget(): ?Widget
-    {
-        if (self::$instance !== null) {
-            return self::$instance;
-        }
-
-        try {
-            $getAddressUrl = Route::getUrl(route: Route::ROUTE_GET_ADDRESS);
-
-            if ($getAddressUrl === '') {
-                throw new IllegalValueException(
-                    message: 'Failed to obtain get address widget URL.'
-                );
-            }
-
-            self::$instance = new Widget(url: $getAddressUrl);
-        } catch (Throwable $e) {
-            Log::error(error: $e);
-        }
-
-        return self::$instance;
     }
 }

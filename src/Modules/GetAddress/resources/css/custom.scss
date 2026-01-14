@@ -3,15 +3,15 @@
 
   #rb-ga-ct-area {
     input {
-      -moz-appearance: none;
-      /*appearance: none;*/
+      -webkit-appearance: none; /* Remove default appearance styling for Webkit */
+      -moz-appearance: none; /* Remove default appearance styling for Firefox */
       background: #fff;
-      border: 1px solid rgba(25, 23, 17, .48);
+      border: 1px solid rgba(25, 23, 17, .60);
       border-radius: 50%;
       cursor: pointer;
       display: inline-block;
       height: 1.5em;
-      left: 0px;
+      left: 0;
       margin: inherit;
       min-height: 24px;
       min-width: 24px;
@@ -24,15 +24,19 @@
       &::after {
         content: '';
         display: block;
-        width: 0.9em;
-        height: 0.9em;
-        background: var(--wp--preset--color--contrast);
+        width: 1em;
+        height: 1em;
         border-radius: 50%;
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         opacity: 0;
+        background: #046bd2;
+      }
+
+      &:checked {
+        border-color: #045cb4;
       }
 
       &:checked::after {
@@ -50,10 +54,7 @@
     #rb-ga-btn {
       padding: 14px;
       text-align: center;
-      background-color: var(--wp--preset--color--contrast);
-      color: var(--wp--preset--color--base);
       cursor: pointer;
-      border-color: var(--wp--preset--color--contrast);
       border-radius: .33rem;
       font-family: var(--wp--preset--font-size--small);
       font-weight: 500;
@@ -80,11 +81,6 @@
         100% {
           transform: rotate(360deg);
         }
-      }
-
-      &:hover, &:disabled {
-        background-color: #666666;
-        border-color: #666666;
       }
 
       &:disabled {

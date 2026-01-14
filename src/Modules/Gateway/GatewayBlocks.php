@@ -18,6 +18,7 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
@@ -25,9 +26,9 @@ use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Ecom\Module\Widget\Logo\Html as LogoWidget;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
@@ -64,12 +65,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             }
         );
 
-        // Note that despite the naming this function also confirm whether we
-        // are currently rendering the blocks based checkout page.
-        if (!WooCommerce::isUsingBlocksCheckout()) {
-            return;
-        }
-
         add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
     }
 
@@ -87,6 +82,14 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 file: 'checkout-blocks.css',
                 type: ResourceType::CSS
             )
+        );
+
+        wp_enqueue_script(
+            'rb-payment-method',
+            Route::getUrl(RouteVariant::PaymentMethodJs),
+            [],
+            '1.0.0',
+            false // Load script in header.
         );
 
         wp_enqueue_style('rb-wc-blocks-css');
@@ -177,20 +180,15 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'title' => $paymentMethod->name,
                     'description' => $helper->getUspWidget(),
                     'costlist' => $helper->getCostList(),
-                    'costlist_url' => Route::getUrl(route: 'get-costlist'),
+                    'costlist_url' => Route::getUrl(route: RouteVariant::Costlist),
                     'readmore' => $helper->getReadMore(),
                     'price_signage_warning' => $helper->getPriceSignageWarning(),
-                    'read_more_css' => '',
                     'logo' => $logo->content,
                     'logo_type' => $logo->getIdentifier(),
-                    'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
-                    'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,
-                    'enabled_for_legal_customer' => $paymentMethod->enabledForLegalCustomer,
-                    'enabled_for_natural_customer' => $paymentMethod->enabledForNaturalCustomer
                 ];
             }
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return $result;
@@ -204,7 +202,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         try {
             return StoreRepository::getConfiguredStore()?->countryCode ?? Country::UNKNOWN;
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
 
         return Country::UNKNOWN;
