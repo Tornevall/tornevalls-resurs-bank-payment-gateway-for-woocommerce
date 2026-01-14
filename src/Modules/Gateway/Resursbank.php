@@ -22,9 +22,9 @@ use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\UserSettingsException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
+use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\Logger;
@@ -34,6 +34,7 @@ use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callback;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callbacks;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\RedirectionUrls;
+use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
@@ -149,64 +150,45 @@ class Resursbank extends WC_Payment_Gateway
      * @param WC_Order $order
      * @return Payment
      * @throws ApiException
+     * @throws AttributeCombinationException
      * @throws AuthException
      * @throws ConfigException
      * @throws CurlException
      * @throws EmptyValueException
      * @throws FilesystemException
-     * @throws IllegalCharsetException
+     * @throws HttpException
      * @throws IllegalTypeException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
      * @throws TranslationException
+     * @throws UserSettingsException
      * @throws ValidationException
-     * @throws AttributeCombinationException
+     * @throws NotJsonEncodedException
      */
     private function createPayment(
         WC_Order $order
     ): Payment {
+        // Add customer id to metadata, if customer is logged in.
+        if ($order->get_user_id() > 0) {
+            $meta[] = new Entry(
+                key: 'externalCustomerId',
+                value: (string) $order->get_user_id()
+            );
+        }
+
         return PaymentRepository::create(
             paymentMethodId: $this->method->id,
             orderLines: Order::getOrderLines(order: $order),
             orderReference: (string)$order->get_id(),
             customer: Customer::getCustomer(order: $order),
-            metadata: $this->getBaseMetadata(order: $order), //Customer::getLoggedInCustomerIdMeta(order: $order),
+            metadata: PaymentRepository::getIntegrationInfoMetadata(
+                platform: 'WooCommerce',
+                platformVersion: UserAgent::getWooCommerceVersion(),
+                pluginVersion: UserAgent::getPluginVersion(),
+                additionalData: $meta ?? []
+            ),
             options: $this->getOptions(order: $order)
-        );
-    }
-
-    /**
-     * Get metadata to attach to order.
-     *
-     * @param WC_Order $order
-     *
-     * @return Payment\Metadata
-     * @throws AttributeCombinationException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     */
-    private function getBaseMetadata(WC_Order $order): Payment\Metadata
-    {
-        $platformInformation = PaymentRepository::getIntegrationInfoMetadata(
-            platform: 'WooCommerce',
-            platformVersion: UserAgent::getWooCommerceVersion(),
-            pluginVersion: UserAgent::getPluginVersion()
-        );
-        $data = $platformInformation->custom->toArray();
-
-        if ($order->get_user_id() > 0) {
-            try {
-                $data[] = Customer::getLoggedInCustomerIdMetaEntry(order: $order);
-            } catch (IllegalValueException $error) {
-                Logger::error(message: $error);
-            }
-        }
-
-        return new Payment\Metadata(
-            custom: new Payment\Metadata\EntryCollection(data: $data)
         );
     }
 

@@ -65,28 +65,6 @@ class Customer
     }
 
     /**
-     * Return customer user id as a Resurs Bank Payment metadata entry.
-     *
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws AttributeCombinationException
-     */
-    public static function getLoggedInCustomerIdMetaEntry(WC_Order $order): Entry
-    {
-        if ((int)$order->get_user_id() > 0) {
-            return new Entry(
-                key: 'externalCustomerId',
-                value: (string)$order->get_user_id()
-            );
-        }
-
-        throw new IllegalValueException(
-            message: 'Attempting to fetch user id on customer who is not logged in!'
-        );
-    }
-
-    /**
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function useAddressForBilling(WC_Order $order): bool
