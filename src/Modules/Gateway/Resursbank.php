@@ -129,8 +129,13 @@ class Resursbank extends WC_Payment_Gateway
             );
         }
 
-        // @todo Document this behaviour.
-        if (!$payment->isProcessable()) {
+        // Get URL to redirect customer to (gateway URL at Resurs Bank).
+        $redirectUrl = $payment->taskRedirectionUrls?->customerUrl;
+
+        // When we create a payment, we will always be asked to redirect to the
+        // gateway for confirmation of the payment. If we do not get a URL to
+        // redirect to, something went wrong, and we will treat it as a failure.
+        if (!$redirectUrl) {
             return [
                 'result' => 'failure',
                 'redirect' => $this->getFailureUrl(order: $order),
@@ -153,9 +158,7 @@ class Resursbank extends WC_Payment_Gateway
         // Redirect customer to Resurs Bank payment page.
         return [
             'result' => 'success',
-            'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                order: $order
-            ),
+            'redirect' => $redirectUrl
         ];
     }
 
