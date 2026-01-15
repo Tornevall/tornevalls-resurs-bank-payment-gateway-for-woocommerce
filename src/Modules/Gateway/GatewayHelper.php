@@ -14,7 +14,8 @@ use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
 use Throwable;
 
 /**
- * Generic class that provides both blocks and legacy with relevant methods for the gateway.
+ * This class centralizes rendering of various gateway related widgets. They are
+ * utilised both in legacy and block based checkout flows.
  */
 class GatewayHelper
 {

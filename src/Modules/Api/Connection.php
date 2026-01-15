@@ -36,7 +36,7 @@ class Connection
     public static function setup(): void
     {
         try {
-            // @todo We want to pass Language from the plattform. Because, clients may use the same API account for different store views to support multi-lingual countries, like Finland or Sweden. We should therefore not forcefully extract language based on API account, while doing so for the Location is correct.
+            // @todo We want to pass Language from the platform. Because, clients may use the same API account for different store views to support multi-lingual countries, like Finland or Sweden. We should therefore not forcefully extract language based on API account, while doing so for the Location is correct.
             Config::setup(
                 cache: new Transient(),
                 network: new Network(

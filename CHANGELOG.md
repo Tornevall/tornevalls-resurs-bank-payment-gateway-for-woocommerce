@@ -1,3 +1,12 @@
+# 1.2.18
+
+* Fixes to reach latest ecom.
+* PD-3915: Merge latest ecom with master (NOT the experimental branch)
+
+# 1.2.17
+
+* No changes, only tag bump.
+
 # 1.2.16
 
 * Ecom widget patch.
