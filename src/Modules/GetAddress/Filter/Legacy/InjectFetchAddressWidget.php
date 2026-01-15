@@ -13,12 +13,12 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
 use Throwable;
 
 /**
  * Render get address form above the form on the checkout page.
+ *
+ * @todo This is wierd, why is this a problem only for this widget? Investigate and see if we can avoid the preg_replace somehow, could save us this entire class.
  */
 class InjectFetchAddressWidget
 {
@@ -31,12 +31,6 @@ class InjectFetchAddressWidget
         $result = '';
 
         try {
-            Log::debug(
-                message: 'Initialize getAddress with URL: ' . Route::getUrl(
-                    route: Route::ROUTE_GET_ADDRESS
-                )
-            );
-
             /**
              * Create compatibility with template paragraphing when wpautop is executed.
              * This script works properly when themes keeps the script code separate

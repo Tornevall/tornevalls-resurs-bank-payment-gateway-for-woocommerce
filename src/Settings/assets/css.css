@@ -1,0 +1,21 @@
+/**
+ * Copyright © Resurs Bank AB. All rights reserved.
+ * See LICENSE for license details.
+ */
+
+/* Callback Test Widget */
+.rb-test-callback-container {
+    margin-top: 25px;
+}
+
+/* Callback List Widget */
+.rb-cb {
+    margin-top: 25px;
+    border-top: 1px dashed #c0c0c0;
+}
+
+/* Add spacing around clear cache button. */
+#resursbank-cache-management-container {
+  margin-top: 25px;
+  margin-bottom: 10px;
+}

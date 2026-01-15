@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce;
 
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Woocommerce\Settings\About;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Api;
@@ -18,9 +19,6 @@ use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Admin_Settings;
@@ -44,34 +42,6 @@ class SettingsPage extends WC_Settings_Page
         $this->label = 'Resurs Bank';
 
         parent::__construct();
-    }
-
-    /**
-     * Callback function for rendering custom button element.
-     */
-    public static function renderButton(
-        string $route,
-        string $title,
-        string $error
-    ): void {
-        $element = '<div class="error notice" style="padding: 10px;">' . $error . '</div>';
-
-        try {
-            $element = '<a class="button-primary" href="' .
-                Route::getUrl(route: $route, admin: true) .
-                '">' . $title . '</a>';
-        } catch (Throwable $error) {
-            Log::error(error: $error);
-        }
-
-        echo <<<EX
-<tr>
-  <th scope="row" class="titledesc" />
-  <td class="forminp">
-    $element
-  </td>
-</tr>
-EX;
     }
 
     /**
@@ -122,6 +92,8 @@ EX;
                 PaymentMethods::render();
             } elseif ($section === About::SECTION_ID) {
                 About::render();
+            } elseif ($section === Callback::SECTION_ID) {
+                Callback::render();
             } else {
                 echo '<table class="form-table">';
                 WC_Admin_Settings::output_fields(
@@ -129,11 +101,14 @@ EX;
                 );
                 echo '</table>';
             }
-        } catch (Throwable $e) {
-            Log::error(error: $e);
+        } catch (Throwable $error) {
+            Logger::error(message: $error);
 
-            // Add visual note stating the page failed to render.
-            Admin::getAdminErrorNote(message: Translator::translate(phraseId: 'content-render-failed'));
+            // Display a generic error message to the user. Letting them know
+            // the page could not render and info is logged.
+            echo '<div class="error"><p>' .
+                Translator::translate(phraseId: 'content-render-failed') .
+            '</p></div>';
         }
     }
 }

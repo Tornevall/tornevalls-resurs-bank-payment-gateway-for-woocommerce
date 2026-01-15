@@ -23,7 +23,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Module\Payment\Enum\ActionType;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -37,14 +37,6 @@ use WC_Order;
  */
 class UpdateOrder
 {
-    /**
-     * During a request the event to update an order may execute several times,
-     * and if we cannot update the payment at Resurs Bank to reflect changes
-     * applied on the order in WC, we will naturally stack errors. We use this
-     * flag to prevent this.
-     */
-    private static bool $modificationError = false;
-
     /**
      * @throws ApiException
      * @throws AttributeCombinationException
@@ -60,6 +52,7 @@ class UpdateOrder
      * @throws ValidationException
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @noinspection PhpUnusedParameterInspection
+     * @todo Errors from this method cannot currently be propagates to frontend. We attempt using order notes and other solutions but they aren't good enough. We need an overhaul of this, but it will take some time. We should poll updated PAyment Information widget when edit has completed, and along with that potential error messages we can track in backend. This reuqires some frontend scripting and it's outside the scope of cleanup, keeping this note here for future reference since we will not create tickets for now.
      */
     public static function exec(mixed $orderId, mixed $order): void
     {
@@ -70,6 +63,7 @@ class UpdateOrder
             return;
         }
 
+        // @todo This message is wierd, hwo is the source unknown?
         if (self::canUpdate(order: $order)) {
             /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $order->add_order_note(
@@ -96,6 +90,7 @@ class UpdateOrder
                 return;
             }
 
+            // @todo Why is this message not translated?
             if ($payment->rejectedReason !== null) {
                 /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
                 $order->add_order_note(
@@ -106,7 +101,7 @@ class UpdateOrder
 
             Modify::exec(payment: $payment, order: $order);
         } catch (Throwable $error) {
-            self::handleError(error: $error);
+            Logger::error(message: $error);
         }
     }
 
@@ -132,25 +127,5 @@ class UpdateOrder
                !OrderManagement::canCapture(order: $order) &&
                !OrderManagement::canCancel(order: $order) &&
                !OrderManagement::canRefund(order: $order);
-    }
-
-    /**
-     * Log error that occurred while updating payment at Resurs Bank. This
-     * method will only track one single error instance.
-     */
-    private static function handleError(
-        Throwable $error
-    ): void {
-        if (self::$modificationError) {
-            return;
-        }
-
-        OrderManagement::logActionError(
-            action: ActionType::MODIFY_ORDER,
-            error: $error,
-            reason: $error->getMessage()
-        );
-
-        self::$modificationError = true;
     }
 }

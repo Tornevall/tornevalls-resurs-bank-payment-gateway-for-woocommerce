@@ -9,26 +9,12 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Order;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Config;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\CacheException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Model\PaymentHistory\Event;
-use Resursbank\Ecom\Lib\Model\PaymentMethod;
-use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\RouteVariant;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
@@ -92,7 +78,7 @@ class Order
 
             $wcOrderid = $wcOrder->get_id();
             $fetchUrl = Route::getUrl(
-                route: Route::ROUTE_ADMIN_GET_ORDER_CONTENT,
+                route: RouteVariant::AdminGetOrderContent,
                 admin: true
             );
 
@@ -114,13 +100,15 @@ class Order
                 '',
                 ['rb-get-order-content-admin-scripts']
             );
+
+            // @todo Think this is used to attempt fetching updated data (like payment info widget, order comments, etc.) when certain actions occur, like changing order content. It seems a little complex, we should review this and see if we can find a simpler way.
             wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
             wp_add_inline_script(
                 'rb-get-order-content-admin-inline-scripts',
                 "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrderid');"
             );
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
     }
 
@@ -206,7 +194,7 @@ class Order
                     phraseId: 'reason'
                 ) . ':</b> ' . $errorMessage;
 
-            Log::error(error: $e);
+            Logger::error(message: $e);
         }
 
         // Skip sanitizing of data here.

@@ -14,8 +14,8 @@ use Resursbank\Ecom\Lib\Model\PaymentHistory\Event;
 use Resursbank\Ecom\Lib\Model\PaymentHistory\User;
 use Resursbank\Ecom\Module\PaymentHistory\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
 
 /**
@@ -58,7 +58,7 @@ class ThankYou
                 user: User::CUSTOMER
             ));
         } catch (Throwable $error) {
-            Log::error(error: $error);
+            Logger::error(message: $error);
         }
     }
 }

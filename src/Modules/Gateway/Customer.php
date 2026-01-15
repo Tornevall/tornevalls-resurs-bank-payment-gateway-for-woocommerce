@@ -15,7 +15,6 @@ use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Address;
-use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\Customer as CustomerModel;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
@@ -26,7 +25,7 @@ use Resursbank\Woocommerce\Util\WooCommerce;
 use WC_Order;
 
 /**
- * Resurs Bank payment gateway.
+ * Class to gather customer related information during payment creation.
  */
 class Customer
 {
@@ -73,7 +72,7 @@ class Customer
      * @throws ReflectionException
      * @throws AttributeCombinationException
      */
-    public static function getLoggedInCustomerIdMetaEntry(WC_Order $order): Payment\Metadata\Entry
+    public static function getLoggedInCustomerIdMetaEntry(WC_Order $order): Entry
     {
         if ((int)$order->get_user_id() > 0) {
             return new Entry(

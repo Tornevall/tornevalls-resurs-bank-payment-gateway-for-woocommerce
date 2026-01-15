@@ -17,4 +17,6 @@ enum AssetWidget
     case GetAddressJs;
     case GetAddressCss;
     case PaymentMethodJs;
+    case AdminCss;
+    case AdminJs;
 }

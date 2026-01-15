@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement;
 
-use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Config;
@@ -25,13 +24,9 @@ use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\UserSettings\Field;
-use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 
@@ -74,7 +69,9 @@ class OrderManagement
             3
         );
 
-        // Execute payment action AFTER the status has changed in WC.
+        // Execute payment action (capture | cancel) after order status has changed.
+        //
+        // Refunds are handled by a separate set of hooks, see initRefund().
         add_action(
             'woocommerce_order_status_changed',
             'Resursbank\Woocommerce\Modules\OrderManagement\Filter\AfterOrderStatusChange::exec',
@@ -301,45 +298,5 @@ class OrderManagement
             Config::getLogger()->error(message: $error);
             return null;
         }
-    }
-
-    /**
-     * Log message to file on disk and message bag.
-     *
-     * @param string $message
-     * @param Throwable $error
-     * @param WC_Order|null $order
-     */
-    public static function logError(
-        string $message,
-        Throwable $error
-    ): void {
-        Log::error(error: $error);
-        MessageBag::addError(message: $message);
-    }
-
-    /**
-     * Log error from a Payment Action request (cancel, debit, credit, modify).
-     * @throws Exception
-     * @todo Think we can remove this, places where it's used should be moveable to Ecom, or just removable altogether.
-     */
-    public static function logActionError(
-        ActionType $action,
-        Throwable $error,
-        string $reason = 'unknown reason'
-    ): void {
-        $actionString = str_replace(
-            search: '_',
-            replace: '-',
-            subject: strtolower(string: $action->value)
-        );
-
-        self::logError(
-            message: sprintf(
-                Translator::translate(phraseId: "$actionString-action-failed"),
-                strtolower(string: $reason)
-            ),
-            error: $error
-        );
     }
 }
