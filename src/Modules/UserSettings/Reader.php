@@ -45,7 +45,6 @@ class Reader implements ReaderInterface
     /**
      * @param Url $url
      * @return string|null
-     * @throws ConfigException
      * @throws HttpException
      * @throws IllegalValueException
      * @throws UserSettingsException
@@ -58,6 +57,7 @@ class Reader implements ReaderInterface
             Url::CALLBACK_TEST_URL => Route::getUrl(route: RouteVariant::TestCallbackReceived),
             Url::CALLBACK_TEST_RECEIVED_AT_URL => Route::getUrl(route: RouteVariant::GetCallbackTestReceivedAt),
             Url::CACHE_CLEAR_URL => Route::getUrl(route: RouteVariant::AdminCacheInvalidate),
+            Url::RELOAD_PAYMENT_INFORMATION_URL => Route::getUrl(route: RouteVariant::ReloadPaymentInformation),
         };
     }
 

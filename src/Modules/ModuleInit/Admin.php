@@ -119,7 +119,6 @@ class Admin
         Order::init();
         OrderManagement::init();
         PaymentInformation::init();
-        Order::initAdmin();
 
         // Hide payment methods from the payment gateways list in WooCommerce
         // settings. There is a hook available

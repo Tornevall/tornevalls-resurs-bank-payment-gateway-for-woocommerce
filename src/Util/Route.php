@@ -25,12 +25,14 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
+use Resursbank\Ecom\Lib\Http\Controller;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Repository as CallbackRepository;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
+use Resursbank\Ecom\Module\Payment\Http\PaymentInformation\FetchHtml;
 use Resursbank\Ecom\Module\PaymentMethod\Http\PartPayment\GetDataController;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
@@ -41,12 +43,15 @@ use Resursbank\Ecom\Module\Widget\CallbackTest\Css;
 use Resursbank\Ecom\Module\Widget\CallbackTest\Js as TestCallbackJs;
 use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
 use Resursbank\Ecom\Module\Widget\GetAddress\Js;
+use Resursbank\Ecom\Module\Widget\PaymentInformation\Html;
+use Resursbank\Ecom\Module\Widget\PaymentInformation\Js as PaymentInformationJs;
 use Resursbank\Ecom\Module\Widget\PaymentMethod\Js as PaymentMethodJs;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
-use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
+use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
+use WC_Order;
 use function is_string;
 use function str_contains;
 use function strlen;
@@ -274,10 +279,17 @@ class Route
                     (new CallbackListCss())->content .
                     (new CacheManagementCss())->content
                 ),
-                AssetWidget::AdminJs => (
-                    (new TestCallbackJs())->content .
-                    (new CacheManagementJs())->content
-                )
+                AssetWidget::AdminJs => (function () {
+                    return
+                        (new TestCallbackJs())->content .
+                        (new CacheManagementJs())->content .
+                        (new PaymentInformationJs(
+                            amountElement: '#woocommerce-order-items .wc-order-totals .woocommerce-Price-amount',
+                            observableElements: [
+                                '#woocommerce-order-items'
+                            ]
+                        ))->content;
+                })()
             };
 
             if ($body === '') {
@@ -374,6 +386,7 @@ class Route
                     );
                 }
             })(),
+            RouteVariant::ReloadPaymentInformation => self::respondWithExit(body: (new FetchHtml())->exec()),
             RouteVariant::TestCallbackReceived => (function () {
                 $reader = new Reader();
                 $reader->update(field: Field::TEST_RECEIVED_AT, value: time());
@@ -397,14 +410,6 @@ class Route
                     );
                 }
             })(),
-            RouteVariant::AdminGetOrderContent => add_action(
-                'woocommerce_after_register_post_type',
-                static function (): void {
-                    Route::respondWithExit(
-                        body: GetOrderContentController::exec()
-                    );
-                }
-            ),
             RouteVariant::Costlist => (function () {
                 try {
                     $paymentMethod = Repository::getById(paymentMethodId: $_GET['method'] ?? '');

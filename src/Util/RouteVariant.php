@@ -93,4 +93,9 @@ enum RouteVariant: string
      * Route to render admin JS resources.
      */
     case AdminJs = 'admin-js';
+
+    /**
+     * URL to reload payment information widget.
+     */
+    case ReloadPaymentInformation = 'reload-payment-information-js';
 }

@@ -45,74 +45,6 @@ class Order
     }
 
     /**
-     * Add JavaScript to order view to update content when order is updated.
-     */
-    public static function initAdmin(): void
-    {
-        add_action(
-            'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\Order\Order::initAdminScripts'
-        );
-    }
-
-    /**
-     * @SuppressWarnings(PHPMD.Superglobals)
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function initAdminScripts(): void
-    {
-        try {
-            // Fetching the order id this way has historically been the best way on
-            // sites where the normal way of doing it not works ("ecompress"). This however fails
-            // when in HPOS-mode. If the solution below does not work, then we have to
-            // reconsider the way this has been historically done,
-            // $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
-            $wcOrder = wc_get_order();
-
-            if (
-                !$wcOrder instanceof WC_Order ||
-                !Metadata::isValidResursPayment(order: $wcOrder)
-            ) {
-                return;
-            }
-
-            $wcOrderid = $wcOrder->get_id();
-            $fetchUrl = Route::getUrl(
-                route: RouteVariant::AdminGetOrderContent,
-                admin: true
-            );
-
-            // Append JS code to observe order changes and fetch new content.
-            $url = Url::getResourceUrl(
-                module: 'Order',
-                file: 'admin/getOrderContent.js'
-            );
-
-            wp_enqueue_script(
-                'rb-get-order-content-admin-scripts',
-                $url,
-                ['jquery']
-            );
-
-            // Echo constant containing URL to get new order view content.
-            wp_register_script(
-                'rb-get-order-content-admin-inline-scripts',
-                '',
-                ['rb-get-order-content-admin-scripts']
-            );
-
-            // @todo Think this is used to attempt fetching updated data (like payment info widget, order comments, etc.) when certain actions occur, like changing order content. It seems a little complex, we should review this and see if we can find a simpler way.
-            wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
-            wp_add_inline_script(
-                'rb-get-order-content-admin-inline-scripts',
-                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrderid');"
-            );
-        } catch (Throwable $error) {
-            Logger::error(message: $error);
-        }
-    }
-
-    /**
      * Add action which will render payment information on order view.
      *
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
@@ -138,13 +70,22 @@ class Order
         add_meta_box(
             'resursbank_payment_info',
             'Resurs',
-            'Resursbank\Woocommerce\Modules\Order\Order::renderPaymentInfo'
+            static function () use ($order): void {
+                try {
+                    echo PaymentInformation::getWidgetHtml(
+                        paymentId: Metadata::getPaymentId(order: $order)
+                    );
+                } catch (Throwable $e) {
+                    Logger::error(message: $e);
+                }
+            }
         );
     }
 
     /**
      * Render payment information box on order view.
      *
+     * @deprecated Use inline closure in addPaymentInfo instead
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function renderPaymentInfo(): void
