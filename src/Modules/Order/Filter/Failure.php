@@ -12,6 +12,7 @@ namespace Resursbank\Woocommerce\Modules\Order\Filter;
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
@@ -40,21 +41,27 @@ class Failure
             'woocommerce_order_cancelled_notice',
             function () {
                 try {
-                    // If this wasn't a Resurs Bank order, there would be no
-                    // payment ID to retrieve the failure reason for.
-                    $paymentId = Metadata::getPaymentId(
-                        order: new WC_Order(order: $_GET['order_id'] ?? 0)
-                    );
+                    // Ensure there is an order ID to work with, to avoid
+                    // unnecessary log entries.
+                    $orderId = $_GET['order_id'] ?? 0;
 
-                    // Not a Resurs Bank order.
-                    if ($paymentId === '') {
+                    if (!$orderId) {
+                        return;
+                    }
+
+                    // Only execute for Resurs Bank orders.
+                    $order = OrderManagement::getOrder(id: $orderId);
+
+                    if (!$order || !Metadata::isValidResursPayment(order: $order)) {
                         return;
                     }
 
                     // Resolve failure reason and store in session.
                     Config::getSessionHandler()->set(
                         key: self::ERROR_MSG_SESSION_KEY,
-                        val: Repository::getFailureReason(paymentId: $paymentId)
+                        val: Repository::getFailureReason(
+                            paymentId: Metadata::getPaymentId(order: $order)
+                        )
                     );
 
                     // Redirect to the checkout page.
