@@ -105,7 +105,6 @@ class Admin
             }
         );
 
-        PartPayment::initAdmin();
         Store::initAdmin();
 
         if (!Repository::isEnabled(field: Field::ENABLED)) {

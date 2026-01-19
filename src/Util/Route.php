@@ -25,7 +25,6 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
-use Resursbank\Ecom\Lib\Http\Controller;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\UserSettings\Field;
@@ -43,15 +42,13 @@ use Resursbank\Ecom\Module\Widget\CallbackTest\Css;
 use Resursbank\Ecom\Module\Widget\CallbackTest\Js as TestCallbackJs;
 use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
 use Resursbank\Ecom\Module\Widget\GetAddress\Js;
-use Resursbank\Ecom\Module\Widget\PaymentInformation\Html;
+use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriodsJs;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Js as PaymentInformationJs;
 use Resursbank\Ecom\Module\Widget\PaymentMethod\Js as PaymentMethodJs;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
-use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Ecom\Lib\Log\Logger;
 use Throwable;
-use WC_Order;
 use function is_string;
 use function str_contains;
 use function strlen;
@@ -288,6 +285,10 @@ class Route
                             observableElements: [
                                 '#woocommerce-order-items'
                             ]
+                        ))->content .
+                        (new GetPeriodsJs(
+                            methodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_METHOD_ID),
+                            periodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD)
                         ))->content;
                 })()
             };

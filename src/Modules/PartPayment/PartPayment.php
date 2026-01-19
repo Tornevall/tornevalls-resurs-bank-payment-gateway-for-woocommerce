@@ -53,19 +53,6 @@ class PartPayment
     }
 
     /**
-     * Init method for admin script.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function initAdmin(): void
-    {
-        add_action(
-            'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
-        );
-    }
-
-    /**
      * Output widget HTML if on a single product page.
      */
     public static function renderWidget(): void
