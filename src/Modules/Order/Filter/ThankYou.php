@@ -52,6 +52,11 @@ class ThankYou
                 return;
             }
 
+            // Only execute this for Resurs Bank payments.
+            if (!Metadata::isValidResursPayment(order: $order)) {
+                return;
+            }
+
             Repository::write(entry: new Entry(
                 paymentId: Metadata::getPaymentId(order: $order),
                 event: Event::REACHED_ORDER_SUCCESS_PAGE,

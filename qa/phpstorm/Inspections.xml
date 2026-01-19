@@ -88,7 +88,7 @@
   <inspection_tool class="OffsetOperationsInspection" enabled="true" level="ERROR" enabled_by_default="true" />
   <inspection_tool class="ParameterDefaultValueIsNotNullInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
   <inspection_tool class="PhpAccessStaticViaInstanceInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
-  <inspection_tool class="PhpArgumentWithoutNamedIdentifierInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+  <inspection_tool class="PhpArgumentWithoutNamedIdentifierInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
   <inspection_tool class="PhpCSFixerValidationInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false">
     <option name="CODING_STANDARD" value="PSR12" />
   </inspection_tool>

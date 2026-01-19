@@ -105,7 +105,6 @@ class Admin
             }
         );
 
-        PartPayment::initAdmin();
         Store::initAdmin();
 
         if (!Repository::isEnabled(field: Field::ENABLED)) {
@@ -116,9 +115,9 @@ class Admin
         // payment methods as compatible in block editor.
         GatewayBlocks::init();
         Gateway::initAdmin();
-        Order::init();
         OrderManagement::init();
         PaymentInformation::init();
+        Order::init();
 
         // Hide payment methods from the payment gateways list in WooCommerce
         // settings. There is a hook available
