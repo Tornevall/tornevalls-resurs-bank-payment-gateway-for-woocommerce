@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\Order;
 
 use Resursbank\Ecom\Lib\Log\Logger;
-use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
+use Resursbank\Ecom\Module\Widget\PaymentInformation\Html as EcomPaymentInformation;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Url;
@@ -52,7 +52,7 @@ class Order
                 'Resurs',
                 static function () use ($paymentId): void {
                     try {
-                        echo PaymentInformation::getWidgetHtml(paymentId: $paymentId);
+                        echo (new EcomPaymentInformation(paymentId: $paymentId))->content;
                     } catch (Throwable $e) {
                         Logger::error(message: $e);
                     }

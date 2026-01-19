@@ -45,6 +45,7 @@ use Resursbank\Ecom\Module\Widget\GetAddress\Js;
 use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriodsJs;
 use Resursbank\Ecom\Module\Widget\PartPayment\Css as PartPaymentCss;
 use Resursbank\Ecom\Module\Widget\PartPayment\Js as PartPaymentJs;
+use Resursbank\Ecom\Module\Widget\PaymentInformation\Css as EcomPaymentInformationCss;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Js as PaymentInformationJs;
 use Resursbank\Ecom\Module\Widget\PaymentMethod\Js as PaymentMethodJs;
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
@@ -282,7 +283,8 @@ class Route
                 AssetWidget::AdminCss => (
                     (new Css())->content .
                     (new CallbackListCss())->content .
-                    (new CacheManagementCss())->content
+                    (new CacheManagementCss())->content .
+                    (new EcomPaymentInformationCss())->content
                 ),
                 AssetWidget::AdminJs => (function () {
                     return

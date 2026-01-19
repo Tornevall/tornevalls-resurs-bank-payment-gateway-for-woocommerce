@@ -30,8 +30,6 @@ use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
 use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
-use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Modules\Store\Store;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Util\Route;
@@ -116,7 +114,6 @@ class Admin
         GatewayBlocks::init();
         Gateway::initAdmin();
         OrderManagement::init();
-        PaymentInformation::init();
         Order::init();
 
         // Hide payment methods from the payment gateways list in WooCommerce
