@@ -89,17 +89,6 @@ class Frontend
                 } catch (Throwable $error) {
                     Logger::debug(message: $error);
                 }
-
-                // Load static JS.
-                wp_enqueue_script(
-                    'partpayment-script',
-                    Url::getResourceUrl(
-                        module: 'PartPayment',
-                        file: 'part-payment.js'
-                    ),
-                    ['jquery'],
-                    true
-                );
             }
         );
 

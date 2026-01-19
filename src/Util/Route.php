@@ -304,7 +304,11 @@ class Route
                     containerElDomPath: is_checkout() ? 'body' : '#rb-pp-widget-container'
                 ))->content,
                 AssetWidget::PartPaymentJs => (new PartPaymentJs(
-                        amount: $_GET['rb_pp_amount'] ? (float)$_GET['rb_pp_amount'] : 0.0
+                        amount: $_GET['rb_pp_amount'] ? (float)$_GET['rb_pp_amount'] : 0.0,
+                        observableElements: ['input.qty', '.single_variation_wrap'],
+                        qtyElDomPath: 'input.qty',
+                        amountElDomPath: '.woocommerce-Price-amount:last-child',
+                        containerElDomPath: '#rb-pp-widget-container',
                     ))->content,
                 AssetWidget::PartPaymentCss => (new PartPaymentCss())->content,
             };
