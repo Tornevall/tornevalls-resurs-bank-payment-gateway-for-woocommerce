@@ -98,4 +98,24 @@ enum RouteVariant: string
      * URL to reload payment information widget.
      */
     case ReloadPaymentInformation = 'reload-payment-information-js';
+
+    /**
+     * Route to controller injecting read more CSS.
+     */
+    case ReadMoreCss = 'read-more-css';
+
+    /**
+     * Controller route to render reader more JS.
+     */
+    case ReadMoreJs = 'read-more-js';
+
+    /**
+     * Route to controller injecting part payment CSS.
+     */
+    case PartPaymentCss = 'part-payment-css';
+
+    /**
+     * Controller route to render part payment JS.
+     */
+    case PartPaymentJs = 'part-payment-js';
 }

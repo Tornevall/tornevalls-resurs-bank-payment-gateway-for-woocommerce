@@ -55,7 +55,6 @@ class AssetLoader
         self::enqueueCostListJs();
         self::enqueuePartPaymentStyles();
         self::enqueueReadMoreStyle();
-        self::enqueueReadMoreJs();
 
         if (!is_checkout()) {
             return;
@@ -138,44 +137,6 @@ class AssetLoader
         wp_add_inline_style(
             'rb-read-more-style',
             WooCommerce::getRenderedWithNoCrLf(content: $readMoreCss)
-        );
-    }
-
-    /**
-     * Enqueue scripts related to ReadMore.
-     */
-    public static function enqueueReadMoreJs(): void
-    {
-        if (is_product() && PartPayment::isEnabled()) {
-            // Product page js.
-            wp_register_script(
-                'rb-pp-readmore-js',
-                '',
-                []
-            );
-            wp_enqueue_script('rb-pp-readmore-js');
-            wp_add_inline_script(
-                'rb-pp-readmore-js',
-                (new ReadMoreJs(
-                    containerElDomPath: '#rb-pp-widget-container'
-                ))->content
-            );
-        }
-
-        if (!is_checkout()) {
-            return;
-        }
-
-        // Checkout page js.
-        wp_register_script(
-            'rb-rm-readmore-js',
-            '',
-            []
-        );
-        wp_enqueue_script('rb-rm-readmore-js');
-        wp_add_inline_script(
-            'rb-rm-readmore-js',
-            (new ReadMoreJs(containerElDomPath: 'body'))->content
         );
     }
 

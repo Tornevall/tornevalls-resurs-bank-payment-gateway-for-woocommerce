@@ -43,8 +43,12 @@ use Resursbank\Ecom\Module\Widget\CallbackTest\Js as TestCallbackJs;
 use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
 use Resursbank\Ecom\Module\Widget\GetAddress\Js;
 use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriodsJs;
+use Resursbank\Ecom\Module\Widget\PartPayment\Css as PartPaymentCss;
+use Resursbank\Ecom\Module\Widget\PartPayment\Js as PartPaymentJs;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Js as PaymentInformationJs;
 use Resursbank\Ecom\Module\Widget\PaymentMethod\Js as PaymentMethodJs;
+use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
+use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
 use Resursbank\Woocommerce\Modules\UserSettings\Reader;
 use Resursbank\Ecom\Lib\Log\Logger;
@@ -145,7 +149,8 @@ class Route
      */
     public static function getUrl(
         RouteVariant $route,
-        bool $admin = false
+        bool $admin = false,
+        array $additionalQueryParams = [],
     ): string {
         $url = !$admin ? get_site_url() : get_admin_url();
 
@@ -162,7 +167,10 @@ class Route
 
         return Url::getQueryArg(
             baseUrl: $url,
-            arguments: [self::ROUTE_PARAM => $route->value]
+            arguments: array_merge(
+                [self::ROUTE_PARAM => $route->value],
+                $additionalQueryParams
+            )
         );
     }
 
@@ -290,7 +298,15 @@ class Route
                             methodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_METHOD_ID),
                             periodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD)
                         ))->content;
-                })()
+                })(),
+                AssetWidget::ReadMoreCss => (new ReadMoreCss())->content,
+                AssetWidget::ReadMoreJs => (new ReadMoreJs(
+                    containerElDomPath: is_checkout() ? 'body' : '#rb-pp-widget-container'
+                ))->content,
+                AssetWidget::PartPaymentJs => (new PartPaymentJs(
+                        amount: $_GET['rb_pp_amount'] ? (float)$_GET['rb_pp_amount'] : 0.0
+                    ))->content,
+                AssetWidget::PartPaymentCss => (new PartPaymentCss())->content,
             };
 
             if ($body === '') {
@@ -301,8 +317,8 @@ class Route
             }
 
             $contentType = match ($widget) {
-                AssetWidget::GetAddressJs, AssetWidget::PaymentMethodJs, AssetWidget::AdminJs => 'application/javascript',
-                AssetWidget::GetAddressCss, AssetWidget::AdminCss => 'text/css',
+                AssetWidget::GetAddressJs, AssetWidget::PaymentMethodJs, AssetWidget::AdminJs, AssetWidget::PartPaymentJs, AssetWidget::ReadMoreJs => 'application/javascript',
+                AssetWidget::GetAddressCss, AssetWidget::AdminCss, AssetWidget::PartPaymentCss, AssetWidget::ReadMoreCss => 'text/css',
             };
 
             self::respondWithExit(body: $body, contentType: $contentType);
@@ -340,6 +356,10 @@ class Route
             RouteVariant::GetAddressCss => self::renderAssetWidget(widget: AssetWidget::GetAddressCss),
             RouteVariant::GetAddressJs => self::renderAssetWidget(widget: AssetWidget::GetAddressJs),
             RouteVariant::PaymentMethodJs => self::renderAssetWidget(widget: AssetWidget::PaymentMethodJs),
+            RouteVariant::PartPaymentJs => self::renderAssetWidget(widget: AssetWidget::PartPaymentJs),
+            RouteVariant::PartPaymentCss => self::renderAssetWidget(widget: AssetWidget::PartPaymentCss),
+            RouteVariant::ReadMoreJs => self::renderAssetWidget(widget: AssetWidget::ReadMoreJs),
+            RouteVariant::ReadMoreCss => self::renderAssetWidget(widget: AssetWidget::ReadMoreCss),
             RouteVariant::PartPayment => self::respondWithExit(body: (new GetDataController())->exec()),
             RouteVariant::GetStoresAdmin => self::respondWithExit(body: (new GetStoresController())->exec()),
             RouteVariant::AdminCacheInvalidate => (function () {

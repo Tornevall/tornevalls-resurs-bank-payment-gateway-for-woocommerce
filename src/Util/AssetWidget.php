@@ -14,9 +14,22 @@ namespace Resursbank\Woocommerce\Util;
  */
 enum AssetWidget
 {
+    // Get address assets (frontend).
     case GetAddressJs;
     case GetAddressCss;
+
+    // Payment method assets (frontend, blocks gateway).
     case PaymentMethodJs;
+
+    // Dynamic CSS & JS content for admin panel.
     case AdminCss;
     case AdminJs;
+
+    // Part payment assets (frontend).
+    case PartPaymentJs;
+    case PartPaymentCss;
+
+    // Read more link assets (frontend).
+    case ReadMoreJs;
+    case ReadMoreCss;
 }
