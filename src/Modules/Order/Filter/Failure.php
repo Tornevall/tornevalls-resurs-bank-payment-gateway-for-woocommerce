@@ -15,7 +15,6 @@ use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Metadata;
 use Throwable;
-use WC_Order;
 
 /**
  * Redirects failed purchases to the checkout page with error message.
