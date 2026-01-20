@@ -1,134 +1,132 @@
 <?php
 
-/**
- * Copyright © Resurs Bank AB. All rights reserved.
- * See LICENSE for license details.
- */
-
 declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\Order\Filter;
 
-use JsonException;
-use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
-use Resursbank\Ecom\Exception\AttributeCombinationException;
-use Resursbank\Ecom\Exception\AuthException;
-use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\TaskStatusDetails;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
+use WC_Order;
 
 /**
  * Event executed when failure page is reached.
  */
 class Failure
 {
-    /**
-     * Register event listener.
-     */
+    /** @noinspection PhpMissingClassConstantTypeInspection */
+    private const SESSION_KEY_ERROR_MESSAGE = 'resursbank_order_error_msg';
+
     public static function init(): void
     {
         add_filter(
             'woocommerce_order_cancelled_notice',
-            'Resursbank\Woocommerce\Modules\Order\Filter\Failure::exec',
+            [self::class, 'captureAndRedirect'],
             10,
             1
+        );
+
+        add_filter(
+            'the_content',
+            [self::class, 'renderMessageOnCheckout'],
+            10
         );
     }
 
     /**
-     * Add information to message on order failure page, explaining why payment
-     * failed at Resurs Bank.
+     * Store failure reason in WC session and redirect to checkout.
      *
-     * @SuppressWarnings(PHPMD.Superglobals)
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    public static function exec(string $message = ''): string
+    public static function captureAndRedirect(string $message): string
     {
-        $orderId = self::getOrderId();
-
-        if ($orderId === '') {
-            return $message;
-        }
-
         try {
-            $message = self::appendPaymentFailureMessage(
-                message: $message,
-                orderId: $orderId
+            $orderId = $_GET['order_id'] ?? '';
+
+            if ($orderId === '') {
+                return $message;
+            }
+
+            $order = new WC_Order((int)$orderId);
+            $paymentId = Metadata::getPaymentId(order: $order);
+
+            if ($paymentId === '') {
+                return $message;
+            }
+
+            WcSession::set(
+                key: self::SESSION_KEY_ERROR_MESSAGE,
+                value: self::getFailureReason(paymentId: $paymentId)
             );
-            Log::debug(sprintf('Order %s: %s.', $orderId, $message));
-        } catch (Throwable $error) {
-            Log::error(error: $error);
+
+            if (!headers_sent()) {
+                wp_redirect(wc_get_checkout_url());
+                exit;
+            }
+        } catch (Throwable) {
+            // Silent by design – never break checkout UX
         }
 
         return $message;
     }
 
     /**
-     * @SuppressWarnings(PHPMD.Superglobals)
+     * Inject failure message on checkout page.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
-    private static function getOrderId(): string
+    public static function renderMessageOnCheckout(string $content): string
     {
-        return $_GET['order_id'] ?? '';
+        if (!is_checkout()) {
+            return $content;
+        }
+
+        $message = WcSession::get(key: self::SESSION_KEY_ERROR_MESSAGE);
+
+        if ($message === '') {
+            return $content;
+        }
+
+        WcSession::unset(key: self::SESSION_KEY_ERROR_MESSAGE);
+
+        return
+            '<div class="woocommerce-error"><p>' .
+            esc_html($message) .
+            '</p></div>' .
+            $content;
     }
 
     /**
-     * @throws ApiException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws ValidationException
-     * @throws AttributeCombinationException
-     * @throws NotJsonEncodedException
+     * Local replacement for Repository::getFailureReason().
      */
-    private static function appendPaymentFailureMessage(string $message, string $orderId): string
+    private static function getFailureReason(string $paymentId): string
     {
-        $order = OrderManagement::getOrder(id: (int)$orderId);
+        try {
+            /** @var Payment $payment */
+            $payment = Repository::get(paymentId: $paymentId);
 
-        if ($order === null) {
-            throw new IllegalValueException(message: 'Missing order id.');
+            if ($payment->isRejectionReasonCreditDenied()) {
+                return Translator::translate(
+                    phraseId: 'credit-denied-try-again'
+                );
+            }
+
+            /** @var TaskStatusDetails $task */
+            $task = Repository::getTaskStatusDetails(paymentId: $paymentId);
+
+            if (!$task->completed) {
+                return Translator::translate(
+                    phraseId: 'payment-cancelled-try-again'
+                );
+            }
+        } catch (Throwable) {
+            // Fall through to a generic message
         }
 
-        $paymentId = Metadata::getPaymentId(order: $order);
-        $task = Repository::getTaskStatusDetails(paymentId: $paymentId);
-        $payment = Repository::get(paymentId: $paymentId);
-
-        return $message . ' ' . self::getFailureMessage(
-            payment: $payment,
-            task: $task
-        );
-    }
-
-    /**
-     * Get the failure message based on either TaskStatusDetails or RejectedReasons.
-     */
-    private static function getFailureMessage(
-        Payment $payment,
-        TaskStatusDetails $task
-    ): string {
-        if ($payment->isRejectionReasonCreditDenied()) {
-            return Translator::translate(phraseId: 'credit-denied-try-again');
-        }
-
-        return $task->completed ?
-            Translator::translate(phraseId: 'payment-failed-try-again') :
-            Translator::translate(phraseId: 'payment-cancelled-try-again');
+        return Translator::translate(phraseId: 'payment-failed-try-again');
     }
 }
