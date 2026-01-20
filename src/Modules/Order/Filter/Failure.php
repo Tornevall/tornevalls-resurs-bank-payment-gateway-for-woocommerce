@@ -45,13 +45,18 @@ class Failure
     public static function captureAndRedirect(string $message): string
     {
         try {
-            $orderId = $_GET['order_id'] ?? '';
+            $orderId = (int)($_GET['order_id'] ?? 0);
 
-            if ($orderId === '') {
+            if ($orderId <= 0) {
                 return $message;
             }
 
-            $order = new WC_Order((int)$orderId);
+            $order = wc_get_order($orderId);
+
+            if (!$order instanceof WC_Order) {
+                return $message;
+            }
+
             $paymentId = Metadata::getPaymentId(order: $order);
 
             if ($paymentId === '') {
