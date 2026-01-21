@@ -51,7 +51,7 @@ class Failure
                 return $message;
             }
 
-            $order = wc_get_order($orderId);
+            $order = new WC_Order($orderId);
 
             if (!$order instanceof WC_Order) {
                 return $message;
@@ -99,9 +99,9 @@ class Failure
         WcSession::unset(key: self::SESSION_KEY_ERROR_MESSAGE);
 
         return
-            '<div class="woocommerce-error"><p>' .
+            '<div class="woocommerce-error" role="status">' .
             esc_html($message) .
-            '</p></div>' .
+            '</div>' .
             $content;
     }
 
