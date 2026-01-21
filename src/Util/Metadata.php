@@ -102,6 +102,49 @@ class Metadata
     }
 
     /**
+     * Resolve payment id from order id.
+     *
+     * The technically accurate way to do this is to load the order, then
+     * resolve metadata using its attached methods.
+     *
+     * Unfortunately, this is not always possible. In some cases we need nothing
+     * more than the payment id, and we need it earlier than the order is loaded
+     * by WooCommerce. Attempting to access the order before WooCommerce has
+     * loaded it automatically (registering post type) will cause an error.
+     *
+     * Even after post type registration however, it's not always possible to
+     * fetch currently loaded order using wc_get_order(). Because of these
+     * issues this method was added to simply resolve the value straight from
+     * the database, since the order id is always available immediately on the
+     * request data, nnd we technically do not require the order anyway.
+     *
+     * @param string|int $id | Accepting a string allows simplified integration.
+     * @return string
+     */
+    public static function getPaymentIdFromOrderId(string|int $id): string
+    {
+        global $wpdb;
+
+        // Convert possible string to integer.
+        if (is_string($id)) {
+            $id = (int) $id;
+        }
+
+        if ($id <= 0) {
+            return '';
+        }
+
+        return (string) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT meta_value FROM {$wpdb->prefix}wc_orders_meta
+                WHERE order_id = %d AND meta_key = %s LIMIT 1",
+                $id,
+                self::KEY_PAYMENT_ID
+            )
+        );
+    }
+
+    /**
      * Check if order was paid through Resurs Bank.
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)

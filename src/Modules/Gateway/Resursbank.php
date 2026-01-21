@@ -12,28 +12,20 @@ namespace Resursbank\Woocommerce\Modules\Gateway;
 use Exception;
 use JsonException;
 use ReflectionException;
-use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
-use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
-use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
-use Resursbank\Ecom\Exception\TranslationException;
 use Resursbank\Ecom\Exception\UserSettingsException;
-use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Ecom\Exception\Validation\IllegalCharsetException;
-use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Locale\Translator;
 use Resursbank\Ecom\Lib\Log\Logger;
-use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callback;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\Callbacks;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\ParticipantRedirectionUrls;
 use Resursbank\Ecom\Lib\Model\Payment\CreatePaymentRequest\Options\RedirectionUrls;
+use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
@@ -73,6 +65,9 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Render info about our payment methods in their section at checkout.
      *
+     * NOTE: This is only used in legacy checkout, blocks render the checkout
+     * using React components instead.
+     *
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function payment_fields(): void
@@ -104,8 +99,28 @@ class Resursbank extends WC_Payment_Gateway
     {
         $order = new WC_Order(order: $order_id);
 
+        // Add customer id to metadata, if customer is logged in.
+        if ($order->get_user_id() > 0) {
+            $meta[] = new Entry(
+                key: 'externalCustomerId',
+                value: (string) $order->get_user_id()
+            );
+        }
+
         try {
-            $payment = $this->createPayment(order: $order);
+            $payment = PaymentRepository::create(
+                paymentMethodId: $this->method->id,
+                orderLines: Order::getOrderLines(order: $order),
+                orderReference: (string)$order->get_id(),
+                customer: Customer::getCustomer(order: $order),
+                metadata: PaymentRepository::getIntegrationInfoMetadata(
+                    platform: 'WooCommerce',
+                    platformVersion: UserAgent::getWooCommerceVersion(),
+                    pluginVersion: UserAgent::getPluginVersion(),
+                    additionalData: $meta ?? []
+                ),
+                options: $this->getOptions(order: $order)
+            );
         } catch (CurlException $error) {
             throw new HttpException(
                 message: $error->getDetailedMessage(
@@ -114,100 +129,37 @@ class Resursbank extends WC_Payment_Gateway
             );
         }
 
-        if (!isset($payment) || !$payment->isProcessable()) {
+        // Get URL to redirect customer to (gateway URL at Resurs Bank).
+        $redirectUrl = $payment->taskRedirectionUrls?->customerUrl;
+
+        // When we create a payment, we will always be asked to redirect to the
+        // gateway for confirmation of the payment. If we do not get a URL to
+        // redirect to, something went wrong, and we will treat it as a failure.
+        if (!$redirectUrl) {
             return [
                 'result' => 'failure',
                 'redirect' => $this->getFailureUrl(order: $order),
             ];
         }
 
-        $this->clearSession();
-
-        Metadata::setPaymentId(order: $order, id: $payment->id);
-
-        return [
-            'result' => 'success',
-            'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                order: $order
-            ),
-        ];
-    }
-
-    /**
-     * Remove session data related to the checkout process.
-     */
-    private function clearSession(): void
-    {
+        // Clear SSN data from session after payment creation.
         try {
             Repository::clearSsnData();
         } catch (ConfigException $e) {
             Logger::error(message: $e);
         }
-    }
 
-    /**
-     * @param WC_Order $order
-     * @return Payment
-     * @throws ApiException
-     * @throws AuthException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws FilesystemException
-     * @throws IllegalCharsetException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws TranslationException
-     * @throws ValidationException
-     * @throws AttributeCombinationException
-     */
-    private function createPayment(
-        WC_Order $order
-    ): Payment {
-        return PaymentRepository::create(
-            paymentMethodId: $this->method->id,
-            orderLines: Order::getOrderLines(order: $order),
-            orderReference: (string)$order->get_id(),
-            customer: Customer::getCustomer(order: $order),
-            metadata: $this->getBaseMetadata(order: $order), //Customer::getLoggedInCustomerIdMeta(order: $order),
-            options: $this->getOptions(order: $order)
-        );
-    }
+        // Store payment id in order metadata for future reference.
+        //
+        // Note that this is metadata from the WooCommerce plugin, not the
+        // Resurs Bank payment metadata.
+        Metadata::setPaymentId(order: $order, id: $payment->id);
 
-    /**
-     * Get metadata to attach to order.
-     *
-     * @param WC_Order $order
-     *
-     * @return Payment\Metadata
-     * @throws AttributeCombinationException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     */
-    private function getBaseMetadata(WC_Order $order): Payment\Metadata
-    {
-        $platformInformation = PaymentRepository::getIntegrationInfoMetadata(
-            platform: 'WooCommerce',
-            platformVersion: UserAgent::getWooCommerceVersion(),
-            pluginVersion: UserAgent::getPluginVersion()
-        );
-        $data = $platformInformation->custom->toArray();
-
-        if ($order->get_user_id() > 0) {
-            try {
-                $data[] = Customer::getLoggedInCustomerIdMetaEntry(order: $order);
-            } catch (IllegalValueException $error) {
-                Logger::error(message: $error);
-            }
-        }
-
-        return new Payment\Metadata(
-            custom: new Payment\Metadata\EntryCollection(data: $data)
-        );
+        // Redirect customer to Resurs Bank payment page.
+        return [
+            'result' => 'success',
+            'redirect' => $redirectUrl
+        ];
     }
 
     /**
@@ -232,11 +184,10 @@ class Resursbank extends WC_Payment_Gateway
      * @param WC_Order $order
      * @return Options
      * @throws AttributeCombinationException
-     * @throws ConfigException
+     * @throws HttpException
      * @throws IllegalValueException
      * @throws JsonException
      * @throws ReflectionException
-     * @throws HttpException
      * @throws UserSettingsException
      */
     private function getOptions(WC_Order $order): Options

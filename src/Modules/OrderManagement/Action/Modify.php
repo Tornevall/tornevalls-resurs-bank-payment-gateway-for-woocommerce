@@ -22,14 +22,12 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\UserSettings\Field;
-use Resursbank\Ecom\Lib\Utilities\Price;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
 use Resursbank\Woocommerce\Modules\OrderManagement\Action;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
@@ -39,11 +37,6 @@ use WC_Order;
  */
 class Modify extends Action
 {
-    /**
-     * Used to ensure that we don't make multiple attempts to modify the payment.
-     */
-    private static bool $hasAlreadyLogged = false;
-
     /**
      * Marker for modify actions on shutdown, when WP/WC finalized their own internal actions.
      */
@@ -69,7 +62,7 @@ class Modify extends Action
      * @throws ReflectionException
      * @throws Throwable
      * @throws ValidationException
-     * @todo Because we
+     * @todo If you attempt to modify an order to a value that is unacceptable to Resurs Bank (too high for example), then  the order in WC will be updated, the payment at Resurs Bank will remain untouched, and there will be history entries sstating inaccurately the payment was deleted at REsurs (or maybe it's deleted then re-instated with the previously accepted value). Anyways, this is wierd and needs reviewing.
      */
     public static function exec(
         Payment $payment,

@@ -37,63 +37,6 @@ class Api
     }
 
     /**
-     * Register actions for this config section.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function init(): void
-    {
-        $properSection = (Admin::isSection('') || Admin::isSection(
-            'api_settings'
-        ));
-
-        if (
-            !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX) ||
-            !$properSection
-        ) {
-            return;
-        }
-
-        add_action(
-            'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Settings\Api::initScripts'
-        );
-    }
-
-    /**
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function initScripts(): void
-    {
-        wp_register_script(
-            'rb-api-admin-scripts-load',
-            Url::getResourceUrl(
-                module: 'Api',
-                file: 'saved-updates.js'
-            )
-        );
-        wp_enqueue_script(
-            'rb-api-admin-scripts-load',
-            Url::getResourceUrl(
-                module: 'Api',
-                file: 'saved-updates.js'
-            ),
-            ['jquery']
-        );
-        
-        wp_enqueue_style(
-            'rb-ga-css',
-            Url::getResourceUrl(
-                module: 'Api',
-                file: 'api.css',
-                type: ResourceType::CSS
-            ),
-            [],
-            '1.0.0'
-        );
-    }
-
-    /**
      * Returns settings provided by this section. These will be rendered by
      * WooCommerce to a form on the config page.
      *
@@ -148,7 +91,7 @@ class Api
     }
 
     /**
-     * Get Client ID setting array.
+     * Get a Client ID setting array.
      */
     private static function getClientId(): array
     {

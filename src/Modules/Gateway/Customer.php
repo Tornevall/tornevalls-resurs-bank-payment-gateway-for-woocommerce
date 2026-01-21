@@ -17,7 +17,6 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Address;
 use Resursbank\Ecom\Lib\Model\Payment\Customer as CustomerModel;
 use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
-use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Module\Customer\Repository;
@@ -61,28 +60,6 @@ class Customer
                 ip: DeviceInfo::getIp(),
                 userAgent: DeviceInfo::getUserAgent()
             )
-        );
-    }
-
-    /**
-     * Return customer user id as a Resurs Bank Payment metadata entry.
-     *
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws AttributeCombinationException
-     */
-    public static function getLoggedInCustomerIdMetaEntry(WC_Order $order): Entry
-    {
-        if ((int)$order->get_user_id() > 0) {
-            return new Entry(
-                key: 'externalCustomerId',
-                value: (string)$order->get_user_id()
-            );
-        }
-
-        throw new IllegalValueException(
-            message: 'Attempting to fetch user id on customer who is not logged in!'
         );
     }
 

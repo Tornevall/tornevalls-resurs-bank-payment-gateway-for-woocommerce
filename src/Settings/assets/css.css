@@ -19,3 +19,8 @@
   margin-top: 25px;
   margin-bottom: 10px;
 }
+
+/* Correct width of error message in payment info widget on order view. */
+#rb-pi-container .rb-pi-error {
+  width: 95.7% !important;
+}

@@ -4,10 +4,10 @@
  * Plugin Name: Resurs Bank Payments for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
  * WC requires at least: 7.6.0
- * WC Tested up to: 10.1.1
- * Plugin requires ecom: 3.3.6
+ * WC Tested up to: 10.3.6
+ * Plugin requires ecom: 3.3.13
  * Requires PHP: 8.1
- * Version: 1.2.16
+ * Version: 1.2.18
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
@@ -22,6 +22,7 @@
 // Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
 // @todo All checks in this file are very confusing. We check for several resources in different blocks and places, we sometimes exit and sometimes return void, several classes  in plugins_loaded will check if the module is enabled but not all places. This needs to be fixed, it's too confusing.
+// @todo Wherever we inject CSS & JS, we give  aversion number, this should match the plugin version number probably, to avoid stale caching. Needs to be fixed in several places.
 
 declare(strict_types=1);
 

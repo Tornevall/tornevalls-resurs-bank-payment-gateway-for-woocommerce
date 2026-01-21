@@ -72,8 +72,6 @@ class Settings
             3
         );
 
-        Api::init();
-
         /**
          * @noinspection PhpArgumentWithoutNamedIdentifierInspection
          */
