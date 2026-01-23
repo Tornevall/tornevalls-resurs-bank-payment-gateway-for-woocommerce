@@ -30,7 +30,6 @@ use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
 use Resursbank\Woocommerce\Modules\Order\Order;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Modules\Store\Store;
 use Resursbank\Woocommerce\Settings\Settings;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\RouteVariant;
@@ -60,39 +59,14 @@ class Admin
      */
     public static function init(): void
     {
-        // Render custom CSS & JS code while in admin panel.
-        add_action('admin_enqueue_scripts', function () {
-            try {
-                wp_enqueue_style(
-                    'resursbank-admin-css',
-                    Route::getUrl(route: RouteVariant::AdminCss),
-                    [],
-                    '1.0.0'
-                );
+        // Render dynamic CSS & JS for Read More & Part Payment widget.
+        Route::loadAssets([
+            RouteVariant::AdminCss,
+            RouteVariant::AdminJs
+        ]);
 
-                wp_enqueue_script(
-                    'resursbank-admin-js',
-                    Route::getUrl(route: RouteVariant::AdminJs),
-                    ['jquery'],
-                    '1.0.0',
-                    true
-                );
-
-                // Load Callback module CSS
-                wp_enqueue_style(
-                    'resursbank-callback-css',
-                    plugins_url('resursbank/src/Settings/assets/css.css'),
-                    ['resursbank-admin-css'],
-                    '1.0.0'
-                );
-            } catch (Throwable $e) {
-                // Silently fail if routes cannot be generated
-                Logger::error(message: $e);
-            }
-        });
-
-        // Settings-related init methods that need to run in order for the plugin to be configurable when
-        // it's inactivated.
+        // Settings-related init methods that need to run in order for the
+        // plugin to be configurable when it's inactivated.
         Settings::init();
 
         // Inject invalidate cache button into settings.
@@ -102,8 +76,6 @@ class Admin
                 echo (new Html())->content;
             }
         );
-
-        Store::initAdmin();
 
         if (!Repository::isEnabled(field: Field::ENABLED)) {
             return;

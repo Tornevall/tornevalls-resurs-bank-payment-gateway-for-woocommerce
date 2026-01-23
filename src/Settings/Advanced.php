@@ -121,7 +121,19 @@ class Advanced
     }
 
     /**
-     * Return array for Invalidate Cache button setting.
+     * Return array for Invalidate Cache button.
+     *
+     * This will inject a field with a custom type (rbinvalidatecachebutton),
+     * which we can aim a hook against
+     * (woocommerce_admin_field_rbinvalidatecachebutton) to actually render the
+     * custom HTML for the button element.
+     *
+     * This hook is used from
+     * \Resursbank\Woocommerce\Modules\ModuleInit\Admin::init at the time of
+     * writing.
+     *
+     * At the time of writing, this is the only way to render a custom button
+     * element using the WooCommerce settings API.
      */
     private static function getInvalidateCacheButton(): array
     {
@@ -153,6 +165,8 @@ class Advanced
 
     /**
      * Timeout settings for API requests.
+     *
+     * @todo missing translations.
      */
     private static function getApiTimeout(): array
     {

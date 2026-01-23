@@ -29,21 +29,6 @@ class Order
             return;
         }
 
-        // Render custom stylesheet on order view, to manipulate elements
-        // not manageable using hooks.
-        add_action('admin_enqueue_scripts', fn () =>
-            wp_enqueue_style(
-                'rb-order-css',
-                Url::getResourceUrl(
-                    module: 'Order',
-                    file: 'order.css',
-                    type: ResourceType::CSS
-                ),
-                [],
-                '1.0.0'
-            )
-        );
-
         // Add payment information box on order view page.
         add_action(
             'add_meta_boxes',

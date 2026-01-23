@@ -118,4 +118,56 @@ enum RouteVariant: string
      * Controller route to render part payment JS.
      */
     case PartPaymentJs = 'part-payment-js';
+
+    /**
+     * Check if the route intends to load a CSS file.
+     *
+     * @return bool
+     */
+    public function isCssRoute(): bool
+    {
+        return in_array(
+            $this,
+            [
+                self::GetAddressCss,
+                self::ReadMoreCss,
+                self::PartPaymentCss,
+                self::AdminCss,
+            ],
+            true
+        );
+    }
+
+    /**
+     * Check if route intends to load a JS file.
+     *
+     * @return bool
+     */
+    public function isJsRoute(): bool
+    {
+        return in_array(
+            $this,
+            [
+                self::GetAddressJs,
+                self::ReadMoreJs,
+                self::PartPaymentJs,
+                self::AdminJs,
+                self::ReloadPaymentInformation,
+                self::PaymentMethodJs,
+            ],
+            true
+        );
+    }
+
+    public function isAdminRoute(): bool
+    {
+        return in_array(
+            $this,
+            [
+                self::AdminCss,
+                self::AdminJs,
+            ],
+            true
+        );
+    }
 }

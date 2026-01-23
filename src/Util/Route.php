@@ -43,6 +43,7 @@ use Resursbank\Ecom\Module\Widget\CallbackTest\Js as TestCallbackJs;
 use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
 use Resursbank\Ecom\Module\Widget\GetAddress\Js;
 use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriodsJs;
+use Resursbank\Ecom\Module\Widget\GetStores\Js as GetStoresJs;
 use Resursbank\Ecom\Module\Widget\PartPayment\Css as PartPaymentCss;
 use Resursbank\Ecom\Module\Widget\PartPayment\Js as PartPaymentJs;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Css as EcomPaymentInformationCss;
@@ -284,7 +285,8 @@ class Route
                     (new Css())->content .
                     (new CallbackListCss())->content .
                     (new CacheManagementCss())->content .
-                    (new EcomPaymentInformationCss())->content
+                    (new EcomPaymentInformationCss())->content .
+                    file_get_contents(filename: RESURSBANK_MODULE_DIR_PATH . '/src/Modules/ModuleInit/assets/css/admin.css')
                 ),
                 AssetWidget::AdminJs => (function () {
                     return
@@ -299,6 +301,14 @@ class Route
                         (new GetPeriodsJs(
                             methodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_METHOD_ID),
                             periodElementId: Reader::getOptionName(field: Field::PART_PAYMENT_PERIOD)
+                        ))->content .
+                        (new GetStoresJs(
+                            automatic: true, storeSelectId: 'resursbank_store_id',
+                            environmentSelectId: 'resursbank_environment',
+                            clientIdInputId: 'resursbank_client_id',
+                            clientSecretInputId: 'resursbank_client_secret',
+                            spinnerClass: 'rb-store-fetching',
+                            createBtn: true
                         ))->content;
                 })(),
                 AssetWidget::ReadMoreCss => (new ReadMoreCss())->content,
@@ -306,12 +316,12 @@ class Route
                     containerElDomPath: is_checkout() ? 'body' : '#rb-pp-widget-container'
                 ))->content,
                 AssetWidget::PartPaymentJs => (new PartPaymentJs(
-                        amount: $_GET['rb_pp_amount'] ? (float)$_GET['rb_pp_amount'] : 0.0,
-                        observableElements: ['input.qty', '.single_variation_wrap'],
-                        qtyElDomPath: 'input.qty',
-                        amountElDomPath: '.woocommerce-Price-amount:last-child',
-                        containerElDomPath: '#rb-pp-widget-container',
-                    ))->content,
+                    amount: $_GET['rb_pp_amount'] ? (float)$_GET['rb_pp_amount'] : 0.0,
+                    observableElements: ['input.qty', '.single_variation_wrap'],
+                    qtyElDomPath: 'input.qty',
+                    amountElDomPath: '.woocommerce-Price-amount:last-child',
+                    containerElDomPath: '#rb-pp-widget-container',
+                ))->content,
                 AssetWidget::PartPaymentCss => (new PartPaymentCss())->content,
             };
 
@@ -322,10 +332,7 @@ class Route
                 );
             }
 
-            $contentType = match ($widget) {
-                AssetWidget::GetAddressJs, AssetWidget::PaymentMethodJs, AssetWidget::AdminJs, AssetWidget::PartPaymentJs, AssetWidget::ReadMoreJs => 'application/javascript',
-                AssetWidget::GetAddressCss, AssetWidget::AdminCss, AssetWidget::PartPaymentCss, AssetWidget::ReadMoreCss => 'text/css',
-            };
+            $contentType = $widget->isJsWidget() ? 'application/javascript' : 'text/css';
 
             self::respondWithExit(body: $body, contentType: $contentType);
         } catch (Throwable $e) {
@@ -423,7 +430,7 @@ class Route
                 try {
                     $reader = new Reader();
                     $timestamp = $reader->read(field: Field::TEST_RECEIVED_AT);
-                    
+
                     self::respondWithExit(
                         body: json_encode(['time' => $timestamp ? (int)$timestamp : null]),
                         contentType: 'application/json'
@@ -486,6 +493,111 @@ class Route
             RouteVariant::AdminJs => self::renderAssetWidget(widget: AssetWidget::AdminJs),
             default => null,
         };
+    }
+
+    /**
+     * Load assets on frontend / admin.
+     *
+     * Note that this body appears to have code duplication between frontend and
+     * admin, cause of where we generate URL:s. This is however necessary,
+     * Parameters resolution will be possible to pass as a callable, which must
+     * be executed within the enqueue hook to ensure other processes (like
+     * loading products, orders etc.) have taken place in the WordPress code
+     * execution flow.
+     *
+     *
+     * Therefore, it's necessary for us to duplicate the code to generate URL:s
+     * within both hooks.
+     *
+     * @param array $data
+     * @return void
+     */
+    public static function loadAssets(array $data): void
+    {
+        // Load frontend assets.
+        add_action('wp_enqueue_scripts', function () use ($data) {
+            try {
+                foreach ($data as $segment) {
+                    list($route, $url) = self::generateAssetUrl(segment: $segment);
+
+                    // Only process frontend routes.
+                    if ($route->isAdminRoute()) {
+                        continue;
+                    }
+
+                    self::enqueueAsset($route, $url);
+                }
+            } catch (Throwable $error) {
+                Logger::error(message: $error);
+            }
+        });
+
+        // Load admin panel assets.
+        add_action('admin_enqueue_scripts', function () use ($data) {
+            try {
+                foreach ($data as $segment) {
+                    list($route, $url) = self::generateAssetUrl(segment: $segment);
+
+                    // Only process admin routes.
+                    if (!$route->isAdminRoute()) {
+                        continue;
+                    }
+
+                    self::enqueueAsset($route, $url);
+                }
+            } catch (Throwable $error) {
+                Logger::error(message: $error);
+            }
+        });
+    }
+
+    private static function generateAssetUrl(RouteVariant|array $segment): array
+    {
+        $params = [];
+
+        if (!($segment instanceof RouteVariant)) {
+            if (!isset($segment['route']) || !$segment['route'] instanceof RouteVariant) {
+                throw new IllegalValueException(
+                    message: 'Invalid route provided for asset loading.'
+                );
+            }
+
+            $route = $segment['route'];
+
+            // Dynamically resolve params if callable.
+            $params = isset($segment['params']) && is_callable(value: $segment['params'])
+                ? $segment['params']()
+                : [];
+
+            if (!is_array(value: $params)) {
+                throw new IllegalValueException(
+                    message: 'Invalid params provided for asset loading.'
+                );
+            }
+        } else {
+            $route = $segment;
+        }
+
+        return [$route, self::getUrl(route: $route, additionalQueryParams: $params)];
+    }
+
+    /**
+     * @param mixed $route
+     * @param mixed $url
+     * @return void
+     * @throws IllegalValueException
+     */
+    private static function enqueueAsset(RouteVariant $route, string $url): void
+    {
+        if ($route->isJsRoute()) {
+            wp_enqueue_script($route->value, $url, [], '2.0.0');
+        } elseif ($route->isCssRoute()) {
+            wp_enqueue_style($route->value, $url, [], '2.0.0');
+        } else {
+            throw new IllegalValueException(
+                message: 'Invalid route provided for asset loading.'
+            );
+        }
     }
 
     /**
