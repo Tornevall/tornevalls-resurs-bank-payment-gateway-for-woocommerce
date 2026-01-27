@@ -1,4 +1,0 @@
-/* If you need to hide the parent container that holds this element */
-*:has(> #_payment_method) {
-  display: none;
-}

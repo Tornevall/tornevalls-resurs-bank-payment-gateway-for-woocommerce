@@ -58,6 +58,7 @@ class Reader implements ReaderInterface
             Url::CALLBACK_TEST_RECEIVED_AT_URL => Route::getUrl(route: RouteVariant::GetCallbackTestReceivedAt),
             Url::CACHE_CLEAR_URL => Route::getUrl(route: RouteVariant::AdminCacheInvalidate),
             Url::RELOAD_PAYMENT_INFORMATION_URL => Route::getUrl(route: RouteVariant::ReloadPaymentInformation),
+            Url::FETCH_STORES => Route::getUrl(route: RouteVariant::GetStoresAdmin),
         };
     }
 

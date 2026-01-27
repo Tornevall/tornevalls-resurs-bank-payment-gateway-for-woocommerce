@@ -64,35 +64,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 );
             }
         );
-
-        add_action('wp_enqueue_scripts', [self::class, 'enqueueAssets']);
-    }
-
-    /**
-     * Enqueue assets for the checkout block.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function enqueueAssets(): void
-    {
-        wp_register_style(
-            'rb-wc-blocks-css',
-            Url::getResourceUrl(
-                module: 'Gateway',
-                file: 'checkout-blocks.css',
-                type: ResourceType::CSS
-            )
-        );
-
-        wp_enqueue_script(
-            'rb-payment-method',
-            Route::getUrl(RouteVariant::PaymentMethodJs),
-            [],
-            '1.0.0',
-            false // Load script in header.
-        );
-
-        wp_enqueue_style('rb-wc-blocks-css');
     }
 
     /**

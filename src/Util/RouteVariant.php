@@ -98,4 +98,76 @@ enum RouteVariant: string
      * URL to reload payment information widget.
      */
     case ReloadPaymentInformation = 'reload-payment-information-js';
+
+    /**
+     * Route to controller injecting read more CSS.
+     */
+    case ReadMoreCss = 'read-more-css';
+
+    /**
+     * Controller route to render reader more JS.
+     */
+    case ReadMoreJs = 'read-more-js';
+
+    /**
+     * Route to controller injecting part payment CSS.
+     */
+    case PartPaymentCss = 'part-payment-css';
+
+    /**
+     * Controller route to render part payment JS.
+     */
+    case PartPaymentJs = 'part-payment-js';
+
+    /**
+     * Check if the route intends to load a CSS file.
+     *
+     * @return bool
+     */
+    public function isCssRoute(): bool
+    {
+        return in_array(
+            $this,
+            [
+                self::GetAddressCss,
+                self::ReadMoreCss,
+                self::PartPaymentCss,
+                self::AdminCss,
+            ],
+            true
+        );
+    }
+
+    /**
+     * Check if route intends to load a JS file.
+     *
+     * @return bool
+     */
+    public function isJsRoute(): bool
+    {
+        return in_array(
+            $this,
+            [
+                self::GetAddressJs,
+                self::ReadMoreJs,
+                self::PartPaymentJs,
+                self::AdminJs,
+                self::ReloadPaymentInformation,
+                self::PaymentMethodJs,
+            ],
+            true
+        );
+    }
+
+    public function isAdminRoute(): bool
+    {
+        return in_array(
+            $this,
+            [
+                self::AdminCss,
+                self::AdminJs,
+            ],
+            true
+        );
+    }
 }

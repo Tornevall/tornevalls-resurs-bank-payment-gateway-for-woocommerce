@@ -1,0 +1,51 @@
+/**
+ * Copyright © Resurs Bank AB. All rights reserved.
+ * See LICENSE for license details.
+ */
+
+/* Callback Test Widget */
+.rb-test-callback-container {
+    margin-top: 25px;
+}
+
+/* Callback List Widget */
+.rb-cb {
+    margin-top: 25px;
+    border-top: 1px dashed #c0c0c0;
+}
+
+/* Add spacing around clear cache button. */
+#resursbank-cache-management-container {
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+/* Correct width of error message in payment info widget on order view. */
+#rb-pi-container .rb-pi-error {
+  width: 95.7% !important;
+}
+
+/* If you need to hide the parent container that holds this element */
+.woocommerce_page_wc-orders *:has(> #_payment_method) {
+  display: none;
+}
+
+/** Get stores styling */
+.rb-store-fetching select {
+  background-image: url("/wp-admin/images/loading.gif") !important;
+}
+
+#resursbank-fetch-stores-btn {
+  border: 0;
+  background-color: #2271b1;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-left: 5px;
+  transition: background-color 0.3s ease;
+}
+
+#resursbank-fetch-stores-btn:hover {
+  background-color: #125e9b;
+}
