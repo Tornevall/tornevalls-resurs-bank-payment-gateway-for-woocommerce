@@ -20,8 +20,11 @@ use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Lib\Log\Logger;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
+use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
+use Resursbank\Ecom\Lib\Model\Rws\PaymentMethodTypeMapCollection;
 use Resursbank\Ecom\Lib\UserSettings\Field;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
+use Resursbank\Ecom\Module\Rws\Repository as RwsRepository;
 use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Ecom\Module\UserSettings\Repository as UserSettingsRepository;
@@ -135,11 +138,21 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         $result = [
             'allowed_country' => $this->getAllowedCountry(),
             'payment_methods' => [],
+            'rws_session_token' => '',
         ];
 
         try {
+            // Get RWS session token for frontend widget context.
+            $result['rws_session_token'] = $this->getRwsSessionToken();
+
+            /** @var PaymentMethodCollection $paymentMethods */
+            $paymentMethods = Repository::getPaymentMethods();
+
+            // Get RWS type mappings for payment methods.
+            $typeMap = $this->getRwsTypeMap(paymentMethods: $paymentMethods);
+
             /** @var PaymentMethod $paymentMethod */
-            foreach (Repository::getPaymentMethods() as $paymentMethod) {
+            foreach ($paymentMethods as $paymentMethod) {
                 $logo = new LogoWidget(paymentMethod: $paymentMethod);
                 $helper = new GatewayHelper(
                     paymentMethod: $paymentMethod,
@@ -156,6 +169,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     'price_signage_warning' => $helper->getPriceSignageWarning(),
                     'logo' => $logo->content,
                     'logo_type' => $logo->getIdentifier(),
+                    'rws_type' => $typeMap?->getTypeById($paymentMethod->id)?->value,
                 ];
             }
         } catch (Throwable $error) {
@@ -163,6 +177,37 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         }
 
         return $result;
+    }
+
+    /**
+     * Get RWS session token for frontend widget.
+     *
+     * @return string Session token string or empty string on failure.
+     */
+    private function getRwsSessionToken(): string
+    {
+        try {
+            return (string) RwsRepository::getSessionToken();
+        } catch (Throwable $error) {
+            Logger::error(message: $error);
+            return '';
+        }
+    }
+
+    /**
+     * Get RWS payment method type mappings.
+     *
+     * @return PaymentMethodTypeMapCollection|null Type mappings or null on failure.
+     */
+    private function getRwsTypeMap(
+        PaymentMethodCollection $paymentMethods
+    ): ?PaymentMethodTypeMapCollection {
+        try {
+            return RwsRepository::getPaymentMethodTypes(paymentMethods: $paymentMethods);
+        } catch (Throwable $error) {
+            Logger::error(message: $error);
+            return null;
+        }
     }
 
     /**

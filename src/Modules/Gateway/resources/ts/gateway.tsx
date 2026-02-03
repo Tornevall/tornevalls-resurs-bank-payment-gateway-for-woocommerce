@@ -12,6 +12,58 @@ const settings = getSetting('resursbank_data', {});
 
 declare var Resursbank_PaymentMethod: any;
 
+// Declare the global resurs object from the RWS payment widget library.
+declare global {
+    interface Window {
+        resurs?: {
+            updatePaymentMethods: (params: {
+                amount?: string;
+                token?: string;
+                customerType?: 'NATURAL' | 'LEGAL';
+            }) => void;
+        };
+    }
+
+    // Declare RWS custom elements for JSX.
+    namespace JSX {
+        interface IntrinsicElements {
+            'resurs-payment-method-title': React.DetailedHTMLProps<
+                React.HTMLAttributes<HTMLElement> & { type?: string },
+                HTMLElement
+            >;
+            'resurs-payment-method-icon': React.DetailedHTMLProps<
+                React.HTMLAttributes<HTMLElement> & { type?: string },
+                HTMLElement
+            >;
+        }
+    }
+}
+
+/**
+ * Determine customer type based on company field.
+ * Same logic as canMakePayment uses.
+ */
+const getCustomerType = (): 'NATURAL' | 'LEGAL' => {
+    const companyField = document.getElementById('billing-company') as HTMLInputElement;
+    return companyField?.value === '' ? 'NATURAL' : 'LEGAL';
+};
+
+/**
+ * Update RWS widget context with current values.
+ * Called at startup and when cart/customer type changes.
+ */
+const updateRwsContext = (amount: number): void => {
+    if (!window.resurs?.updatePaymentMethods || !settings.rws_session_token) {
+        return;
+    }
+
+    window.resurs.updatePaymentMethods({
+        token: settings.rws_session_token,
+        amount: String(amount),
+        customerType: getCustomerType(),
+    });
+};
+
 (() => {
     if (typeof getSetting !== 'function') {
         console.error('WooCommerce: getSetting is not available.');
@@ -26,6 +78,52 @@ declare var Resursbank_PaymentMethod: any;
     if (typeof select !== 'function') {
         console.error('WooCommerce: select is not available.');
         return;
+    }
+
+    // Initialize RWS widget context with initial values.
+    // Use a small delay to ensure the store is ready.
+    setTimeout(() => {
+        try {
+            const cartData = select(CART_STORE_KEY).getCartData();
+            if (cartData?.totals?.total_price) {
+                const cartTotal = parseInt(cartData.totals.total_price, 10) /
+                    Math.pow(10, cartData.totals.currency_minor_unit);
+                updateRwsContext(cartTotal);
+            }
+        } catch (e) {
+            // Store may not be ready yet, will be updated by Content component.
+        }
+    }, 100);
+
+    // Track previous values to avoid unnecessary updates.
+    let previousAmount = 0;
+    let previousCustomerType = getCustomerType();
+
+    // Set up store subscription to sync RWS context on cart/billing changes.
+    // This runs once globally, not per payment method.
+    const store = select(CART_STORE_KEY);
+    if (store?.subscribe) {
+        store.subscribe(() => {
+            try {
+                const cartData = store.getCartData();
+                if (!cartData?.totals?.total_price) {
+                    return;
+                }
+
+                const cartTotal = parseInt(cartData.totals.total_price, 10) /
+                    Math.pow(10, cartData.totals.currency_minor_unit);
+                const currentCustomerType = getCustomerType();
+
+                // Only update if amount or customer type changed.
+                if (cartTotal !== previousAmount || currentCustomerType !== previousCustomerType) {
+                    previousAmount = cartTotal;
+                    previousCustomerType = currentCustomerType;
+                    updateRwsContext(cartTotal);
+                }
+            } catch (e) {
+                // Ignore errors during subscription.
+            }
+        });
     }
 
     // Register payment methods, making them available in the checkout.
@@ -134,11 +232,27 @@ declare var Resursbank_PaymentMethod: any;
         /**
          * Label component
          *
+         * Renders RWS custom elements when session token and rws_type are available,
+         * otherwise falls back to the existing MAPI-based rendering.
+         *
          * @param {*} props Props from payment API.
          */
         const Label = (props: any) => {
             const {PaymentMethodLabel} = props.components;
 
+            // Use RWS elements only when both token and rws_type are available.
+            const useRwsElements = settings.rws_session_token && method.rws_type;
+
+            if (useRwsElements) {
+                return (
+                    <div className="rb-payment-method-title">
+                        <resurs-payment-method-title type={method.rws_type} />
+                        <resurs-payment-method-icon type={method.rws_type} />
+                    </div>
+                );
+            }
+
+            // Fallback: use existing MAPI-based rendering.
             return (
                 <div className="rb-payment-method-title">
                     <PaymentMethodLabel text={method.title}/>

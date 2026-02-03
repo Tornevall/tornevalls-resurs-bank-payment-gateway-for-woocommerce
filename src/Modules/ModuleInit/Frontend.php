@@ -9,7 +9,9 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\ModuleInit;
 
+use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Lib\Log\Logger;
+use Resursbank\Ecom\Module\Rws\Repository as RwsRepository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as EcomPartPayment;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
@@ -64,6 +66,9 @@ class Frontend
             )
         ));
 
+        // Load RWS payment widget script on checkout.
+        self::enqueueRwsWidgetScript();
+
         // Render Part Payment widget HTML.
         add_action(
             'woocommerce_single_product_summary',
@@ -79,5 +84,39 @@ class Frontend
                 }
             }
         );
+    }
+
+    /**
+     * Load the RWS payment widget script on checkout pages.
+     *
+     * The script is loaded with specific attributes required by the RWS widget:
+     * - name and id: resurs-payment-widget
+     * - data-customer-type: NATURAL (default, overridden by JS)
+     * - data-locale: BCP 47 language tag from Config::getLanguage()
+     * - type: module
+     * - crossorigin: anonymous
+     *
+     * We use wp_head to directly echo the script tag because WordPress's
+     * enqueue system doesn't properly support all the required attributes
+     * (like name, data-*, type="module") and may transform external scripts.
+     */
+    private static function enqueueRwsWidgetScript(): void
+    {
+        add_action('wp_head', static function (): void {
+            if (!is_checkout()) {
+                return;
+            }
+
+            $locale = Config::getLanguage()->toBcp47();
+            $src = RwsRepository::getWidgetScriptUrl();
+
+            printf(
+                '<script name="resurs-payment-widget" id="resurs-payment-widget" ' .
+                'data-customer-type="NATURAL" data-locale="%s" ' .
+                'type="module" crossorigin="anonymous" src="%s"></script>' . "\n",
+                esc_attr($locale),
+                esc_url($src)
+            );
+        });
     }
 }
