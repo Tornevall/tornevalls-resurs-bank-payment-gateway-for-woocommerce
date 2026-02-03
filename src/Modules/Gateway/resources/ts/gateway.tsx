@@ -12,6 +12,18 @@ const settings = getSetting('resursbank_data', {});
 
 declare var Resursbank_PaymentMethod: any;
 
+/**
+ * Track the currently selected RWS payment method ID.
+ * This is updated when user selects a payment method within an RWS widget.
+ */
+let selectedRwsMethodId: string | null = null;
+
+/**
+ * Get the currently selected RWS payment method ID.
+ * Used by payment processing to determine which actual method was selected.
+ */
+export const getSelectedRwsMethodId = (): string | null => selectedRwsMethodId;
+
 // Declare the global resurs object from the RWS payment widget library.
 declare global {
     interface Window {
@@ -133,6 +145,38 @@ const updateRwsContext = (amount: number): void => {
             }
         });
     }
+
+    /**
+     * Listen for RWS payment method selection events.
+     *
+     * When a user selects a payment method within an RWS widget (which may contain
+     * multiple sub-options), this event fires with the selected methodId.
+     * We track this to ensure WooCommerce processes the correct payment method.
+     */
+    window.addEventListener('resursPaymentMethodSelected', ((event: CustomEvent) => {
+        if (event.detail === null) {
+            // Payment method was deselected.
+            selectedRwsMethodId = null;
+            return;
+        }
+
+        const { methodId, type } = event.detail;
+
+        if (methodId) {
+            // Store the selected method ID for payment processing.
+            selectedRwsMethodId = methodId;
+
+            // Find and select the corresponding WooCommerce payment method.
+            // The methodId should match one of our registered payment method names.
+            const radioInput = document.querySelector(
+                `input[name="radio-control-wc-payment-method-options"][value="${methodId}"]`
+            ) as HTMLInputElement;
+
+            if (radioInput && !radioInput.checked) {
+                radioInput.click();
+            }
+        }
+    }) as EventListener);
 
     // Register payment methods, making them available in the checkout.
     settings.payment_methods.forEach((method: any) => {
