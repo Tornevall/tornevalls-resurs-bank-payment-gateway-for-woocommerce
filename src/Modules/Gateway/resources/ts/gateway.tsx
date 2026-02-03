@@ -35,6 +35,14 @@ declare global {
                 React.HTMLAttributes<HTMLElement> & { type?: string },
                 HTMLElement
             >;
+            'resurs-payment-method-subtitle': React.DetailedHTMLProps<
+                React.HTMLAttributes<HTMLElement> & { type?: string; amount?: string },
+                HTMLElement
+            >;
+            'resurs-payment-method': React.DetailedHTMLProps<
+                React.HTMLAttributes<HTMLElement> & { type?: string; token?: string; amount?: string },
+                HTMLElement
+            >;
         }
     }
 }
@@ -165,12 +173,35 @@ const updateRwsContext = (amount: number): void => {
 
         /**
          * Payment method content.
+         *
+         * Renders RWS custom elements when session token and rws_type are available,
+         * otherwise falls back to the existing MAPI-based rendering.
          */
         const Content = () => {
             const cartData = select(CART_STORE_KEY).getCartData();
             const customerData = select(CART_STORE_KEY).getCustomerData();
             const cartTotal = calculateCartTotal(cartData);
 
+            // Use RWS elements only when both token and rws_type are available.
+            const useRwsElements = settings.rws_session_token && method.rws_type;
+
+            if (useRwsElements) {
+                return (
+                    <div>
+                        <resurs-payment-method-subtitle
+                            type={method.rws_type}
+                            amount={String(cartTotal)}
+                        />
+                        <resurs-payment-method
+                            type={method.rws_type}
+                            token={settings.rws_session_token}
+                            amount={String(cartTotal)}
+                        />
+                    </div>
+                );
+            }
+
+            // Fallback: use existing MAPI-based rendering.
             const billingCountry = customerData?.billingAddress?.country || '';
             const shippingCountry = customerData?.shippingAddress?.country || '';
 
