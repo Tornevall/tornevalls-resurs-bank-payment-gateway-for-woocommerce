@@ -44,7 +44,8 @@ class Admin
      * contexts: admin, REST, AJAX, and Resurs Bank callbacks.
      *
      * Use this as a guard before rendering checkout UI components (payment fields,
-     * assets, USP text, etc.) to ensure they only run during actual frontend checkout.
+     * assets, USP text, etc. - especially when we are depending on USP and priceSignage)
+     * to ensure they only run during actual frontend checkout.
      */
     public static function isFrontendContext(): bool
     {
