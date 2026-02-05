@@ -29,6 +29,32 @@ class Admin
         }
     }
 
+    /**
+     * Determine if we are in a frontend rendering context.
+     *
+     * This method exists because WooCommerce may instantiate gateways in wp-admin
+     * (e.g., for building lists, checking availability, fetching gateway data,
+     * hooks, block/analytics/order views, etc.) even when no checkout is in progress.
+     * Additionally, wp-admin requests may still appear to have an active cart
+     * (via session state or HPOS), causing payment field and USP rendering to run
+     * incorrectly.
+     *
+     * Standard signals like is_admin(), is_ajax(), and cart presence are unreliable
+     * for this purpose. This method provides a consolidated check for all non-frontend
+     * contexts: admin, REST, AJAX, and Resurs Bank callbacks.
+     *
+     * Use this as a guard before rendering checkout UI components (payment fields,
+     * assets, USP text, etc.) to ensure they only run during actual frontend checkout.
+     */
+    public static function isFrontendContext(): bool
+    {
+        return !defined(constant_name: 'IS_RESURS_CALLBACK')
+            && !is_admin()
+            && !defined(constant_name: 'WP_ADMIN')
+            && !defined(constant_name: 'REST_REQUEST')
+            && !(defined(constant_name: 'DOING_AJAX') && DOING_AJAX);
+    }
+
     public static function getAdminErrorNote(string $message, string $additional = ''): void
     {
         if (!self::isAdmin()) {

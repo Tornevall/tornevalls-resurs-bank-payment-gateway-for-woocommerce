@@ -51,6 +51,17 @@ class Callback
      */
     public static function init(): void
     {
+        // Flag as early as possible, for both GET/POST, before other hooks rely on it.
+        $route = $_REQUEST['wc-api'] ?? null;
+
+        if (
+            $route === Route::ROUTE_PARAM &&
+            isset($_REQUEST['callback']) &&
+            !defined(constant_name: 'IS_RESURS_CALLBACK')
+        ) {
+            define(constant_name: 'IS_RESURS_CALLBACK', value: true);
+        }
+
         add_action(
             'woocommerce_api_' . Route::ROUTE_PARAM,
             'Resursbank\Woocommerce\Modules\Callback\Callback::execute'

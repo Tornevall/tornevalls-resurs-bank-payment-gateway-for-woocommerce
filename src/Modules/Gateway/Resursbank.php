@@ -283,23 +283,43 @@ class Resursbank extends WC_Payment_Gateway
         return AdminUtility::isAdmin() || WC()->cart === null;
     }
 
+    /**
+     * Pre-generate USP and payment field HTML for checkout rendering.
+     *
+     * This method is called from the constructor to cache the payment field content
+     * in $this->uspText, which is then output by payment_fields(). The caching avoids
+     * repeated API calls to getUniqueSellingPoint() if payment_fields() is called
+     * multiple times during a request (common in Blocks checkout).
+     *
+     * Guards ensure this only runs in valid frontend checkout contexts. WooCommerce
+     * may instantiate gateways in wp-admin or during callbacks where rendering is
+     * unnecessary. See AdminUtility::isFrontendContext() for details.
+     */
     private function generatePaymentFieldsHtml(): void
     {
         try {
-            if (AdminUtility::isAdmin() || WC()?->cart === null) {
-                // Do not render payment fields in admin.
+            if (
+                !AdminUtility::isFrontendContext() ||
+                !is_checkout() ||
+                WC()?->cart === null ||
+                (float)WC()?->cart->total <= 0.0
+            ) {
                 return;
             }
 
-            $gatewayHelper = new GatewayHelper(paymentMethod: $this->method);
-            $usp = PaymentMethodRepository::getUniqueSellingPoint(
-                paymentMethod: $this->method,
-                amount: $this->get_order_total()
-            );
-            $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
-                paymentMethod: $this->method,
-                amount: $this->get_order_total()
-            );
+            if ($this->method instanceof PaymentMethod) {
+                $gatewayHelper = new GatewayHelper(
+                    paymentMethod: $this->method
+                );
+                $usp = PaymentMethodRepository::getUniqueSellingPoint(
+                    paymentMethod: $this->method,
+                    amount: $this->get_order_total()
+                );
+                $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
+                    paymentMethod: $this->method,
+                    amount: $this->get_order_total()
+                );
+            }
         } catch (TranslationException $error) {
             // Translation errors should rather  go as debug messages since we
             // translate with english fallbacks.

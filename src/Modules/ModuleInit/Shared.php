@@ -16,6 +16,7 @@ use Resursbank\Woocommerce\Modules\Callback\Callback;
 use Resursbank\Woocommerce\Modules\Gateway\Gateway;
 use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
 use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbank\Woocommerce\Util\Admin as AdminUtility;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use WC_Order;
@@ -44,14 +45,18 @@ class Shared
             return;
         }
 
+        Callback::init();
+
         // Assets must be enqueued, not called directly.
-        add_action(
-            'wp_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
-        );
+        // During callbacks, assets are unnecessary and may be blocked by unrelated errors.
+        if (AdminUtility::isFrontendContext()) {
+            add_action(
+                'wp_enqueue_scripts',
+                'Resursbank\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
+            );
+        }
 
         Gateway::init();
-        Callback::init();
         GetAddress::init();
     }
 
