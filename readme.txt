@@ -1,5 +1,5 @@
 === Resurs Bank Payments for WooCommerce ===
-Contributors: Resurs Bank AB
+Contributors: RB-Tornevall, rbonboarding
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank
 Requires at least: 6.0
 Tested up to: 6.9
