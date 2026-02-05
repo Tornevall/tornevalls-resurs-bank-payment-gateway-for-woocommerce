@@ -57,7 +57,6 @@ class Callback
      */
     public static function init(): void
     {
-        // Flag as early as possible, for both GET/POST, before other hooks rely on it.
         $route = $_GET['wc-api'] ?? null;
 
         if (
