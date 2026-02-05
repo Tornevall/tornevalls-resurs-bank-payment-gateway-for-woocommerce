@@ -41,22 +41,30 @@ class Callback
     private const MINIMUM_RESPONSE_DELAY = 60;
 
     /**
-     * Setup endpoint for incoming callbacks using the WC API.
+     * Register the WC API endpoint used for Resurs Bank callbacks.
      *
-     * NOTE: we are required to use the API here because otherwise we will not
-     * have access to our orders on frontend. If we attempt to use our regular
-     * controller pattern orders are inaccessible.
+     * We use WooCommerce's `wc-api` route to handle callbacks because it gives us
+     * reliable access to WooCommerce order APIs in a frontend request context.
+     *
+     * The same `wc-api` route may be used for other requests, so we only flag
+     * requests that include the `callback` query parameter.
+     *
+     * `IS_RESURS_CALLBACK` is defined *before* the action is registered so other
+     * components (request context checks, asset loading, payment field rendering)
+     * can short-circuit early.
+     *
+     * Note: the callback type is passed via query string, so `$_GET` is enough.
      *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function init(): void
     {
         // Flag as early as possible, for both GET/POST, before other hooks rely on it.
-        $route = $_REQUEST['wc-api'] ?? null;
+        $route = $_GET['wc-api'] ?? null;
 
         if (
             $route === Route::ROUTE_PARAM &&
-            isset($_REQUEST['callback']) &&
+            isset($_GET['callback']) &&
             !defined(constant_name: 'IS_RESURS_CALLBACK')
         ) {
             define(constant_name: 'IS_RESURS_CALLBACK', value: true);
