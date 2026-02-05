@@ -29,6 +29,8 @@ use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
+use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
+use Resursbank\Ecom\Module\Rws\Repository as RwsRepository;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
@@ -68,14 +70,38 @@ class Resursbank extends WC_Payment_Gateway
      * NOTE: This is only used in legacy checkout, blocks render the checkout
      * using React components instead.
      *
+     * When RWS (Resurs Widget Service) is available for this payment method,
+     * renders RWS custom elements. Otherwise, falls back to MAPI-based rendering.
+     *
      * @noinspection PhpMissingParentCallCommonInspection
      */
     public function payment_fields(): void
     {
         try {
+            $amount = $this->get_order_total();
+
+            // Try to get RWS type and session token for this payment method.
+            $rwsType = $this->getRwsType();
+            $sessionToken = $this->getRwsSessionToken();
+
+            // Use RWS elements if both type and token are available.
+            if ($rwsType !== null && $sessionToken !== '') {
+                printf(
+                    '<resurs-payment-method-subtitle type="%s" amount="%s"></resurs-payment-method-subtitle>' .
+                    '<resurs-payment-method type="%s" token="%s" amount="%s"></resurs-payment-method>',
+                    esc_attr($rwsType),
+                    esc_attr((string) $amount),
+                    esc_attr($rwsType),
+                    esc_attr($sessionToken),
+                    esc_attr((string) $amount)
+                );
+                return;
+            }
+
+            // Fallback: use existing MAPI-based rendering.
             $gatewayHelper = new GatewayHelper(
                 paymentMethod: $this->method,
-                amount: $this->get_order_total()
+                amount: $amount
             );
 
             echo $gatewayHelper->getUspWidget() .
@@ -86,6 +112,45 @@ class Resursbank extends WC_Payment_Gateway
                 '</div>';
         } catch (Throwable $error) {
             Logger::error(message: $error);
+        }
+    }
+
+    /**
+     * Get the RWS type for this payment method.
+     *
+     * @return string|null RWS type string or null if not available.
+     */
+    private function getRwsType(): ?string
+    {
+        try {
+            // Get all payment methods to build the type map.
+            $paymentMethods = PaymentMethodRepository::getPaymentMethods();
+            $typeMap = RwsRepository::getPaymentMethodTypes(paymentMethods: $paymentMethods);
+
+            if ($typeMap === null) {
+                return null;
+            }
+
+            $rwsType = $typeMap->getTypeById($this->method->id);
+            return $rwsType?->value;
+        } catch (Throwable $error) {
+            Logger::error(message: $error);
+            return null;
+        }
+    }
+
+    /**
+     * Get the RWS session token.
+     *
+     * @return string Session token or empty string if not available.
+     */
+    private function getRwsSessionToken(): string
+    {
+        try {
+            return (string) RwsRepository::getSessionToken();
+        } catch (Throwable $error) {
+            Logger::error(message: $error);
+            return '';
         }
     }
 
