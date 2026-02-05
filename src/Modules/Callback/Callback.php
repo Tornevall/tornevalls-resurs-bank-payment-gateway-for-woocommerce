@@ -53,8 +53,6 @@ class Callback
      * components (request context checks, asset loading, payment field rendering)
      * can short-circuit early.
      *
-     * Note: the callback type is passed via query string, so `$_GET` is enough.
-     *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function init(): void
