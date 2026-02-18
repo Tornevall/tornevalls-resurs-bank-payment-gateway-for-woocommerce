@@ -22,7 +22,7 @@ A payment is expected to be simple, secure and fast, regardless of whether it ta
 At checkout, your customer can choose between several flexible payment options, something that not only provides a better shopping experience but also generates more and larger purchases.
 
 Sign up for Resurs!
-Find out more in about the plugin in our documentation.
+[Find out more in about the plugin in our documentation](https://developers.resurs.com/platform-plugins/woocommerce).
 
 = System Requirements =
 
