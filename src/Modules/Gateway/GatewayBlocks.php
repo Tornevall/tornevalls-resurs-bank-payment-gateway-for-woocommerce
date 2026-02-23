@@ -31,6 +31,11 @@ use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * This class adds support for Resurs Bank payment methods in the WooCommerce
  * blocks based checkout.

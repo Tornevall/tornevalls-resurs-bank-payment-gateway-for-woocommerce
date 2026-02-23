@@ -12,6 +12,11 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Throwable;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * General utility functionality for admin-side things
  */
@@ -40,10 +45,10 @@ class Admin
             'admin_notices',
             static function () use ($message, $additional): void {
                 echo '<div class="notice notice-error">';
-                echo $message;
+                echo wp_kses_post($message);
 
                 if ($additional !== '') {
-                    echo '<br />' . $additional;
+                    echo '<br />' . wp_kses_post($additional);
                 }
 
                 echo '</div>';

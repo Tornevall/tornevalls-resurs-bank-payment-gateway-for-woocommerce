@@ -39,6 +39,12 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
+use WC_Order_Refund;
+
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
 
 /**
  * Business logic relating to order management functionality.

@@ -20,6 +20,11 @@ use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use WC_Order;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Module initialization class for functionality shared between both the frontend and wp-admin.
  */

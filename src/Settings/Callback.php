@@ -104,7 +104,9 @@ class Callback
     private static function getTestReceivedAt(): array
     {
         $time = TestReceivedAt::getData();
-        $date = $time > 0 ? date(format: 'Y-m-d H:i:s', timestamp: $time) : '';
+        $date = $time > 0
+            ? gmdate(format: 'Y-m-d H:i:s', timestamp: $time)
+            : '';
 
         return [
             'id' => TestReceivedAt::getName(),

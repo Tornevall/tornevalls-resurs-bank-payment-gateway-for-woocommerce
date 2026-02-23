@@ -20,6 +20,11 @@ use Throwable;
 
 use function is_array;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * General business logic for settings.
  *
@@ -187,6 +192,7 @@ class Settings
 
     /**
      * Add link to "Settings" page for our plugin in WP admin.
+     *
      * @noinspection HtmlUnknownTarget
      */
     public static function addPluginActionLinks(

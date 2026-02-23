@@ -13,6 +13,11 @@ use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 use WC_Order;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Event executed when failure page is reached.
  */
@@ -69,7 +74,7 @@ class Failure
             );
 
             if (!headers_sent()) {
-                wp_redirect(wc_get_checkout_url());
+                wp_safe_redirect(wc_get_checkout_url());
                 exit;
             }
         } catch (Throwable) {

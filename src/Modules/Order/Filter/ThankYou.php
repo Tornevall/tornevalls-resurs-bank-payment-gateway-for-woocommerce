@@ -18,6 +18,11 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Event executed when "Thank You" page is rendered after completing checkout.
  */

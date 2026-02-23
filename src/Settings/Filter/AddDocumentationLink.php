@@ -13,6 +13,11 @@ use Resursbank\Woocommerce\Util\Translator;
 
 use function is_array;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Add documentation link to Plugins page.
  */

@@ -29,6 +29,11 @@ use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Product;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Part payment widget
  */
@@ -80,6 +85,7 @@ class PartPayment
      * Output widget HTML if on a single product page.
      *
      * @throws ConfigException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function renderWidget(): void
     {
@@ -104,7 +110,7 @@ class PartPayment
             );
 
             echo '<div id="rb-pp-widget-container">' .
-                $widget->content .
+                wp_kses_post($widget->content) .
                 '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);

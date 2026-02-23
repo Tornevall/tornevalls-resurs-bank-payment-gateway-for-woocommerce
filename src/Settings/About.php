@@ -26,10 +26,13 @@ class About
 
     /**
      * Set up css for the About widget.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setCss(): void
     {
-        echo '<style>' . ((new EcomSupportInfoCss())->content ?? '') . "</style>\n";
+        $css = (new EcomSupportInfoCss())->content ?? '';
+        echo '<style>' . esc_html($css) . "</style>\n";
     }
 
     /**

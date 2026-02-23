@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\MessageBag;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Possible message types and their corresponding CSS class for message div.
  */

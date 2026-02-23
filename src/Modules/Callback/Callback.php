@@ -27,8 +27,12 @@ use Resursbank\Woocommerce\Util\Route;
 use Throwable;
 use WC_DateTime;
 use WC_Order;
-
 use function is_string;
+
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
 
 /**
  * Implementation of callback module.

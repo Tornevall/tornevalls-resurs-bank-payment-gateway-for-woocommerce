@@ -32,6 +32,11 @@ use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use function is_array;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Implementation of Resurs Bank gateway.
  */

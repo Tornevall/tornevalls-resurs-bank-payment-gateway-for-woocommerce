@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Resource type enum.
  *

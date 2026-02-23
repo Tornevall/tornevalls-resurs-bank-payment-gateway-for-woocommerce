@@ -187,6 +187,7 @@ class Metadata
     {
         $result = null;
 
+        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
         $orders = wc_get_orders(args: [
             'meta_key' => self::KEY_PAYMENT_ID,
             'meta_value' => $paymentId,

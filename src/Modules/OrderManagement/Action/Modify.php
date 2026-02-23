@@ -31,8 +31,11 @@ use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-use WC_Abstract_Order;
-use WC_Order;
+
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
 
 /**
  * Business logic to modify Resurs Bank payment.
@@ -152,8 +155,8 @@ class Modify extends Action
 
                 if (
                     count(
-                    value: $orderLines
-                ) > 0 &&
+                        value: $orderLines
+                    ) > 0 &&
                     $orderLines->getTotal() > 0
                 ) {
                     Repository::addOrderLines(
@@ -231,6 +234,7 @@ class Modify extends Action
 
     /**
      * Handle logging of validation errors.
+     *
      * @throws \Exception
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */

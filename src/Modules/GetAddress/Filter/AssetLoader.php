@@ -67,7 +67,7 @@ class AssetLoader
      */
     public static function enqueueCostListStyle(): void
     {
-        wp_register_style('rb-costlist-css', false);
+        wp_register_style('rb-costlist-css', false, [], '1.0.0');
         wp_enqueue_style('rb-costlist-css');
         wp_add_inline_style(
             'rb-costlist-css',
@@ -87,7 +87,9 @@ class AssetLoader
         wp_register_script(
             'rb-costlist-js',
             '',
-            []
+            [],
+            '1.0.0',
+            true
         );
         wp_enqueue_script('rb-costlist-js');
         wp_add_inline_script('rb-costlist-js', $costListJs);
@@ -102,14 +104,14 @@ class AssetLoader
             $css = '';
         }
 
-        wp_register_style('rb-pp-styles', false);
+        wp_register_style('rb-pp-styles', false, [], '1.0.0');
         wp_enqueue_style('rb-pp-styles');
         wp_add_inline_style(
             'rb-pp-styles',
             WooCommerce::getRenderedWithNoCrLf(content: $css)
         );
 
-        wp_register_style('rb-pp-css-extra', false);
+        wp_register_style('rb-pp-css-extra', false, [], '1.0.0');
         wp_enqueue_style('rb-pp-css-extra');
         wp_add_inline_style(
             'rb-pp-css-extra',
@@ -130,7 +132,7 @@ class AssetLoader
             $readMoreCss = '';
         }
 
-        wp_register_style('rb-read-more-style', false);
+        wp_register_style('rb-read-more-style', false, [], '1.0.0');
         wp_enqueue_style('rb-read-more-style');
         wp_add_inline_style(
             'rb-read-more-style',
@@ -148,7 +150,9 @@ class AssetLoader
             wp_register_script(
                 'rb-pp-readmore-js',
                 '',
-                []
+                [],
+                '1.0.0',
+                true
             );
             wp_enqueue_script('rb-pp-readmore-js');
             wp_add_inline_script(
@@ -167,7 +171,9 @@ class AssetLoader
         wp_register_script(
             'rb-rm-readmore-js',
             '',
-            []
+            [],
+            '1.0.0',
+            true
         );
         wp_enqueue_script('rb-rm-readmore-js');
         wp_add_inline_script(
@@ -251,18 +257,16 @@ class AssetLoader
      */
     private static function getPartPaymentCssExtras(): string
     {
-        return <<<EX
-  .rb-usp {
-	display: block;
-	background-color: rgba(0, 155, 145, 0.8);
-	border-radius: 4px;
-	padding: 10px;
-	color: #fff;
-	margin: 0 0 15px 0;
-  }
-  .rb-ps-cl-container {
-    margin-bottom: 10px;
-  }
-EX;
+        return ".rb-usp {\n" .
+            "\tdisplay: block;\n" .
+            "\tbackground-color: rgba(0, 155, 145, 0.8);\n" .
+            "\tborder-radius: 4px;\n" .
+            "\tpadding: 10px;\n" .
+            "\tcolor: #fff;\n" .
+            "\tmargin: 0 0 15px 0;\n" .
+            "}\n" .
+            ".rb-ps-cl-container {\n" .
+            "\tmargin-bottom: 10px;\n" .
+            "}\n";
     }
 }

@@ -67,14 +67,12 @@ class SettingsPage extends WC_Settings_Page
             Log::error(error: $error);
         }
 
-        echo <<<EX
-<tr>
-  <th scope="row" class="titledesc" />
-  <td class="forminp">
-    $element
-  </td>
-</tr>
-EX;
+        echo '<tr>' .
+            '<th scope="row" class="titledesc" />' .
+            '<td class="forminp">' .
+            wp_kses_post($element) .
+            '</td>' .
+            '</tr>';
     }
 
     /**
@@ -172,7 +170,9 @@ EX;
                 );
             }
 
-            echo PaymentMethods::getOutput(storeId: StoreId::getData());
+            echo wp_kses_post(
+                PaymentMethods::getOutput(storeId: StoreId::getData())
+            );
         } catch (Throwable $e) {
             Log::error(error: $e, message: $e->getMessage());
 
@@ -186,7 +186,7 @@ EX;
     public function renderAboutPage(): void
     {
         try {
-            echo About::getWidgetHtml();
+            echo wp_kses_post(About::getWidgetHtml());
         } catch (Throwable $error) {
             Log::error(error: $error);
 

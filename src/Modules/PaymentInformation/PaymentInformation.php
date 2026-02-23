@@ -25,6 +25,11 @@ use Resursbank\Ecom\Module\Widget\PaymentInformation\Css as EcomPaymentInformati
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Html as EcomPaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Handles the output of the order view payment information widget
  *
@@ -45,6 +50,8 @@ class PaymentInformation
 
     /**
      * Sets CSS in header if the current page is the order view.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setCss(): void
     {
@@ -53,7 +60,7 @@ class PaymentInformation
         }
 
         echo '<style>' .
-            (new EcomPaymentInformationCss())->content .
+            esc_html((new EcomPaymentInformationCss())->content) .
             '</style>';
     }
 

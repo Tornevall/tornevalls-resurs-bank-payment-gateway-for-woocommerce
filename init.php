@@ -10,8 +10,11 @@
  * Version: 1.2.20
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
- * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
+ * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
  * Text Domain: resurs-bank-payments-for-woocommerce
+ * Domain Path: /languages
+ * License: GPLv2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Requires Plugins: woocommerce
  *
  * @noinspection PhpCSValidationInspection

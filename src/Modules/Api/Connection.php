@@ -39,9 +39,11 @@ use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
-use WC_Logger;
 
-use function function_exists;
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
 
 /**
  * API connection adapter.
@@ -163,7 +165,8 @@ class Connection
         return new Jwt(
             clientId: ClientId::getData(),
             clientSecret: ClientSecret::getData(),
-            grantType: GrantType::CREDENTIALS
+            grantType: GrantType::CREDENTIALS,
+            cacheToken: true
         );
     }
 

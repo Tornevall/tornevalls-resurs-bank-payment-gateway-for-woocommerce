@@ -19,6 +19,11 @@ use Resursbank\Woocommerce\Util\Admin as AdminUtil;
 use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Part payment admin functionality
  */

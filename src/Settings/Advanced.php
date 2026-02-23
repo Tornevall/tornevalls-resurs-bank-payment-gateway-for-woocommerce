@@ -79,7 +79,7 @@ class Advanced
         return [
             'id' => LogEnabled::getName(),
             'type' => 'checkbox',
-            'desc' => __('Yes'),
+            'desc' => __('Yes', 'resurs-bank-payments-for-woocommerce'),
             'title' => Translator::translate(phraseId: 'log-enabled'),
             'desc_tip' => 'Default: ' . LogEnabled::getDefault(),
             'default' => LogEnabled::getDefault()
@@ -142,7 +142,7 @@ class Advanced
             'id' => EnableCache::getName(),
             'title' => Translator::translate(phraseId: 'cache-enabled'),
             'type' => 'checkbox',
-            'desc' => __('Yes'),
+            'desc' => __('Yes', 'resurs-bank-payments-for-woocommerce'),
             'default' => EnableCache::getDefault(),
             'desc_tip' => 'Default: ' . EnableCache::getDefault(),
         ];
@@ -171,7 +171,7 @@ class Advanced
             'title' => Translator::translate(
                 phraseId: 'enable-widget-to-get-address'
             ),
-            'desc' => __('Yes'),
+            'desc' => __('Yes', 'resurs-bank-payments-for-woocommerce'),
             'default' => EnableGetAddress::getData(),
             'desc_tip' => 'Only available in Sweden.<br>Default: ' . EnableGetAddress::getDefault(),
         ];
@@ -187,7 +187,7 @@ class Advanced
             'id' => ForcePaymentMethodSortOrder::getName(),
             'title' => 'Sort payment methods according to admin',
             'type' => 'checkbox',
-            'desc' => __('Yes'),
+            'desc' => __('Yes', 'resurs-bank-payments-for-woocommerce'),
             'default' => ForcePaymentMethodSortOrder::getDefault(),
             'desc_tip' => 'Default: ' . ForcePaymentMethodSortOrder::getDefault(),
         ];
@@ -202,7 +202,7 @@ class Advanced
             'id' => SetMethodCountryRestriction::getName(),
             'title' => 'Restrict payment methods display in checkout to API country',
             'type' => 'checkbox',
-            'desc' => __('Yes'),
+            'desc' => __('Yes', 'resurs-bank-payments-for-woocommerce'),
             'default' => SetMethodCountryRestriction::getDefault(),
             'desc_tip' => 'Default: ' . SetMethodCountryRestriction::getDefault(),
         ];
@@ -254,7 +254,7 @@ class Advanced
             'title' => Translator::translate(
                 phraseId: 'enable-widget-to-get-address'
             ),
-            'value' => __('Disabled'),
+            'value' => __('Disabled', 'resurs-bank-payments-for-woocommerce'),
             'desc' => '<b>Not available in this country (' . $countryCode . ')</b>',
             // phpcs:ignore
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none; font-weight: bold',

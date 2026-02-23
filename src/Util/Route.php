@@ -41,9 +41,15 @@ use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Callback;
 use Throwable;
+
 use function is_string;
 use function str_contains;
 use function strlen;
+
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
 
 /**
  * Primitive routing, executing arbitrary code depending on $_GET parameters.
@@ -107,7 +113,6 @@ class Route
      * Route to get updated cost list HTML.
      */
     public const ROUTE_COSTLIST = 'get-costlist';
-
 
     /**
      * Route to get JSON response with store country (usually happens after a save for which that value is delayed
@@ -225,6 +230,20 @@ class Route
         header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
+        $normalizedType = strtolower($contentType);
+
+        if (str_starts_with($normalizedType, 'text/html')) {
+            echo wp_kses_post($body);
+            return;
+        }
+
+        if (str_starts_with($normalizedType, 'text/plain')) {
+            echo esc_html($body);
+            return;
+        }
+
+        // Non-HTML responses (JSON/CSS/JS) must not be escaped.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo $body;
     }
 
@@ -384,7 +403,10 @@ class Route
                 $amount = isset($_GET['amount']) ? (float)$_GET['amount'] : 0;
 
                 try {
-                    $paymentMethod = Repository::getById(paymentMethodId: $methodId);
+                    $paymentMethod = Repository::getById(
+                        paymentMethodId: $methodId
+                    );
+
                     if (!$paymentMethod instanceof PaymentMethod) {
                         self::respondWithExit(
                             body: wp_json_encode(
@@ -405,6 +427,7 @@ class Route
                 } catch (Throwable $e) {
                     self::respondWithError(exception: $e);
                 }
+
                 break;
 
             default:
@@ -432,8 +455,8 @@ class Route
     private static function userIsAdmin(): bool
     {
         return is_user_logged_in() && current_user_can(
-                capability: 'administrator'
-            );
+            capability: 'administrator'
+        );
     }
 
     /**
@@ -442,9 +465,9 @@ class Route
     private static function getUrlWithProperTrailingSlash(string $url): string
     {
         return preg_replace(
-                pattern: '/\/$/',
-                replacement: '',
-                subject: $url
-            ) . '/';
+            pattern: '/\/$/',
+            replacement: '',
+            subject: $url
+        ) . '/';
     }
 }

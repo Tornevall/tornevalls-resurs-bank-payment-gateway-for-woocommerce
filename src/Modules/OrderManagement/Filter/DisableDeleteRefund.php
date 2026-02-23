@@ -13,6 +13,7 @@ use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Metadata;
 use WC_Order;
+use WP_Post;
 
 /**
  * Disable control to delete applied refunds.
@@ -24,7 +25,12 @@ class DisableDeleteRefund
      */
     public static function exec(): void
     {
-        $orderId = $_GET['post'] ?? null;
+        $orderId = 0;
+        $post = get_post();
+
+        if ($post instanceof WP_Post) {
+            $orderId = $post->ID;
+        }
 
         // Prioritize HPOS for order id.
         $testOrder = wc_get_order();
@@ -34,7 +40,7 @@ class DisableDeleteRefund
         }
 
         if (
-            !is_numeric(value: $orderId) ||
+            $orderId <= 0 ||
             !Admin::isInShopOrderEdit()
         ) {
             return;
@@ -46,12 +52,10 @@ class DisableDeleteRefund
             return;
         }
 
-        echo <<<EOL
-  <style>
-    .refund .delete_refund {
-      display: none !important;
-    }  
-  </style>
-EOL;
+        echo '<style>' .
+            '.refund .delete_refund {' .
+            'display: none !important;' .
+            '}' .
+            '</style>';
     }
 }

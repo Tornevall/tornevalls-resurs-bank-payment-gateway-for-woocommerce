@@ -133,7 +133,7 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function payment_fields(): void
     {
-        echo $this->uspText;
+        echo wp_kses_post($this->uspText);
     }
 
     /**
@@ -157,7 +157,9 @@ class Resursbank extends WC_Payment_Gateway
                 $blockCreateErrorMessage &&
                 WooCommerce::isUsingBlocksCheckout()
             ) {
-                throw new Exception(message: $blockCreateErrorMessage);
+                throw new Exception(
+                    message: esc_html((string)$blockCreateErrorMessage)
+                );
             }
         }
 
@@ -288,6 +290,10 @@ class Resursbank extends WC_Payment_Gateway
         try {
             if (AdminUtility::isAdmin() || WC()?->cart === null) {
                 // Do not render payment fields in admin.
+                return;
+            }
+
+            if (!$this->method instanceof PaymentMethod) {
                 return;
             }
 

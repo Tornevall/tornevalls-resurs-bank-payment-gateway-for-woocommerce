@@ -36,6 +36,11 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Generates the settings form for the Part payment module.
  *

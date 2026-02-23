@@ -15,6 +15,7 @@ use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 /**
@@ -52,6 +53,8 @@ class InjectFetchAddressWidget
                 replacement: ' ',
                 subject: (new Widget())->content
             );
+
+            $result = WordPress::sanitizeWidgetHtml($result);
         } catch (Throwable $e) {
             try {
                 Config::getLogger()->error(

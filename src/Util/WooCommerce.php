@@ -224,7 +224,10 @@ class WooCommerce
             !is_readable(filename: $filePath)
         ) {
             throw new FilesystemException(
-                message: "Asset file not found or inaccessible: $filePath"
+                message: sprintf(
+                    'Asset file not found or inaccessible: %s',
+                    esc_html($filePath)
+                )
             );
         }
 
@@ -234,7 +237,10 @@ class WooCommerce
         // Check if version exists and is valid.
         if (empty($assets['version'])) {
             throw new EmptyValueException(
-                message: "Version not found or empty in asset file: $filePath"
+                message: sprintf(
+                    'Version not found or empty in asset file: %s',
+                    esc_html($filePath)
+                )
             );
         }
 

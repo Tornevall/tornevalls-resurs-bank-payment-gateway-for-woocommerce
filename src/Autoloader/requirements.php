@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+// Prevent direct access.
+if (!defined(constant_name: 'ABSPATH')) {
+    exit;
+}
+
 /**
  * Add admin notice when dependencies like ecom are missing.
  */

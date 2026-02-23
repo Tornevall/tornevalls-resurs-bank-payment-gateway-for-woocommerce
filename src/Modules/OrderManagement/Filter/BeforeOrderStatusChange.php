@@ -12,6 +12,8 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Exception;
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -19,8 +21,6 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
@@ -184,9 +184,9 @@ class BeforeOrderStatusChange
 
             if ($payment->isFrozen()) {
                 throw new Exception(
-                    Translator::translate(
+                    esc_html(Translator::translate(
                         phraseId: 'unable-to-capture-frozen-order'
-                    )
+                    ))
                 );
             }
         }

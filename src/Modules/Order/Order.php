@@ -32,6 +32,11 @@ use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * WC_Order related business logic.
  */
@@ -103,14 +108,18 @@ class Order
             wp_enqueue_script(
                 'rb-get-order-content-admin-scripts',
                 $url,
-                ['jquery']
+                ['jquery'],
+                '1.0.0',
+                true
             );
 
             // Echo constant containing URL to get new order view content.
             wp_register_script(
                 'rb-get-order-content-admin-inline-scripts',
                 '',
-                ['rb-get-order-content-admin-scripts']
+                ['rb-get-order-content-admin-scripts'],
+                '1.0.0',
+                true
             );
             wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
             wp_add_inline_script(
@@ -208,7 +217,7 @@ class Order
         }
 
         // Skip sanitizing of data here.
-        echo $data;
+        echo wp_kses_post($data);
     }
 
     /**
