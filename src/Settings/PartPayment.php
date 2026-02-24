@@ -186,6 +186,7 @@ class PartPayment
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
@@ -247,6 +248,7 @@ class PartPayment
      *  If missing, an error message is added and false is returned.
      *
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     private static function validateStoreAndMethod(): bool
     {
@@ -366,6 +368,7 @@ class PartPayment
      * @throws ValidationException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     private static function handleLimitUpdate(mixed $new): void
     {

@@ -244,6 +244,9 @@ class Metadata
 
     /**
      * Early validation of cached payment status.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     private static function isCachedPaymentInvalid(int $orderId): bool
     {
@@ -254,6 +257,8 @@ class Metadata
     /**
      * Validate the used payment method for an order, making sure that we "own" the payment before proceeding.
      *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
      */
