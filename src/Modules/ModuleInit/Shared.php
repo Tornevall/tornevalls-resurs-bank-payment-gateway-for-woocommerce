@@ -66,6 +66,7 @@ class Shared
      *
      * @noinspection PhpUnusedPrivateMethodInspection
      * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @todo Currently not in use. Should be used to handle payment status changes on future decision.
      */
     private static function registerStatusFilters(): void
