@@ -373,6 +373,8 @@ class WooCommerce
 
     /**
      * Check for misconfigured payment methods during CSS-process and option updates in wp-admin.
+     *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public static function validateAndUpdatePartPaymentMethod(): bool
     {
@@ -396,6 +398,8 @@ class WooCommerce
                 );
             }
         } catch (Throwable) {
+            // Silently ignore errors during validation - if payment method cannot be validated,
+            // it will default to false return value below.
         }
 
         return $paymentMethod instanceof PaymentMethod;
