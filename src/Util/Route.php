@@ -161,25 +161,6 @@ class Route
                 );
             }
 
-            // Verify nonce for admin routes to prevent CSRF attacks
-            if (
-                in_array(
-                    needle: $route,
-                    haystack: self::getAdminRoutes(),
-                    strict: true
-                )
-            ) {
-                WordPress::ensurePluggableLoaded();
-                if (!WordPress::verifyPostNonce(action: 'resursbank_admin_action')) {
-                    self::respondWithError(
-                        exception: new HttpException(
-                            message: 'Nonce verification failed',
-                            code: 403
-                        )
-                    );
-                }
-            }
-
             self::route(route: $route);
         } catch (Throwable $exception) {
             self::respondWithError(exception: $exception);
