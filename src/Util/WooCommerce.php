@@ -76,6 +76,7 @@ class WooCommerce
      * page.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function isUsingBlocksCheckout(): bool
     {
@@ -182,6 +183,7 @@ class WooCommerce
      * WordPress cache functions cannot be used here because we need to discover all transient keys dynamically.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function invalidateFullCache(): void
     {
