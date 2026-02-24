@@ -105,11 +105,23 @@ class WcSession
 
         if (
             self::getCustomerType() === CustomerType::LEGAL &&
-            isset($_POST['billing_resurs_government_id'])
+            isset($_POST['billing_resurs_government_id']) &&
+            is_string(value: $_POST['billing_resurs_government_id'])
         ) {
-            // POST data should have higher priority than the session not only for the getAddress
-            // widget, but also for security reason (so we won't use manipulated data from the session).
-            $return = $_POST['billing_resurs_government_id'];
+            $nonceValid = WordPress::verifyPostNonce(
+                action: 'woocommerce-process_checkout',
+                field: 'woocommerce-process-checkout-nonce'
+            ) || WordPress::verifyPostNonce(
+                action: 'woocommerce-process_checkout'
+            );
+
+            if ($nonceValid) {
+                // POST data should have higher priority than the session not only for the getAddress
+                // widget, but also for security reason (so we won't use manipulated data from the session).
+                $return = sanitize_text_field(
+                    wp_unslash($_POST['billing_resurs_government_id'])
+                );
+            }
         }
 
         return $return;

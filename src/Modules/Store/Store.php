@@ -173,7 +173,8 @@ class Store
                     route: Route::ROUTE_GET_STORES_ADMIN
                 ),
                 'fetch_stores_translation' => $fetchStoresString,
-                'no_fetch_url' => $noFetchUrl
+                'no_fetch_url' => $noFetchUrl,
+                'nonce' => wp_create_nonce('resursbank_get_stores_admin')
             ]
         );
     }

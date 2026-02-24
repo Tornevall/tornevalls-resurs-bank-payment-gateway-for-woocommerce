@@ -226,7 +226,7 @@ class WooCommerce
             throw new FilesystemException(
                 message: sprintf(
                     'Asset file not found or inaccessible: %s',
-                    esc_html($filePath)
+                    esc_html(text: $filePath)
                 )
             );
         }
@@ -239,7 +239,7 @@ class WooCommerce
             throw new EmptyValueException(
                 message: sprintf(
                     'Version not found or empty in asset file: %s',
-                    esc_html($filePath)
+                    esc_html(text: $filePath)
                 )
             );
         }
@@ -256,17 +256,19 @@ class WooCommerce
      */
     public static function isAdminOrderCreateTool(): bool
     {
+        $page = WordPress::getQueryParam(key: 'page');
+        $action = WordPress::getQueryParam(key: 'action');
+        $postType = WordPress::getQueryParam(key: 'post_type');
+
         return Admin::isAdmin() && (
                 (
                     self::isUsingHpos() &&
-                    isset($_GET['page'], $_GET['action']) &&
-                    $_GET['page'] === 'wc-orders' && $_GET['action'] === 'new'
+                    $page === 'wc-orders' && $action === 'new'
                 ) ||
                 (
                     !self::isUsingHpos() &&
-                    isset($_GET['post_type'], $_GET['action']) &&
-                    $_GET['post_type'] === 'shop_order' &&
-                    $_GET['action'] === 'add'
+                    $postType === 'shop_order' &&
+                    $action === 'add'
                 )
             );
     }
