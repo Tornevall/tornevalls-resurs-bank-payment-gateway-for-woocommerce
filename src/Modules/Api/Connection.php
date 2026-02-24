@@ -248,6 +248,12 @@ class Connection
             return null;
         }
 
+        // Verify nonce to ensure request originates from the settings form.
+        WordPress::ensurePluggableLoaded();
+        if (!WordPress::verifyPostNonce(action: 'woocommerce-settings', field: '_wpnonce')) {
+            return null;
+        }
+
         $clientId = WordPress::getPostParam(
             key: RESURSBANK_MODULE_PREFIX . '_client_id'
         );
