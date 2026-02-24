@@ -25,6 +25,7 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Product;
@@ -145,7 +146,9 @@ class PartPayment
                     module: 'PartPayment',
                     file: 'part-payment.js'
                 ),
-                ['jquery']
+                ['jquery'],
+                UserAgent::getPluginVersion(),
+                true
             );
 
             // Disable this only if you want all front end calculations to break.

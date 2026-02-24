@@ -16,6 +16,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
@@ -109,7 +110,12 @@ class Store
      */
     private static function enqueueStyles(): void
     {
-        wp_register_style('rb-store-admin-css', false);
+        wp_register_style(
+            'rb-store-admin-css',
+            false,
+            [],
+            UserAgent::getPluginVersion()
+        );
         wp_enqueue_style('rb-store-admin-css');
         wp_add_inline_style(
             'rb-store-admin-css',
@@ -127,7 +133,13 @@ class Store
     {
         $widget = self::initializeWidget();
 
-        wp_register_script('rb-store-admin-scripts', false);
+        wp_register_script(
+            'rb-store-admin-scripts',
+            false,
+            [],
+            UserAgent::getPluginVersion(),
+            true
+        );
         wp_enqueue_script('rb-store-admin-scripts');
         wp_add_inline_script('rb-store-admin-scripts', $widget->content);
 
@@ -136,7 +148,10 @@ class Store
             Url::getResourceUrl(
                 module: 'Store',
                 file: 'rb-store.js'
-            )
+            ),
+            ['jquery'],
+            UserAgent::getPluginVersion(),
+            true
         );
 
         wp_enqueue_script(
@@ -145,7 +160,9 @@ class Store
                 module: 'Store',
                 file: 'rb-store.js'
             ),
-            ['jquery']
+            ['jquery'],
+            UserAgent::getPluginVersion(),
+            true
         );
     }
 

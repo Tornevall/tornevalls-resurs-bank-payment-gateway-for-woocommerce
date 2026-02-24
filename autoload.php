@@ -15,8 +15,8 @@ class ResursBankEcomAutoloader
     public static function exec(string $class): void
     {
         $map = [
-            'Resursbank\Ecom' => 'vendor/ecom/src',
-            'Resursbank\Woocommerce' => 'src'
+            'Resursbank\\Ecom' => 'vendor/ecom/src',
+            'Resursbank\\Woocommerce' => 'src'
         ];
 
         foreach ($map as $namespace => $dir) {
@@ -24,15 +24,22 @@ class ResursBankEcomAutoloader
                 continue;
             }
 
-            require __DIR__ . '/' . $dir .
-                str_replace(
-                    search: '\\',
-                    replace: '/',
-                    subject: substr(
-                        string: $class,
-                        offset: strlen($namespace)
-                    )
-                ) . '.php';
+            $relative = str_replace(
+                search: '\\',
+                replace: '/',
+                subject: substr(
+                    string: $class,
+                    offset: strlen($namespace)
+                )
+            ) . '.php';
+
+            $path = __DIR__ . '/' . $dir . $relative;
+
+            if (!is_file($path)) {
+                continue;
+            }
+
+            require $path;
         }
     }
 }

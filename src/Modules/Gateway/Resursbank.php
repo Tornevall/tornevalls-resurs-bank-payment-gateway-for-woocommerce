@@ -49,6 +49,7 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WcSession;
+use Resursbank\Woocommerce\Util\WooCommerce;
 use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Cart;

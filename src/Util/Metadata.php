@@ -188,19 +188,35 @@ class Metadata
      */
     public static function getOrderByPaymentId(string $paymentId): ?WC_Order
     {
+        $cacheKey = 'resursbank_order_by_payment_' . md5($paymentId);
+        $cachedOrderId = wp_cache_get($cacheKey, 'resursbank');
+
+        if ($cachedOrderId !== false) {
+            return $cachedOrderId ? wc_get_order((int)$cachedOrderId) : null;
+        }
+
         $result = null;
 
-        // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
         $orders = wc_get_orders(args: [
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- unavoidable lookup, cached above
             'meta_key' => self::KEY_PAYMENT_ID,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- unavoidable lookup, cached above
             'meta_value' => $paymentId,
             'meta_compare' => '=',
             'limit' => 1,
+            'return' => 'ids',
         ]);
 
-        if (!empty($orders) && $orders[0] instanceof WC_Order) {
-            $result = $orders[0];
+        if (!empty($orders) && is_numeric($orders[0])) {
+            $result = wc_get_order((int)$orders[0]);
         }
+
+        wp_cache_set(
+            $cacheKey,
+            $result instanceof WC_Order ? $result->get_id() : 0,
+            'resursbank',
+            300
+        );
 
         return $result;
     }
