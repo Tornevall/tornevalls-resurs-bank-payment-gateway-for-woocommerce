@@ -193,8 +193,7 @@ class WooCommerce
 
             if ($transients === false) {
                 /** @noinspection SqlNoDataSourceInspection */
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Required for cache invalidation, discovering transient keys dynamically
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- This query result is cached via wp_cache_set below
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Required for cache invalidation, discovering transient keys dynamically. Result is cached via wp_cache_set below
                 $transients = $wpdb->get_col(
                     $wpdb->prepare(
                         "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",

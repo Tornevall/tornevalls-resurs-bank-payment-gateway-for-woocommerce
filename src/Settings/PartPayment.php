@@ -188,9 +188,9 @@ class PartPayment
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
-        global $rb_overrideSavedCountryCode, $rb_isCountryOverride;
+        global $resursbank_overrideSavedCountryCode, $resursbank_isCountryOverride;
 
-        $rb_isCountryOverride = false;
+        $resursbank_isCountryOverride = false;
 
         try {
             Config::getCache()->invalidate();
@@ -221,8 +221,8 @@ class PartPayment
                     $countryCode
                 )
             ) {
-                $rb_overrideSavedCountryCode = $countryCode;
-                $rb_isCountryOverride = true;
+                $resursbank_overrideSavedCountryCode = $countryCode;
+                $resursbank_isCountryOverride = true;
                 self::updateThresholdLimit($countryCode);
             }
         } catch (Throwable) {
@@ -247,7 +247,7 @@ class PartPayment
      */
     private static function validateStoreAndMethod(): bool
     {
-        global $rb_isCountryOverride;
+        global $resursbank_isCountryOverride;
 
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
@@ -270,7 +270,7 @@ class PartPayment
         // Country overrider may cause empty values during a limited amount of time
         // due to handleStoreIdUpdate are saving the threshold values via the update hook.
         // During this time we should not validate the period.
-        if (empty($period) && !$rb_isCountryOverride) {
+        if (empty($period) && !$resursbank_isCountryOverride) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-period'
             ));
@@ -365,7 +365,7 @@ class PartPayment
      */
     private static function handleLimitUpdate(mixed $new): void
     {
-        global $overrideSavedCountryCode;
+        global $resursbank_overrideSavedCountryCode;
 
         $customerCountry = get_option('woocommerce_default_country');
 
@@ -373,7 +373,7 @@ class PartPayment
             $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
 
             // Do not touch anything if override is active.
-            if (isset($overrideSavedCountryCode)) {
+            if (isset($resursbank_overrideSavedCountryCode)) {
                 return;
             }
         } catch (Throwable) {

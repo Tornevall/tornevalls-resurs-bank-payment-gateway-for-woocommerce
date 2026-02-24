@@ -254,7 +254,10 @@ class PartPayment
      */
     private static function displayInfoText(): bool
     {
-        $returnBool = apply_filters('display_part_payment_info_text', true);
+        $returnBool = apply_filters(
+            'resursbank_display_part_payment_info_text',
+            true
+        );
         return is_bool(value: $returnBool) ? $returnBool : false;
     }
 
@@ -263,7 +266,9 @@ class PartPayment
      */
     private static function getProduct(): WC_Product
     {
+        // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $product is a WooCommerce core global
         global $product;
+        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
         if (!$product instanceof WC_Product) {
             $product = wc_get_product();

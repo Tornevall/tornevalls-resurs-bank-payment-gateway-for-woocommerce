@@ -133,7 +133,7 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
-        global $rbPaymentIsValid;
+        global $resursbank_payment_is_valid;
 
         $orderId = $order->get_id() ?? 0;
 
@@ -150,7 +150,7 @@ class Metadata
             $stringValidation->isUuid(value: $order->get_payment_method());
             self::isValidResursMethod(order: $order);
         } catch (Throwable) {
-            $rbPaymentIsValid[$orderId] = false;
+            $resursbank_payment_is_valid[$orderId] = false;
             return false;
         }
 
@@ -165,19 +165,22 @@ class Metadata
         // Note that this method is called through several actions in the plugin which means
         // each request will render a getPayment, unless we cache it the first time. We only
         // need to know the first time if the payment is valid.
-        if ($checkPaymentStatus && !isset($rbPaymentIsValid[$orderId])) {
+        if (
+            $checkPaymentStatus &&
+            !isset($resursbank_payment_is_valid[$orderId])
+        ) {
             try {
                 OrderManagement::getPayment(order: $order);
-                $rbPaymentIsValid[$orderId] = true;
+                $resursbank_payment_is_valid[$orderId] = true;
             } catch (Throwable $error) {
                 Log::debug(message: $error->getMessage());
-                $rbPaymentIsValid[$orderId] = false;
+                $resursbank_payment_is_valid[$orderId] = false;
                 return false;
             }
         }
 
         // If all checks passed or if checkPaymentStatus has not been requested.
-        return $rbPaymentIsValid[$orderId] ?? true;
+        return $resursbank_payment_is_valid[$orderId] ?? true;
     }
 
     /**
@@ -228,8 +231,8 @@ class Metadata
      */
     private static function isCachedPaymentInvalid(int $orderId): bool
     {
-        global $rbPaymentIsValid;
-        return isset($rbPaymentIsValid[$orderId]) && $rbPaymentIsValid[$orderId] === false;
+        global $resursbank_payment_is_valid;
+        return isset($resursbank_payment_is_valid[$orderId]) && $resursbank_payment_is_valid[$orderId] === false;
     }
 
     /**

@@ -93,7 +93,7 @@ class Connection
             }
 
             // For internal usages (dashboard).
-            $useProxy = apply_filters('mapi_proxy', '') ?? '';
+            $useProxy = apply_filters('resursbank_mapi_proxy', '') ?? '';
 
             if (!is_string($useProxy)) {
                 $useProxy = '';

@@ -146,7 +146,7 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function process_payment(mixed $order_id): array
     {
-        global $blockCreateErrorMessage;
+        global $resursbank_block_create_error_message;
 
         $order = new WC_Order(order: $order_id);
 
@@ -156,11 +156,13 @@ class Resursbank extends WC_Payment_Gateway
             $this->handleCreatePaymentError(order: $order, error: $e);
 
             if (
-                $blockCreateErrorMessage &&
+                $resursbank_block_create_error_message &&
                 WooCommerce::isUsingBlocksCheckout()
             ) {
                 throw new Exception(
-                    message: esc_html((string)$blockCreateErrorMessage)
+                    message: esc_html(
+                        (string)$resursbank_block_create_error_message
+                    )
                 );
             }
         }
@@ -520,7 +522,7 @@ class Resursbank extends WC_Payment_Gateway
     {
         // Required for Blocks checkout: an error message must be handled through process_payment(),
         // wc_add_notice() alone is not respected by Blocks.
-        global $blockCreateErrorMessage;
+        global $resursbank_block_create_error_message;
 
         Log::error(
             error: $error,
@@ -553,7 +555,7 @@ class Resursbank extends WC_Payment_Gateway
         wc_add_notice(message: $finalMessage, notice_type: 'error');
 
         // Pass message back to process_payment() for Blocks checkout
-        $blockCreateErrorMessage = $finalMessage;
+        $resursbank_block_create_error_message = $finalMessage;
     }
 
     /**
