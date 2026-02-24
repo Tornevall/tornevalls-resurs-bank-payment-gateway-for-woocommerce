@@ -105,7 +105,9 @@ class WcSession
 
         if (
             self::getCustomerType() === CustomerType::LEGAL &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified below
             isset($_POST['billing_resurs_government_id']) &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified below
             is_string(value: $_POST['billing_resurs_government_id'])
         ) {
             $nonceValid = WordPress::verifyPostNonce(
@@ -118,7 +120,9 @@ class WcSession
             if ($nonceValid) {
                 // POST data should have higher priority than the session not only for the getAddress
                 // widget, but also for security reason (so we won't use manipulated data from the session).
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
                 $return = sanitize_text_field(
+                    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
                     wp_unslash($_POST['billing_resurs_government_id'])
                 );
             }

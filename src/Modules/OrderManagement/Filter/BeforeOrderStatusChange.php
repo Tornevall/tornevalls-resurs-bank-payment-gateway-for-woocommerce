@@ -34,6 +34,7 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Order;
 use WC_Order_Refund;
@@ -81,7 +82,7 @@ class BeforeOrderStatusChange
 
         $order = OrderManagement::getOrder(id: (int)$postId);
         $newStatus = WooCommerce::stripStatusPrefix(
-            status: $_POST['order_status'] ?? ''
+            status: WordPress::getPostParam('order_status')
         );
 
         // Ignore other methods.

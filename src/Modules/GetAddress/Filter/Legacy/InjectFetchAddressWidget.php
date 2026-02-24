@@ -53,8 +53,6 @@ class InjectFetchAddressWidget
                 replacement: ' ',
                 subject: (new Widget())->content
             );
-
-            $result = WordPress::sanitizeWidgetHtml($result);
         } catch (Throwable $e) {
             try {
                 Config::getLogger()->error(
@@ -68,6 +66,8 @@ class InjectFetchAddressWidget
             }
         }
 
-        echo $result;
+        // Escape output as late as possible (WordPress best practice).
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped via WordPress::sanitizeWidgetHtml (wp_kses)
+        echo WordPress::sanitizeWidgetHtml(html: $result);
     }
 }

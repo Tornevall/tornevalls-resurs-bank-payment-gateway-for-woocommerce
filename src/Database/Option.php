@@ -32,7 +32,7 @@ abstract class Option
     {
         // Temporary workaround: API scope has been removed,
         // so environment (prod/test) must be resolved via request overrides.
-        $val = apply_filters('rb_raw_data_config', get_option(
+        $val = apply_filters('resursbank_raw_data_config', get_option(
             static::getName(),
             null
         ));

@@ -26,6 +26,7 @@ use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
 use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Cart;
 
@@ -179,12 +180,15 @@ class GatewayHelper
         }
 
         // Requested through ajax calls should be dynamic.
+        $route = WordPress::getQueryParam(key: 'resursbank');
+        $amount = WordPress::getQueryParam(key: 'amount');
+
         if (
-            isset($_GET['amount'], $_GET['resursbank']) &&
-            $_GET['resursbank'] === 'get-costlist' &&
-            is_numeric(value: $_GET['amount'])
+            $route === 'get-costlist' &&
+            $amount !== '' &&
+            is_numeric(value: $amount)
         ) {
-            $total = (float)$_GET['amount'];
+            $total = (float)$amount;
         }
 
         return $total;

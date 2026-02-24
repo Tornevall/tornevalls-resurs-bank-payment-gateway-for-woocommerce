@@ -17,6 +17,7 @@ use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 use function constant;
@@ -39,8 +40,8 @@ class GetOrderContentController
     // phpcs:ignore
     public static function exec(): string
     {
-        $orderId = $_GET['orderId'] ?? null;
-        $orderId = (int)$orderId;
+        $orderId = WordPress::getQueryParam('orderId');
+        $orderId = $orderId !== '' ? (int)$orderId : 0;
 
         if ($orderId === 0) {
             throw new HttpException(message: 'Missing order id.');

@@ -60,10 +60,12 @@ class WordPress
      */
     public static function verifyPostNonce(string $action, string $field = '_wpnonce'): bool
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- this IS the nonce verification function
         if (!isset($_POST[$field]) || !is_string(value: $_POST[$field])) {
             return false;
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- this IS the nonce verification function
         $nonce = sanitize_text_field(wp_unslash($_POST[$field]));
 
         return self::verifyNonce($nonce, $action);
@@ -85,6 +87,8 @@ class WordPress
 
     /**
      * Sanitize widget HTML while preserving required form markup.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function sanitizeWidgetHtml(string $html): string
     {
@@ -137,6 +141,8 @@ class WordPress
 
     /**
      * Sanitize payment methods widget HTML while preserving its table and styles.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function sanitizePaymentMethodsHtml(string $html): string
     {
@@ -164,6 +170,8 @@ class WordPress
 
     /**
      * Sanitize support info widget HTML while preserving its table markup.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function sanitizeSupportInfoHtml(string $html): string
     {
@@ -194,10 +202,28 @@ class WordPress
      */
     public static function getQueryParam(string $key): string
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- caller must verify nonce when required
         if (!isset($_GET[$key]) || !is_string(value: $_GET[$key])) {
             return '';
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- caller must verify nonce when required
         return sanitize_text_field(wp_unslash($_GET[$key]));
+    }
+
+    /**
+     * Get and sanitize a POST parameter.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     */
+    public static function getPostParam(string $key): string
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller must verify nonce when required
+        if (!isset($_POST[$key]) || !is_string(value: $_POST[$key])) {
+            return '';
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller must verify nonce when required
+        return sanitize_text_field(wp_unslash($_POST[$key]));
     }
 }

@@ -133,10 +133,14 @@ class Route
      */
     public static function exec(): void
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
         $route = (
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
             isset($_GET[self::ROUTE_PARAM]) &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
             is_string(value: $_GET[self::ROUTE_PARAM])
-        ) ? $_GET[self::ROUTE_PARAM] : '';
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
+        ) ? sanitize_text_field(wp_unslash($_GET[self::ROUTE_PARAM])) : '';
 
         $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
@@ -298,7 +302,12 @@ class Route
     public static function redirectBack(
         bool $admin = true
     ): void {
-        $url = $_SERVER['HTTP_REFERER'] ?? '';
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized via esc_url_raw below
+        $url = isset($_SERVER['HTTP_REFERER'])
+            ? esc_url_raw(
+            wp_unslash($_SERVER['HTTP_REFERER'])
+        )
+            : '';
 
         try {
             $default = self::getUrl(route: '', admin: $admin);
@@ -399,8 +408,9 @@ class Route
                 break;
 
             case self::ROUTE_COSTLIST:
-                $methodId = $_GET['method'] ?? '';
-                $amount = isset($_GET['amount']) ? (float)$_GET['amount'] : 0;
+                $methodId = WordPress::getQueryParam('method');
+                $amount = WordPress::getQueryParam('amount');
+                $amount = $amount !== '' ? (float)$amount : 0.0;
 
                 try {
                     $paymentMethod = Repository::getById(

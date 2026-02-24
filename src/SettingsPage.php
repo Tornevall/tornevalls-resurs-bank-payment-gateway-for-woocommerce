@@ -171,8 +171,9 @@ class SettingsPage extends WC_Settings_Page
                 );
             }
 
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in WordPress::sanitizePaymentMethodsHtml
             echo WordPress::sanitizePaymentMethodsHtml(
-                PaymentMethods::getOutput(storeId: StoreId::getData())
+                html: PaymentMethods::getOutput(storeId: StoreId::getData())
             );
         } catch (Throwable $e) {
             Log::error(error: $e, message: $e->getMessage());
@@ -187,6 +188,7 @@ class SettingsPage extends WC_Settings_Page
     public function renderAboutPage(): void
     {
         try {
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in WordPress::sanitizeSupportInfoHtml
             echo WordPress::sanitizeSupportInfoHtml(About::getWidgetHtml());
         } catch (Throwable $error) {
             Log::error(error: $error);

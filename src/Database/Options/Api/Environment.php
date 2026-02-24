@@ -100,7 +100,9 @@ class Environment extends Option implements OptionInterface
             return null;
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
         if (isset($_POST[$key]) && is_string(value: $_POST[$key])) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
             $rawValue = sanitize_text_field(wp_unslash($_POST[$key]));
 
             if ($rawValue !== '') {
@@ -136,14 +138,9 @@ class Environment extends Option implements OptionInterface
             return null;
         }
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route check only, nonce verified below
-        if (
-            !isset($_GET['resursbank']) ||
-            !is_string(value: $_GET['resursbank']) ||
-            sanitize_text_field(
-                wp_unslash($_GET['resursbank'])
-            ) !== 'get-stores-admin'
-        ) {
+        $route = WordPress::getQueryParam(key: 'resursbank');
+
+        if ($route !== 'get-stores-admin') {
             return null;
         }
 
@@ -159,10 +156,12 @@ class Environment extends Option implements OptionInterface
             return null;
         }
 
-        if (!WordPress::verifyJsonNonce(
-            payload: $decoded,
-            action: 'resursbank_get_stores_admin'
-        )) {
+        if (
+            !WordPress::verifyJsonNonce(
+                payload: $decoded,
+                action: 'resursbank_get_stores_admin'
+            )
+        ) {
             return null;
         }
 
