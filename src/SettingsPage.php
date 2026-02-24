@@ -24,6 +24,7 @@ use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WordPress;
 use RuntimeException;
 use Throwable;
 use WC_Admin_Settings;
@@ -170,8 +171,9 @@ class SettingsPage extends WC_Settings_Page
                 );
             }
 
-            echo wp_kses_post(
-                PaymentMethods::getOutput(storeId: StoreId::getData())
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in WordPress::sanitizePaymentMethodsHtml
+            echo WordPress::sanitizePaymentMethodsHtml(
+                html: PaymentMethods::getOutput(storeId: StoreId::getData())
             );
         } catch (Throwable $e) {
             Log::error(error: $e, message: $e->getMessage());
@@ -186,7 +188,8 @@ class SettingsPage extends WC_Settings_Page
     public function renderAboutPage(): void
     {
         try {
-            echo wp_kses_post(About::getWidgetHtml());
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in WordPress::sanitizeSupportInfoHtml
+            echo WordPress::sanitizeSupportInfoHtml(About::getWidgetHtml());
         } catch (Throwable $error) {
             Log::error(error: $error);
 

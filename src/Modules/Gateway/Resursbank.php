@@ -49,7 +49,7 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WcSession;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Cart;
 use WC_Order;
@@ -103,8 +103,10 @@ class Resursbank extends WC_Payment_Gateway
         // When the blocks editor redirects admins to woocommerce internal sections
         // for handling payment methods, we need to redirect them back to the correct
         // location since our methods are not editable from WooCommerce.
+        $section = WordPress::getQueryParam(key: 'section');
+
         if (
-            isset($_REQUEST['section']) &&
+            $section !== '' &&
             isset($method->id) &&
             is_string(value: $this->id) &&
             $method->id !== RESURSBANK_MODULE_PREFIX
@@ -465,14 +467,18 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // Legacy order objects by post/id.
-        $orderIdByRequest = $_GET['id'] ?? null;
+        $orderIdByRequest = WordPress::getQueryParam('id');
 
-        if (!$orderIdByRequest && isset($_GET['post']) && (int)$_GET['post']) {
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            $testOrderByPost = wc_get_order($_GET['post']);
+        if ($orderIdByRequest === '') {
+            $postId = WordPress::getQueryParam('post');
 
-            if ($testOrderByPost instanceof WC_Order) {
-                $orderIdByRequest = $testOrderByPost->get_id();
+            if ($postId !== '' && (int)$postId > 0) {
+                /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                $testOrderByPost = wc_get_order((int)$postId);
+
+                if ($testOrderByPost instanceof WC_Order) {
+                    $orderIdByRequest = (string)$testOrderByPost->get_id();
+                }
             }
         }
 
@@ -480,12 +486,12 @@ class Resursbank extends WC_Payment_Gateway
         // for example a bulk editing view, the order has to be validated before proceeding to the return.
 
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        $validatedOrder = wc_get_order($orderIdByRequest);
+        $validatedOrder = $orderIdByRequest !== ''
+            ? wc_get_order((int)$orderIdByRequest)
+            : false;
 
         // Return the order if valid ID is provided and it's a valid order.
-        return $validatedOrder instanceof WC_Order && (int)$orderIdByRequest
-            ? $validatedOrder
-            : null;
+        return $validatedOrder instanceof WC_Order ? $validatedOrder : null;
     }
 
     /**

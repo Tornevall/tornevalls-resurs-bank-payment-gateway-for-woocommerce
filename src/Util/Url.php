@@ -63,7 +63,7 @@ class Url
         string $path
     ): string {
         return self::getUrl(
-            path: RESURSBANK_MODULE_DIR_NAME . "/lib/ecom/$path"
+            path: RESURSBANK_MODULE_DIR_NAME . "/vendor/ecom/$path"
         );
     }
 
@@ -186,9 +186,13 @@ class Url
      */
     public static function getHttpGet(string $key): ?string
     {
-        return isset($_GET[$key]) && is_string(value: $_GET[$key])
-            ? $_GET[$key]
-            : null;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- caller must verify nonce when required
+        if (!isset($_GET[$key]) || !is_string(value: $_GET[$key])) {
+            return null;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- caller must verify nonce when required
+        return sanitize_text_field(wp_unslash($_GET[$key]));
     }
 
     /**
@@ -198,9 +202,13 @@ class Url
      */
     public static function getHttpPost(string $key): ?string
     {
-        return isset($_POST[$key]) && is_string(value: $_POST[$key])
-            ? $_POST[$key]
-            : null;
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller must verify nonce when required
+        if (!isset($_POST[$key]) || !is_string(value: $_POST[$key])) {
+            return null;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller must verify nonce when required
+        return sanitize_text_field(wp_unslash($_POST[$key]));
     }
 
     /**

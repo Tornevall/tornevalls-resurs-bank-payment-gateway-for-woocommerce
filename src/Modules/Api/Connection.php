@@ -38,7 +38,9 @@ use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
+use WC_Logger;
 
 // Prevent direct access.
 if (!defined(constant_name: 'ABSPATH')) {
@@ -234,30 +236,36 @@ class Connection
     // phpcs:ignore
     private static function getJwtFromPost(): ?Jwt
     {
-        // WordPress usually deliver_wpnonces for us here, but we can't use it to verify the nonce in this early state
-        // since WP is not a guarantee to be present. However, we can verify that users are admins and that the
+        // WordPress usually delivers nonces for us here, but we can't use it to verify the nonce in this early state
+        // since WP is not guaranteed to be present. However, we can verify that users are admins and that the
         // usual request variables for updating options are present. This access request must be limited to one section
         // only.
+
         if (
-            Admin::isAdmin() &&
-            isset(
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'],
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment']
-            ) && (
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
-                Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
-            )
+            !Admin::isAdmin() ||
+            !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
         ) {
-            $return = new Jwt(
-                clientId: $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
-                clientSecret: $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                grantType: GrantType::CREDENTIALS
-            );
+            return null;
         }
 
-        return $return ?? null;
+        $clientId = WordPress::getPostParam(
+            key: RESURSBANK_MODULE_PREFIX . '_client_id'
+        );
+        $clientSecret = WordPress::getPostParam(
+            key: RESURSBANK_MODULE_PREFIX . '_client_secret'
+        );
+        $environment = WordPress::getPostParam(
+            key: RESURSBANK_MODULE_PREFIX . '_environment'
+        );
+
+        if ($clientId === '' || $clientSecret === '' || $environment === '') {
+            return null;
+        }
+
+        return new Jwt(
+            clientId: $clientId,
+            clientSecret: $clientSecret,
+            grantType: GrantType::CREDENTIALS
+        );
     }
 }

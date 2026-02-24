@@ -50,13 +50,11 @@ class Settings
             'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
-        // Only need this css when in proper section.
-        if (isset($_REQUEST['section']) && $_REQUEST['section'] === 'about') {
-            add_action(
-                'in_admin_header',
-                'Resursbank\Woocommerce\Settings\About::setCss'
-            );
-        }
+        // Ensure About CSS is injected only on the About section.
+        add_action(
+            'in_admin_header',
+            'Resursbank\\Woocommerce\\Settings\\Settings::maybeSetAboutCss'
+        );
 
         /**
          * @noinspection PhpArgumentWithoutNamedIdentifierInspection
@@ -187,7 +185,11 @@ class Settings
     {
         global $current_section;
 
-        return $current_section === '' ? Api::SECTION_ID : $current_section;
+        if (!is_string(value: $current_section) || $current_section === '') {
+            return Api::SECTION_ID;
+        }
+
+        return $current_section;
     }
 
     /**
@@ -212,5 +214,17 @@ class Settings
         }
 
         return $links;
+    }
+
+    /**
+     * Inject About tab CSS only when the About section is active.
+     */
+    public static function maybeSetAboutCss(): void
+    {
+        if (self::getCurrentSectionId() !== About::SECTION_ID) {
+            return;
+        }
+
+        About::setCss();
     }
 }

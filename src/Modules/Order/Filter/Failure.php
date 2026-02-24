@@ -10,6 +10,7 @@ use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WcSession;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Order;
 
@@ -50,7 +51,8 @@ class Failure
     public static function captureAndRedirect(string $message): string
     {
         try {
-            $orderId = (int)($_GET['order_id'] ?? 0);
+            $orderId = WordPress::getQueryParam('order_id');
+            $orderId = $orderId !== '' ? (int)$orderId : 0;
 
             if ($orderId <= 0) {
                 return $message;

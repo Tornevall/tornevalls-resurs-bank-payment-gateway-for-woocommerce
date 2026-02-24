@@ -138,6 +138,7 @@ class Customer
          * For classic checkout (non-block), rely on the legacy POST flag.
          * If 'ship_to_different_address' is not set, assume shipping = billing.
          */
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce checkout nonce already verified by core
         return !isset($_POST['ship_to_different_address']);
     }
 

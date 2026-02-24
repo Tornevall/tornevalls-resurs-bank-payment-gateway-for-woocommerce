@@ -26,13 +26,11 @@ class About
 
     /**
      * Set up css for the About widget.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function setCss(): void
     {
-        $css = (new EcomSupportInfoCss())->content ?? '';
-        echo '<style>' . esc_html($css) . "</style>\n";
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo '<style>' . ((new EcomSupportInfoCss())->content ?? '') . "</style>\n";
     }
 
     /**
@@ -69,7 +67,9 @@ class About
      */
     public static function getWidgetHtml(): string
     {
+        // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- hide_save_button is a standard WooCommerce global
         $GLOBALS['hide_save_button'] = '1';
+        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
         return self::getWidget()->content;
     }
 }

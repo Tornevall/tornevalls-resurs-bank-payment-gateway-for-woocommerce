@@ -16,6 +16,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 // Prevent direct access.
@@ -85,16 +86,20 @@ class Store
 
     /**
      * Checks if we are on the WooCommerce settings page and the Resurs Bank tab.
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
      */
     private static function isOnResursBankSettingsPage(): bool
     {
-        return is_admin() &&
-            isset($_REQUEST['page'], $_REQUEST['tab']) &&
-            $_REQUEST['page'] === 'wc-settings' &&
-            $_REQUEST['tab'] === 'resursbank' &&
-            (!isset($_REQUEST['section']) || $_REQUEST['section'] === 'api_settings');
+        if (!is_admin()) {
+            return false;
+        }
+
+        $page = WordPress::getQueryParam('page');
+        $tab = WordPress::getQueryParam('tab');
+        $section = WordPress::getQueryParam('section');
+
+        return $page === 'wc-settings' &&
+            $tab === 'resursbank' &&
+            ($section === '' || $section === 'api_settings');
     }
 
     /**
@@ -173,7 +178,8 @@ class Store
                     route: Route::ROUTE_GET_STORES_ADMIN
                 ),
                 'fetch_stores_translation' => $fetchStoresString,
-                'no_fetch_url' => $noFetchUrl
+                'no_fetch_url' => $noFetchUrl,
+                'nonce' => wp_create_nonce('resursbank_get_stores_admin')
             ]
         );
     }
