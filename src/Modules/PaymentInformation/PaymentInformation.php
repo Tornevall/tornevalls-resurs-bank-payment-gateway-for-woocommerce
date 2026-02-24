@@ -26,7 +26,7 @@ use Resursbank\Ecom\Module\Widget\PaymentInformation\Html as EcomPaymentInformat
 use Resursbank\Woocommerce\Util\Admin;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

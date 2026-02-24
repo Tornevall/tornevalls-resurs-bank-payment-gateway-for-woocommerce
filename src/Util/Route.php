@@ -47,7 +47,7 @@ use function str_contains;
 use function strlen;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

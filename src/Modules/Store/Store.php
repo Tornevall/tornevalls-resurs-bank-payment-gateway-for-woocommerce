@@ -20,7 +20,7 @@ use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

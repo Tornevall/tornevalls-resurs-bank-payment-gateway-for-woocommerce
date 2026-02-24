@@ -30,7 +30,7 @@ use Throwable;
 use WC_Product;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -266,9 +266,8 @@ class PartPayment
      */
     private static function getProduct(): WC_Product
     {
-        // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $product is a WooCommerce core global
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $product is a WooCommerce core global
         global $product;
-        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
         if (!$product instanceof WC_Product) {
             $product = wc_get_product();

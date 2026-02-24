@@ -22,6 +22,10 @@ use Throwable;
 
 use function constant;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Fetch new content for order view after order updates.
  */

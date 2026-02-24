@@ -37,7 +37,7 @@ use WC_Abstract_Order;
 use WC_Order;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

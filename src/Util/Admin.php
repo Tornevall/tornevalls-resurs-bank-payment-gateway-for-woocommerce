@@ -13,7 +13,7 @@ use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Throwable;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

@@ -19,7 +19,7 @@ use Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint;
 use Resursbank\Woocommerce\Util\WooCommerce;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

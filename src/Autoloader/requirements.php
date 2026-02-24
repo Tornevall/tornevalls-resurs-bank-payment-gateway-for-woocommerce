@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

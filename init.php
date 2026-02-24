@@ -38,7 +38,7 @@ use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Resursbank\Woocommerce\Util\WordPress;
 
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

@@ -43,7 +43,7 @@ use Throwable;
 use WC_Logger;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

@@ -26,7 +26,7 @@ use function function_exists;
 use function is_array;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 

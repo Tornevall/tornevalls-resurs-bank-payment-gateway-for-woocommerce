@@ -14,7 +14,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
