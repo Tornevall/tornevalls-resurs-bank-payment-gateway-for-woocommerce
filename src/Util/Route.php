@@ -161,6 +161,37 @@ class Route
                 );
             }
 
+            // Verify nonce for state-changing admin routes to prevent CSRF attacks.
+            // Routes that modify data (cache invalidate, trigger test callback) require nonce verification.
+            // Read-only routes (get stores, get order content) use capability check only.
+            $stateChangingRoutes = [
+                self::ROUTE_ADMIN_CACHE_INVALIDATE,
+                self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+            ];
+
+            if (
+                in_array(
+                    needle: $route,
+                    haystack: $stateChangingRoutes,
+                    strict: true
+                )
+            ) {
+                WordPress::ensurePluggableLoaded();
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verification performed below
+                $nonce = isset($_GET['_wpnonce']) && is_string($_GET['_wpnonce'])
+                    ? sanitize_text_field(wp_unslash($_GET['_wpnonce']))
+                    : '';
+
+                if (!WordPress::verifyNonce(nonce: $nonce, action: 'resursbank_admin_' . $route)) {
+                    self::respondWithError(
+                        exception: new HttpException(
+                            message: 'Security verification failed. Please try again.',
+                            code: 403
+                        )
+                    );
+                }
+            }
+
             self::route(route: $route);
         } catch (Throwable $exception) {
             self::respondWithError(exception: $exception);
@@ -216,9 +247,22 @@ class Route
         $url = self::getUrlWithProperTrailingSlash(url: $url);
         $url .= str_contains(haystack: $url, needle: '?') ? '&' : '?';
 
+        $arguments = [self::ROUTE_PARAM => $route];
+
+        // Add nonce for state-changing admin routes to prevent CSRF attacks
+        $stateChangingRoutes = [
+            self::ROUTE_ADMIN_CACHE_INVALIDATE,
+            self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+        ];
+
+        if (in_array(needle: $route, haystack: $stateChangingRoutes, strict: true)) {
+            WordPress::ensurePluggableLoaded();
+            $arguments['_wpnonce'] = wp_create_nonce('resursbank_admin_' . $route);
+        }
+
         return Url::getQueryArg(
             baseUrl: $url,
-            arguments: [self::ROUTE_PARAM => $route]
+            arguments: $arguments
         );
     }
 

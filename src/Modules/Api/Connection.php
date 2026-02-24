@@ -228,6 +228,12 @@ class Connection
      * Get JWT from $_POST. Used on early update_option requests from where we need to try to fetch store lists
      * with not-yet-set credentials.
      *
+     * Nonce verification is not performed here because:
+     * 1. This is a private method, only called internally after Admin::isAdmin() + Admin::isTab() checks
+     * 2. WooCommerce Settings API handles nonce verification internally for all settings forms
+     * 3. This method extracts data from the WooCommerce-validated POST payload during settings save
+     * 4. Adding duplicate nonce verification would fail as WC uses its own nonce actions
+     *
      * @throws AttributeCombinationException
      * @throws JsonException
      * @throws ReflectionException
@@ -248,12 +254,15 @@ class Connection
             return null;
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
         $clientId = WordPress::getPostParam(
             key: RESURSBANK_MODULE_PREFIX . '_client_id'
         );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
         $clientSecret = WordPress::getPostParam(
             key: RESURSBANK_MODULE_PREFIX . '_client_secret'
         );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
         $environment = WordPress::getPostParam(
             key: RESURSBANK_MODULE_PREFIX . '_environment'
         );
