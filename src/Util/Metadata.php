@@ -131,6 +131,7 @@ class Metadata
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {

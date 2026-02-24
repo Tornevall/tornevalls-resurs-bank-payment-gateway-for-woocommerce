@@ -62,7 +62,9 @@ class MessageBag
                     message: 'Empty message encountered.',
                     type: Type::ERROR
                 );
-            } else {
+            }
+
+            if ($message !== '') {
                 $messageInstance = new Message(message: $message, type: $type);
             }
 

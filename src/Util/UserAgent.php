@@ -72,11 +72,12 @@ class UserAgent
         $file_contents = file_get_contents(filename: $plugin_file);
 
         // Use a regular expression to extract the version information.
+        $matches = [];
         if (preg_match(
             pattern: '/Version:\s*(\S+)/',
             subject: $file_contents,
             matches: $matches
-        )) {
+        ) && isset($matches[1])) {
             return $matches[1];
         }
 

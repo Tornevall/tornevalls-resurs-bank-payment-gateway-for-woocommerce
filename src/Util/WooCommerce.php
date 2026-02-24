@@ -154,17 +154,18 @@ class WooCommerce
                 self::$storeCountry = strtoupper(
                     string: $configuredStore->countryCode->value
                 );
-            } else {
-                $newStore = StoreRepository::getStores()->getFirst();
-                self::$storeCountry = $newStore->countryCode?->value ?? 'EN';
+                return self::$storeCountry;
+            }
 
-                if ($configuredStore === null && $newStore !== null) {
-                    // No store was configured, but we have at least one store available that should be there.
-                    update_option(
-                        option: StoreId::getName(),
-                        value: $newStore->id
-                    );
-                }
+            $newStore = StoreRepository::getStores()->getFirst();
+            self::$storeCountry = $newStore->countryCode?->value ?? 'EN';
+
+            if ($configuredStore === null && $newStore !== null) {
+                // No store was configured, but we have at least one store available that should be there.
+                update_option(
+                    option: StoreId::getName(),
+                    value: $newStore->id
+                );
             }
         } catch (Throwable $exception) {
             Config::getLogger()->debug(
