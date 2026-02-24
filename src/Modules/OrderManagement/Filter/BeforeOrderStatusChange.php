@@ -143,6 +143,7 @@ class BeforeOrderStatusChange
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public static function handlePostStatusTransitions(WC_Order $order, mixed $data_store): void
     {
