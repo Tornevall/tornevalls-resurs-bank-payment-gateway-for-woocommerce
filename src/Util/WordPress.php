@@ -57,6 +57,8 @@ class WordPress
 
     /**
      * Verify a nonce from POST payload.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function verifyPostNonce(string $action, string $field = '_wpnonce'): bool
     {
@@ -199,6 +201,7 @@ class WordPress
      * Get and sanitize a query string parameter.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function getQueryParam(string $key): string
     {
@@ -215,6 +218,7 @@ class WordPress
      * Get and sanitize a POST parameter.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function getPostParam(string $key): string
     {

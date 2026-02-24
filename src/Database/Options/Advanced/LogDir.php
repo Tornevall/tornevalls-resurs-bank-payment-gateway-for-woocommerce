@@ -70,6 +70,8 @@ class LogDir extends StringOption implements OptionInterface
 
     /**
      * Check if a directory is writable using WP_Filesystem.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     private static function isWritableDir(string $dir): bool
     {

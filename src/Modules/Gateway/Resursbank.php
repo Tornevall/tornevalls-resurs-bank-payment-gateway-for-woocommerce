@@ -144,6 +144,7 @@ class Resursbank extends WC_Payment_Gateway
      *
      * @throws Exception
      * @noinspection PhpMissingParentCallCommonInspection
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function process_payment(mixed $order_id): array
     {

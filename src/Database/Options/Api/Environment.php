@@ -87,6 +87,7 @@ class Environment extends Option implements OptionInterface
      * respected for immediate API initialization.
      *
      * @return string|null The environment value from POST, or null if not applicable.
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     private static function getEnvironmentFromSavePost(): ?string
     {

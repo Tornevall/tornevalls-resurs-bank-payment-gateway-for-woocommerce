@@ -141,6 +141,7 @@ class BeforeOrderStatusChange
      * @throws NotJsonEncodedException
      * @throws Exception
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function handlePostStatusTransitions(WC_Order $order, mixed $data_store): void
     {

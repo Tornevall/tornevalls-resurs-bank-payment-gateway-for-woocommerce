@@ -185,6 +185,7 @@ class PartPayment
      * Handles the update logic when StoreId changes.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
@@ -244,6 +245,8 @@ class PartPayment
     /**
      * Checks if required store, payment method, and period data is present.
      *  If missing, an error message is added and false is returned.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     private static function validateStoreAndMethod(): bool
     {
@@ -362,6 +365,7 @@ class PartPayment
      * @throws Throwable
      * @throws ValidationException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     private static function handleLimitUpdate(mixed $new): void
     {
