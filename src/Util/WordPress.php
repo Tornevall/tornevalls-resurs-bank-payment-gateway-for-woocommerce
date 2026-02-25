@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Util;
 
 // Prevent direct access.
+use Resursbank\Ecom\Lib\Api\Environment;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -19,6 +21,16 @@ if (!defined('ABSPATH')) {
  */
 class WordPress
 {
+    /**
+     * Cached JSON request payload (read once per request).
+     */
+    private static ?array $jsonPayload = null;
+
+    /**
+     * Flag to track if we've attempted to read JSON.
+     */
+    private static bool $jsonPayloadRead = false;
+
     /**
      * Ensure pluggable functions are available as early as possible.
      */
@@ -175,5 +187,128 @@ class WordPress
 
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller must verify nonce when required
         return sanitize_text_field(wp_unslash($_POST[$key]));
+    }
+
+    /**
+     * Get the decoded JSON payload from request body (cached after first read).
+     *
+     * Note: php://input can only be read once per request, so we cache it.
+     * Returns an empty array if no JSON payload exists or if decoding fails.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public static function getJsonPayload(): array
+    {
+        // Return cached payload if already read
+        if (self::$jsonPayloadRead) {
+            return self::$jsonPayload ?? [];
+        }
+
+        // Mark as read to prevent re-reading
+        self::$jsonPayloadRead = true;
+
+        // Read raw input from request body
+        $rawInput = file_get_contents('php://input');
+
+        if ($rawInput === false || $rawInput === '') {
+            self::$jsonPayload = [];
+            return [];
+        }
+
+        // Decode JSON
+        $decoded = json_decode($rawInput, true);
+
+        if (!is_array($decoded)) {
+            self::$jsonPayload = [];
+            return [];
+        }
+
+        self::$jsonPayload = $decoded;
+        return $decoded;
+    }
+
+    /**
+     * Get a specific value from the JSON payload with optional sanitization.
+     *
+     * @param string $key The key to retrieve from the JSON payload
+     * @param bool $sanitize Whether to sanitize the value (default: true)
+     * @return string|null The value as string if exists and is string, null otherwise
+     */
+    public static function getJsonParam(string $key, bool $sanitize = true): ?string
+    {
+        $payload = self::getJsonPayload();
+
+        if (!isset($payload[$key]) || !is_string($payload[$key])) {
+            return null;
+        }
+
+        $value = $payload[$key];
+
+        return $sanitize ? sanitize_text_field($value) : $value;
+    }
+
+    /**
+     * Check if current request is an admin AJAX request for a specific route.
+     *
+     * @param string $route The route to check for (e.g., 'get-stores-admin')
+     * @return bool True if this is an admin AJAX request for the specified route
+     */
+    public static function isAdminAjaxRoute(string $route): bool
+    {
+        if (!is_admin()) {
+            return false;
+        }
+
+        if (!function_exists('wp_doing_ajax') || !wp_doing_ajax()) {
+            return false;
+        }
+
+        return self::getQueryParam(key: 'resursbank') === $route;
+    }
+
+    /**
+     * Resolve environment value from admin AJAX request payload.
+     *
+     * Specifically handles the "get-stores-admin" request, where credentials
+     * and environment are submitted as a JSON payload rather than form data.
+     *
+     * Uses centralized getJsonPayload() to retrieve cached JSON request body,
+     * ensuring consistency across multiple access points.
+     *
+     * @return string|null The environment value from JSON payload, or null if unavailable.
+     */
+    public static function getEnvironmentFromAdminAjax(): ?string
+    {
+        // Get cached JSON payload (same instance used in Connection::getJwtFromPost)
+        $payload = self::getJsonPayload();
+
+        if (empty($payload)) {
+            return null;
+        }
+
+        if (
+            !self::verifyJsonNonce(
+                payload: $payload,
+                action: 'resursbank_get_stores_admin'
+            )
+        ) {
+            return null;
+        }
+
+        // Extract environment from JSON payload
+        $environment = self::getJsonParam('environment');
+
+        if ($environment === null || $environment === '') {
+            return null;
+        }
+
+        // Validate environment value
+        try {
+            // Import EnvironmentEnum at the top of the file if not already imported
+            $envEnum = Environment::from(value: $environment);
+            return $envEnum->value;
+        } catch (\ValueError) {
+            return null;
+        }
     }
 }
