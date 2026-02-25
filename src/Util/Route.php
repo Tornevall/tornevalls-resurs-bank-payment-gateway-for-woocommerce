@@ -179,7 +179,7 @@ class Route
                 WordPress::ensurePluggableLoaded();
                 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verification performed below
                 $nonce = isset($_GET['_wpnonce']) && is_string($_GET['_wpnonce'])
-                    ? sanitize_text_field(wp_unslash($_GET['_wpnonce']))
+                    ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                     : '';
 
                 if (!WordPress::verifyNonce(nonce: $nonce, action: 'resursbank_admin_' . $route)) {
