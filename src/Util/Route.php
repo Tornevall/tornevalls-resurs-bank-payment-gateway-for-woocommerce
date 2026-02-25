@@ -260,6 +260,11 @@ class Route
             $arguments['_wpnonce'] = wp_create_nonce('resursbank_admin_' . $route);
         }
 
+        if ($route === self::ROUTE_GET_STORES_ADMIN) {
+            WordPress::ensurePluggableLoaded();
+            $arguments['_wpnonce'] = wp_create_nonce('resursbank_get_stores_admin');
+        }
+
         return Url::getQueryArg(
             baseUrl: $url,
             arguments: $arguments

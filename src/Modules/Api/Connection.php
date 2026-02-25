@@ -36,6 +36,7 @@ use Resursbank\Woocommerce\Database\Options\Api\Environment;
 use Resursbank\Woocommerce\Modules\Cache\Transient;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
+use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Resursbank\Woocommerce\Util\WordPress;
@@ -74,15 +75,21 @@ class Connection
             // Conditions are that data is saved from wp-admin under very specific circumstances.
             $hasPostJwtInstance = false;
 
-            if ($jwt === null && self::getJwtFromPost() instanceof Jwt) {
-                // In the wc-save-section, options are only allowed to be saved if they are present in the options list.
-                // If we can't fetch credentials in an early "save" we can't generate a new store list properly.
-                $jwt = self::getJwtFromPost();
-                $hasPostJwtInstance = $jwt instanceof Jwt;
-            }
+            // Sets default.
+            $isProduction = Environment::getData() === EnvironmentEnum::PROD;
 
-            if ($jwt === null && self::hasCredentials()) {
-                $jwt = self::getConfigJwt();
+            if ($jwt === null) {
+                // We don't have credentials, but we still want to initialize the config with the correct loggers and such.
+                // This allows us to log errors related to missing credentials and similar issues.
+                if (self::getJwtFromPost() instanceof Jwt) {
+                    // In the wc-save-section, options are only allowed to be saved if they are present in the options list.
+                    // If we can't fetch credentials in an early "save" we can't generate a new store list properly.
+                    $jwt = self::getJwtFromPost();
+                    $hasPostJwtInstance = $jwt instanceof Jwt;
+                    $isProduction = WordPress::getEnvironmentFromAdminAjax() === 'production';
+                } elseif (self::hasCredentials()) {
+                    $jwt = self::getConfigJwt();
+                }
             }
 
             $timeout = (int)ApiTimeout::getData();
@@ -104,7 +111,7 @@ class Connection
                 cache: self::getCache(),
                 jwtAuth: $jwt,
                 logLevel: LogLevel::getData(),
-                isProduction: Environment::getData() === EnvironmentEnum::PROD,
+                isProduction: $isProduction,
                 currencySymbol: Currency::getWooCommerceCurrencySymbol(),
                 currencyFormat: Currency::getEcomCurrencyFormat(),
                 network: new Network(
@@ -246,6 +253,59 @@ class Connection
         // since WP is not guaranteed to be present. However, we can verify that users are admins and that the
         // usual request variables for updating options are present. This access request must be limited to one section
         // only.
+
+        $route = WordPress::getQueryParam(key: Route::ROUTE_PARAM);
+        $isStoresAdminRoute = $route === Route::ROUTE_GET_STORES_ADMIN;
+
+        if ($isStoresAdminRoute) {
+            WordPress::ensurePluggableLoaded();
+
+            if (
+                function_exists('current_user_can') &&
+                !current_user_can('manage_woocommerce')
+            ) {
+                return null;
+            }
+
+            // Get cached JSON payload (read once, reused across the request)
+            $payload = WordPress::getJsonPayload();
+
+            // Verify nonce from JSON payload or query string
+            $jsonNonceOk = WordPress::verifyJsonNonce(
+                payload: $payload,
+                action: 'resursbank_get_stores_admin',
+                field: 'nonce'
+            );
+
+            $queryNonce = WordPress::getQueryParam('_wpnonce');
+            $queryNonceOk = $queryNonce !== '' && WordPress::verifyNonce(
+                nonce: $queryNonce,
+                action: 'resursbank_get_stores_admin'
+            );
+
+            if (!$jsonNonceOk && !$queryNonceOk) {
+                return null;
+            }
+
+            // Extract credentials from JSON payload
+            $clientId = WordPress::getJsonParam('clientId') ?? '';
+            $clientSecret = WordPress::getJsonParam('clientSecret') ?? '';
+            $environment = WordPress::getJsonParam('environment') ?? '';
+
+            if (
+                $clientId === '' ||
+                $clientSecret === '' ||
+                $environment === ''
+            ) {
+                return null;
+            }
+
+            return new Jwt(
+                clientId: $clientId,
+                clientSecret: $clientSecret,
+                grantType: GrantType::CREDENTIALS
+            );
+        }
 
         if (
             !Admin::isAdmin() ||

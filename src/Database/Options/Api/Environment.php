@@ -121,64 +121,14 @@ class Environment extends Option implements OptionInterface
     /**
      * Resolve environment value from admin AJAX request payload.
      *
-     * Specifically handles the "get-stores-admin" request, where credentials
-     * and environment are submitted as a JSON payload rather than form data.
-     *
-     * Since PHP does not populate $_POST for JSON requests, the raw input
-     * stream is decoded manually.
+     * Delegates to centralized WordPress::getEnvironmentFromAdminAjax() to avoid
+     * code duplication and ensure consistent handling of JSON payloads.
      *
      * @return string|null The environment value from JSON payload, or null if unavailable.
      */
     private static function getEnvironmentFromAdminAjax(): ?string
     {
-        if (!is_admin()) {
-            return null;
-        }
-
-        if (!function_exists('wp_doing_ajax') || !wp_doing_ajax()) {
-            return null;
-        }
-
-        $route = WordPress::getQueryParam(key: 'resursbank');
-
-        if ($route !== 'get-stores-admin') {
-            return null;
-        }
-
-        $rawInput = file_get_contents(filename: 'php://input');
-
-        if (!is_string(value: $rawInput) || $rawInput === '') {
-            return null;
-        }
-
-        $decoded = json_decode(json: $rawInput, associative: true);
-
-        if (!is_array(value: $decoded)) {
-            return null;
-        }
-
-        if (
-            !WordPress::verifyJsonNonce(
-                payload: $decoded,
-                action: 'resursbank_get_stores_admin'
-            )
-        ) {
-            return null;
-        }
-
-        $environment = $decoded['environment'] ?? '';
-
-        if (!is_string(value: $environment) || $environment === '') {
-            return null;
-        }
-
-        try {
-            return EnvironmentEnum::from(
-                value: sanitize_text_field($environment)
-            )->value;
-        } catch (ValueError) {
-            return null;
-        }
+        return WordPress::getEnvironmentFromAdminAjax();
     }
 
     /**
