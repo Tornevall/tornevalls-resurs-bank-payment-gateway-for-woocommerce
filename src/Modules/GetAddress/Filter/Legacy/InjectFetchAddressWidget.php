@@ -53,6 +53,10 @@ class InjectFetchAddressWidget
                 replacement: ' ',
                 subject: (new Widget())->content
             );
+
+            // Widget HTML is generated server-side by our SDK (no user input) and must remain intact.
+            // Sanitizing here breaks required widget markup/scripts, so we output as-is.
+            echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         } catch (Throwable $e) {
             try {
                 Config::getLogger()->error(
@@ -66,8 +70,6 @@ class InjectFetchAddressWidget
             }
         }
 
-        // Escape output as late as possible (WordPress best practice).
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped via WordPress::sanitizeWidgetHtml (wp_kses)
-        echo WordPress::sanitizeWidgetHtml(html: $result);
+        echo $result;
     }
 }

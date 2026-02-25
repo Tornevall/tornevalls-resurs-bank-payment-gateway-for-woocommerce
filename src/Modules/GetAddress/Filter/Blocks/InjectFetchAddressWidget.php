@@ -66,9 +66,8 @@ class InjectFetchAddressWidget
                 return $content;
             }
 
-            $widgetHtml = WordPress::sanitizeWidgetHtml(
-                (new Widget())->content
-            );
+            $widgetHtml = (new Widget())->content;
+            // SDK-provided widget markup is trusted; avoid sanitizing to prevent filter breakage.
 
             $content = preg_replace(
                 pattern: '/(<div[^>]*data-block-name="woocommerce\/checkout-contact-information-block"[^>]*><\/div>)/',

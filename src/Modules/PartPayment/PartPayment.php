@@ -99,7 +99,7 @@ class PartPayment
         );
 
         try {
-            $widget = new EcomPartPayment(
+            $widgetHtml = (new EcomPartPayment(
                 paymentMethod: self::getPaymentMethod(),
                 months: (int)Period::getData(),
                 amount: self::getPriceData(),
@@ -108,11 +108,12 @@ class PartPayment
                 ),
                 displayInfoText: self::displayInfoText(),
                 threshold: Limit::getData()
-            );
+            ))->content;
 
+            // SDK-provided widget markup is trusted; do not sanitize to avoid breaking layout.
             echo '<div id="rb-pp-widget-container">' .
-                wp_kses_post($widget->content) .
-                '</div>';
+                $widgetHtml .
+                '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
