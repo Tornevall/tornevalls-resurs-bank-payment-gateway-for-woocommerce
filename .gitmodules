@@ -1,0 +1,3 @@
+[submodule "vendor/ecom"]
+	path = vendor/ecom
+	url = https://bitbucket.org/resursbankplugins/ecom2.git
