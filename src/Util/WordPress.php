@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Util;
 
 // Prevent direct access.
 use Resursbank\Ecom\Lib\Api\Environment;
+use ValueError;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -307,7 +308,7 @@ class WordPress
             // Import EnvironmentEnum at the top of the file if not already imported
             $envEnum = Environment::from(value: $environment);
             return $envEnum->value;
-        } catch (\ValueError) {
+        } catch (ValueError) {
             return null;
         }
     }
