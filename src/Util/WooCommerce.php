@@ -51,6 +51,7 @@ class WooCommerce
         return in_array(
             needle: 'woocommerce/woocommerce.php',
             haystack: apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- active_plugins is a WordPress core hook
                 'active_plugins',
                 get_option(option: 'active_plugins')
             ),
@@ -75,6 +76,7 @@ class WooCommerce
      * page.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function isUsingBlocksCheckout(): bool
     {
@@ -152,17 +154,18 @@ class WooCommerce
                 self::$storeCountry = strtoupper(
                     string: $configuredStore->countryCode->value
                 );
-            } else {
-                $newStore = StoreRepository::getStores()->getFirst();
-                self::$storeCountry = $newStore->countryCode?->value ?? 'EN';
+                return self::$storeCountry;
+            }
 
-                if ($configuredStore === null && $newStore !== null) {
-                    // No store was configured, but we have at least one store available that should be there.
-                    update_option(
-                        option: StoreId::getName(),
-                        value: $newStore->id
-                    );
-                }
+            $newStore = StoreRepository::getStores()->getFirst();
+            self::$storeCountry = $newStore->countryCode?->value ?? 'EN';
+
+            if ($configuredStore === null && $newStore !== null) {
+                // No store was configured, but we have at least one store available that should be there.
+                update_option(
+                    option: StoreId::getName(),
+                    value: $newStore->id
+                );
             }
         } catch (Throwable $exception) {
             Config::getLogger()->debug(
@@ -177,24 +180,42 @@ class WooCommerce
     /**
      * Full cache invalidation.
      *
+     * This method intentionally uses direct database queries to find and clear all Resurs Bank transients.
+     * WordPress cache functions cannot be used here because we need to discover all transient keys dynamically.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function invalidateFullCache(): void
     {
         global $wpdb;
 
         try {
-            /** @noinspection SqlNoDataSourceInspection */
-            $transients = $wpdb->get_col(
-                "SELECT option_name FROM {$wpdb->options}
-                         WHERE option_name LIKE '_transient_resurs%'"
-            );
+            $cache_key = 'resursbank_transient_keys';
+            $transients = wp_cache_get($cache_key);
+
+            if ($transients === false) {
+                /** @noinspection SqlNoDataSourceInspection */
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Required for cache invalidation, discovering transient keys dynamically. Result is cached via wp_cache_set below
+                $transients = $wpdb->get_col(
+                    $wpdb->prepare(
+                        "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+                        '_transient_resurs%'
+                    )
+                );
+
+                // Cache the list of transient keys for 1 hour to reduce database queries.
+                wp_cache_set($cache_key, $transients, '', 3600);
+            }
 
             // Making sure we delete other cached transients as well, besides the ecom cache.
             foreach ($transients as $transient) {
                 $transient_name = str_replace('_transient_', '', $transient);
                 delete_transient($transient_name);
             }
+
+            // Clear the cached transient keys list since we just deleted them all.
+            wp_cache_delete($cache_key);
         } catch (Throwable $e) {
             Log::error(error: $e);
         }
@@ -224,7 +245,10 @@ class WooCommerce
             !is_readable(filename: $filePath)
         ) {
             throw new FilesystemException(
-                message: "Asset file not found or inaccessible: $filePath"
+                message: sprintf(
+                    'Asset file not found or inaccessible: %s',
+                    esc_html(text: $filePath)
+                )
             );
         }
 
@@ -234,7 +258,10 @@ class WooCommerce
         // Check if version exists and is valid.
         if (empty($assets['version'])) {
             throw new EmptyValueException(
-                message: "Version not found or empty in asset file: $filePath"
+                message: sprintf(
+                    'Version not found or empty in asset file: %s',
+                    esc_html(text: $filePath)
+                )
             );
         }
 
@@ -250,17 +277,19 @@ class WooCommerce
      */
     public static function isAdminOrderCreateTool(): bool
     {
+        $page = WordPress::getQueryParam(key: 'page');
+        $action = WordPress::getQueryParam(key: 'action');
+        $postType = WordPress::getQueryParam(key: 'post_type');
+
         return Admin::isAdmin() && (
                 (
                     self::isUsingHpos() &&
-                    isset($_GET['page'], $_GET['action']) &&
-                    $_GET['page'] === 'wc-orders' && $_GET['action'] === 'new'
+                    $page === 'wc-orders' && $action === 'new'
                 ) ||
                 (
                     !self::isUsingHpos() &&
-                    isset($_GET['post_type'], $_GET['action']) &&
-                    $_GET['post_type'] === 'shop_order' &&
-                    $_GET['action'] === 'add'
+                    $postType === 'shop_order' &&
+                    $action === 'add'
                 )
             );
     }
@@ -347,6 +376,8 @@ class WooCommerce
 
     /**
      * Check for misconfigured payment methods during CSS-process and option updates in wp-admin.
+     *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public static function validateAndUpdatePartPaymentMethod(): bool
     {
@@ -370,6 +401,8 @@ class WooCommerce
                 );
             }
         } catch (Throwable) {
+            // Silently ignore errors during validation - if payment method cannot be validated,
+            // it will default to false return value below.
         }
 
         return $paymentMethod instanceof PaymentMethod;

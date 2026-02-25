@@ -50,6 +50,7 @@ use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Cart;
 use WC_Order;
@@ -103,8 +104,10 @@ class Resursbank extends WC_Payment_Gateway
         // When the blocks editor redirects admins to woocommerce internal sections
         // for handling payment methods, we need to redirect them back to the correct
         // location since our methods are not editable from WooCommerce.
+        $section = WordPress::getQueryParam(key: 'section');
+
         if (
-            isset($_REQUEST['section']) &&
+            $section !== '' &&
             isset($method->id) &&
             is_string(value: $this->id) &&
             $method->id !== RESURSBANK_MODULE_PREFIX
@@ -133,7 +136,7 @@ class Resursbank extends WC_Payment_Gateway
      */
     public function payment_fields(): void
     {
-        echo $this->uspText;
+        echo wp_kses_post($this->uspText);
     }
 
     /**
@@ -141,10 +144,11 @@ class Resursbank extends WC_Payment_Gateway
      *
      * @throws Exception
      * @noinspection PhpMissingParentCallCommonInspection
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function process_payment(mixed $order_id): array
     {
-        global $blockCreateErrorMessage;
+        global $resursbank_block_create_error_message;
 
         $order = new WC_Order(order: $order_id);
 
@@ -154,10 +158,14 @@ class Resursbank extends WC_Payment_Gateway
             $this->handleCreatePaymentError(order: $order, error: $e);
 
             if (
-                $blockCreateErrorMessage &&
+                $resursbank_block_create_error_message &&
                 WooCommerce::isUsingBlocksCheckout()
             ) {
-                throw new Exception(message: $blockCreateErrorMessage);
+                throw new Exception(
+                    message: esc_html(
+                        (string)$resursbank_block_create_error_message
+                    )
+                );
             }
         }
 
@@ -288,6 +296,10 @@ class Resursbank extends WC_Payment_Gateway
         try {
             if (AdminUtility::isAdmin() || WC()?->cart === null) {
                 // Do not render payment fields in admin.
+                return;
+            }
+
+            if (!$this->method instanceof PaymentMethod) {
                 return;
             }
 
@@ -459,14 +471,18 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // Legacy order objects by post/id.
-        $orderIdByRequest = $_GET['id'] ?? null;
+        $orderIdByRequest = WordPress::getQueryParam('id');
 
-        if (!$orderIdByRequest && isset($_GET['post']) && (int)$_GET['post']) {
-            /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-            $testOrderByPost = wc_get_order($_GET['post']);
+        if ($orderIdByRequest === '') {
+            $postId = WordPress::getQueryParam('post');
 
-            if ($testOrderByPost instanceof WC_Order) {
-                $orderIdByRequest = $testOrderByPost->get_id();
+            if ($postId !== '' && (int)$postId > 0) {
+                /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
+                $testOrderByPost = wc_get_order((int)$postId);
+
+                if ($testOrderByPost instanceof WC_Order) {
+                    $orderIdByRequest = (string)$testOrderByPost->get_id();
+                }
             }
         }
 
@@ -474,12 +490,12 @@ class Resursbank extends WC_Payment_Gateway
         // for example a bulk editing view, the order has to be validated before proceeding to the return.
 
         /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        $validatedOrder = wc_get_order($orderIdByRequest);
+        $validatedOrder = $orderIdByRequest !== ''
+            ? wc_get_order((int)$orderIdByRequest)
+            : false;
 
         // Return the order if valid ID is provided and it's a valid order.
-        return $validatedOrder instanceof WC_Order && (int)$orderIdByRequest
-            ? $validatedOrder
-            : null;
+        return $validatedOrder instanceof WC_Order ? $validatedOrder : null;
     }
 
     /**
@@ -508,7 +524,7 @@ class Resursbank extends WC_Payment_Gateway
     {
         // Required for Blocks checkout: an error message must be handled through process_payment(),
         // wc_add_notice() alone is not respected by Blocks.
-        global $blockCreateErrorMessage;
+        global $resursbank_block_create_error_message;
 
         Log::error(
             error: $error,
@@ -541,7 +557,7 @@ class Resursbank extends WC_Payment_Gateway
         wc_add_notice(message: $finalMessage, notice_type: 'error');
 
         // Pass message back to process_payment() for Blocks checkout
-        $blockCreateErrorMessage = $finalMessage;
+        $resursbank_block_create_error_message = $finalMessage;
     }
 
     /**

@@ -13,6 +13,11 @@ use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMore;
 use Resursbank\Woocommerce\Util\Log;
 use Throwable;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Checkout Unique selling Point (USP) functionality
  */
@@ -41,11 +46,7 @@ class UniqueSellingPoint
         try {
             $css = (new ReadMore())->content;
 
-            echo <<<EX
-<style id="rb-rm-styles">
-  $css
-</style>
-EX;
+            echo '<style id="rb-rm-styles">' . esc_html($css) . '</style>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }

@@ -15,6 +15,7 @@ use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 /**
@@ -65,6 +66,8 @@ class InjectFetchAddressWidget
             }
         }
 
-        echo $result;
+        // Escape output as late as possible (WordPress best practice).
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped via WordPress::sanitizeWidgetHtml (wp_kses)
+        echo WordPress::sanitizeWidgetHtml(html: $result);
     }
 }

@@ -130,10 +130,12 @@ class Metadata
      *
      * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
-        global $rbPaymentIsValid;
+        global $resursbank_payment_is_valid;
 
         $orderId = $order->get_id() ?? 0;
 
@@ -150,7 +152,7 @@ class Metadata
             $stringValidation->isUuid(value: $order->get_payment_method());
             self::isValidResursMethod(order: $order);
         } catch (Throwable) {
-            $rbPaymentIsValid[$orderId] = false;
+            $resursbank_payment_is_valid[$orderId] = false;
             return false;
         }
 
@@ -165,19 +167,22 @@ class Metadata
         // Note that this method is called through several actions in the plugin which means
         // each request will render a getPayment, unless we cache it the first time. We only
         // need to know the first time if the payment is valid.
-        if ($checkPaymentStatus && !isset($rbPaymentIsValid[$orderId])) {
+        if (
+            $checkPaymentStatus &&
+            !isset($resursbank_payment_is_valid[$orderId])
+        ) {
             try {
                 OrderManagement::getPayment(order: $order);
-                $rbPaymentIsValid[$orderId] = true;
+                $resursbank_payment_is_valid[$orderId] = true;
             } catch (Throwable $error) {
                 Log::debug(message: $error->getMessage());
-                $rbPaymentIsValid[$orderId] = false;
+                $resursbank_payment_is_valid[$orderId] = false;
                 return false;
             }
         }
 
         // If all checks passed or if checkPaymentStatus has not been requested.
-        return $rbPaymentIsValid[$orderId] ?? true;
+        return $resursbank_payment_is_valid[$orderId] ?? true;
     }
 
     /**
@@ -185,18 +190,35 @@ class Metadata
      */
     public static function getOrderByPaymentId(string $paymentId): ?WC_Order
     {
+        $cacheKey = 'resursbank_order_by_payment_' . md5($paymentId);
+        $cachedOrderId = wp_cache_get($cacheKey, 'resursbank');
+
+        if ($cachedOrderId !== false) {
+            return $cachedOrderId ? wc_get_order((int)$cachedOrderId) : null;
+        }
+
         $result = null;
 
         $orders = wc_get_orders(args: [
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- unavoidable lookup, cached above
             'meta_key' => self::KEY_PAYMENT_ID,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- unavoidable lookup, cached above
             'meta_value' => $paymentId,
             'meta_compare' => '=',
             'limit' => 1,
+            'return' => 'ids',
         ]);
 
-        if (!empty($orders) && $orders[0] instanceof WC_Order) {
-            $result = $orders[0];
+        if (!empty($orders) && is_numeric($orders[0])) {
+            $result = wc_get_order((int)$orders[0]);
         }
+
+        wp_cache_set(
+            $cacheKey,
+            $result instanceof WC_Order ? $result->get_id() : 0,
+            'resursbank',
+            300
+        );
 
         return $result;
     }
@@ -224,16 +246,21 @@ class Metadata
 
     /**
      * Early validation of cached payment status.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     private static function isCachedPaymentInvalid(int $orderId): bool
     {
-        global $rbPaymentIsValid;
-        return isset($rbPaymentIsValid[$orderId]) && $rbPaymentIsValid[$orderId] === false;
+        global $resursbank_payment_is_valid;
+        return isset($resursbank_payment_is_valid[$orderId]) && $resursbank_payment_is_valid[$orderId] === false;
     }
 
     /**
      * Validate the used payment method for an order, making sure that we "own" the payment before proceeding.
      *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      * @noinspection PhpReturnValueOfMethodIsNeverUsedInspection
      */

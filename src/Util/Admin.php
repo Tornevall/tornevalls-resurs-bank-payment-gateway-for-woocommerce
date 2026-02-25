@@ -12,6 +12,11 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Throwable;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * General utility functionality for admin-side things
  */
@@ -40,10 +45,10 @@ class Admin
             'admin_notices',
             static function () use ($message, $additional): void {
                 echo '<div class="notice notice-error">';
-                echo $message;
+                echo wp_kses_post($message);
 
                 if ($additional !== '') {
-                    echo '<br />' . $additional;
+                    echo '<br />' . wp_kses_post($additional);
                 }
 
                 echo '</div>';
@@ -58,8 +63,11 @@ class Admin
      */
     public static function isTab(string $tabName): bool
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check for rendering context
         return isset($_GET['tab'], $_GET['page']) &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check for rendering context
             $_GET['page'] === 'wc-settings' &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check for rendering context
             $_GET['tab'] === $tabName;
     }
 
@@ -77,10 +85,13 @@ class Admin
             Admin::isTab(tabName: 'checkout')
         ) {
             if (
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check for rendering context
                 isset($_GET['section']) &&
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check for rendering context
                 $_GET['section'] === $sectionName
             ) {
                 $return = true;
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check for rendering context
             } elseif ($sectionName === '' && !isset($_GET['section'])) {
                 // If requested section is empty and no section is requested, allow true booleans too.
                 $return = true;
@@ -114,7 +125,9 @@ class Admin
             'woocommerce_get_sections_checkout',
             static function (array $sections = []) use ($method): array {
                 if (
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- redirect safety check
                     isset($_REQUEST['section']) &&
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- redirect safety check
                     $_REQUEST['section'] === $method
                 ) {
                     wp_safe_redirect(

@@ -25,9 +25,15 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Product;
+
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Part payment widget
@@ -80,6 +86,7 @@ class PartPayment
      * Output widget HTML if on a single product page.
      *
      * @throws ConfigException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function renderWidget(): void
     {
@@ -104,7 +111,7 @@ class PartPayment
             );
 
             echo '<div id="rb-pp-widget-container">' .
-                $widget->content .
+                wp_kses_post($widget->content) .
                 '</div>';
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -139,7 +146,9 @@ class PartPayment
                     module: 'PartPayment',
                     file: 'part-payment.js'
                 ),
-                ['jquery']
+                ['jquery'],
+                UserAgent::getPluginVersion(),
+                true
             );
 
             // Disable this only if you want all front end calculations to break.
@@ -248,7 +257,10 @@ class PartPayment
      */
     private static function displayInfoText(): bool
     {
-        $returnBool = apply_filters('display_part_payment_info_text', true);
+        $returnBool = apply_filters(
+            'resursbank_display_part_payment_info_text',
+            true
+        );
         return is_bool(value: $returnBool) ? $returnBool : false;
     }
 
@@ -257,6 +269,7 @@ class PartPayment
      */
     private static function getProduct(): WC_Product
     {
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $product is a WooCommerce core global
         global $product;
 
         if (!$product instanceof WC_Product) {

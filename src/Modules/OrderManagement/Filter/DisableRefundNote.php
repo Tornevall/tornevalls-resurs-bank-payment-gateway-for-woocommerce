@@ -20,9 +20,8 @@ class DisableRefundNote
     public static function exec(array $data): array
     {
         $note = __(
-            text: 'Order status set to refunded. To return funds to the customer ' .
-                'you will need to issue a refund through your payment gateway.',
-            domain: 'woocommerce'
+            text: 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.',
+            domain: 'resurs-bank-payments-for-woocommerce'
         );
 
         if (

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
 
+use Exception;
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
@@ -30,9 +31,15 @@ use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
+
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Business logic to modify Resurs Bank payment.
@@ -152,8 +159,8 @@ class Modify extends Action
 
                 if (
                     count(
-                    value: $orderLines
-                ) > 0 &&
+                        value: $orderLines
+                    ) > 0 &&
                     $orderLines->getTotal() > 0
                 ) {
                     Repository::addOrderLines(
@@ -213,10 +220,9 @@ class Modify extends Action
             }
 
             // No need to log failed removals, since nothing will be updated anyway.
-            if (
-                isset($_REQUEST['action']) &&
-                $_REQUEST['action'] !== 'woocommerce_remove_order_item'
-            ) {
+            $action = WordPress::getQueryParam(key: 'action');
+
+            if ($action !== 'woocommerce_remove_order_item') {
                 self::handleValidationError(
                     error: $error,
                     requestedAmount: (float)$requestedAmount,
@@ -231,7 +237,8 @@ class Modify extends Action
 
     /**
      * Handle logging of validation errors.
-     * @throws \Exception
+     *
+     * @throws Exception
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function handleValidationError(

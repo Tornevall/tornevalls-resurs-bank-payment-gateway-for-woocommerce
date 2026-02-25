@@ -20,6 +20,11 @@ use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\Route;
 use WC_Order;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Module initialization class for functionality shared between both the frontend and wp-admin.
  */
@@ -60,6 +65,8 @@ class Shared
      * Not in use - for the moment.
      *
      * @noinspection PhpUnusedPrivateMethodInspection
+     * @SuppressWarnings(PHPMD.UnusedPrivateMethod)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @todo Currently not in use. Should be used to handle payment status changes on future decision.
      */
     private static function registerStatusFilters(): void

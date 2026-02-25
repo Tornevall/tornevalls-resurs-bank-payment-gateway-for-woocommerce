@@ -56,6 +56,8 @@ class UserAgent
      * This is because we need this data when we initialize Ecom, which we do as
      * early as possible. If you attempt to use get_plugin_data() you will get a
      * PHP notice.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public static function getWooCommerceVersion(): string
     {
@@ -70,11 +72,12 @@ class UserAgent
         $file_contents = file_get_contents(filename: $plugin_file);
 
         // Use a regular expression to extract the version information.
+        $matches = [];
         if (preg_match(
             pattern: '/Version:\s*(\S+)/',
             subject: $file_contents,
             matches: $matches
-        )) {
+        ) && isset($matches[1])) {
             return $matches[1];
         }
 
@@ -99,17 +102,5 @@ class UserAgent
         }
 
         return $return;
-    }
-
-    /**
-     * Extract data from plugin registry naturally but validated.
-     *
-     * @param string $pluginMatch Case-sensitive matching.
-     */
-    private static function getVersionFromPluginData(string $pluginMatch, array $pluginData): string
-    {
-        return isset($pluginData['Name'], $pluginData['Version']) &&
-        $pluginData['Name'] === $pluginMatch &&
-        is_string(value: $pluginData['Version']) ? $pluginData['Version'] : '';
     }
 }

@@ -17,7 +17,13 @@ use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PartPay
 use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
 use Resursbank\Woocommerce\Util\Admin as AdminUtil;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Throwable;
+
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Part payment admin functionality
@@ -45,7 +51,13 @@ class Admin
 
         /** @noinspection BadExceptionsProcessingInspection */
         try {
-            wp_register_script('partpayment-admin-scripts', false);
+            wp_register_script(
+                'partpayment-admin-scripts',
+                false,
+                [],
+                UserAgent::getPluginVersion(),
+                true
+            );
             wp_enqueue_script('partpayment-admin-scripts');
             wp_add_inline_script(
                 'partpayment-admin-scripts',
@@ -59,7 +71,10 @@ class Admin
                 Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'rb-part-payment-admin.js'
-                )
+                ),
+                [],
+                UserAgent::getPluginVersion(),
+                true
             );
 
             wp_enqueue_script(
@@ -68,7 +83,9 @@ class Admin
                     module: 'PartPayment',
                     file: 'rb-part-payment-admin.js'
                 ),
-                ['jquery']
+                ['jquery'],
+                UserAgent::getPluginVersion(),
+                true
             );
         } catch (Throwable $exception) {
             Config::getLogger()->error(message: $exception);

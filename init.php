@@ -10,8 +10,11 @@
  * Version: 1.2.20
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
- * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-2.0-for-woocommerce/
+ * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
  * Text Domain: resurs-bank-payments-for-woocommerce
+ * Domain Path: /languages
+ * License: GPLv2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Requires Plugins: woocommerce
  *
  * @noinspection PhpCSValidationInspection
@@ -33,8 +36,9 @@ use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
 use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -44,7 +48,7 @@ require_once __DIR__ . '/src/Autoloader/requirements.php';
 // has not been checked out properly. This issue typically occurs during a manual
 // checkout when ecom2 is missing. We cannot move this into a class, as the autoload
 // process will fail if ecom2 is unavailable.
-if (!file_exists(filename: __DIR__ . '/lib/ecom/composer.json')) {
+if (!file_exists(filename: __DIR__ . '/vendor/ecom/composer.json')) {
     resursBankHasNoEcom();
     return;
 }
@@ -72,6 +76,9 @@ define(
 define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 require_once __DIR__ . '/autoload.php';
+
+// Ensure pluggable functions like wp_verify_nonce are available early.
+WordPress::ensurePluggableLoaded();
 
 // Make sure there is an instance of WooCommerce among active plugins.
 if (!WooCommerce::isAvailable()) {

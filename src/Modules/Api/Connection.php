@@ -38,10 +38,14 @@ use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Currency;
 use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Logger;
 
-use function function_exists;
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * API connection adapter.
@@ -89,7 +93,7 @@ class Connection
             }
 
             // For internal usages (dashboard).
-            $useProxy = apply_filters('mapi_proxy', '') ?? '';
+            $useProxy = apply_filters('resursbank_mapi_proxy', '') ?? '';
 
             if (!is_string($useProxy)) {
                 $useProxy = '';
@@ -163,7 +167,8 @@ class Connection
         return new Jwt(
             clientId: ClientId::getData(),
             clientSecret: ClientSecret::getData(),
-            grantType: GrantType::CREDENTIALS
+            grantType: GrantType::CREDENTIALS,
+            cacheToken: true
         );
     }
 
@@ -223,6 +228,12 @@ class Connection
      * Get JWT from $_POST. Used on early update_option requests from where we need to try to fetch store lists
      * with not-yet-set credentials.
      *
+     * Nonce verification is not performed here because:
+     * 1. This is a private method, only called internally after Admin::isAdmin() + Admin::isTab() checks
+     * 2. WooCommerce Settings API handles nonce verification internally for all settings forms
+     * 3. This method extracts data from the WooCommerce-validated POST payload during settings save
+     * 4. Adding duplicate nonce verification would fail as WC uses its own nonce actions
+     *
      * @throws AttributeCombinationException
      * @throws JsonException
      * @throws ReflectionException
@@ -231,30 +242,39 @@ class Connection
     // phpcs:ignore
     private static function getJwtFromPost(): ?Jwt
     {
-        // WordPress usually deliver_wpnonces for us here, but we can't use it to verify the nonce in this early state
-        // since WP is not a guarantee to be present. However, we can verify that users are admins and that the
+        // WordPress usually delivers nonces for us here, but we can't use it to verify the nonce in this early state
+        // since WP is not guaranteed to be present. However, we can verify that users are admins and that the
         // usual request variables for updating options are present. This access request must be limited to one section
         // only.
+
         if (
-            Admin::isAdmin() &&
-            isset(
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'],
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment']
-            ) && (
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_id'] !== '' &&
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_client_secret'] !== '' &&
-                $_REQUEST[RESURSBANK_MODULE_PREFIX . '_environment'] !== '' &&
-                Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
-            )
+            !Admin::isAdmin() ||
+            !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
         ) {
-            $return = new Jwt(
-                clientId: $_POST[RESURSBANK_MODULE_PREFIX . '_client_id'],
-                clientSecret: $_POST[RESURSBANK_MODULE_PREFIX . '_client_secret'],
-                grantType: GrantType::CREDENTIALS
-            );
+            return null;
         }
 
-        return $return ?? null;
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
+        $clientId = WordPress::getPostParam(
+            key: RESURSBANK_MODULE_PREFIX . '_client_id'
+        );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
+        $clientSecret = WordPress::getPostParam(
+            key: RESURSBANK_MODULE_PREFIX . '_client_secret'
+        );
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
+        $environment = WordPress::getPostParam(
+            key: RESURSBANK_MODULE_PREFIX . '_environment'
+        );
+
+        if ($clientId === '' || $clientSecret === '' || $environment === '') {
+            return null;
+        }
+
+        return new Jwt(
+            clientId: $clientId,
+            clientSecret: $clientSecret,
+            grantType: GrantType::CREDENTIALS
+        );
     }
 }

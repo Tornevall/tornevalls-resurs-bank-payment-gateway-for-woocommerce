@@ -38,6 +38,11 @@ use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * API settings section.
  */
@@ -90,7 +95,10 @@ class Api
             Url::getResourceUrl(
                 module: 'Api',
                 file: 'saved-updates.js'
-            )
+            ),
+            [],
+            '1.0.0',
+            true
         );
         wp_enqueue_script(
             'rb-api-admin-scripts-load',
@@ -98,7 +106,9 @@ class Api
                 module: 'Api',
                 file: 'saved-updates.js'
             ),
-            ['jquery']
+            ['jquery'],
+            '1.0.0',
+            true
         );
 
         wp_localize_script(
@@ -191,7 +201,7 @@ class Api
             'custom_attributes' => [
                 'disabled' => true,
             ],
-            'title' => __('Country'),
+            'title' => __('Country', 'resurs-bank-payments-for-woocommerce'),
             'value' => WooCommerce::getStoreCountry(),
             'css' => 'border: none; width: 100%; background: transparent; color: #000; box-shadow: none;',
         ];

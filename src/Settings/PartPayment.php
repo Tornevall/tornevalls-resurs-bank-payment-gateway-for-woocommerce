@@ -36,6 +36,11 @@ use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Generates the settings form for the Part payment module.
  *
@@ -180,12 +185,14 @@ class PartPayment
      * Handles the update logic when StoreId changes.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
-        global $overrideSavedCountryCode, $isCountryOverride;
+        global $resursbank_overrideSavedCountryCode, $resursbank_isCountryOverride;
 
-        $isCountryOverride = false;
+        $resursbank_isCountryOverride = false;
 
         try {
             Config::getCache()->invalidate();
@@ -216,8 +223,8 @@ class PartPayment
                     $countryCode
                 )
             ) {
-                $overrideSavedCountryCode = $countryCode;
-                $isCountryOverride = true;
+                $resursbank_overrideSavedCountryCode = $countryCode;
+                $resursbank_isCountryOverride = true;
                 self::updateThresholdLimit($countryCode);
             }
         } catch (Throwable) {
@@ -239,10 +246,13 @@ class PartPayment
     /**
      * Checks if required store, payment method, and period data is present.
      *  If missing, an error message is added and false is returned.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     private static function validateStoreAndMethod(): bool
     {
-        global $isCountryOverride;
+        global $resursbank_isCountryOverride;
 
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
@@ -265,7 +275,7 @@ class PartPayment
         // Country overrider may cause empty values during a limited amount of time
         // due to handleStoreIdUpdate are saving the threshold values via the update hook.
         // During this time we should not validate the period.
-        if (empty($period) && !$isCountryOverride) {
+        if (empty($period) && !$resursbank_isCountryOverride) {
             MessageBag::addError(message: Translator::translate(
                 phraseId: 'limit-missing-period'
             ));
@@ -288,9 +298,7 @@ class PartPayment
         try {
             // This method is triggered through several requests due to how javascript are loaded
             // but should not be fully executed when AJAX requests are handling the calls.
-            $isAjaxRequest = isset($_REQUEST['resursbank']) && $_REQUEST['resursbank'] === 'get-store-country';
-
-            if ($isAjaxRequest) {
+            if (function_exists('wp_doing_ajax') && wp_doing_ajax()) {
                 return;
             }
 
@@ -359,10 +367,12 @@ class PartPayment
      * @throws Throwable
      * @throws ValidationException
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.LongVariable)
      */
     private static function handleLimitUpdate(mixed $new): void
     {
-        global $overrideSavedCountryCode;
+        global $resursbank_overrideSavedCountryCode;
 
         $customerCountry = get_option('woocommerce_default_country');
 
@@ -370,7 +380,7 @@ class PartPayment
             $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
 
             // Do not touch anything if override is active.
-            if (isset($overrideSavedCountryCode)) {
+            if (isset($resursbank_overrideSavedCountryCode)) {
                 return;
             }
         } catch (Throwable) {
