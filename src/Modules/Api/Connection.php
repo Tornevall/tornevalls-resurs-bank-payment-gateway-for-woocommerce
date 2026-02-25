@@ -75,15 +75,21 @@ class Connection
             // Conditions are that data is saved from wp-admin under very specific circumstances.
             $hasPostJwtInstance = false;
 
+            // Default stuff.
             $isProduction = Environment::getData() === EnvironmentEnum::PROD;
-            if ($jwt === null && self::getJwtFromPost() instanceof Jwt) {
-                // In the wc-save-section, options are only allowed to be saved if they are present in the options list.
-                // If we can't fetch credentials in an early "save" we can't generate a new store list properly.
-                $jwt = self::getJwtFromPost();
-                $hasPostJwtInstance = $jwt instanceof Jwt;
-                $isProduction = WordPress::getEnvironmentFromAdminAjax() === 'production';
-            } else if ($jwt === null && self::hasCredentials()) {
-                $jwt = self::getConfigJwt();
+
+            if ($jwt === null) {
+                // We don't have credentials, but we still want to initialize the config with the correct loggers and such.
+                // This allows us to log errors related to missing credentials and similar issues.
+                if (self::getJwtFromPost() instanceof Jwt) {
+                    // In the wc-save-section, options are only allowed to be saved if they are present in the options list.
+                    // If we can't fetch credentials in an early "save" we can't generate a new store list properly.
+                    $jwt = self::getJwtFromPost();
+                    $hasPostJwtInstance = $jwt instanceof Jwt;
+                    $isProduction = WordPress::getEnvironmentFromAdminAjax() === 'production';
+                } elseif (self::hasCredentials()) {
+                    $jwt = self::getConfigJwt();
+                }
             }
 
             $timeout = (int)ApiTimeout::getData();
@@ -270,9 +276,9 @@ class Connection
 
             $queryNonce = WordPress::getQueryParam('_wpnonce');
             $queryNonceOk = $queryNonce !== '' && WordPress::verifyNonce(
-                nonce: $queryNonce,
-                action: 'resursbank_get_stores_admin'
-            );
+                    nonce: $queryNonce,
+                    action: 'resursbank_get_stores_admin'
+                );
 
             if (!$jsonNonceOk && !$queryNonceOk) {
                 return null;
