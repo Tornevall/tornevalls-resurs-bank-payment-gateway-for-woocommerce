@@ -1,5 +1,4 @@
 composer.json
-vendor
 composer.lock
 qa/bin
 qa/psalm/cache
