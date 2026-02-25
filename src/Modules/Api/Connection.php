@@ -75,7 +75,7 @@ class Connection
             // Conditions are that data is saved from wp-admin under very specific circumstances.
             $hasPostJwtInstance = false;
 
-            // Default stuff.
+            // Sets default.
             $isProduction = Environment::getData() === EnvironmentEnum::PROD;
 
             if ($jwt === null) {
@@ -260,7 +260,10 @@ class Connection
         if ($isStoresAdminRoute) {
             WordPress::ensurePluggableLoaded();
 
-            if (function_exists('current_user_can') && !current_user_can('manage_woocommerce')) {
+            if (
+                function_exists('current_user_can') &&
+                !current_user_can('manage_woocommerce')
+            ) {
                 return null;
             }
 
@@ -276,9 +279,9 @@ class Connection
 
             $queryNonce = WordPress::getQueryParam('_wpnonce');
             $queryNonceOk = $queryNonce !== '' && WordPress::verifyNonce(
-                    nonce: $queryNonce,
-                    action: 'resursbank_get_stores_admin'
-                );
+                nonce: $queryNonce,
+                action: 'resursbank_get_stores_admin'
+            );
 
             if (!$jsonNonceOk && !$queryNonceOk) {
                 return null;
@@ -289,7 +292,11 @@ class Connection
             $clientSecret = WordPress::getJsonParam('clientSecret') ?? '';
             $environment = WordPress::getJsonParam('environment') ?? '';
 
-            if ($clientId === '' || $clientSecret === '' || $environment === '') {
+            if (
+                $clientId === '' ||
+                $clientSecret === '' ||
+                $environment === ''
+            ) {
                 return null;
             }
 
@@ -298,7 +305,9 @@ class Connection
                 clientSecret: $clientSecret,
                 grantType: GrantType::CREDENTIALS
             );
-        } elseif (
+        }
+
+        if (
             !Admin::isAdmin() ||
             !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
         ) {
