@@ -280,11 +280,25 @@ class WordPress
      */
     public static function getEnvironmentFromAdminAjax(): ?string
     {
+        $key = defined('RESURSBANK_MODULE_PREFIX')
+            ? RESURSBANK_MODULE_PREFIX . '_environment'
+            : 'resursbank_environment';
+
         // Get cached JSON payload (same instance used in Connection::getJwtFromPost)
         $payload = self::getJsonPayload();
 
         if (empty($payload)) {
-            return null;
+            $postEnv = self::getPostParam($key);
+
+            if ($postEnv === '') {
+                return null;
+            }
+
+            try {
+                return Environment::from(value: $postEnv)->value;
+            } catch (ValueError) {
+                return null;
+            }
         }
 
         if (
@@ -305,7 +319,6 @@ class WordPress
 
         // Validate environment value
         try {
-            // Import EnvironmentEnum at the top of the file if not already imported
             $envEnum = Environment::from(value: $environment);
             return $envEnum->value;
         } catch (ValueError) {

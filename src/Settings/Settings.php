@@ -17,8 +17,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-
-use function is_array;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
@@ -124,6 +123,7 @@ class Settings
             );
 
             Config::getCache()->invalidate();
+            StoreRepository::getCache()->clear();
         } catch (Throwable $e) {
             Log::error(
                 error: $e,

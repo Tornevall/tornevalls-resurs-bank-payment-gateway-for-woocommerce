@@ -86,7 +86,7 @@ class Connection
                     // If we can't fetch credentials in an early "save" we can't generate a new store list properly.
                     $jwt = self::getJwtFromPost();
                     $hasPostJwtInstance = $jwt instanceof Jwt;
-                    $isProduction = WordPress::getEnvironmentFromAdminAjax() === 'production';
+                    $isProduction = WordPress::getEnvironmentFromAdminAjax() === 'prod';
                 } elseif (self::hasCredentials()) {
                     $jwt = self::getConfigJwt();
                 }
