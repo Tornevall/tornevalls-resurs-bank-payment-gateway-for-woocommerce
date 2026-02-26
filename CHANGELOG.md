@@ -1,3 +1,18 @@
+# 1.2.20
+
+* WordPress.org review hardening: Implemented additional sanitization/validation at controlled entry points and centralized input handling.
+* Improved output escaping for admin notices and inline script payloads where applicable.
+* Removed disallowed HEREDOC/NOWDOC usage flagged by review.
+* Removed unneeded development artifacts from the release package.
+* Clarified SDK separation by relocating shared SDK path from lib/ecom to vendor/ecom.
+* Added/updated inline code comments to document rationale for guideline-driven implementations.
+* Plugin Check findings addressed and reduced to minimal, justified remaining notices.
+* Fixes and stuff connected to "spammy services" and security advices.
+
+# 1.2.19
+
+* Minor maintenance updates and internal adjustments.
+
 # 1.2.18
 
 * Fixes to reach latest ecom.
