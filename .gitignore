@@ -1,5 +1,4 @@
 composer.json
-vendor
 composer.lock
 qa/bin
 qa/psalm/cache
@@ -7,4 +6,22 @@ qa/php-cs-fixer/.php-cs-fixer.cache
 lib/cbf
 node_modules
 Makefile
-**.DS_Store
+**/.DS_Store
+.DS_Store
+._*
+
+# Build artifacts and caches
+**/.sass-cache
+.sass-cache/
+**/*.css.map
+dist/
+build/
+.cache/
+**/.cache/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

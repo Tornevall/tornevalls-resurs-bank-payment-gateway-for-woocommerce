@@ -41,9 +41,15 @@ use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
 use Resursbank\Woocommerce\Settings\Advanced;
 use Resursbank\Woocommerce\Settings\Callback;
 use Throwable;
+
 use function is_string;
 use function str_contains;
 use function strlen;
+
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Primitive routing, executing arbitrary code depending on $_GET parameters.
@@ -108,7 +114,6 @@ class Route
      */
     public const ROUTE_COSTLIST = 'get-costlist';
 
-
     /**
      * Route to get JSON response with store country (usually happens after a save for which that value is delayed
      * until the page is reloaded).
@@ -128,10 +133,14 @@ class Route
      */
     public static function exec(): void
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
         $route = (
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
             isset($_GET[self::ROUTE_PARAM]) &&
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
             is_string(value: $_GET[self::ROUTE_PARAM])
-        ) ? $_GET[self::ROUTE_PARAM] : '';
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
+        ) ? sanitize_text_field(wp_unslash($_GET[self::ROUTE_PARAM])) : '';
 
         $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
@@ -150,6 +159,37 @@ class Route
                         code: 403
                     )
                 );
+            }
+
+            // Verify nonce for state-changing admin routes to prevent CSRF attacks.
+            // Routes that modify data (cache invalidate, trigger test callback) require nonce verification.
+            // Read-only routes (get stores, get order content) use capability check only.
+            $stateChangingRoutes = [
+                self::ROUTE_ADMIN_CACHE_INVALIDATE,
+                self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+            ];
+
+            if (
+                in_array(
+                    needle: $route,
+                    haystack: $stateChangingRoutes,
+                    strict: true
+                )
+            ) {
+                WordPress::ensurePluggableLoaded();
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verification performed below
+                $nonce = isset($_GET['_wpnonce']) && is_string($_GET['_wpnonce'])
+                    ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                    : '';
+
+                if (!WordPress::verifyNonce(nonce: $nonce, action: 'resursbank_admin_' . $route)) {
+                    self::respondWithError(
+                        exception: new HttpException(
+                            message: 'Security verification failed. Please try again.',
+                            code: 403
+                        )
+                    );
+                }
             }
 
             self::route(route: $route);
@@ -207,9 +247,27 @@ class Route
         $url = self::getUrlWithProperTrailingSlash(url: $url);
         $url .= str_contains(haystack: $url, needle: '?') ? '&' : '?';
 
+        $arguments = [self::ROUTE_PARAM => $route];
+
+        // Add nonce for state-changing admin routes to prevent CSRF attacks
+        $stateChangingRoutes = [
+            self::ROUTE_ADMIN_CACHE_INVALIDATE,
+            self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+        ];
+
+        if (in_array(needle: $route, haystack: $stateChangingRoutes, strict: true)) {
+            WordPress::ensurePluggableLoaded();
+            $arguments['_wpnonce'] = wp_create_nonce('resursbank_admin_' . $route);
+        }
+
+        if ($route === self::ROUTE_GET_STORES_ADMIN) {
+            WordPress::ensurePluggableLoaded();
+            $arguments['_wpnonce'] = wp_create_nonce('resursbank_get_stores_admin');
+        }
+
         return Url::getQueryArg(
             baseUrl: $url,
-            arguments: [self::ROUTE_PARAM => $route]
+            arguments: $arguments
         );
     }
 
@@ -225,6 +283,20 @@ class Route
         header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
+        $normalizedType = strtolower($contentType);
+
+        if (str_starts_with($normalizedType, 'text/html')) {
+            echo wp_kses_post($body);
+            return;
+        }
+
+        if (str_starts_with($normalizedType, 'text/plain')) {
+            echo esc_html($body);
+            return;
+        }
+
+        // Non-HTML responses (JSON/CSS/JS) must not be escaped.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo $body;
     }
 
@@ -279,7 +351,12 @@ class Route
     public static function redirectBack(
         bool $admin = true
     ): void {
-        $url = $_SERVER['HTTP_REFERER'] ?? '';
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized via esc_url_raw below
+        $url = isset($_SERVER['HTTP_REFERER'])
+            ? esc_url_raw(
+            wp_unslash($_SERVER['HTTP_REFERER'])
+        )
+            : '';
 
         try {
             $default = self::getUrl(route: '', admin: $admin);
@@ -380,11 +457,15 @@ class Route
                 break;
 
             case self::ROUTE_COSTLIST:
-                $methodId = $_GET['method'] ?? '';
-                $amount = isset($_GET['amount']) ? (float)$_GET['amount'] : 0;
+                $methodId = WordPress::getQueryParam('method');
+                $amount = WordPress::getQueryParam('amount');
+                $amount = $amount !== '' ? (float)$amount : 0.0;
 
                 try {
-                    $paymentMethod = Repository::getById(paymentMethodId: $methodId);
+                    $paymentMethod = Repository::getById(
+                        paymentMethodId: $methodId
+                    );
+
                     if (!$paymentMethod instanceof PaymentMethod) {
                         self::respondWithExit(
                             body: wp_json_encode(
@@ -405,6 +486,7 @@ class Route
                 } catch (Throwable $e) {
                     self::respondWithError(exception: $e);
                 }
+
                 break;
 
             default:
@@ -432,8 +514,8 @@ class Route
     private static function userIsAdmin(): bool
     {
         return is_user_logged_in() && current_user_can(
-                capability: 'administrator'
-            );
+            capability: 'administrator'
+        );
     }
 
     /**
@@ -442,9 +524,9 @@ class Route
     private static function getUrlWithProperTrailingSlash(string $url): string
     {
         return preg_replace(
-                pattern: '/\/$/',
-                replacement: '',
-                subject: $url
-            ) . '/';
+            pattern: '/\/$/',
+            replacement: '',
+            subject: $url
+        ) . '/';
     }
 }

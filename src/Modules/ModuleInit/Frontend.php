@@ -18,6 +18,11 @@ use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
 use Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint;
 use Resursbank\Woocommerce\Util\WooCommerce;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Module initialization class for functionality used by the frontend parts of plugin.
  */

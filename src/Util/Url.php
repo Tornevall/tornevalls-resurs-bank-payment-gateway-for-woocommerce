@@ -63,7 +63,7 @@ class Url
         string $path
     ): string {
         return self::getUrl(
-            path: RESURSBANK_MODULE_DIR_NAME . "/lib/ecom/$path"
+            path: RESURSBANK_MODULE_DIR_NAME . "/vendor/ecom/$path"
         );
     }
 
@@ -80,15 +80,14 @@ class Url
             default => 'resurs.png'
         };
 
-        return self::getEcomUrl(
-            path: "src/Module/Widget/Logo/img/$file"
-        );
+        return self::getEcomUrl(path: "src/Module/Widget/Logo/img/$file");
     }
 
     /**
      * Generate a URL for a given endpoint, with a list of arguments.
      *
      * @throws IllegalValueException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getQueryArg(string $baseUrl, array $arguments): string
     {
@@ -101,7 +100,10 @@ class Url
         foreach ($arguments as $argumentKey => $argumentValue) {
             if (!is_string(value: $argumentValue)) {
                 throw new IllegalValueException(
-                    message: "$argumentValue is not a string"
+                    message: sprintf(
+                        'Argument value is not a string (type: %s).',
+                        esc_html(gettype(value: $argumentValue))
+                    )
                 );
             }
 
@@ -168,8 +170,11 @@ class Url
         /** @noinspection PhpConditionAlreadyCheckedInspection */
         if (!is_string(value: $result)) {
             throw new RuntimeException(
-                message: 'Could not produce a string URL for ' .
-                "\"$path\". Result came back as: " . gettype(value: $result)
+                message: sprintf(
+                    'Could not produce a string URL for "%s". Result came back as: %s',
+                    esc_html($path),
+                    esc_html(gettype(value: $result))
+                )
             );
         }
 
@@ -181,9 +186,13 @@ class Url
      */
     public static function getHttpGet(string $key): ?string
     {
-        return isset($_GET[$key]) && is_string(value: $_GET[$key])
-            ? $_GET[$key]
-            : null;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- caller must verify nonce when required
+        if (!isset($_GET[$key]) || !is_string(value: $_GET[$key])) {
+            return null;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- caller must verify nonce when required
+        return sanitize_text_field(wp_unslash($_GET[$key]));
     }
 
     /**
@@ -193,9 +202,13 @@ class Url
      */
     public static function getHttpPost(string $key): ?string
     {
-        return isset($_POST[$key]) && is_string(value: $_POST[$key])
-            ? $_POST[$key]
-            : null;
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller must verify nonce when required
+        if (!isset($_POST[$key]) || !is_string(value: $_POST[$key])) {
+            return null;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- caller must verify nonce when required
+        return sanitize_text_field(wp_unslash($_POST[$key]));
     }
 
     /**

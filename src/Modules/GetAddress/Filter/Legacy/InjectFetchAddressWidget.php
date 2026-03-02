@@ -15,6 +15,7 @@ use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 /**
@@ -52,6 +53,10 @@ class InjectFetchAddressWidget
                 replacement: ' ',
                 subject: (new Widget())->content
             );
+
+            // Widget HTML is generated server-side by our SDK (no user input) and must remain intact.
+            // Sanitizing here breaks required widget markup/scripts, so we output as-is.
+            echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         } catch (Throwable $e) {
             try {
                 Config::getLogger()->error(

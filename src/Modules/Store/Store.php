@@ -16,7 +16,14 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
+
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Store related business logic.
@@ -80,16 +87,20 @@ class Store
 
     /**
      * Checks if we are on the WooCommerce settings page and the Resurs Bank tab.
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
      */
     private static function isOnResursBankSettingsPage(): bool
     {
-        return is_admin() &&
-            isset($_REQUEST['page'], $_REQUEST['tab']) &&
-            $_REQUEST['page'] === 'wc-settings' &&
-            $_REQUEST['tab'] === 'resursbank' &&
-            (!isset($_REQUEST['section']) || $_REQUEST['section'] === 'api_settings');
+        if (!is_admin()) {
+            return false;
+        }
+
+        $page = WordPress::getQueryParam('page');
+        $tab = WordPress::getQueryParam('tab');
+        $section = WordPress::getQueryParam('section');
+
+        return $page === 'wc-settings' &&
+            $tab === 'resursbank' &&
+            ($section === '' || $section === 'api_settings');
     }
 
     /**
@@ -99,7 +110,12 @@ class Store
      */
     private static function enqueueStyles(): void
     {
-        wp_register_style('rb-store-admin-css', false);
+        wp_register_style(
+            'rb-store-admin-css',
+            false,
+            [],
+            UserAgent::getPluginVersion()
+        );
         wp_enqueue_style('rb-store-admin-css');
         wp_add_inline_style(
             'rb-store-admin-css',
@@ -117,7 +133,13 @@ class Store
     {
         $widget = self::initializeWidget();
 
-        wp_register_script('rb-store-admin-scripts', false);
+        wp_register_script(
+            'rb-store-admin-scripts',
+            false,
+            [],
+            UserAgent::getPluginVersion(),
+            true
+        );
         wp_enqueue_script('rb-store-admin-scripts');
         wp_add_inline_script('rb-store-admin-scripts', $widget->content);
 
@@ -126,7 +148,10 @@ class Store
             Url::getResourceUrl(
                 module: 'Store',
                 file: 'rb-store.js'
-            )
+            ),
+            ['jquery'],
+            UserAgent::getPluginVersion(),
+            true
         );
 
         wp_enqueue_script(
@@ -135,7 +160,9 @@ class Store
                 module: 'Store',
                 file: 'rb-store.js'
             ),
-            ['jquery']
+            ['jquery'],
+            UserAgent::getPluginVersion(),
+            true
         );
     }
 
@@ -168,7 +195,8 @@ class Store
                     route: Route::ROUTE_GET_STORES_ADMIN
                 ),
                 'fetch_stores_translation' => $fetchStoresString,
-                'no_fetch_url' => $noFetchUrl
+                'no_fetch_url' => $noFetchUrl,
+                'nonce' => wp_create_nonce('resursbank_get_stores_admin')
             ]
         );
     }

@@ -25,9 +25,11 @@ use function defined;
 use function function_exists;
 use function is_array;
 
-/**
- * Message bag.
- */
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class MessageBag
 {
     public const SESSION_KEY = 'rb-message-bag';
@@ -60,7 +62,9 @@ class MessageBag
                     message: 'Empty message encountered.',
                     type: Type::ERROR
                 );
-            } else {
+            }
+
+            if ($message !== '') {
                 $messageInstance = new Message(message: $message, type: $type);
             }
 

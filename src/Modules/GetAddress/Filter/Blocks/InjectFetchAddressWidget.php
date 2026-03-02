@@ -11,6 +11,7 @@ namespace Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks;
 
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
 use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 /**
@@ -65,9 +66,12 @@ class InjectFetchAddressWidget
                 return $content;
             }
 
+            $widgetHtml = (new Widget())->content;
+            // SDK-provided widget markup is trusted; avoid sanitizing to prevent filter breakage.
+
             $content = preg_replace(
                 pattern: '/(<div[^>]*data-block-name="woocommerce\/checkout-contact-information-block"[^>]*><\/div>)/',
-                replacement: '$1' . (new Widget())->content,
+                replacement: '$1' . $widgetHtml,
                 subject: $content
             );
         } catch (Throwable $error) {

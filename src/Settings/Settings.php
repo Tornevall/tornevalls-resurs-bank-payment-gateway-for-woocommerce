@@ -17,8 +17,12 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 
-use function is_array;
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * General business logic for settings.
@@ -45,13 +49,11 @@ class Settings
             'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
-        // Only need this css when in proper section.
-        if (isset($_REQUEST['section']) && $_REQUEST['section'] === 'about') {
-            add_action(
-                'in_admin_header',
-                'Resursbank\Woocommerce\Settings\About::setCss'
-            );
-        }
+        // Ensure About CSS is injected only on the About section.
+        add_action(
+            'in_admin_header',
+            'Resursbank\\Woocommerce\\Settings\\Settings::maybeSetAboutCss'
+        );
 
         /**
          * @noinspection PhpArgumentWithoutNamedIdentifierInspection
@@ -121,6 +123,7 @@ class Settings
             );
 
             Config::getCache()->invalidate();
+            StoreRepository::getCache()->clear();
         } catch (Throwable $e) {
             Log::error(
                 error: $e,
@@ -182,11 +185,16 @@ class Settings
     {
         global $current_section;
 
-        return $current_section === '' ? Api::SECTION_ID : $current_section;
+        if (!is_string(value: $current_section) || $current_section === '') {
+            return Api::SECTION_ID;
+        }
+
+        return $current_section;
     }
 
     /**
      * Add link to "Settings" page for our plugin in WP admin.
+     *
      * @noinspection HtmlUnknownTarget
      */
     public static function addPluginActionLinks(
@@ -206,5 +214,17 @@ class Settings
         }
 
         return $links;
+    }
+
+    /**
+     * Inject About tab CSS only when the About section is active.
+     */
+    public static function maybeSetAboutCss(): void
+    {
+        if (self::getCurrentSectionId() !== About::SECTION_ID) {
+            return;
+        }
+
+        About::setCss();
     }
 }

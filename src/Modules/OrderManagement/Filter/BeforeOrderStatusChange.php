@@ -12,6 +12,8 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
 
 use Exception;
+use JsonException;
+use ReflectionException;
 use Resursbank\Ecom\Exception\ApiException;
 use Resursbank\Ecom\Exception\AttributeCombinationException;
 use Resursbank\Ecom\Exception\AuthException;
@@ -19,8 +21,6 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\CurlException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use JsonException;
-use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
@@ -34,6 +34,7 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Order;
 use WC_Order_Refund;
@@ -81,7 +82,7 @@ class BeforeOrderStatusChange
 
         $order = OrderManagement::getOrder(id: (int)$postId);
         $newStatus = WooCommerce::stripStatusPrefix(
-            status: $_POST['order_status'] ?? ''
+            status: WordPress::getPostParam('order_status')
         );
 
         // Ignore other methods.
@@ -140,6 +141,9 @@ class BeforeOrderStatusChange
      * @throws NotJsonEncodedException
      * @throws Exception
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public static function handlePostStatusTransitions(WC_Order $order, mixed $data_store): void
     {
@@ -184,9 +188,9 @@ class BeforeOrderStatusChange
 
             if ($payment->isFrozen()) {
                 throw new Exception(
-                    Translator::translate(
+                    esc_html(Translator::translate(
                         phraseId: 'unable-to-capture-frozen-order'
-                    )
+                    ))
                 );
             }
         }

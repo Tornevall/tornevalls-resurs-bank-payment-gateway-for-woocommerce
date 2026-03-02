@@ -28,8 +28,14 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
+
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * This class adds support for Resurs Bank payment methods in the WooCommerce
@@ -82,7 +88,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 module: 'Gateway',
                 file: 'checkout-blocks.css',
                 type: ResourceType::CSS
-            )
+            ),
+            [],
+            UserAgent::getPluginVersion()
         );
 
         wp_enqueue_style('rb-wc-blocks-css');

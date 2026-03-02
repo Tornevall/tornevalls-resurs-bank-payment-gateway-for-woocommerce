@@ -19,6 +19,6 @@ abstract class Action
      */
     public static function generateTransactionId(): string
     {
-        return time() . mt_rand();
+        return time() . wp_rand();
     }
 }

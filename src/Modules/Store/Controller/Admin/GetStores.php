@@ -29,6 +29,7 @@ class GetStores extends GetStoresController
     /**
      * @throws HttpException
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function exec(): string
     {
@@ -61,9 +62,13 @@ class GetStores extends GetStoresController
             Log::error(error: $error);
 
             throw new HttpException(
-                message: Translator::translate(
-                    phraseId: 'get-stores-could-not-fetch'
-                ) . ' Error: ' . $error->getMessage()
+                message: sprintf(
+                    '%s Error: %s',
+                    esc_html(Translator::translate(
+                        phraseId: 'get-stores-could-not-fetch'
+                    )),
+                    esc_html($error->getMessage())
+                )
             );
         }
 

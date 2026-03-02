@@ -46,7 +46,7 @@ class LogDir extends StringOption implements OptionInterface
             subject: $ulDir . '/wc-logs/'
         );
 
-        if (is_dir(filename: $dir) && is_writable(filename: $dir)) {
+        if (self::isWritableDir($dir)) {
             $result = $dir;
         }
 
@@ -66,5 +66,28 @@ class LogDir extends StringOption implements OptionInterface
             is_string(value: $dir['basedir']) &&
             $dir['basedir'] !== ''
         ) ? $dir['basedir'] : null;
+    }
+
+    /**
+     * Check if a directory is writable using WP_Filesystem.
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     */
+    private static function isWritableDir(string $dir): bool
+    {
+        global $wp_filesystem;
+
+        if (!isset($wp_filesystem) || !is_object(value: $wp_filesystem)) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
+
+        if (!isset($wp_filesystem) || !is_object($wp_filesystem)) {
+            return false;
+        }
+
+        return $wp_filesystem->is_dir($dir) && $wp_filesystem->is_writable(
+            $dir
+        );
     }
 }

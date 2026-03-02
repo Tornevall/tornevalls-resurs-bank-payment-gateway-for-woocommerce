@@ -12,6 +12,11 @@ jQuery(document).ready(function () {
 
                 return returnUrl;
             },
+            getPostData: function () {
+                const data = Resursbank_FetchStores.prototype.getPostData.call(this);
+                data.nonce = rbStoreAdminLocalize.nonce || '';
+                return data;
+            },
             handleFetchData: function (data) {
                 Resursbank_FetchStores.prototype.handleFetchData.call(this, data);
             }

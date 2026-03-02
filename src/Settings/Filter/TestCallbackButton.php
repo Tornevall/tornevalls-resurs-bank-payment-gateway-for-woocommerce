@@ -13,6 +13,11 @@ use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 
+// Prevent direct access.
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Filter (event listener) which adds custom button to test callbacks.
  */

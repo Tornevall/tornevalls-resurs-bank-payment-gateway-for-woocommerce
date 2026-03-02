@@ -29,6 +29,7 @@ class About
      */
     public static function setCss(): void
     {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo '<style>' . ((new EcomSupportInfoCss())->content ?? '') . "</style>\n";
     }
 
@@ -66,7 +67,9 @@ class About
      */
     public static function getWidgetHtml(): string
     {
+        // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- hide_save_button is a standard WooCommerce global
         $GLOBALS['hide_save_button'] = '1';
+        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
         return self::getWidget()->content;
     }
 }

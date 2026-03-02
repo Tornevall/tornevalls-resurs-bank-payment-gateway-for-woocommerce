@@ -1,14 +1,14 @@
 === Resurs Bank Payments for WooCommerce ===
-Contributors: RB-Tornevall, rbonboarding
+Contributors: rbonboarding, RB-Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank
 Requires at least: 6.0
-Tested up to: 6.9
+Tested up to: 6.9.1
 Requires PHP: 8.1
 WC requires at least: 7.6.0
-WC Tested up to: 10.3.6
+WC Tested up to: 10.5.2
 Plugin requires ecom: 3.3.13
 Requires Plugins: woocommerce
-Stable tag: 1.2.19
+Stable tag: 1.2.20
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -22,15 +22,40 @@ A payment is expected to be simple, secure and fast, regardless of whether it ta
 At checkout, your customer can choose between several flexible payment options, something that not only provides a better shopping experience but also generates more and larger purchases.
 
 Sign up for Resurs!
-Find out more in about the plugin in our documentation.
+[Find out more in about the plugin in our documentation](https://developers.resurs.com/platform-plugins/woocommerce).
 
-= System Requirements =
+## System Requirements
 
-* **Required**: PHP 8.1 or higher.
-* **Required**: WooCommerce: At least v7.6.0
-* **Required**: SSL - HTTPS **must** be **fully** enabled. This is a callback security measure, which is required from Resurs Bank.
-* **Required**: CURL (php-curl) with **CURLAUTH_BEARER**.
-* Preferably the **latest** release of WordPress. See here for more information.
+- Required: PHP 8.1 or higher
+- Required: WooCommerce 7.6.0 or higher
+- Required: SSL - HTTPS must be fully enabled. This is a callback security measure required by Resurs Bank.
+- Required: CURL (php-curl) with CURLAUTH_BEARER
+- Recommended: Latest stable WordPress release
+
+## External services
+
+This plugin is a payment gateway. To create and manage Resurs payments it must communicate with Resurs Bank AB (publ) external services.
+
+External calls only occur when the plugin is configured with valid Resurs credentials and a Resurs payment flow is used.
+
+**Endpoints**
+
+Production:
+https://merchant-api.resurs.com/
+
+Test:
+https://merchant-api.integration.resurs.com/
+
+**Legal**
+
+Terms:
+https://www.resursbank.se/dokument-och-blanketter
+
+Privacy policy:
+https://www.resursbank.se/om-oss/integritet-och-sakerhet
+
+Customer GDPR information:
+https://www.resursbank.se/om-oss/integritet-och-sakerhet/gdpr-som-kund
 
 
 == Installation ==
@@ -62,6 +87,30 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
 
 Latest changes:
+
+# 1.2.20
+
+* WordPress.org review hardening: Implemented additional sanitization/validation at controlled entry points and centralized input handling.
+* Improved output escaping for admin notices and inline script payloads where applicable.
+* Removed disallowed HEREDOC/NOWDOC usage flagged by review.
+* Removed unneeded development artifacts from the release package.
+* Clarified SDK separation by relocating shared SDK path from lib/ecom to vendor/ecom.
+* Added/updated inline code comments to document rationale for guideline-driven implementations.
+* Plugin Check findings addressed and reduced to minimal, justified remaining notices.
+* Fixes and stuff connected to "spammy services" and security advices.
+
+# 1.2.19
+
+* Minor maintenance updates and internal adjustments.
+
+# 1.2.18
+
+* Fixes to reach latest ecom.
+* PD-3915: Merge latest ecom with master (NOT the experimental branch)
+
+# 1.2.17
+
+* No changes, only tag bump.
 
 # 1.2.16
 

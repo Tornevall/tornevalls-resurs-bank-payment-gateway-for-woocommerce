@@ -116,6 +116,7 @@ class Product
      * Attempts to fetch SKU from product.
      *
      * @throws IllegalValueException
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function getSku(WC_Order_Item_Product $product): string
     {
@@ -132,12 +133,16 @@ class Product
             );
 
             throw new IllegalValueException(
-                message: Translator::translate(
-                    phraseId: 'failed-to-resolve-sku-from-order-line-object'
-                ) . ' (' . $title . ')<br />' .
-                         Translator::translate(
-                             phraseId: 'could-not-complete-your-order-please-contact-support'
-                         )
+                message: sprintf(
+                    '%s (%s)<br />%s',
+                    esc_html(Translator::translate(
+                        phraseId: 'failed-to-resolve-sku-from-order-line-object'
+                    )),
+                    esc_html((string)$title),
+                    esc_html(Translator::translate(
+                        phraseId: 'could-not-complete-your-order-please-contact-support'
+                    ))
+                )
             );
         }
 

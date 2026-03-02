@@ -13,6 +13,7 @@ use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Woocommerce\Database\Option;
 use Resursbank\Woocommerce\Database\OptionInterface;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\WordPress;
 use ValueError;
 
 class Environment extends Option implements OptionInterface
@@ -50,9 +51,17 @@ class Environment extends Option implements OptionInterface
      */
     public static function getRawData(): ?string
     {
-        return self::getEnvironmentFromSavePost()
-            ?? self::getEnvironmentFromAdminAjax()
-            ?? self::getEnvironmentFromOption();
+        // Only attempt request-based resolution when nonce verification is available.
+        if (function_exists('wp_verify_nonce')) {
+            $fromRequest = self::getEnvironmentFromSavePost()
+                ?? self::getEnvironmentFromAdminAjax();
+
+            if ($fromRequest !== null) {
+                return $fromRequest;
+            }
+        }
+
+        return self::getEnvironmentFromOption();
     }
 
     /**
@@ -78,21 +87,31 @@ class Environment extends Option implements OptionInterface
      * respected for immediate API initialization.
      *
      * @return string|null The environment value from POST, or null if not applicable.
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     private static function getEnvironmentFromSavePost(): ?string
     {
         $key = self::NAME_PREFIX . 'environment';
 
-        if (
-            Admin::isAdmin() &&
-            isset($_POST[$key]) &&
-            is_string(value: $_POST[$key]) &&
-            $_POST[$key] !== ''
-        ) {
-            try {
-                return EnvironmentEnum::from(value: $_POST[$key])->value;
-            } catch (ValueError) {
-                // Ignore invalid enum values and continue resolution.
+        if (!Admin::isAdmin()) {
+            return null;
+        }
+
+        if (!WordPress::verifyPostNonce(action: 'woocommerce-settings')) {
+            return null;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
+        if (isset($_POST[$key]) && is_string(value: $_POST[$key])) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
+            $rawValue = sanitize_text_field(wp_unslash($_POST[$key]));
+
+            if ($rawValue !== '') {
+                try {
+                    return EnvironmentEnum::from(value: $rawValue)->value;
+                } catch (ValueError) {
+                    // Ignore invalid enum values and continue resolution.
+                }
             }
         }
 
@@ -102,45 +121,14 @@ class Environment extends Option implements OptionInterface
     /**
      * Resolve environment value from admin AJAX request payload.
      *
-     * Specifically handles the "get-stores-admin" request, where credentials
-     * and environment are submitted as a JSON payload rather than form data.
-     *
-     * Since PHP does not populate $_POST for JSON requests, the raw input
-     * stream is decoded manually.
+     * Delegates to centralized WordPress::getEnvironmentFromAdminAjax() to avoid
+     * code duplication and ensure consistent handling of JSON payloads.
      *
      * @return string|null The environment value from JSON payload, or null if unavailable.
      */
     private static function getEnvironmentFromAdminAjax(): ?string
     {
-        if (
-            !isset($_REQUEST['resursbank']) ||
-            $_REQUEST['resursbank'] !== 'get-stores-admin'
-        ) {
-            return null;
-        }
-
-        $rawInput = file_get_contents(filename: 'php://input');
-
-        if (!is_string(value: $rawInput) || $rawInput === '') {
-            return null;
-        }
-
-        $decoded = json_decode(json: $rawInput, associative: true);
-
-        if (
-            !is_array(value: $decoded) ||
-            !isset($decoded['environment']) ||
-            !is_string(value: $decoded['environment']) ||
-            $decoded['environment'] === ''
-        ) {
-            return null;
-        }
-
-        try {
-            return EnvironmentEnum::from(value: $decoded['environment'])->value;
-        } catch (ValueError) {
-            return null;
-        }
+        return WordPress::getEnvironmentFromAdminAjax();
     }
 
     /**
