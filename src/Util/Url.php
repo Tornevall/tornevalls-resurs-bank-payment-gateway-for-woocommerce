@@ -220,12 +220,20 @@ class Url
      */
     public static function getHttpJson(string $key): null|string|int|float
     {
-        $jsonData = file_get_contents(filename: 'php://input');
-        $data = json_decode(
-            json: $jsonData,
-            associative: true,
-            flags: JSON_THROW_ON_ERROR
-        );
+        try {
+            $jsonData = file_get_contents(filename: 'php://input');
+            if ($jsonData === false || $jsonData === '') {
+                return null;
+            }
+
+            $data = json_decode(
+                json: $jsonData,
+                associative: true,
+                flags: JSON_THROW_ON_ERROR
+            );
+        } catch (JsonException) {
+            return null;
+        }
 
         if (!isset($data[$key]) || !$data[$key]) {
             return null;
