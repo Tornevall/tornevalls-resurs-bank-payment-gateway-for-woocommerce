@@ -554,10 +554,11 @@ class Resursbank extends WC_Payment_Gateway
             }
         }
 
-        wc_add_notice(message: $finalMessage, notice_type: 'error');
+        // Escape message for output to user via wc_add_notice
+        wc_add_notice(message: esc_html($finalMessage), notice_type: 'error');
 
-        // Pass message back to process_payment() for Blocks checkout
-        $resursbank_block_create_error_message = $finalMessage;
+        // Pass escaped message back to process_payment() for Blocks checkout
+        $resursbank_block_create_error_message = esc_html($finalMessage);
     }
 
     /**

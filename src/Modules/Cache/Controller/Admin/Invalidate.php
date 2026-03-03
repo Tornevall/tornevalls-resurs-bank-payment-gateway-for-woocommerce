@@ -30,12 +30,16 @@ class Invalidate
             Config::getCache()->invalidate();
             WooCommerce::invalidateFullCache();
             MessageBag::addSuccess(
-                message: Translator::translate(phraseId: 'cache-cleared')
+                message: esc_html(
+                    Translator::translate(phraseId: 'cache-cleared')
+                )
             );
         } catch (Throwable $e) {
             Log::error(
                 error: $e,
-                message: Translator::translate(phraseId: 'clear-cache-failed')
+                message: esc_html(
+                    Translator::translate(phraseId: 'clear-cache-failed')
+                )
             );
         }
     }

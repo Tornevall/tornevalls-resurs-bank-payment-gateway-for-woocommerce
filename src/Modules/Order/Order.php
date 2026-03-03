@@ -24,11 +24,11 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 
@@ -42,11 +42,11 @@ if (!defined('ABSPATH')) {
  */
 class Order
 {
-    /**
-     * Initialize Order module.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
+  /**
+   * Initialize Order module.
+   *
+   * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+   */
     public static function init(): void
     {
         add_action(
@@ -61,9 +61,9 @@ class Order
         );
     }
 
-    /**
-     * Add JavaScript to order view to update content when order is updated.
-     */
+  /**
+   * Add JavaScript to order view to update content when order is updated.
+   */
     public static function initAdmin(): void
     {
         add_action(
@@ -72,18 +72,13 @@ class Order
         );
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.Superglobals)
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
+  /**
+   * @SuppressWarnings(PHPMD.Superglobals)
+   * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+   */
     public static function initAdminScripts(): void
     {
         try {
-            // Fetching the order id this way has historically been the best way on
-            // sites where the normal way of doing it not works ("ecompress"). This however fails
-            // when in HPOS-mode. If the solution below does not work, then we have to
-            // reconsider the way this has been historically done,
-            // $orderId = $_REQUEST['post'] ?? $_REQUEST['post_ID'] ?? $_REQUEST['order_id'] ?? null;
             $wcOrder = wc_get_order();
 
             if (
@@ -99,7 +94,6 @@ class Order
                 admin: true
             );
 
-            // Append JS code to observe order changes and fetch new content.
             $url = Url::getResourceUrl(
                 module: 'Order',
                 file: 'admin/getOrderContent.js'
@@ -113,7 +107,6 @@ class Order
                 true
             );
 
-            // Echo constant containing URL to get new order view content.
             wp_register_script(
                 'rb-get-order-content-admin-inline-scripts',
                 '',
@@ -131,19 +124,17 @@ class Order
         }
     }
 
-    /**
-     * Add action which will render payment information on order view.
-     *
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
+  /**
+   * Add action which will render payment information on order view.
+   *
+   * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+   * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+   */
     public static function addPaymentInfo(): void
     {
         try {
             $order = wc_get_order();
         } catch (Throwable) {
-            // wc_get_order is a WooCommerce owned method that normally returns false on errors.
-            // They should not be necessary to log.
             return;
         }
 
@@ -161,11 +152,16 @@ class Order
         );
     }
 
-    /**
-     * Render payment information box on order view.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
+  /**
+   * Render payment information box on order view.
+   *
+   * NOTE:
+   * - The HTML comes from an SDK.
+   * - wp_kses() is fine, but you must allow the specific inline CSS properties used by the SDK.
+   *   Otherwise, "style=\"display: none;\"" is stripped and loader/overlay/error become visible.
+   *
+   * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+   */
     public static function renderPaymentInfo(): void
     {
         $order = self::getCurrentOrder();
@@ -181,11 +177,11 @@ class Order
                 }
 
                 ?>
-              <script type="text/javascript">
-                  jQuery(document).ready(function ($) {
-                      $('select#_payment_method option:not(:selected)').attr('disabled', true);
-                  });
-              </script>
+        <script type="text/javascript">
+            jQuery(document).ready(function ($) {
+                $('select#_payment_method option:not(:selected)').attr('disabled', true);
+            });
+        </script>
                 <?php
             });
 
@@ -197,8 +193,8 @@ class Order
 
             $httpCode = $e->httpCode ?? 0;
 
-            // According to APIs (when we get the codes), code 403 means the payment is either denied due to
-            // the credentials or no longer available due to expiration.
+          // According to APIs (when we get the codes), code 403 means the payment is either denied due to
+          // the credentials or no longer available due to expiration.
             if ($httpCode === 403) {
                 $errorMessage = Translator::translate(
                     phraseId: 'payment-info-denied-or-no-longer-available'
@@ -206,30 +202,49 @@ class Order
             }
 
             $data = '<b>' .
-                Translator::translate(
-                    phraseId: 'failed-to-fetch-payment-data-from-the-server'
-                ) . ' ' .
-                Translator::translate(
-                    phraseId: 'reason'
-                ) . ':</b> ' . $errorMessage;
+            Translator::translate(
+                phraseId: 'failed-to-fetch-payment-data-from-the-server'
+            ) . ' ' .
+            Translator::translate(
+                phraseId: 'reason'
+            ) . ':</b> ' . $errorMessage;
 
             Log::error(error: $e);
         }
 
-        // Payment info widget is generated by our own trusted widget (EcomPaymentInformation)
-        // and rendered only in wp-admin for users with 'edit_shop_orders' capability.
-        // WordPress.org allows unescaped output in admin when source is trusted and contains
-        // complex markup (SVG, tables with inline styles) that would break with wp_kses().
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- trusted widget output in admin context
-        echo $data;
+      // Allow only the minimal CSS properties needed by the SDK markup.
+      // This is applied only for this rendering, then removed.
+        $styleFilter = static function (array $styles): array {
+            $styles[] = 'display';
+
+          // The SDK logo uses inline SVG path styles in some builds.
+          // Keeping these allows the SVG to render identically pre/post kses.
+            $styles[] = 'fill';
+            $styles[] = 'fill-opacity';
+            $styles[] = 'fill-rule';
+            $styles[] = 'stroke';
+            $styles[] = 'stroke-width';
+            $styles[] = 'stroke-miterlimit';
+
+            return array_values(array_unique($styles));
+        };
+
+        add_filter('safe_style_css', $styleFilter);
+
+        echo wp_kses(
+            (string)$data,
+            HtmlSanitizer::getPaymentInfoAllowlist()
+        );
+
+        remove_filter('safe_style_css', $styleFilter);
     }
 
-    /**
-     * Hide the plugin's custom fields from view.
-     *
-     * @SuppressWarnings(PHPMD.CamelCaseParameterName)
-     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
-     */
+  /**
+   * Hide the plugin's custom fields from view.
+   *
+   * @SuppressWarnings(PHPMD.CamelCaseParameterName)
+   * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+   */
     public static function hideCustomFields(mixed $protected, mixed $meta_key): mixed
     {
         if (
@@ -244,23 +259,22 @@ class Order
         return $protected;
     }
 
-    /**
-     * @throws ApiException
-     * @throws AuthException
-     * @throws CacheException
-     * @throws ConfigException
-     * @throws CurlException
-     * @throws EmptyValueException
-     * @throws IllegalTypeException
-     * @throws IllegalValueException
-     * @throws JsonException
-     * @throws ReflectionException
-     * @throws Throwable
-     * @throws ValidationException
-     */
-    public static function getPaymentMethod(
-        WC_Order $order
-    ): ?PaymentMethod {
+  /**
+   * @throws ApiException
+   * @throws AuthException
+   * @throws CacheException
+   * @throws ConfigException
+   * @throws CurlException
+   * @throws EmptyValueException
+   * @throws IllegalTypeException
+   * @throws IllegalValueException
+   * @throws JsonException
+   * @throws ReflectionException
+   * @throws Throwable
+   * @throws ValidationException
+   */
+    public static function getPaymentMethod(WC_Order $order): ?PaymentMethod
+    {
         $method = (string)$order->get_payment_method();
 
         if ($method === '') {
@@ -270,13 +284,11 @@ class Order
         return Repository::getById(paymentMethodId: $method);
     }
 
-    /**
-     * Get currently viewed WP_Post as WP_Order instance, if any. For example,
-     * while on the order view in admin we can obtain the currently viewed order
-     * this way.
-     *
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
-     */
+  /**
+   * Get currently viewed WP_Post as WP_Order instance, if any.
+   *
+   * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+   */
     public static function getCurrentOrder(): ?WC_Order
     {
         try {
@@ -286,8 +298,7 @@ class Order
                 return $currentOrder;
             }
         } catch (Throwable) {
-            // wc_get_order is a WooCommerce owned method that normally returns false on errors.
-            // They should not be necessary to log.
+          // WooCommerce owned method that normally returns false on errors.
         }
 
         return null;

@@ -253,7 +253,7 @@ class Modify extends Action
 
         OrderManagement::logError(
             sprintf(
-                Translator::translate(phraseId: 'modify-too-large'),
+                esc_html(Translator::translate(phraseId: 'modify-too-large')),
                 Currency::getFormattedAmount(
                     amount: (float)$requestedAmount
                 ),

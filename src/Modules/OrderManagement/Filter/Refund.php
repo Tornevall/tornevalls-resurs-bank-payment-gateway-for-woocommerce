@@ -46,6 +46,7 @@ class Refund
 
     /**
      * Resolve a refund object.
+     *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function getRefund(int $id): ?WC_Order_Refund
@@ -65,7 +66,11 @@ class Refund
             Log::error(
                 $error,
                 sprintf(
-                    Translator::translate(phraseId: 'failed-resolving-refund'),
+                    esc_html(
+                        Translator::translate(
+                            phraseId: 'failed-resolving-refund'
+                        )
+                    ),
                     $id
                 )
             );

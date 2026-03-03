@@ -7,6 +7,7 @@ namespace Resursbank\Woocommerce\Modules\Order\Filter;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\TaskStatusDetails;
 use Resursbank\Ecom\Module\Payment\Repository;
+use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\WcSession;
@@ -77,7 +78,7 @@ class Failure
 
             if (!headers_sent()) {
                 wp_safe_redirect(wc_get_checkout_url());
-                die();
+                die;
             }
         } catch (Throwable) {
             // Silent by design – never break checkout UX
@@ -88,6 +89,10 @@ class Failure
 
     /**
      * Inject failure message on checkout page.
+     *
+     * This is a the_content filter callback, so the return value must be escaped.
+     * We apply wp_kses separately on the error message and content to preserve
+     * their respective HTML structures, then combine them in the error div.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
@@ -105,11 +110,15 @@ class Failure
 
         WcSession::unset(key: self::SESSION_KEY_ERROR_MESSAGE);
 
-        return
-            '<div class="woocommerce-error" role="status">' .
-            esc_html($message) .
+        // Apply wp_kses separately on message and content with their respective allowlists
+        // then combine in the error div for return
+        return '<div class="woocommerce-error" role="status">' .
+            wp_kses(
+                $message,
+                HtmlSanitizer::getErrorMessageAllowlist()
+            ) .
             '</div>' .
-            $content;
+            wp_kses_post($content);
     }
 
     /**
@@ -122,8 +131,10 @@ class Failure
             $payment = Repository::get(paymentId: $paymentId);
 
             if ($payment->isRejectionReasonCreditDenied()) {
-                return Translator::translate(
-                    phraseId: 'credit-denied-try-again'
+                return esc_html(
+                    Translator::translate(
+                        phraseId: 'credit-denied-try-again'
+                    )
                 );
             }
 
@@ -131,14 +142,16 @@ class Failure
             $task = Repository::getTaskStatusDetails(paymentId: $paymentId);
 
             if (!$task->completed) {
-                return Translator::translate(
+                return esc_html(Translator::translate(
                     phraseId: 'payment-cancelled-try-again'
-                );
+                ));
             }
         } catch (Throwable) {
             // Fall through to a generic message
         }
 
-        return Translator::translate(phraseId: 'payment-failed-try-again');
+        return esc_html(
+            Translator::translate(phraseId: 'payment-failed-try-again')
+        );
     }
 }

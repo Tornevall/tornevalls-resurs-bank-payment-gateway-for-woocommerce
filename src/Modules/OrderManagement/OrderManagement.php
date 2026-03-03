@@ -257,15 +257,15 @@ class OrderManagement
                     $text === 'This order is no longer editable.'
                 ) {
                     if ($isRejected) {
-                        $translation = Translator::translate(
+                        $translation = esc_html(Translator::translate(
                             phraseId: 'can-not-edit-order-due-to-rejected'
-                        );
+                        ));
                     }
 
                     if ($isFrozen) {
-                        $translation = Translator::translate(
+                        $translation = esc_html(Translator::translate(
                             phraseId: 'can-not-edit-order-due-to-frozen'
-                        );
+                        ));
                     }
                 }
 

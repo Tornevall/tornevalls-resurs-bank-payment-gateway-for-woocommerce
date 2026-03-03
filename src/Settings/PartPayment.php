@@ -184,9 +184,9 @@ class PartPayment
     /**
      * Handles the update logic when StoreId changes.
      *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @SuppressWarnings(PHPMD.LongVariable)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
@@ -259,16 +259,16 @@ class PartPayment
         $period = Period::getData();
 
         if (empty($storeId)) {
-            MessageBag::addError(message: Translator::translate(
+            MessageBag::addError(message: esc_html(Translator::translate(
                 phraseId: 'limit-missing-store-id'
-            ));
+            )));
             return false;
         }
 
         if (empty($paymentMethodId)) {
-            MessageBag::addError(message: Translator::translate(
+            MessageBag::addError(message: esc_html(Translator::translate(
                 phraseId: 'limit-missing-payment-method'
-            ));
+            )));
             return false;
         }
 
@@ -276,9 +276,9 @@ class PartPayment
         // due to handleStoreIdUpdate are saving the threshold values via the update hook.
         // During this time we should not validate the period.
         if (empty($period) && !$resursbank_isCountryOverride) {
-            MessageBag::addError(message: Translator::translate(
+            MessageBag::addError(message: esc_html(Translator::translate(
                 phraseId: 'limit-missing-period'
-            ));
+            )));
             return false;
         }
 
@@ -366,9 +366,9 @@ class PartPayment
      * @throws ReflectionException
      * @throws Throwable
      * @throws ValidationException
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @SuppressWarnings(PHPMD.LongVariable)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     private static function handleLimitUpdate(mixed $new): void
     {
@@ -391,9 +391,9 @@ class PartPayment
         $paymentMethod = Repository::getById(paymentMethodId: $paymentMethodId);
 
         if ($paymentMethod === null) {
-            MessageBag::addError(message: Translator::translate(
+            MessageBag::addError(message: esc_html(Translator::translate(
                 phraseId: 'limit-failed-to-load-payment-method'
-            ));
+            )));
             return;
         }
 
@@ -404,17 +404,17 @@ class PartPayment
 
         // Validate numeric range against min/max.
         if ($new < 0) {
-            MessageBag::addError(message: Translator::translate(
+            MessageBag::addError(message: esc_html(Translator::translate(
                 phraseId: 'limit-new-value-not-positive'
-            ));
+            )));
         } elseif ((float)$new > $maxLimit) {
-            MessageBag::addError(message: str_replace(
+            MessageBag::addError(message: esc_html(str_replace(
                 search: '%1',
                 replace: (string)$maxLimit,
                 subject: Translator::translate(
                     phraseId: 'limit-new-value-above-max'
                 )
-            ));
+            )));
         } elseif ($new < $minLimit) {
             update_option('resursbank_part_payment_limit', $minLimit);
             MessageBag::addError(message: str_replace(
