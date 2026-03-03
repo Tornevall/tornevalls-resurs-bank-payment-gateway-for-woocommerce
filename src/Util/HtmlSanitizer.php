@@ -387,4 +387,331 @@ class HtmlSanitizer
             ],
         ];
     }
+
+    /**
+     * Allowlist for WooCommerce Blocks checkout widgets (ReadMore, logos, payment info).
+     *
+     * Includes SDK-generated HTML with:
+     * - Basic structure (b, br, strong, p, div, span, aside, ul, ol, li, table)
+     * - ReadMore iframe (src, loading, title, allow, referrerpolicy, sandbox, dimensions)
+     * - SVG logos/icons (svg, defs, g, path, polygon, circle with full styling)
+     * - Data attributes for JavaScript integration
+     * - Inline styles for layout and visibility
+     *
+     * @return array<string, array<string, bool>>
+     */
+    public static function getBlocksWidgetAllowlist(): array
+    {
+        return [
+            'b' => [],
+            'br' => [],
+            'strong' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'p' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'div' => [
+                'class' => true,
+                'id' => true,
+                'data-*' => true,
+                'style' => true,
+                'role' => true,
+                'aria-*' => true,
+            ],
+            'span' => [
+                'class' => true,
+                'id' => true,
+                'data-*' => true,
+                'style' => true,
+                'role' => true,
+                'aria-*' => true,
+            ],
+            'aside' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'ul' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'ol' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'li' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'table' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'thead' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'tbody' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'tr' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            'th' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+                'scope' => true,
+            ],
+            'td' => [
+                'class' => true,
+                'id' => true,
+                'style' => true,
+                'colspan' => true,
+                'rowspan' => true,
+            ],
+            'a' => [
+                'href' => true,
+                'title' => true,
+                'target' => true,
+                'rel' => true,
+                'class' => true,
+                'id' => true,
+                'style' => true,
+            ],
+            // ReadMore modal uses an iframe.
+            'iframe' => [
+                'src' => true,
+                'loading' => true,
+                'title' => true,
+                'allow' => true,
+                'referrerpolicy' => true,
+                'sandbox' => true,
+                'class' => true,
+                'id' => true,
+                'style' => true,
+                'width' => true,
+                'height' => true,
+            ],
+            // SVG (logos, spinners, warning icons).
+            'svg' => [
+                'class' => true,
+                'width' => true,
+                'height' => true,
+                'viewBox' => true,
+                'viewbox' => true,
+                'version' => true,
+                'id' => true,
+                'xmlns' => true,
+                'xmlns:svg' => true,
+                'xmlns:xlink' => true,
+                'xml:space' => true,
+                'role' => true,
+                'aria-label' => true,
+                'focusable' => true,
+                'x' => true,
+                'y' => true,
+            ],
+            'defs' => [
+                'id' => true,
+            ],
+            'g' => [
+                'id' => true,
+                'transform' => true,
+            ],
+            'path' => [
+                'class' => true,
+                'd' => true,
+                'id' => true,
+                'style' => true,
+                'fill' => true,
+                'fill-opacity' => true,
+                'fill-rule' => true,
+                'stroke' => true,
+                'stroke-width' => true,
+                'stroke-miterlimit' => true,
+            ],
+            'polygon' => [
+                'class' => true,
+                'points' => true,
+                'style' => true,
+                'fill' => true,
+                'stroke' => true,
+                'stroke-width' => true,
+                'stroke-miterlimit' => true,
+            ],
+            'circle' => [
+                'class' => true,
+                'cx' => true,
+                'cy' => true,
+                'r' => true,
+                'fill' => true,
+                'stroke' => true,
+                'stroke-width' => true,
+                'stroke-miterlimit' => true,
+            ],
+        ];
+    }
+
+    /**
+     * Get safe CSS properties for Blocks widget sanitization.
+     *
+     * These properties are temporarily allowed via safe_style_css filter
+     * when sanitizing SDK-generated widget HTML.
+     *
+     * @return string[]
+     */
+    public static function getBlocksWidgetSafeStyles(): array
+    {
+        return [
+            'display',
+            'visibility',
+            'opacity',
+            'pointer-events',
+            'position',
+            'top',
+            'right',
+            'bottom',
+            'left',
+            'z-index',
+            'transform',
+            'transition',
+            'float',
+            'clear',
+            'width',
+            'height',
+            'max-width',
+            'min-width',
+            'max-height',
+            'min-height',
+            'margin',
+            'margin-top',
+            'margin-right',
+            'margin-bottom',
+            'margin-left',
+            'padding',
+            'padding-top',
+            'padding-right',
+            'padding-bottom',
+            'padding-left',
+            'color',
+            'background',
+            'background-color',
+            'text-align',
+            'text-decoration',
+            'line-height',
+            'font-size',
+            'font-weight',
+            'border',
+            'border-color',
+            'border-width',
+            'border-style',
+            'border-radius',
+        ];
+    }
+
+    /**
+     * Temporarily extends WordPress safe inline style properties while executing a callback.
+     *
+     * Used when SDK widgets rely on style properties not in WordPress' default safe list.
+     *
+     * @param string[] $properties CSS property names to allow
+     * @param callable():string $callback Function that performs wp_kses sanitization
+     * @return string Sanitized HTML
+     */
+    public static function withSafeStyleCss(array $properties, callable $callback): string
+    {
+        $filter = static function (array $styles) use ($properties): array {
+            foreach ($properties as $prop) {
+                $styles[] = $prop;
+            }
+            return array_values(array_unique($styles));
+        };
+
+        add_filter('safe_style_css', $filter, 9999);
+
+        try {
+            return (string)$callback();
+        } finally {
+            remove_filter('safe_style_css', $filter, 9999);
+        }
+    }
+
+    /**
+     * Defense-in-depth: only allow iframes pointing to known Resurs domains.
+     *
+     * @param string $src The iframe src attribute value
+     * @return bool True if the iframe source is allowed, false otherwise
+     */
+    public static function isAllowedIframeSrc(string $src): bool
+    {
+        $src = trim($src);
+        if ($src === '') {
+            return false;
+        }
+
+        $parts = wp_parse_url($src);
+        if (!is_array($parts)) {
+            return false;
+        }
+
+        $scheme = strtolower((string)($parts['scheme'] ?? ''));
+        $host = strtolower((string)($parts['host'] ?? ''));
+
+        if ($scheme !== 'https') {
+            return false;
+        }
+
+        if ($host === '') {
+            return false;
+        }
+
+        // Allow production + known subdomains.
+        if ($host === 'resurs.com' || str_ends_with($host, '.resurs.com')) {
+            return true;
+        }
+
+        // Allow integration/test environments used by the SDK.
+        if (str_ends_with($host, '.integration.resurs.com')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Normalize SDK HTML to survive wp_kses without losing key visuals.
+     *
+     * - Removes <style> blocks (wp_kses will strip them anyway, and their content can become stray text nodes).
+     * - Inlines the warning icon fill color when the SDK uses class="st0" + a removed <style> rule.
+     *
+     * @param string $html The HTML to normalize
+     * @return string Normalized HTML
+     */
+    public static function normalizeWidgetHtml(string $html): string
+    {
+        // Remove style tags completely.
+        $html = (string)preg_replace('~<style[^>]*>.*?</style>~is', '', $html);
+
+        // Inline fill color for elements that rely on a removed CSS class.
+        // Note: This is intentionally simple because the SDK markup uses class="st0" without an existing fill attribute.
+        $html = str_replace('class="st0"', 'class="st0" fill="#AA1E1E"', $html);
+        $html = str_replace("class='st0'", "class='st0' fill='#AA1E1E'", $html);
+
+        return $html;
+    }
 }
