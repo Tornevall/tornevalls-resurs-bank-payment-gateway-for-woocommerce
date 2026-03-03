@@ -214,49 +214,23 @@ class Url
     /**
      * Get JSON requests the same way we do for _GET and _POST.
      *
-     * Sanitizes the decoded JSON values to prevent injection of unsanitized data.
-     *
-     * @throws JsonException
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-    public static function getHttpJson(string $key): null|string|int|float
+    public static function getHttpJson(string $key): ?string
     {
-        try {
-            $jsonData = file_get_contents(filename: 'php://input');
-            if ($jsonData === false || $jsonData === '') {
-                return null;
-            }
-
-            $data = json_decode(
-                json: $jsonData,
-                associative: true,
-                flags: JSON_THROW_ON_ERROR
-            );
-        } catch (JsonException) {
+        $raw = file_get_contents('php://input');
+        if (!$raw) {
             return null;
         }
 
-        if (!isset($data[$key]) || !$data[$key]) {
+        $json = json_decode($raw, true);
+        if (!is_array($json) || !isset($json[$key]) || !is_string($json[$key])) {
             return null;
         }
 
-        $value = $data[$key];
-
-        // Sanitize the decoded value based on its type
-        if (is_string($value)) {
-            return sanitize_text_field(wp_unslash($value));
-        }
-
-        if (is_numeric($value)) {
-            // For numeric values, cast appropriately
-            if (is_int($value)) {
-                return absint($value);
-            }
-
-            return (float)$value;
-        }
-
-        return $value;
+        return sanitize_text_field(wp_unslash($json[$key]));
     }
+
 
     /**
      * Generate URL for MAPI callbacks.
