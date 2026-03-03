@@ -270,7 +270,6 @@ class PartPayment
             $priceDataMaybe = (float)apply_filters(
                 'resursbank_pp_price_data',
                 $priceData,
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $product is a WooCommerce core global
                 self::getProduct()
             );
 
@@ -299,9 +298,6 @@ class PartPayment
         return is_bool(value: $returnBool) ? $returnBool : false;
     }
 
-    /**
-     * @throws IllegalTypeException
-     */
     /**
      * @throws IllegalTypeException
      */
