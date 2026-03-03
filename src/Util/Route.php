@@ -187,7 +187,6 @@ class Route
                 )
                     ? sanitize_text_field(
                         str: wp_unslash(value: $_GET['_wpnonce'])
-                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                     )
                     : '';
 
@@ -304,6 +303,7 @@ class Route
         header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escapeForContentType() returns escaped content
         echo self::escapeForContentType($body, $contentType);
     }
 

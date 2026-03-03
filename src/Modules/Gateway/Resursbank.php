@@ -142,6 +142,7 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // Sanitize and output using same logic as Blocks checkout for consistent HTML handling.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HtmlSanitizer::withSafeStyleCss returns escaped content via wp_kses
         echo HtmlSanitizer::withSafeStyleCss(
             HtmlSanitizer::getBlocksWidgetSafeStyles(),
             fn (): string => wp_kses(
