@@ -214,6 +214,8 @@ class Url
     /**
      * Get JSON requests the same way we do for _GET and _POST.
      *
+     * Sanitizes the decoded JSON values to prevent injection of unsanitized data.
+     *
      * @throws JsonException
      */
     public static function getHttpJson(string $key): null|string|int|float
@@ -224,7 +226,28 @@ class Url
             associative: true,
             flags: JSON_THROW_ON_ERROR
         );
-        return isset($data[$key]) && $data[$key] ? $data[$key] : null;
+
+        if (!isset($data[$key]) || !$data[$key]) {
+            return null;
+        }
+
+        $value = $data[$key];
+
+        // Sanitize the decoded value based on its type
+        if (is_string($value)) {
+            return sanitize_text_field(wp_unslash($value));
+        }
+
+        if (is_numeric($value)) {
+            // For numeric values, cast appropriately
+            if (is_int($value)) {
+                return absint($value);
+            }
+
+            return (float)$value;
+        }
+
+        return $value;
     }
 
     /**

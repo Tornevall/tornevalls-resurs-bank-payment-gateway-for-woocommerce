@@ -59,7 +59,6 @@ class InjectFetchAddressWidget
             echo wp_kses(
                 $result,
                 HtmlSanitizer::getGetAddressFormAllowlist()
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped via wp_kses
             );
         } catch (Throwable $e) {
             try {

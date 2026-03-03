@@ -47,7 +47,7 @@ use function str_contains;
 use function strlen;
 
 // Prevent direct access.
-if (!defined('ABSPATH')) {
+if (!defined(constant_name: 'ABSPATH')) {
     exit;
 }
 
@@ -140,7 +140,11 @@ class Route
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
             is_string(value: $_GET[self::ROUTE_PARAM])
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-        ) ? sanitize_text_field(wp_unslash($_GET[self::ROUTE_PARAM])) : '';
+        )
+            ? sanitize_text_field(
+            str: wp_unslash(value: $_GET[self::ROUTE_PARAM])
+        )
+            : '';
 
         $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
@@ -178,11 +182,19 @@ class Route
             ) {
                 WordPress::ensurePluggableLoaded();
                 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verification performed below
-                $nonce = isset($_GET['_wpnonce']) && is_string($_GET['_wpnonce'])
-                    ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                $nonce = isset($_GET['_wpnonce']) && is_string(
+                    value: $_GET['_wpnonce']
+                )
+                    ? sanitize_text_field(
+                        str: wp_unslash(value: $_GET['_wpnonce'])
+                    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                    )
                     : '';
 
-                if (!WordPress::verifyNonce(nonce: $nonce, action: 'resursbank_admin_' . $route)) {
+                if (!WordPress::verifyNonce(
+                    nonce: $nonce,
+                    action: 'resursbank_admin_' . $route
+                )) {
                     self::respondWithError(
                         exception: new HttpException(
                             message: 'Security verification failed. Please try again.',
@@ -255,20 +267,25 @@ class Route
             self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
         ];
 
-        if (in_array(needle: $route, haystack: $stateChangingRoutes, strict: true)) {
+        if (in_array(
+            needle: $route,
+            haystack: $stateChangingRoutes,
+            strict: true
+        )) {
             WordPress::ensurePluggableLoaded();
-            $arguments['_wpnonce'] = wp_create_nonce('resursbank_admin_' . $route);
+            $arguments['_wpnonce'] = wp_create_nonce(
+                action: 'resursbank_admin_' . $route
+            );
         }
 
         if ($route === self::ROUTE_GET_STORES_ADMIN) {
             WordPress::ensurePluggableLoaded();
-            $arguments['_wpnonce'] = wp_create_nonce('resursbank_get_stores_admin');
+            $arguments['_wpnonce'] = wp_create_nonce(
+                action: 'resursbank_get_stores_admin'
+            );
         }
 
-        return Url::getQueryArg(
-            baseUrl: $url,
-            arguments: $arguments
-        );
+        return Url::getQueryArg(baseUrl: $url, arguments: $arguments);
     }
 
     /**
@@ -283,21 +300,43 @@ class Route
         header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
-        $normalizedType = strtolower($contentType);
+        $normalizedType = strtolower(string: $contentType);
 
-        if (str_starts_with($normalizedType, 'text/html')) {
-            echo wp_kses_post($body);
-            return;
+        // Escape output based on content type context
+        if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
+            $escapedBody = wp_kses_post(data: $body);
+        } elseif (str_starts_with(
+            haystack: $normalizedType,
+            needle: 'text/plain'
+        )) {
+            $escapedBody = esc_html(text: $body);
+        } elseif (
+            str_starts_with(
+                haystack: $normalizedType,
+                needle: 'application/json'
+            ) ||
+            str_starts_with(haystack: $normalizedType, needle: 'text/css') ||
+            str_starts_with(
+                haystack: $normalizedType,
+                needle: 'text/javascript'
+            ) ||
+            str_starts_with(
+                haystack: $normalizedType,
+                needle: 'application/javascript'
+            )
+        ) {
+            // JSON/CSS/JS must not be HTML-escaped as it would corrupt the syntax.
+            // These responses are generated server-side by trusted code (not user input),
+            // consumed by JavaScript/browsers (not rendered as HTML), and protected by
+            // Content-Type headers. HTML escaping would break JSON/CSS/JS syntax.
+            $escapedBody = $body;
+        } else {
+            // Default: escape as HTML for unknown content types
+            $escapedBody = esc_html($body);
         }
 
-        if (str_starts_with($normalizedType, 'text/plain')) {
-            echo esc_html($body);
-            return;
-        }
-
-        // Non-HTML responses (JSON/CSS/JS) must not be escaped.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo $body;
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above based on content type
+        echo $escapedBody;
     }
 
     /**
@@ -354,8 +393,8 @@ class Route
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized via esc_url_raw below
         $url = isset($_SERVER['HTTP_REFERER'])
             ? esc_url_raw(
-            wp_unslash($_SERVER['HTTP_REFERER'])
-        )
+                url: wp_unslash(value: $_SERVER['HTTP_REFERER'])
+            )
             : '';
 
         try {

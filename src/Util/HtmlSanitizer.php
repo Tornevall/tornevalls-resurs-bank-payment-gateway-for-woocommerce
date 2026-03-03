@@ -277,4 +277,114 @@ class HtmlSanitizer
     {
         return [];
     }
+
+    /**
+     * Allowlist for part payment widget HTML (from EcomPartPayment SDK).
+     *
+     * Includes:
+     * - Basic structure (div, span, p, table, tr, td, th, a, br, strong, em)
+     * - Form elements (form, input, select, option, button, label)
+     * - Interactive elements with data attributes
+     * - Inline styles for widget layout
+     */
+    public static function getPartPaymentWidgetAllowlist(): array
+    {
+        return [
+            'div' => [
+                'id' => true,
+                'class' => true,
+                'data-*' => true,
+                'style' => true,
+            ],
+            'span' => [
+                'id' => true,
+                'class' => true,
+                'data-*' => true,
+                'style' => true,
+            ],
+            'p' => [
+                'class' => true,
+                'style' => true,
+            ],
+            'table' => [
+                'class' => true,
+                'style' => true,
+            ],
+            'thead' => [],
+            'tbody' => [],
+            'tr' => [
+                'class' => true,
+            ],
+            'th' => [
+                'class' => true,
+            ],
+            'td' => [
+                'class' => true,
+            ],
+            'a' => [
+                'href' => true,
+                'class' => true,
+                'id' => true,
+                'target' => true,
+                'rel' => true,
+                'data-*' => true,
+            ],
+            'br' => [],
+            'strong' => [],
+            'em' => [],
+            'b' => [],
+            'i' => [],
+            'form' => [
+                'id' => true,
+                'class' => true,
+                'method' => true,
+                'action' => true,
+            ],
+            'input' => [
+                'id' => true,
+                'class' => true,
+                'type' => true,
+                'name' => true,
+                'value' => true,
+                'placeholder' => true,
+                'required' => true,
+                'disabled' => true,
+                'readonly' => true,
+                'checked' => true,
+                'data-*' => true,
+            ],
+            'select' => [
+                'id' => true,
+                'class' => true,
+                'name' => true,
+                'required' => true,
+                'disabled' => true,
+                'data-*' => true,
+            ],
+            'option' => [
+                'value' => true,
+                'selected' => true,
+            ],
+            'button' => [
+                'id' => true,
+                'class' => true,
+                'type' => true,
+                'disabled' => true,
+                'data-*' => true,
+            ],
+            'label' => [
+                'for' => true,
+                'class' => true,
+            ],
+            'ul' => [
+                'class' => true,
+            ],
+            'ol' => [
+                'class' => true,
+            ],
+            'li' => [
+                'class' => true,
+            ],
+        ];
+    }
 }

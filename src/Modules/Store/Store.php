@@ -120,7 +120,9 @@ class Store
         wp_add_inline_style(
             'rb-store-admin-css',
             '.rb-store-fetching select { background-image: url("' .
-            get_admin_url() . '/images/loading.gif' . '") !important; }'
+            esc_url(
+                get_admin_url() . '/images/loading.gif'
+            ) . '") !important; }'
         );
     }
 

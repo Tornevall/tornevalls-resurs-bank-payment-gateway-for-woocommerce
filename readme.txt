@@ -5,7 +5,7 @@ Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.1
 WC requires at least: 7.6.0
-WC Tested up to: 10.5.2
+WC Tested up to: 10.5.3
 Plugin requires ecom: 3.3.13
 Requires Plugins: woocommerce
 Stable tag: 1.2.20

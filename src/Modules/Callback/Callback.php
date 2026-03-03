@@ -68,7 +68,8 @@ class Callback
      */
     public static function execute(): void
     {
-        $type = $_GET['callback'] ?? '';
+        // Sanitize callback type immediately to prevent injection
+        $type = isset($_GET['callback']) ? sanitize_text_field(wp_unslash($_GET['callback'])) : '';
 
         /** @noinspection BadExceptionsProcessingInspection */
         try {
