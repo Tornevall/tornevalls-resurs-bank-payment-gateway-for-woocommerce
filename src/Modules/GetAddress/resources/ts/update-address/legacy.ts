@@ -29,11 +29,11 @@ export class LegacyAddressUpdater {
 
     constructor() {
         // @ts-ignore
-        this.isUsingCheckoutBlocks = resursbank_frontend_data?.isUsingCheckoutBlocks === '1' || resursbank_frontend_data?.isUsingCheckoutBlocks === true;
+        this.isUsingCheckoutBlocks = rbFrontendData?.isUsingCheckoutBlocks === '1' || rbFrontendData?.isUsingCheckoutBlocks === true;
 
         this.getAddressEnabled = // @ts-ignore
-            resursbank_frontend_data?.getAddressEnabled === '1' || // @ts-ignore
-            resursbank_frontend_data?.getAddressEnabled === true;
+            rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
+            rbFrontendData?.getAddressEnabled === true;
 
         this.customerTypeUpdater = new BlocksCustomerType();
 
