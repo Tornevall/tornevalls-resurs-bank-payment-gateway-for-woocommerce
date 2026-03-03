@@ -302,10 +302,12 @@ class PartPayment
     /**
      * @throws IllegalTypeException
      */
+    /**
+     * @throws IllegalTypeException
+     */
     private static function getProduct(): WC_Product
     {
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $product is a WooCommerce core global
-        global $product;
+        $product = wc_get_product(get_the_ID());
 
         if (!$product instanceof WC_Product) {
             $product = wc_get_product();

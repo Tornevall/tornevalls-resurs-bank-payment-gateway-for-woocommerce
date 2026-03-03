@@ -133,16 +133,15 @@ class Route
      */
     public static function exec(): void
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-        $route = (
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-            isset($_GET[self::ROUTE_PARAM]) &&
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-            is_string(value: $_GET[self::ROUTE_PARAM])
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-        )
+        $routeRaw = filter_input(
+            type: INPUT_GET,
+            var_name: self::ROUTE_PARAM,
+            filter: FILTER_UNSAFE_RAW
+        );
+
+        $route = is_string(value: $routeRaw)
             ? sanitize_text_field(
-                str: wp_unslash(value: $_GET[self::ROUTE_PARAM])
+                str: wp_unslash(value: $routeRaw)
             )
             : '';
 
@@ -165,37 +164,29 @@ class Route
                 );
             }
 
-            // Verify nonce for state-changing admin routes to prevent CSRF attacks.
-            // Routes that modify data (cache invalidate, trigger test callback) require nonce verification.
-            // Read-only routes (get stores, get order content) use capability check only.
-            $stateChangingRoutes = [
-                self::ROUTE_ADMIN_CACHE_INVALIDATE,
-                self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+            // Verify nonce for routes where we generate a nonce in getUrl().
+            $nonceActionByRoute = [
+                self::ROUTE_ADMIN_CACHE_INVALIDATE => 'resursbank_admin_' . self::ROUTE_ADMIN_CACHE_INVALIDATE,
+                self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK => 'resursbank_admin_' . self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+                self::ROUTE_GET_STORES_ADMIN => 'resursbank_get_stores_admin',
             ];
 
-            if (
-                in_array(
-                    needle: $route,
-                    haystack: $stateChangingRoutes,
-                    strict: true
-                )
-            ) {
+            if (isset($nonceActionByRoute[$route])) {
                 WordPress::ensurePluggableLoaded();
-                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verification performed below
-                $nonce = isset($_GET['_wpnonce']) && is_string(
-                    value: $_GET['_wpnonce']
-                )
+
+                $nonceRaw = filter_input(
+                    type: INPUT_GET,
+                    var_name: '_wpnonce',
+                    filter: FILTER_UNSAFE_RAW
+                );
+
+                $nonce = is_string(value: $nonceRaw)
                     ? sanitize_text_field(
-                        str: wp_unslash(value: $_GET['_wpnonce'])
+                        str: wp_unslash(value: $nonceRaw)
                     )
                     : '';
 
-                if (
-                    !WordPress::verifyNonce(
-                        nonce: $nonce,
-                        action: 'resursbank_admin_' . $route
-                    )
-                ) {
+                if (!wp_verify_nonce($nonce, $nonceActionByRoute[$route])) {
                     self::respondWithError(
                         exception: new HttpException(
                             message: 'Security verification failed. Please try again.',
@@ -310,12 +301,6 @@ class Route
     /**
      * Method that exits after response instead of proceeding with regular WordPress executions.
      *
-     * In some cases, during API responding, WordPress could potentially execute other data that renders
-     * more content after the final json responses, and breaks the requests. This happens due to how
-     * WP is handling unknown requests and depends on how the site is configured with permalinks and rewrite-urls.
-     * For example, when WP handles 404 errors on unknown http-requests, we have to stop our own execution
-     * like this.
-     *
      * @SuppressWarnings(PHPMD.ExitExpression)
      * @noinspection PhpNoReturnAttributeCanBeAddedInspection
      */
@@ -396,6 +381,11 @@ class Route
         string $contentType
     ): string {
         $normalizedType = strtolower(string: $contentType);
+
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- json should not be escaped!
+        if (str_starts_with(haystack: $normalizedType, needle: 'application/json')) {
+            return $body;
+        }
 
         if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
             return wp_kses_post(data: $body);
@@ -541,8 +531,8 @@ class Route
     private static function userIsAdmin(): bool
     {
         return is_user_logged_in() && current_user_can(
-            capability: 'administrator'
-        );
+                capability: 'administrator'
+            );
     }
 
     /**
@@ -551,9 +541,9 @@ class Route
     private static function getUrlWithProperTrailingSlash(string $url): string
     {
         return preg_replace(
-            pattern: '/\/$/',
-            replacement: '',
-            subject: $url
-        ) . '/';
+                pattern: '/\/$/',
+                replacement: '',
+                subject: $url
+            ) . '/';
     }
 }

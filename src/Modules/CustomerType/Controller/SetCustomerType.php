@@ -29,30 +29,49 @@ class SetCustomerType
     {
         $response = [
             'update' => false,
+            'customerType' => null,
         ];
-        $customerType = Url::getHttpGet(key: 'customerType');
 
-        if (function_exists(function: 'WC') && $customerType) {
+        try {
+            $customerType = Url::getHttpGet(key: 'customerType');
+
+            if (!function_exists(function: 'WC')) {
+                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+            }
+
+            if (!$customerType) {
+                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+            }
+
             WC()->initialize_session();
-            $customerType = CustomerType::from(value: $customerType);
 
-            if ($customerType instanceof CustomerType) {
+            try {
+                $customerTypeEnum = CustomerType::from(value: $customerType);
+            } catch (Throwable) {
+                // Invalid customer type value
+                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+            }
+
+            if ($customerTypeEnum instanceof CustomerType) {
                 // Report back if successful or not.
                 $response['update'] = WcSession::set(
                     key: RESURSBANK_MODULE_PREFIX . '_' . CustomerRepository::SESSION_KEY_CUSTOMER_TYPE,
-                    value: $customerType->value
+                    value: $customerTypeEnum->value
                 );
-                $response['customerType'] = $customerType->value;
+                $response['customerType'] = $customerTypeEnum->value;
             }
-        }
 
-        try {
-            return json_encode(
-                value: $response,
-                flags: JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR
-            );
-        } catch (Throwable) {
-            return '';
+            return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR);
+        } catch (Throwable $e) {
+            // Ensure we always return valid JSON even on exception
+            $response['error'] = $e->getMessage();
+
+            try {
+                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+            } catch (Throwable) {
+                // Last resort: return minimal valid JSON
+                return '{"update":false,"error":"Server error"}';
+            }
         }
     }
 }
