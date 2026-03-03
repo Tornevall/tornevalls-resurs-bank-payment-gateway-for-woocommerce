@@ -304,42 +304,7 @@ class Route
         header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
-        $normalizedType = strtolower(string: $contentType);
-
-        // Escape output based on content type context
-        if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
-            $escapedBody = wp_kses_post(data: $body);
-        } elseif (
-            str_starts_with(haystack: $normalizedType, needle: 'text/plain')
-        ) {
-            $escapedBody = esc_html(text: $body);
-        } elseif (
-            str_starts_with(
-                haystack: $normalizedType,
-                needle: 'application/json'
-            ) ||
-            str_starts_with(haystack: $normalizedType, needle: 'text/css') ||
-            str_starts_with(
-                haystack: $normalizedType,
-                needle: 'text/javascript'
-            ) ||
-            str_starts_with(
-                haystack: $normalizedType,
-                needle: 'application/javascript'
-            )
-        ) {
-            // JSON/CSS/JS must not be HTML-escaped as it would corrupt the syntax.
-            // These responses are generated server-side by trusted code (not user input),
-            // consumed by JavaScript/browsers (not rendered as HTML), and protected by
-            // Content-Type headers. HTML escaping would break JSON/CSS/JS syntax.
-            $escapedBody = $body;
-        } else {
-            // Default: escape as HTML for unknown content types
-            $escapedBody = esc_html($body);
-        }
-
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above based on content type
-        echo $escapedBody;
+        echo self::escapeForContentType($body, $contentType);
     }
 
     /**
@@ -417,6 +382,26 @@ class Route
 
         header(header: 'Location: ' . $url);
         exit;
+    }
+
+    /**
+     * Escape output based on content type.
+     *
+     * @param string $body The content to escape
+     * @param string $contentType The HTTP Content-Type header value
+     * @return string Escaped content ready for output
+     */
+    private static function escapeForContentType(
+        string $body,
+        string $contentType
+    ): string {
+        $normalizedType = strtolower(string: $contentType);
+
+        if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
+            return wp_kses_post(data: $body);
+        }
+
+        return esc_html(text: $body);
     }
 
     /**
