@@ -141,8 +141,7 @@ class Resursbank extends WC_Payment_Gateway
             return;
         }
 
-        // Sanitize and output using same logic as Blocks checkout for consistent HTML handling.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HtmlSanitizer::withSafeStyleCss returns escaped content via wp_kses
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped via wp_kses in echo
         echo HtmlSanitizer::withSafeStyleCss(
             HtmlSanitizer::getBlocksWidgetSafeStyles(),
             fn (): string => wp_kses(
@@ -158,9 +157,11 @@ class Resursbank extends WC_Payment_Gateway
      * @throws Exception
      * @noinspection PhpMissingParentCallCommonInspection
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @phpcs:ignore WordPress.Security.NonceVerification.Recommended -- order_id and globals are from WooCommerce internal processing, not user input
      */
     public function process_payment(mixed $order_id): array
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- global from WooCommerce internal error handling
         global $resursbank_block_create_error_message;
 
         $order = new WC_Order(order: $order_id);
@@ -171,6 +172,7 @@ class Resursbank extends WC_Payment_Gateway
             $this->handleCreatePaymentError(order: $order, error: $e);
 
             if (
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- global from WooCommerce internal error handling
                 $resursbank_block_create_error_message &&
                 WooCommerce::isUsingBlocksCheckout()
             ) {
