@@ -14,26 +14,42 @@ export class BlocksCustomerType {
      *
      * @param customerType The type of customer (LEGAL or NATURAL).
      */
-    private updateCustomerType(customerType: string) { // @ts-ignore
+    private updateCustomerType(customerType: string) {
         // @ts-ignore
-        const apiUrl = rbFrontendData?.apiUrl; // Ensure the API URL is defined.
+        const apiUrl = rbFrontendData?.apiUrl;
+
         if (!apiUrl) {
             console.error('API URL is undefined');
             return;
         }
 
         jQuery.ajax({
-            url: `${apiUrl}&customerType=${customerType}`,
-        }) // @ts-ignore
-            .done((response) => {
-                // @ts-ignore
-                resursConsoleLog("Updated customer: " + response?.customerType, 'DEBUG');
-                // Trigger the update_checkout event on successful AJAX call.
-                jQuery(document.body).trigger('update_checkout');
-            }) // @ts-ignore
-            .fail((error) => {
-                // Log any errors encountered during the AJAX call.
-                console.error('Error updating customer type:', error);
-            });
+            type: 'GET',
+            url: apiUrl,
+            data: {
+                customerType: customerType,
+            },
+            dataType: 'json',
+            success: (response: any) => {
+                if (response && response.customerType) {
+                    // @ts-ignore
+                    resursConsoleLog("Updated customer: " + response.customerType, 'DEBUG');
+                    // Trigger the update_checkout event on successful AJAX call.
+                    jQuery(document.body).trigger('update_checkout');
+                } else {
+                    console.warn('Invalid response structure:', response);
+                }
+            },
+            error: (xhr: any, status: string, error: string) => {
+                console.error('Error updating customer type:', {
+                    status: status,
+                    error: error,
+                    responseText: xhr.responseText,
+                    responseStatus: xhr.status,
+                });
+            },
+        });
     }
 }
+
+

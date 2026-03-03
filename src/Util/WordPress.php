@@ -101,66 +101,10 @@ class WordPress
     }
 
     /**
-     * Sanitize payment methods widget HTML while preserving its table and styles.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function sanitizePaymentMethodsHtml(string $html): string
-    {
-        return wp_kses(
-            $html,
-            [
-                'style' => [],
-                'div' => [
-                    'class' => true
-                ],
-                'table' => [],
-                'thead' => [],
-                'tbody' => [],
-                'tr' => [
-                    'id' => true
-                ],
-                'th' => [],
-                'td' => [],
-                'p' => [
-                    'class' => true
-                ]
-            ]
-        );
-    }
-
-    /**
-     * Sanitize support info widget HTML while preserving its table markup.
-     *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     */
-    public static function sanitizeSupportInfoHtml(string $html): string
-    {
-        return wp_kses(
-            $html,
-            [
-                'div' => [
-                    'class' => true
-                ],
-                'table' => [],
-                'tbody' => [],
-                'tr' => [],
-                'td' => [
-                    'class' => true
-                ],
-                'span' => [
-                    'class' => true
-                ],
-                'br' => []
-            ]
-        );
-    }
-
-    /**
      * Get and sanitize a query string parameter.
      *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.Superglobals)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getQueryParam(string $key): string
     {
@@ -176,8 +120,8 @@ class WordPress
     /**
      * Get and sanitize a POST parameter.
      *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.Superglobals)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function getPostParam(string $key): string
     {

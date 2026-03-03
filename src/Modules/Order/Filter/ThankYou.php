@@ -74,9 +74,9 @@ class ThankYou
 
             /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
             $order->add_order_note(
-                Translator::translate(
+                esc_html(Translator::translate(
                     phraseId: 'customer-landingpage-return'
-                )
+                ))
             );
         } catch (Throwable $error) {
             Log::error(error: $error);

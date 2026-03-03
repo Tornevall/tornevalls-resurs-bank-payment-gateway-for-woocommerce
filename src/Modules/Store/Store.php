@@ -120,7 +120,9 @@ class Store
         wp_add_inline_style(
             'rb-store-admin-css',
             '.rb-store-fetching select { background-image: url("' .
-            get_admin_url() . '/images/loading.gif' . '") !important; }'
+            esc_url(
+                get_admin_url() . '/images/loading.gif'
+            ) . '") !important; }'
         );
     }
 
@@ -189,7 +191,7 @@ class Store
 
         wp_localize_script(
             'rb-store-admin-scripts-load',
-            'rbStoreAdminLocalize',
+            'resursbank_store_admin_localize',
             [
                 'url' => Route::getUrl(
                     route: Route::ROUTE_GET_STORES_ADMIN

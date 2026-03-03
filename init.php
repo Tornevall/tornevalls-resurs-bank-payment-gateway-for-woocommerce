@@ -4,7 +4,7 @@
  * Plugin Name: Resurs Bank Payments for WooCommerce
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
  * WC requires at least: 7.6.0
- * WC Tested up to: 10.5.2
+ * WC Tested up to: 10.5.3
  * Plugin requires ecom: 3.3.13
  * Requires PHP: 8.1
  * Version: 1.2.20
@@ -73,6 +73,10 @@ define(
     value: plugin_dir_path(file: __FILE__)
 );
 
+/**
+ * Plugin prefix for unique identification and conflict prevention.
+ * Used throughout the plugin for options, settings fields, hook names, and script handles.
+ */
 define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 require_once __DIR__ . '/autoload.php';

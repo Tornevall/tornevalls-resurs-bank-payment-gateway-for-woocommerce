@@ -20,11 +20,10 @@ use Resursbank\Woocommerce\Settings\OrderManagement;
 use Resursbank\Woocommerce\Settings\PartPayment;
 use Resursbank\Woocommerce\Settings\PaymentMethods;
 use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WordPress;
 use RuntimeException;
 use Throwable;
 use WC_Admin_Settings;
@@ -159,6 +158,8 @@ class SettingsPage extends WC_Settings_Page
 
     /**
      * Render content of the payment method tab for our config page.
+     *
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function renderPaymentMethodsPage(): void
     {
@@ -171,9 +172,10 @@ class SettingsPage extends WC_Settings_Page
                 );
             }
 
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in WordPress::sanitizePaymentMethodsHtml
-            echo WordPress::sanitizePaymentMethodsHtml(
-                html: PaymentMethods::getOutput(storeId: StoreId::getData())
+            // Apply wp_kses directly in echo to sanitize payment methods HTML output
+            echo wp_kses(
+                PaymentMethods::getOutput(storeId: StoreId::getData()),
+                HtmlSanitizer::getPaymentMethodsTableAllowlist()
             );
         } catch (Throwable $e) {
             Log::error(error: $e, message: $e->getMessage());
@@ -188,8 +190,11 @@ class SettingsPage extends WC_Settings_Page
     public function renderAboutPage(): void
     {
         try {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in WordPress::sanitizeSupportInfoHtml
-            echo WordPress::sanitizeSupportInfoHtml(About::getWidgetHtml());
+            // Apply wp_kses directly in echo to sanitize support info HTML output
+            echo wp_kses(
+                About::getWidgetHtml(),
+                HtmlSanitizer::getSupportInfoAllowlist()
+            );
         } catch (Throwable $error) {
             Log::error(error: $error);
 

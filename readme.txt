@@ -2,10 +2,10 @@
 Contributors: rbonboarding, RB-Tornevall
 Tags: WooCommerce, Resurs Bank, Payment, Payment gateway, ResursBank
 Requires at least: 6.0
-Tested up to: 6.9.1
+Tested up to: 6.9
 Requires PHP: 8.1
 WC requires at least: 7.6.0
-WC Tested up to: 10.5.2
+WC Tested up to: 10.5.3
 Plugin requires ecom: 3.3.13
 Requires Plugins: woocommerce
 Stable tag: 1.2.20
@@ -92,6 +92,7 @@ Latest changes:
 
 * WordPress.org review hardening: Implemented additional sanitization/validation at controlled entry points and centralized input handling.
 * Improved output escaping for admin notices and inline script payloads where applicable.
+* Added wp_kses sanitization for GetAddress widget HTML output in the_content filter callbacks to meet WordPress.org security requirements while preserving widget functionality.
 * Removed disallowed HEREDOC/NOWDOC usage flagged by review.
 * Removed unneeded development artifacts from the release package.
 * Clarified SDK separation by relocating shared SDK path from lib/ecom to vendor/ecom.

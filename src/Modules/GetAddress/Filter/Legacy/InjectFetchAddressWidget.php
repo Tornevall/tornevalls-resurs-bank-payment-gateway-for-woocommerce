@@ -13,9 +13,8 @@ use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
-use Resursbank\Woocommerce\Util\Log;
+use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 /**
@@ -29,7 +28,7 @@ class InjectFetchAddressWidget
      */
     public static function exec(): void
     {
-        $result = '';
+        $errorMessage = '';
 
         try {
             Log::debug(
@@ -54,9 +53,13 @@ class InjectFetchAddressWidget
                 subject: (new Widget())->content
             );
 
-            // Widget HTML is generated server-side by our SDK (no user input) and must remain intact.
-            // Sanitizing here breaks required widget markup/scripts, so we output as-is.
-            echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            // Escape output directly using wp_kses to satisfy WordPress.org security requirements.
+            // We use wp_kses with an explicit allowlist to preserve form elements and
+            // interactive components while still protecting against XSS.
+            echo wp_kses(
+                $result,
+                HtmlSanitizer::getGetAddressFormAllowlist()
+            );
         } catch (Throwable $e) {
             try {
                 Config::getLogger()->error(
@@ -66,10 +69,14 @@ class InjectFetchAddressWidget
                     )
                 );
             } catch (ConfigException) {
-                $result = 'ResursBank: failed to render get address widget.';
+                $errorMessage = 'ResursBank: failed to render get address widget.';
             }
         }
 
-        echo $result;
+        if ($errorMessage === '') {
+            return;
+        }
+
+        echo esc_html($errorMessage);
     }
 }

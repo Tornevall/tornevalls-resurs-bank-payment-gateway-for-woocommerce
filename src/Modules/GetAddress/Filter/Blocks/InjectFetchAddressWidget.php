@@ -10,8 +10,7 @@ declare(strict_types=1);
 namespace Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks;
 
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Throwable;
 
 /**
@@ -44,11 +43,6 @@ class InjectFetchAddressWidget
     public static function exec(mixed $content): string
     {
         try {
-            // Not clear if we really need to protect this section.
-            //if (!function_exists(function: 'is_checkout') || !is_checkout()) {
-            //    return $content;
-            //}
-
             // Since this is a filter hook executed by the_content, we cannot be sure that the
             // content really is string and throw errors back to the frontend from here.
             // If we get anything but a string, we will therefore only silently return it.
@@ -67,8 +61,8 @@ class InjectFetchAddressWidget
             }
 
             $widgetHtml = (new Widget())->content;
-            // SDK-provided widget markup is trusted; avoid sanitizing to prevent filter breakage.
 
+            // Inject widget HTML into content
             $content = preg_replace(
                 pattern: '/(<div[^>]*data-block-name="woocommerce\/checkout-contact-information-block"[^>]*><\/div>)/',
                 replacement: '$1' . $widgetHtml,
@@ -78,6 +72,12 @@ class InjectFetchAddressWidget
             Log::error(error: $error);
         }
 
-        return $content;
+        // Escape the entire returned content to satisfy WordPress.org security requirements.
+        // We use wp_kses directly with an explicit allowlist to preserve form elements and
+        // interactive components while still protecting against XSS.
+        return wp_kses(
+            $content,
+            HtmlSanitizer::getGetAddressFormAllowlist()
+        );
     }
 }

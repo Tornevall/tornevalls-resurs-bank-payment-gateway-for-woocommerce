@@ -133,14 +133,17 @@ class Route
      */
     public static function exec(): void
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-        $route = (
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-            isset($_GET[self::ROUTE_PARAM]) &&
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-            is_string(value: $_GET[self::ROUTE_PARAM])
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
-        ) ? sanitize_text_field(wp_unslash($_GET[self::ROUTE_PARAM])) : '';
+        $routeRaw = filter_input(
+            type: INPUT_GET,
+            var_name: self::ROUTE_PARAM,
+            filter: FILTER_UNSAFE_RAW
+        );
+
+        $route = is_string(value: $routeRaw)
+            ? sanitize_text_field(
+                str: wp_unslash(value: $routeRaw)
+            )
+            : '';
 
         $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
@@ -161,28 +164,29 @@ class Route
                 );
             }
 
-            // Verify nonce for state-changing admin routes to prevent CSRF attacks.
-            // Routes that modify data (cache invalidate, trigger test callback) require nonce verification.
-            // Read-only routes (get stores, get order content) use capability check only.
-            $stateChangingRoutes = [
-                self::ROUTE_ADMIN_CACHE_INVALIDATE,
-                self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+            // Verify nonce for routes where we generate a nonce in getUrl().
+            $nonceActionByRoute = [
+                self::ROUTE_ADMIN_CACHE_INVALIDATE => 'resursbank_admin_' . self::ROUTE_ADMIN_CACHE_INVALIDATE,
+                self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK => 'resursbank_admin_' . self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
+                self::ROUTE_GET_STORES_ADMIN => 'resursbank_get_stores_admin',
             ];
 
-            if (
-                in_array(
-                    needle: $route,
-                    haystack: $stateChangingRoutes,
-                    strict: true
-                )
-            ) {
+            if (isset($nonceActionByRoute[$route])) {
                 WordPress::ensurePluggableLoaded();
-                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verification performed below
-                $nonce = isset($_GET['_wpnonce']) && is_string($_GET['_wpnonce'])
-                    ? sanitize_text_field(wp_unslash($_GET['_wpnonce'])) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+                $nonceRaw = filter_input(
+                    type: INPUT_GET,
+                    var_name: '_wpnonce',
+                    filter: FILTER_UNSAFE_RAW
+                );
+
+                $nonce = is_string(value: $nonceRaw)
+                    ? sanitize_text_field(
+                        str: wp_unslash(value: $nonceRaw)
+                    )
                     : '';
 
-                if (!WordPress::verifyNonce(nonce: $nonce, action: 'resursbank_admin_' . $route)) {
+                if (!wp_verify_nonce($nonce, $nonceActionByRoute[$route])) {
                     self::respondWithError(
                         exception: new HttpException(
                             message: 'Security verification failed. Please try again.',
@@ -255,20 +259,27 @@ class Route
             self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
         ];
 
-        if (in_array(needle: $route, haystack: $stateChangingRoutes, strict: true)) {
+        if (
+            in_array(
+                needle: $route,
+                haystack: $stateChangingRoutes,
+                strict: true
+            )
+        ) {
             WordPress::ensurePluggableLoaded();
-            $arguments['_wpnonce'] = wp_create_nonce('resursbank_admin_' . $route);
+            $arguments['_wpnonce'] = wp_create_nonce(
+                action: 'resursbank_admin_' . $route
+            );
         }
 
         if ($route === self::ROUTE_GET_STORES_ADMIN) {
             WordPress::ensurePluggableLoaded();
-            $arguments['_wpnonce'] = wp_create_nonce('resursbank_get_stores_admin');
+            $arguments['_wpnonce'] = wp_create_nonce(
+                action: 'resursbank_get_stores_admin'
+            );
         }
 
-        return Url::getQueryArg(
-            baseUrl: $url,
-            arguments: $arguments
-        );
+        return Url::getQueryArg(baseUrl: $url, arguments: $arguments);
     }
 
     /**
@@ -283,31 +294,12 @@ class Route
         header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
-        $normalizedType = strtolower($contentType);
-
-        if (str_starts_with($normalizedType, 'text/html')) {
-            echo wp_kses_post($body);
-            return;
-        }
-
-        if (str_starts_with($normalizedType, 'text/plain')) {
-            echo esc_html($body);
-            return;
-        }
-
-        // Non-HTML responses (JSON/CSS/JS) must not be escaped.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo $body;
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escapeForContentType() returns escaped content
+        echo self::escapeForContentType($body, $contentType);
     }
 
     /**
      * Method that exits after response instead of proceeding with regular WordPress executions.
-     *
-     * In some cases, during API responding, WordPress could potentially execute other data that renders
-     * more content after the final json responses, and breaks the requests. This happens due to how
-     * WP is handling unknown requests and depends on how the site is configured with permalinks and rewrite-urls.
-     * For example, when WP handles 404 errors on unknown http-requests, we have to stop our own execution
-     * like this.
      *
      * @SuppressWarnings(PHPMD.ExitExpression)
      * @noinspection PhpNoReturnAttributeCanBeAddedInspection
@@ -354,8 +346,8 @@ class Route
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized via esc_url_raw below
         $url = isset($_SERVER['HTTP_REFERER'])
             ? esc_url_raw(
-            wp_unslash($_SERVER['HTTP_REFERER'])
-        )
+                url: wp_unslash(value: $_SERVER['HTTP_REFERER'])
+            )
             : '';
 
         try {
@@ -375,6 +367,31 @@ class Route
 
         header(header: 'Location: ' . $url);
         exit;
+    }
+
+    /**
+     * Escape output based on content type.
+     *
+     * @param string $body The content to escape
+     * @param string $contentType The HTTP Content-Type header value
+     * @return string Escaped content ready for output
+     */
+    private static function escapeForContentType(
+        string $body,
+        string $contentType
+    ): string {
+        $normalizedType = strtolower(string: $contentType);
+
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- json should not be escaped!
+        if (str_starts_with(haystack: $normalizedType, needle: 'application/json')) {
+            return $body;
+        }
+
+        if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
+            return wp_kses_post(data: $body);
+        }
+
+        return esc_html(text: $body);
     }
 
     /**
@@ -514,8 +531,8 @@ class Route
     private static function userIsAdmin(): bool
     {
         return is_user_logged_in() && current_user_can(
-            capability: 'administrator'
-        );
+                capability: 'administrator'
+            );
     }
 
     /**
@@ -524,9 +541,9 @@ class Route
     private static function getUrlWithProperTrailingSlash(string $url): string
     {
         return preg_replace(
-            pattern: '/\/$/',
-            replacement: '',
-            subject: $url
-        ) . '/';
+                pattern: '/\/$/',
+                replacement: '',
+                subject: $url
+            ) . '/';
     }
 }

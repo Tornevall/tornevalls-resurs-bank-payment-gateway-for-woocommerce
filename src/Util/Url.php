@@ -214,18 +214,23 @@ class Url
     /**
      * Get JSON requests the same way we do for _GET and _POST.
      *
-     * @throws JsonException
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-    public static function getHttpJson(string $key): null|string|int|float
+    public static function getHttpJson(string $key): ?string
     {
-        $jsonData = file_get_contents(filename: 'php://input');
-        $data = json_decode(
-            json: $jsonData,
-            associative: true,
-            flags: JSON_THROW_ON_ERROR
-        );
-        return isset($data[$key]) && $data[$key] ? $data[$key] : null;
+        $raw = file_get_contents('php://input');
+        if (!$raw) {
+            return null;
+        }
+
+        $json = json_decode($raw, true);
+        if (!is_array($json) || !isset($json[$key]) || !is_string($json[$key])) {
+            return null;
+        }
+
+        return sanitize_text_field(wp_unslash($json[$key]));
     }
+
 
     /**
      * Generate URL for MAPI callbacks.

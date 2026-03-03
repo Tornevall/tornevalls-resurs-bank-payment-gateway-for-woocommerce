@@ -113,7 +113,7 @@ class Api
 
         wp_localize_script(
             'rb-api-admin-scripts-load',
-            'rbApiAdminLocalize',
+            'resursbank_api_admin_localize',
             [
                 'url' => Route::getUrl(
                     route: Route::ROUTE_GET_STORE_COUNTRY

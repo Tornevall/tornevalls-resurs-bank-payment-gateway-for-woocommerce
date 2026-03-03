@@ -43,6 +43,7 @@ use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin as AdminUtility;
+use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
@@ -133,10 +134,28 @@ class Resursbank extends WC_Payment_Gateway
      * Render info about our payment methods in their section at checkout.
      *
      * @noinspection PhpMissingParentCallCommonInspection
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function payment_fields(): void
     {
-        echo wp_kses_post($this->uspText);
+        if ($this->uspText === '') {
+            return;
+        }
+
+        $html = HtmlSanitizer::withSafeStyleCss(
+            properties: HtmlSanitizer::getBlocksWidgetSafeStyles(),
+            callback: static fn (): string => $this->uspText
+        );
+
+        $allowedHtml = HtmlSanitizer::getBlocksWidgetAllowlist();
+
+        $allowedHtml['style'] = [
+            'id' => true,
+            'type' => true,
+            'media' => true,
+        ];
+
+        echo wp_kses($html, $allowedHtml);
     }
 
     /**
@@ -145,9 +164,11 @@ class Resursbank extends WC_Payment_Gateway
      * @throws Exception
      * @noinspection PhpMissingParentCallCommonInspection
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
+     * @phpcs:ignore WordPress.Security.NonceVerification.Recommended -- order_id and globals are from WooCommerce internal processing, not user input
      */
     public function process_payment(mixed $order_id): array
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- global from WooCommerce internal error handling
         global $resursbank_block_create_error_message;
 
         $order = new WC_Order(order: $order_id);
@@ -158,6 +179,7 @@ class Resursbank extends WC_Payment_Gateway
             $this->handleCreatePaymentError(order: $order, error: $e);
 
             if (
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- global from WooCommerce internal error handling
                 $resursbank_block_create_error_message &&
                 WooCommerce::isUsingBlocksCheckout()
             ) {
@@ -183,8 +205,8 @@ class Resursbank extends WC_Payment_Gateway
         return [
             'result' => 'success',
             'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                order: $order
-            ),
+                    order: $order
+                ),
         ];
     }
 
@@ -309,9 +331,9 @@ class Resursbank extends WC_Payment_Gateway
                 amount: $this->get_order_total()
             );
             $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
-                paymentMethod: $this->method,
-                amount: $this->get_order_total()
-            );
+                    paymentMethod: $this->method,
+                    amount: $this->get_order_total()
+                );
         } catch (TranslationException $error) {
             // Translation errors should rather  go as debug messages since we
             // translate with english fallbacks.
@@ -554,10 +576,11 @@ class Resursbank extends WC_Payment_Gateway
             }
         }
 
-        wc_add_notice(message: $finalMessage, notice_type: 'error');
+        // Escape message for output to user via wc_add_notice
+        wc_add_notice(message: esc_html($finalMessage), notice_type: 'error');
 
-        // Pass message back to process_payment() for Blocks checkout
-        $resursbank_block_create_error_message = $finalMessage;
+        // Pass escaped message back to process_payment() for Blocks checkout
+        $resursbank_block_create_error_message = esc_html($finalMessage);
     }
 
     /**
@@ -571,8 +594,8 @@ class Resursbank extends WC_Payment_Gateway
         // TTL default from WooCommerce. If stock reservations is enabled and over 0, we should use that value instead
         // of our default.
         $stockEnabled = ((string)get_option(
-            'woocommerce_manage_stock'
-        ) === 'yes');
+                'woocommerce_manage_stock'
+            ) === 'yes');
         $holdStockMinutes = (int)get_option('woocommerce_hold_stock_minutes');
 
         return new Options(
