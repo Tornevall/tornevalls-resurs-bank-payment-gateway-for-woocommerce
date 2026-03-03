@@ -199,8 +199,12 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
-                    'description' => self::sanitizeBlocksWidgetHtml($descriptionHtml),
-                    'costlist' => self::sanitizeBlocksWidgetHtml($costList ?? ''),
+                    'description' => self::sanitizeBlocksWidgetHtml(
+                        $descriptionHtml
+                    ),
+                    'costlist' => self::sanitizeBlocksWidgetHtml(
+                        $costList ?? ''
+                    ),
                     'costlist_url' => Route::getUrl(route: 'get-costlist'),
                     'readmore' => self::sanitizeBlocksWidgetHtml(
                         $readMore->content ?? ''
@@ -209,7 +213,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                         $priceSignageWarning ?? ''
                     ),
                     'read_more_css' => '',
-                    'logo' => self::sanitizeBlocksWidgetHtml($logo->content ?? ''),
+                    'logo' => self::sanitizeBlocksWidgetHtml(
+                        $logo->content ?? ''
+                    ),
                     'logo_type' => $logo->getIdentifier(),
                     'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
                     'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,
@@ -241,6 +247,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     private static function sanitizeBlocksWidgetHtml(string $html): string
     {
         $html = (string)$html;
+
         if ($html === '') {
             return '';
         }
@@ -253,9 +260,11 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             '~<iframe\b([^>]*\bsrc\s*=\s*(["\'])(.*?)\2[^>]*)>(.*?)</iframe>~is',
             callback: static function (array $m): string {
                 $src = (string)$m[3];
+
                 if (!HtmlSanitizer::isAllowedIframeSrc($src)) {
                     return '';
                 }
+
                 return $m[0];
             },
             subject: $html
