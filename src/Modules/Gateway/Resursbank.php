@@ -134,6 +134,7 @@ class Resursbank extends WC_Payment_Gateway
      * Render info about our payment methods in their section at checkout.
      *
      * @noinspection PhpMissingParentCallCommonInspection
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public function payment_fields(): void
     {
@@ -141,14 +142,20 @@ class Resursbank extends WC_Payment_Gateway
             return;
         }
 
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped via wp_kses in echo
-        echo HtmlSanitizer::withSafeStyleCss(
-            HtmlSanitizer::getBlocksWidgetSafeStyles(),
-            fn (): string => wp_kses(
-                $this->uspText,
-                HtmlSanitizer::getBlocksWidgetAllowlist()
-            )
+        $html = HtmlSanitizer::withSafeStyleCss(
+            properties: HtmlSanitizer::getBlocksWidgetSafeStyles(),
+            callback: static fn (): string => $this->uspText
         );
+
+        $allowedHtml = HtmlSanitizer::getBlocksWidgetAllowlist();
+
+        $allowedHtml['style'] = [
+            'id' => true,
+            'type' => true,
+            'media' => true,
+        ];
+
+        echo wp_kses($html, $allowedHtml);
     }
 
     /**
