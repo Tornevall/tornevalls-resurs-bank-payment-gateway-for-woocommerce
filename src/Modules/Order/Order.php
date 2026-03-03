@@ -29,6 +29,7 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 
