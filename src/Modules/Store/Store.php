@@ -191,7 +191,7 @@ class Store
 
         wp_localize_script(
             'rb-store-admin-scripts-load',
-            'rbStoreAdminLocalize',
+            'resursbank_store_admin_localize',
             [
                 'url' => Route::getUrl(
                     route: Route::ROUTE_GET_STORES_ADMIN

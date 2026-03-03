@@ -243,7 +243,7 @@ class AssetLoader
 
         wp_localize_script(
             'rb-get-address',
-            'rbFrontendData',
+            'resursbank_frontend_data',
             [
                 'currentCustomerType' => WcSession::getCustomerType(),
                 'apiUrl' => Route::getUrl(

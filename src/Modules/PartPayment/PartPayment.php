@@ -188,13 +188,13 @@ class PartPayment
                 true
             );
 
-        // Disable this only if you want all front end calculations to break.
+            // Disable this only if you want all front end calculations to break.
             wp_add_inline_script('partpayment-script', $widget->content);
             wp_localize_script(
                 'partpayment-script',
                 'rbPpScript',
                 [
-                'product_price' => self::getPriceData(),
+                    'product_price' => self::getPriceData(),
                 ]
             );
         } catch (Throwable $error) {
@@ -383,6 +383,14 @@ class PartPayment
         $allowed['aside']['style'] = true;
 
         // SVG support (spinner + logo + warning icon).
+        // If these tags are not allowed, wp_kses will leave an empty <svg></svg> (logo disappears).
+        $allowed['defs'] ??= [];
+        $allowed['defs']['id'] = true;
+
+        $allowed['g'] ??= [];
+        $allowed['g']['id'] = true;
+        $allowed['g']['transform'] = true;
+
         if (!isset($allowed['svg']) || !is_array($allowed['svg'])) {
             $allowed['svg'] = [];
         }
@@ -399,6 +407,8 @@ class PartPayment
         $allowed['svg']['id'] = true;
         $allowed['svg']['xmlns'] = true;
         $allowed['svg']['xmlns:svg'] = true;
+        $allowed['svg']['xmlns:xlink'] = true;
+        $allowed['svg']['xml:space'] = true;
 
         // Accessibility attributes often present in SVG.
         $allowed['svg']['role'] = true;
