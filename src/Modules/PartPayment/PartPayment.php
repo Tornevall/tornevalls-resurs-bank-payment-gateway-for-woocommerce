@@ -188,13 +188,13 @@ class PartPayment
                 true
             );
 
-            // Disable this only if you want all front end calculations to break.
+        // Disable this only if you want all front end calculations to break.
             wp_add_inline_script('partpayment-script', $widget->content);
             wp_localize_script(
                 'partpayment-script',
                 'rbPpScript',
                 [
-                    'product_price' => self::getPriceData(),
+                'product_price' => self::getPriceData(),
                 ]
             );
         } catch (Throwable $error) {

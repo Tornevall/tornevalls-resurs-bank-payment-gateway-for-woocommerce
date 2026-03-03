@@ -47,7 +47,7 @@ use function str_contains;
 use function strlen;
 
 // Prevent direct access.
-if (!defined(constant_name: 'ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -142,8 +142,8 @@ class Route
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- route param is sanitized and auth checked below
         )
             ? sanitize_text_field(
-            str: wp_unslash(value: $_GET[self::ROUTE_PARAM])
-        )
+                str: wp_unslash(value: $_GET[self::ROUTE_PARAM])
+            )
             : '';
 
         $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
@@ -191,10 +191,12 @@ class Route
                     )
                     : '';
 
-                if (!WordPress::verifyNonce(
-                    nonce: $nonce,
-                    action: 'resursbank_admin_' . $route
-                )) {
+                if (
+                    !WordPress::verifyNonce(
+                        nonce: $nonce,
+                        action: 'resursbank_admin_' . $route
+                    )
+                ) {
                     self::respondWithError(
                         exception: new HttpException(
                             message: 'Security verification failed. Please try again.',
@@ -267,11 +269,13 @@ class Route
             self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
         ];
 
-        if (in_array(
-            needle: $route,
-            haystack: $stateChangingRoutes,
-            strict: true
-        )) {
+        if (
+            in_array(
+                needle: $route,
+                haystack: $stateChangingRoutes,
+                strict: true
+            )
+        ) {
             WordPress::ensurePluggableLoaded();
             $arguments['_wpnonce'] = wp_create_nonce(
                 action: 'resursbank_admin_' . $route
@@ -305,10 +309,9 @@ class Route
         // Escape output based on content type context
         if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
             $escapedBody = wp_kses_post(data: $body);
-        } elseif (str_starts_with(
-            haystack: $normalizedType,
-            needle: 'text/plain'
-        )) {
+        } elseif (
+            str_starts_with(haystack: $normalizedType, needle: 'text/plain')
+        ) {
             $escapedBody = esc_html(text: $body);
         } elseif (
             str_starts_with(

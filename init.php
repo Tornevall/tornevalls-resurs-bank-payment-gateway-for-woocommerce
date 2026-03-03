@@ -73,6 +73,10 @@ define(
     value: plugin_dir_path(file: __FILE__)
 );
 
+/**
+ * Plugin prefix for unique identification and conflict prevention.
+ * Used throughout the plugin for options, settings fields, hook names, and script handles.
+ */
 define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
 
 require_once __DIR__ . '/autoload.php';
