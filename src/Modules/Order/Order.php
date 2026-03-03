@@ -79,6 +79,10 @@ class Order
     public static function initAdminScripts(): void
     {
         try {
+            // Fetching the order id this way has historically been the best way on
+            // sites where the normal way of doing it not works ("ecompress"). This however fails
+            // when in HPOS-mode. If the solution below does not work, then we have to
+            // reconsider the way this has been historically done,
             $wcOrder = wc_get_order();
 
             if (
