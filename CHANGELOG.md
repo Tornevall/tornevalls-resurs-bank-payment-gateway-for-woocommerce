@@ -1,7 +1,12 @@
+# 1.2.21
+
+* Incremental commit.
+
 # 1.2.20
 
 * WordPress.org review hardening: Implemented additional sanitization/validation at controlled entry points and centralized input handling.
 * Improved output escaping for admin notices and inline script payloads where applicable.
+* Added wp_kses sanitization for GetAddress widget HTML output in the_content filter callbacks to meet WordPress.org security requirements while preserving widget functionality.
 * Removed disallowed HEREDOC/NOWDOC usage flagged by review.
 * Removed unneeded development artifacts from the release package.
 * Clarified SDK separation by relocating shared SDK path from lib/ecom to vendor/ecom.
