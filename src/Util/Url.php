@@ -224,7 +224,7 @@ class Url
         }
 
         $json = json_decode($raw, true);
-        if (!is_array($json) || !isset($json[$key]) || !is_string($json[$key])) {
+        if (!is_array($json) || !isset($json[$key])) {
             return null;
         }
 

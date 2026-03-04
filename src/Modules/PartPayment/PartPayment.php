@@ -192,7 +192,7 @@ class PartPayment
             wp_add_inline_script('partpayment-script', $widget->content);
             wp_localize_script(
                 'partpayment-script',
-                'rbPpScript',
+                'resursbank_part_payment_script',
                 [
                     'product_price' => self::getPriceData(),
                 ]

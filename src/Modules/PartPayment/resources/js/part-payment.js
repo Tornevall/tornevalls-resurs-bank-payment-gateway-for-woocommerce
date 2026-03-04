@@ -20,14 +20,12 @@ function getRbPpPriceFromWooCom() {
 
 jQuery(document).ready(function () {
     const qtyElement = document.querySelector('input.qty');
-
     if (typeof Resursbank_PartPayment !== 'undefined' && null !== document.getElementById('rb-pp-widget-container')) {
         // noinspection JSUndeclaredVariable (Ecom owned)
         RB_PP_WIDGET_INSTANCE = Resursbank_PartPayment.createInstance(
             document.getElementById('rb-pp-widget-container'),
             {
                 getAmount: function () {
-                    // noinspection JSUnresolvedReference
                     return getRbPpPriceFromWooCom() * this.getQty();
                 },
                 getObservableElements: function () {
