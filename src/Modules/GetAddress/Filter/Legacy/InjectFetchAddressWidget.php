@@ -14,6 +14,7 @@ use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
 use Resursbank\Woocommerce\Util\HtmlSanitizer;
+use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Throwable;
 
