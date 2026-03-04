@@ -241,6 +241,9 @@ class AssetLoader
             true
         );
 
+        // Declare wc-blocks-data-store as dependency for inline script that uses WC Blocks data
+        wp_script_add_data('rb-get-address', 'dependencies', ['wc-blocks-data-store']);
+
         wp_localize_script(
             'rb-get-address',
             'rbFrontendData',
@@ -257,7 +260,8 @@ class AssetLoader
 
         wp_add_inline_script(
             'rb-get-address',
-            (string)GetAddress::getWidget()?->content
+            (string)GetAddress::getWidget()?->content,
+            'before'
         );
     }
 

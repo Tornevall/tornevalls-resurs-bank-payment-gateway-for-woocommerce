@@ -142,20 +142,15 @@ class Resursbank extends WC_Payment_Gateway
             return;
         }
 
-        $html = HtmlSanitizer::withSafeStyleCss(
-            properties: HtmlSanitizer::getBlocksWidgetSafeStyles(),
-            callback: static fn (): string => $this->uspText
-        );
-
         $allowedHtml = HtmlSanitizer::getBlocksWidgetAllowlist();
+        $html = HtmlSanitizer::normalizeWidgetHtml($this->uspText);
 
-        $allowedHtml['style'] = [
-            'id' => true,
-            'type' => true,
-            'media' => true,
-        ];
-
-        echo wp_kses($html, $allowedHtml);
+        HtmlSanitizer::withSafeStyleCssContext(
+            properties: HtmlSanitizer::getBlocksWidgetSafeStyles(),
+            callback: static function () use ($html, $allowedHtml): void {
+                echo wp_kses($html, $allowedHtml);
+            }
+        );
     }
 
     /**

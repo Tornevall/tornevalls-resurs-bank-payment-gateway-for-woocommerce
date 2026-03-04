@@ -714,4 +714,30 @@ class HtmlSanitizer
 
         return $html;
     }
+
+    /**
+     * Temporarily extends WordPress safe inline style properties while executing a callback.
+     *
+     * Use this when wp_kses() must run while the safe_style_css filter is active.
+     *
+     * @param string[] $properties CSS property names to allow
+     * @param callable():void $callback Function executed while styles are allowed
+     */
+    public static function withSafeStyleCssContext(array $properties, callable $callback): void
+    {
+        $filter = static function (array $styles) use ($properties): array {
+            foreach ($properties as $prop) {
+                $styles[] = $prop;
+            }
+            return array_values(array_unique($styles));
+        };
+
+        add_filter('safe_style_css', $filter, 9999);
+
+        try {
+            $callback();
+        } finally {
+            remove_filter('safe_style_css', $filter, 9999);
+        }
+    }
 }
