@@ -11,10 +11,10 @@ var variationDisplayPrice = 0;
  */
 function getRbPpPriceFromWooCom() {
     return (
-        typeof resursbank_part_payment_script !== 'undefined' &&
-        typeof resursbank_part_payment_script.product_price !== 'undefined' &&
+        typeof resursbankabpaygwPartPaymentScript !== 'undefined' &&
+        typeof resursbankabpaygwPartPaymentScript.product_price !== 'undefined' &&
         variationDisplayPrice === 0
-    ) ? resursbank_part_payment_script.product_price
+    ) ? resursbankabpaygwPartPaymentScript.product_price
         : variationDisplayPrice;
 }
 

@@ -4,7 +4,7 @@
  */
 
 // Prepare country code data.
-const ajaxPromise = fetch(rbApiAdminLocalize.url)
+const ajaxPromise = fetch(resursbankabpaygwApiAdminLocalize.url)
     .then(response => response.json())
     .then(data => data)
     .catch(error => {

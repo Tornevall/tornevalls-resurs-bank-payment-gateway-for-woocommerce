@@ -81,7 +81,7 @@ class Store
             environmentSelectId: 'resursbank_environment',
             clientIdInputId: 'resursbank_client_id',
             clientSecretInputId: 'resursbank_client_secret',
-            spinnerClass: 'rb-store-fetching'
+            spinnerClass: 'resursbankabpaygw-store-fetching'
         );
     }
 
@@ -111,15 +111,15 @@ class Store
     private static function enqueueStyles(): void
     {
         wp_register_style(
-            'rb-store-admin-css',
+            'resursbankabpaygw-store-admin-css',
             false,
             [],
             UserAgent::getPluginVersion()
         );
-        wp_enqueue_style('rb-store-admin-css');
+        wp_enqueue_style('resursbankabpaygw-store-admin-css');
         wp_add_inline_style(
-            'rb-store-admin-css',
-            '.rb-store-fetching select { background-image: url("' .
+            'resursbankabpaygw-store-admin-css',
+            '.resursbankabpaygw-store-fetching select { background-image: url("' .
             esc_url(
                 get_admin_url() . '/images/loading.gif'
             ) . '") !important; }'
@@ -136,17 +136,17 @@ class Store
         $widget = self::initializeWidget();
 
         wp_register_script(
-            'rb-store-admin-scripts',
+            'resursbankabpaygw-store-admin-scripts',
             false,
             [],
             UserAgent::getPluginVersion(),
             true
         );
-        wp_enqueue_script('rb-store-admin-scripts');
-        wp_add_inline_script('rb-store-admin-scripts', $widget->content);
+        wp_enqueue_script('resursbankabpaygw-store-admin-scripts');
+        wp_add_inline_script('resursbankabpaygw-store-admin-scripts', $widget->content);
 
         wp_register_script(
-            'rb-store-admin-scripts-load',
+            'resursbankabpaygw-store-admin-scripts-load',
             Url::getResourceUrl(
                 module: 'Store',
                 file: 'rb-store.js'
@@ -157,7 +157,7 @@ class Store
         );
 
         wp_enqueue_script(
-            'rb-store-admin-scripts-load',
+            'resursbankabpaygw-store-admin-scripts-load',
             Url::getResourceUrl(
                 module: 'Store',
                 file: 'rb-store.js'
@@ -190,8 +190,8 @@ class Store
         }
 
         wp_localize_script(
-            'rb-store-admin-scripts-load',
-            'resursbank_store_admin_localize',
+            'resursbankabpaygw-store-admin-scripts-load',
+            'resursbankabpaygwStoreAdminLocalize',
             [
                 'url' => Route::getUrl(
                     route: Route::ROUTE_GET_STORES_ADMIN
