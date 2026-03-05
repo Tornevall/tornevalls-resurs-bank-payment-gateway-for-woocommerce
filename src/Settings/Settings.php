@@ -81,7 +81,7 @@ class Settings
          */
         // Save changes to database.
         add_action(
-            'woocommerce_settings_save_' . RESURSBANK_MODULE_PREFIX,
+            'woocommerce_settings_save_' . RESURSBANKABPAYMENTS_MODULE_PREFIX,
             'Resursbank\Woocommerce\Settings\Settings::saveSettings'
         );
 
@@ -203,7 +203,7 @@ class Settings
     ): array {
         if (
             is_array(value: $links) &&
-            $file === RESURSBANK_MODULE_DIR_NAME . '/init.php'
+            $file === RESURSBANKABPAYMENTS_MODULE_DIR_NAME . '/init.php'
         ) {
             /** @noinspection HtmlUnknownTarget */
             $links[] = sprintf(

@@ -3,7 +3,7 @@ import * as jQuery from 'jquery';
 
 /**
  * BlocksCustomerType class handles interactions with the customer type in the checkout process.
- * rbFrontendData is expected through internal localization.
+ * resursbankabpaygwFrontendData is expected through internal localization.
  */
 export class BlocksCustomerType {
     /**
@@ -16,7 +16,7 @@ export class BlocksCustomerType {
      */
     private updateCustomerType(customerType: string) {
         // @ts-ignore
-        const apiUrl = rbFrontendData?.apiUrl;
+        const apiUrl = resursbankabpaygwFrontendData?.apiUrl;
 
         if (!apiUrl) {
             console.error('API URL is undefined');
@@ -33,7 +33,7 @@ export class BlocksCustomerType {
             success: (response: any) => {
                 if (response && response.customerType) {
                     // @ts-ignore
-                    resursConsoleLog("Updated customer: " + response.customerType, 'DEBUG');
+                    resursbankabpaygwConsoleLog("Updated customer: " + response.customerType, 'DEBUG');
                     // Trigger the update_checkout event on successful AJAX call.
                     jQuery(document.body).trigger('update_checkout');
                 } else {

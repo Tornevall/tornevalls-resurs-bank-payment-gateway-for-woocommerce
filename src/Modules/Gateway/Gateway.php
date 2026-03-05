@@ -196,7 +196,7 @@ class Gateway
      */
     public static function initAdmin(): void
     {
-        if (!Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
+        if (!Admin::isSection(sectionName: RESURSBANKABPAYMENTS_MODULE_PREFIX)) {
             return;
         }
 

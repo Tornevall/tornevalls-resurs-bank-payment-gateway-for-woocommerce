@@ -255,7 +255,7 @@ class Order
         if (
             str_starts_with(
                 haystack: $meta_key,
-                needle: RESURSBANK_MODULE_PREFIX . '_'
+                needle: RESURSBANKABPAYMENTS_MODULE_PREFIX . '_'
             )
         ) {
             return true;

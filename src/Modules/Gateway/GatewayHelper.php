@@ -125,7 +125,7 @@ class GatewayHelper
     private function getCostListHtml(): string
     {
         // Fixing performance issues on reloads. Loading content this way significantly improves efficiency.
-        $transientName = RESURSBANK_MODULE_PREFIX . '_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
+        $transientName = RESURSBANKABPAYMENTS_MODULE_PREFIX . '_cost_list_' . $this->getPaymentMethod()->id . '_' . $this->getWcTotal();
         $transientContent = get_transient($transientName);
 
         if (EnableCache::isEnabled() === false) {

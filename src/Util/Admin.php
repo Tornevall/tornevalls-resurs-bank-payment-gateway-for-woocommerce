@@ -81,7 +81,7 @@ class Admin
         $return = false;
 
         if (
-            Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX) ||
+            Admin::isTab(tabName: RESURSBANKABPAYMENTS_MODULE_PREFIX) ||
             Admin::isTab(tabName: 'checkout')
         ) {
             if (

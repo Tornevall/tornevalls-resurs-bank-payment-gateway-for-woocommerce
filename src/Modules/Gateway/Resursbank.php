@@ -87,7 +87,7 @@ class Resursbank extends WC_Payment_Gateway
         int $sortOrder = 0
     ) {
         // Assign default property values for this gateway.
-        $this->id = RESURSBANK_MODULE_PREFIX;
+        $this->id = RESURSBANKABPAYMENTS_MODULE_PREFIX;
         $this->plugin_id = 'resursbank-mapi';
         $this->title = 'Resurs Bank';
         $this->method_description = 'Resurs Bank Gateway';
@@ -111,7 +111,7 @@ class Resursbank extends WC_Payment_Gateway
             $section !== '' &&
             isset($method->id) &&
             is_string(value: $this->id) &&
-            $method->id !== RESURSBANK_MODULE_PREFIX
+            $method->id !== RESURSBANKABPAYMENTS_MODULE_PREFIX
         ) {
             // Redirects to the correct section if the wrong section is requested when the section is set to a method ID.
             AdminUtility::redirectAtWrongSection(method: $method->id);

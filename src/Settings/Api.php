@@ -71,7 +71,7 @@ class Api
         ));
 
         if (
-            !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX) ||
+            !Admin::isTab(tabName: RESURSBANKABPAYMENTS_MODULE_PREFIX) ||
             !$properSection
         ) {
             return;

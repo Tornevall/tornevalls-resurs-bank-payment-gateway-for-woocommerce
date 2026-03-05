@@ -29,7 +29,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
     ) {
         // Log the mismatch for debugging purposes
         // @ts-ignore
-        resursConsoleLog(
+        resursbankabpaygwConsoleLog(
             'Exclude ' + method.title + ': Customer type not matching.',
             'DEBUG'
         );
@@ -131,7 +131,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                         }
                     })
                     .catch(err => {
-                        // byt till resursConsoleLog om du vill
+                        // byt till resursbankabpaygwConsoleLog om du vill
                         console.error("Failed to fetch costlist:", err);
                     });
             }, [cartTotal]);
@@ -185,7 +185,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
             );
         };
 
-        //resursConsoleLog('Registering payment method: ' + method.title + ' (' + method.name + ')', 'DEBUG');
+        //resursbankabpaygwConsoleLog('Registering payment method: ' + method.title + ' (' + method.name + ')', 'DEBUG');
 
         registerPaymentMethod({
             name: method.name,
@@ -200,7 +200,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                     data.billingAddress.country !== settings.allowed_country
                 ) {
                     // @ts-ignore
-                    resursConsoleLog(
+                    resursbankabpaygwConsoleLog(
                         'Country does not match.',
                         'DEBUG'
                     );
@@ -209,7 +209,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
 
                 if (!validateCustomerType(data.billingAddress, data.shippingAddress, method)) {
                     // @ts-ignore
-                    resursConsoleLog('Customer type does not match.', 'DEBUG');
+                    resursbankabpaygwConsoleLog('Customer type does not match.', 'DEBUG');
                     return false;
                 }
 
@@ -224,7 +224,7 @@ const validateCustomerType = (billingAddress: any, shippingAddress: any, method:
                     cart_total > method.max_purchase_limit
                 ) {
                     // @ts-ignore
-                    resursConsoleLog(
+                    resursbankabpaygwConsoleLog(
                         method.title + ': Order total (' + cart_total + ') does not match with ' +
                         method.min_purchase_limit + ' and ' + method.max_purchase_limit + '.',
                         'DEBUG'

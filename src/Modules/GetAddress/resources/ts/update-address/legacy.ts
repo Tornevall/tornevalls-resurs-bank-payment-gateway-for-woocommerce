@@ -29,11 +29,11 @@ export class LegacyAddressUpdater {
 
     constructor() {
         // @ts-ignore
-        this.isUsingCheckoutBlocks = rbFrontendData?.isUsingCheckoutBlocks === '1' || rbFrontendData?.isUsingCheckoutBlocks === true;
+        this.isUsingCheckoutBlocks = resursbankabpaygwFrontendData?.isUsingCheckoutBlocks === '1' || resursbankabpaygwFrontendData?.isUsingCheckoutBlocks === true;
 
         this.getAddressEnabled = // @ts-ignore
-            rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
-            rbFrontendData?.getAddressEnabled === true;
+            resursbankabpaygwFrontendData?.getAddressEnabled === '1' || // @ts-ignore
+            resursbankabpaygwFrontendData?.getAddressEnabled === true;
 
         this.customerTypeUpdater = new BlocksCustomerType();
 
@@ -48,17 +48,17 @@ export class LegacyAddressUpdater {
     initialize() {
         if (this.isUsingCheckoutBlocks) {
             // @ts-ignore
-            resursConsoleLog('Checkout Blocks enabled. Skipping Legacy Address Fetcher Initializations.');
+            resursbankabpaygwConsoleLog('Checkout Blocks enabled. Skipping Legacy Address Fetcher Initializations.');
             return;
         }
         if (!this.getAddressEnabled) {
             // @ts-ignore
-            resursConsoleLog('Legacy Address Fetcher is disabled, Initializing Alternative CustomerType.');
+            resursbankabpaygwConsoleLog('Legacy Address Fetcher is disabled, Initializing Alternative CustomerType.');
             this.setupCustomerTypeOnInit();
             return;
         }
         // @ts-ignore
-        resursConsoleLog('Legacy Address Fetcher Ready.');
+        resursbankabpaygwConsoleLog('Legacy Address Fetcher Ready.');
 
         jQuery(document).ready(() => {
             // Ensure the address widget is available before proceeding.

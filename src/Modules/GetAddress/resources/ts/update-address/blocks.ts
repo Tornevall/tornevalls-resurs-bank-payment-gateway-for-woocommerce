@@ -112,11 +112,11 @@ export class BlocksAddressUpdater {
                 mutationObserver.disconnect();
 
                 // @ts-ignore
-                resursConsoleLog(`Listener add: ${fieldName}`, 'DEBUG');
+                resursbankabpaygwConsoleLog(`Listener add: ${fieldName}`, 'DEBUG');
 
                 companyField.addEventListener('change', (event) => {
                     // @ts-ignore
-                    resursConsoleLog(`${fieldName} has changed`, 'DEBUG');
+                    resursbankabpaygwConsoleLog(`${fieldName} has changed`, 'DEBUG');
                     this.refreshPaymentMethods();
                 });
             }
@@ -136,19 +136,19 @@ export class BlocksAddressUpdater {
         const element = document.querySelector<HTMLInputElement>('.wc-block-checkout__use-address-for-billing input[type="checkbox"]');
         if (element) {
             // @ts-ignore
-            resursConsoleLog("useBillingElement found during initialization.", 'DEBUG');
+            resursbankabpaygwConsoleLog("useBillingElement found during initialization.", 'DEBUG');
             this.useBillingElement = element;
             return;
         }
 
         // @ts-ignore
         // Set up a MutationObserver to detect when the element is added
-        resursConsoleLog("useBillingElement not found. Setting up observer...", 'DEBUG');
+        resursbankabpaygwConsoleLog("useBillingElement not found. Setting up observer...", 'DEBUG');
         const observer = new MutationObserver((mutations, obs) => {
             const observedElement = document.querySelector<HTMLInputElement>('.wc-block-checkout__use-address-for-billing input[type="checkbox"]');
             if (observedElement) {
                 // @ts-ignore
-                resursConsoleLog("useBillingElement found by observer.", 'DEBUG');
+                resursbankabpaygwConsoleLog("useBillingElement found by observer.", 'DEBUG');
                 this.useBillingElement = observedElement;
                 obs.disconnect(); // Stop observing once the element is found
             }
@@ -180,7 +180,7 @@ export class BlocksAddressUpdater {
         const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
         if (!cartDataReady) {
             // @ts-ignore
-            resursConsoleLog('Cart data not ready, triggered dispatch.', 'DEBUG');
+            resursbankabpaygwConsoleLog('Cart data not ready, triggered dispatch.', 'DEBUG');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         }
 
@@ -197,7 +197,7 @@ export class BlocksAddressUpdater {
      */
     loadAllPaymentMethods() {
         // @ts-ignore
-        resursConsoleLog('Loading internal payment methods.', 'DEBUG');
+        resursbankabpaygwConsoleLog('Loading internal payment methods.', 'DEBUG');
         // Initially build a full list, locally, of available payment methods.
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
@@ -265,7 +265,7 @@ export class BlocksAddressUpdater {
         }
 
         // @ts-ignore
-        resursConsoleLog("Use same address for billing:", this.useBillingElement.checked);
+        resursbankabpaygwConsoleLog("Use same address for billing:", this.useBillingElement.checked);
         return !this.useBillingElement.checked; // Return true when unchecked (use billing)
     }
 
@@ -275,13 +275,13 @@ export class BlocksAddressUpdater {
     refreshPaymentMethods() {
         if (!this.allPaymentMethods.length) {
             // @ts-ignore
-            resursConsoleLog('No payment methods available for filtering.', 'DEBUG');
+            resursbankabpaygwConsoleLog('No payment methods available for filtering.', 'DEBUG');
             this.loadAllPaymentMethods();
             return;
         }
 
         // @ts-ignore
-        resursConsoleLog('Refreshing internal payment methods.', 'DEBUG');
+        resursbankabpaygwConsoleLog('Refreshing internal payment methods.', 'DEBUG');
 
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethods = cartData.paymentMethods;
@@ -341,7 +341,7 @@ export class BlocksAddressUpdater {
 
                 if (supportsCustomerType && withinPurchaseLimits) {
                     // @ts-ignore
-                    resursConsoleLog( // @ts-ignore
+                    resursbankabpaygwConsoleLog( // @ts-ignore
                         methodFromSettings.title + ', ' + cartTotal + ': Approved limit and supported customer type.',
                         'DEBUG'
                     );
@@ -349,7 +349,7 @@ export class BlocksAddressUpdater {
                 }
 
                 // @ts-ignore
-                resursConsoleLog( // @ts-ignore
+                resursbankabpaygwConsoleLog( // @ts-ignore
                     methodFromSettings.title + ', Cart total ' + cartTotal + ': ' + (withinPurchaseLimits ? 'OK: Within' : 'Not OK: Outside') + ' limit. ' +
                     (supportsCustomerType ? 'Customer type supported (OK).' : 'Customer type not supported (Not OK).'),
                     'DEBUG'

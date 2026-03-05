@@ -309,22 +309,22 @@ class Connection
 
         if (
             !Admin::isAdmin() ||
-            !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX)
+            !Admin::isTab(tabName: RESURSBANKABPAYMENTS_MODULE_PREFIX)
         ) {
             return null;
         }
 
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
         $clientId = WordPress::getPostParam(
-            key: RESURSBANK_MODULE_PREFIX . '_client_id'
+            key: RESURSBANKABPAYMENTS_MODULE_PREFIX . '_client_id'
         );
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
         $clientSecret = WordPress::getPostParam(
-            key: RESURSBANK_MODULE_PREFIX . '_client_secret'
+            key: RESURSBANKABPAYMENTS_MODULE_PREFIX . '_client_secret'
         );
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce Settings API handles nonce verification
         $environment = WordPress::getPostParam(
-            key: RESURSBANK_MODULE_PREFIX . '_environment'
+            key: RESURSBANKABPAYMENTS_MODULE_PREFIX . '_environment'
         );
 
         if ($clientId === '' || $clientSecret === '' || $environment === '') {

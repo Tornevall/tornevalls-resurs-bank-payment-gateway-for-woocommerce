@@ -223,7 +223,7 @@ class Route
     ): string {
         return admin_url(
             path: 'admin.php?page=wc-settings&tab='
-            . RESURSBANK_MODULE_PREFIX
+            . RESURSBANKABPAYMENTS_MODULE_PREFIX
             . "&section=$tab"
         );
     }

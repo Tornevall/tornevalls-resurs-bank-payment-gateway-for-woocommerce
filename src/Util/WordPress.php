@@ -224,8 +224,8 @@ class WordPress
      */
     public static function getEnvironmentFromAdminAjax(): ?string
     {
-        $key = defined('RESURSBANK_MODULE_PREFIX')
-            ? RESURSBANK_MODULE_PREFIX . '_environment'
+        $key = defined('RESURSBANKABPAYMENTS_MODULE_PREFIX')
+            ? RESURSBANKABPAYMENTS_MODULE_PREFIX . '_environment'
             : 'resursbank_environment';
 
         // Get cached JSON payload (same instance used in Connection::getJwtFromPost)

@@ -233,7 +233,7 @@ class AssetLoader
     public static function enqueueGetAddressJs(): void
     {
         wp_enqueue_script(
-            'rb-get-address',
+            'resursbankabpaygw-get-address',
             Url::getAssetUrl(file: 'update-address.js'),
             ['wp-data', 'jquery', 'wc-blocks-data-store'],
             WooCommerce::getAssetVersion(assetFile: 'update-address'),
@@ -242,11 +242,11 @@ class AssetLoader
         );
 
         // Declare wc-blocks-data-store as dependency for inline script that uses WC Blocks data
-        wp_script_add_data('rb-get-address', 'dependencies', ['wc-blocks-data-store']);
+        wp_script_add_data('resursbankabpaygw-get-address', 'dependencies', ['wc-blocks-data-store']);
 
         wp_localize_script(
-            'rb-get-address',
-            'rbFrontendData',
+            'resursbankabpaygw-get-address',
+            'resursbankabpaygwFrontendData',
             [
                 'currentCustomerType' => WcSession::getCustomerType(),
                 'apiUrl' => Route::getUrl(
@@ -259,7 +259,7 @@ class AssetLoader
         );
 
         wp_add_inline_script(
-            'rb-get-address',
+            'resursbankabpaygw-get-address',
             (string)GetAddress::getWidget()?->content,
             'before'
         );
