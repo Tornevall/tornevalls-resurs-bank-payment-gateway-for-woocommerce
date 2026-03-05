@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * Add admin notice when dependencies like ecom are missing.
+ * @noinspection PhpArgumentWithoutNamedIdentifierInspection
  */
 function resursbankabpaygw_has_no_ecom(): void
 {
