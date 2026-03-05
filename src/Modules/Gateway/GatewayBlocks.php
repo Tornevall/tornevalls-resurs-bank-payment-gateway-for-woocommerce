@@ -84,7 +84,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     public static function enqueueAssets(): void
     {
         wp_register_style(
-            'rb-wc-blocks-css',
+            'resursbankabpaygw-wc-blocks-css',
             Url::getResourceUrl(
                 module: 'Gateway',
                 file: 'checkout-blocks.css',
@@ -94,7 +94,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             UserAgent::getPluginVersion()
         );
 
-        wp_enqueue_style('rb-wc-blocks-css');
+        wp_enqueue_style('resursbankabpaygw-wc-blocks-css');
     }
 
     /**
@@ -139,7 +139,7 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     public function get_payment_method_script_handles(): array
     {
         wp_register_script(
-            'rb-wc-blocks-js',
+            'resursbankabpaygw-wc-blocks-js',
             Url::getAssetUrl(file: 'gateway.js'),
             ['react', 'wc-blocks-data-store', 'wc-blocks-registry', 'wc-settings', 'wp-data'],
             WooCommerce::getAssetVersion(),
@@ -147,9 +147,9 @@ final class GatewayBlocks extends AbstractPaymentMethodType
             true
         );
 
-        wp_script_add_data('rb-wc-blocks-js', 'type', 'module');
+        wp_script_add_data('resursbankabpaygw-wc-blocks-js', 'type', 'module');
 
-        return ['rb-wc-blocks-js'];
+        return ['resursbankabpaygw-wc-blocks-js'];
     }
 
     /**
