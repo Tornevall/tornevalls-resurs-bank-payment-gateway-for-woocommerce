@@ -38,6 +38,14 @@ class Metadata
     public const KEY_REPOSITORY_CREATED = RESURSBANKABPAYMENTS_MODULE_PREFIX . '_repository_created';
 
     /**
+     * Cache payment validity status by order ID to avoid redundant API calls.
+     * Maps order ID to boolean (false = invalid, true = valid).
+     *
+     * @var array<int, bool>
+     */
+    private static array $paymentValidityCache = [];
+
+    /**
      * Store UUID of Resurs Bank payment on order.
      */
     public static function setPaymentId(
@@ -135,8 +143,6 @@ class Metadata
      */
     public static function isValidResursPayment(WC_Order $order, bool $checkPaymentStatus = true): bool
     {
-        global $resursbank_payment_is_valid;
-
         $orderId = $order->get_id() ?? 0;
 
         // Early validation of cached payment status.
@@ -152,7 +158,7 @@ class Metadata
             $stringValidation->isUuid(value: $order->get_payment_method());
             self::isValidResursMethod(order: $order);
         } catch (Throwable) {
-            $resursbank_payment_is_valid[$orderId] = false;
+            self::$paymentValidityCache[$orderId] = false;
             return false;
         }
 
@@ -169,20 +175,20 @@ class Metadata
         // need to know the first time if the payment is valid.
         if (
             $checkPaymentStatus &&
-            !isset($resursbank_payment_is_valid[$orderId])
+            !isset(self::$paymentValidityCache[$orderId])
         ) {
             try {
                 OrderManagement::getPayment(order: $order);
-                $resursbank_payment_is_valid[$orderId] = true;
+                self::$paymentValidityCache[$orderId] = true;
             } catch (Throwable $error) {
                 Log::debug(message: $error->getMessage());
-                $resursbank_payment_is_valid[$orderId] = false;
+                self::$paymentValidityCache[$orderId] = false;
                 return false;
             }
         }
 
         // If all checks passed or if checkPaymentStatus has not been requested.
-        return $resursbank_payment_is_valid[$orderId] ?? true;
+        return self::$paymentValidityCache[$orderId] ?? true;
     }
 
     /**
@@ -252,8 +258,7 @@ class Metadata
      */
     private static function isCachedPaymentInvalid(int $orderId): bool
     {
-        global $resursbank_payment_is_valid;
-        return isset($resursbank_payment_is_valid[$orderId]) && $resursbank_payment_is_valid[$orderId] === false;
+        return isset(self::$paymentValidityCache[$orderId]) && self::$paymentValidityCache[$orderId] === false;
     }
 
     /**
