@@ -237,7 +237,7 @@ class WooCommerce
         );
 
         // Construct the file path.
-        $filePath = RESURSBANK_MODULE_DIR_PATH . '/assets/js/dist/' . $sanitizedFile . '.asset.php';
+        $filePath = RESURSBANKABPAYMENTS_MODULE_DIR_PATH . '/assets/js/dist/' . $sanitizedFile . '.asset.php';
 
         // Verify the file exists and is within the expected directory.
         if (

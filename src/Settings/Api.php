@@ -71,7 +71,7 @@ class Api
         ));
 
         if (
-            !Admin::isTab(tabName: RESURSBANK_MODULE_PREFIX) ||
+            !Admin::isTab(tabName: RESURSBANKABPAYMENTS_MODULE_PREFIX) ||
             !$properSection
         ) {
             return;
@@ -91,7 +91,7 @@ class Api
     public static function initScripts(): void
     {
         wp_register_script(
-            'rb-api-admin-scripts-load',
+            'resursbankabpaygw-api-admin-scripts-load',
             Url::getResourceUrl(
                 module: 'Api',
                 file: 'saved-updates.js'
@@ -101,7 +101,7 @@ class Api
             true
         );
         wp_enqueue_script(
-            'rb-api-admin-scripts-load',
+            'resursbankabpaygw-api-admin-scripts-load',
             Url::getResourceUrl(
                 module: 'Api',
                 file: 'saved-updates.js'
@@ -112,8 +112,8 @@ class Api
         );
 
         wp_localize_script(
-            'rb-api-admin-scripts-load',
-            'resursbank_api_admin_localize',
+            'resursbankabpaygw-api-admin-scripts-load',
+            'resursbankabpaygwApiAdminLocalize',
             [
                 'url' => Route::getUrl(
                     route: Route::ROUTE_GET_STORE_COUNTRY
@@ -122,7 +122,7 @@ class Api
         );
 
         wp_enqueue_style(
-            'rb-ga-css',
+            'resursbankabpaygw-ga-css',
             Url::getResourceUrl(
                 module: 'Api',
                 file: 'api.css',

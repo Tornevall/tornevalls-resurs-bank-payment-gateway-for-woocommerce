@@ -80,6 +80,13 @@ class Resursbank extends WC_Payment_Gateway
     private string $uspText = '';
 
     /**
+     * Error message for Blocks checkout (replaces global variable).
+     * Required for Blocks checkout: error messages must be handled through process_payment(),
+     * as wc_add_notice() alone is not respected by Blocks.
+     */
+    private static ?string $blockCreateErrorMessage = null;
+
+    /**
      * Setup.
      */
     public function __construct(
@@ -87,7 +94,7 @@ class Resursbank extends WC_Payment_Gateway
         int $sortOrder = 0
     ) {
         // Assign default property values for this gateway.
-        $this->id = RESURSBANK_MODULE_PREFIX;
+        $this->id = RESURSBANKABPAYMENTS_MODULE_PREFIX;
         $this->plugin_id = 'resursbank-mapi';
         $this->title = 'Resurs Bank';
         $this->method_description = 'Resurs Bank Gateway';
@@ -111,7 +118,7 @@ class Resursbank extends WC_Payment_Gateway
             $section !== '' &&
             isset($method->id) &&
             is_string(value: $this->id) &&
-            $method->id !== RESURSBANK_MODULE_PREFIX
+            $method->id !== RESURSBANKABPAYMENTS_MODULE_PREFIX
         ) {
             // Redirects to the correct section if the wrong section is requested when the section is set to a method ID.
             AdminUtility::redirectAtWrongSection(method: $method->id);
@@ -159,13 +166,10 @@ class Resursbank extends WC_Payment_Gateway
      * @throws Exception
      * @noinspection PhpMissingParentCallCommonInspection
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
-     * @phpcs:ignore WordPress.Security.NonceVerification.Recommended -- order_id and globals are from WooCommerce internal processing, not user input
+     * @phpcs:ignore WordPress.Security.NonceVerification.Recommended -- order_id is from WooCommerce internal processing, not user input
      */
     public function process_payment(mixed $order_id): array
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- global from WooCommerce internal error handling
-        global $resursbank_block_create_error_message;
-
         $order = new WC_Order(order: $order_id);
 
         try {
@@ -174,13 +178,12 @@ class Resursbank extends WC_Payment_Gateway
             $this->handleCreatePaymentError(order: $order, error: $e);
 
             if (
-                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- global from WooCommerce internal error handling
-                $resursbank_block_create_error_message &&
+                self::$blockCreateErrorMessage &&
                 WooCommerce::isUsingBlocksCheckout()
             ) {
                 throw new Exception(
                     message: esc_html(
-                        (string)$resursbank_block_create_error_message
+                        (string)self::$blockCreateErrorMessage
                     )
                 );
             }
@@ -469,7 +472,6 @@ class Resursbank extends WC_Payment_Gateway
      * Method to properly fetch an order if it is present on a current screen (the order view), making sure we
      * can display "Payment via <method>" instead of "Payment via <uuid>".
      *
-     * @noinspection SpellCheckingInspection
      */
     private function getOrder(): ?WC_Order
     {
@@ -539,10 +541,6 @@ class Resursbank extends WC_Payment_Gateway
      */
     private function handleCreatePaymentError(WC_Order $order, Throwable $error): void
     {
-        // Required for Blocks checkout: an error message must be handled through process_payment(),
-        // wc_add_notice() alone is not respected by Blocks.
-        global $resursbank_block_create_error_message;
-
         Log::error(
             error: $error,
             message: $error->getMessage()
@@ -574,8 +572,8 @@ class Resursbank extends WC_Payment_Gateway
         // Escape message for output to user via wc_add_notice
         wc_add_notice(message: esc_html($finalMessage), notice_type: 'error');
 
-        // Pass escaped message back to process_payment() for Blocks checkout
-        $resursbank_block_create_error_message = esc_html($finalMessage);
+        // Pass escaped message to process_payment() for Blocks checkout
+        self::$blockCreateErrorMessage = esc_html($finalMessage);
     }
 
     /**

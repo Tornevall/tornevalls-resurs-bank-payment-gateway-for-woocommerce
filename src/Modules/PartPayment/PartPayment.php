@@ -178,7 +178,7 @@ class PartPayment
             );
 
             wp_enqueue_script(
-                'partpayment-script',
+                'resursbankabpaygw-partpayment-script',
                 Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'part-payment.js'
@@ -189,10 +189,10 @@ class PartPayment
             );
 
             // Disable this only if you want all front end calculations to break.
-            wp_add_inline_script('partpayment-script', $widget->content);
+            wp_add_inline_script('resursbankabpaygw-partpayment-script', $widget->content);
             wp_localize_script(
-                'partpayment-script',
-                'resursbank_part_payment_script',
+                'resursbankabpaygw-partpayment-script',
+                'resursbankabpaygwPartPaymentScript',
                 [
                     'product_price' => self::getPriceData(),
                 ]

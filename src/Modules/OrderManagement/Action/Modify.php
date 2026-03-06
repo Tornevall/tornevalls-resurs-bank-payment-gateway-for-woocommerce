@@ -62,6 +62,14 @@ class Modify extends Action
     private static null|WC_Abstract_Order|WC_Order $order = null;
 
     /**
+     * Track bulk operation types by order ID (replaces global $resursCheckBulkIds).
+     * Maps order ID to bulk operation type (e.g., 'mark_completed').
+     *
+     * @var array<int, string>
+     */
+    private static array $bulkOperationTypes = [];
+
+    /**
      * Modify content of Resurs Bank payment.
      *
      * @throws ApiException
@@ -183,9 +191,7 @@ class Modify extends Action
      */
     public static function canBulkModify(WC_Order $order, Payment $payment): bool
     {
-        global $resursCheckBulkIds;
-
-        $bulkType = $resursCheckBulkIds[$order->get_id()] ?? '';
+        $bulkType = self::$bulkOperationTypes[$order->get_id()] ?? '';
 
         return $bulkType === 'mark_completed' && $payment->canCancel() && !$payment->isFrozen();
     }

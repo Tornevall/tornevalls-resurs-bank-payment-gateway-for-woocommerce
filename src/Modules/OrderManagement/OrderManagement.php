@@ -68,6 +68,11 @@ class OrderManagement
     private static array $payments = [];
 
     /**
+     * Count getPayment API calls to enable smart caching during single request.
+     */
+    private static int $getPaymentCallCount = 0;
+
+    /**
      * The actual method that sets up actions for order status change hooks.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
@@ -438,8 +443,7 @@ class OrderManagement
      */
     public static function getPayment(WC_Order $order): Payment
     {
-        global $rbGetPaymentCount;
-        $rbGetPaymentCount++;
+        self::$getPaymentCallCount++;
 
         $id = (int)$order->get_id();
 
@@ -447,7 +451,7 @@ class OrderManagement
         // as we validate several abilities for a payment (like canCapture, canCancel, etc.). To avoid API
         // overload, we'll use self if it has been already set once, instead of risking more than 10 API calls
         // during that single web request.
-        if ($rbGetPaymentCount > 1 && isset(self::$payments[$id]) && self::$payments[$id] instanceof Payment) {
+        if (self::$getPaymentCallCount > 1 && isset(self::$payments[$id]) && self::$payments[$id] instanceof Payment) {
             return self::$payments[$id];
         }
 

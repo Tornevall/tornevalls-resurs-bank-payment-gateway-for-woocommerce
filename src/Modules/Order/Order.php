@@ -105,7 +105,7 @@ class Order
             );
 
             wp_enqueue_script(
-                'rb-get-order-content-admin-scripts',
+                'resursbankabpaygw-get-order-content-admin-scripts',
                 $url,
                 ['jquery'],
                 '1.0.0',
@@ -113,15 +113,15 @@ class Order
             );
 
             wp_register_script(
-                'rb-get-order-content-admin-inline-scripts',
+                'resursbankabpaygw-get-order-content-admin-inline-scripts',
                 '',
-                ['rb-get-order-content-admin-scripts'],
+                ['resursbankabpaygw-get-order-content-admin-scripts'],
                 '1.0.0',
                 true
             );
-            wp_enqueue_script('rb-get-order-content-admin-inline-scripts');
+            wp_enqueue_script('resursbankabpaygw-get-order-content-admin-inline-scripts');
             wp_add_inline_script(
-                'rb-get-order-content-admin-inline-scripts',
+                'resursbankabpaygw-get-order-content-admin-inline-scripts',
                 "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrderid');"
             );
         } catch (Throwable $error) {
@@ -255,7 +255,7 @@ class Order
         if (
             str_starts_with(
                 haystack: $meta_key,
-                needle: RESURSBANK_MODULE_PREFIX . '_'
+                needle: RESURSBANKABPAYMENTS_MODULE_PREFIX . '_'
             )
         ) {
             return true;

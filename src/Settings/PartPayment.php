@@ -61,6 +61,16 @@ class PartPayment
     public const MINIMUM_THRESHOLD_LIMIT_FI = 15;
 
     /**
+     * Tracks if a country override is active during store update (replaces global).
+     */
+    private static bool $isCountryOverride = false;
+
+    /**
+     * Stores the new country code during store update override (replaces global).
+     */
+    private static ?string $overrideSavedCountryCode = null;
+
+    /**
      * Get translated title of tab.
      */
     public static function getTitle(): string
@@ -190,9 +200,7 @@ class PartPayment
      */
     public static function handleStoreIdUpdate(mixed $newStoreId): void
     {
-        global $resursbank_overrideSavedCountryCode, $resursbank_isCountryOverride;
-
-        $resursbank_isCountryOverride = false;
+        self::$isCountryOverride = false;
 
         try {
             Config::getCache()->invalidate();
@@ -223,8 +231,8 @@ class PartPayment
                     $countryCode
                 )
             ) {
-                $resursbank_overrideSavedCountryCode = $countryCode;
-                $resursbank_isCountryOverride = true;
+                self::$overrideSavedCountryCode = $countryCode;
+                self::$isCountryOverride = true;
                 self::updateThresholdLimit($countryCode);
             }
         } catch (Throwable) {
@@ -252,8 +260,6 @@ class PartPayment
      */
     private static function validateStoreAndMethod(): bool
     {
-        global $resursbank_isCountryOverride;
-
         $paymentMethodId = PaymentMethodOption::getData();
         $storeId = StoreId::getData();
         $period = Period::getData();
@@ -275,7 +281,7 @@ class PartPayment
         // Country overrider may cause empty values during a limited amount of time
         // due to handleStoreIdUpdate are saving the threshold values via the update hook.
         // During this time we should not validate the period.
-        if (empty($period) && !$resursbank_isCountryOverride) {
+        if (empty($period) && !self::$isCountryOverride) {
             MessageBag::addError(message: esc_html(Translator::translate(
                 phraseId: 'limit-missing-period'
             )));
@@ -372,15 +378,13 @@ class PartPayment
      */
     private static function handleLimitUpdate(mixed $new): void
     {
-        global $resursbank_overrideSavedCountryCode;
-
         $customerCountry = get_option('woocommerce_default_country');
 
         try {
             $storeCountry = WooCommerce::getStoreCountry() ?? $customerCountry;
 
             // Do not touch anything if override is active.
-            if (isset($resursbank_overrideSavedCountryCode)) {
+            if (self::$overrideSavedCountryCode !== null) {
                 return;
             }
         } catch (Throwable) {

@@ -43,7 +43,7 @@ class AddDocumentationLink
     {
         if (
             is_array(value: $links) &&
-            $file === RESURSBANK_MODULE_DIR_NAME . '/init.php'
+            $file === RESURSBANKABPAYMENTS_MODULE_DIR_NAME . '/init.php'
         ) {
             $links[] = wp_kses(
                 '<a href="blank" target="_blank">' .

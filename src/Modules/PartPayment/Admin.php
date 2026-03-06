@@ -52,22 +52,22 @@ class Admin
         /** @noinspection BadExceptionsProcessingInspection */
         try {
             wp_register_script(
-                'partpayment-admin-scripts',
+                'resursbankabpaygw-partpayment-admin-scripts',
                 false,
                 [],
                 UserAgent::getPluginVersion(),
                 true
             );
-            wp_enqueue_script('partpayment-admin-scripts');
+            wp_enqueue_script('resursbankabpaygw-partpayment-admin-scripts');
             wp_add_inline_script(
-                'partpayment-admin-scripts',
+                'resursbankabpaygw-partpayment-admin-scripts',
                 $periods->content,
                 'before'
             );
-            add_action('admin_enqueue_scripts', 'partpayment-admin-scripts');
+            add_action('admin_enqueue_scripts', 'resursbankabpaygw-partpayment-admin-scripts');
 
             wp_register_script(
-                'rb-store-admin-scripts-load',
+                'resursbankabpaygw-partpayment-admin-scripts-load',
                 Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'rb-part-payment-admin.js'
@@ -78,7 +78,7 @@ class Admin
             );
 
             wp_enqueue_script(
-                'rb-store-admin-scripts-load',
+                'resursbankabpaygw-partpayment-admin-scripts-load',
                 Url::getResourceUrl(
                     module: 'PartPayment',
                     file: 'rb-part-payment-admin.js'

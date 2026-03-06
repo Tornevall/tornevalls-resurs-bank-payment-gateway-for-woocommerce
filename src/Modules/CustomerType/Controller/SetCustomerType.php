@@ -55,7 +55,7 @@ class SetCustomerType
             if ($customerTypeEnum instanceof CustomerType) {
                 // Report back if successful or not.
                 $response['update'] = WcSession::set(
-                    key: RESURSBANK_MODULE_PREFIX . '_' . CustomerRepository::SESSION_KEY_CUSTOMER_TYPE,
+                    key: RESURSBANKABPAYMENTS_MODULE_PREFIX . '_' . CustomerRepository::SESSION_KEY_CUSTOMER_TYPE,
                     value: $customerTypeEnum->value
                 );
                 $response['customerType'] = $customerTypeEnum->value;

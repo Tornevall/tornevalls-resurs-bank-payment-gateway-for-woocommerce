@@ -32,7 +32,7 @@ if (!defined('ABSPATH')) {
 
 class MessageBag
 {
-    public const SESSION_KEY = 'rb-message-bag';
+    public const SESSION_KEY = 'resursbankabpaygw-message-bag';
 
     /**
      * Whether to clear the bag after rendering it.

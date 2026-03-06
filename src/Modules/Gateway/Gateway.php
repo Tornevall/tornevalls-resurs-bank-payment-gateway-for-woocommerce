@@ -43,6 +43,11 @@ if (!defined('ABSPATH')) {
 class Gateway
 {
     /**
+     * Cache for payment method list to avoid multiple API calls in a single request.
+     */
+    private static ?PaymentMethodCollection $paymentMethodList = null;
+
+    /**
      * Add payment gateways.
      */
     public static function init(): void
@@ -196,7 +201,7 @@ class Gateway
      */
     public static function initAdmin(): void
     {
-        if (!Admin::isSection(sectionName: RESURSBANK_MODULE_PREFIX)) {
+        if (!Admin::isSection(sectionName: RESURSBANKABPAYMENTS_MODULE_PREFIX)) {
             return;
         }
 
@@ -309,12 +314,10 @@ class Gateway
     {
         // Making sure that cache-less solution only fetches payment methods once and reusing
         // data if already fetched during a single threaded call.
-        global $paymentMethodList;
-
-        if (!$paymentMethodList instanceof PaymentMethodCollection) {
-            $paymentMethodList = PaymentMethodRepository::getPaymentMethods();
+        if (!self::$paymentMethodList instanceof PaymentMethodCollection) {
+            self::$paymentMethodList = PaymentMethodRepository::getPaymentMethods();
         }
 
-        return $paymentMethodList;
+        return self::$paymentMethodList;
     }
 }

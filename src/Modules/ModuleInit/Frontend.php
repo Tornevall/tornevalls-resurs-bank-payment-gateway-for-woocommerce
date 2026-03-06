@@ -60,9 +60,9 @@ class Frontend
     public static function enableConsoleLogs(): void
     {
         echo "<script>
-        function resursConsoleLog(message, logLevel = 'INFO') {
-            if (typeof rbFrontendData !== 'undefined') {
-                const currentLogLevel = rbFrontendData.logLevel;
+        function resursbankabpaygwConsoleLog(message, logLevel = 'INFO') {
+            if (typeof resursbankabpaygwFrontendData !== 'undefined') {
+                const currentLogLevel = resursbankabpaygwFrontendData.logLevel;
                 if (currentLogLevel === 'DEBUG' || (currentLogLevel === 'INFO' && logLevel === 'INFO')) {
                     console.log(message);
                 }

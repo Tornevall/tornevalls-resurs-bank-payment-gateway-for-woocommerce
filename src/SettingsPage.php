@@ -43,7 +43,7 @@ class SettingsPage extends WC_Settings_Page
      */
     public function __construct()
     {
-        $this->id = RESURSBANK_MODULE_PREFIX;
+        $this->id = RESURSBANKABPAYMENTS_MODULE_PREFIX;
         $this->label = 'Resurs Bank';
 
         parent::__construct();

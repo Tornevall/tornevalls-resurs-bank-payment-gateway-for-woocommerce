@@ -49,18 +49,18 @@ require_once __DIR__ . '/src/Autoloader/requirements.php';
 // checkout when ecom2 is missing. We cannot move this into a class, as the autoload
 // process will fail if ecom2 is unavailable.
 if (!file_exists(filename: __DIR__ . '/vendor/ecom/composer.json')) {
-    resursBankHasNoEcom();
+    resursbankabpaygw_has_no_ecom();
     return;
 }
 
 if (PHP_VERSION_ID < 80100) {
-    resursBankHasOldPhp();
+    resursbankabpaygw_has_old_php();
     return;
 }
 
 // Name of plugin directory; normally the slug name.
 define(
-    constant_name: 'RESURSBANK_MODULE_DIR_NAME',
+    constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_NAME',
     value: substr(
         string: __DIR__,
         offset: strrpos(haystack: __DIR__, needle: '/') + 1
@@ -69,7 +69,7 @@ define(
 
 // Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>"
 define(
-    constant_name: 'RESURSBANK_MODULE_DIR_PATH',
+    constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_PATH',
     value: plugin_dir_path(file: __FILE__)
 );
 
@@ -77,7 +77,7 @@ define(
  * Plugin prefix for unique identification and conflict prevention.
  * Used throughout the plugin for options, settings fields, hook names, and script handles.
  */
-define(constant_name: 'RESURSBANK_MODULE_PREFIX', value: 'resursbank');
+define(constant_name: 'RESURSBANKABPAYMENTS_MODULE_PREFIX', value: 'resursbank');
 
 require_once __DIR__ . '/autoload.php';
 

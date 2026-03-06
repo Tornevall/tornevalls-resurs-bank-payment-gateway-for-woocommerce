@@ -11,8 +11,8 @@ declare const Resursbank_GetAddress: any;
  */
 document.addEventListener('DOMContentLoaded', () => {
     const getAddressEnabled = ( // @ts-ignore
-        rbFrontendData?.getAddressEnabled === '1' || // @ts-ignore
-        rbFrontendData?.getAddressEnabled === true
+        resursbankabpaygwFrontendData?.getAddressEnabled === '1' || // @ts-ignore
+        resursbankabpaygwFrontendData?.getAddressEnabled === true
     );
 
     // Confirm we are loaded on the checkout page.
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Limited to the checkout section. Occurs randomly depending on load speed.
     if (document.querySelector('.wc-block-components-form')) {
         // @ts-ignore
-        resursConsoleLog(
+        resursbankabpaygwConsoleLog(
             'Address Fetcher found by element (Enabled: ' + getAddressEnabled + ').'
         );
         new BlocksAddressUpdater(getAddressEnabled).initialize(getAddressEnabled);
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (document.querySelector('.wc-block-components-form')) {
                 new BlocksAddressUpdater(getAddressEnabled).initialize(getAddressEnabled);
                 // @ts-ignore
-                resursConsoleLog('Address Fetcher found by observer (Enabled: ' + getAddressEnabled + ').');
+                resursbankabpaygwConsoleLog('Address Fetcher found by observer (Enabled: ' + getAddressEnabled + ').');
                 obs.disconnect();
             }
         });

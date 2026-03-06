@@ -46,7 +46,7 @@ class UniqueSellingPoint
         try {
             $css = (new ReadMore())->content;
 
-            echo '<style id="rb-rm-styles">' . esc_html($css) . '</style>';
+            echo '<style id="resursbankabpaygw-rm-styles">' . esc_html($css) . '</style>';
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
