@@ -122,7 +122,17 @@ class Order
             wp_enqueue_script('resursbankabpaygw-get-order-content-admin-inline-scripts');
             wp_add_inline_script(
                 'resursbankabpaygw-get-order-content-admin-inline-scripts',
-                "RESURSBANK_GET_ORDER_CONTENT('$fetchUrl', '$wcOrderid');"
+                sprintf(
+                    'RESURSBANK_GET_ORDER_CONTENT(%s, %s);',
+                    (string)wp_json_encode(
+                        $fetchUrl,
+                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                    ),
+                    (string)wp_json_encode(
+                        (string)$wcOrderid,
+                        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                    )
+                )
             );
         } catch (Throwable $error) {
             Log::error(error: $error);
