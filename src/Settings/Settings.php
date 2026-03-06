@@ -52,7 +52,7 @@ class Settings
         // Ensure About CSS is injected only on the About section.
         add_action(
             'in_admin_header',
-            'Resursbank\\Woocommerce\\Settings\\Settings::maybeSetAboutCss'
+            'Resursbankabpayments\\Woocommerce\\Settings\\Settings::maybeSetAboutCss'
         );
 
         /**
