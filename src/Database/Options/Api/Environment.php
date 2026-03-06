@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\Api;
+namespace Resursbankabpayments\Woocommerce\Database\Options\Api;
 
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
-use Resursbank\Woocommerce\Database\Option;
-use Resursbank\Woocommerce\Database\OptionInterface;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Database\Option;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use ValueError;
 
 class Environment extends Option implements OptionInterface

@@ -7,12 +7,12 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Api\Controller\Admin;
+namespace Resursbankabpayments\Woocommerce\Modules\Api\Controller\Admin;
 
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Settings\PartPayment;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Settings\PartPayment;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**

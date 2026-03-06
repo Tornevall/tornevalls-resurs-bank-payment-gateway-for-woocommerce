@@ -7,11 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings\Filter;
+namespace Resursbankabpayments\Woocommerce\Settings\Filter;
 
-use Resursbank\Woocommerce\SettingsPage;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\SettingsPage;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
@@ -30,7 +30,7 @@ class InvalidateCacheButton
     {
         add_action(
             'woocommerce_admin_field_rbinvalidatecachebutton',
-            'Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton::render'
+            'Resursbankabpayments\Woocommerce\Settings\Filter\InvalidateCacheButton::render'
         );
     }
 

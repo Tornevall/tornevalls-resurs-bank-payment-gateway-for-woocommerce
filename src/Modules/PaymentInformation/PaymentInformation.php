@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\PaymentInformation;
+namespace Resursbankabpayments\Woocommerce\Modules\PaymentInformation;
 
 use JsonException;
 use ReflectionException;
@@ -23,7 +23,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Css as EcomPaymentInformationCss;
 use Resursbank\Ecom\Module\Widget\PaymentInformation\Html as EcomPaymentInformation;
-use Resursbank\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\Admin;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
@@ -44,7 +44,7 @@ class PaymentInformation
     {
         add_action(
             'admin_head',
-            'Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
+            'Resursbankabpayments\Woocommerce\Modules\PaymentInformation\PaymentInformation::setCss'
         );
     }
 

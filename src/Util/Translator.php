@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Util;
+namespace Resursbankabpayments\Woocommerce\Util;
 
 use Resursbank\Ecom\Lib\Locale\Translator as EcomTranslator;
 use Throwable;

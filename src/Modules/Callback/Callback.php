@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Callback;
+namespace Resursbankabpayments\Woocommerce\Modules\Callback;
 
 use Resursbank\Ecom\Exception\CallbackException;
 use Resursbank\Ecom\Exception\ConfigException;
@@ -18,12 +18,12 @@ use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
-use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
-use Resursbank\Woocommerce\Modules\Order\Status;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Modules\Callback\Callback as CallbackModule;
+use Resursbankabpayments\Woocommerce\Modules\Order\Status;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Route;
 use Throwable;
 use WC_DateTime;
 use WC_Order;
@@ -57,7 +57,7 @@ class Callback
     {
         add_action(
             'woocommerce_api_' . Route::ROUTE_PARAM,
-            'Resursbank\Woocommerce\Modules\Callback\Callback::execute'
+            'Resursbankabpayments\Woocommerce\Modules\Callback\Callback::execute'
         );
     }
 

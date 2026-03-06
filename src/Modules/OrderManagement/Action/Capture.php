@@ -7,18 +7,18 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
 
 use Exception;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 

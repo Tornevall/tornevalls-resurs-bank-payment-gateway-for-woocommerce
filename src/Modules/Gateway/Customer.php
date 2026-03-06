@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Gateway;
+namespace Resursbankabpayments\Woocommerce\Modules\Gateway;
 
 use JsonException;
 use ReflectionException;
@@ -20,8 +20,8 @@ use Resursbank\Ecom\Lib\Model\Payment\Customer\DeviceInfo;
 use Resursbank\Ecom\Lib\Model\Payment\Metadata\Entry;
 use Resursbank\Ecom\Lib\Order\CountryCode;
 use Resursbank\Ecom\Lib\Order\CustomerType;
-use Resursbank\Woocommerce\Util\WcSession;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Util\WcSession;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use WC_Order;
 
 /**

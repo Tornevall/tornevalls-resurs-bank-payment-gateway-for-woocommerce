@@ -7,18 +7,18 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\MessageBag;
+namespace Resursbankabpayments\Woocommerce\Modules\MessageBag;
 
 use JsonException;
 use ReflectionException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Utilities\DataConverter;
-use Resursbank\Woocommerce\Modules\MessageBag\Models\Message;
-use Resursbank\Woocommerce\Modules\MessageBag\Models\MessageCollection;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\WcSession;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\Models\Message;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\Models\MessageCollection;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\WcSession;
 use Throwable;
 
 use function defined;
@@ -46,7 +46,7 @@ class MessageBag
     {
         add_action(
             'admin_notices',
-            'Resursbank\Woocommerce\Modules\MessageBag\MessageBag::printMessages'
+            'Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag::printMessages'
         );
     }
 

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\UniqueSellingPoint;
+namespace Resursbankabpayments\Woocommerce\Modules\UniqueSellingPoint;
 
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMore;
-use Resursbank\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Log;
 use Throwable;
 
 // Prevent direct access.
@@ -30,7 +30,7 @@ class UniqueSellingPoint
     {
         add_action(
             'wp_head',
-            'Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint::setCss'
+            'Resursbankabpayments\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint::setCss'
         );
     }
 

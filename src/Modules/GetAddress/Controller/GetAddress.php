@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\GetAddress\Controller;
+namespace Resursbankabpayments\Woocommerce\Modules\GetAddress\Controller;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
@@ -16,7 +16,7 @@ use Resursbank\Ecom\Lib\Model\Callback\GetAddressRequest;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Http\GetAddressController;
 use Resursbank\Ecom\Module\Customer\Repository;
-use Resursbank\Woocommerce\Util\WcSession;
+use Resursbankabpayments\Woocommerce\Util\WcSession;
 use Throwable;
 
 /**

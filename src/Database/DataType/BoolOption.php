@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\DataType;
+namespace Resursbankabpayments\Woocommerce\Database\DataType;
 
-use Resursbank\Woocommerce\Database\Option;
+use Resursbankabpayments\Woocommerce\Database\Option;
 
 /**
  * Resolve value from options table and typecast to bool.

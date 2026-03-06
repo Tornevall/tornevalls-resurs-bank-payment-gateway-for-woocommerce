@@ -7,15 +7,15 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\GetAddress\Filter\Legacy;
+namespace Resursbankabpayments\Woocommerce\Modules\GetAddress\Filter\Legacy;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\GetAddressException;
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Route;
 use Throwable;
 
 /**

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\Api;
+namespace Resursbankabpayments\Woocommerce\Database\Options\Api;
 
-use Resursbank\Woocommerce\Database\DataType\StringOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\DataType\StringOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_client_secret value in options table.

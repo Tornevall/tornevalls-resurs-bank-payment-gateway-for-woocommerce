@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Order\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\Order\Filter;
 
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Lib\Model\Payment\TaskStatusDetails;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WcSession;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WcSession;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Order;
 

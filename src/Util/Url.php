@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Util;
+namespace Resursbankabpayments\Woocommerce\Util;
 
 use JsonException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
-use Resursbank\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
 use RuntimeException;
 
 use function is_string;

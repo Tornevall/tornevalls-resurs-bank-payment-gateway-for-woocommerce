@@ -7,11 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\Advanced;
+namespace Resursbankabpayments\Woocommerce\Database\Options\Advanced;
 
-use Resursbank\Woocommerce\Database\DataType\BoolOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\DataType\BoolOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 
 /**
  * Implementation of resursbank_get_address_enabled value in options table.

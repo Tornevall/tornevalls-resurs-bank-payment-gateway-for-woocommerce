@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\PartPayment;
+namespace Resursbankabpayments\Woocommerce\Database\Options\PartPayment;
 
-use Resursbank\Woocommerce\Database\DataType\IntOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\DataType\IntOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_part_payment_period value in options table.

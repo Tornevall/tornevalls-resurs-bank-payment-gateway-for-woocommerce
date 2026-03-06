@@ -30,13 +30,13 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Resursbank\Ecom\Config;
-use Resursbank\Woocommerce\Modules\Api\Connection;
-use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
-use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
-use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\WooCommerce;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Modules\Api\Connection;
+use Resursbankabpayments\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
+use Resursbankabpayments\Woocommerce\Modules\ModuleInit\Frontend;
+use Resursbankabpayments\Woocommerce\Modules\ModuleInit\Shared;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 
 if (!defined('ABSPATH')) {
     exit;

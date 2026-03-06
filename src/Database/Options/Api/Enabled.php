@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\Api;
+namespace Resursbankabpayments\Woocommerce\Database\Options\Api;
 
-use Resursbank\Woocommerce\Database\DataType\BoolOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\DataType\BoolOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_enabled value in options table.

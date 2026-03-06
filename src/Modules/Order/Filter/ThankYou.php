@@ -7,15 +7,15 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Order\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\Order\Filter;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
-use Resursbank\Woocommerce\Modules\Order\Status;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\Order\Status;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 
 // Prevent direct access.
@@ -37,7 +37,7 @@ class ThankYou
     {
         add_action(
             'woocommerce_thankyou',
-            'Resursbank\Woocommerce\Modules\Order\Filter\ThankYou::exec',
+            'Resursbankabpayments\Woocommerce\Modules\Order\Filter\ThankYou::exec',
             10,
             1
         );

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Util;
+namespace Resursbankabpayments\Woocommerce\Util;
 
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
@@ -16,9 +16,9 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Modules\Gateway\Gateway;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;

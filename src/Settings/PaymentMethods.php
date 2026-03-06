@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings;
+namespace Resursbankabpayments\Woocommerce\Settings;
 
 use JsonException;
 use ReflectionException;
@@ -24,7 +24,7 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Widget\PaymentMethod\Html as PaymentMethodWidget;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 
 /**

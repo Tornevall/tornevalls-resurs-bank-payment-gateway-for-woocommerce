@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings;
+namespace Resursbankabpayments\Woocommerce\Settings;
 
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableCancel;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableModify;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableRefund;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 
 /**
  * Order management settings section.

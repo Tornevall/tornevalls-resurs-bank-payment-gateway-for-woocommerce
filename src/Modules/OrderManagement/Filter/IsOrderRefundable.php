@@ -9,11 +9,11 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter;
 
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
 use Throwable;
 use WC_Order;
 

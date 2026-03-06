@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings;
+namespace Resursbankabpayments\Woocommerce\Settings;
 
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
-use Resursbank\Woocommerce\Database\Option;
-use Resursbank\Woocommerce\Database\Options\Callback\TestReceivedAt;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Database\Option;
+use Resursbankabpayments\Woocommerce\Database\Options\Callback\TestReceivedAt;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\Url;
 use Throwable;
 
 /**

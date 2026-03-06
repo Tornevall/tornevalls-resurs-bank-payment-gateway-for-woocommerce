@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Payment\Converter\Order;
+namespace Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order;
 
 use JsonException;
 use ReflectionException;
@@ -16,9 +16,9 @@ use Resursbank\Ecom\Exception\Validation\EmptyValueException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLine;
 use Resursbank\Ecom\Lib\Order\OrderLineType;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use WC_Order_Item_Product;
 use WC_Product;
 

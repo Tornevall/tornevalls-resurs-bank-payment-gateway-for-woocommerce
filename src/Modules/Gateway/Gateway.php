@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Gateway;
+namespace Resursbankabpayments\Woocommerce\Modules\Gateway;
 
 use JsonException;
 use ReflectionException;
@@ -24,11 +24,11 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\ArrayValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 use function is_array;
 
@@ -54,7 +54,7 @@ class Gateway
     {
         add_filter(
             'woocommerce_payment_gateways',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
+            'Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway::addPaymentMethods'
         );
 
         // Ensure that if you make any changes below this point, you handle the sorting
@@ -68,12 +68,12 @@ class Gateway
         // The Feature is only available from WooCommerce 8.5.0 and above.
         add_action(
             'wc_payment_gateways_initialized',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::handleInitializedGatewaysSorting'
+            'Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway::handleInitializedGatewaysSorting'
         );
 
         add_filter(
             'woocommerce_available_payment_gateways',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::getAvailablePaymentGatewaysSorted'
+            'Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway::getAvailablePaymentGatewaysSorted'
         );
     }
 
@@ -215,7 +215,7 @@ class Gateway
     {
         add_filter(
             'woocommerce_gateway_icon',
-            'Resursbank\Woocommerce\Modules\Gateway\Gateway::modifyIcon',
+            'Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway::modifyIcon',
             10,
             1
         );
@@ -270,7 +270,7 @@ class Gateway
         }
 
         // Add the default method to payment gateways.
-        // Will only be reflected on gateway page, see \Resursbank\Woocommerce\Modules\Gateway\Resursbank::is_available
+        // Will only be reflected on gateway page, see \Resursbankabpayments\Woocommerce\Modules\Gateway\Resursbank::is_available
         $gateways[] = Resursbank::class;
 
         return $gateways;

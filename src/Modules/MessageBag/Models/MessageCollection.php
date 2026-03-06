@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\MessageBag\Models;
+namespace Resursbankabpayments\Woocommerce\Modules\MessageBag\Models;
 
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Lib\Collection\Collection;

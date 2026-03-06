@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\GetAddress\Controller;
+namespace Resursbankabpayments\Woocommerce\Modules\GetAddress\Controller;
 
 use Resursbank\Ecom\Module\Widget\GetAddress\Css as Widget;
-use Resursbank\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Log;
 use Throwable;
 
 /**

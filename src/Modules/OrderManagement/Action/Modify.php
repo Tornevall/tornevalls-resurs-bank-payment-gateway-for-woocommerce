@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
 
 use Exception;
 use JsonException;
@@ -25,13 +25,13 @@ use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Currency;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableModify;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbankabpayments\Woocommerce\Util\Currency;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Order;
@@ -108,7 +108,7 @@ class Modify extends Action
              */
             add_action(
                 'shutdown',
-                '\Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify::execModify',
+                '\Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action\Modify::execModify',
                 10,
                 3
             );

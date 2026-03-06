@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter;
 
 use JsonException;
 use ReflectionException;
@@ -25,10 +25,10 @@ use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action\Modify;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action\Modify;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 

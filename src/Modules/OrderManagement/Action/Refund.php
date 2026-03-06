@@ -7,16 +7,16 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
 
 use Resursbank\Ecom\Exception\PaymentActionException;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 use WC_Order_Refund;

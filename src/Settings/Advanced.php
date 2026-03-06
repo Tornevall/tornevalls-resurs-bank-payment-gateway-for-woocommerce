@@ -7,22 +7,22 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings;
+namespace Resursbankabpayments\Woocommerce\Settings;
 
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
-use Resursbank\Woocommerce\Database\Option;
-use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
-use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
-use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
-use Resursbank\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
-use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
-use Resursbank\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Option;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\ApiTimeout;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\EnableCache;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\EnableGetAddress;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\ForcePaymentMethodSortOrder;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\LogDir;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\LogEnabled;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\XDebugSessionValue;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 
 /**
  * Advanced settings section.

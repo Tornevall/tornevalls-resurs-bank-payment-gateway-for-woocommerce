@@ -7,11 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Util;
+namespace Resursbankabpayments\Woocommerce\Util;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
 use Throwable;
 
 /**

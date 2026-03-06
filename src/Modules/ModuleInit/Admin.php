@@ -7,19 +7,19 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\ModuleInit;
+namespace Resursbankabpayments\Woocommerce\Modules\ModuleInit;
 
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Modules\Gateway\Gateway;
-use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
-use Resursbank\Woocommerce\Modules\Order\Order;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
-use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
-use Resursbank\Woocommerce\Modules\Store\Store;
-use Resursbank\Woocommerce\Settings\Filter\InvalidateCacheButton;
-use Resursbank\Woocommerce\Settings\Filter\TestCallbackButton;
-use Resursbank\Woocommerce\Settings\Settings;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Enabled;
+use Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway;
+use Resursbankabpayments\Woocommerce\Modules\Gateway\GatewayBlocks;
+use Resursbankabpayments\Woocommerce\Modules\Order\Order;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Modules\PartPayment\PartPayment;
+use Resursbankabpayments\Woocommerce\Modules\PaymentInformation\PaymentInformation;
+use Resursbankabpayments\Woocommerce\Modules\Store\Store;
+use Resursbankabpayments\Woocommerce\Settings\Filter\InvalidateCacheButton;
+use Resursbankabpayments\Woocommerce\Settings\Filter\TestCallbackButton;
+use Resursbankabpayments\Woocommerce\Settings\Settings;
 
 /**
  * Module initialization class for functionality used by wp-admin.

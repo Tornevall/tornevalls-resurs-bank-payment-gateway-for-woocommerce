@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database;
+namespace Resursbankabpayments\Woocommerce\Database;
 
 /**
  * Contact to communicate with database and extract options value.

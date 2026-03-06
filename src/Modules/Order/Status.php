@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Order;
+namespace Resursbankabpayments\Woocommerce\Modules\Order;
 
 use JsonException;
 use ReflectionException;
@@ -26,9 +26,9 @@ use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
-use Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order;
 

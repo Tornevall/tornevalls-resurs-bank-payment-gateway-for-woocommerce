@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement;
 
 /**
  * Common functionality for actions.

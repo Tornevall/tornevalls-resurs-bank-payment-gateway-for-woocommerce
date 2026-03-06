@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Cache;
+namespace Resursbankabpayments\Woocommerce\Modules\Cache;
 
 use JsonException;
 use Resursbank\Ecom\Exception\ConfigException;

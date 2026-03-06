@@ -9,12 +9,12 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter;
 
-use Resursbank\Woocommerce\Modules\OrderManagement\Action\Cancel;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action\Capture;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action\Cancel;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action\Capture;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
 
 /**
  * After order status has been changed, execute call to capture or cancel

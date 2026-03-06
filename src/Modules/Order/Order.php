@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Order;
+namespace Resursbankabpayments\Woocommerce\Modules\Order;
 
 use JsonException;
 use ReflectionException;
@@ -22,14 +22,14 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Modules\PaymentInformation\PaymentInformation;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 
@@ -52,11 +52,11 @@ class Order
     {
         add_action(
             'add_meta_boxes',
-            'Resursbank\Woocommerce\Modules\Order\Order::addPaymentInfo'
+            'Resursbankabpayments\Woocommerce\Modules\Order\Order::addPaymentInfo'
         );
         add_filter(
             'is_protected_meta',
-            'Resursbank\Woocommerce\Modules\Order\Order::hideCustomFields',
+            'Resursbankabpayments\Woocommerce\Modules\Order\Order::hideCustomFields',
             10,
             2
         );
@@ -69,7 +69,7 @@ class Order
     {
         add_action(
             'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\Order\Order::initAdminScripts'
+            'Resursbankabpayments\Woocommerce\Modules\Order\Order::initAdminScripts'
         );
     }
 
@@ -163,7 +163,7 @@ class Order
         add_meta_box(
             'resursbank_payment_info',
             'Resurs',
-            'Resursbank\Woocommerce\Modules\Order\Order::renderPaymentInfo'
+            'Resursbankabpayments\Woocommerce\Modules\Order\Order::renderPaymentInfo'
         );
     }
 

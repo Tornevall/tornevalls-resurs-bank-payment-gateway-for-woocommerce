@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Api;
+namespace Resursbankabpayments\Woocommerce\Modules\Api;
 
 use JsonException;
 use ReflectionException;
@@ -24,22 +24,22 @@ use Resursbank\Ecom\Lib\Log\NoneLogger;
 use Resursbank\Ecom\Lib\Model\Config\Network;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Repository;
-use Resursbank\Woocommerce\Database\Options\Advanced\ApiTimeout;
-use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogDir;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogEnabled;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
-use Resursbank\Woocommerce\Database\Options\Api\Environment;
-use Resursbank\Woocommerce\Modules\Cache\Transient;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Currency;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\UserAgent;
-use Resursbank\Woocommerce\Util\WooCommerce;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\ApiTimeout;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\EnableCache;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\LogDir;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\LogEnabled;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\ClientId;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\ClientSecret;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Environment;
+use Resursbankabpayments\Woocommerce\Modules\Cache\Transient;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\Currency;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\UserAgent;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Logger;
 

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings;
+namespace Resursbankabpayments\Woocommerce\Settings;
 
 use JsonException;
 use ReflectionException;
@@ -25,15 +25,15 @@ use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Enabled;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Limit;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\PaymentMethod;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\PaymentMethod as PaymentMethodOption;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 // Prevent direct access.
@@ -88,7 +88,7 @@ class PartPayment
     {
         add_action(
             'updated_option',
-            'Resursbank\Woocommerce\Settings\PartPayment::validateLimit',
+            'Resursbankabpayments\Woocommerce\Settings\PartPayment::validateLimit',
             10,
             3
         );

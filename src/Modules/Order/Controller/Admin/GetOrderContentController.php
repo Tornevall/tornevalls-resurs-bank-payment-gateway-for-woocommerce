@@ -7,17 +7,17 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Order\Controller\Admin;
+namespace Resursbankabpayments\Woocommerce\Modules\Order\Controller\Admin;
 
 use JsonException;
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\EmptyValueException;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Modules\PaymentInformation\PaymentInformation;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Modules\PaymentInformation\PaymentInformation;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 
 use function constant;

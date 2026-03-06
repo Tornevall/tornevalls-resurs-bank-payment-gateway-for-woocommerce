@@ -7,17 +7,17 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\ModuleInit;
+namespace Resursbankabpayments\Woocommerce\Modules\ModuleInit;
 
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Lib\Model\Payment;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Modules\Callback\Callback;
-use Resursbank\Woocommerce\Modules\Gateway\Gateway;
-use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Currency;
-use Resursbank\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Enabled;
+use Resursbankabpayments\Woocommerce\Modules\Callback\Callback;
+use Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway;
+use Resursbankabpayments\Woocommerce\Modules\GetAddress\GetAddress;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Util\Currency;
+use Resursbankabpayments\Woocommerce\Util\Route;
 use WC_Order;
 
 // Prevent direct access.
@@ -52,7 +52,7 @@ class Shared
         // Assets must be enqueued, not called directly.
         add_action(
             'wp_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
+            'Resursbankabpayments\Woocommerce\Modules\GetAddress\Filter\AssetLoader::init'
         );
 
         Gateway::init();

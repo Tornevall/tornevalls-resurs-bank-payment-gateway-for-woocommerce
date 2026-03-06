@@ -7,23 +7,23 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce;
+namespace Resursbankabpayments\Woocommerce;
 
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Modules\Api\Connection;
-use Resursbank\Woocommerce\Settings\About;
-use Resursbank\Woocommerce\Settings\Advanced;
-use Resursbank\Woocommerce\Settings\Api;
-use Resursbank\Woocommerce\Settings\Callback;
-use Resursbank\Woocommerce\Settings\OrderManagement;
-use Resursbank\Woocommerce\Settings\PartPayment;
-use Resursbank\Woocommerce\Settings\PaymentMethods;
-use Resursbank\Woocommerce\Settings\Settings;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Modules\Api\Connection;
+use Resursbankabpayments\Woocommerce\Settings\About;
+use Resursbankabpayments\Woocommerce\Settings\Advanced;
+use Resursbankabpayments\Woocommerce\Settings\Api;
+use Resursbankabpayments\Woocommerce\Settings\Callback;
+use Resursbankabpayments\Woocommerce\Settings\OrderManagement;
+use Resursbankabpayments\Woocommerce\Settings\PartPayment;
+use Resursbankabpayments\Woocommerce\Settings\PaymentMethods;
+use Resursbankabpayments\Woocommerce\Settings\Settings;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use RuntimeException;
 use Throwable;
 use WC_Admin_Settings;

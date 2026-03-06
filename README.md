@@ -339,7 +339,7 @@ The Get Address implementation differs slightly between legacy and blocks. How
 we inject the HTML for the widget differs, as well as the JavaScript that is
 responsible for the widget's functionality.
 
-If we look at `\Resursbank\Woocommerce\Modules\GetAddress\GetAddress::init()` we
+If we look at `\Resursbankabpayments\Woocommerce\Modules\GetAddress\GetAddress::init()` we
 will see three filters being added:
 
 * `wp_enqueue_scripts` - This loads the same JS and CSS code regardless of what
@@ -383,11 +383,11 @@ Payment methods can however be passed information from PHP, and we leverage this
 by first registering a single payment method called `resursbank` and passing it
 data which is assembled from all our payment methods.
 
-Open `\Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks`. You will see that
+Open `\Resursbankabpayments\Woocommerce\Modules\Gateway\GatewayBlocks`. You will see that
 we use the `woocommerce_blocks_payment_method_type_registration` filter to
 register our payment method (`$this->name` specifies "resursbank").
 
-`\Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks::get_payment_method_data()`
+`\Resursbankabpayments\Woocommerce\Modules\Gateway\GatewayBlocks::get_payment_method_data()`
 is responsible for assembling the data that is passed to the block component.
 We supply an array consisting of `allowed_country`, to filter methods based on
 configured address country, and `payment_methods`, a list of all payment methods

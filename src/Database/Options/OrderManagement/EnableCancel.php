@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\OrderManagement;
+namespace Resursbankabpayments\Woocommerce\Database\Options\OrderManagement;
 
-use Resursbank\Woocommerce\Database\DataType\BoolOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\DataType\BoolOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_enable_cancel value in options table.

@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Gateway;
+namespace Resursbankabpayments\Woocommerce\Modules\Gateway;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
@@ -22,15 +22,15 @@ use Resursbank\Ecom\Module\Store\Enum\Country;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Ecom\Module\Widget\Logo\Html as LogoWidget;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMoreWidget;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\ResourceType;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\UserAgent;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Enabled;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\ResourceType;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\UserAgent;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 // Prevent direct access.

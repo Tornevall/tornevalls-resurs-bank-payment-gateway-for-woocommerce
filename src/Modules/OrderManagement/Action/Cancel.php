@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Action;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
 
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableCancel;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
 use WC_Order;
 
 /**

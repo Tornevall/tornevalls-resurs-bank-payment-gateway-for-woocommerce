@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\GetAddress\Filter\Blocks;
+namespace Resursbankabpayments\Woocommerce\Modules\GetAddress\Filter\Blocks;
 
 use Resursbank\Ecom\Module\Widget\GetAddress\Html as Widget;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
 use Throwable;
 
 /**

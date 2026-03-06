@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter;
 
-use Resursbank\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
 use WC_Order;
 
 /**

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\Callback;
+namespace Resursbankabpayments\Woocommerce\Database\Options\Callback;
 
-use Resursbank\Woocommerce\Database\DataType\IntOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\DataType\IntOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_callback_test value in options table.

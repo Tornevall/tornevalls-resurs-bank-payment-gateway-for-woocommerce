@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Util;
+namespace Resursbankabpayments\Woocommerce\Util;
 
 use JsonException;
 use ReflectionException;
@@ -27,10 +27,10 @@ use Resursbank\Ecom\Lib\Model\PaymentMethodCollection;
 use Resursbank\Ecom\Module\AnnuityFactor\Repository as AnnuityRepository;
 use Resursbank\Ecom\Module\Store\Repository;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Modules\Api\Connection;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\PaymentMethod;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbankabpayments\Woocommerce\Modules\Api\Connection;
 use Throwable;
 use WP_Post;
 

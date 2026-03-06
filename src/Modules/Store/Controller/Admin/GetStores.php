@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Store\Controller\Admin;
+namespace Resursbankabpayments\Woocommerce\Modules\Store\Controller\Admin;
 
 use Resursbank\Ecom\Exception\AuthException;
 use Resursbank\Ecom\Exception\HttpException;
@@ -15,10 +15,10 @@ use Resursbank\Ecom\Lib\Api\GrantType;
 use Resursbank\Ecom\Lib\Model\Network\Auth\Jwt;
 use Resursbank\Ecom\Module\Store\Http\GetStoresController;
 use Resursbank\Ecom\Module\Store\Repository;
-use Resursbank\Woocommerce\Modules\Api\Connection;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\Api\Connection;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 
 /**

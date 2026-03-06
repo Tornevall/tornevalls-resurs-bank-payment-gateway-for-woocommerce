@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\GetAddress\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\GetAddress\Filter;
 
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Exception\HttpException;
@@ -20,16 +20,16 @@ use Resursbank\Ecom\Module\Widget\CostList\Js as CostListJs;
 use Resursbank\Ecom\Module\Widget\PartPayment\Css as EcomPartPaymentCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Css as ReadMoreCss;
 use Resursbank\Ecom\Module\Widget\ReadMore\Js as ReadMoreJs;
-use Resursbank\Woocommerce\Database\Options\Advanced\EnableGetAddress;
-use Resursbank\Woocommerce\Database\Options\Advanced\LogLevel;
-use Resursbank\Woocommerce\Modules\GetAddress\GetAddress;
-use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\ResourceType;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WcSession;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\EnableGetAddress;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\LogLevel;
+use Resursbankabpayments\Woocommerce\Modules\GetAddress\GetAddress;
+use Resursbankabpayments\Woocommerce\Modules\PartPayment\PartPayment;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\ResourceType;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\WcSession;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**

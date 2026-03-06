@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter;
 
 use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
-use Resursbank\Woocommerce\Modules\OrderManagement\Action\Refund as RefundAction;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\Action\Refund as RefundAction;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 use WC_Order_Refund;
 

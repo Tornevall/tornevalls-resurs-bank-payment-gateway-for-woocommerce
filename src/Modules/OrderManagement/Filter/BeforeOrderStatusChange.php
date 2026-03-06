@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement\Filter;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter;
 
 use Exception;
 use JsonException;
@@ -25,16 +25,16 @@ use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Exception\Validation\NotJsonEncodedException;
 use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Module\Payment\Enum\Status;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCancel;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableCapture;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
-use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableCancel;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableCapture;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableRefund;
+use Resursbankabpayments\Woocommerce\Modules\OrderManagement\OrderManagement;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Order;
 use WC_Order_Refund;

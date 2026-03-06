@@ -7,15 +7,15 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings;
+namespace Resursbankabpayments\Woocommerce\Settings;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
-use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
-use Resursbank\Woocommerce\SettingsPage;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Settings\Filter\AddDocumentationLink;
+use Resursbankabpayments\Woocommerce\SettingsPage;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 
@@ -27,7 +27,7 @@ if (!defined('ABSPATH')) {
 /**
  * General business logic for settings.
  *
- * NOTE: This is not part of Resursbank\Woocommerce\SettingsPage because that
+ * NOTE: This is not part of Resursbankabpayments\Woocommerce\SettingsPage because that
  * class extends a WC class not available to us when we need to register events.
  */
 class Settings
@@ -46,7 +46,7 @@ class Settings
         // Render configuration page.
         add_action(
             'woocommerce_settings_page_init',
-            'Resursbank\Woocommerce\Settings\Settings::renderSettingsPage'
+            'Resursbankabpayments\Woocommerce\Settings\Settings::renderSettingsPage'
         );
 
         // Ensure About CSS is injected only on the About section.
@@ -82,7 +82,7 @@ class Settings
         // Save changes to database.
         add_action(
             'woocommerce_settings_save_' . RESURSBANKABPAYMENTS_MODULE_PREFIX,
-            'Resursbank\Woocommerce\Settings\Settings::saveSettings'
+            'Resursbankabpayments\Woocommerce\Settings\Settings::saveSettings'
         );
 
         /**
@@ -91,7 +91,7 @@ class Settings
         // Add a link to Settings page from Plugin page in WP admin.
         add_filter(
             'plugin_action_links',
-            'Resursbank\Woocommerce\Settings\Settings::addPluginActionLinks',
+            'Resursbankabpayments\Woocommerce\Settings\Settings::addPluginActionLinks',
             10,
             2
         );

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings;
+namespace Resursbankabpayments\Woocommerce\Settings;
 
 use JsonException;
 use ReflectionException;
@@ -24,18 +24,18 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Api\Environment as EnvironmentEnum;
 use Resursbank\Ecom\Lib\Model\Store\Store;
 use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientId;
-use Resursbank\Woocommerce\Database\Options\Api\ClientSecret;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Database\Options\Api\Environment;
-use Resursbank\Woocommerce\Util\Admin;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\ResourceType;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\StoreId;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\ClientId;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\ClientSecret;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Enabled;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Environment;
+use Resursbankabpayments\Woocommerce\Util\Admin;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\ResourceType;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 // Prevent direct access.
@@ -79,7 +79,7 @@ class Api
 
         add_action(
             'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Settings\Api::initScripts'
+            'Resursbankabpayments\Woocommerce\Settings\Api::initScripts'
         );
     }
 

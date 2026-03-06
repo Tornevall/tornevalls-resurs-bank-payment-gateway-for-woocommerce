@@ -7,9 +7,9 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Settings\Filter;
+namespace Resursbankabpayments\Woocommerce\Settings\Filter;
 
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 
 use function is_array;
 
@@ -30,7 +30,7 @@ class AddDocumentationLink
     {
         add_filter(
             'plugin_row_meta',
-            'Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink::exec',
+            'Resursbankabpayments\Woocommerce\Settings\Filter\AddDocumentationLink::exec',
             10,
             2
         );

@@ -7,13 +7,13 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Cache\Controller\Admin;
+namespace Resursbankabpayments\Woocommerce\Modules\Cache\Controller\Admin;
 
 use Resursbank\Ecom\Config;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**

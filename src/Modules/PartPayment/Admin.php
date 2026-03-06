@@ -7,17 +7,17 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\PartPayment;
+namespace Resursbankabpayments\Woocommerce\Modules\PartPayment;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
 use Resursbank\Ecom\Exception\FilesystemException;
 use Resursbank\Ecom\Module\Widget\GetPeriods\Js as GetPeriods;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod as PartPaymentMethodOption;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Util\Admin as AdminUtil;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\UserAgent;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\PaymentMethod as PartPaymentMethodOption;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbankabpayments\Woocommerce\Util\Admin as AdminUtil;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\UserAgent;
 use Throwable;
 
 // Prevent direct access.

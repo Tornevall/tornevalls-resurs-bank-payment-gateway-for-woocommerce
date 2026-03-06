@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\PartPayment;
+namespace Resursbankabpayments\Woocommerce\Database\Options\PartPayment;
 
-use Resursbank\Woocommerce\Database\DataType\StringOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\DataType\StringOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_part_payment_payment_method value in options table.

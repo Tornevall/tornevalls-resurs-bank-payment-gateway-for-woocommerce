@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Util;
+namespace Resursbankabpayments\Woocommerce\Util;
 
 use JsonException;
 use ReflectionException;
@@ -26,20 +26,20 @@ use Resursbank\Ecom\Exception\ValidationException;
 use Resursbank\Ecom\Lib\Http\Controller as CoreController;
 use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
-use Resursbank\Woocommerce\Modules\Api\Controller\Admin\GetStoreCountry;
-use Resursbank\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
-use Resursbank\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
-use Resursbank\Woocommerce\Modules\Callback\Controller\TestReceived;
-use Resursbank\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
-use Resursbank\Woocommerce\Modules\Gateway\GatewayHelper;
-use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddress;
-use Resursbank\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
-use Resursbank\Woocommerce\Modules\PartPayment\Controller\PartPayment;
-use Resursbank\Woocommerce\Modules\Store\Controller\Admin\GetStores;
-use Resursbank\Woocommerce\Settings\Advanced;
-use Resursbank\Woocommerce\Settings\Callback;
+use Resursbankabpayments\Woocommerce\Modules\Api\Controller\Admin\GetStoreCountry;
+use Resursbankabpayments\Woocommerce\Modules\Cache\Controller\Admin\Invalidate;
+use Resursbankabpayments\Woocommerce\Modules\Callback\Controller\Admin\TestTrigger;
+use Resursbankabpayments\Woocommerce\Modules\Callback\Controller\TestReceived;
+use Resursbankabpayments\Woocommerce\Modules\CustomerType\Controller\SetCustomerType;
+use Resursbankabpayments\Woocommerce\Modules\Gateway\GatewayHelper;
+use Resursbankabpayments\Woocommerce\Modules\GetAddress\Controller\GetAddress;
+use Resursbankabpayments\Woocommerce\Modules\GetAddress\Controller\GetAddressCss;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Modules\Order\Controller\Admin\GetOrderContentController;
+use Resursbankabpayments\Woocommerce\Modules\PartPayment\Controller\PartPayment;
+use Resursbankabpayments\Woocommerce\Modules\Store\Controller\Admin\GetStores;
+use Resursbankabpayments\Woocommerce\Settings\Advanced;
+use Resursbankabpayments\Woocommerce\Settings\Callback;
 use Throwable;
 
 use function is_string;

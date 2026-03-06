@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Gateway;
+namespace Resursbankabpayments\Woocommerce\Modules\Gateway;
 
 use JsonException;
 use ReflectionException;
@@ -23,10 +23,10 @@ use Resursbank\Ecom\Module\PriceSignage\Repository as GetPriceSignageRepository;
 use Resursbank\Ecom\Module\Widget\ConsumerCreditWarning\Html as Warning;
 use Resursbank\Ecom\Module\Widget\CostList\Html as CostList;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
-use Resursbank\Woocommerce\Database\Options\Advanced\EnableCache;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\WooCommerce;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\EnableCache;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Cart;
 

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\Advanced;
+namespace Resursbankabpayments\Woocommerce\Database\Options\Advanced;
 
-use Resursbank\Woocommerce\Database\DataType\StringOption;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\DataType\StringOption;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_logs_enabled value in options table.

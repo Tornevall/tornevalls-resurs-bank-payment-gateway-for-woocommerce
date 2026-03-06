@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\OrderManagement;
+namespace Resursbankabpayments\Woocommerce\Modules\OrderManagement;
 
 use Exception;
 use JsonException;
@@ -27,16 +27,16 @@ use Resursbank\Ecom\Lib\Api\MerchantPortal;
 use Resursbank\Ecom\Lib\Model\Payment;
 use Resursbank\Ecom\Module\Payment\Enum\ActionType;
 use Resursbank\Ecom\Module\Payment\Repository;
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Database\Options\Api\Environment;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableModify;
-use Resursbank\Woocommerce\Database\Options\OrderManagement\EnableRefund;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Currency;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Enabled;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Environment;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableModify;
+use Resursbankabpayments\Woocommerce\Database\Options\OrderManagement\EnableRefund;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Util\Currency;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Order;
 use WC_Order_Refund;
@@ -89,7 +89,7 @@ class OrderManagement
         // Status update transition handler for legacy (non-HPOS).
         add_action(
             'transition_post_status',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::exec',
             10,
             3
         );
@@ -97,7 +97,7 @@ class OrderManagement
         // Break status update if unavailable based on payment status (HPOS).
         add_action(
             'woocommerce_before_order_object_save',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::handlePostStatusTransitions',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\BeforeOrderStatusChange::handlePostStatusTransitions',
             10,
             3
         );
@@ -105,7 +105,7 @@ class OrderManagement
         // Execute payment action AFTER the status has changed in WC.
         add_action(
             'woocommerce_order_status_changed',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\AfterOrderStatusChange::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\AfterOrderStatusChange::exec',
             10,
             3
         );
@@ -113,7 +113,7 @@ class OrderManagement
         // Add custom CSS rules relating to order view.
         add_action(
             'admin_head',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableDeleteRefund::exec'
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\DisableDeleteRefund::exec'
         );
     }
 
@@ -130,7 +130,7 @@ class OrderManagement
         // Try to put us last in the reply chain so our answer is the last to make the decision.
         add_filter(
             'wc_order_is_editable',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\IsOrderEditable::exec',
             9999,
             2
         );
@@ -138,7 +138,7 @@ class OrderManagement
         // Perform payment action to update payment when order content changes.
         add_action(
             'woocommerce_update_order',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\UpdateOrder::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\UpdateOrder::exec',
             10,
             2
         );
@@ -156,7 +156,7 @@ class OrderManagement
         // Prevent order refund options from rendering when unavailable.
         add_filter(
             'woocommerce_admin_order_should_render_refunds',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\IsOrderRefundable::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\IsOrderRefundable::exec',
             10,
             3
         );
@@ -164,7 +164,7 @@ class OrderManagement
         // Hide capture action on order list view.
         add_filter(
             'woocommerce_admin_order_actions',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\HideCaptureAction::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\HideCaptureAction::exec',
             999,
             2
         );
@@ -172,7 +172,7 @@ class OrderManagement
         // Execute refund payment action after refund has been created.
         add_action(
             'woocommerce_order_refunded',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\Refund::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\Refund::exec',
             10,
             2
         );
@@ -180,7 +180,7 @@ class OrderManagement
         // Prevent internal note indicating funds need to be manually returned.
         add_filter(
             'woocommerce_new_order_note_data',
-            'Resursbank\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
+            'Resursbankabpayments\Woocommerce\Modules\OrderManagement\Filter\DisableRefundNote::exec',
             10,
             1
         );

@@ -7,10 +7,10 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Callback\Controller;
+namespace Resursbankabpayments\Woocommerce\Modules\Callback\Controller;
 
-use Resursbank\Woocommerce\Database\Options\Callback\TestReceivedAt;
-use Resursbank\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Database\Options\Callback\TestReceivedAt;
+use Resursbankabpayments\Woocommerce\Util\Log;
 use Throwable;
 
 /**

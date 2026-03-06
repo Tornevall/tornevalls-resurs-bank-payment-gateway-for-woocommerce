@@ -7,16 +7,16 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\ModuleInit;
+namespace Resursbankabpayments\Woocommerce\Modules\ModuleInit;
 
-use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Modules\Gateway\Gateway;
-use Resursbank\Woocommerce\Modules\Gateway\GatewayBlocks;
-use Resursbank\Woocommerce\Modules\Order\Filter\Failure;
-use Resursbank\Woocommerce\Modules\Order\Filter\ThankYou;
-use Resursbank\Woocommerce\Modules\PartPayment\PartPayment;
-use Resursbank\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\Api\Enabled;
+use Resursbankabpayments\Woocommerce\Modules\Gateway\Gateway;
+use Resursbankabpayments\Woocommerce\Modules\Gateway\GatewayBlocks;
+use Resursbankabpayments\Woocommerce\Modules\Order\Filter\Failure;
+use Resursbankabpayments\Woocommerce\Modules\Order\Filter\ThankYou;
+use Resursbankabpayments\Woocommerce\Modules\PartPayment\PartPayment;
+use Resursbankabpayments\Woocommerce\Modules\UniqueSellingPoint\UniqueSellingPoint;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {

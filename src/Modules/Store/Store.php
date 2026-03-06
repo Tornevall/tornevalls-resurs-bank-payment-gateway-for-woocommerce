@@ -7,17 +7,17 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Store;
+namespace Resursbankabpayments\Woocommerce\Modules\Store;
 
 use Resursbank\Ecom\Exception\HttpException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Module\Widget\GetStores\Js as GetStores;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\UserAgent;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\UserAgent;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 
 // Prevent direct access.
@@ -39,7 +39,7 @@ class Store
         /** @noinspection BadExceptionsProcessingInspection */
         add_action(
             'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\Store\Store::onAdminEnqueueScripts'
+            'Resursbankabpayments\Woocommerce\Modules\Store\Store::onAdminEnqueueScripts'
         );
     }
 

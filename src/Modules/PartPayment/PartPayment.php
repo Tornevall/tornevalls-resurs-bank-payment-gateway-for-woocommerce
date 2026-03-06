@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\PartPayment;
+namespace Resursbankabpayments\Woocommerce\Modules\PartPayment;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
@@ -18,16 +18,16 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod as EcomPaymentMethod;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as EcomPartPayment;
 use Resursbank\Ecom\Module\Widget\PartPayment\Js as EcomPartPaymentJs;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\UserAgent;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Enabled as PartPaymentOptions;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Limit;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\PaymentMethod;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\UserAgent;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 use WC_Product;
 
@@ -62,11 +62,11 @@ class PartPayment
 
         add_action(
             'wp_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
+            'Resursbankabpayments\Woocommerce\Modules\PartPayment\PartPayment::setJs'
         );
         add_action(
             'woocommerce_single_product_summary',
-            'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'
+            'Resursbankabpayments\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'
         );
     }
 
@@ -79,7 +79,7 @@ class PartPayment
     {
         add_action(
             'admin_enqueue_scripts',
-            'Resursbank\Woocommerce\Modules\PartPayment\Admin::setJs'
+            'Resursbankabpayments\Woocommerce\Modules\PartPayment\Admin::setJs'
         );
     }
 

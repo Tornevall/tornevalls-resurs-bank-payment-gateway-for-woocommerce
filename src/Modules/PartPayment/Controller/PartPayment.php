@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\PartPayment\Controller;
+namespace Resursbankabpayments\Woocommerce\Modules\PartPayment\Controller;
 
 use JsonException;
 use ReflectionException;
@@ -28,12 +28,12 @@ use Resursbank\Ecom\Lib\Locale\Location;
 use Resursbank\Ecom\Module\PaymentMethod\Repository;
 use Resursbank\Ecom\Module\Widget\PartPayment\Html as PartPaymentWidget;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMore;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Limit;
-use Resursbank\Woocommerce\Database\Options\PartPayment\PaymentMethod;
-use Resursbank\Woocommerce\Database\Options\PartPayment\Period;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Limit;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\PaymentMethod;
+use Resursbankabpayments\Woocommerce\Database\Options\PartPayment\Period;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
 use Throwable;
 
 /**

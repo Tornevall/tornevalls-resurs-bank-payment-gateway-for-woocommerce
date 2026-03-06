@@ -7,11 +7,11 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Database\Options\Advanced;
+namespace Resursbankabpayments\Woocommerce\Database\Options\Advanced;
 
 use Resursbank\Ecom\Lib\Log\LogLevel as EcomLogLevel;
-use Resursbank\Woocommerce\Database\Option;
-use Resursbank\Woocommerce\Database\OptionInterface;
+use Resursbankabpayments\Woocommerce\Database\Option;
+use Resursbankabpayments\Woocommerce\Database\OptionInterface;
 
 /**
  * Implementation of resursbank_log_level value in options table.

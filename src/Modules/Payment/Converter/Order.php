@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Payment\Converter;
+namespace Resursbankabpayments\Woocommerce\Modules\Payment\Converter;
 
 use JsonException;
 use ReflectionException;
@@ -21,9 +21,9 @@ use Resursbank\Ecom\Exception\Validation\IllegalTypeException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Payment\Converter\DiscountItemCollection;
 use Resursbank\Ecom\Lib\Model\Payment\Order\ActionLog\OrderLineCollection;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Fee;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Product;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order\Shipping;
+use Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order\Fee;
+use Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order\Product;
+use Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order\Shipping;
 use WC_Abstract_Order;
 use WC_Order_Item;
 use WC_Order_Item_Fee;

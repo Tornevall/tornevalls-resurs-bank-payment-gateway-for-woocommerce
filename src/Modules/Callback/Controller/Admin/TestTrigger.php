@@ -7,15 +7,15 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Callback\Controller\Admin;
+namespace Resursbankabpayments\Woocommerce\Modules\Callback\Controller\Admin;
 
 use Resursbank\Ecom\Exception\CallbackException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\TestStatus;
 use Resursbank\Ecom\Module\Callback\Repository;
-use Resursbank\Woocommerce\Modules\MessageBag\MessageBag;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Route;
-use Resursbank\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Modules\MessageBag\MessageBag;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Route;
+use Resursbankabpayments\Woocommerce\Util\Translator;
 use Throwable;
 
 /**

@@ -16,7 +16,7 @@ class ResursBankEcomAutoloader
     {
         $map = [
             'Resursbank\\Ecom' => 'vendor/ecom/src',
-            'Resursbank\\Woocommerce' => 'src'
+            'Resursbankabpayments\\Woocommerce' => 'src'
         ];
 
         foreach ($map as $namespace => $dir) {

@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\MessageBag;
+namespace Resursbankabpayments\Woocommerce\Modules\MessageBag;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {

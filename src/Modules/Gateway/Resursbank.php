@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\Gateway;
+namespace Resursbankabpayments\Woocommerce\Modules\Gateway;
 
 use Exception;
 use JsonException;
@@ -39,19 +39,19 @@ use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
-use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
-use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
-use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
-use Resursbank\Woocommerce\Util\Admin as AdminUtility;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
-use Resursbank\Woocommerce\Util\Log;
-use Resursbank\Woocommerce\Util\Metadata;
-use Resursbank\Woocommerce\Util\Translator;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\UserAgent;
-use Resursbank\Woocommerce\Util\WcSession;
-use Resursbank\Woocommerce\Util\WooCommerce;
-use Resursbank\Woocommerce\Util\WordPress;
+use Resursbankabpayments\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
+use Resursbankabpayments\Woocommerce\Modules\Order\Order as OrderModule;
+use Resursbankabpayments\Woocommerce\Modules\Payment\Converter\Order;
+use Resursbankabpayments\Woocommerce\Util\Admin as AdminUtility;
+use Resursbankabpayments\Woocommerce\Util\HtmlSanitizer;
+use Resursbankabpayments\Woocommerce\Util\Log;
+use Resursbankabpayments\Woocommerce\Util\Metadata;
+use Resursbankabpayments\Woocommerce\Util\Translator;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\UserAgent;
+use Resursbankabpayments\Woocommerce\Util\WcSession;
+use Resursbankabpayments\Woocommerce\Util\WooCommerce;
+use Resursbankabpayments\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Cart;
 use WC_Order;

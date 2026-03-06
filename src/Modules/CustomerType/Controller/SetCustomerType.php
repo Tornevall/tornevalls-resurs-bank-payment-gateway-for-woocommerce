@@ -7,12 +7,12 @@
 
 declare(strict_types=1);
 
-namespace Resursbank\Woocommerce\Modules\CustomerType\Controller;
+namespace Resursbankabpayments\Woocommerce\Modules\CustomerType\Controller;
 
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Module\Customer\Repository as CustomerRepository;
-use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WcSession;
+use Resursbankabpayments\Woocommerce\Util\Url;
+use Resursbankabpayments\Woocommerce\Util\WcSession;
 use Throwable;
 
 use function function_exists;
