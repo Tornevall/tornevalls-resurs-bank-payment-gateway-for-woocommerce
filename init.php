@@ -7,7 +7,7 @@
  * WC Tested up to: 10.5.3
  * Plugin requires ecom: 3.3.13
  * Requires PHP: 8.1
- * Version: 1.2.22
+ * Version: 1.2.23
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
@@ -77,7 +77,10 @@ define(
  * Plugin prefix for unique identification and conflict prevention.
  * Used throughout the plugin for options, settings fields, hook names, and script handles.
  */
-define(constant_name: 'RESURSBANKABPAYMENTS_MODULE_PREFIX', value: 'resursbank');
+define(
+	constant_name: 'RESURSBANKABPAYMENTS_MODULE_PREFIX',
+	value: 'resursbank'
+);
 
 require_once __DIR__ . '/autoload.php';
 
