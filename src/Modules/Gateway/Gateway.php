@@ -29,6 +29,7 @@ use Resursbank\Woocommerce\Util\Admin;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use function is_array;
 
@@ -201,7 +202,7 @@ class Gateway
      */
     public static function initAdmin(): void
     {
-        if (!Admin::isSection(sectionName: RESURSBANKABPAYMENTS_MODULE_PREFIX)) {
+        if (!Admin::isSection(sectionName: WordPress::getModulePrefix())) {
             return;
         }
 

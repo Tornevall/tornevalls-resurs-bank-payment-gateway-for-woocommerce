@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * Add admin notice when dependencies like ecom are missing.
+ *
  * @noinspection PhpArgumentWithoutNamedIdentifierInspection
  */
 function resursbankabpaygw_has_no_ecom(): void
@@ -33,7 +34,9 @@ function resursbankabpaygw_has_old_php(): void
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- PHP_VERSION is from PHP core
         echo wp_kses_post(
             '<div class="notice notice-error is-dismissible">' .
-            '<p><strong>ECom2:</strong> Your PHP version (' . esc_html(PHP_VERSION) . ') is too old. This plugin requires ' .
+            '<p><strong>ECom2:</strong> Your PHP version (' . esc_html(
+                PHP_VERSION
+            ) . ') is too old. This plugin requires ' .
             'PHP 8.1.0 or higher. Please update your PHP version to continue using the Resurs plugin.</p>' .
             '</div>'
         );

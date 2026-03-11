@@ -94,7 +94,7 @@ class Resursbank extends WC_Payment_Gateway
         int $sortOrder = 0
     ) {
         // Assign default property values for this gateway.
-        $this->id = RESURSBANKABPAYMENTS_MODULE_PREFIX;
+        $this->id = WordPress::getModulePrefix();
         $this->plugin_id = 'resursbank-mapi';
         $this->title = 'Resurs Bank';
         $this->method_description = 'Resurs Bank Gateway';
@@ -203,8 +203,8 @@ class Resursbank extends WC_Payment_Gateway
         return [
             'result' => 'success',
             'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                    order: $order
-                ),
+                order: $order
+            ),
         ];
     }
 
@@ -329,9 +329,9 @@ class Resursbank extends WC_Payment_Gateway
                 amount: $this->get_order_total()
             );
             $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
-                    paymentMethod: $this->method,
-                    amount: $this->get_order_total()
-                );
+                paymentMethod: $this->method,
+                amount: $this->get_order_total()
+            );
         } catch (TranslationException $error) {
             // Translation errors should rather  go as debug messages since we
             // translate with english fallbacks.
@@ -587,8 +587,8 @@ class Resursbank extends WC_Payment_Gateway
         // TTL default from WooCommerce. If stock reservations is enabled and over 0, we should use that value instead
         // of our default.
         $stockEnabled = ((string)get_option(
-                'woocommerce_manage_stock'
-            ) === 'yes');
+            'woocommerce_manage_stock'
+        ) === 'yes');
         $holdStockMinutes = (int)get_option('woocommerce_hold_stock_minutes');
 
         return new Options(
