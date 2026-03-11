@@ -46,6 +46,8 @@ use function is_string;
 use function str_contains;
 use function strlen;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 // Prevent direct access.
 if (!defined('ABSPATH')) {
     exit;
@@ -383,7 +385,12 @@ class Route
         $normalizedType = strtolower(string: $contentType);
 
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- json should not be escaped!
-        if (str_starts_with(haystack: $normalizedType, needle: 'application/json')) {
+        if (
+            str_starts_with(
+                haystack: $normalizedType,
+                needle: 'application/json'
+            )
+        ) {
             return $body;
         }
 
@@ -531,8 +538,8 @@ class Route
     private static function userIsAdmin(): bool
     {
         return is_user_logged_in() && current_user_can(
-                capability: 'administrator'
-            );
+            capability: 'administrator'
+        );
     }
 
     /**
@@ -541,9 +548,9 @@ class Route
     private static function getUrlWithProperTrailingSlash(string $url): string
     {
         return preg_replace(
-                pattern: '/\/$/',
-                replacement: '',
-                subject: $url
-            ) . '/';
+            pattern: '/\/$/',
+            replacement: '',
+            subject: $url
+        ) . '/';
     }
 }

@@ -30,6 +30,8 @@ use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Cart;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 /**
  * Generic class that provides both blocks and legacy with relevant methods for the gateway.
  */

@@ -59,6 +59,8 @@ use WC_Payment_Gateway;
 
 use function get_option;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 /**
  * Resurs Bank payment gateway.
  * This class tends to be longer than necessary. We should ignore inspection warnings.
@@ -76,15 +78,15 @@ class Resursbank extends WC_Payment_Gateway
     /** @var int Internal sort order. */
     public int $sortOrder = 0;
 
-    /** @var string Pre-generated USP text. */
-    private string $uspText = '';
-
     /**
      * Error message for Blocks checkout (replaces global variable).
      * Required for Blocks checkout: error messages must be handled through process_payment(),
      * as wc_add_notice() alone is not respected by Blocks.
      */
     private static ?string $blockCreateErrorMessage = null;
+
+    /** @var string Pre-generated USP text. */
+    private string $uspText = '';
 
     /**
      * Setup.
@@ -93,7 +95,6 @@ class Resursbank extends WC_Payment_Gateway
         private ?PaymentMethod $method = null,
         int $sortOrder = 0
     ) {
-        // Assign default property values for this gateway.
         $this->id = RESURSBANKABPAYMENTS_MODULE_PREFIX;
         $this->plugin_id = 'resursbank-mapi';
         $this->title = 'Resurs Bank';
@@ -203,8 +204,8 @@ class Resursbank extends WC_Payment_Gateway
         return [
             'result' => 'success',
             'redirect' => $payment->taskRedirectionUrls?->customerUrl ?? $this->getSuccessUrl(
-                    order: $order
-                ),
+                order: $order
+            ),
         ];
     }
 
@@ -329,9 +330,9 @@ class Resursbank extends WC_Payment_Gateway
                 amount: $this->get_order_total()
             );
             $this->uspText = '<div class="rb-usp">' . $usp->getText() . '</div>' . $gatewayHelper->renderPaymentMethodContent(
-                    paymentMethod: $this->method,
-                    amount: $this->get_order_total()
-                );
+                paymentMethod: $this->method,
+                amount: $this->get_order_total()
+            );
         } catch (TranslationException $error) {
             // Translation errors should rather  go as debug messages since we
             // translate with english fallbacks.
@@ -471,7 +472,6 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Method to properly fetch an order if it is present on a current screen (the order view), making sure we
      * can display "Payment via <method>" instead of "Payment via <uuid>".
-     *
      */
     private function getOrder(): ?WC_Order
     {
@@ -587,8 +587,8 @@ class Resursbank extends WC_Payment_Gateway
         // TTL default from WooCommerce. If stock reservations is enabled and over 0, we should use that value instead
         // of our default.
         $stockEnabled = ((string)get_option(
-                'woocommerce_manage_stock'
-            ) === 'yes');
+            'woocommerce_manage_stock'
+        ) === 'yes');
         $holdStockMinutes = (int)get_option('woocommerce_hold_stock_minutes');
 
         return new Options(

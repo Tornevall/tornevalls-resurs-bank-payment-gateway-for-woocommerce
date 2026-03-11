@@ -7,7 +7,7 @@
  * WC Tested up to: 10.5.3
  * Plugin requires ecom: 3.3.13
  * Requires PHP: 8.1
- * Version: 1.2.22
+ * Version: 1.2.23
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
@@ -21,7 +21,7 @@
  * @noinspection PhpDefineCanBeReplacedWithConstInspection
  */
 
-// Welcome to WordPress. SideEffects cannot be handled properly while the init looks like this.
+// Welcome to the world of WordPress. SideEffects cannot be handled properly while the init looks like this.
 // Consider honoring this in the future another way.
 // phpcs:disable PSR1.Files.SideEffects
 
@@ -35,11 +35,60 @@ use Resursbank\Woocommerce\Modules\ModuleInit\Admin as AdminInit;
 use Resursbank\Woocommerce\Modules\ModuleInit\Frontend;
 use Resursbank\Woocommerce\Modules\ModuleInit\Shared;
 use Resursbank\Woocommerce\Util\Admin;
+use Resursbank\Woocommerce\Util\UpgradeBootstrap;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Resursbank\Woocommerce\Util\WordPress;
 
 if (!defined('ABSPATH')) {
     exit;
+}
+
+require_once __DIR__ . '/src/Util/UpgradeBootstrap.php';
+
+/**
+ * Keep this very early: if plugin was just updated, skip one bootstrap cycle.
+ */
+if (UpgradeBootstrap::shouldSkipBootstrapOnce()) {
+    return;
+}
+
+/**
+ * Register lightweight upgrade signal hook, used to prevent plugin running during an upgrade process.
+ */
+UpgradeBootstrap::registerUpgradeSignalHook(
+    pluginBasename: plugin_basename(__FILE__)
+);
+
+// Define constants EARLY - before autoload and requirements check.
+// This prevents "Undefined constant" errors when WooCommerce instantiates payment gateways
+// during plugins_loaded (before Connection::setup() runs).
+
+// Name of plugin directory; normally the slug name.
+if (!defined('RESURSBANKABPAYMENTS_MODULE_DIR_NAME')) {
+    define(
+        constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_NAME',
+        value: substr(
+            string: __DIR__,
+            offset: strrpos(haystack: __DIR__, needle: '/') + 1
+        )
+    );
+}
+
+// Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>"
+if (!defined('RESURSBANKABPAYMENTS_MODULE_DIR_PATH')) {
+    define(
+        constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_PATH',
+        value: plugin_dir_path(file: __FILE__)
+    );
+}
+
+/**
+ * Plugin prefix for unique identification and conflict prevention.
+ * Used throughout the plugin for options, settings fields, hook names, and script handles.
+ * MUST be defined early to avoid "Undefined constant" during WooCommerce payment gateway init.
+ */
+if (!defined('RESURSBANKABPAYMENTS_MODULE_PREFIX')) {
+    define('RESURSBANKABPAYMENTS_MODULE_PREFIX', 'resursbank');
 }
 
 require_once __DIR__ . '/src/Autoloader/requirements.php';
@@ -57,27 +106,6 @@ if (PHP_VERSION_ID < 80100) {
     resursbankabpaygw_has_old_php();
     return;
 }
-
-// Name of plugin directory; normally the slug name.
-define(
-    constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_NAME',
-    value: substr(
-        string: __DIR__,
-        offset: strrpos(haystack: __DIR__, needle: '/') + 1
-    )
-);
-
-// Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>"
-define(
-    constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_PATH',
-    value: plugin_dir_path(file: __FILE__)
-);
-
-/**
- * Plugin prefix for unique identification and conflict prevention.
- * Used throughout the plugin for options, settings fields, hook names, and script handles.
- */
-define(constant_name: 'RESURSBANKABPAYMENTS_MODULE_PREFIX', value: 'resursbank');
 
 require_once __DIR__ . '/autoload.php';
 

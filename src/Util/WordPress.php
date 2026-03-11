@@ -9,9 +9,10 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-// Prevent direct access.
 use Resursbank\Ecom\Lib\Api\Environment;
 use ValueError;
+
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
 
 if (!defined('ABSPATH')) {
     exit;

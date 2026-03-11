@@ -17,6 +17,8 @@ use Throwable;
 
 use function function_exists;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 /**
  * AJAX controller for the Part payment widget.
  */
@@ -36,11 +38,17 @@ class SetCustomerType
             $customerType = Url::getHttpGet(key: 'customerType');
 
             if (!function_exists(function: 'WC')) {
-                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+                return wp_json_encode(
+                    value: $response,
+                    flags: JSON_FORCE_OBJECT
+                );
             }
 
             if (!$customerType) {
-                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+                return wp_json_encode(
+                    value: $response,
+                    flags: JSON_FORCE_OBJECT
+                );
             }
 
             WC()->initialize_session();
@@ -49,7 +57,10 @@ class SetCustomerType
                 $customerTypeEnum = CustomerType::from(value: $customerType);
             } catch (Throwable) {
                 // Invalid customer type value
-                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+                return wp_json_encode(
+                    value: $response,
+                    flags: JSON_FORCE_OBJECT
+                );
             }
 
             if ($customerTypeEnum instanceof CustomerType) {
@@ -61,13 +72,19 @@ class SetCustomerType
                 $response['customerType'] = $customerTypeEnum->value;
             }
 
-            return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR);
+            return wp_json_encode(
+                value: $response,
+                flags: JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR
+            );
         } catch (Throwable $e) {
             // Ensure we always return valid JSON even on exception
             $response['error'] = $e->getMessage();
 
             try {
-                return wp_json_encode(value: $response, flags: JSON_FORCE_OBJECT);
+                return wp_json_encode(
+                    value: $response,
+                    flags: JSON_FORCE_OBJECT
+                );
             } catch (Throwable) {
                 // Last resort: return minimal valid JSON
                 return '{"update":false,"error":"Server error"}';

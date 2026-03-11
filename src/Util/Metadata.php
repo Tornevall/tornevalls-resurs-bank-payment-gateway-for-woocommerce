@@ -25,6 +25,8 @@ use WC_Order;
 
 use function get_class;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 /**
  * Order metadata handler.
  *

@@ -64,6 +64,7 @@ class PartPayment
             'wp_enqueue_scripts',
             'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::setJs'
         );
+
         add_action(
             'woocommerce_single_product_summary',
             'Resursbank\Woocommerce\Modules\PartPayment\PartPayment::renderWidget'

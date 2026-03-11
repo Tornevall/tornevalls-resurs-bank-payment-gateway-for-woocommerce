@@ -43,6 +43,8 @@ use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Logger;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 // Prevent direct access.
 if (!defined('ABSPATH')) {
     exit;
@@ -160,10 +162,10 @@ class Connection
     }
 
     /**
-     * @throws AuthException
-     * @throws JsonException
-     * @throws ReflectionException
      * @throws AttributeCombinationException
+     * @throws AuthException
+     * @throws ReflectionException
+     * @throws JsonException
      */
     public static function getConfigJwt(): ?Jwt
     {

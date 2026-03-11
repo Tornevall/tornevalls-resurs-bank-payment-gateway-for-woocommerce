@@ -33,6 +33,8 @@ use Resursbank\Woocommerce\Util\Url;
 use Throwable;
 use WC_Order;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 // Prevent direct access.
 if (!defined('ABSPATH')) {
     exit;
@@ -80,10 +82,10 @@ class Order
     public static function initAdminScripts(): void
     {
         try {
-            // Fetching the order id this way has historically been the best way on
-            // sites where the normal way of doing it not works ("ecompress"). This however fails
-            // when in HPOS-mode. If the solution below does not work, then we have to
-            // reconsider the way this has been historically done,
+          // Fetching the order id this way has historically been the best way on
+          // sites where the normal way of doing it not works ("ecompress"). This however fails
+          // when in HPOS-mode. If the solution below does not work, then we have to
+          // reconsider the way this has been historically done,
             $wcOrder = wc_get_order();
 
             if (
@@ -119,7 +121,9 @@ class Order
                 '1.0.0',
                 true
             );
-            wp_enqueue_script('resursbankabpaygw-get-order-content-admin-inline-scripts');
+            wp_enqueue_script(
+                'resursbankabpaygw-get-order-content-admin-inline-scripts'
+            );
             wp_add_inline_script(
                 'resursbankabpaygw-get-order-content-admin-inline-scripts',
                 sprintf(
@@ -208,8 +212,8 @@ class Order
 
             $httpCode = $e->httpCode ?? 0;
 
-            // According to APIs (when we get the codes), code 403 means the payment is either denied due to
-            // the credentials or no longer available due to expiration.
+          // According to APIs (when we get the codes), code 403 means the payment is either denied due to
+          // the credentials or no longer available due to expiration.
             if ($httpCode === 403) {
                 $errorMessage = Translator::translate(
                     phraseId: 'payment-info-denied-or-no-longer-available'

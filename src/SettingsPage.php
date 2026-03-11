@@ -29,6 +29,8 @@ use Throwable;
 use WC_Admin_Settings;
 use WC_Settings_Page;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 /**
  * Render Resurs Bank settings page for WooCommerce.
  *

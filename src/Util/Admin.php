@@ -12,6 +12,8 @@ namespace Resursbank\Woocommerce\Util;
 use Resursbank\Ecom\Lib\Validation\StringValidation;
 use Throwable;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 // Prevent direct access.
 if (!defined('ABSPATH')) {
     exit;

@@ -38,6 +38,8 @@ use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
+
 // Prevent direct access.
 if (!defined('ABSPATH')) {
     exit;

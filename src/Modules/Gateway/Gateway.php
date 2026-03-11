@@ -31,6 +31,7 @@ use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 use function is_array;
+use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
