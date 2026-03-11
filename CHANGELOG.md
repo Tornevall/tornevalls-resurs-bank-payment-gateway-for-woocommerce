@@ -1,3 +1,11 @@
+# 1.2.23
+
+* Due to constant changes, upgrades may show temporary critical warnings during mixed-version loading, without harming platform operation.
+
+# 1.2.22
+
+* Incremental commit.
+
 # 1.2.21
 
 * Incremental commit.
