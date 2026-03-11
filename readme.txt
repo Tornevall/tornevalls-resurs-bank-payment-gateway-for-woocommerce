@@ -91,6 +91,7 @@ Latest changes:
 # 1.2.23
 
 * Due to constant changes, upgrades may show temporary critical warnings during mixed-version loading, without harming platform operation.
+* ECom upgraded to support PHP 8.5.
 
 # 1.2.22
 
