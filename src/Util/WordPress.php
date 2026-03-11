@@ -225,9 +225,7 @@ class WordPress
      */
     public static function getEnvironmentFromAdminAjax(): ?string
     {
-        $key = defined('RESURSBANKABPAYMENTS_MODULE_PREFIX')
-            ? RESURSBANKABPAYMENTS_MODULE_PREFIX . '_environment'
-            : 'resursbank_environment';
+        $key = self::getModulePrefix() . '_environment';
 
         // Get cached JSON payload (same instance used in Connection::getJwtFromPost)
         $payload = self::getJsonPayload();
@@ -269,5 +267,32 @@ class WordPress
         } catch (ValueError) {
             return null;
         }
+    }
+
+    /**
+     * Resolve module prefix safely across mixed-version upgrade requests.
+     *
+     * During plugin updates, WordPress may execute a request where old and new
+     * files are mixed temporarily (for example while WooCommerce bootstraps
+     * gateways from hooks). In that window, one file may reference the new
+     * constant name while another still defines the legacy one, which can fatal
+     * on direct constant usage.
+     *
+     * This method provides a single compatibility resolver used by runtime code:
+     * - prefer current constant,
+     * - fallback to legacy constant,
+     * - final hard fallback to the stable prefix value.
+     */
+    public static function getModulePrefix(): string
+    {
+        if (defined('RESURSBANKABPAYMENTS_MODULE_PREFIX')) {
+            return RESURSBANKABPAYMENTS_MODULE_PREFIX;
+        }
+
+        if (defined('RESURSBANK_MODULE_PREFIX')) {
+            return RESURSBANK_MODULE_PREFIX;
+        }
+
+        return 'resursbank';
     }
 }

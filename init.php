@@ -82,11 +82,6 @@ if (!defined('RESURSBANKABPAYMENTS_MODULE_DIR_PATH')) {
     );
 }
 
-/**
- * Plugin prefix for unique identification and conflict prevention.
- * Used throughout the plugin for options, settings fields, hook names, and script handles.
- * MUST be defined early to avoid "Undefined constant" during WooCommerce payment gateway init.
- */
 if (!defined('RESURSBANKABPAYMENTS_MODULE_PREFIX')) {
     define('RESURSBANKABPAYMENTS_MODULE_PREFIX', 'resursbank');
 }

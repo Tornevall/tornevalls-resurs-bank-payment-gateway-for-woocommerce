@@ -59,8 +59,6 @@ use WC_Payment_Gateway;
 
 use function get_option;
 
-use const RESURSBANKABPAYMENTS_MODULE_PREFIX;
-
 /**
  * Resurs Bank payment gateway.
  * This class tends to be longer than necessary. We should ignore inspection warnings.
@@ -95,7 +93,7 @@ class Resursbank extends WC_Payment_Gateway
         private ?PaymentMethod $method = null,
         int $sortOrder = 0
     ) {
-        $this->id = RESURSBANKABPAYMENTS_MODULE_PREFIX;
+        $this->id = WordPress::getModulePrefix();
         $this->plugin_id = 'resursbank-mapi';
         $this->title = 'Resurs Bank';
         $this->method_description = 'Resurs Bank Gateway';
@@ -119,7 +117,7 @@ class Resursbank extends WC_Payment_Gateway
             $section !== '' &&
             isset($method->id) &&
             is_string(value: $this->id) &&
-            $method->id !== RESURSBANKABPAYMENTS_MODULE_PREFIX
+            $method->id !== WordPress::getModulePrefix()
         ) {
             // Redirects to the correct section if the wrong section is requested when the section is set to a method ID.
             AdminUtility::redirectAtWrongSection(method: $method->id);
