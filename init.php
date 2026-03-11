@@ -43,22 +43,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-require_once __DIR__ . '/src/Util/UpgradeBootstrap.php';
-
-/**
- * Keep this very early: if plugin was just updated, skip one bootstrap cycle.
- */
-if (UpgradeBootstrap::shouldSkipBootstrapOnce()) {
-    return;
-}
-
-/**
- * Register lightweight upgrade signal hook, used to prevent plugin running during an upgrade process.
- */
-UpgradeBootstrap::registerUpgradeSignalHook(
-    pluginBasename: plugin_basename(__FILE__)
-);
-
 // Define constants EARLY - before autoload and requirements check.
 // This prevents "Undefined constant" errors when WooCommerce instantiates payment gateways
 // during plugins_loaded (before Connection::setup() runs).
