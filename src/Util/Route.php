@@ -141,7 +141,7 @@ class Route
 
         $route = is_string(value: $routeRaw)
             ? sanitize_text_field(
-                str: wp_unslash(value: $routeRaw)
+                wp_unslash($routeRaw)
             )
             : '';
 
@@ -182,7 +182,7 @@ class Route
 
                 $nonce = is_string(value: $nonceRaw)
                     ? sanitize_text_field(
-                        str: wp_unslash(value: $nonceRaw)
+                        wp_unslash($nonceRaw)
                     )
                     : '';
 
@@ -268,14 +268,14 @@ class Route
         ) {
             WordPress::ensurePluggableLoaded();
             $arguments['_wpnonce'] = wp_create_nonce(
-                action: 'resursbank_admin_' . $route
+                'resursbank_admin_' . $route
             );
         }
 
         if ($route === self::ROUTE_GET_STORES_ADMIN) {
             WordPress::ensurePluggableLoaded();
             $arguments['_wpnonce'] = wp_create_nonce(
-                action: 'resursbank_get_stores_admin'
+                'resursbank_get_stores_admin'
             );
         }
 
@@ -346,7 +346,7 @@ class Route
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized via esc_url_raw below
         $url = isset($_SERVER['HTTP_REFERER'])
             ? esc_url_raw(
-                url: wp_unslash(value: $_SERVER['HTTP_REFERER'])
+                wp_unslash($_SERVER['HTTP_REFERER'])
             )
             : '';
 
@@ -383,12 +383,15 @@ class Route
         $normalizedType = strtolower(string: $contentType);
 
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- json should not be escaped!
-        if (str_starts_with(haystack: $normalizedType, needle: 'application/json')) {
+        if (str_starts_with(
+            haystack: $normalizedType,
+            needle: 'application/json'
+        )) {
             return $body;
         }
 
         if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
-            return wp_kses_post(data: $body);
+            return wp_kses_post($body);
         }
 
         return esc_html(text: $body);
@@ -531,8 +534,8 @@ class Route
     private static function userIsAdmin(): bool
     {
         return is_user_logged_in() && current_user_can(
-                capability: 'administrator'
-            );
+            capability: 'administrator'
+        );
     }
 
     /**
@@ -541,9 +544,9 @@ class Route
     private static function getUrlWithProperTrailingSlash(string $url): string
     {
         return preg_replace(
-                pattern: '/\/$/',
-                replacement: '',
-                subject: $url
-            ) . '/';
+            pattern: '/\/$/',
+            replacement: '',
+            subject: $url
+        ) . '/';
     }
 }

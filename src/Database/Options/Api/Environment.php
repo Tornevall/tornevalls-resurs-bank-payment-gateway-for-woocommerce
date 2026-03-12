@@ -52,7 +52,7 @@ class Environment extends Option implements OptionInterface
     public static function getRawData(): ?string
     {
         // Only attempt request-based resolution when nonce verification is available.
-        if (function_exists('wp_verify_nonce')) {
+        if (function_exists(function: 'wp_verify_nonce')) {
             $fromRequest = self::getEnvironmentFromSavePost()
                 ?? self::getEnvironmentFromAdminAjax();
 

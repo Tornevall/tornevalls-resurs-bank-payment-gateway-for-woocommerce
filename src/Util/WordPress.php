@@ -37,11 +37,11 @@ class WordPress
      */
     public static function ensurePluggableLoaded(): void
     {
-        if (function_exists('wp_verify_nonce')) {
+        if (function_exists(function: 'wp_verify_nonce')) {
             return;
         }
 
-        if (!defined('ABSPATH')) {
+        if (!defined(constant_name: 'ABSPATH')) {
             return;
         }
 
@@ -61,7 +61,7 @@ class WordPress
     {
         self::ensurePluggableLoaded();
 
-        if (!function_exists('wp_verify_nonce')) {
+        if (!function_exists(function: 'wp_verify_nonce')) {
             return false;
         }
 
@@ -204,7 +204,7 @@ class WordPress
             return false;
         }
 
-        if (!function_exists('wp_doing_ajax') || !wp_doing_ajax()) {
+        if (!function_exists(function: 'wp_doing_ajax') || !wp_doing_ajax()) {
             return false;
         }
 

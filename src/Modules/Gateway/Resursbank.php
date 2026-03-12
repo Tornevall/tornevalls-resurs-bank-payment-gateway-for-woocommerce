@@ -570,7 +570,7 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // Escape message for output to user via wc_add_notice
-        wc_add_notice(message: esc_html($finalMessage), notice_type: 'error');
+        wc_add_notice(esc_html($finalMessage), 'error');
 
         // Pass escaped message to process_payment() for Blocks checkout
         self::$blockCreateErrorMessage = esc_html($finalMessage);

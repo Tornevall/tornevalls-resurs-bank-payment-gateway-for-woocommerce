@@ -304,7 +304,7 @@ class PartPayment
         try {
             // This method is triggered through several requests due to how javascript are loaded
             // but should not be fully executed when AJAX requests are handling the calls.
-            if (function_exists('wp_doing_ajax') && wp_doing_ajax()) {
+            if (function_exists(function: 'wp_doing_ajax') && wp_doing_ajax()) {
                 return;
             }
 

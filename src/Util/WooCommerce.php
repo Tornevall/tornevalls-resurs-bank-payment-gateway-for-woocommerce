@@ -75,8 +75,8 @@ class WooCommerce
      * NOTE: This function also checks whether the current page is the checkout
      * page.
      *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function isUsingBlocksCheckout(): bool
     {
@@ -85,7 +85,10 @@ class WooCommerce
         $blocksCheckoutPageId = wc_get_page_id('checkout');
 
         // Special legacy vs blocks control
-        if ($wp_query !== null && function_exists('get_queried_object')) {
+        if (
+            $wp_query !== null &&
+            function_exists(function: 'get_queried_object')
+        ) {
             $objectId = function_exists('get_queried_object_id')
                 ? get_queried_object_id()
                 : 0;
@@ -183,8 +186,8 @@ class WooCommerce
      * This method intentionally uses direct database queries to find and clear all Resurs Bank transients.
      * WordPress cache functions cannot be used here because we need to discover all transient keys dynamically.
      *
-     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
     public static function invalidateFullCache(): void
     {
@@ -413,7 +416,7 @@ class WooCommerce
      */
     public static function getOrderStatusName(string $status): string
     {
-        $name = wc_get_order_status_name(status: $status);
+        $name = wc_get_order_status_name($status);
 
         if (!is_string(value: $name)) {
             return $status;

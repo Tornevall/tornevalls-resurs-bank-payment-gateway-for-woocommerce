@@ -205,7 +205,7 @@ class Metadata
 
         $result = null;
 
-        $orders = wc_get_orders(args: [
+        $orders = wc_get_orders([
             // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- unavoidable lookup, cached above
             'meta_key' => self::KEY_PAYMENT_ID,
             // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- unavoidable lookup, cached above

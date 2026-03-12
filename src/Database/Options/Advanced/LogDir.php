@@ -58,7 +58,7 @@ class LogDir extends StringOption implements OptionInterface
      */
     private static function getUploadDir(): ?string
     {
-        $dir = wp_upload_dir(create_dir: false);
+        $dir = wp_upload_dir(false);
 
         return (
             is_array(value: $dir) &&
