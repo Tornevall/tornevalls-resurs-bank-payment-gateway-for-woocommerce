@@ -59,7 +59,9 @@ class GetAddress
         if (!$ecomSession->isAvailable()) {
             // ECom sessions in this request are practically never available initially, so we need to set it up
             // if we want to store data in them.
-            session_start();
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
         }
 
         WcSession::set(

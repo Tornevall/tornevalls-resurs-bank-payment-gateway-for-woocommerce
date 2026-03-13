@@ -59,28 +59,34 @@ if (PHP_VERSION_ID < 80100) {
 }
 
 // Name of plugin directory; normally the slug name.
-define(
-    constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_NAME',
-    value: substr(
-        string: __DIR__,
-        offset: strrpos(haystack: __DIR__, needle: '/') + 1
-    )
-);
+if (!defined('RESURSBANKABPAYMENTS_MODULE_DIR_NAME')) {
+    define(
+        constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_NAME',
+        value: substr(
+            string: __DIR__,
+            offset: strrpos(haystack: __DIR__, needle: '/') + 1
+        )
+    );
+}
 
 // Absolute path to plugin directory; "/var/www/html/wp-content/plugins/<the-slug-name>"
-define(
-    constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_PATH',
-    value: plugin_dir_path(file: __FILE__)
-);
+if (!defined('RESURSBANKABPAYMENTS_MODULE_DIR_PATH')) {
+    define(
+        constant_name: 'RESURSBANKABPAYMENTS_MODULE_DIR_PATH',
+        value: plugin_dir_path(file: __FILE__)
+    );
+}
 
 /**
  * Plugin prefix for unique identification and conflict prevention.
  * Used throughout the plugin for options, settings fields, hook names, and script handles.
  */
-define(
-	constant_name: 'RESURSBANKABPAYMENTS_MODULE_PREFIX',
-	value: 'resursbank'
-);
+if (!defined('RESURSBANKABPAYMENTS_MODULE_PREFIX')) {
+    define(
+        constant_name: 'RESURSBANKABPAYMENTS_MODULE_PREFIX',
+        value: 'resursbank'
+    );
+}
 
 require_once __DIR__ . '/autoload.php';
 
@@ -101,7 +107,7 @@ if (!Config::hasInstance()) {
 }
 
 // Setup event listeners and resources when WP has finished loading all modules.
-add_action(hook_name: 'plugins_loaded', callback: static function (): void {
+add_action('plugins_loaded', static function (): void {
     if (!WooCommerce::isWcPresent()) {
         return;
     }
@@ -120,7 +126,7 @@ add_action(hook_name: 'plugins_loaded', callback: static function (): void {
         static function (): void {
             if (
                 !class_exists(
-                    class: 'Automattic\WooCommerce\Utilities\FeaturesUtil'
+                    class: 'Automattic\\WooCommerce\\Utilities\\FeaturesUtil'
                 )
             ) {
                 return;

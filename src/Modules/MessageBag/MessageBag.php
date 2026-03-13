@@ -81,7 +81,7 @@ class MessageBag
                     self::updateBag(bag: $bag);
                 }
             } elseif (function_exists(function: 'wc_add_notice')) {
-                wc_add_notice(message: $message, notice_type: $type->value);
+                wc_add_notice($message, $type->value);
             }
         } catch (Throwable $e) {
             Log::error(error: $e);

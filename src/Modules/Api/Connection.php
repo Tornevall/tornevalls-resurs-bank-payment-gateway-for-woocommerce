@@ -261,7 +261,7 @@ class Connection
             WordPress::ensurePluggableLoaded();
 
             if (
-                function_exists('current_user_can') &&
+                function_exists(function: 'current_user_can') &&
                 !current_user_can('manage_woocommerce')
             ) {
                 return null;
