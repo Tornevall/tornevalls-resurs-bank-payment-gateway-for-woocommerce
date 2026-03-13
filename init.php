@@ -5,9 +5,10 @@
  * Description: Connect Resurs Bank as WooCommerce payment gateway.
  * WC requires at least: 7.6.0
  * WC Tested up to: 10.5.3
- * Plugin requires ecom: 3.3.13
+ * Plugin requires ecom: 3.4.0
+ * Plugin tested up to: PHP 8.5
  * Requires PHP: 8.1
- * Version: 1.2.23
+ * Version: 1.2.24
  * Author: Resurs Bank AB
  * Author URI: https://developers.resurs.com/
  * Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/

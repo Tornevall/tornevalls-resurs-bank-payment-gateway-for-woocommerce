@@ -53,7 +53,7 @@ class About
             if (self::$widget === null) {
                 self::$widget = new EcomSupportInfo(
                     minimumPhpVersion: '8.1',
-                    maximumPhpVersion: '8.4',
+                    maximumPhpVersion: '8.5',
                     pluginVersion: UserAgent::getPluginVersion()
                 );
             }
