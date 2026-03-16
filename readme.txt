@@ -42,21 +42,21 @@ External calls only occur when the plugin is configured with valid Resurs creden
 **Endpoints**
 
 Production:
-https://merchant-api.resurs.com/
+[https://merchant-api.resurs.com/](https://merchant-api.resurs.com/)
 
 Test:
-https://merchant-api.integration.resurs.com/
+[https://merchant-api.integration.resurs.com/](https://merchant-api.integration.resurs.com/)
 
 **Legal**
 
 Terms:
-https://www.resursbank.se/dokument-och-blanketter
+[https://www.resursbank.se/dokument-och-blanketter](https://www.resursbank.se/dokument-och-blanketter)
 
 Privacy policy:
-https://www.resursbank.se/om-oss/integritet-och-sakerhet
+[https://www.resursbank.se/om-oss/integritet-och-sakerhet](https://www.resursbank.se/om-oss/integritet-och-sakerhet)
 
 Customer GDPR information:
-https://www.resursbank.se/om-oss/integritet-och-sakerhet/gdpr-som-kund
+[https://www.resursbank.se/om-oss/integritet-och-sakerhet/gdpr-som-kund](https://www.resursbank.se/om-oss/integritet-och-sakerhet/gdpr-som-kund)
 
 
 == Installation ==
@@ -88,6 +88,11 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
 
 Latest changes:
+
+# 1.2.24
+
+* Updated bundled ECom to 3.4.0.
+* Marked the plugin as tested with PHP 8.5 and aligned related plugin metadata.
 
 # 1.2.23
 

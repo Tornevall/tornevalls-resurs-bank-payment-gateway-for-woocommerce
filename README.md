@@ -203,7 +203,7 @@ Will use the object `window.wc.wcBlocksData` as the import.
 It is essential to understand how this works in order to develop features for
 WooCommerce. Since the node modules are bundled directly into WooCommerce, you
 will need to visit their github repository to see the raw source files:
-https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/assets/js
+[https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/assets/js](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/assets/js)
 
 - **Entry Points**:
     - `dist/gateway`: Entry point for `src/Modules/Gateway/resources/ts/gateway.tsx`.

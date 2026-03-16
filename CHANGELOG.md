@@ -1,7 +1,11 @@
+# 1.2.24
+
+* Marked the plugin as tested with PHP 8.5 and aligned related plugin metadata.
+
 # 1.2.23
 
 * Due to constant changes, upgrades may show temporary critical warnings during mixed-version loading, without harming platform operation.
-* ECom upgraded to support PHP 8.5.
+* Updated bundled ECom to 3.4.0 to support PHP 8.5.
 
 # 1.2.22
 
