@@ -30,7 +30,6 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
-use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Order;
 
@@ -104,7 +103,7 @@ class Order
                 module: 'Order',
                 file: 'admin/getOrderContent.js'
             );
-            $pluginVersion = WordPress::getPluginVersion();
+            $pluginVersion = UserAgent::getPluginVersion();
 
             wp_enqueue_script(
                 'resursbankabpaygw-get-order-content-admin-scripts',

@@ -35,8 +35,8 @@ use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
-use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 // Prevent direct access.
@@ -91,7 +91,7 @@ class Api
      */
     public static function initScripts(): void
     {
-        $pluginVersion = WordPress::getPluginVersion();
+        $pluginVersion = UserAgent::getPluginVersion();
 
         wp_register_script(
             'resursbankabpaygw-api-admin-scripts-load',

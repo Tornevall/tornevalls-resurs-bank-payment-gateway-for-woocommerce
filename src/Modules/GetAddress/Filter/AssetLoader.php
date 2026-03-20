@@ -28,9 +28,9 @@ use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
-use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 /**
@@ -72,7 +72,7 @@ class AssetLoader
             'resursbankabpaygw-costlist-css',
             false,
             [],
-            WordPress::getPluginVersion()
+            UserAgent::getPluginVersion()
         );
         wp_enqueue_style('resursbankabpaygw-costlist-css');
 
@@ -105,7 +105,7 @@ class AssetLoader
         $costListJsSafe = (string) (new CostListJs(
             containerElDomPath: 'body'
         ))->content;
-        $pluginVersion = WordPress::getPluginVersion();
+        $pluginVersion = UserAgent::getPluginVersion();
 
         wp_register_script(
             'resursbankabpaygw-costlist-js',
@@ -132,7 +132,7 @@ class AssetLoader
 
     public static function enqueuePartPaymentStyles(): void
     {
-        $pluginVersion = WordPress::getPluginVersion();
+        $pluginVersion = UserAgent::getPluginVersion();
 
         try {
             $cssSafe = (string) ((new EcomPartPaymentCss())->content ?? '');
@@ -178,7 +178,7 @@ class AssetLoader
      */
     public static function enqueueReadMoreStyle(): void
     {
-        $pluginVersion = WordPress::getPluginVersion();
+        $pluginVersion = UserAgent::getPluginVersion();
 
         try {
             WooCommerce::validateAndUpdatePartPaymentMethod();
@@ -218,7 +218,7 @@ class AssetLoader
      */
     public static function enqueueReadMoreJs(): void
     {
-        $pluginVersion = WordPress::getPluginVersion();
+        $pluginVersion = UserAgent::getPluginVersion();
 
         if (is_product() && PartPayment::isEnabled()) {
             wp_register_script(
@@ -295,7 +295,7 @@ class AssetLoader
      */
     public static function enqueueBasicGetAddressStyle(): void
     {
-        $pluginVersion = WordPress::getPluginVersion();
+        $pluginVersion = UserAgent::getPluginVersion();
 
         try {
             wp_enqueue_style(
