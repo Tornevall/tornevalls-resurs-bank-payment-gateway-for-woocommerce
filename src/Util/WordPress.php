@@ -33,6 +33,16 @@ class WordPress
     private static bool $jsonPayloadRead = false;
 
     /**
+     * Cached plugin version (resolved once per request).
+     */
+    private static string $pluginVersion = '1.0.0';
+
+    /**
+     * Flag to track if plugin version has been resolved.
+     */
+    private static bool $pluginVersionResolved = false;
+
+    /**
      * Ensure pluggable functions are available as early as possible.
      */
     public static function ensurePluggableLoaded(): void
@@ -291,5 +301,86 @@ class WordPress
         }
 
         return 'resursbank';
+    }
+
+    /**
+     * Resolve plugin version from plugin metadata and cache it for this request.
+     */
+    public static function getPluginVersion(): string
+    {
+        if (self::$pluginVersionResolved) {
+            return self::$pluginVersion;
+        }
+
+        self::$pluginVersionResolved = true;
+
+        $pluginRootPath = self::getPluginRootPath();
+
+        $versionFromInit = self::getHeaderValue(
+            filePath: $pluginRootPath . '/init.php',
+            headerPattern: '/^\s*\*\s*Version:\s*(.+)$/mi'
+        );
+
+        if ($versionFromInit !== '') {
+            self::$pluginVersion = $versionFromInit;
+            return self::$pluginVersion;
+        }
+
+        $versionFromReadme = self::getHeaderValue(
+            filePath: $pluginRootPath . '/readme.txt',
+            headerPattern: '/^\s*Stable tag:\s*(.+)$/mi'
+        );
+
+        if ($versionFromReadme !== '') {
+            self::$pluginVersion = $versionFromReadme;
+        }
+
+        return self::$pluginVersion;
+    }
+
+    /**
+     * Get plugin root directory regardless of current active slug.
+     */
+    private static function getPluginRootPath(): string
+    {
+        if (defined('RESURSBANKABPAYMENTS_MODULE_DIR_PATH')) {
+            return rtrim(
+                string: RESURSBANKABPAYMENTS_MODULE_DIR_PATH,
+                characters: '/'
+            );
+        }
+
+        return dirname(path: __DIR__, levels: 2);
+    }
+
+    /**
+     * Read a metadata value using a line-based regex header pattern.
+     */
+    private static function getHeaderValue(string $filePath, string $headerPattern): string
+    {
+        if (!file_exists(filename: $filePath)) {
+            return '';
+        }
+
+        $fileContent = file_get_contents(filename: $filePath);
+
+        if (!is_string(value: $fileContent) || $fileContent === '') {
+            return '';
+        }
+
+        $matches = [];
+
+        if (
+            !preg_match(
+                pattern: $headerPattern,
+                subject: $fileContent,
+                matches: $matches
+            ) ||
+            !isset($matches[1])
+        ) {
+            return '';
+        }
+
+        return trim(string: $matches[1]);
     }
 }

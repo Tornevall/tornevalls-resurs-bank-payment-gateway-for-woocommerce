@@ -30,6 +30,7 @@ use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 use WC_Order;
 
@@ -103,12 +104,13 @@ class Order
                 module: 'Order',
                 file: 'admin/getOrderContent.js'
             );
+            $pluginVersion = WordPress::getPluginVersion();
 
             wp_enqueue_script(
                 'resursbankabpaygw-get-order-content-admin-scripts',
                 $url,
                 ['jquery'],
-                '1.0.0',
+                $pluginVersion,
                 true
             );
 
@@ -116,10 +118,12 @@ class Order
                 'resursbankabpaygw-get-order-content-admin-inline-scripts',
                 '',
                 ['resursbankabpaygw-get-order-content-admin-scripts'],
-                '1.0.0',
+                $pluginVersion,
                 true
             );
-            wp_enqueue_script('resursbankabpaygw-get-order-content-admin-inline-scripts');
+            wp_enqueue_script(
+                'resursbankabpaygw-get-order-content-admin-inline-scripts'
+            );
             wp_add_inline_script(
                 'resursbankabpaygw-get-order-content-admin-inline-scripts',
                 sprintf(

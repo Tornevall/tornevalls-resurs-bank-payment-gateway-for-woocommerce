@@ -30,6 +30,7 @@ use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Url;
 use Resursbank\Woocommerce\Util\WcSession;
 use Resursbank\Woocommerce\Util\WooCommerce;
+use Resursbank\Woocommerce\Util\WordPress;
 use Throwable;
 
 /**
@@ -67,7 +68,12 @@ class AssetLoader
      */
     public static function enqueueCostListStyle(): void
     {
-        wp_register_style('resursbankabpaygw-costlist-css', false, [], '1.0.0');
+        wp_register_style(
+            'resursbankabpaygw-costlist-css',
+            false,
+            [],
+            WordPress::getPluginVersion()
+        );
         wp_enqueue_style('resursbankabpaygw-costlist-css');
 
         $costListCssSafe = (string) (new CostListCss())->content;
@@ -83,7 +89,10 @@ class AssetLoader
          * safecss_filter_attr() is for style attributes, not full CSS blocks.
          */
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prebuilt safe CSS payload from trusted SDK, escaped at source by contract.
-        wp_add_inline_style('resursbankabpaygw-costlist-css', esc_html(wp_strip_all_tags($costListCssSafe)));
+        wp_add_inline_style(
+            'resursbankabpaygw-costlist-css',
+            esc_html(wp_strip_all_tags($costListCssSafe))
+        );
     }
 
     /**
@@ -93,13 +102,16 @@ class AssetLoader
      */
     public static function enqueueCostListJs(): void
     {
-        $costListJsSafe = (string) (new CostListJs(containerElDomPath: 'body'))->content;
+        $costListJsSafe = (string) (new CostListJs(
+            containerElDomPath: 'body'
+        ))->content;
+        $pluginVersion = WordPress::getPluginVersion();
 
         wp_register_script(
             'resursbankabpaygw-costlist-js',
             '',
             ['wc-blocks-data-store'],
-            '1.0.0',
+            $pluginVersion,
             true
         );
         wp_enqueue_script('resursbankabpaygw-costlist-js');
@@ -120,6 +132,8 @@ class AssetLoader
 
     public static function enqueuePartPaymentStyles(): void
     {
+        $pluginVersion = WordPress::getPluginVersion();
+
         try {
             $cssSafe = (string) ((new EcomPartPaymentCss())->content ?? '');
         } catch (Throwable $error) {
@@ -127,7 +141,12 @@ class AssetLoader
             $cssSafe = '';
         }
 
-        wp_register_style('resursbankabpaygw-pp-styles', false, [], '1.0.0');
+        wp_register_style(
+            'resursbankabpaygw-pp-styles',
+            false,
+            [],
+            $pluginVersion
+        );
         wp_enqueue_style('resursbankabpaygw-pp-styles');
 
         if ($cssSafe !== '') {
@@ -141,7 +160,12 @@ class AssetLoader
             wp_add_inline_style('resursbankabpaygw-pp-styles', $cssSafe);
         }
 
-        wp_register_style('resursbankabpaygw-pp-css-extra', false, [], '1.0.0');
+        wp_register_style(
+            'resursbankabpaygw-pp-css-extra',
+            false,
+            [],
+            $pluginVersion
+        );
         wp_enqueue_style('resursbankabpaygw-pp-css-extra');
         wp_add_inline_style(
             'resursbankabpaygw-pp-css-extra',
@@ -154,6 +178,8 @@ class AssetLoader
      */
     public static function enqueueReadMoreStyle(): void
     {
+        $pluginVersion = WordPress::getPluginVersion();
+
         try {
             WooCommerce::validateAndUpdatePartPaymentMethod();
             $readMoreCssSafe = (string) ((new ReadMoreCss())->content ?? '');
@@ -162,7 +188,12 @@ class AssetLoader
             $readMoreCssSafe = '';
         }
 
-        wp_register_style('resursbankabpaygw-read-more-style', false, [], '1.0.0');
+        wp_register_style(
+            'resursbankabpaygw-read-more-style',
+            false,
+            [],
+            $pluginVersion
+        );
         wp_enqueue_style('resursbankabpaygw-read-more-style');
 
         if ($readMoreCssSafe === '') {
@@ -176,7 +207,10 @@ class AssetLoader
          * safecss_filter_attr() is for style attributes, not full CSS blocks.
          */
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prebuilt safe CSS payload from trusted SDK, escaped at source by contract.
-        wp_add_inline_style('resursbankabpaygw-read-more-style', esc_html(wp_strip_all_tags($readMoreCssSafe)));
+        wp_add_inline_style(
+            'resursbankabpaygw-read-more-style',
+            esc_html(wp_strip_all_tags($readMoreCssSafe))
+        );
     }
 
     /**
@@ -184,12 +218,14 @@ class AssetLoader
      */
     public static function enqueueReadMoreJs(): void
     {
+        $pluginVersion = WordPress::getPluginVersion();
+
         if (is_product() && PartPayment::isEnabled()) {
             wp_register_script(
                 'resursbankabpaygw-pp-readmore-js',
                 '',
                 ['wc-blocks-data-store'],
-                '1.0.0',
+                $pluginVersion,
                 true
             );
             wp_enqueue_script('resursbankabpaygw-pp-readmore-js');
@@ -226,12 +262,14 @@ class AssetLoader
             'resursbankabpaygw-rm-readmore-js',
             '',
             ['wc-blocks-data-store'],
-            '1.0.0',
+            $pluginVersion,
             true
         );
         wp_enqueue_script('resursbankabpaygw-rm-readmore-js');
 
-        $readMoreCheckoutJsSafe = (string) (new ReadMoreJs(containerElDomPath: 'body'))->content;
+        $readMoreCheckoutJsSafe = (string) (new ReadMoreJs(
+            containerElDomPath: 'body'
+        ))->content;
 
         if ($readMoreCheckoutJsSafe === '') {
             return;
@@ -257,12 +295,14 @@ class AssetLoader
      */
     public static function enqueueBasicGetAddressStyle(): void
     {
+        $pluginVersion = WordPress::getPluginVersion();
+
         try {
             wp_enqueue_style(
                 'resursbankabpaygw-ga-basic-css',
                 Route::getUrl('get-address-css'),
                 [],
-                '1.0.0'
+                $pluginVersion
             );
         } catch (Throwable $error) {
             Log::error(error: $error);
@@ -276,7 +316,7 @@ class AssetLoader
                 type: ResourceType::CSS
             ),
             [],
-            '1.0.0'
+            $pluginVersion
         );
     }
 

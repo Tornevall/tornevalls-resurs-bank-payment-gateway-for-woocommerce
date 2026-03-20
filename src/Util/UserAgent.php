@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Throwable;
 
 /**
@@ -20,32 +19,10 @@ class UserAgent
     /**
      * Get version from the current installed plugin (which potentially can be dynamically installed
      * with different slugs).
-     *
-     * @throws IllegalValueException
      */
     public static function getPluginVersion(): string
     {
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        // Using get_file_data here since WordPress' base function get_plugin_data is currently not available when
-        // this method is called.
-        $pluginFileData = get_file_data(
-            RESURSBANKABPAYMENTS_MODULE_DIR_PATH . '/readme.txt',
-            ['plugin_version' => 'Stable tag']
-        );
-
-        if (
-            (
-                !isset($pluginFileData['plugin_version']) &&
-                !is_string(value: $pluginFileData['plugin_version']) ||
-                $pluginFileData['plugin_version'] === ''
-            )
-        ) {
-            throw new IllegalValueException(
-                message: 'Plugin version is missing.'
-            );
-        }
-
-        return $pluginFileData['plugin_version'];
+        return WordPress::getPluginVersion();
     }
 
     /**
@@ -73,11 +50,14 @@ class UserAgent
 
         // Use a regular expression to extract the version information.
         $matches = [];
-        if (preg_match(
-            pattern: '/Version:\s*(\S+)/',
-            subject: $file_contents,
-            matches: $matches
-        ) && isset($matches[1])) {
+
+        if (
+            preg_match(
+                pattern: '/Version:\s*(\S+)/',
+                subject: $file_contents,
+                matches: $matches
+            ) && isset($matches[1])
+        ) {
             return $matches[1];
         }
 
