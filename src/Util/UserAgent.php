@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Throwable;
 
 /**
@@ -18,34 +17,48 @@ use Throwable;
 class UserAgent
 {
     /**
-     * Get version from the current installed plugin (which potentially can be dynamically installed
-     * with different slugs).
+     * Cached plugin version (resolved once per request).
+     */
+    private static string $pluginVersion = '1.0.0';
+
+    /**
+     * Whether version has been resolved yet.
+     */
+    private static bool $pluginVersionResolved = false;
+
+    /**
+     * Resolve plugin version from plugin metadata, cached for the request lifetime.
      *
-     * @throws IllegalValueException
+     * Reads `Version:` from init.php first, falls back to `Stable tag:` in readme.txt.
+     * Returns '1.0.0' if neither source is available.
      */
     public static function getPluginVersion(): string
     {
-        /** @noinspection PhpArgumentWithoutNamedIdentifierInspection */
-        // Using get_file_data here since WordPress' base function get_plugin_data is currently not available when
-        // this method is called.
-        $pluginFileData = get_file_data(
-            RESURSBANKABPAYMENTS_MODULE_DIR_PATH . '/readme.txt',
-            ['plugin_version' => 'Stable tag']
+        if (self::$pluginVersionResolved) {
+            return self::$pluginVersion;
+        }
+
+        self::$pluginVersionResolved = true;
+
+        $root = self::getPluginRootPath();
+
+        $version = self::readHeaderValue(
+            filePath: $root . '/init.php',
+            pattern: '/^\s*\*\s*Version:\s*(.+)$/mi'
         );
 
-        if (
-            (
-                !isset($pluginFileData['plugin_version']) &&
-                !is_string(value: $pluginFileData['plugin_version']) ||
-                $pluginFileData['plugin_version'] === ''
-            )
-        ) {
-            throw new IllegalValueException(
-                message: 'Plugin version is missing.'
+        if ($version === '') {
+            $version = self::readHeaderValue(
+                filePath: $root . '/readme.txt',
+                pattern: '/^\s*Stable tag:\s*(.+)$/mi'
             );
         }
 
-        return $pluginFileData['plugin_version'];
+        if ($version !== '') {
+            self::$pluginVersion = $version;
+        }
+
+        return self::$pluginVersion;
     }
 
     /**
@@ -73,11 +86,14 @@ class UserAgent
 
         // Use a regular expression to extract the version information.
         $matches = [];
-        if (preg_match(
-            pattern: '/Version:\s*(\S+)/',
-            subject: $file_contents,
-            matches: $matches
-        ) && isset($matches[1])) {
+
+        if (
+            preg_match(
+                pattern: '/Version:\s*(\S+)/',
+                subject: $file_contents,
+                matches: $matches
+            ) && isset($matches[1])
+        ) {
             return $matches[1];
         }
 
@@ -102,5 +118,51 @@ class UserAgent
         }
 
         return $return;
+    }
+
+    /**
+     * Resolve plugin root path from constant or relative to this file.
+     */
+    private static function getPluginRootPath(): string
+    {
+        if (defined('RESURSBANKABPAYMENTS_MODULE_DIR_PATH')) {
+            return rtrim(
+                string: RESURSBANKABPAYMENTS_MODULE_DIR_PATH,
+                characters: '/'
+            );
+        }
+
+        return dirname(path: __DIR__, levels: 2);
+    }
+
+    /**
+     * Extract a single header value from a file using a regex pattern.
+     */
+    private static function readHeaderValue(string $filePath, string $pattern): string
+    {
+        if (!file_exists(filename: $filePath)) {
+            return '';
+        }
+
+        $content = file_get_contents(filename: $filePath);
+
+        if (!is_string(value: $content) || $content === '') {
+            return '';
+        }
+
+        $matches = [];
+
+        if (
+            !preg_match(
+                pattern: $pattern,
+                subject: $content,
+                matches: $matches
+            ) ||
+            !isset($matches[1])
+        ) {
+            return '';
+        }
+
+        return trim(string: $matches[1]);
     }
 }

@@ -103,12 +103,13 @@ class Order
                 module: 'Order',
                 file: 'admin/getOrderContent.js'
             );
+            $pluginVersion = UserAgent::getPluginVersion();
 
             wp_enqueue_script(
                 'resursbankabpaygw-get-order-content-admin-scripts',
                 $url,
                 ['jquery'],
-                '1.0.0',
+                $pluginVersion,
                 true
             );
 
@@ -116,10 +117,12 @@ class Order
                 'resursbankabpaygw-get-order-content-admin-inline-scripts',
                 '',
                 ['resursbankabpaygw-get-order-content-admin-scripts'],
-                '1.0.0',
+                $pluginVersion,
                 true
             );
-            wp_enqueue_script('resursbankabpaygw-get-order-content-admin-inline-scripts');
+            wp_enqueue_script(
+                'resursbankabpaygw-get-order-content-admin-inline-scripts'
+            );
             wp_add_inline_script(
                 'resursbankabpaygw-get-order-content-admin-inline-scripts',
                 sprintf(

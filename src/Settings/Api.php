@@ -35,6 +35,7 @@ use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Resursbank\Woocommerce\Util\Url;
+use Resursbank\Woocommerce\Util\UserAgent;
 use Resursbank\Woocommerce\Util\WooCommerce;
 use Throwable;
 
@@ -90,6 +91,8 @@ class Api
      */
     public static function initScripts(): void
     {
+        $pluginVersion = UserAgent::getPluginVersion();
+
         wp_register_script(
             'resursbankabpaygw-api-admin-scripts-load',
             Url::getResourceUrl(
@@ -97,7 +100,7 @@ class Api
                 file: 'saved-updates.js'
             ),
             [],
-            '1.0.0',
+            $pluginVersion,
             true
         );
         wp_enqueue_script(
@@ -107,7 +110,7 @@ class Api
                 file: 'saved-updates.js'
             ),
             ['jquery'],
-            '1.0.0',
+            $pluginVersion,
             true
         );
 
@@ -129,7 +132,7 @@ class Api
                 type: ResourceType::CSS
             ),
             [],
-            '1.0.0'
+            $pluginVersion
         );
     }
 

@@ -294,8 +294,8 @@ class Route
         header(header: 'Content-Type: ' . $contentType);
         header(header: 'Content-Length: ' . strlen(string: $body));
 
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escapeForContentType() returns escaped content
-        echo self::escapeForContentType($body, $contentType);
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo $body;
     }
 
     /**
@@ -367,34 +367,6 @@ class Route
 
         header(header: 'Location: ' . $url);
         exit;
-    }
-
-    /**
-     * Escape output based on content type.
-     *
-     * @param string $body The content to escape
-     * @param string $contentType The HTTP Content-Type header value
-     * @return string Escaped content ready for output
-     */
-    private static function escapeForContentType(
-        string $body,
-        string $contentType
-    ): string {
-        $normalizedType = strtolower(string: $contentType);
-
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- json should not be escaped!
-        if (str_starts_with(
-            haystack: $normalizedType,
-            needle: 'application/json'
-        )) {
-            return $body;
-        }
-
-        if (str_starts_with(haystack: $normalizedType, needle: 'text/html')) {
-            return wp_kses_post($body);
-        }
-
-        return esc_html(text: $body);
     }
 
     /**
