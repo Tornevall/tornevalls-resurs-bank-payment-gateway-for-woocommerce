@@ -1,3 +1,9 @@
+# 1.2.25
+
+* PD-4007: Fixed frontend and AJAX response issues affecting Get Address related flows.
+* Moved script injection to a more reliable execution point.
+* Replaced hardcoded asset version strings with the plugin version for better cache busting.
+
 # 1.2.24
 
 * Marked the plugin as tested with PHP 8.5 and aligned related plugin metadata.

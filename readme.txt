@@ -9,7 +9,7 @@ WC Tested up to: 10.5.3
 Plugin requires ecom: 3.4.0
 Plugin tested up to: PHP 8.5
 Requires Plugins: woocommerce
-Stable tag: 1.2.24
+Stable tag: 1.2.25
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -88,6 +88,12 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
 
 Latest changes:
+
+# 1.2.25
+
+* PD-4007: Fixed frontend and AJAX response issues affecting Get Address related flows.
+* Moved script injection to a more reliable execution point.
+* Replaced hardcoded asset version strings with the plugin version for better cache busting.
 
 # 1.2.24
 
