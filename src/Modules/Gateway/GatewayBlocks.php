@@ -165,6 +165,10 @@ final class GatewayBlocks extends AbstractPaymentMethodType
      */
     public function get_payment_method_data(): array
     {
+        if (WC()?->cart?->total === 0) {
+            return [];
+        }
+
         $result = [
             'allowed_country' => $this->getAllowedCountry(),
             'payment_methods' => [],
