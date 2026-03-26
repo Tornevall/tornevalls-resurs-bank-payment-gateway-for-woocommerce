@@ -318,7 +318,7 @@ class Resursbank extends WC_Payment_Gateway
                 return;
             }
 
-            if (!$this->method instanceof PaymentMethod) {
+            if (!$this->method instanceof PaymentMethod || $this->get_order_total() === 0) {
                 return;
             }
 
