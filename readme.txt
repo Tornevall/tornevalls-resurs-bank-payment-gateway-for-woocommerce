@@ -6,10 +6,10 @@ Tested up to: 6.9
 Requires PHP: 8.1
 WC requires at least: 7.6.0
 WC Tested up to: 10.5.3
-Plugin requires ecom: 3.4.0
+Plugin requires ecom: 3.4.1
 Plugin tested up to: PHP 8.5
 Requires Plugins: woocommerce
-Stable tag: 1.2.26
+Stable tag: 1.2.27
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -88,6 +88,11 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
 
 Latest changes:
+
+# 1.2.27
+
+* Updated bundled ECom to 3.4.1.
+* Fixed CostList row expander reinitializing on repeated DOM mutations, which forced the first section back to expanded and overrode user-selected rows in dynamic checkout flows.
 
 # 1.2.26
 

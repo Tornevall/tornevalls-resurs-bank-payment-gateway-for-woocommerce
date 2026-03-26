@@ -1,3 +1,8 @@
+# 1.2.27
+
+* Updated bundled ECom to 3.4.1.
+* Fixed CostList row expander reinitializing on repeated DOM mutations, which forced the first section back to expanded and overrode user-selected rows in dynamic checkout flows. Initialization is now idempotent via a `data-rb-row-expander-init` guard.
+
 # 1.2.26
 
 * Fixed hangs and timeouts due to a calculation of zero amounts.
