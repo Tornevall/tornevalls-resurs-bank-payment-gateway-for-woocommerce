@@ -315,7 +315,6 @@ class Resursbank extends WC_Payment_Gateway
     {
         try {
             if (AdminUtility::isAdmin() || WC()?->cart === null) {
-                // Do not render payment fields in admin.
                 return;
             }
 
