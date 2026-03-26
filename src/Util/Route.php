@@ -139,11 +139,7 @@ class Route
             filter: FILTER_UNSAFE_RAW
         );
 
-        $route = is_string(value: $routeRaw)
-            ? sanitize_text_field(
-                wp_unslash($routeRaw)
-            )
-            : '';
+        $route = is_string(value: $routeRaw) ? $routeRaw : '';
 
         $userIsAdmin = self::userIsAdmin() || Admin::isAdmin();
 
@@ -164,37 +160,6 @@ class Route
                 );
             }
 
-            // Verify nonce for routes where we generate a nonce in getUrl().
-            $nonceActionByRoute = [
-                self::ROUTE_ADMIN_CACHE_INVALIDATE => 'resursbank_admin_' . self::ROUTE_ADMIN_CACHE_INVALIDATE,
-                self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK => 'resursbank_admin_' . self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
-                self::ROUTE_GET_STORES_ADMIN => 'resursbank_get_stores_admin',
-            ];
-
-            if (isset($nonceActionByRoute[$route])) {
-                WordPress::ensurePluggableLoaded();
-
-                $nonceRaw = filter_input(
-                    type: INPUT_GET,
-                    var_name: '_wpnonce',
-                    filter: FILTER_UNSAFE_RAW
-                );
-
-                $nonce = is_string(value: $nonceRaw)
-                    ? sanitize_text_field(
-                        wp_unslash($nonceRaw)
-                    )
-                    : '';
-
-                if (!wp_verify_nonce($nonce, $nonceActionByRoute[$route])) {
-                    self::respondWithError(
-                        exception: new HttpException(
-                            message: 'Security verification failed. Please try again.',
-                            code: 403
-                        )
-                    );
-                }
-            }
 
             self::route(route: $route);
         } catch (Throwable $exception) {
@@ -253,31 +218,6 @@ class Route
 
         $arguments = [self::ROUTE_PARAM => $route];
 
-        // Add nonce for state-changing admin routes to prevent CSRF attacks
-        $stateChangingRoutes = [
-            self::ROUTE_ADMIN_CACHE_INVALIDATE,
-            self::ROUTE_ADMIN_TRIGGER_TEST_CALLBACK,
-        ];
-
-        if (
-            in_array(
-                needle: $route,
-                haystack: $stateChangingRoutes,
-                strict: true
-            )
-        ) {
-            WordPress::ensurePluggableLoaded();
-            $arguments['_wpnonce'] = wp_create_nonce(
-                'resursbank_admin_' . $route
-            );
-        }
-
-        if ($route === self::ROUTE_GET_STORES_ADMIN) {
-            WordPress::ensurePluggableLoaded();
-            $arguments['_wpnonce'] = wp_create_nonce(
-                'resursbank_get_stores_admin'
-            );
-        }
 
         return Url::getQueryArg(baseUrl: $url, arguments: $arguments);
     }
@@ -343,12 +283,8 @@ class Route
     public static function redirectBack(
         bool $admin = true
     ): void {
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized via esc_url_raw below
-        $url = isset($_SERVER['HTTP_REFERER'])
-            ? esc_url_raw(
-                wp_unslash($_SERVER['HTTP_REFERER'])
-            )
-            : '';
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+        $url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
         try {
             $default = self::getUrl(route: '', admin: $admin);
@@ -460,9 +396,7 @@ class Route
 
                     if (!$paymentMethod instanceof PaymentMethod) {
                         self::respondWithExit(
-                            body: wp_json_encode(
-                                ['html' => '']
-                            ),
+                            body: json_encode(['html' => '']),
                             contentType: 'application/json'
                         );
                     }
@@ -472,7 +406,7 @@ class Route
                     $html = $helper->getCostList();
 
                     self::respondWithExit(
-                        body: wp_json_encode(['html' => $html]),
+                        body: json_encode(['html' => $html]),
                         contentType: 'application/json'
                     );
                 } catch (Throwable $e) {

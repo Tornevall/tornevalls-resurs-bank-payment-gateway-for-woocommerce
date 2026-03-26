@@ -89,6 +89,10 @@ For full documentation, please refer to our [documentation](https://developers.r
 
 Latest changes:
 
+# 1.2.27
+
+* Escaping and sanitizing on trusted elements removed.
+
 # 1.2.26
 
 * Fixed hangs and timeouts due to a calculation of zero amounts.
