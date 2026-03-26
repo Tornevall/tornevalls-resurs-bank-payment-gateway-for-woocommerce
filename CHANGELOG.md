@@ -1,3 +1,7 @@
+# 1.2.26
+
+* Fixed hangs and timeouts due to a calculation of zero amounts.
+
 # 1.2.25
 
 * PD-4007: Fixed frontend and AJAX response issues affecting Get Address related flows.
