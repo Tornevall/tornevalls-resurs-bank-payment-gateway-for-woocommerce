@@ -278,19 +278,24 @@ class PartPayment
                 ? WooCommerce::getCartTotals()
                 : (float) self::getProduct()?->get_price();
 
+        } catch (Throwable) {
+            $priceData = WooCommerce::getCartTotals();
+        }
+
+        try {
             // Let partners override.
             $priceDataMaybe = (float) apply_filters(
                 'resursbank_pp_price_data',
                 $priceData,
                 self::getProduct()
             );
-
-            // Only accept positive values from filter.
-            if ($priceDataMaybe > 0.0) {
-                $priceData = $priceDataMaybe;
-            }
         } catch (Throwable) {
-            $priceData = WooCommerce::getCartTotals();
+            $priceDataMaybe = 0.0;
+        }
+
+        // Only accept positive values from filter.
+        if ($priceDataMaybe > 0.0) {
+            $priceData = $priceDataMaybe;
         }
 
         return $priceData;
