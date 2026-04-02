@@ -1,3 +1,7 @@
+# 1.2.29
+
+* Fixed bug in pricedata-checker.
+
 # 1.2.28
 
 * Fatal error: Uncaught Error: Class "Resursbank\Woocommerce\Admin" not found
