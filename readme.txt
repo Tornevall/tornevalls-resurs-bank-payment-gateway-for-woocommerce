@@ -9,7 +9,7 @@ WC Tested up to: 10.5.3
 Plugin requires ecom: 3.4.1
 Plugin tested up to: PHP 8.5
 Requires Plugins: woocommerce
-Stable tag: 1.2.27
+Stable tag: 1.2.28
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -89,72 +89,15 @@ For full documentation, please refer to our [documentation](https://developers.r
 
 Latest changes:
 
+# 1.2.28
+
+* Fatal error: Uncaught Error: Class "Resursbank\Woocommerce\Admin" not found
+
 # 1.2.27
 
 * Updated bundled ECom to 3.4.1.
 * Fixed CostList row expander reinitializing on repeated DOM mutations, which forced the first section back to expanded and overrode user-selected rows in dynamic checkout flows.
 
-# 1.2.26
-
-* Fixed hangs and timeouts due to a calculation of zero amounts.
-
-# 1.2.25
-
-* PD-4007: Fixed frontend and AJAX response issues affecting Get Address related flows.
-* Moved script injection to a more reliable execution point.
-* Replaced hardcoded asset version strings with the plugin version for better cache busting.
-
-# 1.2.24
-
-* Updated bundled ECom to 3.4.0.
-* Marked the plugin as tested with PHP 8.5 and aligned related plugin metadata.
-
-# 1.2.23
-
-* Due to constant changes, upgrades may show temporary critical warnings during mixed-version loading, without harming platform operation.
-* ECom upgraded to support PHP 8.5.
-
-# 1.2.22
-
-* Incremental commit.
-
-# 1.2.21
-
-* Incremental commit.
-
-# 1.2.20
-
-* WordPress.org review hardening: Implemented additional sanitization/validation at controlled entry points and centralized input handling.
-* Improved output escaping for admin notices and inline script payloads where applicable.
-* Added wp_kses sanitization for GetAddress widget HTML output in the_content filter callbacks to meet WordPress.org security requirements while preserving widget functionality.
-* Removed disallowed HEREDOC/NOWDOC usage flagged by review.
-* Removed unneeded development artifacts from the release package.
-* Clarified SDK separation by relocating shared SDK path from lib/ecom to vendor/ecom.
-* Added/updated inline code comments to document rationale for guideline-driven implementations.
-* Plugin Check findings addressed and reduced to minimal, justified remaining notices.
-* Fixes and stuff connected to "spammy services" and security advices.
-
-# 1.2.19
-
-* Minor maintenance updates and internal adjustments.
-
-# 1.2.18
-
-* Fixes to reach latest ecom.
-* PD-3915: Merge latest ecom with master (NOT the experimental branch)
-
-# 1.2.17
-
-* No changes, only tag bump.
-
-# 1.2.16
-
-* Ecom widget patch.
-
-# 1.2.15
-
-* Positional execution problem (hotfix).
-* Can't change order status on other orders than Resurs (hotfix).
 
 == Upgrade Notice ==
 

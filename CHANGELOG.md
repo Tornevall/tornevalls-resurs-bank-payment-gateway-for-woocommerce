@@ -1,3 +1,7 @@
+# 1.2.28
+
+* Fatal error: Uncaught Error: Class "Resursbank\Woocommerce\Admin" not found
+
 # 1.2.27
 
 * Updated bundled ECom to 3.4.1.
