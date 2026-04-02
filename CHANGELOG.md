@@ -1,4 +1,4 @@
-# 1.2.29
+# 1.2.29/1.2.30
 
 * Fixed bug in pricedata-checker.
 

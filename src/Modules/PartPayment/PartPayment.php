@@ -283,18 +283,20 @@ class PartPayment
         }
 
         try {
+            $theProduct = self::getProduct();
             // Let partners override.
-            $priceDataMaybe = (float) apply_filters(
-                'resursbank_pp_price_data',
-                $priceData,
-                self::getProduct()
-            );
         } catch (Throwable) {
-            $priceDataMaybe = 0.0;
+            $theProduct = null;
         }
 
+        $priceDataMaybe = (float) apply_filters(
+            'resursbank_pp_price_data',
+            $priceData,
+            $theProduct
+        );
+
         // Only accept positive values from filter.
-        if ($priceDataMaybe > 0.0) {
+        if ((float)$priceDataMaybe > 0.0) {
             $priceData = $priceDataMaybe;
         }
 

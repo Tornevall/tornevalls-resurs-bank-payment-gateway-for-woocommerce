@@ -9,7 +9,7 @@ WC Tested up to: 10.5.3
 Plugin requires ecom: 3.4.1
 Plugin tested up to: PHP 8.5
 Requires Plugins: woocommerce
-Stable tag: 1.2.29
+Stable tag: 1.2.30
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -89,7 +89,7 @@ For full documentation, please refer to our [documentation](https://developers.r
 
 Latest changes:
 
-# 1.2.29
+# 1.2.29/1.2.30
 
 * Fixed bug in pricedata-checker.
 
