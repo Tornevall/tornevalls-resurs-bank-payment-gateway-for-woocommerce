@@ -1,3 +1,7 @@
+# 1.2.31
+
+* wp-admin create orders manually are blocked by status update filters.
+
 # 1.2.29/1.2.30
 
 * Fixed bug in pricedata-checker.
