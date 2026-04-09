@@ -85,6 +85,11 @@ class BeforeOrderStatusChange
             status: WordPress::getPostParam('order_status')
         );
 
+        // Draft/new admin order flows may not have a materialized WC_Order yet.
+        if (!$order instanceof WC_Order) {
+            return;
+        }
+
         // Ignore other methods.
         if (!Metadata::isValidResursPayment(order: $order)) {
             return;
