@@ -101,7 +101,7 @@ class Url
                 throw new IllegalValueException(
                     message: sprintf(
                         'Argument value is not a string (type: %s).',
-                        esc_html(gettype(value: $argumentValue))
+                        gettype(value: $argumentValue)
                     )
                 );
             }
@@ -171,8 +171,8 @@ class Url
             throw new RuntimeException(
                 message: sprintf(
                     'Could not produce a string URL for "%s". Result came back as: %s',
-                    esc_html($path),
-                    esc_html(gettype(value: $result))
+                    $path,
+                    gettype(value: $result)
                 )
             );
         }
