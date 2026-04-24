@@ -91,7 +91,7 @@ class AssetLoader
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prebuilt safe CSS payload from trusted SDK, escaped at source by contract.
         wp_add_inline_style(
             'resursbankabpaygw-costlist-css',
-            esc_html(wp_strip_all_tags($costListCssSafe))
+            $costListCssSafe
         );
     }
 
@@ -169,7 +169,7 @@ class AssetLoader
         wp_enqueue_style('resursbankabpaygw-pp-css-extra');
         wp_add_inline_style(
             'resursbankabpaygw-pp-css-extra',
-            esc_html(wp_strip_all_tags(self::getPartPaymentCssExtras()))
+            self::getPartPaymentCssExtras()
         );
     }
 
@@ -209,7 +209,7 @@ class AssetLoader
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prebuilt safe CSS payload from trusted SDK, escaped at source by contract.
         wp_add_inline_style(
             'resursbankabpaygw-read-more-style',
-            esc_html(wp_strip_all_tags($readMoreCssSafe))
+            $readMoreCssSafe
         );
     }
 

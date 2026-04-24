@@ -693,27 +693,6 @@ class HtmlSanitizer
         return false;
     }
 
-    /**
-     * Normalize SDK HTML to survive wp_kses without losing key visuals.
-     *
-     * - Removes <style> blocks (wp_kses will strip them anyway, and their content can become stray text nodes).
-     * - Inlines the warning icon fill color when the SDK uses class="st0" + a removed <style> rule.
-     *
-     * @param string $html The HTML to normalize
-     * @return string Normalized HTML
-     */
-    public static function normalizeWidgetHtml(string $html): string
-    {
-        // Remove style tags completely.
-        $html = (string)preg_replace('~<style[^>]*>.*?</style>~is', '', $html);
-
-        // Inline fill color for elements that rely on a removed CSS class.
-        // Note: This is intentionally simple because the SDK markup uses class="st0" without an existing fill attribute.
-        $html = str_replace('class="st0"', 'class="st0" fill="#AA1E1E"', $html);
-        $html = str_replace("class='st0'", "class='st0' fill='#AA1E1E'", $html);
-
-        return $html;
-    }
 
     /**
      * Temporarily extends WordPress safe inline style properties while executing a callback.
