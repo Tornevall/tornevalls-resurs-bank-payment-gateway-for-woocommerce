@@ -143,7 +143,10 @@ class Store
             true
         );
         wp_enqueue_script('resursbankabpaygw-store-admin-scripts');
-        wp_add_inline_script('resursbankabpaygw-store-admin-scripts', $widget->content);
+        wp_add_inline_script(
+            'resursbankabpaygw-store-admin-scripts',
+            $widget->content
+        );
 
         wp_register_script(
             'resursbankabpaygw-store-admin-scripts-load',

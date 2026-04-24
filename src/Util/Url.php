@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Resursbank\Woocommerce\Util;
 
-use JsonException;
 use Resursbank\Ecom\Exception\Validation\IllegalValueException;
 use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Lib\Order\PaymentMethod\Type;
@@ -219,18 +218,19 @@ class Url
     public static function getHttpJson(string $key): ?string
     {
         $raw = file_get_contents('php://input');
+
         if (!$raw) {
             return null;
         }
 
         $json = json_decode($raw, true);
+
         if (!is_array($json) || !isset($json[$key])) {
             return null;
         }
 
         return sanitize_text_field(wp_unslash($json[$key]));
     }
-
 
     /**
      * Generate URL for MAPI callbacks.

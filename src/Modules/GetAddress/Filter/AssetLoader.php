@@ -89,10 +89,7 @@ class AssetLoader
          * safecss_filter_attr() is for style attributes, not full CSS blocks.
          */
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prebuilt safe CSS payload from trusted SDK, escaped at source by contract.
-        wp_add_inline_style(
-            'resursbankabpaygw-costlist-css',
-            $costListCssSafe
-        );
+        wp_add_inline_style('resursbankabpaygw-costlist-css', $costListCssSafe);
     }
 
     /**

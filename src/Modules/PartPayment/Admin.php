@@ -75,7 +75,10 @@ class Admin
                 );
             }
 
-            add_action('admin_enqueue_scripts', 'resursbankabpaygw-partpayment-admin-scripts');
+            add_action(
+                'admin_enqueue_scripts',
+                'resursbankabpaygw-partpayment-admin-scripts'
+            );
 
             wp_register_script(
                 'resursbankabpaygw-partpayment-admin-scripts-load',

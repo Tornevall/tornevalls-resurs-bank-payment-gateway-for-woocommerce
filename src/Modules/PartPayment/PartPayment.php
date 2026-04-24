@@ -240,7 +240,6 @@ class PartPayment
             $priceData = is_checkout()
                 ? WooCommerce::getCartTotals()
                 : (float) self::getProduct()?->get_price();
-
         } catch (Throwable) {
             $priceData = WooCommerce::getCartTotals();
         }
