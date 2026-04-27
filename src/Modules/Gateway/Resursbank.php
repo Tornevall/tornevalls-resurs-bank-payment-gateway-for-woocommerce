@@ -43,7 +43,6 @@ use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction
 use Resursbank\Woocommerce\Modules\Order\Order as OrderModule;
 use Resursbank\Woocommerce\Modules\Payment\Converter\Order;
 use Resursbank\Woocommerce\Util\Admin as AdminUtility;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
@@ -149,15 +148,8 @@ class Resursbank extends WC_Payment_Gateway
             return;
         }
 
-        $allowedHtml = HtmlSanitizer::getBlocksWidgetAllowlist();
-        $html = HtmlSanitizer::normalizeWidgetHtml($this->uspText);
-
-        HtmlSanitizer::withSafeStyleCssContext(
-            properties: HtmlSanitizer::getBlocksWidgetSafeStyles(),
-            callback: static function () use ($html, $allowedHtml): void {
-                echo wp_kses($html, $allowedHtml);
-            }
-        );
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo $this->uspText;
     }
 
     /**

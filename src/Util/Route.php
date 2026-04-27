@@ -460,9 +460,7 @@ class Route
 
                     if (!$paymentMethod instanceof PaymentMethod) {
                         self::respondWithExit(
-                            body: wp_json_encode(
-                                ['html' => '']
-                            ),
+                            body: self::toJsonBody(['html' => '']),
                             contentType: 'application/json'
                         );
                     }
@@ -472,7 +470,7 @@ class Route
                     $html = $helper->getCostList();
 
                     self::respondWithExit(
-                        body: wp_json_encode(['html' => $html]),
+                        body: self::toJsonBody(['html' => $html]),
                         contentType: 'application/json'
                     );
                 } catch (Throwable $e) {
@@ -520,5 +518,17 @@ class Route
             replacement: '',
             subject: $url
         ) . '/';
+    }
+
+    /**
+     * Encode payload as JSON and always return a valid JSON string.
+     *
+     * @param array<string, mixed> $payload
+     */
+    private static function toJsonBody(array $payload): string
+    {
+        $encoded = wp_json_encode($payload);
+
+        return is_string($encoded) ? $encoded : '{"html":""}';
     }
 }

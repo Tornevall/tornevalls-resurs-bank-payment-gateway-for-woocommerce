@@ -11,13 +11,13 @@ namespace Resursbank\Woocommerce\Settings;
 
 use Resursbank\Ecom\Config;
 use Resursbank\Ecom\Exception\ConfigException;
+use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 use Resursbank\Woocommerce\Settings\Filter\AddDocumentationLink;
 use Resursbank\Woocommerce\SettingsPage;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Route;
 use Resursbank\Woocommerce\Util\Translator;
 use Throwable;
-use Resursbank\Ecom\Module\Store\Repository as StoreRepository;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {

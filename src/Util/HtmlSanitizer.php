@@ -573,7 +573,7 @@ class HtmlSanitizer
      * These properties are temporarily allowed via safe_style_css filter
      * when sanitizing SDK-generated widget HTML.
      *
-     * @return string[]
+     * @return array<string>
      */
     public static function getBlocksWidgetSafeStyles(): array
     {
@@ -629,7 +629,7 @@ class HtmlSanitizer
      *
      * Used when SDK widgets rely on style properties not in WordPress' default safe list.
      *
-     * @param string[] $properties CSS property names to allow
+     * @param array<string> $properties CSS property names to allow
      * @param callable():string $callback Function that performs wp_kses sanitization
      * @return string Sanitized HTML
      */
@@ -639,6 +639,7 @@ class HtmlSanitizer
             foreach ($properties as $prop) {
                 $styles[] = $prop;
             }
+
             return array_values(array_unique($styles));
         };
 
@@ -660,11 +661,13 @@ class HtmlSanitizer
     public static function isAllowedIframeSrc(string $src): bool
     {
         $src = trim($src);
+
         if ($src === '') {
             return false;
         }
 
         $parts = wp_parse_url($src);
+
         if (!is_array($parts)) {
             return false;
         }
@@ -694,33 +697,11 @@ class HtmlSanitizer
     }
 
     /**
-     * Normalize SDK HTML to survive wp_kses without losing key visuals.
-     *
-     * - Removes <style> blocks (wp_kses will strip them anyway, and their content can become stray text nodes).
-     * - Inlines the warning icon fill color when the SDK uses class="st0" + a removed <style> rule.
-     *
-     * @param string $html The HTML to normalize
-     * @return string Normalized HTML
-     */
-    public static function normalizeWidgetHtml(string $html): string
-    {
-        // Remove style tags completely.
-        $html = (string)preg_replace('~<style[^>]*>.*?</style>~is', '', $html);
-
-        // Inline fill color for elements that rely on a removed CSS class.
-        // Note: This is intentionally simple because the SDK markup uses class="st0" without an existing fill attribute.
-        $html = str_replace('class="st0"', 'class="st0" fill="#AA1E1E"', $html);
-        $html = str_replace("class='st0'", "class='st0' fill='#AA1E1E'", $html);
-
-        return $html;
-    }
-
-    /**
      * Temporarily extends WordPress safe inline style properties while executing a callback.
      *
      * Use this when wp_kses() must run while the safe_style_css filter is active.
      *
-     * @param string[] $properties CSS property names to allow
+     * @param array<string> $properties CSS property names to allow
      * @param callable():void $callback Function executed while styles are allowed
      */
     public static function withSafeStyleCssContext(array $properties, callable $callback): void
@@ -729,6 +710,7 @@ class HtmlSanitizer
             foreach ($properties as $prop) {
                 $styles[] = $prop;
             }
+
             return array_values(array_unique($styles));
         };
 

@@ -67,7 +67,9 @@ class PaymentInformation
          * safecss_filter_attr() is intended for style attributes, not full CSS blocks.
          */
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Prebuilt safe CSS payload from trusted SDK, escaped at source by contract.
-        echo '<style>' . esc_html(wp_strip_all_tags($paymentInformationCssSafe)) . '</style>';
+        echo '<style>' . esc_html(
+            wp_strip_all_tags($paymentInformationCssSafe)
+        ) . '</style>';
     }
 
     /**

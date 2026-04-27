@@ -24,7 +24,6 @@ use Resursbank\Ecom\Module\Widget\Logo\Html as LogoWidget;
 use Resursbank\Ecom\Module\Widget\ReadMore\Html as ReadMoreWidget;
 use Resursbank\Woocommerce\Database\Options\Advanced\StoreId;
 use Resursbank\Woocommerce\Database\Options\Api\Enabled;
-use Resursbank\Woocommerce\Util\HtmlSanitizer;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\ResourceType;
 use Resursbank\Woocommerce\Util\Route;
@@ -155,10 +154,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
     /**
      * Get data for payment gateway, will render to JS.
      *
-     * NOTE: The HTML snippets below originate from an SDK.
-     * We sanitize them via wp_kses with an allowlist that preserves required behavior
-     * (iframe, data-* attributes, ids) while preventing XSS.
-     *
      * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      * @noinspection PhpMissingParentCallCommonInspection
@@ -197,29 +192,19 @@ final class GatewayBlocks extends AbstractPaymentMethodType
                     continue;
                 }
 
-                // Sanitize SDK HTML before sending it to JS.
+                // Build widget HTML payload as-is and pass directly to JS.
                 $descriptionHtml = '<div class="rb-usp">' . ($uspText ?? '') . '</div>';
 
                 $result['payment_methods'][] = [
                     'name' => $paymentMethod->id,
                     'title' => $paymentMethod->name,
-                    'description' => self::sanitizeBlocksWidgetHtml(
-                        $descriptionHtml
-                    ),
-                    'costlist' => self::sanitizeBlocksWidgetHtml(
-                        $costList ?? ''
-                    ),
+                    'description' => $descriptionHtml,
+                    'costlist' => (string)($costList ?? ''),
                     'costlist_url' => Route::getUrl(route: 'get-costlist'),
-                    'readmore' => self::sanitizeBlocksWidgetHtml(
-                        $readMore->content ?? ''
-                    ),
-                    'price_signage_warning' => self::sanitizeBlocksWidgetHtml(
-                        $priceSignageWarning ?? ''
-                    ),
+                    'readmore' => (string)($readMore->content ?? ''),
+                    'price_signage_warning' => (string)($priceSignageWarning ?? ''),
                     'read_more_css' => '',
-                    'logo' => self::sanitizeBlocksWidgetHtml(
-                        $logo->content ?? ''
-                    ),
+                    'logo' => (string)($logo->content ?? ''),
                     'logo_type' => $logo->getIdentifier(),
                     'min_purchase_limit' => $paymentMethod->minPurchaseLimit,
                     'max_purchase_limit' => $paymentMethod->maxPurchaseLimit,
@@ -233,54 +218,6 @@ final class GatewayBlocks extends AbstractPaymentMethodType
         }
 
         return $result;
-    }
-
-    /**
-     * Sanitize SDK-generated HTML for Blocks checkout.
-     *
-     * Delegates to centralized HtmlSanitizer utility which handles:
-     * - ReadMore widget functionality (data-* attributes, id, iframe)
-     * - SVG logos (defs/g/path/polygon)
-     * - Defense-in-depth iframe src validation
-     * - Safe inline style properties
-     * - Preventing script injection via wp_kses
-     *
-     * @param string $html HTML to sanitize
-     * @return string Sanitized HTML safe for output
-     */
-    private static function sanitizeBlocksWidgetHtml(string $html): string
-    {
-        $html = (string)$html;
-
-        if ($html === '') {
-            return '';
-        }
-
-        // Normalize SDK patterns that break when <style> is removed.
-        $html = HtmlSanitizer::normalizeWidgetHtml($html);
-
-        // Remove iframes with unexpected src (defense-in-depth).
-        $html = (string)preg_replace_callback(
-            '~<iframe\b([^>]*\bsrc\s*=\s*(["\'])(.*?)\2[^>]*)>(.*?)</iframe>~is',
-            callback: static function (array $m): string {
-                $src = (string)$m[3];
-
-                if (!HtmlSanitizer::isAllowedIframeSrc($src)) {
-                    return '';
-                }
-
-                return $m[0];
-            },
-            subject: $html
-        );
-
-        $allowed = HtmlSanitizer::getBlocksWidgetAllowlist();
-
-        // Temporarily extend safe_style_css to allow widget-required CSS properties.
-        return HtmlSanitizer::withSafeStyleCss(
-            HtmlSanitizer::getBlocksWidgetSafeStyles(),
-            static fn (): string => wp_kses($html, $allowed)
-        );
     }
 
     /**
