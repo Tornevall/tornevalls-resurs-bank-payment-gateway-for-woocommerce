@@ -408,7 +408,7 @@ class WooCommerce
             // it will default to false return value below.
         }
 
-        return $paymentMethod instanceof PaymentMethod;
+        return $paymentMethod instanceof EcomPaymentMethod;
     }
 
     /**

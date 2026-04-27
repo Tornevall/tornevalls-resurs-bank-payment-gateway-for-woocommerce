@@ -217,6 +217,10 @@ class PartPayment
             $amount = self::getPriceData();
             $method = self::getPaymentMethod();
 
+            if (!$method instanceof EcomPaymentMethod) {
+                return false;
+            }
+
             // Enabled if there is a product and a price.
             return PartPaymentOptions::isEnabled() &&
                 PaymentMethod::getData() !== '' &&
