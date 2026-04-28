@@ -7,9 +7,9 @@ Requires PHP: 8.1
 WC requires at least: 7.6.0
 WC Tested up to: 10.5.3
 Plugin requires ecom: 3.4.1
-Plugin tested up to: PHP 8.5
+Plugin tested up to: PHP 8.6
 Requires Plugins: woocommerce
-Stable tag: 1.2.31
+Stable tag: 1.2.32
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -89,22 +89,28 @@ For full documentation, please refer to our [documentation](https://developers.r
 
 Latest changes:
 
+# 1.2.32
+
+* Fixed null-pointer issue when `EcomPaymentMethod` is not always present on dashboard installs (PartPayment + WooCommerce utility).
+* Removed breaking HTML/CSS sanitization in checkout widget rendering — SDK-generated HTML, CSS and JS now pass through unsanitized as intended (PD-4049).
+* Fixed PHP 8.5 compatibility header: max tested PHP version bumped to 8.6 to correctly reflect 8.5 support (PD-4030).
+
 # 1.2.31
 
-* wp-admin create orders manually are blocked by status update filters.
+* Fixed manually created orders in wp-admin being incorrectly blocked by order status update filters.
 
-# 1.2.29/1.2.30
+# 1.2.29 / 1.2.30
 
-* Fixed bug in pricedata-checker.
+* Fixed incorrect price data being returned in the part payment price checker.
 
 # 1.2.28
 
-* Fatal error: Uncaught Error: Class "Resursbank\Woocommerce\Admin" not found
+* Fixed fatal error caused by missing class `Resursbank\Woocommerce\Admin` on certain install configurations.
 
 # 1.2.27
 
-* Updated bundled ECom to 3.4.1.
-* Fixed CostList row expander reinitializing on repeated DOM mutations, which forced the first section back to expanded and overrode user-selected rows in dynamic checkout flows.
+* Updated bundled ECom library to 3.4.1.
+* Fixed CostList row expander resetting to the first section on repeated DOM mutations, overriding user-selected rows in dynamic checkout flows.
 
 
 == Upgrade Notice ==
