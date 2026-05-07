@@ -1,3 +1,13 @@
+# 1.2.33
+
+* Updated bundled ECom library to 3.4.2.
+
+# 1.2.32
+
+* Fixed null-pointer issue when `EcomPaymentMethod` is not always present on dashboard installs (PartPayment + WooCommerce utility).
+* Removed breaking HTML/CSS sanitization in checkout widget rendering — SDK-generated HTML, CSS and JS now pass through unsanitized as intended (PD-4049).
+* Fixed PHP 8.5 compatibility header: max tested PHP version bumped to 8.6 to correctly reflect 8.5 support (PD-4030).
+
 # 1.2.31
 
 * wp-admin create orders manually are blocked by status update filters.
