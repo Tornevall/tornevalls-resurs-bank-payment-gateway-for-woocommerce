@@ -164,6 +164,17 @@ class Resursbank extends WC_Payment_Gateway
     {
         $order = new WC_Order(order: $order_id);
 
+        $existingRedirectUrl = $this->getExistingPaymentRedirectUrl(order: $order);
+
+        if ($existingRedirectUrl !== null) {
+            $this->clearSession();
+
+            return [
+                'result' => 'success',
+                'redirect' => $existingRedirectUrl,
+            ];
+        }
+
         try {
             $payment = $this->createPayment(order: $order);
         } catch (Throwable $e) {
@@ -381,6 +392,37 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
+     * Get redirect URL for existing payment awaiting gateway completion.
+     *
+     * Uses the tasks/status endpoint which provides the redirect URL even after
+     * payment creation (unlike the main GET payment endpoint). Returns null if
+     * no existing payment or no redirect URL available.
+     */
+    private function getExistingPaymentRedirectUrl(WC_Order $order): ?string
+    {
+        $paymentId = Metadata::getOrderMeta(
+            order: $order,
+            key: Metadata::KEY_PAYMENT_ID
+        );
+
+        if ($paymentId === '') {
+            return null;
+        }
+
+        try {
+            $taskStatus = PaymentRepository::getTaskStatusDetails(
+                paymentId: $paymentId
+            );
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $taskStatus->customer?->customerUrl ?? null;
+    }
+
+    /**
+     * Create a new payment at Resurs Bank.
+     *
      * @throws ApiException
      * @throws AuthException
      * @throws ConfigException
