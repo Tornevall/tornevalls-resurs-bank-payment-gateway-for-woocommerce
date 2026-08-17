@@ -16,6 +16,7 @@ use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
 use Resursbank\Woocommerce\Util\Log;
 use Resursbank\Woocommerce\Util\Metadata;
 use Resursbank\Woocommerce\Util\Translator;
+use Resursbank\Woocommerce\Util\WcSession;
 use Throwable;
 
 // Prevent direct access.
@@ -78,6 +79,9 @@ class ThankYou
                     phraseId: 'customer-landingpage-return'
                 ))
             );
+
+            // Clear the last order tracking to prevent issues with subsequent checkouts
+            WcSession::unset(key: 'resursbank_last_payment_order');
         } catch (Throwable $error) {
             Log::error(error: $error);
         }
