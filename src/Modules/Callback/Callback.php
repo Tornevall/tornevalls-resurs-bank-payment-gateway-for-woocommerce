@@ -18,6 +18,8 @@ use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
+use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
+use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
 use Resursbank\Woocommerce\Modules\Order\Status;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -64,6 +66,11 @@ class Callback
     /**
      * Performs callback processing.
      *
+     * CallbackException for missing orders is logged as DEBUG for rejected
+     * payments (expected when intentionally cancelled) but as ERROR for
+     * successful payments (indicates a race condition where payment completed
+     * while being cancelled).
+     *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function execute(): void
@@ -80,6 +87,14 @@ class Callback
             Log::debug(message: "Executing $type callback.");
 
             self::respond(type: $type);
+        } catch (CallbackException $e) {
+            // Order not found - check if this was a successful payment
+            // (which would indicate a race condition problem)
+            self::handleDetachedPaymentCallback(exception: $e);
+            Route::respondWithExit(
+                body: $e->getMessage(),
+                code: $e->getCode()
+            );
         } catch (Throwable $e) {
             Log::error(error: $e);
             Route::respondWithExit(
@@ -90,6 +105,59 @@ class Callback
     }
 
     /**
+     * Handle callback for a payment that's no longer attached to an order.
+     *
+     * For rejected payments, this is expected (we cancelled them) - log as DEBUG.
+     * For successful payments (CAPTURED, FROZEN, ACCEPTED), this is a problem -
+     * the payment completed while we were cancelling it. Log as ERROR.
+     */
+    private static function handleDetachedPaymentCallback(CallbackException $exception): void
+    {
+        // Try to extract payment ID from exception message
+        // Message format: "Unable to find order matching $paymentId"
+        if (!preg_match('/matching ([a-f0-9-]+)$/i', $exception->getMessage(), $matches)) {
+            Log::debug(message: $exception->getMessage());
+            return;
+        }
+
+        $paymentId = $matches[1];
+
+        try {
+            $payment = PaymentRepository::get(paymentId: $paymentId);
+
+            // Successful payment for detached order = race condition problem
+            if (in_array($payment->status, [
+                PaymentStatus::FROZEN,
+                PaymentStatus::ACCEPTED,
+            ], true)) {
+                Log::error(
+                    error: $exception,
+                    message: "CRITICAL: Successful payment $paymentId (status: " .
+                        "{$payment->status->value}) has no attached order! " .
+                        "Customer may have been charged but order not processed."
+                );
+                return;
+            }
+
+            // Rejected/cancelled payment - expected, log as debug
+            Log::debug(
+                message: "Detached payment $paymentId callback - status: " .
+                    "{$payment->status->value} (expected for cancelled payments)"
+            );
+        } catch (Throwable $e) {
+            // Can't check payment status - log original exception as debug
+            Log::debug(message: $exception->getMessage());
+            Log::debug(message: "Could not verify payment status: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Find the order associated with a payment ID.
+     *
+     * Throws CallbackException with 408 code when no order is found. This is
+     * expected behavior for payments that were intentionally detached from
+     * their orders during multi-tab checkout handling.
+     *
      * @throws CallbackException
      */
     public static function getOrder(string $paymentId): WC_Order
@@ -98,7 +166,8 @@ class Callback
 
         if (!$order instanceof WC_Order) {
             throw new CallbackException(
-                message: "Unable to find order matching $paymentId"
+                message: "Unable to find order matching $paymentId",
+                code: 408
             );
         }
 
