@@ -18,8 +18,6 @@ use Resursbank\Ecom\Lib\Model\Callback\Enum\CallbackType;
 use Resursbank\Ecom\Module\Callback\Http\AuthorizationController;
 use Resursbank\Ecom\Module\Callback\Http\ManagementController;
 use Resursbank\Ecom\Module\Callback\Repository;
-use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
-use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Woocommerce\Modules\Callback\Callback as CallbackModule;
 use Resursbank\Woocommerce\Modules\Order\Status;
 use Resursbank\Woocommerce\Modules\OrderManagement\OrderManagement;
@@ -108,47 +106,38 @@ class Callback
      * Handle callback for a payment that's no longer attached to an order.
      *
      * For rejected payments, this is expected (we cancelled them) - log as DEBUG.
-     * For successful payments (CAPTURED, FROZEN, ACCEPTED), this is a problem -
-     * the payment completed while we were cancelling it. Log as ERROR.
+     * For successful payments (CAPTURED), this is a problem - the payment
+     * completed while we were cancelling it. Log as ERROR.
      */
     private static function handleDetachedPaymentCallback(CallbackException $exception): void
     {
-        // Try to extract payment ID from exception message
-        // Message format: "Unable to find order matching $paymentId"
-        if (!preg_match('/matching ([a-f0-9-]+)$/i', $exception->getMessage(), $matches)) {
+        // Get payment ID and status from the callback request body
+        try {
+            $callback = (new AuthorizationController())->getRequestData();
+            $paymentId = $callback->paymentId;
+            $status = $callback->status->value;
+        } catch (Throwable) {
             Log::debug(message: $exception->getMessage());
             return;
         }
 
-        $paymentId = $matches[1];
-
-        try {
-            $payment = PaymentRepository::get(paymentId: $paymentId);
-
-            // Successful payment for detached order = race condition problem
-            if (in_array($payment->status, [
-                PaymentStatus::FROZEN,
-                PaymentStatus::ACCEPTED,
-            ], true)) {
-                Log::error(
-                    error: $exception,
-                    message: "CRITICAL: Successful payment $paymentId (status: " .
-                        "{$payment->status->value}) has no attached order! " .
-                        "Customer may have been charged but order not processed."
-                );
-                return;
-            }
-
-            // Rejected/cancelled payment - expected, log as debug
-            Log::debug(
-                message: "Detached payment $paymentId callback - status: " .
-                    "{$payment->status->value} (expected for cancelled payments)"
+        // CAPTURED callback for detached order = race condition problem
+        // (Customer completed payment while we were cancelling/creating new one)
+        if ($status === 'CAPTURED') {
+            Log::error(
+                error: $exception,
+                message: "CRITICAL: Successful payment $paymentId (status: $status) " .
+                    "has no attached order! Customer may have been charged but " .
+                    "order not processed."
             );
-        } catch (Throwable $e) {
-            // Can't check payment status - log original exception as debug
-            Log::debug(message: $exception->getMessage());
-            Log::debug(message: "Could not verify payment status: " . $e->getMessage());
+            return;
         }
+
+        // REJECTED/other status - expected for cancelled payments, log as debug
+        Log::debug(
+            message: "Detached payment $paymentId callback - status: $status " .
+                "(expected for cancelled payments)"
+        );
     }
 
     /**
