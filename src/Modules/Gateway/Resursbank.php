@@ -37,6 +37,7 @@ use Resursbank\Ecom\Lib\Model\PaymentMethod;
 use Resursbank\Ecom\Lib\Order\CustomerType;
 use Resursbank\Ecom\Lib\Utilities\Session;
 use Resursbank\Ecom\Module\Customer\Repository;
+use Resursbank\Ecom\Module\Payment\Enum\Status as PaymentStatus;
 use Resursbank\Ecom\Module\Payment\Repository as PaymentRepository;
 use Resursbank\Ecom\Module\PaymentMethod\Repository as PaymentMethodRepository;
 use Resursbank\Woocommerce\Database\Options\Advanced\SetMethodCountryRestriction;
@@ -84,6 +85,11 @@ class Resursbank extends WC_Payment_Gateway
      * as wc_add_notice() alone is not respected by Blocks.
      */
     private static ?string $blockCreateErrorMessage = null;
+
+    /**
+     * Session key for tracking the last order with a Resurs payment.
+     */
+    private const SESSION_KEY_LAST_RESURS_ORDER = 'resursbank_last_payment_order';
 
     /**
      * Setup.
@@ -164,16 +170,34 @@ class Resursbank extends WC_Payment_Gateway
     {
         $order = new WC_Order(order: $order_id);
 
-        $existingRedirectUrl = $this->getExistingPaymentRedirectUrl(order: $order);
+        // Handle any existing payment - returns redirect URL if cancel failed
+        // (payment is in progress and customer should continue existing session)
+        $existingSessionUrl = $this->handleExistingPayment(order: $order);
 
-        if ($existingRedirectUrl !== null) {
-            $this->clearSession();
-
+        if ($existingSessionUrl !== null) {
+            // Redirect to existing payment session instead of creating new one
             return [
                 'result' => 'success',
-                'redirect' => $existingRedirectUrl,
+                'redirect' => $existingSessionUrl,
             ];
         }
+
+        // Generate a unique cancel token for this payment attempt.
+        // This token is included in the failure URL and stored on the order.
+        // When the failure page is reached, we compare tokens - if they don't match,
+        // it means the payment was cancelled and a new one created, so we skip
+        // order cancellation. We want to avoid unnecessary order cancellations
+        // because the cart is still open in WooCommerce (the order remains in a
+        // modifiable "Pending Payment" state), allowing the customer to retry.
+        // Without this safeguard, each cancelled payment request would trigger
+        // an order cancellation, potentially creating many cancelled orders when
+        // a customer simply retries checkout.
+        $cancelToken = $this->generateCancelToken();
+        Metadata::setOrderMeta(
+            order: $order,
+            key: Metadata::KEY_CANCEL_TOKEN,
+            value: $cancelToken
+        );
 
         try {
             $payment = $this->createPayment(order: $order);
@@ -202,6 +226,12 @@ class Resursbank extends WC_Payment_Gateway
         $this->clearSession();
 
         Metadata::setPaymentId(order: $order, id: $payment->id);
+
+        // Track this order in session so we can cancel its payment if a new
+        // checkout starts on a different order (WC might create a fresh order)
+        if (function_exists('WC') && WC()->session !== null) {
+            WC()->session->set(self::SESSION_KEY_LAST_RESURS_ORDER, $order->get_id());
+        }
 
         return [
             'result' => 'success',
@@ -392,16 +422,64 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
-     * Get redirect URL for existing payment awaiting gateway completion.
+     * Handle any existing payment before creating a new one.
      *
-     * Uses the tasks/status endpoint which provides the redirect URL even after
-     * payment creation (unlike the main GET payment endpoint). Returns null if
-     * no existing payment or no redirect URL available.
+     * Checks the current order and any previous session order for existing
+     * payments. Returns a redirect URL if the customer should continue an
+     * existing session, or null to proceed with creating a new payment.
+     *
+     * @return string|null Redirect URL, or null to proceed with new payment
      */
-    private function getExistingPaymentRedirectUrl(WC_Order $order): ?string
+    private function handleExistingPayment(WC_Order $order): ?string
     {
+        // Check current order for existing payment
         $paymentId = Metadata::getOrderMeta(
             order: $order,
+            key: Metadata::KEY_PAYMENT_ID
+        );
+
+        if ($paymentId !== '') {
+            $url = $this->resolveExistingPayment(
+                order: $order,
+                paymentId: $paymentId,
+                redirectIfCompleted: true
+            );
+
+            if ($url !== null) {
+                return $url;
+            }
+        }
+
+        // Check previous session order (handles fresh order scenario).
+        // WooCommerce may create a fresh order instead of reusing the previous
+        // one (e.g., due to cart changes). When this happens, we have Order A
+        // (previous, with payment attached) and Order B (current, no payment).
+        // Without this check, the previous payment would remain active.
+        if (!function_exists('WC') || WC()->session === null) {
+            return null;
+        }
+
+        $previousOrderId = absint(
+            WC()->session->get(self::SESSION_KEY_LAST_RESURS_ORDER) ?? 0
+        );
+
+        if ($previousOrderId === 0 || $previousOrderId === $order->get_id()) {
+            return null;
+        }
+
+        $previousOrder = wc_get_order($previousOrderId);
+
+        if (!$previousOrder instanceof WC_Order) {
+            return null;
+        }
+
+        Log::debug(
+            message: "Checking previous session order $previousOrderId for " .
+                "payment to cancel"
+        );
+
+        $paymentId = Metadata::getOrderMeta(
+            order: $previousOrder,
             key: Metadata::KEY_PAYMENT_ID
         );
 
@@ -409,15 +487,136 @@ class Resursbank extends WC_Payment_Gateway
             return null;
         }
 
+        // For previous orders, don't redirect to thank you page if completed
+        // (we don't want to redirect to an old order's thank you page)
+        return $this->resolveExistingPayment(
+            order: $previousOrder,
+            paymentId: $paymentId,
+            redirectIfCompleted: false
+        );
+    }
+
+    /**
+     * Resolve an existing payment attached to an order.
+     *
+     * Detaches the payment ID first to prevent REJECTED callbacks (from
+     * cancelled payments) from marking the order as Failed. Then checks
+     * payment status:
+     * - Completed → return thank you URL (if redirectIfCompleted), else null
+     * - Active → try to cancel, return session URL if cancel fails
+     * - Other status → return null (safe to create new payment)
+     *
+     * Re-attaches payment ID when returning a URL (customer will complete it).
+     *
+     * @param WC_Order $order The order with the payment attached
+     * @param string $paymentId The payment ID to resolve
+     * @param bool $redirectIfCompleted Whether to redirect to thank you page
+     *                                  if payment is completed
+     * @return string|null Redirect URL, or null to proceed with new payment
+     */
+    private function resolveExistingPayment(
+        WC_Order $order,
+        string $paymentId,
+        bool $redirectIfCompleted
+    ): ?string {
+        // Detach payment first - prevents REJECTED callbacks from marking
+        // order as Failed as they naturally come when we send a cancel request.
+        Metadata::setPaymentId(order: $order, id: '');
+
+        Log::debug(
+            message: "Detached payment $paymentId from order {$order->get_id()}, " .
+                "checking status"
+        );
+
+        $payment = PaymentRepository::get(paymentId: $paymentId);
+
+        // Payment completed - redirect to thank you or proceed based on flag
+        if (in_array($payment->status, [PaymentStatus::FROZEN, PaymentStatus::ACCEPTED], true)) {
+            Log::debug(
+                message: "Payment $paymentId is {$payment->status->value}, " .
+                    "checkout completed"
+            );
+
+            // Re-attach so callbacks still work for this order
+            Metadata::setPaymentId(order: $order, id: $paymentId);
+
+            if ($redirectIfCompleted) {
+                return $this->getSuccessUrl(order: $order);
+            }
+
+            return null;
+        }
+
+        // Payment not active - safe to proceed with new payment
+        if ($payment->status !== PaymentStatus::TASK_REDIRECTION_REQUIRED) {
+            Log::debug(
+                message: "Payment $paymentId is {$payment->status->value}, " .
+                    "not active - proceeding"
+            );
+            return null;
+        }
+
+        // Try to cancel the active payment session
+        try {
+            // Invalidate the cancel token so the failure redirect from this
+            // cancelled payment won't cancel the order. This is needed for the
+            // "fresh order" scenario where WC created a new order and we're
+            // cancelling the previous order's payment - without this, the old
+            // failure URL would still match the old token.
+            Metadata::setOrderMeta(
+                order: $order,
+                key: Metadata::KEY_CANCEL_TOKEN,
+                value: $this->generateCancelToken()
+            );
+
+            PaymentRepository::cancel(paymentId: $paymentId);
+            Log::debug(message: "Cancelled payment $paymentId");
+
+            return null;
+        } catch (Throwable $e) {
+            // Cancel failed - payment is in progress, redirect to existing session
+            Log::debug(
+                message: "Cancel failed for $paymentId: {$e->getMessage()} - " .
+                    "redirecting to existing session"
+            );
+
+            Metadata::setPaymentId(order: $order, id: $paymentId);
+            return $this->getExistingSessionUrl(paymentId: $paymentId);
+        }
+    }
+
+    /**
+     * Get the gateway URL for an existing payment session.
+     *
+     * Used when cancellation fails because payment is in progress - we redirect
+     * the customer back to their existing session instead of creating a new one.
+     *
+     * @throws Exception When the URL cannot be retrieved (API error).
+     */
+    private function getExistingSessionUrl(string $paymentId): string
+    {
         try {
             $taskStatus = PaymentRepository::getTaskStatusDetails(
                 paymentId: $paymentId
             );
-        } catch (Throwable) {
-            return null;
+
+            if ($taskStatus->customer !== null) {
+                Log::debug(
+                    message: "Retrieved existing session URL for payment $paymentId"
+                );
+                return $taskStatus->customer->customerUrl;
+            }
+        } catch (Throwable $e) {
+            Log::error(
+                error: $e,
+                message: "Failed to get taskStatusDetails for $paymentId"
+            );
         }
 
-        return $taskStatus->customer?->customerUrl ?? null;
+        // Could not get the redirect URL - show error to customer
+        throw new Exception(
+            message: Translator::translate(phraseId: 'api-temporary-error')
+        );
     }
 
     /**
@@ -559,13 +758,39 @@ class Resursbank extends WC_Payment_Gateway
     }
 
     /**
-     * Get URL to failure page.
+     * Get URL to failure page with cancel token appended.
+     *
+     * The cancel token is used by the failure page to verify that this failure
+     * redirect corresponds to the current payment attempt. If tokens don't match,
+     * it means a new payment was created and the order should not be cancelled.
      */
     private function getFailureUrl(WC_Order $order): string
     {
-        return html_entity_decode(
+        $baseUrl = html_entity_decode(
             string: $order->get_cancel_order_url()
         );
+
+        $cancelToken = Metadata::getOrderMeta(
+            order: $order,
+            key: Metadata::KEY_CANCEL_TOKEN
+        );
+
+        if ($cancelToken === '') {
+            return $baseUrl;
+        }
+
+        return add_query_arg('rb_cancel_token', $cancelToken, $baseUrl);
+    }
+
+    /**
+     * Generate a unique token for identifying this payment attempt.
+     *
+     * Used to prevent the failure page from cancelling the order when a payment
+     * has been superseded by a new one (e.g., multi-tab checkout).
+     */
+    private function generateCancelToken(): string
+    {
+        return substr(md5((string)microtime(true) . wp_generate_uuid4()), 0, 16);
     }
 
     /**

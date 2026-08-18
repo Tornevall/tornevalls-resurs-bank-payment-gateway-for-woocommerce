@@ -30,6 +30,14 @@ class Failure
 
     public static function init(): void
     {
+        // Intercept cancel order requests BEFORE WooCommerce processes them (WC uses priority 20)
+        // This prevents order cancellation when a payment has been superseded
+        add_action(
+            'wp_loaded',
+            [self::class, 'interceptCancelOrder'],
+            10
+        );
+
         add_filter(
             'woocommerce_order_cancelled_notice',
             [self::class, 'captureAndRedirect'],
@@ -45,7 +53,71 @@ class Failure
     }
 
     /**
+     * Intercept cancel order requests before WooCommerce processes them.
+     *
+     * This runs at wp_loaded priority 10, before WooCommerce's cancel_order
+     * handler at priority 20. If the cancel token doesn't match, we redirect
+     * away immediately, preventing WooCommerce from cancelling the order.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.ExitExpression)
+     */
+    public static function interceptCancelOrder(): void
+    {
+        // Check if this is a cancel order request (same conditions as WooCommerce)
+        if (
+            !isset($_GET['cancel_order']) ||
+            !isset($_GET['order']) ||
+            !isset($_GET['order_id'])
+        ) {
+            return;
+        }
+
+        try {
+            $orderId = absint($_GET['order_id']);
+
+            if ($orderId <= 0) {
+                return;
+            }
+
+            $order = wc_get_order($orderId);
+
+            if (!$order instanceof WC_Order) {
+                return;
+            }
+
+            // Check if this is a Resurs Bank order by looking for our cancel token
+            $orderToken = Metadata::getOrderMeta(
+                order: $order,
+                key: Metadata::KEY_CANCEL_TOKEN
+            );
+
+            if ($orderToken === '') {
+                // No token on order - not a Resurs payment or legacy order, let WC handle it
+                return;
+            }
+
+            // Get token from URL
+            $urlToken = isset($_GET['rb_cancel_token'])
+                ? sanitize_text_field(wp_unslash($_GET['rb_cancel_token']))
+                : '';
+
+            // If tokens don't match, the payment was superseded - redirect silently
+            if ($urlToken !== $orderToken) {
+                wp_safe_redirect(wc_get_checkout_url());
+                exit;
+            }
+        } catch (Throwable) {
+            // On any error, let WooCommerce handle it normally
+        }
+    }
+
+    /**
      * Store failure reason in WC session and redirect to checkout.
+     *
+     * Checks the cancel token from URL against the one stored on the order.
+     * If they don't match, it means a new payment was created (the old one was
+     * cancelled in process_payment) and this failure redirect should be ignored.
      *
      * @noinspection PhpArgumentWithoutNamedIdentifierInspection
      */
@@ -65,9 +137,38 @@ class Failure
                 return $message;
             }
 
-            $paymentId = Metadata::getPaymentId(order: $order);
+            // Check if the cancel token in the URL matches the one on the order.
+            // If they don't match, the payment was superseded by a new one and
+            // we should redirect silently without cancelling the order.
+            $urlToken = WordPress::getQueryParam('rb_cancel_token');
+            $orderToken = Metadata::getOrderMeta(
+                order: $order,
+                key: Metadata::KEY_CANCEL_TOKEN
+            );
 
+            if ($urlToken !== '' && $orderToken !== '' && $urlToken !== $orderToken) {
+                // Token mismatch - a new payment was created, ignore this failure
+                if (!headers_sent()) {
+                    wp_safe_redirect(wc_get_checkout_url());
+                    die;
+                }
+                return $message;
+            }
+
+            // Use getOrderMeta directly because getPaymentId() throws when empty
+            $paymentId = Metadata::getOrderMeta(
+                order: $order,
+                key: Metadata::KEY_PAYMENT_ID
+            );
+
+            // If no payment ID attached, the payment was detached intentionally
+            // (cancelled from process_payment to allow a new checkout attempt).
+            // Don't show an error or cancel the order - just redirect to checkout silently.
             if ($paymentId === '') {
+                if (!headers_sent()) {
+                    wp_safe_redirect(wc_get_checkout_url());
+                    die;
+                }
                 return $message;
             }
 
