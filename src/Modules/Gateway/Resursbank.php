@@ -499,14 +499,13 @@ class Resursbank extends WC_Payment_Gateway
     /**
      * Resolve an existing payment attached to an order.
      *
-     * Detaches the payment ID first to prevent REJECTED callbacks (from
-     * cancelled payments) from marking the order as Failed. Then checks
-     * payment status:
+     * Checks payment status first, then takes appropriate action:
      * - Completed → return thank you URL (if redirectIfCompleted), else null
-     * - Active → try to cancel, return session URL if cancel fails
-     * - Other status → return null (safe to create new payment)
+     * - Not active (e.g., REJECTED) → return null, payment stays attached
+     * - Active → detach, cancel, return session URL if cancel fails
      *
-     * Re-attaches payment ID when returning a URL (customer will complete it).
+     * Only detaches payment when it's active and we're about to cancel it.
+     * This prevents unnecessary detachment of already-finalized payments.
      *
      * @param WC_Order $order The order with the payment attached
      * @param string $paymentId The payment ID to resolve
@@ -519,13 +518,8 @@ class Resursbank extends WC_Payment_Gateway
         string $paymentId,
         bool $redirectIfCompleted
     ): ?string {
-        // Detach payment first - prevents REJECTED callbacks from marking
-        // order as Failed as they naturally come when we send a cancel request.
-        Metadata::setPaymentId(order: $order, id: '');
-
         Log::debug(
-            message: "Detached payment $paymentId from order {$order->get_id()}, " .
-                "checking status"
+            message: "Checking payment $paymentId status for order {$order->get_id()}"
         );
 
         $payment = PaymentRepository::get(paymentId: $paymentId);
@@ -537,9 +531,6 @@ class Resursbank extends WC_Payment_Gateway
                     "checkout completed"
             );
 
-            // Re-attach so callbacks still work for this order
-            Metadata::setPaymentId(order: $order, id: $paymentId);
-
             if ($redirectIfCompleted) {
                 return $this->getSuccessUrl(order: $order);
             }
@@ -548,6 +539,7 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // Payment not active - safe to proceed with new payment
+        // (e.g., already REJECTED from a previous attempt)
         if ($payment->status !== PaymentStatus::TASK_REDIRECTION_REQUIRED) {
             Log::debug(
                 message: "Payment $paymentId is {$payment->status->value}, " .
@@ -556,22 +548,30 @@ class Resursbank extends WC_Payment_Gateway
             return null;
         }
 
-        // Try to cancel the active payment session
-        try {
-            // Invalidate the cancel token so the failure redirect from this
-            // cancelled payment won't cancel the order. This is needed for the
-            // "fresh order" scenario where WC created a new order and we're
-            // cancelling the previous order's payment - without this, the old
-            // failure URL would still match the old token.
-            Metadata::setOrderMeta(
-                order: $order,
-                key: Metadata::KEY_CANCEL_TOKEN,
-                value: $this->generateCancelToken()
-            );
+        // Payment is active - we need to cancel it before creating a new one.
+        // Detach first to prevent REJECTED callbacks (from our cancel request)
+        // from marking the order as Failed.
+        Metadata::setPaymentId(order: $order, id: '');
 
+        Log::debug(
+            message: "Detached active payment $paymentId from order " .
+                "{$order->get_id()}, attempting cancel"
+        );
+
+        // Invalidate the cancel token so the failure redirect from this
+        // cancelled payment won't cancel the order. This is needed for the
+        // "fresh order" scenario where WC created a new order and we're
+        // cancelling the previous order's payment - without this, the old
+        // failure URL would still match the old token.
+        Metadata::setOrderMeta(
+            order: $order,
+            key: Metadata::KEY_CANCEL_TOKEN,
+            value: $this->generateCancelToken()
+        );
+
+        try {
             PaymentRepository::cancel(paymentId: $paymentId);
             Log::debug(message: "Cancelled payment $paymentId");
-
             return null;
         } catch (Throwable $e) {
             // Cancel failed - payment is in progress, redirect to existing session
