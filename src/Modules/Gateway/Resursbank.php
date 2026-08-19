@@ -87,6 +87,11 @@ class Resursbank extends WC_Payment_Gateway
     private static ?string $blockCreateErrorMessage = null;
 
     /**
+     * Session key for tracking the last order with a Resurs payment.
+     */
+    private const SESSION_KEY_LAST_RESURS_ORDER = 'resursbank_last_payment_order';
+
+    /**
      * Setup.
      */
     public function __construct(
@@ -221,6 +226,12 @@ class Resursbank extends WC_Payment_Gateway
         $this->clearSession();
 
         Metadata::setPaymentId(order: $order, id: $payment->id);
+
+        // Track this order in session so we can cancel its payment if a new
+        // checkout starts on a different order (WC might create a fresh order)
+        if (function_exists('WC') && WC()->session !== null) {
+            WC()->session->set(self::SESSION_KEY_LAST_RESURS_ORDER, $order->get_id());
+        }
 
         return [
             'result' => 'success',
@@ -440,28 +451,42 @@ class Resursbank extends WC_Payment_Gateway
             }
         }
 
-        // Check for other pending orders with Resurs payments (fresh order scenario).
+        // Check previous session order (handles fresh order scenario).
         // WooCommerce may create a fresh order instead of reusing the previous
-        // one (e.g., due to cart changes). Query the database directly to find
-        // any other pending orders with active Resurs payments.
-        $previousOrder = $this->findPreviousPendingResursOrder(
-            currentOrderId: $order->get_id(),
-            customerId: $order->get_customer_id()
-        );
-
-        if ($previousOrder === null) {
+        // one (e.g., due to cart changes). When this happens, we have Order A
+        // (previous, with payment attached) and Order B (current, no payment).
+        // Without this check, the previous payment would remain active.
+        if (!function_exists('WC') || WC()->session === null) {
             return null;
         }
+
+        $previousOrderId = absint(
+            WC()->session->get(self::SESSION_KEY_LAST_RESURS_ORDER) ?? 0
+        );
+
+        if ($previousOrderId === 0 || $previousOrderId === $order->get_id()) {
+            return null;
+        }
+
+        $previousOrder = wc_get_order($previousOrderId);
+
+        if (!$previousOrder instanceof WC_Order) {
+            return null;
+        }
+
+        Log::debug(
+            message: "Checking previous session order $previousOrderId for " .
+                "payment to cancel"
+        );
 
         $paymentId = Metadata::getOrderMeta(
             order: $previousOrder,
             key: Metadata::KEY_PAYMENT_ID
         );
 
-        Log::debug(
-            message: "Found previous pending order {$previousOrder->get_id()} " .
-                "with payment $paymentId"
-        );
+        if ($paymentId === '') {
+            return null;
+        }
 
         // For previous orders:
         // - Don't redirect to thank you page if completed (wrong order)
@@ -472,54 +497,6 @@ class Resursbank extends WC_Payment_Gateway
             redirectIfCompleted: false,
             preserveOrder: false
         );
-    }
-
-    /**
-     * Find another pending order with a Resurs payment for this customer.
-     *
-     * Queries the database directly to find pending orders (excluding the
-     * current one) that have a Resurs payment attached. This handles the
-     * "fresh order" scenario where WooCommerce creates a new order instead
-     * of reusing the previous one.
-     *
-     * @param int $currentOrderId The current order ID to exclude
-     * @param int $customerId The customer ID to search for
-     * @return WC_Order|null The previous order, or null if not found
-     */
-    private function findPreviousPendingResursOrder(
-        int $currentOrderId,
-        int $customerId
-    ): ?WC_Order {
-        // Query for pending orders with a Resurs payment ID
-        $orders = wc_get_orders([
-            'customer_id' => $customerId,
-            'status' => 'pending',
-            'exclude' => [$currentOrderId],
-            'limit' => 10,
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'meta_key' => Metadata::KEY_PAYMENT_ID,
-            'meta_compare' => '!=',
-            'meta_value' => '',
-        ]);
-
-        // Return the first order that has a payment ID
-        foreach ($orders as $order) {
-            if (!$order instanceof WC_Order) {
-                continue;
-            }
-
-            $paymentId = Metadata::getOrderMeta(
-                order: $order,
-                key: Metadata::KEY_PAYMENT_ID
-            );
-
-            if ($paymentId !== '') {
-                return $order;
-            }
-        }
-
-        return null;
     }
 
     /**
