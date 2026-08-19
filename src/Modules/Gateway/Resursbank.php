@@ -87,11 +87,6 @@ class Resursbank extends WC_Payment_Gateway
     private static ?string $blockCreateErrorMessage = null;
 
     /**
-     * Session key for tracking the last order with a Resurs payment.
-     */
-    private const SESSION_KEY_LAST_RESURS_ORDER = 'resursbank_last_payment_order';
-
-    /**
      * Setup.
      */
     public function __construct(
@@ -226,12 +221,6 @@ class Resursbank extends WC_Payment_Gateway
         $this->clearSession();
 
         Metadata::setPaymentId(order: $order, id: $payment->id);
-
-        // Track this order in session so we can cancel its payment if a new
-        // checkout starts on a different order (WC might create a fresh order)
-        if (function_exists('WC') && WC()->session !== null) {
-            WC()->session->set(self::SESSION_KEY_LAST_RESURS_ORDER, $order->get_id());
-        }
 
         return [
             'result' => 'success',
@@ -442,7 +431,8 @@ class Resursbank extends WC_Payment_Gateway
             $url = $this->resolveExistingPayment(
                 order: $order,
                 paymentId: $paymentId,
-                redirectIfCompleted: true
+                redirectIfCompleted: true,
+                preserveOrder: true
             );
 
             if ($url !== null) {
@@ -450,50 +440,86 @@ class Resursbank extends WC_Payment_Gateway
             }
         }
 
-        // Check previous session order (handles fresh order scenario).
+        // Check for other pending orders with Resurs payments (fresh order scenario).
         // WooCommerce may create a fresh order instead of reusing the previous
-        // one (e.g., due to cart changes). When this happens, we have Order A
-        // (previous, with payment attached) and Order B (current, no payment).
-        // Without this check, the previous payment would remain active.
-        if (!function_exists('WC') || WC()->session === null) {
-            return null;
-        }
-
-        $previousOrderId = absint(
-            WC()->session->get(self::SESSION_KEY_LAST_RESURS_ORDER) ?? 0
+        // one (e.g., due to cart changes). Query the database directly to find
+        // any other pending orders with active Resurs payments.
+        $previousOrder = $this->findPreviousPendingResursOrder(
+            currentOrderId: $order->get_id(),
+            customerId: $order->get_customer_id()
         );
 
-        if ($previousOrderId === 0 || $previousOrderId === $order->get_id()) {
+        if ($previousOrder === null) {
             return null;
         }
-
-        $previousOrder = wc_get_order($previousOrderId);
-
-        if (!$previousOrder instanceof WC_Order) {
-            return null;
-        }
-
-        Log::debug(
-            message: "Checking previous session order $previousOrderId for " .
-                "payment to cancel"
-        );
 
         $paymentId = Metadata::getOrderMeta(
             order: $previousOrder,
             key: Metadata::KEY_PAYMENT_ID
         );
 
-        if ($paymentId === '') {
-            return null;
-        }
+        Log::debug(
+            message: "Found previous pending order {$previousOrder->get_id()} " .
+                "with payment $paymentId"
+        );
 
-        // For previous orders, don't redirect to thank you page if completed
-        // (we don't want to redirect to an old order's thank you page)
+        // For previous orders:
+        // - Don't redirect to thank you page if completed (wrong order)
+        // - Don't preserve order (allow it to be cancelled via callbacks/redirects)
         return $this->resolveExistingPayment(
             order: $previousOrder,
             paymentId: $paymentId,
-            redirectIfCompleted: false
+            redirectIfCompleted: false,
+            preserveOrder: false
         );
+    }
+
+    /**
+     * Find another pending order with a Resurs payment for this customer.
+     *
+     * Queries the database directly to find pending orders (excluding the
+     * current one) that have a Resurs payment attached. This handles the
+     * "fresh order" scenario where WooCommerce creates a new order instead
+     * of reusing the previous one.
+     *
+     * @param int $currentOrderId The current order ID to exclude
+     * @param int $customerId The customer ID to search for
+     * @return WC_Order|null The previous order, or null if not found
+     */
+    private function findPreviousPendingResursOrder(
+        int $currentOrderId,
+        int $customerId
+    ): ?WC_Order {
+        // Query for pending orders with a Resurs payment ID
+        $orders = wc_get_orders([
+            'customer_id' => $customerId,
+            'status' => 'pending',
+            'exclude' => [$currentOrderId],
+            'limit' => 10,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'meta_key' => Metadata::KEY_PAYMENT_ID,
+            'meta_compare' => '!=',
+            'meta_value' => '',
+        ]);
+
+        // Return the first order that has a payment ID
+        foreach ($orders as $order) {
+            if (!$order instanceof WC_Order) {
+                continue;
+            }
+
+            $paymentId = Metadata::getOrderMeta(
+                order: $order,
+                key: Metadata::KEY_PAYMENT_ID
+            );
+
+            if ($paymentId !== '') {
+                return $order;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -502,21 +528,24 @@ class Resursbank extends WC_Payment_Gateway
      * Checks payment status first, then takes appropriate action:
      * - Completed → return thank you URL (if redirectIfCompleted), else null
      * - Not active (e.g., REJECTED) → return null, payment stays attached
-     * - Active → detach, cancel, return session URL if cancel fails
-     *
-     * Only detaches payment when it's active and we're about to cancel it.
-     * This prevents unnecessary detachment of already-finalized payments.
+     * - Active → cancel payment, behavior depends on preserveOrder flag
      *
      * @param WC_Order $order The order with the payment attached
      * @param string $paymentId The payment ID to resolve
      * @param bool $redirectIfCompleted Whether to redirect to thank you page
      *                                  if payment is completed
+     * @param bool $preserveOrder If true (same order reuse), detach payment and
+     *                            invalidate token before cancel to keep order
+     *                            open for a new payment. If false (fresh order
+     *                            scenario), leave payment attached so callbacks
+     *                            and failure redirects properly close the order.
      * @return string|null Redirect URL, or null to proceed with new payment
      */
     private function resolveExistingPayment(
         WC_Order $order,
         string $paymentId,
-        bool $redirectIfCompleted
+        bool $redirectIfCompleted,
+        bool $preserveOrder
     ): ?string {
         Log::debug(
             message: "Checking payment $paymentId status for order {$order->get_id()}"
@@ -549,25 +578,29 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // Payment is active - we need to cancel it before creating a new one.
-        // Detach first to prevent REJECTED callbacks (from our cancel request)
-        // from marking the order as Failed.
-        Metadata::setPaymentId(order: $order, id: '');
+        if ($preserveOrder) {
+            // Same order reuse: detach payment and invalidate token so
+            // callbacks/redirects won't affect the order (keeping it open for
+            // a new payment attempt).
+            Metadata::setPaymentId(order: $order, id: '');
+            Metadata::setOrderMeta(
+                order: $order,
+                key: Metadata::KEY_CANCEL_TOKEN,
+                value: $this->generateCancelToken()
+            );
 
-        Log::debug(
-            message: "Detached active payment $paymentId from order " .
-                "{$order->get_id()}, attempting cancel"
-        );
-
-        // Invalidate the cancel token so the failure redirect from this
-        // cancelled payment won't cancel the order. This is needed for the
-        // "fresh order" scenario where WC created a new order and we're
-        // cancelling the previous order's payment - without this, the old
-        // failure URL would still match the old token.
-        Metadata::setOrderMeta(
-            order: $order,
-            key: Metadata::KEY_CANCEL_TOKEN,
-            value: $this->generateCancelToken()
-        );
+            Log::debug(
+                message: "Detached active payment $paymentId from order " .
+                    "{$order->get_id()} (preserving order for new payment)"
+            );
+        } else {
+            // Fresh order scenario: leave payment attached so the REJECTED
+            // callback and failure redirect properly close this old order.
+            Log::debug(
+                message: "Cancelling payment $paymentId on order " .
+                    "{$order->get_id()} (allowing order closure)"
+            );
+        }
 
         try {
             PaymentRepository::cancel(paymentId: $paymentId);
@@ -580,7 +613,11 @@ class Resursbank extends WC_Payment_Gateway
                     "redirecting to existing session"
             );
 
-            Metadata::setPaymentId(order: $order, id: $paymentId);
+            // Re-attach if we detached (preserveOrder case)
+            if ($preserveOrder) {
+                Metadata::setPaymentId(order: $order, id: $paymentId);
+            }
+
             return $this->getExistingSessionUrl(paymentId: $paymentId);
         }
     }
