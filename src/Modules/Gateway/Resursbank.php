@@ -442,7 +442,8 @@ class Resursbank extends WC_Payment_Gateway
             $url = $this->resolveExistingPayment(
                 order: $order,
                 paymentId: $paymentId,
-                redirectIfCompleted: true
+                redirectIfCompleted: true,
+                preserveOrder: true
             );
 
             if ($url !== null) {
@@ -487,45 +488,44 @@ class Resursbank extends WC_Payment_Gateway
             return null;
         }
 
-        // For previous orders, don't redirect to thank you page if completed
-        // (we don't want to redirect to an old order's thank you page)
+        // For previous orders:
+        // - Don't redirect to thank you page if completed (wrong order)
+        // - Don't preserve order (allow it to be cancelled via callbacks/redirects)
         return $this->resolveExistingPayment(
             order: $previousOrder,
             paymentId: $paymentId,
-            redirectIfCompleted: false
+            redirectIfCompleted: false,
+            preserveOrder: false
         );
     }
 
     /**
      * Resolve an existing payment attached to an order.
      *
-     * Detaches the payment ID first to prevent REJECTED callbacks (from
-     * cancelled payments) from marking the order as Failed. Then checks
-     * payment status:
+     * Checks payment status first, then takes appropriate action:
      * - Completed → return thank you URL (if redirectIfCompleted), else null
-     * - Active → try to cancel, return session URL if cancel fails
-     * - Other status → return null (safe to create new payment)
-     *
-     * Re-attaches payment ID when returning a URL (customer will complete it).
+     * - Not active (e.g., REJECTED) → return null, payment stays attached
+     * - Active → cancel payment, behavior depends on preserveOrder flag
      *
      * @param WC_Order $order The order with the payment attached
      * @param string $paymentId The payment ID to resolve
      * @param bool $redirectIfCompleted Whether to redirect to thank you page
      *                                  if payment is completed
+     * @param bool $preserveOrder If true (same order reuse), detach payment and
+     *                            invalidate token before cancel to keep order
+     *                            open for a new payment. If false (fresh order
+     *                            scenario), leave payment attached so callbacks
+     *                            and failure redirects properly close the order.
      * @return string|null Redirect URL, or null to proceed with new payment
      */
     private function resolveExistingPayment(
         WC_Order $order,
         string $paymentId,
-        bool $redirectIfCompleted
+        bool $redirectIfCompleted,
+        bool $preserveOrder
     ): ?string {
-        // Detach payment first - prevents REJECTED callbacks from marking
-        // order as Failed as they naturally come when we send a cancel request.
-        Metadata::setPaymentId(order: $order, id: '');
-
         Log::debug(
-            message: "Detached payment $paymentId from order {$order->get_id()}, " .
-                "checking status"
+            message: "Checking payment $paymentId status for order {$order->get_id()}"
         );
 
         $payment = PaymentRepository::get(paymentId: $paymentId);
@@ -537,9 +537,6 @@ class Resursbank extends WC_Payment_Gateway
                     "checkout completed"
             );
 
-            // Re-attach so callbacks still work for this order
-            Metadata::setPaymentId(order: $order, id: $paymentId);
-
             if ($redirectIfCompleted) {
                 return $this->getSuccessUrl(order: $order);
             }
@@ -548,6 +545,7 @@ class Resursbank extends WC_Payment_Gateway
         }
 
         // Payment not active - safe to proceed with new payment
+        // (e.g., already REJECTED from a previous attempt)
         if ($payment->status !== PaymentStatus::TASK_REDIRECTION_REQUIRED) {
             Log::debug(
                 message: "Payment $paymentId is {$payment->status->value}, " .
@@ -556,22 +554,34 @@ class Resursbank extends WC_Payment_Gateway
             return null;
         }
 
-        // Try to cancel the active payment session
-        try {
-            // Invalidate the cancel token so the failure redirect from this
-            // cancelled payment won't cancel the order. This is needed for the
-            // "fresh order" scenario where WC created a new order and we're
-            // cancelling the previous order's payment - without this, the old
-            // failure URL would still match the old token.
+        // Payment is active - we need to cancel it before creating a new one.
+        if ($preserveOrder) {
+            // Same order reuse: detach payment and invalidate token so
+            // callbacks/redirects won't affect the order (keeping it open for
+            // a new payment attempt).
+            Metadata::setPaymentId(order: $order, id: '');
             Metadata::setOrderMeta(
                 order: $order,
                 key: Metadata::KEY_CANCEL_TOKEN,
                 value: $this->generateCancelToken()
             );
 
+            Log::debug(
+                message: "Detached active payment $paymentId from order " .
+                    "{$order->get_id()} (preserving order for new payment)"
+            );
+        } else {
+            // Fresh order scenario: leave payment attached so the REJECTED
+            // callback and failure redirect properly close this old order.
+            Log::debug(
+                message: "Cancelling payment $paymentId on order " .
+                    "{$order->get_id()} (allowing order closure)"
+            );
+        }
+
+        try {
             PaymentRepository::cancel(paymentId: $paymentId);
             Log::debug(message: "Cancelled payment $paymentId");
-
             return null;
         } catch (Throwable $e) {
             // Cancel failed - payment is in progress, redirect to existing session
@@ -580,7 +590,11 @@ class Resursbank extends WC_Payment_Gateway
                     "redirecting to existing session"
             );
 
-            Metadata::setPaymentId(order: $order, id: $paymentId);
+            // Re-attach if we detached (preserveOrder case)
+            if ($preserveOrder) {
+                Metadata::setPaymentId(order: $order, id: $paymentId);
+            }
+
             return $this->getExistingSessionUrl(paymentId: $paymentId);
         }
     }
