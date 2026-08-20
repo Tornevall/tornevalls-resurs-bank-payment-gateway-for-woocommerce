@@ -1,0 +1,35 @@
+name: WordPress Plugin Check
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+      - 'development'
+  push:
+    branches:
+      - 'master'
+      - 'development'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wordpress-plugin-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plugin-check:
+    name: WordPress Plugin Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out plugin
+        uses: actions/checkout@v4
+
+      - name: Run WordPress Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: './'
+          exclude-directories: 'vendor,node_modules'
+          strict: false
