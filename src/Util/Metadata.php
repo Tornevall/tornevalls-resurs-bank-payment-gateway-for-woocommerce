@@ -36,6 +36,7 @@ class Metadata
     public const KEY_LEGACY_ORDER_REFERENCE = 'paymentId';
     public const KEY_THANK_YOU = RESURSBANKABPAYMENTS_MODULE_PREFIX . '_thankyou_trigger';
     public const KEY_REPOSITORY_CREATED = RESURSBANKABPAYMENTS_MODULE_PREFIX . '_repository_created';
+    public const KEY_CANCEL_TOKEN = RESURSBANKABPAYMENTS_MODULE_PREFIX . '_cancel_token';
 
     /**
      * Cache payment validity status by order ID to avoid redundant API calls.

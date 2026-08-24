@@ -64,6 +64,11 @@ class Callback
     /**
      * Performs callback processing.
      *
+     * CallbackException for missing orders is logged as DEBUG for rejected
+     * payments (expected when intentionally cancelled) but as ERROR for
+     * successful payments (indicates a race condition where payment completed
+     * while being cancelled).
+     *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
     public static function execute(): void
@@ -80,6 +85,14 @@ class Callback
             Log::debug(message: "Executing $type callback.");
 
             self::respond(type: $type);
+        } catch (CallbackException $e) {
+            // Order not found - check if this was a successful payment
+            // (which would indicate a race condition problem)
+            self::handleDetachedPaymentCallback(exception: $e);
+            Route::respondWithExit(
+                body: $e->getMessage(),
+                code: $e->getCode()
+            );
         } catch (Throwable $e) {
             Log::error(error: $e);
             Route::respondWithExit(
@@ -90,6 +103,50 @@ class Callback
     }
 
     /**
+     * Handle callback for a payment that's no longer attached to an order.
+     *
+     * For rejected payments, this is expected (we cancelled them) - log as DEBUG.
+     * For successful payments (CAPTURED), this is a problem - the payment
+     * completed while we were cancelling it. Log as ERROR.
+     */
+    private static function handleDetachedPaymentCallback(CallbackException $exception): void
+    {
+        // Get payment ID and status from the callback request body
+        try {
+            $callback = (new AuthorizationController())->getRequestData();
+            $paymentId = $callback->paymentId;
+            $status = $callback->status->value;
+        } catch (Throwable) {
+            Log::debug(message: $exception->getMessage());
+            return;
+        }
+
+        // CAPTURED callback for detached order = race condition problem
+        // (Customer completed payment while we were cancelling/creating new one)
+        if ($status === 'CAPTURED') {
+            Log::error(
+                error: $exception,
+                message: "CRITICAL: Successful payment $paymentId (status: $status) " .
+                    "has no attached order! Customer may have been charged but " .
+                    "order not processed."
+            );
+            return;
+        }
+
+        // REJECTED/other status - expected for cancelled payments, log as debug
+        Log::debug(
+            message: "Detached payment $paymentId callback - status: $status " .
+                "(expected for cancelled payments)"
+        );
+    }
+
+    /**
+     * Find the order associated with a payment ID.
+     *
+     * Throws CallbackException with 408 code when no order is found. This is
+     * expected behavior for payments that were intentionally detached from
+     * their orders during multi-tab checkout handling.
+     *
      * @throws CallbackException
      */
     public static function getOrder(string $paymentId): WC_Order
@@ -98,7 +155,8 @@ class Callback
 
         if (!$order instanceof WC_Order) {
             throw new CallbackException(
-                message: "Unable to find order matching $paymentId"
+                message: "Unable to find order matching $paymentId",
+                code: 408
             );
         }
 
