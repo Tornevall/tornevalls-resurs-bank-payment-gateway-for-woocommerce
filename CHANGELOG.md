@@ -1,3 +1,10 @@
+# 1.2.34
+
+* PD-4170
+* PD-4176
+
+Solved problem with payment session duplication and associated race conditions.
+
 # 1.2.33
 
 * Updated bundled ECom library to 3.4.2.
