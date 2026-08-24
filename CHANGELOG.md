@@ -1,9 +1,15 @@
+# 1.2.36
+
+* Separate release for updated changelog wording in 1.2.34. No functional changes.
+
 # 1.2.35
 
-* PD-4170
-* PD-4176
+* Version bump only; no functional changes over 1.2.34.
 
-Solved problem with payment session duplication and associated race conditions.
+# 1.2.34
+
+* PD-4170: Fixed duplicate payment sessions when checkout is opened/retried in parallel. The plugin now reuses the active session per order and cancels unfinished duplicates.
+* PD-4176: Fixed Resurs payment references being detached too early on retry. References are now only removed when an order is actually reused for a new payment attempt.
 
 # 1.2.33
 

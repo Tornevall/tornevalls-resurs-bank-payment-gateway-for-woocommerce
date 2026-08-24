@@ -9,7 +9,7 @@ WC Tested up to: 11.0.1
 Plugin requires ecom: 3.4.2
 Plugin tested up to: PHP 8.6
 Requires Plugins: woocommerce
-Stable tag: 1.2.34
+Stable tag: 1.2.36
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -88,6 +88,19 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
 
 Latest changes:
+
+# 1.2.36
+
+* Separate release for updated changelog wording in 1.2.34. No functional changes.
+
+# 1.2.35
+
+* Version bump only; no functional changes over 1.2.34.
+
+# 1.2.34
+
+* Fixed duplicate Resurs Bank payment sessions being created for a single order when checkout was opened in multiple tabs or retried, only the last session was ever linked to the order (PD-4170).
+* Fixed the Resurs Bank connection being removed from an order when checkout was retried after the order had already ended up in an unprocessable state, e.g. a declined credit application (PD-4176).
 
 # 1.2.33
 
