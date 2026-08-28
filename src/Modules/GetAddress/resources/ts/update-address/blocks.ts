@@ -44,14 +44,8 @@ export class BlocksAddressUpdater {
         if (typeof Resursbank_GetAddress !== 'undefined') {
             this.widget = new Resursbank_GetAddress({
                 updateAddress: (data: any) => {
-
-                    // Reset store data (and consequently the form).
-                    this.resetCartData();
-
-                    // Get current cart data.
-                    let cartData = this.getCartData();
-
-                    const map = {
+                    // Map API response fields to WooCommerce address fields
+                    const map: Record<string, string> = {
                         first_name: 'firstName',
                         last_name: 'lastName',
                         address_1: 'addressRow1',
@@ -62,29 +56,33 @@ export class BlocksAddressUpdater {
                         company: 'fullName',
                     };
 
-                    for (const [key, value] of Object.entries(map)) {
-                        if (!data.hasOwnProperty(value)) {
+                    // Build address object from API response
+                    const address: Record<string, string> = {};
+
+                    for (const [wcField, apiField] of Object.entries(map)) {
+                        if (!data.hasOwnProperty(apiField)) {
                             throw new Error(
-                                `Missing required field "${value}" in data object.`
+                                `Missing required field "${apiField}" in data object.`
                             );
                         }
 
-                        if (key === 'company') {
-                            this.setBillingAndShipping(
-                                cartData,
-                                typeof data[value] === 'string' && this.widget.getCustomerType() === 'LEGAL' ? data[value] : ''
-                            );
-                            continue;
+                        if (wcField === 'company') {
+                            // Only set company for LEGAL customer type
+                            address[wcField] = typeof data[apiField] === 'string' &&
+                                this.widget.getCustomerType() === 'LEGAL'
+                                    ? data[apiField]
+                                    : '';
+                        } else {
+                            address[wcField] = typeof data[apiField] === 'string'
+                                ? data[apiField]
+                                : '';
                         }
-
-                        // Update both shipping and billing.
-                        const addressValue = typeof data[value] === 'string' ? data[value] : '';
-                        cartData.shippingAddress[key] = addressValue;
-                        cartData.billingAddress[key] = addressValue;
                     }
 
-                    // Dispatch the updated cart data back to the store
-                    dispatch(CART_STORE_KEY).setCartData(cartData);
+                    // Use WooCommerce Blocks' dedicated address update actions
+                    // These properly trigger store updates and re-renders
+                    dispatch(CART_STORE_KEY).setShippingAddress(address);
+                    dispatch(CART_STORE_KEY).setBillingAddress(address);
 
                     // Trigger update for payment methods by re-triggering cart actions
                     this.refreshPaymentMethods();
@@ -110,13 +108,7 @@ export class BlocksAddressUpdater {
 
             if (companyField) {
                 mutationObserver.disconnect();
-
-                // @ts-ignore
-                resursbankabpaygwConsoleLog(`Listener add: ${fieldName}`, 'DEBUG');
-
-                companyField.addEventListener('change', (event) => {
-                    // @ts-ignore
-                    resursbankabpaygwConsoleLog(`${fieldName} has changed`, 'DEBUG');
+                companyField.addEventListener('change', () => {
                     this.refreshPaymentMethods();
                 });
             }
@@ -135,22 +127,16 @@ export class BlocksAddressUpdater {
         // Try to find the element initially
         const element = document.querySelector<HTMLInputElement>('.wc-block-checkout__use-address-for-billing input[type="checkbox"]');
         if (element) {
-            // @ts-ignore
-            resursbankabpaygwConsoleLog("useBillingElement found during initialization.", 'DEBUG');
             this.useBillingElement = element;
             return;
         }
 
-        // @ts-ignore
         // Set up a MutationObserver to detect when the element is added
-        resursbankabpaygwConsoleLog("useBillingElement not found. Setting up observer...", 'DEBUG');
         const observer = new MutationObserver((mutations, obs) => {
             const observedElement = document.querySelector<HTMLInputElement>('.wc-block-checkout__use-address-for-billing input[type="checkbox"]');
             if (observedElement) {
-                // @ts-ignore
-                resursbankabpaygwConsoleLog("useBillingElement found by observer.", 'DEBUG');
                 this.useBillingElement = observedElement;
-                obs.disconnect(); // Stop observing once the element is found
+                obs.disconnect();
             }
         });
 
@@ -161,17 +147,6 @@ export class BlocksAddressUpdater {
     }
 
     /**
-     * Update billing and shipping address in cartData.
-     * @param cartData
-     * @param value
-     */
-    setBillingAndShipping(cartData: any, value: any) {
-        // Update both shipping and billing.
-        cartData.shippingAddress.company = value;
-        cartData.billingAddress.company = value;
-    }
-
-    /**
      * Configure the event listeners for the getAddress-widget.
      *
      * @param widgetEnabled
@@ -179,8 +154,6 @@ export class BlocksAddressUpdater {
     initialize(widgetEnabled: boolean) {
         const cartDataReady = select(CART_STORE_KEY).hasFinishedResolution('getCartData');
         if (!cartDataReady) {
-            // @ts-ignore
-            resursbankabpaygwConsoleLog('Cart data not ready, triggered dispatch.', 'DEBUG');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
         }
 
@@ -196,8 +169,6 @@ export class BlocksAddressUpdater {
      * customer types.
      */
     loadAllPaymentMethods() {
-        // @ts-ignore
-        resursbankabpaygwConsoleLog('Loading internal payment methods.', 'DEBUG');
         // Initially build a full list, locally, of available payment methods.
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethodsFromSettings = getSetting('resursbank_data', {}).payment_methods || [];
@@ -218,55 +189,14 @@ export class BlocksAddressUpdater {
     }
 
     /**
-     * Resolve cart data from store and confirm the presence of shipping address
-     * data since this is what we will be manipulating.
-     */
-    getCartData() {
-        const data = select(CART_STORE_KEY).getCartData();
-        const requiredFields = [
-            'first_name', 'last_name', 'address_1', 'address_2',
-            'postcode', 'city', 'country', 'company'
-        ];
-
-        if (!data.shippingAddress || requiredFields.some(field => data.shippingAddress[field] === undefined)) {
-            throw new Error('Missing required shipping address data in cart.');
-        }
-
-        return data;
-    }
-
-    /**
-     * Reset cart data.
-     */
-    resetCartData() {
-        let cartData = this.getCartData();
-
-        // Clear address.
-        cartData.shippingAddress.first_name = '';
-        cartData.shippingAddress.last_name = '';
-        cartData.shippingAddress.address_1 = '';
-        cartData.shippingAddress.address_2 = '';
-        cartData.shippingAddress.postcode = '';
-        cartData.shippingAddress.city = '';
-        cartData.shippingAddress.country = '';
-        cartData.shippingAddress.company = '';
-
-        // Dispatch the updated cart data back to the store
-        dispatch(CART_STORE_KEY).setCartData(cartData);
-    }
-
-    /**
      * Determine whether billing is being used based on the checkbox state.
      */
     usingBilling(): boolean {
         if (!this.useBillingElement) {
-            console.warn("useBillingElement is not initialized. Defaulting to billing.");
-            return true; // Default to billing if the element is not initialized
+            return true;
         }
 
-        // @ts-ignore
-        resursbankabpaygwConsoleLog("Use same address for billing:", this.useBillingElement.checked);
-        return !this.useBillingElement.checked; // Return true when unchecked (use billing)
+        return !this.useBillingElement.checked;
     }
 
     /**
@@ -274,20 +204,14 @@ export class BlocksAddressUpdater {
      */
     refreshPaymentMethods() {
         if (!this.allPaymentMethods.length) {
-            // @ts-ignore
-            resursbankabpaygwConsoleLog('No payment methods available for filtering.', 'DEBUG');
             this.loadAllPaymentMethods();
             return;
         }
-
-        // @ts-ignore
-        resursbankabpaygwConsoleLog('Refreshing internal payment methods.', 'DEBUG');
 
         const cartData = select(CART_STORE_KEY).getCartData();
         const paymentMethods = cartData.paymentMethods;
 
         if (!paymentMethods) {
-            console.warn('No payment methods found in cart data.');
             dispatch(CART_STORE_KEY).invalidateResolution('getCartData');
             return;
         }
@@ -340,22 +264,10 @@ export class BlocksAddressUpdater {
                     cartTotal >= min_purchase_limit && cartTotal <= max_purchase_limit;
 
                 if (supportsCustomerType && withinPurchaseLimits) {
-                    // @ts-ignore
-                    resursbankabpaygwConsoleLog( // @ts-ignore
-                        methodFromSettings.title + ', ' + cartTotal + ': Approved limit and supported customer type.',
-                        'DEBUG'
-                    );
-                    return cartMethod; // Keep the method if it meets all conditions.
+                    return cartMethod;
                 }
 
-                // @ts-ignore
-                resursbankabpaygwConsoleLog( // @ts-ignore
-                    methodFromSettings.title + ', Cart total ' + cartTotal + ': ' + (withinPurchaseLimits ? 'OK: Within' : 'Not OK: Outside') + ' limit. ' +
-                    (supportsCustomerType ? 'Customer type supported (OK).' : 'Customer type not supported (Not OK).'),
-                    'DEBUG'
-                );
-
-                return null; // Exclude the method if it doesn't meet the conditions.
+                return null;
             }
 
             // If it's not a custom method, retain it as-is.
