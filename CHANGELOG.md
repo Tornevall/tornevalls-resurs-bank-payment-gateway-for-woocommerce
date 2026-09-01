@@ -1,3 +1,7 @@
+# 1.2.37
+
+* PD-4175: Fixed address fetching for Firefox and Safari in WooCommerce 11+ checkout flows.
+
 # 1.2.36
 
 * Separate release for updated changelog wording in 1.2.34. No functional changes.

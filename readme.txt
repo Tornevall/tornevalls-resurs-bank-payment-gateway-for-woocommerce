@@ -9,7 +9,7 @@ WC Tested up to: 11.0.1
 Plugin requires ecom: 3.4.3
 Plugin tested up to: PHP 8.6
 Requires Plugins: woocommerce
-Stable tag: 1.2.36
+Stable tag: 1.2.37
 Plugin URI: https://developers.resurs.com/platform-plugins/woocommerce/
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -88,6 +88,10 @@ If you wish to upgrade from the old plugin release, you need to contact Resurs B
 For full documentation, please refer to our [documentation](https://developers.resurs.com/platform-plugins/woocommerce/resurs-merchant-api-for-woocommerce).
 
 Latest changes:
+
+# 1.2.37
+
+* Fixed address fetching for Firefox and Safari in WooCommerce 11+ checkout flows (PD-4175).
 
 # 1.2.36
 
